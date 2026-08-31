@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Mapping
 
-__all__ = ["RunResult", "StatusResult"]
+__all__ = ["RunResult", "StatusResult", "EvidenceResult", "CostResult"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -98,4 +98,54 @@ class StatusResult:
             "modelRoute": dict(self.model_route) if self.model_route else None,
             "missing": list(self.missing),
             "detail": self.detail,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class EvidenceResult:
+    """Durable evidence projection for one run.
+
+    CLI and API serialize from this single shape.  Absent trajectory evidence
+    is named in ``missing`` rather than fabricated.
+    """
+
+    run_id: str
+    status: str
+    event_count: int
+    trajectory: Mapping[str, Any] | None
+    event_digests: tuple[str, ...] = ()
+    missing: tuple[str, ...] = ()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "runId": self.run_id,
+            "status": self.status,
+            "events": self.event_count,
+            "trajectory": self.trajectory,
+            "eventDigests": list(self.event_digests),
+            "missing": list(self.missing),
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class CostResult:
+    """Observed budget settlement for one run.
+
+    Absent settlement dimensions stay absent: an unobserved cost is reported
+    through ``missing``, never as a placeholder zero.
+    """
+
+    run_id: str
+    observed: bool
+    observed_cost: int | None
+    settlement: Mapping[str, int] = field(default_factory=dict)
+    missing: tuple[str, ...] = ()
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "runId": self.run_id,
+            "observed": self.observed,
+            "observedCost": self.observed_cost,
+            "settlement": dict(self.settlement),
+            "missing": list(self.missing),
         }

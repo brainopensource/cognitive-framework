@@ -41,6 +41,14 @@ from .activation import (
     ComponentHandle,
     plan_activation,
 )
+from .model_selection import (
+    get_default_model,
+    get_default_paid_model,
+    get_pricing_usd_table,
+    load_model_registry,
+    resolve_model,
+    select_model,
+)
 from .assurance import AssurancePolicy
 from .determinism import SystemClock
 from .run_plan import RunPlan, RunPlanError, plan_run

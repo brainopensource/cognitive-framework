@@ -3,7 +3,7 @@
   "authority": "frozen-canary",
   "freeze_note": "Frozen before any live run. The workload dataset supports implementation and adversarial task classes only; bugfix and multi-file classes require dataset extension and are owned by the CMX-07 qualification set, not this canary.",
   "base_commit": "ee67f6d38bf77f3441a3c58185ff12f3a087eb61",
-  "workload_digest": "sha256:37a4f2654ab285d1f6fe9d24731d76f79226c01b52e50ee2ce8d96ce2205e362",
+  "workload_digest": "sha256:66804731e6f58617e01b644b509bb28a586701cd555c06d09f03a504086446b9",
   "model": "deepseek/deepseek-v4-flash-0731",
   "provider": "openrouter",
   "task_count": 10,
@@ -299,5 +299,5 @@
   },
   "promotion_authority": "independent-acceptance-only",
   "dry_run_emits": "structural preflight receipt only; empirical fields are NOT_RUN/missing",
-  "manifest_digest": "sha256:c8dda08ffe8eed1ad236eacca4b6619dbf8854e9eb4bae012690800c1e600a4a"
+  "manifest_digest": "sha256:c20ddf4f636d3d2bf1df03d46e79761b0750333d3b2f4fc49d5c6a9447c77e3c"
 }

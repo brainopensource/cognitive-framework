@@ -2,14 +2,12 @@
 """Autonomous Vanguard Benchmark 20 Execution Harness & Scientific Matrix Analyzer.
 
 Executes 20 decoupled coding challenges (10 Brownfield + 10 Greenfield) using
-Vanguard's agentic loop and OpenRouter AI models (e.g. DeepSeek V3/V4 / GLM-4).
+Vanguard's agentic loop and Centralized Model Configuration.
 
-Features:
-- Silent API key handling (from .env / env vars)
-- Cryptographic cassette capture in tools/002_LLM_API_MOCK/runs/benchmark_20_captures/
-- Provenance recording in tools/002_LLM_API_MOCK/lam.sqlite
-- Complete empirical telemetry: PASS/FAIL, Tokens, USD Cost, Latency, Turns, Diagnosis
-- ASCII Matrix comparison report
+POLICY:
+- Model identities, defaults, and pricing MUST be loaded from the centralized
+  unified model registry: `vanguard/packages/adapters/models/config.py` & `models_registry.json`.
+- Zero hardcoded model literals in runner code.
 """
 
 from __future__ import annotations
@@ -19,6 +17,7 @@ import base64
 import hashlib
 import json
 import os
+import re
 import shutil
 import sqlite3
 import subprocess
@@ -41,6 +40,15 @@ if str(ROOT) not in sys.path:
 if str(ROOT / "tools" / "002_LLM_API_MOCK") not in sys.path:
     sys.path.insert(0, str(ROOT / "tools" / "002_LLM_API_MOCK"))
 
+# Centralized Model Registry Configuration
+from vanguard.packages.runtime.root import (
+    get_default_model,
+    get_default_paid_model,
+    get_pricing_usd_table,
+    resolve_model,
+    load_model_registry,
+)
+
 try:
     from recorder import MockRecorder
 except ImportError:
@@ -62,7 +70,6 @@ def load_openrouter_key() -> str:
     return ""
 
 
-# Tool definitions for LLM function calling
 HARNESS_TOOLS = [
     {
         "type": "function",
@@ -97,7 +104,7 @@ HARNESS_TOOLS = [
         "type": "function",
         "function": {
             "name": "run_command",
-            "description": "Execute a shell command (e.g. run tests or python scripts) inside the workspace.",
+            "description": "Execute a shell command (e.g. run unit tests) inside the workspace.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -141,11 +148,11 @@ SYSTEM_PROMPT = """You are Vanguard Autonomous Software Engineer operating insid
 Your mission is to resolve the assigned coding challenge strictly following the specification.
 
 Operational Workflow:
-1. Inspect the workspace: check README.md / docs/SPEC.md, source files, and test files using `view_file` or `list_dir`.
-2. Run the test suite using `run_command` (e.g. `python3 test/test_*.py` or `python3 -m unittest`) to reproduce the failure.
-3. Apply surgical, robust modifications using `edit_file`.
-4. Re-run tests using `run_command` until ALL test assertions pass (100% GREEN).
-5. Call `finish_task` to complete your mission.
+1. Inspect the workspace: check README.md / docs/SPEC.md, source files in `src/`, and test files in `test/`.
+2. Run the test suite using `run_command` (e.g. `python3 -m unittest` or `python3 test/test_suite.py`) to observe test behavior.
+3. Edit the implementation in `src/` using `edit_file` to fix the bug or implement the requirements.
+4. Re-run tests with `run_command` until ALL test assertions pass (100% GREEN).
+5. Call `finish_task` only after confirming that all tests pass.
 
 Do NOT add unrelated files. Write clean, production-grade Python adhering strictly to the specifications."""
 
@@ -166,39 +173,93 @@ class ChallengeResult:
     trajectory: List[Dict[str, Any]] = field(default_factory=list)
 
 
+def extract_tool_calls_from_content(content: str) -> List[Dict[str, Any]]:
+    calls = []
+    if not content:
+        return calls
+
+    parts = re.split(r"<[|｜]tool[^>|｜]*[|｜]>function<[|｜]tool[^>|｜]*[|｜]>", content)
+    if len(parts) > 1:
+        for part in parts[1:]:
+            lines = part.strip().split("\n", 1)
+            name = lines[0].strip()
+            rest = lines[1] if len(lines) > 1 else ""
+            j_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", rest, re.DOTALL)
+            if j_match:
+                args_str = j_match.group(1)
+            else:
+                j_match = re.search(r"(\{.*\})", rest, re.DOTALL)
+                args_str = j_match.group(1) if j_match else "{}"
+            try:
+                args = json.loads(args_str)
+                calls.append({"name": name, "arguments": args})
+            except Exception:
+                pass
+
+    return calls
+
+
 class BenchmarkRunner:
     def __init__(
         self,
-        model_name: str = "deepseek/deepseek-chat",
+        model_name: Optional[str] = None,
         max_turns: int = 8,
         budget_limit_usd: float = 0.20,
         recorder: Optional[Any] = None,
     ):
-        self.model_name = model_name
+        # Use Centralized Config as authoritative source
+        self.model_name = resolve_model(model_name) if model_name else get_default_paid_model()
         self.max_turns = max_turns
         self.budget_limit_usd = budget_limit_usd
         self.total_cost_usd = 0.0
         self.api_key = load_openrouter_key()
         self.recorder = recorder
+        self.pricing_table = get_pricing_usd_table()
         CAPTURES_DIR.mkdir(parents=True, exist_ok=True)
 
-    def execute_tool(self, tool_name: str, args: Dict[str, Any], workspace: Path) -> str:
+    def check_workspace_tests(self, workspace: Path) -> Tuple[bool, str]:
+        env = {
+            **os.environ,
+            "PYTHONPATH": f"{str(workspace.resolve())}:{str((workspace / 'src').resolve())}",
+        }
+        test_files = list((workspace / "test").glob("test_*.py"))
+        if not test_files:
+            return False, "No test files found in test/"
+
+        all_ok = True
+        outputs = []
+        for tf in test_files:
+            p = subprocess.run([sys.executable, str(tf)], cwd=workspace, env=env, capture_output=True, text=True)
+            if p.returncode != 0:
+                all_ok = False
+                outputs.append(f"{tf.name} FAILED:\n{p.stderr}\n{p.stdout}")
+            else:
+                outputs.append(f"{tf.name} PASSED")
+
+        return all_ok, "\n".join(outputs)
+
+    def execute_tool(self, tool_name: str, args: Dict[str, Any], workspace: Path) -> Tuple[str, bool]:
         try:
+            env = {
+                **os.environ,
+                "PYTHONPATH": f"{str(workspace.resolve())}:{str((workspace / 'src').resolve())}",
+            }
+
             if tool_name == "view_file":
                 p = (workspace / args["path"]).resolve()
                 if not str(p).startswith(str(workspace.resolve())):
-                    return "Error: Path outside workspace"
+                    return "Error: Path outside workspace", False
                 if not p.is_file():
-                    return f"Error: File not found: {args['path']}"
-                return p.read_text(encoding="utf-8")
+                    return f"Error: File not found: {args['path']}", False
+                return p.read_text(encoding="utf-8"), False
 
             elif tool_name == "edit_file":
                 p = (workspace / args["path"]).resolve()
                 if not str(p).startswith(str(workspace.resolve())):
-                    return "Error: Path outside workspace"
+                    return "Error: Path outside workspace", False
                 p.parent.mkdir(parents=True, exist_ok=True)
                 p.write_text(args["content"], encoding="utf-8")
-                return f"Successfully wrote {len(args['content'])} characters to {args['path']}"
+                return f"Successfully wrote {len(args['content'])} characters to {args['path']}", False
 
             elif tool_name == "run_command":
                 cmd = args["command"]
@@ -206,33 +267,37 @@ class BenchmarkRunner:
                     cmd,
                     shell=True,
                     cwd=workspace,
+                    env=env,
                     capture_output=True,
                     text=True,
                     timeout=20,
                 )
                 output = (proc.stdout + "\n" + proc.stderr).strip()
-                return f"Exit Code: {proc.returncode}\nOutput:\n{output}"
+                return f"Exit Code: {proc.returncode}\nOutput:\n{output}", False
 
             elif tool_name == "list_dir":
                 rel = args.get("path", ".") or "."
                 target = (workspace / rel).resolve()
                 if not target.is_dir():
-                    return f"Error: Not a directory: {rel}"
+                    return f"Error: Not a directory: {rel}", False
                 entries = []
                 for child in sorted(target.iterdir()):
                     entries.append(f"{'[DIR] ' if child.is_dir() else '[FILE]'} {child.name}")
-                return "\n".join(entries) if entries else "(Empty directory)"
+                return "\n".join(entries) if entries else "(Empty directory)", False
 
             elif tool_name == "finish_task":
-                return f"Task marked complete: {args.get('summary', 'Done')}"
+                tests_passed, test_log = self.check_workspace_tests(workspace)
+                if not tests_passed:
+                    return f"Cannot finish task yet: Tests are currently failing.\n{test_log}\nPlease fix the implementation using edit_file and run tests again.", False
+                return f"Task marked complete: {args.get('summary', 'All tests green.')}", True
 
             else:
-                return f"Error: Unknown tool {tool_name}"
+                return f"Error: Unknown tool {tool_name}", False
 
         except subprocess.TimeoutExpired:
-            return "Error: Command timed out after 20 seconds."
+            return "Error: Command timed out after 20 seconds.", False
         except Exception as exc:
-            return f"Error executing {tool_name}: {exc}"
+            return f"Error executing {tool_name}: {exc}", False
 
     def call_model(
         self,
@@ -240,7 +305,6 @@ class BenchmarkRunner:
         scenario_key: str,
         turn: int,
     ) -> Tuple[Dict[str, Any], Dict[str, Any], float]:
-        """Calls OpenRouter API, records cassette, and updates telemetry."""
         if not self.api_key:
             raise RuntimeError("OPENROUTER_API_KEY not configured in .env or environment")
 
@@ -250,7 +314,7 @@ class BenchmarkRunner:
             "tools": HARNESS_TOOLS,
             "tool_choice": "auto",
             "temperature": 0.0,
-            "max_tokens": 1500,
+            "max_tokens": 2048,
         }
         req_bytes = json.dumps(payload).encode("utf-8")
         req_sha256 = hashlib.sha256(req_bytes).hexdigest()
@@ -266,72 +330,91 @@ class BenchmarkRunner:
             },
         )
 
-        t0 = time.perf_counter()
-        try:
-            with urllib.request.urlopen(req, timeout=30) as resp:
-                resp_bytes = resp.read()
-                millis = int((time.perf_counter() - t0) * 1000)
-                resp_json = json.loads(resp_bytes.decode("utf-8"))
-        except urllib.error.HTTPError as err:
-            err_body = err.read().decode("utf-8", errors="replace")
-            raise RuntimeError(f"OpenRouter HTTP {err.code}: {err_body}")
-
-        reply_sha256 = hashlib.sha256(resp_bytes).hexdigest()
-        usage = resp_json.get("usage", {})
-        cost = usage.get("cost", 0.0) or 0.0
-        prompt_tokens = usage.get("prompt_tokens", 0)
-        completion_tokens = usage.get("completion_tokens", 0)
-
-        # Record to LAM SQLite if available
-        if self.recorder is not None:
+        last_err = None
+        for attempt in range(3):
+            t0 = time.perf_counter()
             try:
-                self.recorder.record_call(
-                    request_sha256=req_sha256,
-                    scenario_key=scenario_key,
-                    tier=1,
-                    requested_turn=turn,
-                    returned_turn=turn,
-                    reply_sha256=reply_sha256,
-                    source_label=self.model_name,
-                    run_id=scenario_key,
-                    prompt=str(messages[-1].get("content", ""))[:200],
-                    response=str(resp_json.get("choices", [{}])[0].get("message", {}).get("content", ""))[:200],
-                    evidence_label="benchmark_20_live",
-                    tokens=prompt_tokens + completion_tokens,
-                    prompt_tokens=prompt_tokens,
-                    completion_tokens=completion_tokens,
-                    cost_usd=cost,
-                    millis=millis,
-                )
-            except Exception:
-                pass
+                with urllib.request.urlopen(req, timeout=35) as resp:
+                    resp_bytes = resp.read()
+                    millis = int((time.perf_counter() - t0) * 1000)
+                    resp_json = json.loads(resp_bytes.decode("utf-8"))
 
-        cassette_entry = {
-            "turn": turn,
-            "request_sha256": req_sha256,
-            "response_sha256": reply_sha256,
-            "status_code": 200,
-            "response_b64": base64.b64encode(resp_bytes).decode("ascii"),
-            "cost_usd": cost,
-            "prompt_tokens": prompt_tokens,
-            "completion_tokens": completion_tokens,
-            "duration_ms": millis,
-        }
+                choice = resp_json.get("choices", [{}])[0]
+                msg = choice.get("message", {})
+                if not msg.get("tool_calls") and not msg.get("content"):
+                    if attempt < 2:
+                        time.sleep(1.5 * (attempt + 1))
+                        continue
 
-        return resp_json, cassette_entry, cost
+                reply_sha256 = hashlib.sha256(resp_bytes).hexdigest()
+                usage = resp_json.get("usage", {})
+                prompt_tokens = usage.get("prompt_tokens", 0)
+                completion_tokens = usage.get("completion_tokens", 0)
+
+                # Use centralized pricing table if available or upstream reported cost
+                if self.model_name in self.pricing_table:
+                    p_rate, c_rate, _ = self.pricing_table[self.model_name]
+                    cost = (prompt_tokens * p_rate) + (completion_tokens * c_rate)
+                else:
+                    cost = usage.get("cost", 0.0) or 0.0
+
+                if self.recorder is not None:
+                    try:
+                        self.recorder.record_call(
+                            request_sha256=req_sha256,
+                            scenario_key=scenario_key,
+                            tier=1,
+                            requested_turn=turn,
+                            returned_turn=turn,
+                            reply_sha256=reply_sha256,
+                            source_label=self.model_name,
+                            run_id=scenario_key,
+                            prompt=str(messages[-1].get("content", ""))[:200],
+                            response=str(msg.get("content", ""))[:200],
+                            evidence_label="benchmark_20_live",
+                            tokens=prompt_tokens + completion_tokens,
+                            prompt_tokens=prompt_tokens,
+                            completion_tokens=completion_tokens,
+                            cost_usd=cost,
+                            millis=millis,
+                        )
+                    except Exception:
+                        pass
+
+                cassette_entry = {
+                    "turn": turn,
+                    "request_sha256": req_sha256,
+                    "response_sha256": reply_sha256,
+                    "status_code": 200,
+                    "response_b64": base64.b64encode(resp_bytes).decode("ascii"),
+                    "cost_usd": cost,
+                    "prompt_tokens": prompt_tokens,
+                    "completion_tokens": completion_tokens,
+                    "duration_ms": millis,
+                }
+
+                return resp_json, cassette_entry, cost
+
+            except urllib.error.HTTPError as err:
+                err_body = err.read().decode("utf-8", errors="replace")
+                last_err = RuntimeError(f"OpenRouter HTTP {err.code}: {err_body}")
+                time.sleep(2.0 * (attempt + 1))
+            except Exception as exc:
+                last_err = exc
+                time.sleep(2.0 * (attempt + 1))
+
+        raise last_err or RuntimeError("Max retries exceeded")
 
     def run_challenge(self, challenge_dir: Path) -> ChallengeResult:
         cname = challenge_dir.name
         is_brownfield = challenge_dir.name.startswith(("01", "02", "03", "04", "05", "06", "07", "08", "09", "10"))
         kind = "Brownfield" if is_brownfield else "Greenfield"
 
-        print(f"\n>>> Running [{kind}] Challenge: {cname}")
+        print(f"\n>>> Running [{kind}] Challenge: {cname} (Model: {self.model_name})")
         t_start = time.perf_counter()
 
-        # Create isolated temporary workspace to avoid mutating root suite files directly
         with tempfile.TemporaryDirectory(prefix=f"bench-run-{cname}-") as tmp_ws:
             ws_path = Path(tmp_ws)
-            # Copy challenge files into tmp workspace
             for item in challenge_dir.iterdir():
                 if item.name in ("initial_state.sha256", "__pycache__", ".vanguard"):
                     continue
@@ -340,19 +423,41 @@ class BenchmarkRunner:
                 else:
                     shutil.copy2(item, ws_path / item.name)
 
-            # Build initial user message
+            file_list = []
+            for root, dirs, files in os.walk(ws_path):
+                for f in files:
+                    rel = str(Path(root, f).relative_to(ws_path))
+                    if not rel.startswith((".", "__")):
+                        file_list.append(rel)
+
+            file_list_str = "\n".join(f"- `{f}`" for f in sorted(file_list))
+
             if is_brownfield:
-                spec_content = (ws_path / "docs" / "SPEC.md").read_text() if (ws_path / "docs" / "SPEC.md").exists() else ""
+                spec_file = ws_path / "docs" / "SPEC.md"
+                spec_content = spec_file.read_text(encoding="utf-8") if spec_file.exists() else ""
                 user_brief = (
-                    f"Fix the bug in the project under `{cname}`.\n"
-                    f"Specification:\n{spec_content}\n\n"
-                    "Your goal: Inspect the code, run tests, fix the bug in `src/`, and verify all tests pass."
+                    f"Task: Fix the bug in challenge `{cname}`.\n\n"
+                    f"Workspace Files:\n{file_list_str}\n\n"
+                    f"Specification (`docs/SPEC.md`):\n{spec_content}\n\n"
+                    "Instructions:\n"
+                    "1. View the source files in `src/` and test files in `test/`.\n"
+                    "2. Run the test suite with `run_command` (e.g. `python3 -m unittest discover -s test`).\n"
+                    "3. Edit `src/` files using `edit_file` to fix the bug according to the specification.\n"
+                    "4. Re-run tests with `run_command` until 100% PASS.\n"
+                    "5. Call `finish_task`."
                 )
             else:
-                readme_content = (ws_path / "README.md").read_text() if (ws_path / "README.md").exists() else ""
+                readme_file = ws_path / "README.md"
+                readme_content = readme_file.read_text(encoding="utf-8") if readme_file.exists() else ""
                 user_brief = (
-                    f"Implement the greenfield project under `{cname}` based on this PRD:\n\n{readme_content}\n\n"
-                    "Your goal: Implement the required module(s) in `src/` so that the predefined test suite passes 100%."
+                    f"Task: Implement greenfield challenge `{cname}`.\n\n"
+                    f"Workspace Files:\n{file_list_str}\n\n"
+                    f"PRD Requirements (`README.md`):\n{readme_content}\n\n"
+                    "Instructions:\n"
+                    "1. View the test file in `test/` to see expected classes, methods, and behaviors.\n"
+                    "2. Implement the required module(s) in `src/` using `edit_file`.\n"
+                    "3. Run the test suite with `run_command` (e.g. `python3 -m unittest discover -s test`) until 100% PASS.\n"
+                    "4. Call `finish_task`."
                 )
 
             messages = [
@@ -388,77 +493,106 @@ class BenchmarkRunner:
 
                 choice = resp_json.get("choices", [{}])[0]
                 message = choice.get("message", {})
-                tool_calls = message.get("tool_calls") or []
+                raw_tool_calls = message.get("tool_calls") or []
+                content_str = message.get("content") or ""
 
-                # Append assistant message to history
-                messages.append(message)
+                cleaned_content = re.sub(r"Use the results below to formulate an answer to the user question[^\.]*\.", "", content_str).strip()
 
-                if not tool_calls:
-                    # Model provided text without tool calls
+                parsed_calls = []
+                if raw_tool_calls:
+                    seen_calls = set()
+                    for idx, tc in enumerate(raw_tool_calls):
+                        fn_name = tc.get("function", {}).get("name")
+                        raw_args = tc.get("function", {}).get("arguments", "{}")
+                        call_key = (fn_name, raw_args if isinstance(raw_args, str) else json.dumps(raw_args, sort_keys=True))
+                        if call_key in seen_calls:
+                            continue
+                        seen_calls.add(call_key)
+
+                        try:
+                            args = json.loads(raw_args) if isinstance(raw_args, str) else raw_args
+                        except Exception:
+                            args = {}
+                        parsed_calls.append({"id": tc.get("id", f"call_{idx}"), "name": fn_name, "arguments": args})
+                else:
+                    extracted = extract_tool_calls_from_content(content_str)
+                    for idx, ec in enumerate(extracted):
+                        parsed_calls.append({"id": f"extracted_{idx}", "name": ec["name"], "arguments": ec["arguments"]})
+
+                parsed_calls = parsed_calls[:4]
+
+                clean_assistant_msg = {
+                    "role": "assistant",
+                    "content": cleaned_content if not parsed_calls else None,
+                }
+                if parsed_calls:
+                    clean_assistant_msg["tool_calls"] = [
+                        {
+                            "id": pc["id"],
+                            "type": "function",
+                            "function": {
+                                "name": pc["name"],
+                                "arguments": json.dumps(pc["arguments"])
+                            }
+                        }
+                        for pc in parsed_calls
+                    ]
+
+                messages.append(clean_assistant_msg)
+
+                if not parsed_calls:
                     trajectory.append({
                         "turn": turn,
-                        "assistant_text": message.get("content", "")
+                        "assistant_text": cleaned_content
                     })
-                    # If it says done or finished without calling tool, check oracle
-                    break
+                    tests_ok, _ = self.check_workspace_tests(ws_path)
+                    if tests_ok:
+                        finished = True
+                        break
 
-                # Execute tool calls
+                    if turn < self.max_turns:
+                        messages.append({
+                            "role": "user",
+                            "content": "Please proceed by using tools (edit_file, run_command, finish_task) to complete the implementation and ensure all tests pass."
+                        })
+                    continue
+
                 turn_actions = []
-                for tc in tool_calls:
-                    fn_name = tc.get("function", {}).get("name")
-                    raw_args = tc.get("function", {}).get("arguments", "{}")
-                    try:
-                        args = json.loads(raw_args)
-                    except Exception:
-                        args = {}
-
-                    tool_res = self.execute_tool(fn_name, args, ws_path)
+                for pc in parsed_calls:
+                    fn_name = pc["name"]
+                    args = pc["arguments"]
+                    tool_res, is_fin = self.execute_tool(fn_name, args, ws_path)
                     turn_actions.append({
                         "tool": fn_name,
                         "args": args,
                         "result_snippet": tool_res[:150],
                     })
 
-                    # Append tool response message
                     messages.append({
                         "role": "tool",
-                        "tool_call_id": tc.get("id"),
+                        "tool_call_id": pc["id"],
                         "content": tool_res
                     })
 
-                    if fn_name == "finish_task":
+                    if is_fin:
                         finished = True
 
                 trajectory.append({
                     "turn": turn,
                     "actions": turn_actions
                 })
-                print(f"  Turn {turn}: Executed {[a['tool'] for a in turn_actions]} (Cost: ${call_cost:.5f})")
+                tools_run = [a["tool"] for a in turn_actions]
+                print(f"  Turn {turn}: Executed {tools_run} (Cost: ${call_cost:.5f})")
 
             # Final Oracle Evaluation
-            test_files = list((ws_path / "test").glob("test_*.py"))
-            oracle_passed = True
-            oracle_logs = []
-
-            if not test_files:
-                oracle_passed = False
-                oracle_logs.append("No test files found in test/")
-            else:
-                for tf in test_files:
-                    p = subprocess.run([sys.executable, str(tf)], cwd=ws_path, capture_output=True, text=True)
-                    if p.returncode != 0:
-                        oracle_passed = False
-                        oracle_logs.append(f"{tf.name} FAILED:\n{p.stderr}\n{p.stdout}")
-                    else:
-                        oracle_logs.append(f"{tf.name} PASSED")
-
+            oracle_passed, test_summary = self.check_workspace_tests(ws_path)
             status = "PASS" if oracle_passed else "FAIL"
-            diagnosis = "All falsifiers green" if oracle_passed else (oracle_logs[0][:120].replace("\n", " ") if oracle_logs else "Unknown failure")
+            diagnosis = "All falsifiers green" if oracle_passed else (test_summary[:120].replace("\n", " ") if test_summary else "Unknown failure")
 
             total_latency = time.perf_counter() - t_start
             self.total_cost_usd += challenge_cost
 
-            # Save Cassette for replay
+            # Save Cassette
             cassette_file = CAPTURES_DIR / f"{cname}_cassette.json"
             cassette_file.write_text(json.dumps(cassettes, indent=2), encoding="utf-8")
 
@@ -526,7 +660,7 @@ def print_results_matrix(results: List[ChallengeResult], total_cost: float, tota
 
 def main():
     parser = argparse.ArgumentParser(description="Run Benchmark 20 Suite")
-    parser.add_argument("--model", default="deepseek/deepseek-chat", help="OpenRouter model identifier")
+    parser.add_argument("--model", default=None, help="Model identifier or alias (defaults to centralized config: get_default_paid_model())")
     parser.add_argument("--max-turns", type=int, default=8, help="Max turns per challenge")
     parser.add_argument("--budget", type=float, default=0.20, help="Max USD budget")
     parser.add_argument("--single", default=None, help="Run single challenge name for debugging")
@@ -557,10 +691,9 @@ def main():
     total_duration = time.perf_counter() - t_suite_start
     print_results_matrix(results, runner.total_cost_usd, total_duration)
 
-    # Save summary report JSON
     report_data = {
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-        "model": args.model,
+        "model": runner.model_name,
         "harness": "vanguard-vg-code-max",
         "pass_rate_pct": round((sum(1 for r in results if r.status == 'PASS') / len(results)) * 100, 1),
         "total_cost_usd": round(runner.total_cost_usd, 6),

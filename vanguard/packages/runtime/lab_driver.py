@@ -301,6 +301,29 @@ def run_lab_task(
         # Exported by run, so every attempt's episode is in the one file.
         _write_jsonl(Path(jsonl_out), store, "lab-run")
 
+    episode_trajectories = [
+        getattr(item, "trajectory", None)
+        for item in outcome.results
+        if isinstance(getattr(item, "trajectory", None), dict)
+    ]
+    cost_values = [
+        trajectory.get("cost", {}).get("usd_micros")
+        for trajectory in episode_trajectories
+        if isinstance(trajectory.get("cost"), dict)
+    ]
+    cost_statuses = [
+        trajectory.get("cost", {}).get("measurement_status", {})
+        .get("usd_micros", {}).get("status")
+        for trajectory in episode_trajectories
+        if isinstance(trajectory.get("cost"), dict)
+    ]
+    observed_cost = (
+        sum(int(value) for value in cost_values)
+        if cost_values and len(cost_values) == len(episode_trajectories)
+        and all(status == "measured" for status in cost_statuses)
+        and all(isinstance(value, int) and not isinstance(value, bool) for value in cost_values)
+        else None
+    )
     result = {
         "harness": harness.harness,
         "taskDir": str(reported_task_path),
@@ -309,6 +332,11 @@ def run_lab_task(
         "turns": outcome.telemetry.turns,
         "promptTokens": outcome.telemetry.prompt_tokens,
         "completionTokens": outcome.telemetry.completion_tokens,
+        # Repair attempts are one durable run.  Expose their measured total
+        # separately from the last episode trajectory so callers cannot
+        # undercount a paid retry.
+        "observedCostMicros": observed_cost,
+        "costProvenance": "measured" if observed_cost is not None else "unknown",
         "mode": "interactive" if interactive else "benchmark",
         "session": [entry.to_dict() for entry in log.entries],
         "deadEnds": [dict(entry) for entry in log.dead_end_details],

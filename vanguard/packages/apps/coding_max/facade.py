@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from ...runtime.app_service import ApplicationService
-from ...runtime.results import RunResult, StatusResult
+from ...runtime.results import CostResult, EvidenceResult, RunResult, StatusResult
 
 __all__ = ["CodingMax", "CodingMaxFacade", "InvalidPreset"]
 
@@ -64,10 +64,10 @@ class CodingMaxFacade:
             model_port=model_port, state_dir=state_dir,
         )
 
-    def evidence(self, run_id: str, *, state_dir: str | Path | None = None) -> Mapping[str, Any]:
+    def evidence(self, run_id: str, *, state_dir: str | Path | None = None) -> EvidenceResult:
         return self.service.evidence(run_id, state_dir=state_dir)
 
-    def cost(self, run_id: str, *, state_dir: str | Path | None = None) -> Mapping[str, Any]:
+    def cost(self, run_id: str, *, state_dir: str | Path | None = None) -> CostResult:
         return self.service.cost(run_id, state_dir=state_dir)
 
 

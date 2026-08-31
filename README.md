@@ -105,6 +105,16 @@ development and research. They never provide Vanguard runtime or acceptance auth
 techniques must be independently implemented behind Vanguard interfaces and verified by tests,
 falsifiers, and the normal evidence gates.
 
+## Centralized Model Policy & Registry
+
+All model access across runtime, benchmarks, CLI, and apps is **strictly governed by a single source of truth**:
+👉 [`vanguard/packages/adapters/models/models_registry.json`](vanguard/packages/adapters/models/models_registry.json)
+
+- **Default Coding Model (Tier 2 Flash)**: `deepseek/deepseek-v4-flash-0731` ($0.14 / $0.28 per MTok $\to$ 140,000 / 280,000 $\mu$USD).
+- **Secondary Flash Model (Tier 2)**: `z-ai/glm-5.3-flash`.
+- **Free Tier (Tier 1)**: `openrouter/free`, `minimax/minimax-m3:free`, `inclusionai/ling-3.0-tiny:free`.
+- **Prohibition on Hardcoded Models**: Hardcoding model names or using unauthorized models (e.g. deprecated versions) in benchmarks or runtime code fails closed with `ModelUnavailable` / `ModelPolicyError`.
+
 ## 2. Documentation authority
 
 | # | Layer | Documents |

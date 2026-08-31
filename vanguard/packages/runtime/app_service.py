@@ -25,7 +25,7 @@ from .compose import TaskContext
 from .model_selection import inspect_model_providers, select_model
 from .profiles import ExecutionProfileError, SandboxUnavailable, resolve_profile
 from .root import Runtime
-from .results import RunResult, StatusResult
+from .results import RunResult, StatusResult, EvidenceResult, CostResult
 from .task_state import CodingTaskState, fold_task_state
 from .state_contract import (
     StateDirectoryError,
@@ -135,8 +135,23 @@ class ApplicationService:
         state_dir: Path | str | None = None,
         interactive: bool = True,
         max_turns: int = 40,
+        autonomous_approval: bool = False,
     ) -> RunResult:
-        """Execute a new run through the canonical runtime pipeline."""
+        """Execute a new run through the canonical runtime pipeline.
+
+        ``autonomous_approval`` is an explicit opt-in (never default-on) that
+        lets an unattended run answer its own approval-gated effects (e.g.
+        ``proc.exec``) with a fresh, ephemeral, per-run Ed25519 governance
+        signature -- the same ``OperatorSigner``-bound pattern already used by
+        ``test/integration/test_lam_runtime_vertical.py`` and the falsifier
+        suite, just reachable from the public application boundary. It never
+        widens the harness's own declared capabilities: the signature only
+        answers challenges for effects the manifest already scoped (e.g.
+        ``proc://exec/allow/git,pytest,ruff,python3``). It has no effect
+        unless ``interactive`` is also true, since ``interactive=False`` maps
+        to the kernel's benchmark mode, which fails closed on every
+        approval-gated effect regardless of any approver (``F-07``).
+        """
         if not brief:
             raise ValueError("brief is required for run")
 
@@ -181,6 +196,14 @@ class ApplicationService:
         else:
             manifest_p = Path(manifest_path).resolve()
 
+        approver_kwargs: dict[str, Any] = {}
+        if autonomous_approval and interactive:
+            from .governance.approvals import OperatorSigner
+
+            signer = OperatorSigner()
+            approver_kwargs["approver"] = lambda challenge, _s=signer: _s.approve(challenge, reviewer="autonomous-operator")
+            approver_kwargs["approval_key"] = signer.public_bytes
+
         exec_result = Runtime.execute_profiled(
             manifest_p,
             task,
@@ -190,6 +213,7 @@ class ApplicationService:
             interactive=interactive,
             blobs=blobs,
             completion_policy=self._pack_completion_policy(manifest_p),
+            **approver_kwargs,
         )
 
         terminal = str(getattr(exec_result.terminal, "value", exec_result.terminal))
@@ -536,17 +560,21 @@ class ApplicationService:
             error=None,
         )
 
-    def evidence(self, run_id: str, *, state_dir: Path | str | None = None) -> Mapping[str, Any]:
+    def evidence(self, run_id: str, *, state_dir: Path | str | None = None) -> EvidenceResult:
         """Return the run's durable evidence projection through one query path."""
         events = self.events(run_id, state_dir=state_dir).events
         trajectory = next((e.get("payload", {}).get("trajectory") for e in reversed(events)
                            if isinstance(e.get("payload"), Mapping) and e.get("payload", {}).get("trajectory")), None)
-        return {"runId": run_id, "status": self.status(run_id, state_dir=state_dir).status,
-                "events": len(events), "trajectory": trajectory,
-                "eventDigests": [e.get("digest") for e in events if e.get("digest")],
-                "missing": [] if trajectory is not None else ["trajectory"]}
+        return EvidenceResult(
+            run_id=run_id,
+            status=self.status(run_id, state_dir=state_dir).status,
+            event_count=len(events),
+            trajectory=trajectory,
+            event_digests=tuple(e.get("digest") for e in events if e.get("digest")),
+            missing=() if trajectory is not None else ("trajectory",),
+        )
 
-    def cost(self, run_id: str, *, state_dir: Path | str | None = None) -> Mapping[str, Any]:
+    def cost(self, run_id: str, *, state_dir: Path | str | None = None) -> CostResult:
         """Return observed budget settlement; absent dimensions remain absent."""
         events = self.events(run_id, state_dir=state_dir).events
         totals: dict[str, int] = {}
@@ -557,10 +585,13 @@ class ApplicationService:
                 for key, value in settlement.items():
                     if isinstance(value, int) and not isinstance(value, bool):
                         totals[str(key)] = totals.get(str(key), 0) + value
-        return {"runId": run_id, "observed": bool(totals),
-                "observedCost": totals.get("usd_micros"),
-                "settlement": totals,
-                "missing": [] if "usd_micros" in totals else ["observedCost"]}
+        return CostResult(
+            run_id=run_id,
+            observed=bool(totals),
+            observed_cost=totals.get("usd_micros"),
+            settlement=totals,
+            missing=() if "usd_micros" in totals else ("observedCost",),
+        )
 
     def doctor(
         self,

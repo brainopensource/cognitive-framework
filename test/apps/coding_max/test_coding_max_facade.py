@@ -160,12 +160,33 @@ class TestCodingMaxFacade(unittest.TestCase):
                 api_payload = facade.status(
                     "run-parity-2", state_dir=self.state_dir).to_dict()
             elif command == "evidence":
-                api_payload = dict(facade.evidence(
-                    "run-parity-2", state_dir=self.state_dir))
+                api_payload = facade.evidence(
+                    "run-parity-2", state_dir=self.state_dir).to_dict()
             else:
-                api_payload = dict(facade.cost(
-                    "run-parity-2", state_dir=self.state_dir))
+                api_payload = facade.cost(
+                    "run-parity-2", state_dir=self.state_dir).to_dict()
             self.assertEqual(cli_payload, api_payload, command)
+
+    def test_cli_code_commands_honor_state_dir(self) -> None:
+        """`--state-dir` lets the CLI address the same durable state as the API."""
+        facade = CodingMaxFacade(workspace=self.workspace)
+        custom_state = self.workspace / "custom-state"
+        facade.run(
+            "state-dir brief", preset="fast", run_id="run-sd-1",
+            state_dir=custom_state, interactive=False, max_turns=6,
+        )
+        exit_code, payload = self._cli([
+            "code", "status", "run-sd-1", "-w", str(self.workspace),
+            "--state-dir", str(custom_state),
+        ])
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(payload["runId"], "run-sd-1")
+        self.assertNotEqual(payload["status"], "not_found")
+        # Without the flag, the default state dir must not see this run.
+        _, default_payload = self._cli([
+            "code", "status", "run-sd-1", "-w", str(self.workspace),
+        ])
+        self.assertEqual(default_payload["status"], "not_found")
 
     # ------------------------------------------------------------------
     # True cold resume

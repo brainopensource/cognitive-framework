@@ -85,7 +85,20 @@ def _compute_turn_cost(
     bytes_val = max(ctx_bytes + prop_bytes, 1)
     bytes_status = "measured"
 
-    cost_micros = ctx.get("usd_micros") or ctx.get("cost_micros")
+    diagnostics = proposal_payload.get("diagnostics")
+    usage = diagnostics.get("usage") if isinstance(diagnostics, Mapping) else None
+    provider_cost = None
+    for source in (diagnostics, usage):
+        if isinstance(source, Mapping):
+            candidate = source.get("usd_micros")
+            if candidate is not None:
+                provider_cost = candidate
+                break
+    cost_micros = ctx.get("usd_micros")
+    if cost_micros is None:
+        cost_micros = ctx.get("cost_micros")
+    if cost_micros is None:
+        cost_micros = provider_cost
     if cost_micros is not None:
         usd_micros = int(cost_micros)
         usd_status = "measured"

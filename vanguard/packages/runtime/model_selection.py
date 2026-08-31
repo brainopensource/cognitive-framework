@@ -26,6 +26,11 @@ __all__ = [
     "SelectedModel",
     "inspect_model_providers",
     "select_model",
+    "get_default_model",
+    "get_default_paid_model",
+    "get_pricing_usd_table",
+    "resolve_model",
+    "load_model_registry",
 ]
 
 #: Selectable ports. `mock` and `fake` are deterministic and offline.
@@ -175,7 +180,10 @@ def select_model(
                 allowed = list(free_models() if free_models is not None else _free_band())
                 name = allowed[0] if allowed else _get_default_paid_model()
             else:
-                name = model_name
+                try:
+                    name = resolve_model(model_name)
+                except (ModelPolicyError, ValueError) as exc:
+                    raise ModelUnavailable(choice, f"model {model_name!r} is not authorized in models_registry.json: {exc}") from exc
             stream_choice = False if "deepseek" in (name or "") else True
             effort_choice = reasoning_effort or ("none" if "deepseek" in (name or "") else None)
             return SelectedModel(
@@ -191,7 +199,20 @@ def select_model(
                 choice,
                 "no free-band models are registered; paid bands are refused until S9-J-03 authorises spend",
             )
-        name = model_name or allowed[0]
+        raw_name = model_name or allowed[0]
+        # A caller-supplied free-band provider is an injected authority (used
+        # by offline tests and local routers), so its opaque model IDs must be
+        # accepted without requiring them to exist in the production registry.
+        # Resolve aliases only when the name is not already in that band; an
+        # explicitly named model outside the band must retain the spend
+        # refusal, rather than leaking a registry-validation error.
+        if raw_name in allowed:
+            name = raw_name
+        else:
+            try:
+                name = resolve_model(raw_name)
+            except (ModelPolicyError, ValueError) as exc:
+                raise ModelUnavailable(choice, f"{raw_name!r} is not in the free band; refusing to spend") from exc
         if name not in allowed:
             raise ModelUnavailable(choice, f"{name!r} is not in the free band; refusing to spend")
         stream_choice = False if "deepseek" in (name or "") else True
@@ -214,7 +235,10 @@ def select_model(
                 allowed = list(free_models() if free_models is not None else _free_band())
                 name = allowed[0] if allowed else _get_default_paid_model()
             else:
-                name = model_name
+                try:
+                    name = resolve_model(model_name)
+                except (ModelPolicyError, ValueError) as exc:
+                    raise ModelUnavailable(choice, f"model {model_name!r} is not authorized in models_registry.json: {exc}") from exc
             return SelectedModel(
                 port="router", model=OpenRouterModel(
                     model=name, stream=False, reasoning_effort="none"),
@@ -327,7 +351,15 @@ def _resolve_tag(wanted: str, installed: Sequence[str]) -> str | None:
     return matches[0] if matches else None
 
 
-from ..adapters.models.config import get_band_models, get_default_paid_model, get_default_model
+from ..adapters.models.config import (
+    get_band_models,
+    get_default_model,
+    get_default_paid_model,
+    get_pricing_usd_table,
+    load_model_registry,
+    resolve_model,
+    ModelPolicyError,
+)
 
 
 def _free_band() -> Sequence[str]:

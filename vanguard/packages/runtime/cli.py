@@ -167,6 +167,12 @@ def cmd_run(args: argparse.Namespace) -> int:
     return EXIT_OK if res.outcome in ("completed", "success", "succeeded") else EXIT_TASK_FAILED
 
 
+def _result_payload(value: Any) -> Any:
+    """Serialize shared result objects uniformly (``to_dict`` or plain value)."""
+    to_dict = getattr(value, "to_dict", None)
+    return to_dict() if callable(to_dict) else value
+
+
 def cmd_code(args: argparse.Namespace) -> int:
     """Coding Max facade; all operations delegate to ApplicationService."""
     workspace = find_workspace_root(Path(args.workspace).resolve())
@@ -189,9 +195,9 @@ def cmd_code(args: argparse.Namespace) -> int:
             print(json.dumps(result.to_dict(), indent=2))
             return EXIT_OK if result.outcome == "completed" else EXIT_TASK_FAILED
         if args.code_command == "evidence":
-            print(json.dumps(app.evidence(args.run_id, state_dir=state_dir), indent=2))
+            print(json.dumps(_result_payload(app.evidence(args.run_id, state_dir=state_dir)), indent=2))
             return EXIT_OK
-        print(json.dumps(app.cost(args.run_id, state_dir=state_dir), indent=2))
+        print(json.dumps(_result_payload(app.cost(args.run_id, state_dir=state_dir)), indent=2))
         return EXIT_OK
     except (ValueError, FileNotFoundError, OSError) as exc:
         print(f"error: {exc}", file=sys.stderr)
@@ -397,12 +403,16 @@ def build_parser() -> argparse.ArgumentParser:
     code_run.add_argument("--run-id", default=None)
     code_run.add_argument("--max-turns", type=int, default=20)
     code_run.add_argument("--non-interactive", action="store_true")
+    code_run.add_argument("--state-dir", default=None,
+                          help="durable state directory (defaults to <workspace>/.vanguard)")
     code_run.set_defaults(handler=cmd_code)
     for name in ("status", "resume", "evidence", "cost"):
         subcmd = code_sub.add_parser(name)
         subcmd.add_argument("run_id")
         subcmd.add_argument("-w", "--workspace", default=".")
         subcmd.add_argument("--profile", default="local")
+        subcmd.add_argument("--state-dir", default=None,
+                            help="durable state directory (defaults to <workspace>/.vanguard)")
         subcmd.set_defaults(handler=cmd_code)
 
     # resume

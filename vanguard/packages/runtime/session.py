@@ -54,6 +54,7 @@ from ..ports.event_store import EventRange, EventStorePort, Result
 from ..ports.index import IndexPort
 from ..ports.meta_controller import MetaController
 from ..ports.memory import MemoryBinding, require_retrieval_provenance
+from ..ports.spi import ICompletionPolicy
 from .compose import (
     Harness,
     Receipt,
@@ -94,6 +95,16 @@ from .wiring import (
     _span_for,
 )
 
+
+#: Harnesses whose terminal ``finish`` must pass the pack completion policy
+#: (W-092-2: completion admitted only by fresh applicable verification).
+#: ``vg-code-default`` is deliberately NOT gated: closed M-2 acceptance
+#: falsifiers (e.g. RF-25 cold continuation) compose bare finishes through it,
+#: and gating it would reopen frozen milestone evidence.  Widening or shrinking
+#: this set is a governance decision to be recorded in
+#: ``docs/execution/active.md`` -- it is pinned by
+#: ``test/falsifiers/test_completion_gate_scope.py``, never changed silently.
+ADMISSION_GATED_HARNESSES = frozenset({"vg-code-fast", "vg-code-balanced", "vg-code-max"})
 
 _CONTROLLER_BUDGET_KEYS: Mapping[str, str] = {
     "usd_micros": "usd_micros",
@@ -363,7 +374,7 @@ class SessionPorts:
     #: Pack-composed terminal admission policy. ``None`` retains the strict
     #: built-in gate for legacy harnesses; production coding packs bind their
     #: repository/greenfield policy here.
-    completion_policy: Any = None
+    completion_policy: ICompletionPolicy | None = None
     #: `M-6`. The runtime that executes child episodes. `None` is legal for a
     #: composition that never declares `agent.spawn`; for one that does, the
     #: binding fails closed at composition rather than substituting a fake.
@@ -965,9 +976,8 @@ class HarnessSession:
                 patch_detector=patch_detector,
                 truncation_detector=truncation_detector,
                 completion_admitter=(self._admit_completion
-                                     if harness.harness in {
-                                         "vg-code-fast", "vg-code-balanced", "vg-code-max"
-                                     } else None))
+                                     if harness.harness in ADMISSION_GATED_HARNESSES
+                                     else None))
             outcome = engine.run(
                 episode_id=task.episode_id, run_id=task.run_id,
                 principal=task.principal, brief=task.brief,

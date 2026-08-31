@@ -966,7 +966,25 @@ class OpenRouterModel:
         body_obj: dict[str, Any] = {
             "model": target_model,
             "messages": _messages(context),
-            "temperature": sampling.get("temperature", 0.0),
+            # 0.0 (fully greedy) reliably drove small/fast models into an
+            # exact-repetition trap once two or three near-identical
+            # (tool_call, tool_result) pairs sat in context: every subsequent
+            # turn deterministically reproduced the same failing call, even
+            # with the corrective tool result already in view. A low but
+            # non-zero default breaks that attractor while staying close to
+            # deterministic; callers that need exact reproducibility (a
+            # cassette recording pass, a frozen canary) still get it by
+            # passing sampling={"temperature": 0.0} explicitly.
+            "temperature": sampling.get("temperature", 0.2),
+            # Temperature alone did not reliably break the exact-repetition
+            # trap above -- some turns still reissued the identical failing
+            # tool call even with a corrective result already in context. A
+            # frequency penalty is the more targeted lever: it discounts
+            # tokens by how often they already occurred in this context, so
+            # it specifically discourages regenerating the same JSON tool
+            # call rather than perturbing everything uniformly. Overridable
+            # the same way for reproducibility-sensitive callers.
+            "frequency_penalty": sampling.get("frequencyPenalty", 0.4),
             # Reasoning-capable routes can spend the first tokens on hidden
             # deliberation.  The old 256-token default routinely exhausted
             # before a tool call, producing an empty proposal and burning a

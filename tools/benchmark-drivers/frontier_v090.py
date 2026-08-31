@@ -259,15 +259,33 @@ def runtime_executor(preset: str, *, model_name: str | None = None, models: Sequ
             state_dir=workspace / ".vanguard",
             reasoning_effort=reasoning_effort,
         )
+        # ``run_lab_task`` exposes the selected route under its canonical
+        # model-selection keys and keeps measured cost on the durable
+        # trajectory.  The benchmark envelope uses the shorter public names;
+        # preserve both identities instead of emitting null attribution.
+        trajectory = result.get("trajectory")
+        cost = trajectory.get("cost") if isinstance(trajectory, Mapping) else None
+        status = cost.get("measurement_status", {}) if isinstance(cost, Mapping) else {}
+        usd_status = status.get("usd_micros", {}) if isinstance(status, Mapping) else {}
+        measured_micros = result.get("observedCostMicros") if (
+            result.get("costProvenance") == "measured"
+        ) else (cost.get("usd_micros") if (
+            isinstance(cost, Mapping) and isinstance(usd_status, Mapping)
+            and usd_status.get("status") == "measured"
+        ) else None)
         return ExecutionTelemetry(
             terminal=str(result.get("outcome", "instrument_error")),
             terminal_reason=str(result.get("detail", "")),
             prompt_tokens=result.get("promptTokens"),
             completion_tokens=result.get("completionTokens"),
+            cost_usd=(float(measured_micros) / 1_000_000
+                      if measured_micros is not None else None),
+            cost_provenance=(result.get("costProvenance")
+                             if measured_micros is not None else "unknown"),
             trajectory_digest=result.get("trajectoryDigest"),
             event_store_identity=result.get("eventStoreIdentity"),
-            provider=result.get("provider"),
-            model=result.get("model"),
+            provider=result.get("provider") or result.get("modelPort"),
+            model=result.get("model") or result.get("modelLabel"),
         )
     return execute
 

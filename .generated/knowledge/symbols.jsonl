@@ -121,6 +121,7 @@
 {"symbol": "ControllerInputError", "kind": "class", "defined_in": "vanguard/packages/runtime/meta_controller.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ControllerOutputError", "kind": "class", "defined_in": "vanguard/packages/runtime/meta_controller.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ControllerProposal", "kind": "class", "defined_in": "vanguard/packages/runtime/meta_controller.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "CostResult", "kind": "class", "defined_in": "vanguard/packages/runtime/results.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "CostVector", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "DSMLDecoderPlugin", "kind": "class", "defined_in": "vanguard/packages/domain/transforms/protocol/response_wrangler.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "DaemonConfig", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/daemon.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -204,6 +205,7 @@
 {"symbol": "EvidenceEnvelopeError", "kind": "class", "defined_in": "vanguard/packages/domain/evidence/envelope.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "EvidenceLedgerAppendError", "kind": "class", "defined_in": "vanguard/packages/runtime/artifacts.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "EvidenceRecord", "kind": "class", "defined_in": "vanguard/packages/domain/ledger/state.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "EvidenceResult", "kind": "class", "defined_in": "vanguard/packages/runtime/results.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "EvidenceRow", "kind": "class", "defined_in": "vanguard/packages/domain/evidence/foundation.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "EvidenceSink", "kind": "protocol", "defined_in": "vanguard/packages/ports/evidence_errors.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "ExecutionProfile", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}

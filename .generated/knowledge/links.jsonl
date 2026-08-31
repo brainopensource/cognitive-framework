@@ -9,6 +9,7 @@
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "spec.core", "target_path": "docs/SPEC.md", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "decision.index", "target_path": "docs/decisions.md", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "execution.active", "target_path": "docs/execution/active.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "models_registry", "target_path": "vanguard/packages/adapters/models/models_registry.json", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "architecture", "target_path": "docs/architecture", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "backend", "target_path": "docs/backend", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "frontend", "target_path": "docs/frontend", "relationship_type": "markdown_link"}

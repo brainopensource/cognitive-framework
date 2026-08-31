@@ -26,8 +26,8 @@ test("TUI daily-use: slash commands execution (/workspace, /agent, /workflow, /p
   assert.equal(store.get().selectedProviderId, "provider-openrouter");
 
   // /model
-  store.executeSlashCommand("/model deepseek/deepseek-chat");
-  assert.equal(store.get().model, "deepseek/deepseek-chat");
+  store.executeSlashCommand("/model deepseek/deepseek-v4-flash-0731");
+  assert.equal(store.get().model, "deepseek/deepseek-v4-flash-0731");
 
   // /history
   store.executeSlashCommand("/history");

@@ -120,6 +120,20 @@ class FakeEnvironment:
                 return Result.fail("denied", f"path traversal escape denied: {path!r}")
             norm_path = os.path.normpath(path).replace("\\", "/")
             if norm_path not in self._files:
+                prefix = "" if norm_path in (".", "") else norm_path.rstrip("/") + "/"
+                matches = sorted(k for k in self._files if k.startswith(prefix))
+                if matches:
+                    # Mirrors GitEnvironment's directory-listing convenience:
+                    # `read` on a directory-shaped path lists rather than
+                    # fails, since several models default to this.
+                    body = "\n".join(matches)
+                    hint = f"'{norm_path}' is a directory, not a file. Call `read` again with one specific file path below."
+                    return Result.success(
+                        Observation(
+                            action="read", content=f"{hint}\n\n{body}", files=(),
+                            metadata={"kind": "directory_listing", "entryCount": len(matches)},
+                        )
+                    )
                 return Result.fail("not_found", f"file not found: {norm_path}")
             content = self._files[norm_path]
             return Result.success(

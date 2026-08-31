@@ -142,5 +142,44 @@ class TestRel02FrozenCanary(unittest.TestCase):
         self.assertIn("digest mismatch", schema["binding"])
 
 
+class TestPreregistrationIntegrity(unittest.TestCase):
+    """The reviewed preregistration must verify against the executed workload.
+
+    Digest basis: the prereg ``workload_digest`` names the runner's
+    ``WorkloadDefinition`` split-ID projection (the object the driver actually
+    executes), not the raw ``workload.json`` bytes.  A re-freeze that used the
+    raw-file JCS digest was rejected by ``test_preregistration_artifact_integrity``
+    and corrected; this class pins the authoritative basis so both artifacts
+    stay coherent and future drift is refused instead of silently accepted.
+    """
+
+    def test_workload_digest_matches_the_executed_workload_definition(self) -> None:
+        from benchmarks.m8_heldout.runner import load_workload
+
+        workload, _ = load_workload()
+        prereg = json.loads(
+            (ROOT / "benchmarks" / "m8_heldout" / "artifacts" / "preregistration.json")
+            .read_text(encoding="utf-8"))
+        self.assertEqual(prereg["workload_digest"], workload.digest())
+
+    def test_preregistration_body_digest_is_self_binding(self) -> None:
+        from vanguard.packages.domain.canonicalisation.digest import digest_of
+
+        prereg = json.loads(
+            (ROOT / "benchmarks" / "m8_heldout" / "artifacts" / "preregistration.json")
+            .read_text(encoding="utf-8"))
+        body = {k: v for k, v in prereg.items() if k != "preregistration_digest"}
+        self.assertEqual(prereg["preregistration_digest"], digest_of(body))
+
+    def test_preregistration_attempt_policy_is_single_attempt(self) -> None:
+        prereg = json.loads(
+            (ROOT / "benchmarks" / "m8_heldout" / "artifacts" / "preregistration.json")
+            .read_text(encoding="utf-8"))
+        self.assertEqual(prereg["attempt_policy"]["max_attempts"], 1)
+        self.assertFalse(prereg["attempt_policy"]["retry_on_instrument_error"])
+
+
+
+
 if __name__ == "__main__":
     unittest.main()

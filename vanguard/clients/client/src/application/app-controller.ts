@@ -192,7 +192,7 @@ export const DEFAULT_PROVIDERS: ModelProviderConfig[] = [
     credentialState: "CONFIGURED",
     models: [
       { id: "openrouter/free", name: "Free Tier Router", defaultForRole: "general" },
-      { id: "deepseek/deepseek-chat", name: "DeepSeek V3", defaultForRole: "coding" },
+      { id: "deepseek/deepseek-v4-flash-0731", name: "DeepSeek V4 Flash", defaultForRole: "coding" },
       { id: "anthropic/claude-3.5-sonnet", name: "Claude 3.5 Sonnet", defaultForRole: "audit" },
     ],
     selectedModel: "openrouter/free",

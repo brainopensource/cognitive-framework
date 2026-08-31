@@ -38,7 +38,7 @@ Modern LLM reasoning costs and latencies are dominated by prompt token volume. I
 Solution C introduces a **5-Layer Radix Cache Compiler** and an **Anti-Thrashing Protocol Recovery Policy**:
 1. **Radix L1–L5 Prefix Cache Alignment**: Strictly partitions the prompt into static, quasi-static, and dynamic layers, ensuring 80–90% KV cache reuse on Anthropic and DeepSeek.
 2. **Structured Compaction (`StructuredConsolidateStrategy`)**: Condenses older conversation turns without breaking strict tool-call ID pairing invariants and without losing dead-end attempt memory.
-3. **DSML & JSON Protocol Recovery (`ProtocolRecoveryPolicy`)**: Intercepts malformed XML/markdown tags emitted by open-weight models (DeepSeek-V3, Qwen-2.5) and repairs them transparently without failing the turn.
+3. **DSML & JSON Protocol Recovery (`ProtocolRecoveryPolicy`)**: Intercepts malformed XML/markdown tags emitted by open-weight models (DeepSeek-V4-Flash, Qwen-2.5) and repairs them transparently without failing the turn.
 
 ```mermaid
 graph TD

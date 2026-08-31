@@ -373,7 +373,7 @@ version: 1.0.0
 description: "Maximum capability mode for difficult SWE-bench Pro tasks and multi-file debugging."
 
 model_routing:
-  primary_role: "deepseek/deepseek-chat"
+  primary_role: "deepseek/deepseek-v4-flash-0731"
   architect_role: "anthropic/claude-3-5-sonnet"
   reviewer_role: "openai/o3-mini"
   fallback_role: "qwen/qwen-2.5-coder-32b-instruct"

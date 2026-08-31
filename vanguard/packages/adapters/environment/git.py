@@ -50,7 +50,12 @@ class GitUnavailableError(RuntimeError):
 
 _DIFF_HEADER = re.compile(r"^diff --git a/(.+) b/(.+)$")
 _HUNK_HEADER = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
-DEFAULT_ALLOWLIST = ("pytest", "ruff", "git", "python3", "python")
+#: `ls`/`find` are pure read-only directory-inspection utilities (no write,
+#: network, or credential surface) added after live qualification runs showed
+#: models reaching for `ls` to orient themselves before a directory-listing
+#: convenience existed on `read`; refusing it burned whole turns on a denied
+#: call instead of one recoverable turn.
+DEFAULT_ALLOWLIST = ("pytest", "ruff", "git", "python3", "python", "ls", "find")
 
 
 def _compute_file_digest(content: str) -> str:
@@ -75,6 +80,42 @@ def _with_file_header(patch_text: str, path: object) -> str:
     if not patch_text.lstrip().startswith("@@"):
         return patch_text
     return f"--- a/{path}\n+++ b/{path}\n{patch_text}"
+
+
+_DIRECTORY_LISTING_IGNORED = {".git", "__pycache__", ".pytest_cache", "node_modules", ".venv"}
+_DIRECTORY_LISTING_MAX_ENTRIES = 200
+
+
+def _directory_listing_observation(target: Path, path_str: str) -> "Observation":
+    """Bounded, sorted listing used when `read` is called on a directory.
+
+    A dedicated `search`/list verb is the sanctioned discovery path, but
+    treating `read` on a directory as an implicit listing matches a
+    convention several models default to; failing it outright just spends
+    the whole turn budget on a repeated identical mistake instead of one
+    recoverable turn.
+    """
+    entries: list[str] = []
+    for child in sorted(target.rglob("*")):
+        if any(part in _DIRECTORY_LISTING_IGNORED for part in child.parts):
+            continue
+        rel = child.relative_to(target).as_posix()
+        entries.append(rel + "/" if child.is_dir() else rel)
+        if len(entries) >= _DIRECTORY_LISTING_MAX_ENTRIES:
+            break
+    body = "\n".join(entries) if entries else "(empty directory)"
+    hint = (
+        f"'{path_str}' is a directory, not a file. Listing below "
+        f"({len(entries)} entr{'y' if len(entries) == 1 else 'ies'}"
+        f"{', truncated' if len(entries) >= _DIRECTORY_LISTING_MAX_ENTRIES else ''}). "
+        "Call `read` again with one specific file path from this list."
+    )
+    return Observation(
+        action="read",
+        content=f"{hint}\n\n{body}",
+        files=(),
+        metadata={"kind": "directory_listing", "entryCount": len(entries)},
+    )
 
 
 class GitEnvironment:
@@ -244,6 +285,13 @@ class GitEnvironment:
                     message=res_path.error.message if res_path.error else "path resolution failed",
                 )
             target = res_path.value
+            if target.is_dir():
+                # Several coding-agent conventions treat `read` on a directory
+                # as an implicit listing. Rather than fail closed on a very
+                # common model habit and burn the whole turn budget on a
+                # repeated identical mistake, return a bounded listing with an
+                # explicit pointer to `read` a specific file next.
+                return Result.success(_directory_listing_observation(target, path_str))
             if not target.is_file():
                 return Result.fail("not_found", f"file not found: {path_str}")
             try:
@@ -323,10 +371,19 @@ class GitEnvironment:
                 text=True,
                 check=False,
             )
-            if grep_proc.returncode != 0 and "not a git repository" in (grep_proc.stderr or ""):
-                cmd_fallback = ["git", "grep", "--no-index", "-n", "--", pattern]
-                if path_filter and isinstance(path_filter, str) and path_filter not in (".", "/workspace", ""):
-                    cmd_fallback.extend(["--", path_filter])
+            if grep_proc.returncode != 0:
+                # Benchmark workspaces are deliberately copied directories,
+                # not Git repositories.  ``git grep`` returns code 1 with no
+                # stderr there (and also for no matches), so checking only
+                # for its diagnostic silently turned every discovery query
+                # into an empty observation.  Fall back on any non-zero
+                # result, while keeping Vanguard's internal state hidden.
+                cmd_fallback = [
+                    "grep", "-rn", "--exclude-dir=.vanguard",
+                    "--exclude-dir=.git", "--exclude-dir=__pycache__",
+                    "--", pattern, path_filter if isinstance(path_filter, str)
+                    and path_filter not in (".", "/workspace", "") else ".",
+                ]
                 grep_proc = subprocess.run(
                     cmd_fallback,
                     cwd=self._working_dir,

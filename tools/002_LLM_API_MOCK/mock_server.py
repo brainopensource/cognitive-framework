@@ -104,7 +104,7 @@ class MockServerHandler(BaseHTTPRequestHandler):
                 {
                     "1": "Toy / Minimal LLM (e.g. qwen2.5:1.5b, llama3.2:3b)",
                     "2": "Cheap / Local Mid LLM (e.g. qwen3.6:27b, deepseek-r1:14b)",
-                    "3": "Strong Flash / Coding LLM (e.g. deepseek-chat, gemini-2.0-flash)",
+                    "3": "Strong Flash / Coding LLM (e.g. deepseek-v4-flash-0731, gemini-2.0-flash)",
                     "4": "Frontier SOTA (e.g. claude-3.5-sonnet, gpt-4o)",
                 },
             )

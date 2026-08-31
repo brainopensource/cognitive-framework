@@ -153,14 +153,23 @@ composition/lifecycle authority; infrastructure stays behind generic ports.
 
 | ID | Capability package | Primary owner | Status | Dependency | Acceptance gate |
 |---|---|---|---|---|---|
-| **CMX-01** | Current-mechanism delta and three presets | `packs/code-default`, manifests | `APPROVED` | EWK-Q disposition | `fast`, `balanced`, and `max` are data-selected compositions over one runtime; no duplicate store, coordinator, tool broker, or evaluator |
-| **CMX-02** | Port-backed repository intelligence | `ports/index.py`, `adapters`, code-pack bindings | `APPROVED` | CMX-01 | Search, symbols, dependencies, test mapping, and repository map have provenance, path containment, deterministic fallback, and bounded output; adapters never import `apps` |
-| **CMX-03** | Durable plan/context/recovery loop | code-pack policies + existing projections | `APPROVED` | CMX-01, CMX-02 | A cold-resumed task restores objective, constraints, discoveries, dead ends, modified files, latest verification, remaining budget, and next action without replaying settled effects |
-| **CMX-04** | Multi-file and greenfield correctness | code-pack policies and fixtures | `APPROVED` | CMX-03 | Change-surface closure and affected-test selection pass multi-file fixtures; greenfield work uses an explicit scaffold/baseline/evidence policy and never silently bypasses admission |
-| **CMX-05** | Coding Max application facade | `apps/coding_max`, shared application service, `vg` | `APPROVED` | CMX-03 | CLI and API invoke the same composition; run/status/resume/evidence/cost results agree; app owns no execution loop or provider HTTP |
-| **CMX-06** | Conditional review and mediated specialist roles | manifests/topology/child runtime | `PROPOSED` | CMX-05 and accepted M-7 evidence | Reviewer/localizer/test-investigator roles exchange artifacts by digest, receive attenuated budgets, run sequentially by default, and cannot override the verifier |
-| **CMX-07** | Repository-scale qualification | benchmark program | `PROPOSED` | CMX-04, CMX-05 | Frozen internal bugfix, multi-file, migration, and greenfield set reports success, missingness, tokens, cost, latency, retries, resume parity, and external verdicts |
-| **CMX-08** | First-party reference-agent portfolio | apps + independent packs/manifests | `PROPOSED` | M-10 and stable public composition contract | Coding Max plus two non-coding supported agents install, run, resume, and emit attributable evidence through the same public framework contract |
+| **CMX-01** | Current-mechanism delta and three presets | `packs/code-default`, manifests | `DONE (hermetic)` | EWK-Q disposition | `fast`, `balanced`, and `max` are data-selected compositions over one runtime; no duplicate store, coordinator, tool broker, or evaluator |
+| **CMX-02** | Port-backed repository intelligence | `ports/index.py`, `adapters`, code-pack bindings | `DONE (hermetic)` | CMX-01 | Search, symbols, dependencies, test mapping, and repository map have provenance, path containment, deterministic fallback, and bounded output; adapters never import `apps` |
+| **CMX-03** | Durable plan/context/recovery loop | code-pack policies + existing projections | `DONE (hermetic)` | CMX-01, CMX-02 | A cold-resumed task restores objective, constraints, discoveries, dead ends, modified files, latest verification, remaining budget, and next action without replaying settled effects |
+| **CMX-04** | Multi-file and greenfield correctness | code-pack policies and fixtures | `DONE (hermetic)` | CMX-03 | Change-surface closure and affected-test selection pass multi-file fixtures; greenfield work uses an explicit scaffold/baseline/evidence policy and never silently bypasses admission |
+| **CMX-05** | Coding Max application facade | `apps/coding_max`, shared application service, `vg` | `DONE (hermetic)` | CMX-03 | CLI and API invoke the same composition; run/status/resume/evidence/cost results agree; app owns no execution loop or provider HTTP |
+| **CMX-06** | Conditional review and mediated specialist roles | manifests/topology/child runtime | `IMPLEMENTED (ABLATION PENDING)` | CMX-05 and accepted M-7 evidence | Reviewer/localizer/test-investigator roles exchange artifacts by digest, receive attenuated budgets, run sequentially by default, and cannot override the verifier |
+| **CMX-07** | Repository-scale qualification | benchmark program | `FROZEN (EXECUTION PENDING)` | CMX-04, CMX-05 | Frozen internal bugfix, multi-file, migration, and greenfield set reports success, missingness, tokens, cost, latency, retries, resume parity, and external verdicts |
+| **CMX-08** | First-party reference-agent portfolio | apps + independent packs/manifests | `TECHNICAL SLICE DONE` | M-10 and stable public composition contract | Coding Max plus two non-coding supported agents install, run, resume, and emit attributable evidence through the same public framework contract |
+
+### Next staged development: 1-forge
+
+The next implementation packet is `FORGE-ADM-001..005` in the non-canonical
+review material under `docs/reports/reviews/electroweak_v091/1_forge/`:
+define the goal contract, compose it with the existing admission gate, and
+make rejection model-visible. ToolScript, forks, mutation, and other later
+forge mechanisms remain deferred until their own falsifiers and evidence gates
+are authorized.
 
 #### Preset contract
 

@@ -11,5 +11,5 @@
   "surgical_patch": "patch.apply",
   "test": "proc.exec",
   "run_command": "proc.exec",
-  "finish": "proc.exec"
+  "finish": "agency.finish"
 }

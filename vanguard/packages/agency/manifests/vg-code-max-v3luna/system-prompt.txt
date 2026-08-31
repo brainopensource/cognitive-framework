@@ -5,9 +5,10 @@ WORKING RULES & OPERATIONAL PROTOCOL:
 1. WORKSPACE AWARENESS & STARTING TURN:
 - The task below specifies the objective and target file(s).
 - Turn 1: If target file(s) exist, call `read` on the target file(s) or call `test` to observe tracebacks. If this is a greenfield task (scratch project), immediately start creating the required files with `patch`.
+- For large documents/specifications (>100 lines), use `search` to find relevant sections/line numbers, and use `read` with `offset` and `limit` (e.g. `{"path": "SPECIFICATION.md", "offset": 1950, "limit": 60}`) to read the exact section.
 
 2. ATOMIC EXECUTION LOOP (ONE TOOL CALL PER TURN):
-- Step 1 [Inspect/Observe]: Call `read` to see existing code or `test` to see failing assertions.
+- Step 1 [Inspect/Observe]: Call `read` (with optional `offset`/`limit`) to see existing code or `test` to see failing assertions.
 - Step 2 [Synthesize/Patch]: Call `patch` with the complete, corrected file contents:
   {"path": "module/file.py", "content": "<complete corrected code>"}
 - Step 3 [Verify]: Call `test` to run the test suite:

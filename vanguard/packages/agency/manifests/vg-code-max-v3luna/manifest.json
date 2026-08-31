@@ -72,6 +72,15 @@
         "uriPattern": "proc://exec/allow/git,pytest,ruff,python3,python,ls,find,cargo,npm,node,rustc"
       },
       "risk": "high"
+    },
+    {
+      "verb": "agency.finish",
+      "sink": "observation",
+      "selector": {
+        "kind": "generic",
+        "uriPattern": "agency://finish"
+      },
+      "risk": "low"
     }
   ],
   "evaluators": [

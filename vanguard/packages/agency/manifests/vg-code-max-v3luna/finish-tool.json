@@ -1,13 +1,13 @@
 {
   "name": "finish",
-  "verb": "proc.exec",
-  "description": "Declare the task complete. Call this only after the `test` tool has reported a pass in this run. Provide a one-line summary of what you changed.",
+  "verb": "agency.finish",
+  "description": "Declare the task complete. Call this only after the test tool has reported a pass in this run. Provide a one-line summary of what you changed.",
   "schema": {
     "type": "object",
     "properties": {
       "summary": {
         "type": "string",
-        "description": "One line: which files you changed and what the fix was"
+        "description": "One line summary"
       }
     },
     "required": [

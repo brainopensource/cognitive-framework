@@ -381,7 +381,7 @@ class GitEnvironment:
                 # into an empty observation.  Fall back on any non-zero
                 # result, while keeping Vanguard's internal state hidden.
                 cmd_fallback = [
-                    "grep", "-rn", "--exclude-dir=.vanguard",
+                    "grep", "-rnH", "--exclude-dir=.vanguard",
                     "--exclude-dir=.git", "--exclude-dir=__pycache__",
                     "--", pattern, path_filter if isinstance(path_filter, str)
                     and path_filter not in (".", "/workspace", "") else ".",

@@ -68,6 +68,7 @@ class TestLamRuntimeVertical(unittest.TestCase):
                 approver=lambda challenge: signer.approve(challenge, reviewer="operator"),
                 approval_key=signer.public_bytes,
                 verifier=_Verifier(),
+                sandbox_mode="host-dev",
             )
 
             self.assertIs(result.terminal, RunTermination.COMPLETED,

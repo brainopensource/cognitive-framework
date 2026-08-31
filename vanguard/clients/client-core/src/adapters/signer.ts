@@ -3,21 +3,8 @@ import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "n
 import { homedir } from "node:os";
 import { join } from "node:path";
 import type { ApprovalChallenge, ApprovalDecision, SignerPort } from "../contract/types.js";
-
-export function jcsCanonicalize(value: unknown): string {
-  if (value === null || typeof value !== "object") {
-    return JSON.stringify(value);
-  }
-  if (Array.isArray(value)) {
-    return "[" + value.map((item) => jcsCanonicalize(item)).join(",") + "]";
-  }
-  const obj = value as Record<string, unknown>;
-  const keys = Object.keys(obj).sort();
-  const pairs = keys
-    .filter((key) => obj[key] !== undefined)
-    .map((key) => JSON.stringify(key) + ":" + jcsCanonicalize(obj[key]));
-  return "{" + pairs.join(",") + "}";
-}
+import { jcsCanonicalize } from "../contract/canonical.js";
+export { jcsCanonicalize } from "../contract/canonical.js";
 
 export function defaultKeyDir(): string {
   return join(homedir(), ".vanguard", "keys");

@@ -59,6 +59,7 @@ This document is the canonical architecture owner for the event-sourced causal s
 
 ## AS_BUILT Status
 - `IMPLEMENTED` — Pure event sourcing with deterministic state folding and verified checkpoint caches is implemented in `vanguard.packages.domain.ledger` and `vanguard.packages.runtime.checkpoints`.
+- `PARTIAL` — Coding task, verification freshness, and classified-recovery projections are **v0.9.2 targets**. Until their event payloads and reducers exist, they must not be represented as durable current behavior.
 
 ---
 
@@ -139,6 +140,34 @@ To accelerate cold start times on runs with thousands of events:
 - The runtime periodically computes a snapshot of `LedgerState` and writes a checkpoint.
 - **Verification Rule**: A checkpoint is never trusted blindly. It contains the sequence number and `state_digest`. The runtime verifies that the checkpoint digest matches the fold of events up to sequence $K$.
 - If a checkpoint is corrupted or deleted, the runtime seamlessly falls back to replaying from genesis event `0` without data loss.
+
+---
+
+## 7. v0.9.2 Target: Coding-State and Evidence Projections
+
+> **TARGET / PLANNED — not AS_BUILT.** Exact event kinds and payload schemas require implementation and registration in [`ref.events`](../reference/events.md); this section defines only causal-state properties.
+
+Coding plans, repository-context selections, patch postimages, verification receipts, failure classifications, recovery decisions, and completion-admission decisions must follow the same authority split as every other runtime view:
+
+```text
+ledger facts + content-addressed artifacts
+                 -> pure reducers
+                 -> CodingTaskState / verification / recovery views
+```
+
+No generated repository index, LDA database, context packet, checkpoint, or benchmark summary becomes operational truth. These are reconstructible projections or evidence artifacts. Their provenance must bind the source repository snapshot and generator/provider identity.
+
+Projection compatibility is part of the event contract. Reducers must consume the fields actually emitted by the active writer, preserve dual-read behavior when a field is renamed, and have contract vectors that fold representative current envelopes. Unknown or incompatible fields must not silently become generic actions when that would change planning, budget, verification, or recovery semantics.
+
+Verification freshness is derived from causal order and identity: a verification receipt is applicable only to the workspace/postimage it evaluated, and any later accepted edit invalidates it for completion admission. A compact expression is:
+
+$$
+\operatorname{fresh}(v, s) =
+(v.\operatorname{postimage\_digest} = s.\operatorname{postimage\_digest})
+\land (v.\operatorname{sequence} > s.\operatorname{last\_edit\_sequence})
+$$
+
+Benchmark evidence should bind `run_id`, task and repository digests, harness/manifest identity, model/provider identity, trajectory digest, terminal reason, patch digest, verification and evaluator receipts, and measured tokens/cost/latency/turns/tool calls/retries. A report row without a trajectory link may be retained diagnostically but is not qualifying evidence.
 
 ---
 

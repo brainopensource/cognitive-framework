@@ -17,9 +17,9 @@ audience:
   - developer
   - architect
   - contributor
-analysis_subject_sha: 9fd444674bf3a97f2673ff36a5f5928ef046c574
-version: 0.9.1a1
-last_verified: 2026-08-29
+analysis_subject_sha: d639ec4bda5ea7d8836a182393498a31fc43ea1a
+version: 0.9.2a2
+last_verified: 2026-08-31
 evidence:
   - E-B-012
   - E-B-017
@@ -115,6 +115,44 @@ $$	ext{domain} \leftarrow 	ext{ports} \leftarrow 	ext{kernel} \leftarrow 	ext{ag
 - **Agency**: Turn cognition. Imports `domain`, `ports`, `kernel`. No evaluator imports.
 - **Runtime**: Orchestration and lifecycle. Composes all layers into sessions.
 - **Adapters**: Concrete implementations. Must import only `domain` and `ports`. Adapters **must never** import `kernel` or `agency`.
+
+## 5. Product applications: thin app, thick composition
+
+`apps/` is a client slot, not a home for another orchestration substrate. A
+first-party product application may validate a request, select a manifest and
+preset, invoke the shared runtime application service, and shape a result for a
+transport. It MUST NOT own a second turn loop, event writer, tool broker,
+provider client, checkpoint store, evaluator, or authorization path.
+
+Domain cognition belongs to the selected pack/composition:
+
+| Concern | Canonical owner |
+|---|---|
+| Request/result ergonomics and preset selection | `apps/<product>/` |
+| Task planner, context policy, domain failure interpretation, completion policy | `packs/<domain>/` and manifest-selected components |
+| Generic model, index, sandbox, environment, memory and store contracts | `ports/` |
+| Concrete infrastructure | `adapters/`; adapters never import `apps/` or pack policy |
+| Composition, lifecycle, ledger, checkpoints and child runtime | `runtime/` |
+| Authorization, budgets and effect mediation | domain-blind `kernel/` |
+
+Repository-intelligence features such as symbol lookup, dependency edges, test
+mapping, history priors, or optional external indexes must enter through a
+generic port and normalized values. An adapter may implement the port; a code
+pack may decide how to rank the observations; an app may select the policy.
+Reversing that dependency—for example, an adapter importing
+`apps.coding_max`—is a boundary violation even when the prototype is stored
+outside the production tree.
+
+The same rule applies to verification. A code pack defines which checks are
+applicable and interprets their receipts. Execution occurs through the mediated
+environment/sandbox path, and independent evaluation remains exterior. Direct
+host `subprocess` or provider HTTP inside product or pack orchestration is not a
+shortcut around those contracts.
+
+Design reports and executable prototypes under `docs/reports/` are
+non-authorizing inputs. Their paths are never production owners, and their
+green demonstrations do not establish composition, boundary, or release
+acceptance against the current source subject.
 
 ---
 

@@ -8,6 +8,7 @@ to generate the lightweight, machine-readable knowledge layer in .generated/know
 from __future__ import annotations
 
 import json
+import ast
 import math
 import os
 import re
@@ -20,6 +21,82 @@ OUT_DIR = ROOT / ".generated" / "knowledge"
 FRONTMATTER_RE = re.compile(r"^---\n(.*?)\n---", re.DOTALL)
 LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 HEADING_RE = re.compile(r"^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$", re.MULTILINE)
+HEADING_RE = re.compile(r"^\s{0,3}#{1,6}\s+(.+?)\s*#*\s*$", re.MULTILINE)
+
+# Symbol index scan roots with per-package canonical-owner fallbacks. Specific
+# subsystem rows in code-map.jsonl always win via longest-prefix matching.
+SYMBOL_SCAN_PACKAGES: tuple[tuple[str, str], ...] = (
+    ("vanguard/packages/domain/", "docs/backend/reference/schemas.md"),
+    ("vanguard/packages/ports/", "docs/backend/reference/ports.md"),
+    ("vanguard/packages/kernel/", "docs/backend/architecture/kernel.md"),
+    ("vanguard/packages/agency/", "docs/backend/architecture/agency.md"),
+    ("vanguard/packages/runtime/", "docs/backend/architecture/runtime-execution.md"),
+    ("vanguard/packages/adapters/", "docs/backend/architecture/runtime-execution.md"),
+)
+
+
+def canonical_owner_for_code_path(rel_path: str, code_map_rows: list[dict[str, str]]) -> str:
+    """Resolve the canonical documentation owner for a production code path.
+
+    Longest-prefix match against code-map.jsonl subsystem rows first; falls back
+    to the per-package defaults above; never raises.
+    """
+    best_prefix = ""
+    best_owner = ""
+    for row in code_map_rows:
+        prefix = row["package_path"]
+        if rel_path.startswith(prefix) and len(prefix) > len(best_prefix):
+            best_prefix = prefix
+            best_owner = row["canonical_owner"]
+    if best_owner:
+        return best_owner
+    for fallback_prefix, owner in SYMBOL_SCAN_PACKAGES:
+        if rel_path.startswith(fallback_prefix):
+            return owner
+    return "docs/README.md"
+
+
+def extract_code_symbols(root: Path, code_map_rows: list[dict[str, str]]) -> list[dict[str, str]]:
+    """Deterministic AST scan of public production classes for the symbol index.
+
+    Extracts every public top-level class from the hexagonal production packages
+    and links it to its canonical documentation owner. Pure function of the tree.
+    """
+    seen: set[tuple[str, str]] = set()
+    rows: list[dict[str, str]] = []
+    for package_prefix, _ in SYMBOL_SCAN_PACKAGES:
+        scan_dir = root / package_prefix
+        if not scan_dir.is_dir():
+            continue
+        for path in sorted(scan_dir.rglob("*.py")):
+            rel_path = str(path.relative_to(root)).replace("\\", "/")
+            try:
+                tree = ast.parse(path.read_text(encoding="utf-8"))
+            except (SyntaxError, OSError):
+                continue
+            for node in tree.body:
+                if not isinstance(node, ast.ClassDef):
+                    continue
+                if node.name.startswith("_") or node.name.startswith("Test"):
+                    continue
+                key = (node.name, rel_path)
+                if key in seen:
+                    continue
+                seen.add(key)
+                kind = "class"
+                for base in node.bases:
+                    base_name = base.id if isinstance(base, ast.Name) else getattr(base, "attr", "")
+                    if base_name == "Protocol":
+                        kind = "protocol"
+                        break
+                rows.append({
+                    "symbol": node.name,
+                    "kind": kind,
+                    "defined_in": rel_path,
+                    "canonical_owner": canonical_owner_for_code_path(rel_path, code_map_rows),
+                })
+    rows.sort(key=lambda r: (r["symbol"], r["defined_in"]))
+    return rows
 
 
 def build_knowledge_base() -> dict[str, int]:
@@ -140,6 +217,14 @@ def build_knowledge_base() -> dict[str, int]:
         {"symbol": "IMemoryEngine", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"},
         {"symbol": "IEvaluationGate", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"},
     ]
+
+    # Merge the deterministic AST-derived symbol index under the curated rows.
+    curated_keys = {(r["symbol"], r["defined_in"]) for r in symbols_rows}
+    for symbol_row in extract_code_symbols(ROOT, code_map_rows):
+        key = (symbol_row["symbol"], symbol_row["defined_in"])
+        if key not in curated_keys:
+            symbols_rows.append(symbol_row)
+    symbols_rows.sort(key=lambda r: (r["symbol"], r["defined_in"]))
 
     report_data = {
         "status": "VALIDATED",

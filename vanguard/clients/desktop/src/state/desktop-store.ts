@@ -2,6 +2,7 @@ import {
   FrontendAppController,
   type AppControllerState,
   type ConversationRecord,
+  ManagedRuntimeHost,
 } from "@aether/client";
 import {
   emptyRunSnapshot,
@@ -22,8 +23,15 @@ import type {
   SemanticActivityItem,
   FrontendSettings,
   DeepLinkTarget,
+  ModelProviderConfig,
+  StartupReadiness,
+  MultiFileDiffModel,
+  VerificationSummary,
+  ResearchProgressSummary,
+  WorkflowExecutionView,
 } from "@aether/contracts";
 import type { RuntimeClient } from "@aether/client";
+import { TauriNativeBridge, type NativePlatformBridge } from "../bridge/tauri-bridge.js";
 import { groupSessionsByDate, filterSessions, type SessionSummary, type SessionGroup } from "./session-history.js";
 
 export type Signal<T> = {
@@ -56,7 +64,7 @@ export function createSignal<T>(initialValue: T): Signal<T> {
   };
 }
 
-export type ForensicTab = "diffs" | "evidence" | "artifacts" | "trace" | "runs" | "settings";
+export type ForensicTab = "diffs" | "evidence" | "artifacts" | "trace" | "runs" | "settings" | "providers";
 export type LayoutMode = "COMPACT" | "STANDARD" | "WIDE";
 
 export type DesktopStoreState = {
@@ -71,6 +79,11 @@ export type DesktopStoreState = {
   recentWorkspaces: string[];
   runId: string;
   runs: RunSummary[];
+
+  // Catalog & Providers
+  providers: ModelProviderConfig[];
+  selectedProviderId: string;
+  readiness: StartupReadiness;
 
   // Connection & Stream
   connectionState: "connected" | "connecting" | "reconnecting" | "unavailable" | "offline" | "degraded" | "incompatible";
@@ -89,6 +102,12 @@ export type DesktopStoreState = {
   traceGraph: TraceGraph;
   pendingApproval?: PendingApproval;
 
+  // Product Stage Models
+  multiFileDiff: MultiFileDiffModel;
+  verificationSummaries: VerificationSummary[];
+  researchSummary: ResearchProgressSummary;
+  workflowExecution: WorkflowExecutionView;
+
   // UI / Renderer State
   forensicDrawerOpen: boolean;
   activeForensicTab: ForensicTab;
@@ -101,7 +120,7 @@ export type DesktopStoreState = {
   sidebarOpen: boolean;
   scrollFollowStream: boolean;
   hasUnreadContent: boolean;
-  activeSettingsTab: "general" | "runtime" | "appearance" | "workspace" | "terminal" | "accessibility";
+  activeSettingsTab: "general" | "runtime" | "providers" | "appearance" | "workspace" | "terminal" | "accessibility";
   selectedRunDetailId?: string;
   settings: FrontendSettings;
 };
@@ -110,20 +129,41 @@ export type DesktopStoreOptions =
   | {
       controller?: FrontendAppController;
       client?: RuntimeClient;
+      bridge?: NativePlatformBridge;
       initial?: Partial<DesktopStoreState>;
     }
   | Partial<DesktopStoreState>;
 
 export class DesktopStore {
   public readonly controller: FrontendAppController;
+  public readonly bridge: NativePlatformBridge;
+  public readonly managedRuntime: ManagedRuntimeHost;
   public readonly state: Signal<DesktopStoreState>;
   private unsubscribeController?: () => void;
+  private lastNotifiedApprovalId?: string;
 
   constructor(options: DesktopStoreOptions = {}) {
     const isDirectState = options && !("controller" in options) && !("client" in options) && !("initial" in options);
     const initialConfig = isDirectState ? (options as Partial<DesktopStoreState>) : (options as any).initial ?? {};
     const controllerParam = isDirectState ? undefined : (options as any).controller;
     const clientParam = isDirectState ? undefined : (options as any).client;
+    this.bridge = (options as any)?.bridge ?? new TauriNativeBridge();
+    this.managedRuntime = new ManagedRuntimeHost({
+      onEvent: (event) => {
+        if (event.type === "status_changed") {
+          this.update((s) => ({
+            ...s,
+            connectionState:
+              event.status === "RUNNING"
+                ? "connected"
+                : event.status === "INCOMPATIBLE"
+                ? "incompatible"
+                : "connecting",
+            statusMessage: event.detail ?? s.statusMessage,
+          }));
+        }
+      },
+    });
 
     this.controller =
       controllerParam ??
@@ -159,6 +199,9 @@ export class DesktopStore {
       recentWorkspaces: ctrlState.recentWorkspaces,
       runId: initialConfig.runId ?? ctrlState.activeRunId,
       runs: ctrlState.runs,
+      providers: ctrlState.providers,
+      selectedProviderId: ctrlState.selectedProviderId,
+      readiness: ctrlState.readiness,
       connectionState: initialConfig.connectionState ?? (ctrlState.connectionState.toLowerCase() as any),
       isStreaming: ctrlState.isStreaming,
       statusMessage: ctrlState.statusMessage,
@@ -172,6 +215,10 @@ export class DesktopStore {
       evidenceGrid: initialConfig.evidenceGrid ?? ctrlState.evidenceGrid,
       traceGraph: ctrlState.traceGraph,
       pendingApproval: initialConfig.pendingApproval ?? ctrlState.pendingApproval,
+      multiFileDiff: ctrlState.multiFileDiff,
+      verificationSummaries: ctrlState.verificationSummaries,
+      researchSummary: ctrlState.researchSummary,
+      workflowExecution: ctrlState.workflowExecution,
       forensicDrawerOpen: false,
       activeForensicTab: "diffs",
       activeDiffText: "",
@@ -189,6 +236,9 @@ export class DesktopStore {
     this.unsubscribeController = this.controller.subscribe((cState) => {
       this.syncFromController(cState);
     });
+
+    // Auto-restore persistence
+    this.controller.restoreFromPersistence();
   }
 
   public get(): DesktopStoreState {
@@ -217,6 +267,18 @@ export class DesktopStore {
         activeDiffText = pendingApproval.unifiedDiff;
       }
 
+      // Check for approval notifications
+      if (pendingApproval && pendingApproval.approvalId !== this.lastNotifiedApprovalId) {
+        this.lastNotifiedApprovalId = pendingApproval.approvalId;
+        this.bridge.sendNotification(
+          "AETHER Authorization Required",
+          `Approval '${pendingApproval.approvalId}' requires operator sign-off.`
+        );
+      }
+
+      const activeConv = cState.conversations.find((c) => c.id === cState.activeConversationId);
+      const composerText = activeConv?.draft !== undefined && prev.activeSessionId !== cState.activeConversationId ? activeConv.draft : prev.composerText;
+
       return {
         ...prev,
         sessions,
@@ -227,6 +289,9 @@ export class DesktopStore {
         recentWorkspaces: cState.recentWorkspaces,
         runId: cState.activeRunId,
         runs: cState.runs,
+        providers: cState.providers,
+        selectedProviderId: cState.selectedProviderId,
+        readiness: cState.readiness,
         connectionState: (cState.connectionState.toLowerCase() as any),
         isStreaming: cState.isStreaming,
         statusMessage: cState.statusMessage,
@@ -241,7 +306,12 @@ export class DesktopStore {
         traceGraph: cState.traceGraph,
         pendingApproval,
         activeDiffText,
+        multiFileDiff: cState.multiFileDiff,
+        verificationSummaries: cState.verificationSummaries,
+        researchSummary: cState.researchSummary,
+        workflowExecution: cState.workflowExecution,
         settings: cState.settings,
+        composerText,
       };
     });
   }
@@ -272,6 +342,11 @@ export class DesktopStore {
 
   public deleteSession(sessionId: string): void {
     this.controller.deleteConversation(sessionId);
+  }
+
+  public setDraft(draft: string): void {
+    this.update((s) => ({ ...s, composerText: draft }));
+    this.controller.setConversationDraft(draft);
   }
 
   public ingestEnvelope(envelope: EventEnvelope): void {
@@ -324,6 +399,11 @@ export class DesktopStore {
     await this.controller.startRun(prompt);
   }
 
+  public async submitFollowUp(client: RuntimeClient, prompt: string): Promise<void> {
+    this.controller.setClient(client);
+    await this.controller.submitFollowUp(prompt);
+  }
+
   public async attachStream(client: RuntimeClient, runId: string): Promise<void> {
     this.controller.setClient(client);
     await this.controller.attachRun(runId);
@@ -351,6 +431,28 @@ export class DesktopStore {
     await this.controller.resumeRun(checkpointId);
   }
 
+  // Cross-Surface Actions
+  public openInLab(target?: DeepLinkTarget): void {
+    const link = formatDeepLink(target ?? { kind: "run", runId: this.get().runId });
+    this.bridge.openExternalUrl(`http://localhost:5174${link}`);
+  }
+
+  public copyCliCommand(runId?: string): void {
+    const id = runId ?? this.get().runId;
+    const cmd = `vg run inspect ${id}`;
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(cmd);
+    }
+  }
+
+  public attachInTui(runId?: string): void {
+    const id = runId ?? this.get().runId;
+    const cmd = `vg run --attach ${id}`;
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(cmd);
+    }
+  }
+
   public handleDeepLink(uri: string): void {
     const target: DeepLinkTarget = { kind: "run", runId: this.get().runId };
     const resolved = resolveDeepLink(target, "desktop");
@@ -359,9 +461,23 @@ export class DesktopStore {
     }
   }
 
-  public destroy(): void {
+  public async startManagedRuntime(): Promise<void> {
+    try {
+      const { client } = await this.managedRuntime.ensureRunning();
+      this.controller.setClient(client);
+    } catch (err) {
+      this.update((s) => ({
+        ...s,
+        connectionState: "unavailable",
+        statusMessage: `Runtime startup error: ${String(err)}`,
+      }));
+    }
+  }
+
+  public async destroy(): Promise<void> {
     if (this.unsubscribeController) {
       this.unsubscribeController();
     }
+    await this.managedRuntime.shutdown();
   }
 }

@@ -11,6 +11,12 @@ import { handleInit } from "./init.js";
 import { handleComposition } from "./composition.js";
 import { handleSchema } from "./schema.js";
 import { handleLineage } from "./lineage.js";
+import { handleConfig } from "./config.js";
+import { handleProvider } from "./provider.js";
+import { handleModel } from "./model.js";
+import { handleWorkspace } from "./workspace.js";
+import { handleHistory } from "./history.js";
+import { handleAttach } from "./attach.js";
 import {
   handleCode,
   handleExplain,
@@ -30,6 +36,12 @@ export const COMMANDS: Record<string, CommandHandler> = {
   approve: handleApprove,
   doctor: handleDoctor,
   daemon: handleDaemon,
+  config: handleConfig,
+  provider: handleProvider,
+  model: handleModel,
+  workspace: handleWorkspace,
+  history: handleHistory,
+  attach: handleAttach,
   code: handleCode,
   explain: handleExplain,
   resume: handleResume,
@@ -40,3 +52,4 @@ export const COMMANDS: Record<string, CommandHandler> = {
   schema: handleSchema,
   lineage: handleLineage,
 };
+

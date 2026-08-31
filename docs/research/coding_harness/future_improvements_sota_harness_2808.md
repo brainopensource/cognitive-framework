@@ -72,7 +72,7 @@ Synthesizing advancements across **Reinforcement Learning from Verifiable Reward
 
 ## Table of Contents
 
-1. [The State-of-the-Art Landscape & Empirical Failure Analysis](#1-the-state-of-the-art-landscape--empirical-failure-analysis)
+1. [The State-of-the-Art Landscape & Empirical Failure Analysis](#1-the-state-of-the-art-landscape-empirical-failure-analysis)
    - 1.1 Where Modern SOTA Systems Fail (The Remaining 45–60% of SWE-bench)
    - 1.2 The Shift from Reactive Turn-Loops (System 1) to Deliberative Search (System 2)
    - 1.3 Reinforcement Learning on Software Evolution (SWE-RL & Agent-RLVR)
@@ -101,11 +101,11 @@ Synthesizing advancements across **Reinforcement Learning from Verifiable Reward
    - 4.3 Matrix C: Workflow Presets Ablation with the Same LLM
    - 4.4 Matrix D: Multi-Tier Challenges (Tiers 1, 2, 3, 5, 6, 7, 8) Live Empirical Records
    - 4.5 Statistical Noise & Variance Reduction via Multi-Trial Aggregations
-5. [The Compound Agency Theory & Multiplier Formulations](#5-the-compound-agency-theory--multiplier-formulations)
+5. [The Compound Agency Theory & Multiplier Formulations](#5-the-compound-agency-theory-multiplier-formulations)
    - 5.1 Mathematical Formulation of the Compound Multiplier ($\mathcal{M}_{\text{compound}} \approx 32.4\times$)
    - 5.2 Dynamic Problem Classifier & Feature Routing Decision Tree
    - 5.3 Synergistic Technology Compounding Matrix
-6. [Probability of Success Index ($\mathbb{P}_{\text{success}}$) & Risk Matrix](#6-probability-of-success-index-mathbbp_textsuccess--risk-matrix)
+6. [Probability of Success Index ($\mathbb{P}_{\text{success}}$) & Risk Matrix](#6-probability-of-success-index-mathbbp_textsuccess-risk-matrix)
    - 6.1 Risk vs. Impact Pareto Frontier
    - 6.2 Comprehensive Scoring and Implementation Feasibility Matrix
 7. [5 Drop-In Reference Prototypes (Standalone Python Implementations)](#7-5-drop-in-reference-prototypes-standalone-python-implementations)
@@ -114,11 +114,11 @@ Synthesizing advancements across **Reinforcement Learning from Verifiable Reward
    - 7.3 Prototype 3: Type-Aware Mutation Falsifier (`mutation_falsifier.py`)
    - 7.4 Prototype 4: AST PageRank Code Graph Indexer (`tree_sitter_graph.py`)
    - 7.5 Prototype 5: Neuro-Symbolic Invariant Verifier (`smt_invariants.py`)
-8. [Substrate Porting Blueprint for Vanguard / LIM](#8-substrate-porting-blueprint-for-vanguard--lim)
+8. [Substrate Porting Blueprint for Vanguard / LIM](#8-substrate-porting-blueprint-for-vanguard-lim)
    - 8.1 Hexagonal Layer Boundary Mapping
    - 8.2 Preserving the Trusted Computing Base ($\le 1438$ LOC)
    - 8.3 Automated Invariant Verification & Linter Suite
-9. [Academic Bibliography & Literature References (30 Citations)](#9-academic-bibliography--literature-references-30-citations)
+9. [Academic Bibliography & Literature References (30 Citations)](#9-academic-bibliography-literature-references-30-citations)
 
 ---
 

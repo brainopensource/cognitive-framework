@@ -100,7 +100,10 @@ class Attenuation(unittest.TestCase):
 
 class BudgetExhaustion(unittest.TestCase):
     def test_the_run_terminates_as_budget_exhausted(self) -> None:
-        wired = spine.build([spine.effect(usd_micros=400) for _ in range(6)],
+        wired = spine.build([
+            spine.effect(args={"path": f"/workspace/src/budget_{i}.ts"}, usd_micros=400)
+            for i in range(6)
+        ],
                             ceilings={"usd_micros": 1_000, "millis": 60_000},
                             adapters={"fs.write": spine.StaticAdapter(
                                 "fs.write", cost={"usd_micros": 400, "millis": 10})})

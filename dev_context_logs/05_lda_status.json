@@ -1,0 +1,30 @@
+{
+  "bytes": 2597691,
+  "database_stats": {
+    "documents": 0,
+    "entities": 0,
+    "files": 0,
+    "relations": 0,
+    "symbols": 0
+  },
+  "documents": 0,
+  "estimated_tokens": 512050,
+  "index_hint": "fact graph is empty; run 'uv run lda index' or use tools/docs_rag_v0.py",
+  "lines": 62555,
+  "providers": [
+    "filesystem",
+    "markdown",
+    "code_ast",
+    "git",
+    "knowledge"
+  ],
+  "relations": 0,
+  "root": "/home/rocha/Coding/Aether-D-System",
+  "status": "DEGRADED_EMPTY_INDEX",
+  "symbols": 0,
+  "topology": {
+    "entities": [],
+    "languages": [],
+    "relations": []
+  }
+}

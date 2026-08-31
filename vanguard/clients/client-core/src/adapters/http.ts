@@ -16,7 +16,6 @@ import type {
   StreamItem,
   SignerPort,
 } from "../contract/types.js";
-import { OperatorSigner } from "./signer.js";
 
 export type HttpTransportOptions = {
   baseUrl?: string;
@@ -307,9 +306,9 @@ export class HttpRuntimeClient implements RuntimeClient {
       return fail("not_available", "approval challenge digests are empty (Joint J4)", false);
     }
     try {
-      const signer = this.signer ?? (typeof window === "undefined" ? OperatorSigner.loadOrCreate() : undefined);
+      const signer = this.signer;
       if (!signer) {
-        return fail("not_available", "no cryptographic signer configured for browser context", false);
+        return fail("not_available", "no cryptographic signer configured", false);
       }
       const decision = await signer.signChallenge(
         challenge,

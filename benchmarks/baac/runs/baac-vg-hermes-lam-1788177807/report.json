@@ -1,0 +1,105 @@
+{
+  "runId": "baac-vg-hermes-lam-1788177807",
+  "timestamp": "2026-08-31T12:03:27Z",
+  "preset": "vg-hermes",
+  "model": "lam-mock",
+  "mode": "lam",
+  "summary": {
+    "totalChallenges": 3,
+    "passedCount": 3,
+    "overallPassRatePct": 100.0,
+    "totalTokens": 4320,
+    "totalCostUsd": 0.0,
+    "totalDurationSeconds": 0.36,
+    "tierPromotion": {
+      "easyPromoted": true,
+      "easyPassRate": 100.0
+    },
+    "attribution": {
+      "PASS": 3,
+      "LLM_COGNITIVE_ERROR": 0,
+      "HARNESS_ERROR": 0,
+      "DATASET_INVALID": 0
+    }
+  },
+  "results": [
+    {
+      "challengeId": "fib_cli",
+      "tier": "easy",
+      "preset": "vg-hermes",
+      "model": "lam-mock",
+      "mode": "lam",
+      "status": "PASS",
+      "attribution": "PASS",
+      "turns": 8,
+      "promptTokens": 1200,
+      "completionTokens": 240,
+      "totalTokens": 1440,
+      "costUsd": 0.0,
+      "durationSeconds": 0.16,
+      "oracle": {
+        "passed": true,
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_cli_execution (__main__.TestFibOracle.test_cli_execution) ... ok\ntest_fib_exceptions (__main__.TestFibOracle.test_fib_exceptions) ... ok\ntest_fib_values (__main__.TestFibOracle.test_fib_values) ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.063s\n\nOK\n",
+        "durationSeconds": 0.117,
+        "error": null,
+        "assertionCount": 3,
+        "failingAssertions": []
+      },
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "challengeId": "json_todo_store",
+      "tier": "easy",
+      "preset": "vg-hermes",
+      "model": "lam-mock",
+      "mode": "lam",
+      "status": "PASS",
+      "attribution": "PASS",
+      "turns": 8,
+      "promptTokens": 1200,
+      "completionTokens": 240,
+      "totalTokens": 1440,
+      "costUsd": 0.0,
+      "durationSeconds": 0.1,
+      "oracle": {
+        "passed": true,
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_lifecycle_and_persistence (__main__.TestTodoStoreOracle.test_lifecycle_and_persistence) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.005s\n\nOK\n",
+        "durationSeconds": 0.054,
+        "error": null,
+        "assertionCount": 1,
+        "failingAssertions": []
+      },
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "challengeId": "quiz_game",
+      "tier": "greenfield",
+      "preset": "vg-hermes",
+      "model": "lam-mock",
+      "mode": "lam",
+      "status": "PASS",
+      "attribution": "PASS",
+      "turns": 8,
+      "promptTokens": 1200,
+      "completionTokens": 240,
+      "totalTokens": 1440,
+      "costUsd": 0.0,
+      "durationSeconds": 0.1,
+      "oracle": {
+        "passed": true,
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_json_loading (__main__.TestQuizEngineOracle.test_json_loading) ... ok\ntest_quiz_engine_lifecycle (__main__.TestQuizEngineOracle.test_quiz_engine_lifecycle) ... ok\n\n----------------------------------------------------------------------\nRan 2 tests in 0.004s\n\nOK\n",
+        "durationSeconds": 0.058,
+        "error": null,
+        "assertionCount": 2,
+        "failingAssertions": []
+      },
+      "diagnosis": "All falsifiers green"
+    }
+  ]
+}

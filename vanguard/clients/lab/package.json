@@ -1,6 +1,7 @@
 {
   "name": "@aether/lab",
   "version": "0.1.0",
+  "private": true,
   "description": "AETHER precision inspection and engineering surface",
   "license": "Apache-2.0",
   "type": "module",

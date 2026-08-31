@@ -32,3 +32,21 @@ python3 benchmarks/run.py --pack vg-code-default --task-dir benchmarks/greenfiel
 # Compare statistical outcomes between two harness configurations
 python3 benchmarks/bench.py --pack-a vg-code-default --pack-b vg-code-claude-shaped --db traces.sqlite
 ```
+
+---
+
+## 4. Benchmarking as Code (BaaC) Framework
+
+The [`baac/`](baac/) framework provides declarative challenges with strict zero-state isolation, external non-leaked oracles, fail-closed budget guards ($0.10 cap, 300 requests cap), and root-cause attribution (Harness vs. LLM cognitive error).
+
+```bash
+# Verify zero-state manifests across all challenges
+python3 -m benchmarks.baac.cli verify
+
+# Run BaaC cycle (verify -> run -> oracle -> reset -> verify) in LAM mode ($0 cost)
+python3 -m benchmarks.baac.cli cycle --mode lam --preset vg-1-forge
+
+# Run BaaC benchmark against live OpenRouter models
+python3 -m benchmarks.baac.cli run --mode live --preset vg-1-forge --tier easy
+```
+

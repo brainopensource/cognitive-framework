@@ -234,6 +234,8 @@ DEFAULT_BINDINGS: Mapping[str, EffectBinding] = {
     "fs.patch": EffectBinding(_environment_effector, carries_diff=True),
     "proc.exec": EffectBinding(_sandbox_effector),
     "agent.spawn": EffectBinding(_spawn_effector),
+    "web.distill": EffectBinding(_environment_observer),
+    "agency.finish": EffectBinding(_environment_effector),
 }
 
 

@@ -6,6 +6,11 @@ export * from "./transports/replay.js";
 export * from "./signers/operator-signer.js";
 export * from "./signers/web-signer.js";
 export * from "./application/app-controller.js";
+export * from "./persistence/persistence-port.js";
+export * from "./product/paths.js";
+export * from "./product/compatibility.js";
+export * from "./product/configuration.js";
+export * from "./runtime/managed-runtime.js";
 
 import type { RuntimeClient } from "./client.js";
 import { SocketRuntimeClient, type SocketTransportOptions } from "./transports/socket.js";

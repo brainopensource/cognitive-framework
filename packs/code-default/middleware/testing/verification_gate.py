@@ -43,9 +43,12 @@ def evaluate_verification_gate(
             diagnostics=parsed.short_diagnostics,
         )
 
-    if require_executed_tests and parsed.total_tests == 0 and parsed.exit_code == 0:
-        # Check if output actually ran tests or was completely silent
-        pass
+    if require_executed_tests and parsed.total_tests == 0:
+        return GateDecision(
+            admitted=False,
+            reason="No tests were executed",
+            diagnostics=parsed.short_diagnostics,
+        )
 
     return GateDecision(
         admitted=True,

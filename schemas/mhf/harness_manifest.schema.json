@@ -58,6 +58,7 @@
           "items": { "$ref": "#/$defs/PluginRef" }
         },
         "evaluation": { "$ref": "#/$defs/PluginRef" },
+        "completion": { "$ref": "#/$defs/PluginRef" },
         "model_routes": {
           "type": "array",
           "items": { "$ref": "#/$defs/ModelRoute" }

@@ -1,0 +1,82 @@
+{
+  "schema": "vanguard.benchmark.scorecard/1",
+  "subjectHead": "4f58736e407ebb0f55f4e8130a250bac7bf219f6",
+  "provider": "openrouter",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "harness": "vg-code-max-v3",
+  "dataset": {
+    "plannedChallenges": 5,
+    "baselinePublicFailures": 5,
+    "baselineHiddenOracleFailures": 5,
+    "executedChallenges": 3,
+    "notRunChallenges": 2
+  },
+  "scores": {
+    "executedExternalOraclePassRate": "3/3",
+    "executedCleanCompletionRate": "3/3",
+    "plannedSuiteObservedPassRate": "3/5",
+    "legacyEasyBatchExternalOraclePassRate": "10/10",
+    "legacyEasyBatchCleanCompletionRate": "0/10"
+  },
+  "results": [
+    {
+      "challenge": "sota_easy_config_precedence",
+      "difficulty": "easy",
+      "status": "PASS",
+      "terminal": "completed",
+      "calls": 9,
+      "costUsd": 0.001589,
+      "runArtifact": "sota5_easy_snapshotfix_20260831__sota_easy_config_precedence__deepseek_deepseek-v4-flash-0731.run.json",
+      "cassetteDigest": "sha256:bb0da6d2b9cf6f737ec00d64ea7657d31b827e738d1a5873efbc73a56da0b618"
+    },
+    {
+      "challenge": "sota_medium_public_interface",
+      "difficulty": "medium",
+      "status": "PASS",
+      "terminal": "completed",
+      "calls": 10,
+      "costUsd": 0.00284,
+      "runArtifact": "sota5_medium_20260831__sota_medium_public_interface__deepseek_deepseek-v4-flash-0731.run.json",
+      "cassetteDigest": "sha256:ac0825e96bd936a6518e1d1225fa8083d71e0b389677d8e6acb4a8ab79224bba"
+    },
+    {
+      "challenge": "sota_hard_large_catalog_collision",
+      "difficulty": "hard",
+      "status": "PASS",
+      "terminal": "completed",
+      "calls": 8,
+      "costUsd": 0.001828,
+      "runArtifact": "sota5_hard_large_20260831__sota_hard_large_catalog_collision__deepseek_deepseek-v4-flash-0731.run.json",
+      "cassetteDigest": "sha256:c623d3aaf0888947f1fd9c5072c292129c9403533960a3000c634c1d17b8281f"
+    },
+    {
+      "challenge": "sota_medium_idempotent_ledger",
+      "difficulty": "medium",
+      "status": "NOT_RUN",
+      "reason": "provider call ceiling reached"
+    },
+    {
+      "challenge": "sota_hard_atomic_quota",
+      "difficulty": "hard",
+      "status": "NOT_RUN",
+      "reason": "provider call ceiling reached"
+    }
+  ],
+  "budgetAudit": {
+    "artifactBackedApiCalls": 332,
+    "knownAdditionalUnrecordedCalls": 1,
+    "minimumObservedApiCalls": 333,
+    "artifactBackedCostUsd": 0.067647,
+    "maxApiCalls": 300,
+    "maxCostUsd": 0.15,
+    "callCapSatisfied": false,
+    "costCapSatisfied": true,
+    "explanation": "A concurrent ladder batch completed while this audit was running, and one credentialed full-suite test entered an unrecorded provider call before it was interrupted. Runtime dotenv auto-discovery and the non-hermetic test were fixed; all further live calls stopped."
+  },
+  "offlineReplay": {
+    "records": 27,
+    "networkBlocked": true,
+    "canonicalProposalParity": true,
+    "lamSynthetic": "20/20"
+  }
+}

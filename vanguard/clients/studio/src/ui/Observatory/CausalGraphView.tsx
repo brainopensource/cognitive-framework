@@ -2,7 +2,7 @@
  * AUTO-GENERATED: Observatory Causal Graph View
  */
 import React, { useState, useMemo } from "react";
-import type { GraphNode, GraphEdge } from "@vanguard/client-core";
+import type { GraphNode, GraphEdge } from "@vanguard/client-core/application/graph-model.js";
 
 export interface CausalGraphViewProps {
   readonly nodes: readonly GraphNode[];

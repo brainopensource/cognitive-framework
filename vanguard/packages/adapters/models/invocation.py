@@ -84,6 +84,25 @@ class ProposalTranslator:
 
         call = calls[0]
         name = str(call["name"])
+
+        # An explicit completion tool. Under `tool_choice="required"` -- which
+        # the phase ladder sets on every turn -- the model is obliged to emit a
+        # tool call, so the text-only path below that produces a `finish` is
+        # unreachable and a run literally cannot terminate successfully. A
+        # declared completion verb gives the model a way to say "done" inside
+        # the protocol it is being forced to speak.
+        if name in {"finish", "agency.finish"}:
+            raw_args = call.get("arguments") or {}
+            if isinstance(raw_args, str):
+                try:
+                    raw_args = json.loads(raw_args)
+                except (TypeError, ValueError):
+                    raw_args = {}
+            note = ""
+            if isinstance(raw_args, Mapping):
+                note = str(raw_args.get("summary") or raw_args.get("note") or "")
+            return Result.success({"kind": "finish", "note": note or "Task completed."})
+
         declared: dict[str, str] = {}
 
         if aliases is not None:

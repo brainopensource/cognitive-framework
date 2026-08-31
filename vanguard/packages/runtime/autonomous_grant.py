@@ -23,7 +23,11 @@ __all__ = [
 ]
 
 DEFAULT_ALLOWED_VERBS = ("fs.read", "fs.search", "patch.apply", "proc.exec")
-DEFAULT_COMMAND_ALLOWLIST = ("git", "pytest", "python3", "python", "ruff")
+# Keep the signed grant aligned with the read-only discovery commands accepted
+# by the concrete environment.  A model that reaches for ``ls``/``find`` must
+# receive a useful observation, not spend a turn on a policy mismatch.
+DEFAULT_COMMAND_ALLOWLIST = (
+    "git", "pytest", "python3", "python", "ruff", "ls", "find")
 
 
 @dataclass(frozen=True, slots=True)

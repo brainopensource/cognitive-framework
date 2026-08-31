@@ -134,6 +134,52 @@ export async function handleWorkflow(args: string[], options: ParsedCli): Promis
     }
   }
 
-  logDiagnostic(`Unknown workflow subcommand '${subcommand}' (supported: list, inspect, validate)`);
+  if (subcommand === "default") {
+    const { NodeFsPersistenceAdapter } = await import("@aether/client");
+    const { DEFAULT_FRONTEND_SETTINGS } = await import("@aether/projections");
+    const persistence = new NodeFsPersistenceAdapter();
+    const settings = (await persistence.loadSettings()) ?? DEFAULT_FRONTEND_SETTINGS;
+    const targetId = args[1];
+
+    if (!targetId) {
+      const def = settings.general?.defaultWorkflow ?? "none";
+      if (options.json) {
+        writeJsonOutcome({
+          api: "aether.cli-outcome/1",
+          command: "workflow default",
+          status: "success",
+          data: { defaultWorkflowId: def },
+        });
+      } else {
+        console.log(`Default workflow: ${def}`);
+      }
+      return CLI_EXIT_CODES.SUCCESS;
+    }
+
+    const updated = {
+      ...DEFAULT_FRONTEND_SETTINGS,
+      ...settings,
+      general: {
+        ...DEFAULT_FRONTEND_SETTINGS.general,
+        ...(settings.general ?? {}),
+        defaultWorkflow: targetId,
+      },
+    };
+    await persistence.saveSettings(updated);
+
+    if (options.json) {
+      writeJsonOutcome({
+        api: "aether.cli-outcome/1",
+        command: "workflow default",
+        status: "success",
+        data: { defaultWorkflowId: targetId },
+      });
+    } else {
+      console.log(`Default workflow set to '${targetId}'.`);
+    }
+    return CLI_EXIT_CODES.SUCCESS;
+  }
+
+  logDiagnostic(`Unknown workflow subcommand '${subcommand}' (supported: list, inspect, validate, default)`);
   return CLI_EXIT_CODES.INVALID_INPUT;
 }

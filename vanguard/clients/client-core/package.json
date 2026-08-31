@@ -1,6 +1,7 @@
 {
   "name": "@vanguard/client-core",
   "version": "0.4.1-beta",
+  "private": true,
   "description": "Vanguard client core: contracts, parsers, adapters, signers, and reducers",
   "license": "Apache-2.0",
   "type": "module",
@@ -82,6 +83,42 @@
     "./application/why.js": {
       "types": "./dist/src/application/why.d.ts",
       "default": "./dist/src/application/why.js"
+    },
+    "./contract/canonical.js": {
+      "types": "./dist/src/contract/canonical.d.ts",
+      "default": "./dist/src/contract/canonical.js"
+    },
+    "./adapters/web-signer.js": {
+      "types": "./dist/src/adapters/web-signer.d.ts",
+      "default": "./dist/src/adapters/web-signer.js"
+    },
+    "./application/budget.js": {
+      "types": "./dist/src/application/budget.d.ts",
+      "default": "./dist/src/application/budget.js"
+    },
+    "./application/coding-types.js": {
+      "types": "./dist/src/application/coding-types.d.ts",
+      "default": "./dist/src/application/coding-types.js"
+    },
+    "./application/coding-receipts.js": {
+      "types": "./dist/src/application/coding-receipts.d.ts",
+      "default": "./dist/src/application/coding-receipts.js"
+    },
+    "./application/coding-commands.js": {
+      "types": "./dist/src/application/coding-commands.d.ts",
+      "default": "./dist/src/application/coding-commands.js"
+    },
+    "./application/projection-model.js": {
+      "types": "./dist/src/application/projection-model.d.ts",
+      "default": "./dist/src/application/projection-model.js"
+    },
+    "./application/graph-model.js": {
+      "types": "./dist/src/application/graph-model.d.ts",
+      "default": "./dist/src/application/graph-model.js"
+    },
+    "./application/mcnemar.js": {
+      "types": "./dist/src/application/mcnemar.d.ts",
+      "default": "./dist/src/application/mcnemar.js"
     },
     "./application/attach.js": {
       "types": "./dist/src/application/attach.d.ts",

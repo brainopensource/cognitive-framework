@@ -1,0 +1,30 @@
+{
+  "challengeId": "quiz_game",
+  "tier": "greenfield",
+  "preset": "vg-hermes",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "mode": "live",
+  "status": "FAIL",
+  "attribution": "HARNESS_ERROR",
+  "turns": 8,
+  "promptTokens": 23178,
+  "completionTokens": 909,
+  "totalTokens": 24087,
+  "costUsd": 0.001503,
+  "durationSeconds": 83.47,
+  "oracle": {
+    "passed": false,
+    "exitCode": 1,
+    "stdout": "",
+    "stderr": "test_json_loading (__main__.TestQuizEngineOracle.test_json_loading) ... ERROR\ntest_quiz_engine_lifecycle (__main__.TestQuizEngineOracle.test_quiz_engine_lifecycle) ... ERROR\n\n======================================================================\nERROR: test_json_loading (__main__.TestQuizEngineOracle.test_json_loading)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rocha/Coding/Aether-D-System/benchmarks/baac/challenges/greenfield/quiz_game/oracle/verify.py\", line 106, in test_json_loading\n    self.assertEqual(engine.current_question().id, \"t1\")\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'NoneType' object has no attribute 'id'\n\n======================================================================\nERROR: test_quiz_engine_lifecycle (__main__.TestQuizEngineOracle.test_quiz_engine_lifecycle)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rocha/Coding/Aether-D-System/benchmarks/baac/challenges/greenfield/quiz_game/oracle/verify.py\", line 53, in test_quiz_engine_lifecycle\n    self.assertEqual(engine.current_question().id, \"q1\")\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'NoneType' object has no attribute 'id'\n\n----------------------------------------------------------------------\nRan 2 tests in 0.004s\n\nFAILED (errors=2)\n",
+    "durationSeconds": 0.064,
+    "error": "test_json_loading (__main__.TestQuizEngineOracle.test_json_loading) ... ERROR\ntest_quiz_engine_lifecycle (__main__.TestQuizEngineOracle.test_quiz_engine_lifecycle) ... ERROR\n\n=========================",
+    "assertionCount": 2,
+    "failingAssertions": [
+      "test_json_loading",
+      "test_quiz_engine_lifecycle",
+      "(errors=2)"
+    ]
+  },
+  "diagnosis": "test_json_loading (__main__.TestQuizEngineOracle.test_json_loading) ... ERROR\ntest_quiz_engine_lifecycle (__main__.TestQuizEngineOracle.test_quiz_engine_lifecycle) ... ERROR\n\n========================="
+}

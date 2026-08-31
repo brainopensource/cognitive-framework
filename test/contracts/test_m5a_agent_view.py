@@ -90,8 +90,8 @@ class AgentViewFold(unittest.TestCase):
             event(1, "PlanRevised", revision=0, planDigest="sha256:" + "b" * 64),
             event(2, "ProposalProduced", operationId="op-1", verb="proc.exec"),
             event(3, "EffectStarted", operationId="op-1", descriptorDigest="sha256:" + "c" * 64),
-            event(4, "EffectCompleted", operationId="op-1", idempotencyKey="idem-1", outcome="ok"),
-            event(5, "BudgetCommitted", debits={"tokens": 7, "millis": 3}),
+            event(4, "EffectCompleted", operationId="op-1", action="proc.exec", idempotencyKey="idem-1", outcome="ok"),
+            event(5, "BudgetCommitted", settlement={"tokens": 7, "millis": 3}),
             event(6, "StrategyChanged", **{"from": "breadth", "to": "depth", "trigger": "stalled"}),
             event(7, "ProgressAssessed", assessment="advancing", signals={"tests": "green"}, basis=["event-4"]),
             event(8, "ContextCompacted", inputDigest="sha256:" + "d" * 64, outputDigest="sha256:" + "e" * 64),
@@ -106,6 +106,10 @@ class AgentViewFold(unittest.TestCase):
         self.assertEqual(view.context_epoch, 1)
         self.assertEqual(view.settled_effects["idem-1"], "ok")
         self.assertEqual(view.budget_consumed, {"millis": 3, "tokens": 7})
+        self.assertEqual(view.attempts[0]["verb"], "proc.exec")
+        self.assertEqual(view.attempts[1]["status"], "dispatched")
+        self.assertEqual(view.attempts[2]["verb"], "proc.exec")
+        self.assertEqual(view.attempts[2]["status"], "ok")
         self.assertEqual(view.terminal, "resolved")
         self.assertEqual(view.covered_through, "event-9")
 
@@ -113,6 +117,25 @@ class AgentViewFold(unittest.TestCase):
         view = fold_agent_view(None, [event(0, "OperatorInvoked")])
         self.assertEqual(view.lineage_id, "lineage-1")
         self.assertEqual(view.attempts, ())
+
+    def test_child_lifecycle_and_failed_effects_fold(self) -> None:
+        events = [
+            event(0, "GoalDeclared", goalDigest="sha256:" + "0" * 64),
+            event(1, "ChildSpawned", childId="child-sub-1", role="subagent"),
+            event(2, "ProposalProduced", operationId="op-2", action="fs.write"),
+            event(3, "EffectFailed", operationId="op-2", action="fs.write", idempotencyKey="idem-2", outcome="failed"),
+            event(4, "ChildReturned", childId="child-sub-1", status="success"),
+            event(5, "BudgetCommitted", settlement={"bytes": 1024, "usd_micros": 500}),
+            event(6, "EpisodeCompleted", outcome="completed"),
+        ]
+        view = fold_agent_view(None, events)
+        self.assertEqual(len(view.children), 1)
+        self.assertEqual(view.children[0]["childId"], "child-sub-1")
+        self.assertEqual(view.children[0]["status"], "success")
+        self.assertEqual(view.settled_effects["idem-2"], "failed")
+        self.assertEqual(view.budget_consumed, {"bytes": 1024, "usd_micros": 500})
+        self.assertEqual(view.terminal, "completed")
+        self.assertEqual(view.covered_through, "event-6")
 
 
 if __name__ == "__main__":

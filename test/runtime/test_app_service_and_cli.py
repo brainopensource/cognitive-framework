@@ -17,6 +17,7 @@ class TestAppServiceAndCli(unittest.TestCase):
     def setUp(self) -> None:
         self.tmp_dir = tempfile.TemporaryDirectory()
         self.workspace = Path(self.tmp_dir.name).resolve()
+        (self.workspace / "pyproject.toml").touch()
         self.state_dir = self.workspace / ".vanguard"
         self.state_dir.mkdir(parents=True, exist_ok=True)
         (self.state_dir / "blobs").mkdir(parents=True, exist_ok=True)
@@ -54,6 +55,15 @@ class TestAppServiceAndCli(unittest.TestCase):
         self.assertEqual(events_res.run_id, "run-test-1")
         self.assertEqual(events_res.total, status_res.event_count)
         self.assertTrue(len(events_res.events) > 0)
+
+        # Resume test asserting original brief preservation
+        resume_res = app.resume(
+            run_id="run-test-1",
+            state_dir=self.state_dir,
+            model=FakeModel([{"kind": "finish", "note": "resumed smoke test completed"}]),
+        )
+        self.assertEqual(resume_res.run_id, "run-test-1")
+        self.assertEqual(resume_res.outcome, "completed")
 
     def test_artifact_retrieval_and_digest_verification(self) -> None:
         app = ApplicationService(workspace=self.workspace)
@@ -105,7 +115,7 @@ class TestAppServiceAndCli(unittest.TestCase):
                 "-w",
                 str(self.workspace),
                 "--profile",
-                "product",
+                "local",
                 "--model-port",
                 "fake",
                 "--run-id",

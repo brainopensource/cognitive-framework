@@ -7,6 +7,7 @@ Observatory daemon) and the runtime substrate.
 from __future__ import annotations
 
 import hashlib
+import importlib
 import json
 import os
 import sys
@@ -24,6 +25,8 @@ from .compose import TaskContext
 from .model_selection import inspect_model_providers, select_model
 from .profiles import ExecutionProfileError, SandboxUnavailable, resolve_profile
 from .root import Runtime
+from .results import RunResult, StatusResult, EvidenceResult, CostResult
+from .task_state import CodingTaskState, fold_task_state
 from .state_contract import (
     StateDirectoryError,
     StateDirectoryUnwritableError,
@@ -65,48 +68,6 @@ class DiagnosticsResult:
         }
 
 
-@dataclass(frozen=True, slots=True)
-class RunResult:
-    run_id: str
-    outcome: str  # "completed" | "failed" | "abstained" | "denied"
-    phase: str
-    turns: int
-    plan_digest: str | None
-    detail: str
-    projections: tuple[Mapping[str, Any], ...] = ()
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "runId": self.run_id,
-            "outcome": self.outcome,
-            "phase": self.phase,
-            "turns": self.turns,
-            "planDigest": self.plan_digest,
-            "detail": self.detail,
-            "projections": list(self.projections),
-        }
-
-
-@dataclass(frozen=True, slots=True)
-class StatusResult:
-    run_id: str
-    status: str
-    event_count: int
-    as_of_seq: int
-    manifest_path: str | None
-    repo_path: str | None
-    detail: str = ""
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "runId": self.run_id,
-            "status": self.status,
-            "eventCount": self.event_count,
-            "asOfSeq": self.as_of_seq,
-            "manifestPath": self.manifest_path,
-            "repoPath": self.repo_path,
-            "detail": self.detail,
-        }
 
 
 @dataclass(frozen=True, slots=True)
@@ -149,6 +110,18 @@ class ApplicationService:
     def __init__(self, workspace: Path | str | None = None) -> None:
         self.workspace = Path(workspace).resolve() if workspace is not None else Path.cwd()
 
+    @staticmethod
+    def _pack_completion_policy(manifest_path: Path) -> Any:
+        """Load the declared code-pack policy only for Coding Max manifests."""
+        if not manifest_path.parent.name in {"vg-code-fast", "vg-code-balanced", "vg-code-max", "vg-code-max-v2", "vg-code-max-v2b"}:
+            return None
+        pack_root = Path(__file__).resolve().parents[3] / "packs" / "code-default"
+        import sys
+        if str(pack_root) not in sys.path:
+            sys.path.insert(0, str(pack_root))
+        module = importlib.import_module("middleware.repository.multi_file_completeness")
+        return module.CodeDefaultCompletionPolicy()
+
     def run(
         self,
         *,
@@ -162,8 +135,24 @@ class ApplicationService:
         state_dir: Path | str | None = None,
         interactive: bool = True,
         max_turns: int = 40,
+        autonomous_approval: bool = False,
+        allow_paid: bool = False,
     ) -> RunResult:
-        """Execute a new run through the canonical runtime pipeline."""
+        """Execute a new run through the canonical runtime pipeline.
+
+        ``autonomous_approval`` is an explicit opt-in (never default-on) that
+        lets an unattended run answer its own approval-gated effects (e.g.
+        ``proc.exec``) with a fresh, ephemeral, per-run Ed25519 governance
+        signature -- the same ``OperatorSigner``-bound pattern already used by
+        ``test/integration/test_lam_runtime_vertical.py`` and the falsifier
+        suite, just reachable from the public application boundary. It never
+        widens the harness's own declared capabilities: the signature only
+        answers challenges for effects the manifest already scoped (e.g.
+        ``proc://exec/allow/git,pytest,ruff,python3``). It has no effect
+        unless ``interactive`` is also true, since ``interactive=False`` maps
+        to the kernel's benchmark mode, which fails closed on every
+        approval-gated effect regardless of any approver (``F-07``).
+        """
         if not brief:
             raise ValueError("brief is required for run")
 
@@ -187,6 +176,7 @@ class ApplicationService:
                     selected_model = select_model(
                         model_port,
                         model_name=planner_model,
+                        allow_paid=allow_paid,
                     ).model
                 else:
                     selected_model = model_port
@@ -194,7 +184,7 @@ class ApplicationService:
                 from ..adapters.models.fake import FakeModel
                 selected_model = FakeModel([{"kind": "finish", "note": "local preview"}])
             else:
-                selected_model = select_model("openrouter", model_name=planner_model).model
+                selected_model = select_model("openrouter", model_name=planner_model, allow_paid=allow_paid).model
         else:
             selected_model = model
 
@@ -208,6 +198,14 @@ class ApplicationService:
         else:
             manifest_p = Path(manifest_path).resolve()
 
+        approver_kwargs: dict[str, Any] = {}
+        if autonomous_approval and interactive:
+            from .governance.approvals import OperatorSigner
+
+            signer = OperatorSigner()
+            approver_kwargs["approver"] = lambda challenge, _s=signer: _s.approve(challenge, reviewer="autonomous-operator")
+            approver_kwargs["approval_key"] = signer.public_bytes
+
         exec_result = Runtime.execute_profiled(
             manifest_p,
             task,
@@ -216,6 +214,8 @@ class ApplicationService:
             store_path=str(store_path),
             interactive=interactive,
             blobs=blobs,
+            completion_policy=self._pack_completion_policy(manifest_p),
+            **approver_kwargs,
         )
 
         terminal = str(getattr(exec_result.terminal, "value", exec_result.terminal))
@@ -239,7 +239,8 @@ class ApplicationService:
             "turns": int(getattr(exec_result.telemetry, "turns", 0)),
         })
 
-        return RunResult(
+        task_state = self._read_task_state(resolved_state, resolved_run_id, fallback=brief)
+        return self._result_from_execution(
             run_id=resolved_run_id,
             outcome=outcome,
             phase="complete",
@@ -247,6 +248,59 @@ class ApplicationService:
             plan_digest=exec_result.run_digest or None,
             detail=exec_result.detail,
             projections=tuple(projections),
+            episode_id=task.episode_id,
+            execution=exec_result,
+            task_state=task_state,
+        )
+
+    def _read_task_state(self, state_dir: Path, run_id: str, *, fallback: str = "") -> CodingTaskState:
+        store = SqliteEventStore(state_dir / "events.sqlite3")
+        result = store.read(EventRange(run_id=run_id))
+        return fold_task_state(list(result.value or ()) if result.ok else (), objective=fallback)
+
+    @staticmethod
+    def _result_from_execution(
+        *, run_id: str, outcome: str, phase: str, turns: int,
+        plan_digest: str | None, detail: str,
+        projections: tuple[Mapping[str, Any], ...], episode_id: str,
+        execution: Any,
+        task_state: CodingTaskState | None = None,
+    ) -> RunResult:
+        trajectory = execution.trajectory if isinstance(getattr(execution, "trajectory", None), Mapping) else {}
+        telemetry = getattr(execution, "telemetry", None)
+        prompt = getattr(telemetry, "prompt_tokens", None)
+        completion = getattr(telemetry, "completion_tokens", None)
+        usage = None
+        if prompt is not None and completion is not None:
+            usage = {"promptTokens": prompt, "completionTokens": completion, "totalTokens": prompt + completion}
+        cost = trajectory.get("cost") if isinstance(trajectory.get("cost"), Mapping) else {}
+        cost_status = (cost.get("measurement_status") or {}).get("usd_micros", {}) if isinstance(cost, Mapping) else {}
+        observed_cost = cost.get("usd_micros") if cost_status.get("status") == "measured" else None
+        routes = trajectory.get("model_routes_used") or ()
+        route = dict(routes[0]) if routes and isinstance(routes[0], Mapping) else None
+        artifacts = tuple(
+            str(item.get("digest") or item.get("artifactId"))
+            for item in trajectory.get("artifacts", ())
+            if isinstance(item, Mapping) and (item.get("digest") or item.get("artifactId"))
+        )
+        missing = tuple(name for name, value in (
+            ("taskDigest", trajectory.get("task_digest")),
+            ("modelRoute", route),
+            ("promptTokens", prompt),
+            ("completionTokens", completion),
+            ("observedCost", observed_cost),
+        ) if value is None)
+        return RunResult(
+            run_id=run_id, episode_id=episode_id, outcome=outcome, phase=phase,
+            terminal_state=outcome, turns=turns, plan_digest=plan_digest,
+            task_digest=trajectory.get("task_digest"),
+            composition_digest=getattr(execution, "composition_digest", None),
+            next_action=task_state.next_action if task_state else None,
+            todo_state=tuple(item.to_dict() for item in task_state.todo_items) if task_state else (),
+            verification_identity=task_state.last_verification if task_state and task_state.last_verification else None,
+            model_route=route, token_usage=usage,
+            observed_cost=observed_cost, artifact_refs=artifacts,
+            missing=missing, detail=detail, projections=projections,
         )
 
     def resume(
@@ -272,14 +326,84 @@ class ApplicationService:
         if not events_res.ok or not events_res.value:
             raise ValueError(f"no events found to resume run {run_id}")
 
-        return self.run(
-            brief=f"Resume run {run_id}",
-            run_id=run_id,
-            profile_id=profile_id,
-            model=model,
-            model_port=model_port,
-            state_dir=resolved_state,
+        events = list(events_res.value)
+        recovered_brief = None
+        for ev in events:
+            payload = getattr(ev, "payload", {}) if isinstance(getattr(ev, "payload", None), dict) else {}
+            b = payload.get("brief") or payload.get("goal") or payload.get("objective")
+            if isinstance(b, str) and b.strip() and not b.startswith("Resume run "):
+                recovered_brief = b.strip()
+                break
+
+        state = fold_task_state(events, objective=recovered_brief or "")
+        if not state.objective:
+            raise ValueError(f"run {run_id} has no durable original objective")
+
+        terminal_kinds = {"EpisodeCompleted", "RunCompleted", "RunFailed"}
+        if any((getattr(event, "payload", {}) or {}).get("kind") in terminal_kinds for event in events):
+            status = self.status(run_id, state_dir=resolved_state)
+            return RunResult(
+                run_id=run_id, episode_id=f"episode-{run_id}", outcome=status.status,
+                phase="complete", turns=len([e for e in events if (getattr(e, "payload", {}) or {}).get("kind") == "ProposalProduced"]),
+                plan_digest=None, detail="run already has a durable terminal event",
+                terminal_state=status.terminal_state, task_digest=status.task_digest,
+                composition_digest=status.composition_digest, next_action=state.next_action,
+                todo_state=tuple(item.to_dict() for item in state.todo_items),
+                missing=("planDigest", "modelRoute", "tokenUsage", "observedCost"),
+            )
+
+        # Re-enter the canonical runtime directly. The original objective and
+        # the ledger-derived turn budget are restored; no synthetic prompt is
+        # emitted and HarnessSession.dispatch reuses settled idempotent effects.
+        resolved_run_id = run_id
+        brief = state.objective
+        task = TaskContext(
+            brief=brief, repo_path=self.workspace, run_id=resolved_run_id,
+            episode_id=f"episode-{resolved_run_id}",
+            max_turns=max(1, max(1, len([e for e in events if (getattr(e, "payload", {}) or {}).get("kind") == "ProposalProduced"])) + 1),
+            resume_state=state.to_canonical_dict(),
         )
+        resolved_state_dir = resolved_state
+        if model is None:
+            if model_port:
+                selected_model = select_model(model_port).model
+            elif profile_id in {"local", "ci", "fast"}:
+                from ..adapters.models.fake import FakeModel
+                selected_model = FakeModel([{"kind": "finish", "note": "resume"}])
+            else:
+                selected_model = select_model("openrouter").model
+        else:
+            selected_model = model
+        manifest_p = self._manifest_path_for_resume(events, profile_id)
+        exec_result = Runtime.execute_profiled(
+            manifest_p, task, profile_id=profile_id, model=selected_model,
+            store_path=str(resolved_state_dir / "events.sqlite3"),
+            interactive=False,
+            blobs=FileBlobStore(resolved_state_dir / "blobs"),
+            completion_policy=self._pack_completion_policy(manifest_p),
+        )
+        terminal = str(getattr(exec_result.terminal, "value", exec_result.terminal))
+        resumed_events = list(getattr(exec_result, "events", ()) or ())
+        projections = tuple({"kind": "resume", "runId": run_id},)
+        return self._result_from_execution(
+            run_id=run_id, outcome=("completed" if terminal in {"completed", "abstained"} else terminal),
+            phase="complete", turns=int(getattr(exec_result.telemetry, "turns", 0)),
+            plan_digest=exec_result.run_digest or None, detail=exec_result.detail,
+            projections=projections, episode_id=task.episode_id, execution=exec_result,
+            task_state=fold_task_state(resumed_events, objective=state.objective),
+        )
+
+    def _manifest_path_for_resume(self, events: Sequence[Any], profile_id: str) -> Path:
+        from importlib.resources import files
+        name = "vg-code-default"
+        for event in events:
+            payload = getattr(event, "payload", {})
+            if isinstance(payload, Mapping):
+                harness = str(payload.get("harness", ""))
+                if harness.startswith("vg-code-"):
+                    name = harness
+                    break
+        return Path(str(files("vanguard.packages.agency").joinpath("manifests", name, "manifest.json")))
 
     def status(
         self,
@@ -299,6 +423,7 @@ class ApplicationService:
                 manifest_path=None,
                 repo_path=str(self.workspace),
                 detail=f"no database at {store_path}",
+                missing=("episodeId", "taskDigest", "compositionDigest", "terminalState", "nextAction"),
             )
 
         store = SqliteEventStore(store_path)
@@ -312,6 +437,7 @@ class ApplicationService:
                 manifest_path=None,
                 repo_path=str(self.workspace),
                 detail=str(getattr(res, "error", "store read failed")),
+                missing=("episodeId", "taskDigest", "compositionDigest", "terminalState", "nextAction"),
             )
 
         events = res.value or ()
@@ -319,15 +445,32 @@ class ApplicationService:
         latest_seq = events[-1].seq if count > 0 else 0
         terminal_kinds = {"RunCompleted", "RunFailed", "EpisodeCompleted"}
         has_terminal = any(e.payload.get("kind") in terminal_kinds for e in events)
+        state = fold_task_state(list(events))
+        started = next((e.payload for e in events if e.payload.get("kind") == "EpisodeStarted"), {})
+        terminal_event = next((e.payload for e in reversed(events) if e.payload.get("kind") in terminal_kinds), {})
+        status_value = "completed" if has_terminal else ("running" if count > 0 else "empty")
+        missing = tuple(name for name, value in (
+            ("taskDigest", started.get("taskDigest")),
+            ("compositionDigest", started.get("compositionDigest")),
+            ("nextAction", state.next_action),
+        ) if value is None)
 
         return StatusResult(
             run_id=run_id,
-            status="completed" if has_terminal else ("running" if count > 0 else "empty"),
+            status=status_value,
             event_count=count,
             as_of_seq=int(latest_seq),
             manifest_path=None,
             repo_path=str(self.workspace),
             detail=f"{count} events recorded",
+            episode_id=next((e.episode_id for e in events if e.episode_id), None),
+            task_digest=started.get("taskDigest"),
+            composition_digest=started.get("compositionDigest"),
+            terminal_state=terminal_event.get("outcome") if has_terminal else None,
+            next_action=state.next_action,
+            todo_state=tuple(item.to_dict() for item in state.todo_items),
+            verification_identity=state.last_verification or None,
+            missing=missing,
         )
 
     def events(
@@ -417,6 +560,39 @@ class ApplicationService:
             role=role,
             verified=True,
             error=None,
+        )
+
+    def evidence(self, run_id: str, *, state_dir: Path | str | None = None) -> EvidenceResult:
+        """Return the run's durable evidence projection through one query path."""
+        events = self.events(run_id, state_dir=state_dir).events
+        trajectory = next((e.get("payload", {}).get("trajectory") for e in reversed(events)
+                           if isinstance(e.get("payload"), Mapping) and e.get("payload", {}).get("trajectory")), None)
+        return EvidenceResult(
+            run_id=run_id,
+            status=self.status(run_id, state_dir=state_dir).status,
+            event_count=len(events),
+            trajectory=trajectory,
+            event_digests=tuple(e.get("digest") for e in events if e.get("digest")),
+            missing=() if trajectory is not None else ("trajectory",),
+        )
+
+    def cost(self, run_id: str, *, state_dir: Path | str | None = None) -> CostResult:
+        """Return observed budget settlement; absent dimensions remain absent."""
+        events = self.events(run_id, state_dir=state_dir).events
+        totals: dict[str, int] = {}
+        for event in events:
+            payload = event.get("payload", {})
+            settlement = payload.get("settlement") if isinstance(payload, Mapping) else None
+            if isinstance(settlement, Mapping):
+                for key, value in settlement.items():
+                    if isinstance(value, int) and not isinstance(value, bool):
+                        totals[str(key)] = totals.get(str(key), 0) + value
+        return CostResult(
+            run_id=run_id,
+            observed=bool(totals),
+            observed_cost=totals.get("usd_micros"),
+            settlement=totals,
+            missing=() if "usd_micros" in totals else ("observedCost",),
         )
 
     def doctor(
@@ -660,4 +836,3 @@ class ApplicationService:
                         pass
 
         return out_p
-

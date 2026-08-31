@@ -70,6 +70,12 @@ This document is the canonical reference owner for the catalog of JSON Schema fa
 
 JSON Schemas define external wire formats, serialized validation boundaries, and test vectors. While schemas establish type contracts, execution authority resides in the code and trusted kernel boundaries. The presence of a schema definition does not alone imply that an associated subsystem is active in the production runtime.
 
+Repository change-surface estimates are domain observations rather than wire schemas. The
+`ChangeSurfaceEstimator` records primary, related, and test paths with deterministic reasons;
+pack middleware supplies bounded `IndexPort` symbol, dependency, and test observations. These
+observations do not authorize edits or completion and remain subordinate to runtime policy and
+exterior verification.
+
 ---
 
 ## 2. Active Schema Families

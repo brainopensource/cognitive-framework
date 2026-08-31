@@ -256,4 +256,19 @@ export class LiveRuntimeClient implements RuntimeClient {
       },
     };
   }
+
+  async listRuns(_options?: { limit?: number; status?: string }): Promise<Result<any[]>> {
+    if (this.transport.kind === "feed") {
+      return { ok: true, value: [] };
+    }
+    try {
+      const res = await this.sendCommand<any>("ListRuns", _options ?? {}, this.currentRunId || "global");
+      if (res.ok) {
+        return { ok: true, value: Array.isArray(res.value) ? res.value : res.value?.runs ?? [] };
+      }
+    } catch {
+      /* ignore */
+    }
+    return { ok: true, value: [] };
+  }
 }

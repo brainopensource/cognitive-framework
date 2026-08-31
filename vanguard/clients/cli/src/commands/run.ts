@@ -53,6 +53,23 @@ export async function handleRun(args: string[], options: ParsedCli): Promise<num
     return handleRunReplay(args.slice(1), options);
   }
 
+  // Load configured defaults if flags omitted
+  const { NodeFsPersistenceAdapter, DEFAULT_PROVIDERS } = await import("@aether/client");
+  const { DEFAULT_FRONTEND_SETTINGS } = await import("@aether/projections");
+  const persistence = new NodeFsPersistenceAdapter();
+  const [settings, providers] = await Promise.all([
+    persistence.loadSettings().then((s) => s ?? DEFAULT_FRONTEND_SETTINGS),
+    persistence.loadProviders().then((p) => p ?? DEFAULT_PROVIDERS),
+  ]);
+  const defaultProvider = (providers as any[]).find((p: any) => p.isDefault) ?? (providers as any[])[0];
+
+  if (!options.repo && (settings as any).general?.defaultWorkspace) {
+    options.repo = (settings as any).general.defaultWorkspace;
+  }
+  if (!options.model && defaultProvider?.selectedModel) {
+    options.model = defaultProvider.selectedModel;
+  }
+
   // Direct execution: aether run [repo] [options]
   if (options.json) {
     return executeRun(options);

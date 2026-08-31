@@ -17,14 +17,17 @@ def get_html() -> str:
     return HTML_PATH.read_text(encoding="utf-8")
 
 def rescan_catalog(ctx):
+    """Read-only filesystem scan for dashboard display.
+
+    This MUST NOT write `.generated/knowledge/catalog.jsonl`: that file is the
+    canonical knowledge base of record, emitted exclusively by
+    `tools/generate_knowledge_base.py` (`just docs-knowledge`). A previous
+    version of this endpoint overwrote the canonical 89-row catalog with a
+    1391-row non-canonical filesystem scan, violating the single-emitter rule.
+    """
     provider = fs_provider.FilesystemProvider()
     res = provider.collect(ctx)
-    entities = [e.metadata for e in res.entities if e.metadata.get("path")]
-    cat_path = ctx.knowledge / "catalog.jsonl"
-    if cat_path.parent.exists():
-        lines = [json.dumps(d) for d in entities]
-        cat_path.write_text("\n".join(lines) + ("\n" if lines else ""), encoding="utf-8")
-    return entities
+    return [e.metadata for e in res.entities if e.metadata.get("path")]
 
 class Handler(BaseHTTPRequestHandler):
     ctx = None
@@ -39,12 +42,14 @@ class Handler(BaseHTTPRequestHandler):
             if p.path=='/api/documents':
                 docs = cli._rows(self.ctx,'catalog.jsonl')
                 if not docs:
-                    docs = rescan_catalog(self.ctx)
+                    provider = fs_provider.FilesystemProvider()
+                    collected = provider.collect(self.ctx)
+                    docs = [e.metadata for e in collected.entities if e.metadata.get('path')]
                 valid_docs = [r for r in docs if (self.ctx.root / r.get('path','')).exists()]
                 return self.send_json(valid_docs)
             if p.path=='/api/rescan':
                 docs = rescan_catalog(self.ctx)
-                return self.send_json({'status':'ok', 'documents':len(docs)})
+                return self.send_json({'status':'ok', 'documents':len(docs), 'written':False})
             if p.path=='/api/relations': return self.send_json([{'source':r.get('source_id'),'target':r.get('target_id'),'kind':r.get('relationship_type','references'),'evidence':'links.jsonl'} for r in cli._rows(self.ctx,'links.jsonl')[:500]])
             if p.path=='/api/context':
                 q=parse_qs(p.query); import dataclasses

@@ -10,3 +10,4 @@ plugins:
   - plugins/ast-patch.yaml
   - plugins/index.yaml
   - plugins/terminal.yaml
+  - plugins/completion.yaml

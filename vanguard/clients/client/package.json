@@ -1,6 +1,7 @@
 {
   "name": "@aether/client",
   "version": "0.1.0",
+  "private": true,
   "description": "AETHER runtime client: UDS socket, HTTP/SSE, Replay transports, and Signer ports",
   "license": "Apache-2.0",
   "type": "module",

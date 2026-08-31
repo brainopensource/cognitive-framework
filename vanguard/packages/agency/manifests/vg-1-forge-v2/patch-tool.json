@@ -1,0 +1,23 @@
+{
+  "name": "patch",
+  "verb": "patch.apply",
+  "description": "Apply atomic bugfix patch or rewrite file with complete updated content (e.g. {\"path\": \"lru/cache.py\", \"content\": \"...full code...\"}).",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "path": {
+        "type": "string",
+        "description": "File path to write"
+      },
+      "content": {
+        "type": "string",
+        "description": "Full file content to write"
+      }
+    },
+    "required": [
+      "path",
+      "content"
+    ],
+    "additionalProperties": false
+  }
+}

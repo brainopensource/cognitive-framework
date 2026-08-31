@@ -1,0 +1,18 @@
+{
+  "name": "read",
+  "verb": "fs.read",
+  "description": "Read one specific source file by exact path (e.g. {\"path\": \"lru/cache.py\"}). Only accepts a file path. Passing \".\" or a directory wastes the turn.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "path": {
+        "type": "string",
+        "description": "Exact file path to read"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "additionalProperties": false
+  }
+}

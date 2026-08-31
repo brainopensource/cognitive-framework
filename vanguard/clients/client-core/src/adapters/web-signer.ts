@@ -1,5 +1,5 @@
 import type { ApprovalChallenge, ApprovalDecision, SignerPort } from "../contract/types.js";
-import { jcsCanonicalize } from "./signer.js";
+import { jcsCanonicalize } from "../contract/canonical.js";
 
 /**
  * Universal browser-safe Ed25519 / WebCrypto Signer implementing SignerPort.

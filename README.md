@@ -33,10 +33,11 @@ AETHER is an event-sourced general agentic computation substrate: a bounded doma
 enforces S0–S12 dispatch and typed budgets; a SQLite-WAL ledger makes state a fold over causal facts;
 and composition, recursive delegation, declarative topologies, authorized durable memory, and governed
 learning remain higher-layer capabilities rather than new cores. M-1 through M-3 are preservation
-anchors and M-6 has accepted recursion evidence. The current delivery path is to close M-4/M-5/M-6.5
-evidence, make M-7 roles perform real artifact-producing work, independently accept M-8, then qualify
-the installable M-9 `0.9.0b1` beta and M-10 `0.9.0` release. Mechanism presence and green tests never
-substitute for exact-subject independently accepted receipts.
+anchors. The current delivery path is to repair the M-8 empirical-evidence path, issue an independent
+positive/negative/undeterminable disposition, then deliver Coding Max as a thin application over a
+thick declarative code-pack composition. M-9 `0.9.0b1`, M-10 `0.9.0`, and the post-M-10 1.0 horizon
+remain gated by exact-subject evidence; mechanism presence and green tests never substitute for
+independently accepted receipts.
 
 ```text
 observe → propose → authorize → effect → receipt → evaluate
@@ -46,10 +47,10 @@ observe → propose → authorize → effect → receipt → evaluate
 |---|---|
 | **Architectural authority** | [`VISION.md`](VISION.md) — constitutional; law and roadmap are subordinate to it |
 | **Normative law** | [`docs/SPEC.md`](docs/SPEC.md) + accepted ADRs indexed through [`docs/decisions.md`](docs/decisions.md) |
-| **Development package** | `vanguard-runtime` `0.7.3.dev0` (`pyproject.toml` is the version source); Python `>=3.10` (tested on Python 3.12 in CI) |
+| **Development package** | `vanguard-runtime` metadata currently declares `0.9.0b1` (`pyproject.toml` is the version source); that string is not M-9 acceptance. Python `>=3.10` (tested on Python 3.12 in CI) |
 | **Current status** | [`docs/execution/active.md`](docs/execution/active.md) is the sole current-state source; status is not duplicated here. |
-| **Roadmap** | M-4 → M-5a → {M-5b ∥ accepted M-6} → M-6.5 → M-7 → M-8 → M-9 `0.9.0b1` → M-10 `0.9.0` |
-| **Production truth** | `vanguard/packages/` (`domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`) |
+| **Roadmap** | M-8 evidence integrity → Coding Max vertical slice → M-9 `0.9.0b1` → M-10 `0.9.0` → non-authorizing 1.0 qualification horizon |
+| **Production truth** | `vanguard/packages/` (`domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`; `apps` is a runtime client) |
 
 [![Vision](https://img.shields.io/badge/Law_Zero-VISION.md-purple.svg)](VISION.md)
 [![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/SPEC.md)
@@ -80,20 +81,39 @@ Mechanism presence is not milestone acceptance; the active board cites the evide
 
 ### Immediate delivery order
 
-1. ~~Publish and independently verify M-4 `candidate-06`~~ done as `candidate-07` (verifies `passed`);
-   obtain a genuinely independent reviewer signature to close the remaining organizational-independence
-   gap.
-2. Publish annotated remote `CONVERGENCE-BASE-v1`, then re-emit M-5b.
-3. Re-emit the corrected M-6.5 study without reinterpreting its undeterminable predecessor.
-4. Make M-7 multi-role children perform real effects and exchange artifacts by digest.
-5. Publish and independently accept M-8 from an immutable clean subject.
-6. Authorize and qualify M-9 `0.9.0b1`, then M-10 `0.9.0`.
-7. Run SWE-Bench optimization as a separate preregistered measurement program.
+1. Repair `REL-01/H0`: route empirical runs through official runtime adapters,
+   execute materialized tasks and exterior oracles, and emit no synthetic
+   success/lift/cost from dry-run mode.
+2. Freeze and run the `REL-02/H1` single-attempt canary with content-addressed
+   tasks, strict budgets, explicit missingness, and independent evaluation.
+3. Close the evidence-integrity sprint with an honest M-8 disposition; a valid
+   negative result closes the sprint but does not accept M-8.
+4. Deliver the Coding Max vertical slice: three data-selected presets,
+   port-backed repository intelligence, durable recovery/resume, multi-file and
+   greenfield policies, and one thin CLI/API facade over the shared runtime.
+5. Qualify Coding Max on frozen internal repository-scale tasks before enabling
+   reviewer/specialist roles or experimental SBFL, mutation, branch-search, or
+   ToolScript treatments.
+6. Authorize and qualify M-9 `0.9.0b1`, then M-10 `0.9.0`; after M-10, qualify
+   the stable framework plus Coding Max and two non-coding reference agents for
+   the 1.0 horizon.
+7. Run official SWE-bench optimization as a separate preregistered measurement
+   program; local canaries never create an official score.
 
 LIM (`tools/006_LLM_INT_MACHINE/`) and LEX research harnesses may assist
 development and research. They never provide Vanguard runtime or acceptance authority; adopted
 techniques must be independently implemented behind Vanguard interfaces and verified by tests,
 falsifiers, and the normal evidence gates.
+
+## Centralized Model Policy & Registry
+
+All model access across runtime, benchmarks, CLI, and apps is **strictly governed by a single source of truth**:
+👉 [`vanguard/packages/adapters/models/models_registry.json`](vanguard/packages/adapters/models/models_registry.json)
+
+- **Default Coding Model (Tier 2 Flash)**: `deepseek/deepseek-v4-flash-0731` ($0.14 / $0.28 per MTok $\to$ 140,000 / 280,000 $\mu$USD).
+- **Secondary Flash Model (Tier 2)**: `z-ai/glm-5.3-flash`.
+- **Free Tier (Tier 1)**: `openrouter/free`, `minimax/minimax-m3:free`, `inclusionai/ling-3.0-tiny:free`.
+- **Prohibition on Hardcoded Models**: Hardcoding model names or using unauthorized models (e.g. deprecated versions) in benchmarks or runtime code fails closed with `ModelUnavailable` / `ModelPolicyError`.
 
 ## 2. Documentation authority
 
@@ -117,6 +137,40 @@ of its own.
 3. [`docs/decisions.md`](docs/decisions.md) — accepted ADRs and decision index.
 4. [`docs/execution/active.md`](docs/execution/active.md) & [`docs/execution/milestones.md`](docs/execution/milestones.md).
 5. [`docs/architecture/overview.md`](docs/architecture/overview.md) — as-built map, navigational only.
+
+### Fast targeted navigation
+
+For implementation and review work, use the repository's generated intelligence to route a small,
+task-specific context before opening source broadly:
+
+```bash
+# 0. Bootstrap state (gates, headroom, known failures)
+cat dev_context_logs/context_summary.md
+
+# 1. Route a task to its canonical documents, inside a token budget
+python3 tools/docs_rag_v0.py "<task keywords>" --budget 8000
+
+# 2. Reverse route a code path to its canonical owner documentation + symbols
+python3 tools/docs_rag_v0.py --file vanguard/packages/kernel/budget.py
+```
+
+Or the equivalent artifact flow, if you prefer reading the raw JSONL projections:
+
+```text
+dev_context_logs/context_summary.{md,json}
+    -> .generated/knowledge/code-map.jsonl
+    -> .generated/knowledge/{symbols,ownership}.jsonl
+    -> applicable canonical documentation
+    -> targeted source and tests
+    -> Tier-2 logs, SQLite trajectories, and benchmark evidence as needed
+```
+
+These artifacts are navigation aids, not authorities. Confirm their repository revision/digest,
+non-zero content, and referenced paths before use; an index that merely opens is not necessarily
+current or usable. If LDA or generated knowledge is empty, stale, or inconsistent, fall back to
+`rg --files`, targeted `rg`, canonical documentation, source, and tests. Prefer selected entries and
+sections over loading whole indexes or log directories into an AI context window. The mandatory
+agent procedure and authority rules are defined in [`AGENTS.md`](AGENTS.md#repository-intelligence-navigation-protocol).
 
 ---
 

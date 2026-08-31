@@ -8,6 +8,7 @@ compose a harness and it does not write envelopes except through
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,6 +16,7 @@ from typing import Any, Callable, Mapping, Sequence
 
 from ..adapters.stores.repo_index import FileRepoIndex
 from ..agency import EpisodeEngine, RunTermination
+from ..agency.episode.admission_gate import AdmissionGate, AdmissionVerdict, VerificationReceipt
 from ..agency.context import (
     CompetencePriorRecorder,
     CompiledContext,
@@ -52,6 +54,7 @@ from ..ports.event_store import EventRange, EventStorePort, Result
 from ..ports.index import IndexPort
 from ..ports.meta_controller import MetaController
 from ..ports.memory import MemoryBinding, require_retrieval_provenance
+from ..ports.spi import ICompletionPolicy
 from .compose import (
     Harness,
     Receipt,
@@ -92,6 +95,35 @@ from .wiring import (
     _span_for,
 )
 
+
+#: Harnesses whose terminal ``finish`` must pass the pack completion policy
+#: (W-092-2: completion admitted only by fresh applicable verification).
+#: ``vg-code-default`` is deliberately NOT gated: closed M-2 acceptance
+#: falsifiers (e.g. RF-25 cold continuation) compose bare finishes through it,
+#: and gating it would reopen frozen milestone evidence.  Widening or shrinking
+#: this set is a governance decision to be recorded in
+#: ``docs/execution/active.md`` -- it is pinned by
+#: ``test/falsifiers/test_completion_gate_scope.py``, never changed silently.
+ADMISSION_GATED_HARNESSES = frozenset(
+    {"vg-code-fast", "vg-code-balanced", "vg-code-max", "vg-code-max-v2",
+     "vg-code-max-v2b", "vg-code-max-v3", "vg-herbs", "vg-chimera-v1", "vg-code-chimera"})
+
+#: Presets deliberately exempt from capability-derived gating. Only shrinks.
+ADMISSION_GATE_EXEMPT = frozenset({"vg-code-default"})
+
+
+def admission_required(harness: Any) -> bool:
+    """Gate completion by declared capability, not by preset name.
+
+    A name allowlist meant every new preset shipped ungated until someone
+    remembered to edit the set, so a bare `finish` with zero effects scored as
+    a completed run. Any harness granted `patch.apply` has a completion claim
+    that must be admitted against real evidence.
+    """
+    name = getattr(harness, "harness", "")
+    if name in ADMISSION_GATE_EXEMPT:
+        return False
+    return "patch.apply" in set(getattr(harness, "verbs", ()) or ())
 
 _CONTROLLER_BUDGET_KEYS: Mapping[str, str] = {
     "usd_micros": "usd_micros",
@@ -358,6 +390,10 @@ class SessionPorts:
     memory: MemoryBinding | None = None
     #: Optional point-of-use authorized experience sink on successful runs.
     experience: MemoryBinding | None = None
+    #: Pack-composed terminal admission policy. ``None`` retains the strict
+    #: built-in gate for legacy harnesses; production coding packs bind their
+    #: repository/greenfield policy here.
+    completion_policy: ICompletionPolicy | None = None
     #: `M-6`. The runtime that executes child episodes. `None` is legal for a
     #: composition that never declares `agent.spawn`; for one that does, the
     #: binding fails closed at composition rather than substituting a fake.
@@ -429,9 +465,14 @@ class HarnessSession:
         self._on_terminal = on_terminal
         self.run_plan = run_plan
         self._episode_begun_here = False
+        self._completion_gate = AdmissionGate()
+        self._completion_changed_files: set[str] = set()
+        self._completion_inspected_files: set[str] = set()
+        self._completion_verification: VerificationReceipt | None = None
 
         repo = Path(task.repo_path)
         self.repo = repo
+        self._completion_scaffold_baseline = self._empty_workspace_baseline()
         self.ledger = LedgerEmitter(
             ports.store,
             episode_id=task.episode_id,
@@ -528,6 +569,10 @@ class HarnessSession:
                     for ref in task.artifact_refs))
         if discovered_env:
             env_parts.append(discovered_env)
+        if task.resume_state:
+            env_parts.append(
+                "=== Durable Coding Task State ===\n"
+                + json.dumps(dict(task.resume_state), sort_keys=True, default=str))
         if self.index is not None:
             files_res = self.index.files()
             if files_res.ok and files_res.value is not None:
@@ -601,6 +646,9 @@ class HarnessSession:
                 for capability in harness.frozen.capabilities
             ),
         )
+        # Read-only callback context for completion facts; it is populated
+        # exclusively by this session's mediated dispatch path.
+        self.operator._completion_calls = self.calls
 
         # Ed25519 verify keys are injected by the operator. The root never mints
         # a signing authority in-process (`GOV-01`, `ADR-0062`): a missing key can
@@ -625,6 +673,18 @@ class HarnessSession:
         read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
         envelopes = read.value if read.ok and read.value is not None else ()
         return reconstruct_state(envelopes)
+
+    def _empty_workspace_baseline(self) -> bool:
+        """Record whether the target was empty before product generation."""
+        ignored = {
+            ".git", ".vanguard", ".pytest_cache", "__pycache__", ".gitignore",
+            ".editorconfig", "README.md", "TASK.md", "pyproject.toml",
+            "package.json", "package-lock.json", "uv.lock",
+        }
+        try:
+            return not any(item.name not in ignored for item in self.repo.iterdir())
+        except OSError:
+            return False
 
     def _controller_remaining_budget(self, view: AgentView) -> Mapping[str, int]:
         return remaining_budget(
@@ -842,6 +902,9 @@ class HarnessSession:
             principal=self.task.principal,
             payload={
                 "episodeId": self.task.episode_id,
+                "objective": self.task.brief,
+                "budgetCeiling": dict(self.harness.budget),
+                "scaffoldBaselineRecorded": self._completion_scaffold_baseline,
                 "harness": self.harness.harness,
                 "compositionDigest": self.harness.composition_digest,
                 "activationDigest": getattr(self.run_plan, "activation_digest", ""),
@@ -874,6 +937,10 @@ class HarnessSession:
             self.begin_episode()
         else:
             scanner = RecoveryScanner(controller_principal=task.principal)
+            # Checkpoints accelerate the fold but never replace the event
+            # stream. A cold continuation proves the checkpoint/state parity
+            # before the planner sees the restored task context.
+            self.reconstruct(verify=True)
             scanner.reconcile_open_intents(
                 ports.store, occurred_at=ports.clock.now(),
                 project_id=task.project_id,
@@ -911,6 +978,16 @@ class HarnessSession:
         # Re-entry is now driven by the ledger: `max_turns` bounds the episode,
         # not each segment of it, and an exhausted budget is terminal.
         delayed = DelayedTerminalEmitter(self.ledger)
+        # The episode's turn history spans approval re-entries. Rebuilding the
+        # engine with an empty `Episode` discarded it every round-trip, so turn
+        # indices restarted at 0 and no-progress detection could never see two
+        # consecutive turns of the same run (`CMX-03`).
+        prior_turns: tuple[Any, ...] = ()
+        # `_record` clears `self.calls`, so the attempted-verb set has to be
+        # accumulated here or the phase ladder resets to `inspect` on every
+        # approval re-entry -- which un-offers `patch` on the turn right after
+        # a patch, the exact shape of the observed instrument error.
+        seen_verbs_acc: set[str] = set()
         while True:
             remaining = task.max_turns - self.turns_consumed()
             if remaining <= 0:
@@ -922,17 +999,27 @@ class HarnessSession:
             engine = EpisodeEngine(
                 kernel=self, model=self.operator, clock=ports.clock,
                 events=delayed, scope=self.scope, tools=harness.tool_schemas,
-                max_turns=remaining, spawn_dispatcher=self.dispatch,
+                max_turns=len(prior_turns) + remaining,
+                spawn_dispatcher=self.dispatch,
                 preset_mode=getattr(harness, "tool_policy_preset", None),
                 protocol_decoders=decoders,
                 patch_detector=patch_detector,
-                truncation_detector=truncation_detector)
+                truncation_detector=truncation_detector,
+                completion_admitter=(self._admit_completion
+                                     if harness.harness in ADMISSION_GATED_HARNESSES
+                                     else None))
             outcome = engine.run(
                 episode_id=task.episode_id, run_id=task.run_id,
                 principal=task.principal, brief=task.brief,
                 spans=(_operator_span(),),
                 receipt_labeller=lambda turn, dispatch: _admit_turn_result(
-                    self.operator, turn, dispatch))
+                    self.operator, turn, dispatch,
+                    on_dispatch=self._observe_completion_dispatch),
+                prior_turns=prior_turns,
+                prior_seen_verbs=tuple(sorted(seen_verbs_acc)))
+            seen_verbs_acc.update(
+                str(getattr(req, "action", "")) for req, _ in self.calls)
+            prior_turns = outcome.episode.turns
             terminal, detail = outcome.terminal, outcome.episode.detail
             suspended = _suspension(self.calls)
             _record(receipts, self.operator, self.calls)
@@ -947,10 +1034,16 @@ class HarnessSession:
             # `K-14`: the approved request re-enters at S1, not at S6, and the
             # model is not asked to re-propose what a human already approved.
             self.policy.bind(authorization)
+            seen_verbs_acc.add(str(getattr(request, "action", "")))
             approved_dispatch = self.dispatch(
                 request, requested_scope=self.scope,
                 reservation=_reservation_for(harness.budget,
                                              harness.effect_budget))
+            # The approved effect is the one that actually lands. It does not
+            # pass through the engine's turn callback, so without this the
+            # completion gate never saw the patch it had just applied and
+            # rejected every finish with MISSING_SOURCE_PATCH.
+            self._observe_completion_dispatch(request, approved_dispatch)
             observer = getattr(self.operator._model, "observe_dispatch", None)
             if callable(observer):
                 observer(approved_dispatch)
@@ -1119,8 +1212,77 @@ class HarnessSession:
                 episode_id=self.task.episode_id, verdict=verdict)
         return verdict
 
+    def _workspace_digest(self) -> str:
+        snapshot = self.ports.environment.snapshot()
+        if snapshot.ok and snapshot.value is not None:
+            return snapshot.value.digest
+        return ""
 
-def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any) -> Span | None:
+    def _observe_completion_dispatch(self, request: EffectRequest, result: Any) -> None:
+        """Capture patch and verification facts at the mediated boundary."""
+        if result.failure is not FailurePath.OK or result.outcome is None:
+            return
+        outcome = result.outcome
+        if request.action in {"read", "search"} or request.action == "fs.read":
+            path = request.args.get("path")
+            if isinstance(path, str) and path and not path.startswith(("/", "\\")):
+                self._completion_inspected_files.add(path.replace("\\", "/"))
+        if request.action in {"patch", "patch.apply", "fs.patch", "write", "fs.write", "delete"}:
+            path = request.args.get("path")
+            if isinstance(path, str) and path and not path.startswith(("/", "\\")):
+                self._completion_changed_files.add(path.replace("\\", "/"))
+        if request.action not in {"test", "exec", "proc.exec"}:
+            return
+        argv = request.args.get("argv", request.args.get("command", ()))
+        if isinstance(argv, str):
+            argv = ()
+        executable = str(argv[0]) if isinstance(argv, Sequence) and argv else ""
+        is_test = executable.rsplit("/", 1)[-1] in {"pytest", "unittest"} or any(
+            "test" in str(item).lower() for item in (argv if isinstance(argv, Sequence) else ()))
+        if not is_test:
+            return
+        detail = str(outcome.detail or "")
+        match = re.search(r"\[exit (-?\d+)\]", detail)
+        exit_code = int(match.group(1)) if match else (0 if outcome.status == "ok" else 1)
+        self._completion_verification = VerificationReceipt(
+            exit_code=exit_code,
+            executed_test_count=1,
+            workspace_digest=self._workspace_digest(),
+            task_digest=digest_of({"runId": self.task.run_id, "brief": self.task.brief}),
+            receipt_digest=outcome.result_digest or "",
+        )
+
+    def _admit_completion(self, _episode: Any, _proposal: Any) -> AdmissionVerdict:
+        """Apply the coding completion contract before reducing ``finish``."""
+        policy = self.ports.completion_policy or self._completion_gate
+        verdict = policy.evaluate(
+            preset_name=self.harness.harness,
+            changed_files=tuple(sorted(self._completion_changed_files)),
+            proposal={"kind": "finish"},
+            verification=self._completion_verification,
+            current_workspace_digest=self._workspace_digest(),
+            inspected_files=tuple(sorted(self._completion_inspected_files)),
+            task_text=self.task.brief,
+            greenfield_evidence={
+                "baseline_recorded": self._completion_scaffold_baseline,
+                "structural_passed": bool(self._completion_verification and self._completion_verification.passed),
+                "smoke_test_created": any("test" in path.lower() for path in self._completion_changed_files),
+                "behavioral_passed": bool(self._completion_verification and self._completion_verification.passed),
+            },
+        )
+        if isinstance(verdict, AdmissionVerdict):
+            return verdict
+        if isinstance(verdict, Mapping):
+            return AdmissionVerdict(
+                bool(verdict.get("admissible", verdict.get("admitted", False))),
+                str(verdict.get("reason", "COMPLETION_POLICY_REJECTED")),
+                verdict.get("rejection_feedback"),
+            )
+        return AdmissionVerdict(False, "COMPLETION_POLICY_INVALID_VERDICT")
+
+
+def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any,
+                       *, on_dispatch: Callable[[EffectRequest, Any], None] | None = None) -> Span | None:
     """Admit the just-produced tool result before the next model turn.
 
     EpisodeEngine invokes this callback immediately after every dispatch. The
@@ -1133,6 +1295,13 @@ def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any) -> Sp
     justify capability widening -- only an operator-authored span can.
     """
     outcome = getattr(result, "outcome", None)
+    if on_dispatch is not None:
+        # The session's dispatch ledger is ordered; the latest call is the
+        # effect represented by this callback. Keeping this hook here means
+        # admission observes only mediated effects, never model output.
+        calls = getattr(operator, "_completion_calls", ())
+        if calls:
+            on_dispatch(calls[-1][0], result)
     # The callback is also used by small operator doubles in the composition
     # contract tests.  Access the wrapped model itself first; looking up
     # ``operator._model`` as an attribute of the model is an accidental
@@ -1174,6 +1343,18 @@ def _record(receipts: list[Receipt], operator: _LayeredOperator,
     """
     for request, result in calls:
         if result.failure is not FailurePath.OK or result.outcome is None:
+            # An approved effect executes between engine segments. Its failed
+            # dispatch therefore has no engine callback to carry the failure
+            # into the next prompt. Dropping it here leaves the model blind and
+            # guarantees identical retries (observed live with proc.exec).
+            if admit_context:
+                failure = str(getattr(result.failure, "value", result.failure))
+                detail = str(result.detail or "dispatch produced no outcome")
+                operator.note(
+                    label=f"{request.action}-failure-{len(receipts)}",
+                    source="tool_result",
+                    text=f"{request.action} -> {failure}\n{detail}",
+                )
             continue
         outcome_detail = result.detail or getattr(result.outcome, "detail", "")
         receipts.append(Receipt(

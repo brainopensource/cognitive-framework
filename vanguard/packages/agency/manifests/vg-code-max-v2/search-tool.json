@@ -1,0 +1,23 @@
+{
+  "name": "search",
+  "verb": "fs.search",
+  "description": "Search workspace directory for filenames or patterns (e.g. {\"path\": \".\", \"pattern\": \"*.py\"}).",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "path": {
+        "type": "string",
+        "description": "Directory to search"
+      },
+      "pattern": {
+        "type": "string",
+        "description": "Pattern to match"
+      }
+    },
+    "required": [
+      "path",
+      "pattern"
+    ],
+    "additionalProperties": false
+  }
+}

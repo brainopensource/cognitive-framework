@@ -197,9 +197,26 @@ class Turn:
     progress_signal: str
 
     @property
-    def signature(self) -> tuple[str, str, str | None, str]:
-        return (self.state_digest, self.proposal_descriptor,
-                self.receipt_digest, self.progress_signal)
+    def signature(self) -> tuple[str, str | None, str]:
+        """What must change for a turn to count as progress.
+
+        `state_digest` is deliberately **excluded**. It digests the whole
+        accumulated turn history (`Episode.state_digest`), so it advances every
+        turn merely because the history got longer — including across turns
+        that proposed the identical action and got back the identical receipt.
+        Including it made `repeats()` unsatisfiable, and the detector never
+        fired in production: live traces show 8-12 consecutive identical
+        `fs.read({"path": "."})` calls burning the whole turn budget.
+
+        The three elements kept are the ones that actually witness change:
+        `proposal_descriptor` is already action-only (verb, resource and
+        canonicalised args — see `Proposal.descriptor`), and the receipt digest
+        plus progress signal carry whatever the effect changed in the world. A
+        re-run whose output moved has a different receipt digest and is
+        correctly *not* a repeat.
+        """
+        return (self.proposal_descriptor, self.receipt_digest,
+                self.progress_signal)
 
 
 @dataclass(frozen=True, slots=True)

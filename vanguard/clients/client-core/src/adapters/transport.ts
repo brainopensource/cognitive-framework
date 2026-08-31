@@ -5,7 +5,12 @@ import { fail, parseDaemonLine, parseJsonlLine, toClientFailureCode } from "../c
 import type { EventCursor, Result, StreamItem } from "../contract/types.js";
 
 export function resolveSocketPath(explicit?: string): string {
-  return explicit || process.env.VANGUARD_RUNTIME_SOCKET || "/tmp/vanguard-runtime.sock";
+  return (
+    explicit ||
+    process.env.AETHER_RUNTIME_SOCK ||
+    process.env.VANGUARD_RUNTIME_SOCKET ||
+    "/tmp/vanguard-runtime.sock"
+  );
 }
 
 export type SocketTransportOptions = {

@@ -159,6 +159,11 @@ Pack plugins loaded by `vanguard.packages.runtime.registry` transition through s
 Topology definitions specify delegation roles and child agent routing:
 - `mhf.topology/1` declarations are compiled by `vanguard.packages.runtime.compose` and lowered to sequential child turn executions (`arch.orchestration.delegation`).
 
+The production code pack registers three data-selected identities:
+`vg-code-fast`, `vg-code-balanced`, and `vg-code-max`. They share the default
+tool and policy artifacts while varying only bounded execution ceilings and
+are compiled by the same runtime composition root.
+
 ---
 
 ## Implementation Evidence

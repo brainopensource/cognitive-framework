@@ -40,11 +40,22 @@ docs-full: docs-check
 docs-diagrams:
 	python3 tools/generate_exploratory_diagrams.py
 
-# Local RAG V0 query interface
+# Local RAG V0 query interface (CANONICAL agent retrieval surface)
 docs-rag QUERY:
 	python3 tools/docs_rag_v0.py "{{QUERY}}"
 
-# LDA thin orchestration wrappers
+# Reverse routing: production code path -> canonical owner docs + symbols
+docs-rag-file FILE:
+	python3 tools/docs_rag_v0.py --file "{{FILE}}"
+
+# Rebuild the LDA SQLite/FTS index (populate .lda/index.db before lda-query/lda-context)
+lda-index:
+	uv run lda index
+
+# LDA thin orchestration wrappers.
+# NOTE: `lda query` / `lda context` are EXPERIMENTAL for agent retrieval until
+# `just lda-doctor` reports index_healthy=true; prefer `just docs-rag` which
+# ranks the canonical .generated/knowledge/ catalog with authority boosting.
 lda:
 	uv run lda serve
 lda-status:

@@ -1,0 +1,202 @@
+{
+  "artifactRefs": [
+    "artifacts/M-8-durable-memory-wave-closure-20260831"
+  ],
+  "claim": "M-8",
+  "digest": "sha256:ee91baa3989151bc785b4420e44b41a48a48588db4420d7aa85ae578ec44d64b",
+  "environment": {
+    "machine": "x86_64",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python": "3.12.3"
+  },
+  "materials": [
+    {
+      "digest": "sha256:022bf4cb66eccca4c3bcbb7a3af0bea3d42944baa325f89cd9a8cc887155e783",
+      "name": "adr_0100",
+      "ref": "docs/decisions.md",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:c7a08e7ae8becbe24811164121a024a301a59ccd2e57f8b1e9d0235ce13ca6cc",
+      "name": "durable_memory_suite",
+      "ref": "test/adapters/test_durable_memory_port.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:accd1e89af5d493a5f12edd974da94815cb2cd2de1a467f3b1fb923dddf77c2c",
+      "name": "governed_learning_suite",
+      "ref": "test/runtime/test_governed_learning.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:cddcb1ae391425673d2f890837fc8a99a1575f536f0843211141b85ae260c258",
+      "name": "learning",
+      "ref": "vanguard/packages/runtime/governance/learning.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:26dbccf1fa57fb3b8a5d57d80228c434d225382e1993d69a74c0eb4938b3e32e",
+      "name": "lifecycle_suite",
+      "ref": "test/falsifiers/test_m8_skill_lifecycle.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:fcf34f1e72ee1722aadcf504b9dfa706be506b85d82e180ba70e427bfc5ebf65",
+      "name": "memory_engine",
+      "ref": "vanguard/packages/adapters/stores/memory_engine.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:1b582f3b674823f8a7384545af6d6b655d4eb3b2026795d88d69e457079fb52e",
+      "name": "memory_falsifiers",
+      "ref": "test/security/test_m8_memory_falsifiers.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:0bbd4ccd5f322bdcea20d0189e3d256618dc843362bd439a70f7501c5452d9c3",
+      "name": "memory_parity",
+      "ref": "test/security/test_m8_memory_fake_parity.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:152a8160dd7498ce7a86dcdefc9ea659b4a02e6823397c19a227fc0984702ed6",
+      "name": "memory_port",
+      "ref": "vanguard/packages/ports/memory.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:00783fffbd08a6b1f43b3ec5ca232c20cbcf9c9bb0cc99555185525fc7e5c78a",
+      "name": "memory_runtime",
+      "ref": "vanguard/packages/runtime/memory.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:2c79ceff976e98e2347bd607e9578b2732df7856f0027c4b92c1fd603c0dae61",
+      "name": "runtime",
+      "ref": "vanguard/packages/runtime/root.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:6759b522715d1728dd97a48f9f07c85161776db08fcf4c3edcf0547746918089",
+      "name": "skill_evaluation",
+      "ref": "vanguard/packages/runtime/skill_evaluation.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:7f917d0589f588414a7d3b9d4ca7da9774c109676c411fb251f6f4dac3a1cee5",
+      "name": "skill_lifecycle",
+      "ref": "vanguard/packages/runtime/skill_lifecycle.py",
+      "scheme": "raw-sha256"
+    },
+    {
+      "digest": "sha256:3068d73df3b73204774f2d9cd4f4812ab40f3eddc9d8e81fe6b35b7ab98b24ef",
+      "name": "falsifier_report",
+      "ref": "artifacts/M-8-durable-memory-wave-closure-20260831/falsifier-report.json",
+      "scheme": "raw-sha256"
+    }
+  ],
+  "outcome": "passed",
+  "pins": {
+    "artifactRoot": "artifacts/M-8-durable-memory-wave-closure-20260831",
+    "branch": "HEAD",
+    "commit": "0a5795df721f762fc94cdfb3f9b6f8601810451c",
+    "dirty": false,
+    "eventSchema": "mhf.event/2",
+    "reducer": "sha256:faf46555bf8083564542a4dd374af66a21b109f1905dbac01b8236a5280f2e81",
+    "reportDigest": "sha256:3068d73df3b73204774f2d9cd4f4812ab40f3eddc9d8e81fe6b35b7ab98b24ef",
+    "runtime": "sha256:2c79ceff976e98e2347bd607e9578b2732df7856f0027c4b92c1fd603c0dae61",
+    "runtimeDigest": "sha256:2c79ceff976e98e2347bd607e9578b2732df7856f0027c4b92c1fd603c0dae61",
+    "trajectorySchema": "mhf.trajectory/2",
+    "tree": "079a3caae49a71951054a42e3a36e60db0f44dd3"
+  },
+  "producer": {
+    "identity": "dev-b",
+    "keyId": "dev-b-evidence-1",
+    "role": "producer"
+  },
+  "protocol": "aether.m8.durable-memory-and-governed-learning/1",
+  "run": {
+    "adr": "ADR-0100",
+    "authorizationBeforeRanking": true,
+    "compositionRegistry": "DurableCompositionRegistry",
+    "distinctAuthorities": [
+      "generator",
+      "evaluator",
+      "promoter"
+    ],
+    "durableStore": "DurableMemoryPort (SQLite-WAL + CAS)",
+    "falsifiers": {
+      "command": [
+        "/usr/bin/python3",
+        "-m",
+        "unittest",
+        "test.falsifiers.test_m8_skill_lifecycle",
+        "test.security.test_m8_memory_falsifiers",
+        "test.security.test_m8_memory_fake_parity",
+        "test.adapters.test_durable_memory_port",
+        "test.runtime.test_governed_learning",
+        "-v"
+      ],
+      "cwd": ".",
+      "failures": 0,
+      "fresh_process": true,
+      "markers": {
+        "authorities_distinct": true,
+        "authorization_before_ranking": true,
+        "backup_restore_verified": true,
+        "cas_conflict_handled": true,
+        "contaminated_split_refused": true,
+        "corruption_quarantined": true,
+        "denial_precedes_shape": true,
+        "evaluator_holds_no_key": true,
+        "expiry_and_revocation": true,
+        "fake_parity_no_fail_open": true,
+        "forged_rollback_refused": true,
+        "generator_is_not_evaluator": true,
+        "held_out_is_real": true,
+        "isolation_enforced": true,
+        "legal_hold_protects_gc": true,
+        "no_fail_open_grant": true,
+        "no_premature_event_kinds": true,
+        "presence_is_not_use": true,
+        "promoter_is_not_evaluator": true,
+        "promoter_is_not_generator": true,
+        "promotion_binds_decision": true,
+        "promotion_needs_verifier": true,
+        "promotion_signature_verified": true,
+        "provenance_required": true,
+        "ranker_sees_only_authorized": true,
+        "reproducibility_recomputed": true,
+        "restart_recovery": true,
+        "restore_in_fresh_process": true,
+        "rollback_executed": true,
+        "rollback_replay_refused": true,
+        "rollback_restores_behaviour": true,
+        "stale_base_refused": true,
+        "thresholds_not_disableable": true,
+        "unsigned_rollback_refused": true
+      },
+      "modules": [
+        "test.falsifiers.test_m8_skill_lifecycle",
+        "test.security.test_m8_memory_falsifiers",
+        "test.security.test_m8_memory_fake_parity",
+        "test.adapters.test_durable_memory_port",
+        "test.runtime.test_governed_learning"
+      ],
+      "output_digest": "sha256:2ecdb8d95cd8f6b565d1b83decfe52ee39ae52be709807dde5a9b33d6e0f8035",
+      "returncode": 0,
+      "schema": "aether.m8-falsifier-report/1",
+      "stderr_digest": "sha256:2ecdb8d95cd8f6b565d1b83decfe52ee39ae52be709807dde5a9b33d6e0f8035",
+      "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "tests": 59
+    },
+    "rollback": "signed RollbackEvidence, generation-bound, executed"
+  },
+  "schema": "aether.evidence/1",
+  "signature": "ed25519:0b2uby56xdHsrgl1nu3NEI2gKH7Hfxkl1j/wg5OQHaz3QR7nZMxdUtYmxulH+633/FARxLrtxYlTIpL/VIvGBg==",
+  "subject": [
+    "package:WP-A4",
+    "package:WP-B4",
+    "milestone:M-8"
+  ]
+}

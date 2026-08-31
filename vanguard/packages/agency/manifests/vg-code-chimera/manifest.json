@@ -1,0 +1,85 @@
+{
+  "harness": "vg-code-chimera",
+  "components": {
+    "system_prompt": [
+      "vg-code-chimera/system-prompt.txt"
+    ],
+    "tools": [
+      "vg-code-chimera/read-tool.json",
+      "vg-code-chimera/search-tool.json",
+      "vg-code-chimera/patch-tool.json",
+      "vg-code-chimera/test-tool.json",
+      "vg-code-chimera/finish-tool.json"
+    ],
+    "context_policy": [
+      "vg-code-default/context-policy.json"
+    ],
+    "routing_policy": [
+      "vg-code-default/routing-policy.json"
+    ],
+    "approval_policy": [
+      "vg-code-default/approval-policy.json"
+    ],
+    "retrieval_policy": [
+      "vg-code-default/retrieval-policy.json"
+    ],
+    "skill": [
+      "vg-code-default/skills/pytest-green.json"
+    ],
+    "repo_index": [
+      "vg-code-chimera/repo-index.json"
+    ]
+  },
+  "capabilities": [
+    {
+      "verb": "fs.read",
+      "sink": "observation",
+      "selector": {
+        "kind": "fs",
+        "root": "/workspace",
+        "paths": [
+          "/workspace"
+        ]
+      },
+      "risk": "low"
+    },
+    {
+      "verb": "fs.search",
+      "sink": "observation",
+      "selector": {
+        "kind": "fs",
+        "root": "/workspace",
+        "paths": [
+          "/workspace"
+        ]
+      },
+      "risk": "low"
+    },
+    {
+      "verb": "patch.apply",
+      "sink": "privileged",
+      "selector": {
+        "kind": "fs",
+        "root": "/workspace",
+        "paths": [
+          "/workspace"
+        ]
+      },
+      "risk": "medium"
+    },
+    {
+      "verb": "proc.exec",
+      "sink": "privileged",
+      "selector": {
+        "kind": "generic",
+        "uriPattern": "proc://exec/allow/git,pytest,ruff,python3,python,ls,find,cargo,npm,node,rustc"
+      },
+      "risk": "high"
+    }
+  ],
+  "evaluators": [
+    "coding-oracle@3"
+  ],
+  "budgetPolicy": "vg-code-default/budget-policy.json",
+  "undeletable": false
+}

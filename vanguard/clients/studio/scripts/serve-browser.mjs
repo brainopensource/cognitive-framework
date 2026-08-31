@@ -1,13 +1,28 @@
-import { createServer, request as httpRequest } from "node:http";
-import { readFile } from "node:fs/promises";
-import { resolve, extname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { resolve, dirname, extname } from "node:path";
 
-const root = resolve("dist-browser");
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const root = resolve(__dirname, "../dist-browser");
 const PYTHON_GATEWAY_PORT = 8000;
 
+const MIME_TYPES = {
+  ".html": "text/html; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".mjs": "text/javascript; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".map": "application/json; charset=utf-8",
+  ".svg": "image/svg+xml",
+  ".png": "image/png",
+  ".ico": "image/x-icon",
+};
+
 const server = createServer(async (req, res) => {
+  const urlObj = new URL(req.url ?? "/", "http://127.0.0.1:4173");
+  const pathname = urlObj.pathname;
+
   // Proxy /api/* to Python Gateway
-  if (req.url && req.url.startsWith("/api/")) {
+  if (pathname.startsWith("/api/")) {
     const proxyReq = httpRequest(
       {
         host: "127.0.0.1",
@@ -32,7 +47,7 @@ const server = createServer(async (req, res) => {
   }
 
   // Serve static files from dist-browser/
-  const requested = req.url === "/" ? "/index.html" : req.url ?? "/index.html";
+  const requested = pathname === "/" ? "/index.html" : pathname;
   const path = resolve(root, `.${requested}`);
   if (!path.startsWith(root)) {
     res.writeHead(403);
@@ -41,7 +56,8 @@ const server = createServer(async (req, res) => {
   }
   try {
     const body = await readFile(path);
-    res.writeHead(200, { "Content-Type": extname(path) === ".js" ? "text/javascript" : "text/html" });
+    const contentType = MIME_TYPES[extname(path)] ?? "application/octet-stream";
+    res.writeHead(200, { "Content-Type": contentType });
     res.end(body);
   } catch {
     res.writeHead(404);

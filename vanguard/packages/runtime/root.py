@@ -19,6 +19,8 @@ from ..adapters.environment.git import GitEnvironmentAdapter
 from ..adapters.sandbox.rootless import RootlessSandboxRunner
 from ..adapters.sandbox.worker import WorkerProtocol
 from ..adapters.stores.event_store import SqliteEventStore
+from ..adapters.models.cassette import Cassette, CassetteRecorder
+from ..adapters.models.openrouter import OpenRouterModel
 from ..domain.canonicalisation.digest import digest_of
 from .workspace import (
     controlled_environment,
@@ -41,6 +43,14 @@ from .activation import (
     ComponentHandle,
     plan_activation,
 )
+from .model_selection import (
+    get_default_model,
+    get_default_paid_model,
+    get_pricing_usd_table,
+    load_model_registry,
+    resolve_model,
+    select_model,
+)
 from .assurance import AssurancePolicy
 from .determinism import SystemClock
 from .run_plan import RunPlan, RunPlanError, plan_run
@@ -53,6 +63,13 @@ from ..ports.memory import MemoryBinding
 from ..ports.event_store import Result
 from .child_runtime import RuntimeChildRunner
 from .delegation import SPAWN_VERB
+from ..agency.forge import (
+    FORGE_PRESET_NAME,
+    ForgeConfig,
+    ForgeFacade,
+    GoalContract,
+    HERBS_PRESET_NAME,
+)
 from .wiring import (
     BindingContext,
     BindingResolver,
@@ -67,6 +84,19 @@ from .wiring import (
     _sandbox_effector,
     _span_for,
 )
+
+
+def application_service(*args: Any, **kwargs: Any) -> Any:
+    """Return the application boundary without creating an import cycle.
+
+    The runtime root is the only public composition seam for clients such as
+    benchmark harnesses.  The import stays lazy because ``app_service`` uses
+    ``Runtime`` during its own initialization.
+    """
+    import importlib
+
+    service_module = importlib.import_module("vanguard.packages.runtime.app_service")
+    return service_module.ApplicationService(*args, **kwargs)
 
 
 class Runtime(_ComposedRuntime):
@@ -95,6 +125,7 @@ class Runtime(_ComposedRuntime):
         controller_confidence: tuple[Any, ...] = (),
         memory: MemoryBinding | None = None,
         experience: MemoryBinding | None = None,
+        completion_policy: Any = None,
     ) -> RunResult:
         """Compose, run one episode, resolve approvals, and evaluate exterior.
 
@@ -184,7 +215,8 @@ class Runtime(_ComposedRuntime):
         )
         try:
             return cls.run_composed(
-                harness, ports, task_context, on_terminal=on_terminal, release=release
+                harness, ports, task_context, on_terminal=on_terminal, release=release,
+                completion_policy=completion_policy,
             )
         finally:
             if sealed_dir is not None:
@@ -214,6 +246,7 @@ class Runtime(_ComposedRuntime):
         controller_confidence: tuple[Any, ...] = (),
         memory: MemoryBinding | None = None,
         experience: MemoryBinding | None = None,
+        completion_policy: Any = None,
     ) -> RunResult:
         """Compose and run one episode through the `RuntimeBootstrap` seam.
 
@@ -258,6 +291,7 @@ class Runtime(_ComposedRuntime):
             return cls.run_composed(
                 harness, ports, task_context, on_terminal=on_terminal,
                 release=release, profile=deps.profile,
+                completion_policy=completion_policy,
             )
         finally:
             deps.cleanup()
@@ -272,6 +306,7 @@ class Runtime(_ComposedRuntime):
         on_terminal: Callable[[HarnessSession], Any] | None = None,
         release: bool = False,
         profile: Any | None = None,
+        completion_policy: Any = None,
     ) -> RunResult:
         """Run an already composed harness through the sole activation boundary.
 
@@ -366,6 +401,8 @@ class Runtime(_ComposedRuntime):
                 harness=harness, parent_ports=ports, parent_task=task_context,
                 profile=profile, release=release,
             ))
+        if completion_policy is not None:
+            ports = replace(ports, completion_policy=completion_policy)
         session = HarnessSession(
             harness, ports, task_context, on_terminal=on_terminal, run_plan=run_plan
         )
@@ -410,6 +447,7 @@ class _TopologyModel:
         self._brief = task.brief
         self._harness = harness
         self._blobs = blobs
+        self._task_max_turns = task.max_turns
         self._operations = tuple(lowered.get("roleOperations", ()))
         self._roles = {
             str(item["role"]): item
@@ -451,7 +489,7 @@ class _TopologyModel:
             if dimension in {"usd_micros", "millis", "tokens", "bytes"}
         }
         max_turns = int(template.get("budget", {}).get(
-            "maxTurns", template.get("budget", {}).get("turns", 1)))
+            "maxTurns", template.get("budget", {}).get("turns", getattr(self, "_task_max_turns", 15))))
         max_turns = max(max_turns, 1)
         # The generic selector is declared by the manifest for agent.spawn;
         # it is selected from that declaration, never fabricated as authority.
@@ -719,4 +757,12 @@ __all__ = [
     "get_workspace_path",
     "get_workspace_root",
     "validate_workspace_path",
+    "FORGE_PRESET_NAME",
+    "HERBS_PRESET_NAME",
+    "ForgeConfig",
+    "ForgeFacade",
+    "GoalContract",
+    "Cassette",
+    "CassetteRecorder",
+    "OpenRouterModel",
 ]

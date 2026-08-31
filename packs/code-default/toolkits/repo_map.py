@@ -1,54 +1,39 @@
-"""Merkle workspace index + token-budgeted repo map (mhf.toolkit.index / mhf.context.repo-map)."""
+"""IndexPort-backed repository toolkit for the code-default pack."""
 
 from __future__ import annotations
 
-import hashlib
-import json
-import re
 from pathlib import Path
 from typing import ClassVar, Mapping, Sequence
 
+from vanguard.packages.adapters.stores.repo_index import FileRepoIndex
+from vanguard.packages.ports.index import IndexPort
 from vanguard.packages.domain.wire.result import Ok, Result
-from vanguard.packages.domain.wire.types_gen import (
-    CompactionReport,
-    ContextBundle,
-    EffectContext,
-    EffectFailure,
-    EffectRequest,
-    EpisodeView,
-    Health,
-    Receipt,
-    ToolSchema,
-)
+from vanguard.packages.domain.wire.types_gen import CompactionReport, ContextBundle, EffectContext, EffectFailure, EffectRequest, EpisodeView, Health, Receipt, ToolSchema
 
 __all__ = ["IndexToolkit", "RepoMapContext"]
 
-_DEFINITIONS: tuple[tuple[str, str, re.Pattern[str]], ...] = (
-    (".py", "function", re.compile(r"^\s*(?:async\s+)?def\s+([A-Za-z_]\w*)")),
-    (".py", "class", re.compile(r"^\s*class\s+([A-Za-z_]\w*)")),
-)
-_IGNORED = {".git", "__pycache__", "node_modules", ".venv"}
-
 
 class IndexToolkit:
+    """SPI adapter that delegates repository observations to ``IndexPort``."""
+
     spi_version: ClassVar[str] = "1.0"
 
     def __init__(self, workspace: str | Path) -> None:
-        self._root = Path(workspace)
-        self._files: dict[str, str] = {}
+        self._index: IndexPort = FileRepoIndex()
+        self._workspace = str(workspace)
         self._symbols: list[dict[str, object]] = []
         self._dirty: set[str] = set()
-        self._merkle = ""
 
     def verbs(self) -> Mapping[str, ToolSchema]:
         return {"index.refresh": ToolSchema(verb="index.refresh", schema={"type": "object"})}
 
     def execute(self, request: EffectRequest, ctx: EffectContext) -> Result[Receipt]:
-        _ = ctx
+        del ctx
         if request.verb == "index.refresh":
-            self.scan()
-        return Ok(Receipt(request_digest="sha256:" + (self._merkle or "0" * 64),
-                          outcome="completed", cost=request.reservation))
+            result = self._index.index(self._workspace)
+            if not result.ok:
+                return Result.fail(result.error.kind, result.error.message) if result.error else Result.fail("unavailable", "index unavailable")
+        return Ok(Receipt(request_digest="sha256:" + "0" * 64, outcome="completed", cost=request.reservation))
 
     def compensate(self, receipt: Receipt) -> Result[Receipt]:
         return Ok(receipt)
@@ -58,65 +43,35 @@ class IndexToolkit:
 
     def ingest(self, receipts: Sequence[Receipt]) -> None:
         for receipt in receipts:
-            for artifact in receipt.artifacts:
-                self._dirty.add(artifact.kind)
+            self._dirty.update(artifact.kind for artifact in receipt.artifacts)
 
     def scan(self) -> str:
-        files: dict[str, str] = {}
-        kept = {item["path"]: item for item in self._symbols if isinstance(item.get("path"), str)}
-        symbols: list[dict[str, object]] = []
-        rescan_all = (not self._dirty) or ("*" in self._dirty) or (not self._files)
-        if self._root.is_dir():
-            for path in sorted(self._root.rglob("*")):
-                if not path.is_file() or set(path.parts) & _IGNORED:
-                    continue
-                rel = path.relative_to(self._root).as_posix()
-                digest = hashlib.sha256(path.read_bytes()).hexdigest()
-                files[rel] = digest
-                dirty = rescan_all or rel in self._dirty
-                if not dirty and rel in self._files:
-                    symbols.extend(item for item in self._symbols if item.get("path") == rel)
-                    continue
-                try:
-                    text = path.read_text(encoding="utf-8")
-                except (OSError, UnicodeDecodeError):
-                    continue
-                suffix = path.suffix
-                for want, kind, pattern in _DEFINITIONS:
-                    if want != suffix:
-                        continue
-                    for lineno, line in enumerate(text.splitlines(), start=1):
-                        match = pattern.match(line)
-                        if match:
-                            symbols.append({"name": match.group(1), "kind": kind, "path": rel, "line": lineno})
-        self._files = files
-        self._symbols = symbols
+        result = self._index.index(self._workspace)
+        if not result.ok:
+            return ""
+        mapped = self._index.repo_map(token_budget=1)
+        symbols = self._index.symbols()
+        self._symbols = [{"name": item.name, "kind": item.kind, "path": item.path, "line": item.line}
+                         for item in (symbols.value or ())] if symbols.ok else []
         self._dirty.clear()
-        _ = kept
-        payload = json.dumps({"files": files, "symbols": symbols}, sort_keys=True)
-        self._merkle = hashlib.sha256(payload.encode("utf-8")).hexdigest()
-        return self._merkle
+        return mapped.value.source_revision if mapped.ok and mapped.value else ""
 
     def render(self, token_budget: int) -> str:
-        if not self._files:
-            self.scan()
-        lines = [f"{path} {digest[:8]}" for path, digest in list(self._files.items())[:64]]
-        for symbol in self._symbols[:64]:
-            lines.append(f"{symbol['kind']} {symbol['name']} {symbol['path']}:{symbol['line']}")
-        text = "\n".join(lines)
-        budget = max(0, token_budget * 4)
-        return text if len(text) <= budget else text[:budget]
+        mapped = self._index.repo_map(token_budget=max(0, token_budget))
+        if not mapped.ok or mapped.value is None:
+            return ""
+        summary = mapped.value
+        lines = [path for path in summary.files]
+        lines.extend(f"{symbol.kind} {symbol.name} {symbol.path}:{symbol.line}" for symbol in summary.symbols)
+        return "\n".join(lines)
 
 
 class RepoMapContext:
     spi_version: ClassVar[str] = "1.0"
 
-    def __init__(self, *, system_prefix: str, index: IndexToolkit, token_budget: int = 4000,
-                 compaction: str = "recency-window") -> None:
-        self._prefix = system_prefix
-        self._index = index
-        self._token_budget = token_budget
-        self._compaction = compaction
+    def __init__(self, *, system_prefix: str, index: IndexToolkit, token_budget: int = 4000, compaction: str = "recency-window") -> None:
+        self._prefix, self._index = system_prefix, index
+        self._token_budget, self._compaction = token_budget, compaction
         self._notes: list[str] = []
 
     def compile(self, view: EpisodeView, budget_tokens: int) -> Result[ContextBundle]:
@@ -126,8 +81,7 @@ class RepoMapContext:
 
     def ingest(self, receipts: Sequence[Receipt]) -> None:
         self._index.ingest(receipts)
-        for receipt in receipts:
-            self._notes.append(receipt.outcome)
+        self._notes.extend(receipt.outcome for receipt in receipts)
 
     def compact(self, pressure: float) -> Result[CompactionReport]:
         removed = len(self._notes)

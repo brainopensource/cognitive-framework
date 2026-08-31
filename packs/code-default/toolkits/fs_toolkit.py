@@ -21,13 +21,13 @@ class FsToolkit:
     def verbs(self) -> Mapping[str, ToolSchema]:
         read_schema: dict[str, object] = {
             "type": "object",
-            "properties": {"path": {"type": "string"}},
+            "properties": {
+                "path": {"type": "string"},
+                "start_line": {"type": "integer"},
+                "end_line": {"type": "integer"},
+            },
             "required": ["path"],
         }
-        # `execute()` has always read `request.args["pattern"]` for fs.search;
-        # the exposed schema only ever declared `path`, so a model had no
-        # contract-level hint that a search needs a term at all -- it could
-        # only discover this by guessing or by the field going silently unused.
         search_schema: dict[str, object] = {
             "type": "object",
             "properties": {
@@ -36,15 +36,23 @@ class FsToolkit:
             },
             "required": ["pattern"],
         }
+        list_schema: dict[str, object] = {
+            "type": "object",
+            "properties": {
+                "path": {"type": "string"},
+                "pattern": {"type": "string"},
+            },
+        }
         return {
             "fs.read": ToolSchema(verb="fs.read", schema=read_schema),
             "fs.search": ToolSchema(verb="fs.search", schema=search_schema),
+            "fs.list": ToolSchema(verb="fs.list", schema=list_schema),
         }
 
     def execute(self, request: EffectRequest, ctx: EffectContext) -> Result[Receipt]:
         _ = ctx
         rel = str(request.args.get("path") or "")
-        target = (self._root / rel).resolve()
+        target = (self._root / rel).resolve() if rel else self._root.resolve()
         try:
             target.relative_to(self._root.resolve())
         except ValueError:
@@ -56,10 +64,27 @@ class FsToolkit:
                 for path in self._root.rglob("*"):
                     if path.is_file() and needle in path.read_text(encoding="utf-8", errors="ignore"):
                         hits.append(path.relative_to(self._root).as_posix())
-            digest = hashlib.sha256("\n".join(hits).encode()).hexdigest()
+            digest = hashlib.sha256("\n".join(sorted(hits)).encode()).hexdigest()
+            return Ok(_receipt(digest, request.reservation))
+        if request.verb == "fs.list":
+            pattern = str(request.args.get("pattern") or "*")
+            files = []
+            base = target if target.is_dir() else self._root
+            for path in base.glob(pattern):
+                files.append(path.relative_to(self._root).as_posix())
+            digest = hashlib.sha256("\n".join(sorted(files)).encode()).hexdigest()
             return Ok(_receipt(digest, request.reservation))
         if not target.is_file():
             return Err("not_found", rel)
+        start_line = request.args.get("start_line")
+        end_line = request.args.get("end_line")
+        if start_line is not None or end_line is not None:
+            lines = target.read_text(encoding="utf-8", errors="replace").splitlines()
+            s = max(1, int(start_line)) if start_line is not None else 1
+            e = min(len(lines), int(end_line)) if end_line is not None else len(lines)
+            selected = "\n".join(lines[s - 1:e])
+            digest = hashlib.sha256(selected.encode("utf-8")).hexdigest()
+            return Ok(_receipt(digest, request.reservation))
         digest = hashlib.sha256(target.read_bytes()).hexdigest()
         return Ok(_receipt(digest, request.reservation))
 

@@ -524,6 +524,7 @@ class PluginBindings:
     memory: PluginRef | None = None
     toolkits: tuple[PluginRef, ...] = field(default_factory=tuple)
     evaluation: PluginRef | None = None
+    completion: PluginRef | None = None
     model_routes: tuple[ModelRoute, ...] = field(default_factory=tuple)
 
 @dataclass(frozen=True, slots=True)

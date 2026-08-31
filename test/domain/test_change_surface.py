@@ -27,6 +27,19 @@ class TestChangeSurfaceEstimator(unittest.TestCase):
         )
         self.assertEqual(estimate_patched.coverage_ratio, 1.0)
 
+    def test_estimate_records_dependency_and_test_surface_reasons(self) -> None:
+        estimate = ChangeSurfaceEstimator().estimate(
+            "Fix pkg/api.py",
+            workspace_files=["pkg/api.py", "pkg/service.py", "tests/test_api.py"],
+            implicated_files={"pkg/api.py": ("task_path",)},
+            dependency_edges=[("pkg/api.py", "pkg/service.py")],
+            test_associations=[("tests/test_api.py", "pkg/api.py")],
+        )
+        self.assertIn("pkg/service.py", estimate.related_files)
+        self.assertIn("tests/test_api.py", estimate.test_files)
+        self.assertIn("dependency_of:pkg/api.py", estimate.reasons["pkg/service.py"])
+        self.assertIn("test_for:pkg/api.py", estimate.reasons["tests/test_api.py"])
+
 
 if __name__ == "__main__":
     unittest.main()

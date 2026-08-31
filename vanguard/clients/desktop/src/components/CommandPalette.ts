@@ -1,5 +1,4 @@
 import type { DesktopStore } from "../state/desktop-store.js";
-import { formatDeepLink } from "@aether/projections";
 
 export type PaletteCommand = {
   id: string;
@@ -100,8 +99,9 @@ export function renderCommandPalette(store: DesktopStore): HTMLElement | null {
       category: "Navigation",
       available: true,
       execute: () => {
-        const chosen = prompt("Enter workspace path:", state.workspacePath);
-        if (chosen) store.controller.selectWorkspace(chosen);
+        store.bridge.openDirectoryDialog().then((dir) => {
+          if (dir) store.controller.selectWorkspace(dir);
+        });
       },
     },
     {
@@ -119,6 +119,17 @@ export function renderCommandPalette(store: DesktopStore): HTMLElement | null {
       category: "Execution",
       available: true,
       execute: () => store.openForensicDrawer("settings"),
+    },
+    {
+      id: "change-provider",
+      title: "Configure Providers & Models",
+      subtitle: `Current: ${state.selectedProviderId} (${state.model})`,
+      category: "Execution",
+      available: true,
+      execute: () => {
+        store.openForensicDrawer("settings");
+        store.update((s) => ({ ...s, activeSettingsTab: "providers" }));
+      },
     },
     {
       id: "cancel-run",
@@ -151,10 +162,23 @@ export function renderCommandPalette(store: DesktopStore): HTMLElement | null {
       subtitle: "Deep event and trace inspection",
       category: "Navigation",
       available: true,
-      execute: () => {
-        const link = formatDeepLink({ kind: "run", runId: state.runId || "latest" });
-        alert(`Deep link to Lab: ${link}`);
-      },
+      execute: () => store.openInLab(),
+    },
+    {
+      id: "copy-cli",
+      title: "Copy CLI Command",
+      subtitle: "Copy `vg run inspect` for current run",
+      category: "Navigation",
+      available: Boolean(state.runId),
+      execute: () => store.copyCliCommand(),
+    },
+    {
+      id: "attach-tui",
+      title: "Attach in TUI",
+      subtitle: "Copy `vg run --attach` command",
+      category: "Navigation",
+      available: Boolean(state.runId),
+      execute: () => store.attachInTui(),
     },
     {
       id: "reconnect-runtime",
@@ -175,7 +199,7 @@ export function renderCommandPalette(store: DesktopStore): HTMLElement | null {
     {
       id: "open-diffs",
       title: "Inspect Diffs",
-      subtitle: "Open patch and diff viewer",
+      subtitle: "Open patch and multi-file diff viewer",
       category: "Navigation",
       available: true,
       execute: () => store.openForensicDrawer("diffs"),
@@ -202,14 +226,13 @@ export function renderCommandPalette(store: DesktopStore): HTMLElement | null {
     for (const cmd of filtered) {
       const item = document.createElement("div");
       item.style.cssText = `
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
         padding: 8px 12px;
         border-radius: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         cursor: pointer;
-        font-size: 13px;
-        color: var(--aether-text-primary, #cdd6f4);
+        transition: background 0.1s ease;
       `;
       item.onmouseenter = () => {
         item.style.background = "var(--aether-surface-raised, #252538)";
@@ -218,24 +241,41 @@ export function renderCommandPalette(store: DesktopStore): HTMLElement | null {
         item.style.background = "transparent";
       };
 
-      const leftCol = document.createElement("div");
-      leftCol.innerHTML = `
-        <div style="font-weight: 600;">${cmd.title}</div>
-        ${cmd.subtitle ? `<div style="font-size: 11px; color: var(--aether-text-muted);">${cmd.subtitle}</div>` : ""}
-      `;
-      item.appendChild(leftCol);
+      const left = document.createElement("div");
+      left.style.cssText = "display: flex; flex-direction: column; gap: 2px;";
+
+      const titleSpan = document.createElement("span");
+      titleSpan.style.cssText = "font-size: 13px; font-weight: 600; color: var(--aether-text-primary, #cdd6f4);";
+      titleSpan.textContent = cmd.title;
+      left.appendChild(titleSpan);
+
+      if (cmd.subtitle) {
+        const subSpan = document.createElement("span");
+        subSpan.style.cssText = "font-size: 11px; color: var(--aether-text-muted, #6c7086);";
+        subSpan.textContent = cmd.subtitle;
+        left.appendChild(subSpan);
+      }
+      item.appendChild(left);
 
       if (cmd.shortcut) {
-        const kbd = document.createElement("span");
-        kbd.style.cssText = "font-size: 11px; color: var(--aether-text-muted); background: var(--aether-surface-raised); padding: 2px 6px; border-radius: 4px;";
-        kbd.textContent = cmd.shortcut;
-        item.appendChild(kbd);
+        const sc = document.createElement("kbd");
+        sc.style.cssText = `
+          background: var(--aether-bg, #11111b);
+          border: 1px solid var(--aether-border, #313244);
+          padding: 2px 6px;
+          border-radius: 4px;
+          font-size: 10px;
+          color: var(--aether-text-muted, #6c7086);
+        `;
+        sc.textContent = cmd.shortcut;
+        item.appendChild(sc);
       }
 
       item.onclick = () => {
-        store.toggleCommandPalette(false);
         cmd.execute();
+        store.toggleCommandPalette(false);
       };
+
       listContainer.appendChild(item);
     }
   }
@@ -243,28 +283,19 @@ export function renderCommandPalette(store: DesktopStore): HTMLElement | null {
   modal.appendChild(listContainer);
   overlay.appendChild(modal);
 
-  // Close overlay on background click or Esc
+  // Close on outside click
   overlay.onclick = (e) => {
     if (e.target === overlay) {
       store.toggleCommandPalette(false);
     }
   };
 
-  input.onkeydown = (e) => {
-    if (e.key === "Escape") {
-      store.toggleCommandPalette(false);
-    } else if (e.key === "Enter" && filtered.length > 0) {
-      store.toggleCommandPalette(false);
-      filtered[0]?.execute();
-    }
-  };
-
+  // Keyboard navigation & search input listener
   input.oninput = () => {
     store.update((s) => ({ ...s, commandPaletteQuery: input.value }));
   };
 
-  // Focus input automatically
-  setTimeout(() => input.focus(), 10);
+  setTimeout(() => input.focus(), 0);
 
   return overlay;
 }

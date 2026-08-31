@@ -2,7 +2,7 @@
 
 import unittest
 
-from vanguard.packages.agency.episode.admission_gate import AdmissionGate
+from vanguard.packages.agency.episode.admission_gate import AdmissionGate, VerificationReceipt
 from vanguard.packages.agency.episode.protocol_recovery import ProtocolRecoveryPolicy, RecoveryState
 
 
@@ -29,7 +29,14 @@ class TestProtocolRecoveryAndAdmissionGate(unittest.TestCase):
         self.assertEqual(verdict.reason, "MISSING_SOURCE_PATCH")
 
         # Proposal with changed files
-        verdict_ok = gate.evaluate("vg-code-v090-react-control", changed_files=("lru/entry.py",), proposal={"text": "done"})
+        verdict_ok = gate.evaluate(
+            "vg-code-v090-react-control",
+            changed_files=("lru/entry.py",),
+            inspected_files=("lru/entry.py",),
+            proposal={"text": "done"},
+            verification=VerificationReceipt(0, 1, "sha256:workspace"),
+            current_workspace_digest="sha256:workspace",
+        )
         self.assertTrue(verdict_ok.admissible)
 
     def test_admission_gate_read_only_preset(self) -> None:

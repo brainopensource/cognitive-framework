@@ -1,5 +1,5 @@
 import React from "react";
-import { computeMcNemarTest } from "@vanguard/client-core";
+import { computeMcNemarTest } from "@vanguard/client-core/application/mcnemar.js";
 
 export const MetricDelta: React.FC<{
   baselineRunId?: string;

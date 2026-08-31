@@ -1,0 +1,256 @@
+{
+  "challenge": "sota_hard_atomic_quota",
+  "tier": "easy",
+  "title": "Atomic Multi-Shard Quota Reservation",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "manifest": "vg-chimera-v1",
+  "status": "PASS",
+  "llm_calls": 9,
+  "turns": 9,
+  "terminal_state": "completed",
+  "cost_usd": 0.002056,
+  "latency_s": 31.09,
+  "files_modified": [
+    "quota/coordinator.py",
+    "quota/store.py"
+  ],
+  "oracle_output": "",
+  "error": "",
+  "terminal_detail": "Fixed quota reservation: made Coordinator atomic with rollback on partial failure, idempotent by request ID, and added capacity checks in ShardStore to prevent negative capacity.",
+  "run_fields": {},
+  "cassette": "benchmarks/artifacts/ladder/chimera_hard_quota__sota_hard_atomic_quota__deepseek_deepseek-v4-flash-0731.cassette.json",
+  "trajectory": [
+    {
+      "turn": 0,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "quota/model.py"
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 3312,
+        "completion_tokens": 179,
+        "cached_tokens": 0,
+        "total_tokens": 3491,
+        "cost_usd": 0.000513,
+        "usd_micros": 513,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000513,
+      "prior_tool_result": null,
+      "recovery_feedback": null
+    },
+    {
+      "turn": 1,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "quota/store.py"
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 3489,
+        "completion_tokens": 147,
+        "cached_tokens": 0,
+        "total_tokens": 3636,
+        "cost_usd": 0.000529,
+        "usd_micros": 529,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000529,
+      "prior_tool_result": "tool result turn=0 digest=sha256:d31509b0b5c296b9c993561411afbe70432ac28099adae4760f50d64212acfef\nfrom dataclasses import dataclass\n@dataclass(frozen=True)\nclass Request:\n request_id:str\n amounts:dict[str,int]\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 2,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "quota/coordinator.py"
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 3687,
+        "completion_tokens": 48,
+        "cached_tokens": 3072,
+        "total_tokens": 3735,
+        "cost_usd": 0.000142,
+        "usd_micros": 142,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000142,
+      "prior_tool_result": "tool result turn=1 digest=sha256:b0720b97624ca43979206862145af7de900f9aef95785f62d8b6d81e3f9d7791\nclass ShardStore:\n def __init__(self,capacities): self.capacities=dict(capacities); self.fail_on=set()\n def take(self,shard,amount):\n  if shard in self.fail_on: raise RuntimeError('injected failure')\n  self.capacities[shard]-=amount\n def give_back(self,shard,amount): self.capacities[shard]+=amount\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 3,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "quota/api.py"
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 3857,
+        "completion_tokens": 46,
+        "cached_tokens": 3584,
+        "total_tokens": 3903,
+        "cost_usd": 0.000101,
+        "usd_micros": 101,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000101,
+      "prior_tool_result": "tool result turn=2 digest=sha256:62ce3191635e6993516e04feaa741049c3f3ecf85e63c632bdb4fedfd35fccbb\nclass Coordinator:\n def __init__(self,store): self.store=store; self.settled={}\n def reserve(self,request):\n  for shard,amount in request.amounts.items(): self.store.take(shard,amount)\n  self.settled[request.request_id]=True\n  return True\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 4,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "test_quota_public.py"
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 4016,
+        "completion_tokens": 49,
+        "cached_tokens": 3584,
+        "total_tokens": 4065,
+        "cost_usd": 0.000124,
+        "usd_micros": 124,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000124,
+      "prior_tool_result": "tool result turn=3 digest=sha256:5dfa2e76f5f805afd2f6fb2ef4c70d90c932aa8c6a9dec5364d015f7aeb6d63d\nfrom .model import Request\nfrom .coordinator import Coordinator\ndef reserve(store,request_id,amounts): return Coordinator(store).reserve(Request(request_id,amounts))\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 5,
+      "kind": "effect",
+      "action": "patch.apply",
+      "args": {
+        "path": "quota/store.py",
+        "content": "class ShardStore:\n def __init__(self,capacities): self.capacities=dict(capacities); self.fail_on=set()\n def take(self,shard,amount):\n  if shard in self.fail_on: raise RuntimeError('injected failure')\n  if self.capacities.get(shard,0) < amount: raise ValueError('insufficient capacity')\n  self.capacities[shard]-=amount\n def give_back(self,shard,amount): self.capacities[shard]+=amount"
+      },
+      "note": "",
+      "text": "Now I understand the requirements. Let me implement the fixes:\n\n1. **Atomic across shards**: Take all shards, and if any fails, roll back the ones already taken.\n2. **Rollback on partial failure**: Track taken shards and give them back on failure.\n3. **Idempotent by request ID**: If request already settled, return True without re-taking.\n4. **Never expose negative capacity**: Check capacity before taking; raise ValueError if insufficient.\n\nLet me update the coordinator and store.",
+      "usage": {
+        "prompt_tokens": 4354,
+        "completion_tokens": 278,
+        "cached_tokens": 3840,
+        "total_tokens": 4632,
+        "cost_usd": 0.000203,
+        "usd_micros": 203,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000203,
+      "prior_tool_result": "tool result turn=4 digest=sha256:46be1314ff4ee693ce45785ff318200ac66717a0fdec4372484f429a58e0f54c\nimport unittest\nfrom quota.model import Request\nfrom quota.coordinator import Coordinator\nfrom quota.store import ShardStore\nclass Public(unittest.TestCase):\n def test_atomic_rollback_and_idempotency(self):\n  s=ShardStore({'a':5,'b':5}); c=Coordinator(s); s.fail_on.add('b')\n  with self.assertRaises(RuntimeError): c.reserve(Request('r1',{'a':3,'b':2}))\n  self.assertEqual(s.capacities,{'a':5,'b':5}); s.fail_on.clear()\n  self.assertTrue(c.reserve(Request('r1',{'a':3,'b':2})))\n  self.assertTrue(c.reserve(Request('r1',{'a':3,'b':2})))\n  self.assertEqual(s.capacities,{'a':2,'b':3})\n def test_insufficient_capacity(self):\n  s=ShardStore({'a':1}); c=Coordinator(s)\n  with self.assertRaises(ValueError): c.reserve(Request('x',{'a':2}))\n  self.assertEqual(s.capacities['a'],1)\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 6,
+      "kind": "effect",
+      "action": "patch.apply",
+      "args": {
+        "content": "class Coordinator:\n def __init__(self,store): self.store=store; self.settled={}\n def reserve(self,request):\n  if request.request_id in self.settled: return True\n  taken=[]\n  try:\n   for shard,amount in request.amounts.items():\n    self.store.take(shard,amount); taken.append((shard,amount))\n  except Exception:\n   for shard,amount in reversed(taken): self.store.give_back(shard,amount)\n   raise\n  self.settled[request.request_id]=True\n  return True",
+        "path": "quota/coordinator.py"
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 4638,
+        "completion_tokens": 185,
+        "cached_tokens": 3840,
+        "total_tokens": 4823,
+        "cost_usd": 0.000217,
+        "usd_micros": 217,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000217,
+      "prior_tool_result": "tool result turn=4 digest=sha256:46be1314ff4ee693ce45785ff318200ac66717a0fdec4372484f429a58e0f54c\nimport unittest\nfrom quota.model import Request\nfrom quota.coordinator import Coordinator\nfrom quota.store import ShardStore\nclass Public(unittest.TestCase):\n def test_atomic_rollback_and_idempotency(self):\n  s=ShardStore({'a':5,'b':5}); c=Coordinator(s); s.fail_on.add('b')\n  with self.assertRaises(RuntimeError): c.reserve(Request('r1',{'a':3,'b':2}))\n  self.assertEqual(s.capacities,{'a':5,'b':5}); s.fail_on.clear()\n  self.assertTrue(c.reserve(Request('r1',{'a':3,'b':2})))\n  self.assertTrue(c.reserve(Request('r1',{'a':3,'b':2})))\n  self.assertEqual(s.capacities,{'a':2,'b':3})\n def test_insufficient_capacity(self):\n  s=ShardStore({'a':1}); c=Coordinator(s)\n  with self.assertRaises(ValueError): c.reserve(Request('x',{'a':2}))\n  self.assertEqual(s.capacities['a'],1)\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 7,
+      "kind": "effect",
+      "action": "proc.exec",
+      "args": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "."
+        ]
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 4872,
+        "completion_tokens": 62,
+        "cached_tokens": 4608,
+        "total_tokens": 4934,
+        "cost_usd": 0.000118,
+        "usd_micros": 118,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000118,
+      "prior_tool_result": "tool result turn=4 digest=sha256:46be1314ff4ee693ce45785ff318200ac66717a0fdec4372484f429a58e0f54c\nimport unittest\nfrom quota.model import Request\nfrom quota.coordinator import Coordinator\nfrom quota.store import ShardStore\nclass Public(unittest.TestCase):\n def test_atomic_rollback_and_idempotency(self):\n  s=ShardStore({'a':5,'b':5}); c=Coordinator(s); s.fail_on.add('b')\n  with self.assertRaises(RuntimeError): c.reserve(Request('r1',{'a':3,'b':2}))\n  self.assertEqual(s.capacities,{'a':5,'b':5}); s.fail_on.clear()\n  self.assertTrue(c.reserve(Request('r1',{'a':3,'b':2})))\n  self.assertTrue(c.reserve(Request('r1',{'a':3,'b':2})))\n  self.assertEqual(s.capacities,{'a':2,'b':3})\n def test_insufficient_capacity(self):\n  s=ShardStore({'a':1}); c=Coordinator(s)\n  with self.assertRaises(ValueError): c.reserve(Request('x',{'a':2}))\n  self.assertEqual(s.capacities['a'],1)\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 8,
+      "kind": "finish",
+      "action": null,
+      "args": null,
+      "note": "Fixed quota reservation: made Coordinator atomic with rollback on partial failure, idempotent by request ID, and added capacity checks in ShardStore to prevent negative capacity.",
+      "text": "All tests pass.\n\n",
+      "usage": {
+        "prompt_tokens": 5001,
+        "completion_tokens": 80,
+        "cached_tokens": 4864,
+        "total_tokens": 5081,
+        "cost_usd": 0.000109,
+        "usd_micros": 109,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000109,
+      "prior_tool_result": "tool result turn=4 digest=sha256:46be1314ff4ee693ce45785ff318200ac66717a0fdec4372484f429a58e0f54c\nimport unittest\nfrom quota.model import Request\nfrom quota.coordinator import Coordinator\nfrom quota.store import ShardStore\nclass Public(unittest.TestCase):\n def test_atomic_rollback_and_idempotency(self):\n  s=ShardStore({'a':5,'b':5}); c=Coordinator(s); s.fail_on.add('b')\n  with self.assertRaises(RuntimeError): c.reserve(Request('r1',{'a':3,'b':2}))\n  self.assertEqual(s.capacities,{'a':5,'b':5}); s.fail_on.clear()\n  self.assertTrue(c.reserve(Request('r1',{'a':3,'b':2})))\n  self.assertTrue(c.reserve(Request('r1',{'a':3,'b':2})))\n  self.assertEqual(s.capacities,{'a':2,'b':3})\n def test_insufficient_capacity(self):\n  s=ShardStore({'a':1}); c=Coordinator(s)\n  with self.assertRaises(ValueError): c.reserve(Request('x',{'a':2}))\n  self.assertEqual(s.capacities['a'],1)\n",
+      "recovery_feedback": null
+    }
+  ]
+}

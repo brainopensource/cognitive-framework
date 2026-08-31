@@ -111,6 +111,8 @@ class TaskContext:
     scope_override: Any = None
     #: Authority-free references admitted by a mediated topology edge.
     artifact_refs: tuple[Mapping[str, str], ...] = ()
+    #: Reconstructed semantic state supplied only on cold continuation.
+    resume_state: Mapping[str, Any] | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -425,6 +427,7 @@ class Runtime:
         than from a dialect's role vocabulary, so identical bytes carry an
         identical artifact digest whichever dialect named them.
         """
+        directory = directory.resolve()
         root = directory.parent
         wanted: list[tuple[str, str]] = []
         for component in canonical.components:

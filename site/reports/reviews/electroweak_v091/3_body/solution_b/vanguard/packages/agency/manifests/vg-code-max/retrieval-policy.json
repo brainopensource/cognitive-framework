@@ -1,0 +1,1 @@
+{"strategy":"progressive-hierarchical","providers":["native","git","ast","lda"],"lda":{"required":false,"timeoutMs":3000},"cache":{"enabled":true,"keyOn":["repoIdentity","head","providerVersion","query"]},"initialBudgetTokens":120000,"maxAdmitPerTurn":12}

@@ -40,11 +40,11 @@ confidence: high
 # Hexagonal Ports & SPI Reference
 
 ## Purpose
-This document is the canonical reference owner for all hexagonal port protocols (`vanguard.packages.ports`), the five frozen Service Provider Interfaces (SPIs), and their concrete adapter mappings and test doubles.
+This document is the canonical reference owner for all hexagonal port protocols (`vanguard.packages.ports`), the frozen Service Provider Interfaces (SPIs), and their concrete adapter mappings and test doubles.
 
 ## Scope
 - Port protocol signatures in `vanguard/packages/ports/`.
-- The five SPI protocols defined in `vanguard/packages/ports/spi.py` (`IPlanner`, `IContextManager`, `IToolkit`, `IMemoryEngine`, `IEvaluationGate`).
+- The six SPI protocols defined in `vanguard/packages/ports/spi.py` (`IPlanner`, `IContextManager`, `IToolkit`, `IMemoryEngine`, `IEvaluationGate`, `ICompletionPolicy`).
 - Mapping of ports to concrete production adapters (`vanguard/packages/adapters/`) and test fakes.
 - Standard port exception and failure hierarchies.
 
@@ -54,12 +54,13 @@ This document is the canonical reference owner for all hexagonal port protocols 
 
 ## AS_BUILT Status
 - `IMPLEMENTED` — Pure Python protocols enforce strict dependency inversion (`domain <- ports <- kernel <- agency <- runtime -> adapters`).
+- `IMPLEMENTED` — `IndexPort` exposes bounded, value-only file, symbol, dependency, test-association, and repository-map observations. It does not select policy or dispatch effects.
 
 ---
 
-## 1. The Five Frozen SPI Protocols (`ports/spi.py`)
+## 1. The Frozen SPI Protocols (`ports/spi.py`)
 
-The five SPI protocols represent the client interfaces of the agent substrate:
+The SPI protocols represent the client interfaces of the agent substrate:
 
 ```python
 from vanguard.packages.ports.spi import (
@@ -68,6 +69,7 @@ from vanguard.packages.ports.spi import (
     IToolkit,
     IMemoryEngine,
     IEvaluationGate,
+    ICompletionPolicy,
 )
 ```
 
@@ -78,6 +80,7 @@ from vanguard.packages.ports.spi import (
 | `IToolkit` | `verbs()`<br>`execute(request, ctx)`<br>`compensate(receipt)`<br>`health()` | `EffectRequest`, `EffectContext`<br>$	o$ `Result[Receipt]`, `Health` | Physical effect execution (leased work only, never grants). |
 | `IMemoryEngine` | `query(q)`<br>`store(record)`<br>`consolidate(hits)`<br>`prune(criteria)` | `MemoryQuery`, `MemoryRecord`<br>$	o$ `Result[Sequence[MemoryHit]]` | Episodic and semantic retrieval with scoped authorization. |
 | `IEvaluationGate` | `evaluate(req)`<br>`rubrics()` | `EvaluationSubject`<br>$	o$ `Result[SignedVerdict]` | Exterior evaluation verdict provider. |
+| `ICompletionPolicy` | `evaluate(**observations)` | Runtime completion observations<br>$	o$ admission verdict | Pack-composed terminal admission policy for repository closure and greenfield evidence. |
 
 ---
 
@@ -96,7 +99,7 @@ Hexagonal ports define the interfaces required by the runtime and kernel:
 | `EnvironmentPort` (`environment.py`) | `get(key) -> str`<br>`cwd() -> Path`<br>`qualify(tool) -> bool` | Host environment inspection and path resolution. |
 | `ClockPort` (`determinism.py`) | `now() -> datetime` | Pluggable time source for deterministic replay. |
 | `RandomPort` (`determinism.py`) | `token() -> str`, `randint(a, b) -> int` | Pluggable entropy source for deterministic replay. |
-| `IndexPort` (`index.py`) | `search(query) -> list[Hit]`, `index(doc) -> None` | Inverted index / search interface. |
+| `IndexPort` (`index.py`) | `index(root)`, `files(prefix)`, `symbols(name, path)`, `dependencies(path)`, `tests(path)`, `repo_map(token_budget)` | Workspace-relative, deterministic repository observations with typed failures and provenance-bearing summaries. |
 | `MemoryPort` (`memory.py`) | `search(q) -> list[MemoryHit]`, `put(r) -> None` | Memory retrieval port interface. |
 | `ChildTurnPort` (`child_turn.py`) | `spawn(child_spec) -> ChildResult` | Mediated child agent execution delegation. |
 
@@ -124,6 +127,28 @@ Adapters live in `vanguard/packages/adapters/` and must never import `kernel` or
 SPI methods return the `Result[T]` Algebraic Data Type (`vanguard.packages.domain.wire.result`):
 - `Ok(value)`: Successful operation wrapping output value.
 - `Err(error)`: Explicit typed error (`EffectFailure`, `MemoryError`, `EvaluationError`) avoiding untyped runtime exceptions.
+
+---
+
+## 5. Repository-Intelligence Binding
+
+The existing `IndexPort` is the narrow repository-intelligence boundary; no LDA-specific substrate port is added. `FileRepoIndex` and `InMemoryRepoIndex` return value-only observations. The file adapter bounds files, symbols, dependency edges, and test associations, rejects traversal and symlink escape, and reports a deterministic source revision.
+
+The code-pack `IContextManager` may query `IndexPort` or a provider adapter and compile the results into a bounded, value-only context packet. The planned logical fields are:
+
+```text
+task_digest                 repository_snapshot_digest
+provider_id                 provider_version
+query_digest                selected_documents[]
+selected_symbols[]          selected_files[]
+related_tests[]             dependency_edges[]
+estimated_tokens            omissions[]
+packet_digest
+```
+
+`omissions` makes truncation, unavailable sources, and failed provider lookups explicit. Hits are advisory references with provenance and confidence; consumers resolve and verify target files before use. An index health claim is usable only when its schema is valid, its source snapshot matches, required entity counts are non-zero, referenced paths resolve, and freshness checks pass. Otherwise composition degrades to a deterministic filesystem/source search implementation.
+
+The provider boundary is intentionally narrow: it retrieves observations but cannot dispatch effects, mutate task state, grant capabilities, or become an authority source. Empty observations are successful values; an unbuilt, unavailable, stale, or invalid source is a typed failure for deterministic fallback.
 
 ---
 

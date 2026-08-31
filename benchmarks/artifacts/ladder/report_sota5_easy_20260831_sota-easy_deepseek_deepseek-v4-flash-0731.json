@@ -1,0 +1,37 @@
+{
+  "tier": "sota-easy",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "manifest": "vg-code-max-v3",
+  "max_turns": 12,
+  "total": 1,
+  "passed": 1,
+  "pass_rate": "1/1",
+  "spend_usd": 0.002353,
+  "llm_calls": 10,
+  "budget_usd": 0.02,
+  "max_calls": 12,
+  "rows": [
+    {
+      "challenge": "sota_easy_config_precedence",
+      "tier": "sota-easy",
+      "title": "Typed Configuration Precedence",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "manifest": "vg-code-max-v3",
+      "status": "PASS",
+      "llm_calls": 10,
+      "turns": 10,
+      "terminal_state": "abandoned",
+      "cost_usd": 0.002353,
+      "latency_s": 99.95,
+      "files_modified": [
+        "config/coerce.py",
+        "config/loader.py"
+      ],
+      "oracle_output": "",
+      "error": "",
+      "terminal_detail": "no progress over 3 turns",
+      "run_fields": {},
+      "cassette": "benchmarks/artifacts/ladder/sota5_easy_20260831__sota_easy_config_precedence__deepseek_deepseek-v4-flash-0731.cassette.json"
+    }
+  ]
+}

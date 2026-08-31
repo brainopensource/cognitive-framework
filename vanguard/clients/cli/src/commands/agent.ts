@@ -137,6 +137,52 @@ export async function handleAgent(args: string[], options: ParsedCli): Promise<n
     }
   }
 
-  logDiagnostic(`Unknown agent subcommand '${subcommand}' (supported: list, inspect, validate)`);
+  if (subcommand === "default") {
+    const { NodeFsPersistenceAdapter } = await import("@aether/client");
+    const { DEFAULT_FRONTEND_SETTINGS } = await import("@aether/projections");
+    const persistence = new NodeFsPersistenceAdapter();
+    const settings = (await persistence.loadSettings()) ?? DEFAULT_FRONTEND_SETTINGS;
+    const targetId = args[1];
+
+    if (!targetId) {
+      const def = settings.general?.defaultAgent ?? "coding-agent";
+      if (options.json) {
+        writeJsonOutcome({
+          api: "aether.cli-outcome/1",
+          command: "agent default",
+          status: "success",
+          data: { defaultAgentId: def },
+        });
+      } else {
+        console.log(`Default agent: ${def}`);
+      }
+      return CLI_EXIT_CODES.SUCCESS;
+    }
+
+    const updated = {
+      ...DEFAULT_FRONTEND_SETTINGS,
+      ...settings,
+      general: {
+        ...DEFAULT_FRONTEND_SETTINGS.general,
+        ...(settings.general ?? {}),
+        defaultAgent: targetId,
+      },
+    };
+    await persistence.saveSettings(updated);
+
+    if (options.json) {
+      writeJsonOutcome({
+        api: "aether.cli-outcome/1",
+        command: "agent default",
+        status: "success",
+        data: { defaultAgentId: targetId },
+      });
+    } else {
+      console.log(`Default agent set to '${targetId}'.`);
+    }
+    return CLI_EXIT_CODES.SUCCESS;
+  }
+
+  logDiagnostic(`Unknown agent subcommand '${subcommand}' (supported: list, inspect, validate, default)`);
   return CLI_EXIT_CODES.INVALID_INPUT;
 }

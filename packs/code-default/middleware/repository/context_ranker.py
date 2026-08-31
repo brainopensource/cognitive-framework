@@ -56,7 +56,7 @@ def rank_repository_context(
         # 3. Symbol match (simple name match)
         symbol_score = 0.0
         for t in query_set:
-            if f"def {t}" in content or f"class {t}" in content:
+            if f"def {t}" in content_lower or f"class {t}" in content_lower:
                 symbol_score = min(1.0, symbol_score + 0.5)
                 matched_symbols.append(t)
         if symbol_score > 0:

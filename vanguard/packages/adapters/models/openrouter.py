@@ -284,7 +284,13 @@ def _redact(text: str, secret: str | None, ref: str) -> str:
 
 
 def _messages(context: ContextBundle) -> list[dict[str, Any]]:
-    if isinstance(context, Mapping) and "messages" in context and isinstance(context["messages"], list):
+    # `list` alone is wrong here: `PromptAssembler` publishes this key as a
+    # *tuple* (immutable bundle), so an exact `list` check silently missed the
+    # assembled conversation and fell through to the lossy block rendering
+    # below -- dropping tool-call structure and the protocol-recovery nudge on
+    # every single live turn. Accept any non-str sequence.
+    if isinstance(context, Mapping) and isinstance(
+            context.get("messages"), (list, tuple)):
         return [dict(item) for item in context["messages"]]
 
     messages: list[dict[str, Any]] = []
@@ -306,7 +312,19 @@ def _messages(context: ContextBundle) -> list[dict[str, Any]]:
         content_str = str(content or "")
         role = getattr(block, "role", None) or (block.get("role") if isinstance(block, Mapping) else None)
 
-        if layer == "L1" or label == "system-core":
+        # `VG-03 §10.1` (`agency/context/layers.py:ROLE_FOR_LAYER`) declares
+        # L1 (system), L2 (tool schemas), and L3 (environment/conventions) all
+        # route to role="system" -- this used to only implement L1, silently
+        # demoting the tool-schema and harness/AGENTS.md blocks (L2, L3) into
+        # role="user" instead. A live qualification traced a model repeatedly
+        # emitting a malformed tool call (`fs.read({"path": "."})`) back to
+        # this exact prompt shape: the tool contract and workspace
+        # instructions arrived as anonymous user turns ahead of the real
+        # task, rather than as the system framing the model was designed to
+        # weight differently. Honoring the block's own declared role (already
+        # correct in the compiled bundle) rather than re-deriving it from the
+        # layer tag is the fix, and it stays correct if a layer is ever added.
+        if role == "system" or layer == "L1" or label == "system-core":
             if not any(m.get("role") == "system" for m in messages):
                 messages.append({"role": "system", "content": content_str})
             else:
@@ -362,6 +380,11 @@ def _tools_payload(tools: ToolSchemas) -> list[dict[str, Any]]:
                 "type": "function",
                 "function": {
                     "name": tool.get("name", ""),
+                    # The manifest's description is the tool contract the
+                    # model's function-calling head actually reads. Dropping it
+                    # made every carefully-worded manifest description
+                    # decorative on the wire.
+                    "description": tool.get("description", ""),
                     "parameters": tool.get("schema") or {"type": "object"},
                 },
             }
@@ -741,6 +764,21 @@ class OpenRouterModel:
             value = self._environ.get(self.api_key_ref)
         else:
             value = os.environ.get(self.api_key_ref)
+        if not value:
+            from pathlib import Path
+            root = Path(__file__).resolve().parents[4]
+            env_p = root / ".env"
+            if env_p.is_file():
+                try:
+                    for line in env_p.read_text(encoding="utf-8").splitlines():
+                        line = line.strip()
+                        if line and not line.startswith("#") and "=" in line:
+                            k, v = line.split("=", 1)
+                            if k.strip() == self.api_key_ref:
+                                value = v.strip().strip("'\"")
+                                break
+                except Exception:
+                    pass
         return value if value else None
 
     def _execute_transport(
@@ -966,7 +1004,25 @@ class OpenRouterModel:
         body_obj: dict[str, Any] = {
             "model": target_model,
             "messages": _messages(context),
-            "temperature": sampling.get("temperature", 0.0),
+            # 0.0 (fully greedy) reliably drove small/fast models into an
+            # exact-repetition trap once two or three near-identical
+            # (tool_call, tool_result) pairs sat in context: every subsequent
+            # turn deterministically reproduced the same failing call, even
+            # with the corrective tool result already in view. A low but
+            # non-zero default breaks that attractor while staying close to
+            # deterministic; callers that need exact reproducibility (a
+            # cassette recording pass, a frozen canary) still get it by
+            # passing sampling={"temperature": 0.0} explicitly.
+            "temperature": sampling.get("temperature", 0.2),
+            # Temperature alone did not reliably break the exact-repetition
+            # trap above -- some turns still reissued the identical failing
+            # tool call even with a corrective result already in context. A
+            # frequency penalty is the more targeted lever: it discounts
+            # tokens by how often they already occurred in this context, so
+            # it specifically discourages regenerating the same JSON tool
+            # call rather than perturbing everything uniformly. Overridable
+            # the same way for reproducibility-sensitive callers.
+            "frequency_penalty": sampling.get("frequencyPenalty", 0.4),
             # Reasoning-capable routes can spend the first tokens on hidden
             # deliberation.  The old 256-token default routinely exhausted
             # before a tool call, producing an empty proposal and burning a
@@ -1111,9 +1167,6 @@ class OpenRouterModel:
         proposal["pricing_source"] = route.pricing_source
         proposal["resolved_model"] = route.resolved_model
 
-        if self._recorder is not None:
-            self._recorder.record_interaction(context, tools, sampling, proposal)
-
         # In streaming/live mode, if a provider emits multiple parallel tool calls,
         # normalize to the primary atomic action to satisfy the single-action protocol.
         if proposal and isinstance(proposal.get("toolCalls"), list) and len(proposal["toolCalls"]) > 1:
@@ -1135,6 +1188,10 @@ class OpenRouterModel:
         if isinstance(proposal.get("model_fingerprint"), str):
             canonical["model_fingerprint"] = proposal["model_fingerprint"]
         canonical["text"] = proposal.get("text", "")
+
+        if self._recorder is not None:
+            self._recorder.record_interaction(context, tools, sampling, canonical)
+
         return Result.success(canonical)
 
 

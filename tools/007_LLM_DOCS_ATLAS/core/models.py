@@ -1,6 +1,8 @@
+"""Domain models for LDA with backwards compatibility and IR integration."""
 from __future__ import annotations
 from dataclasses import asdict, dataclass, field
-from typing import Any, Mapping
+from typing import Any, Mapping, Optional
+from .ir import ConfidenceTier, EntityKind, RelationKind, RepresentationKind, to_dict
 
 @dataclass(frozen=True)
 class Entity:
@@ -51,6 +53,9 @@ class Candidate:
     tokens: int
     reason: str
     authority: str | None = None
+    representation: str = "FULL"
+    content: Optional[str] = None
+    provenance_ref: Optional[str] = None
 
 @dataclass
 class ContextPacket:
@@ -63,10 +68,10 @@ class ContextPacket:
     tests: list[Candidate] = field(default_factory=list)
     authority: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
+    callers: list[dict[str, Any]] = field(default_factory=list)
+    invariants: list[str] = field(default_factory=list)
+    provenance: dict[str, Any] = field(default_factory=dict)
+    token_accounting: dict[str, int] = field(default_factory=dict)
 
 def serialise(value: Any) -> Any:
-    if hasattr(value, "__dataclass_fields__"):
-        return {k: serialise(v) for k, v in asdict(value).items()}
-    if isinstance(value, list): return [serialise(v) for v in value]
-    if isinstance(value, dict): return {k: serialise(v) for k, v in value.items()}
-    return value
+    return to_dict(value)

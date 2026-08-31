@@ -160,6 +160,14 @@ def main() -> int:
             print(f"SECRET SCAN FAIL: {hit}")
         return 1
     print("SECRET SCAN PASS: no blocking secret patterns in scanned surfaces")
+    # Environment hygiene (values are never printed).  A provider credential
+    # present in the shell does not violate the repository, but it breaks the
+    # hermetic trust-spine falsifiers and risks leaking into logs and traces.
+    if os.environ.get("OPENROUTER_API_KEY"):
+        print(
+            "SECRET SCAN WARN: OPENROUTER_API_KEY is set in this environment; "
+            "hermetic gates require it unset (use `env -u OPENROUTER_API_KEY`)"
+        )
     return 0
 
 

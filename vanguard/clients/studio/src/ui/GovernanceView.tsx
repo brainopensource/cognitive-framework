@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import type { StudioFold } from "../store/fold.js";
-import { WebCryptoSigner } from "@vanguard/client-core";
+import { WebCryptoSigner } from "@vanguard/client-core/adapters/web-signer.js";
 
 type AuditEntry = {
   seq: string;

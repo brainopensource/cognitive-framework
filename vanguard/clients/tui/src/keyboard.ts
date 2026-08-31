@@ -90,17 +90,12 @@ export class KeyboardManager {
       return;
     }
 
-    // Submit prompt
+    // Submit prompt or execute slash command
     if (key.name === "return" && !key.shift && !key.meta) {
       if (state.composerText.startsWith("/")) {
-        const query = state.composerText.slice(1);
-        this.store.update((s) => ({
-          ...s,
-          activeModal: "command-palette",
-          activeCommandQuery: query,
-          composerText: "",
-          composerCursor: 0,
-        }));
+        const fullCmd = state.composerText;
+        this.store.setComposerText("", 0);
+        this.store.executeSlashCommand(fullCmd, this.client);
         return;
       }
       this.store.submitComposer(this.client);
@@ -317,6 +312,39 @@ export class KeyboardManager {
           activeCommandQuery: s.activeCommandQuery + key.name,
         }));
       }
+    } else if (state.activeModal === "select-agent") {
+      const agents = state.availableAgents;
+      if (key.name === "up") {
+        this.selectModalIndex = Math.max(0, this.selectModalIndex - 1);
+      } else if (key.name === "down") {
+        this.selectModalIndex = Math.min(agents.length - 1, this.selectModalIndex + 1);
+      } else if (key.name === "return") {
+        const picked = agents[this.selectModalIndex];
+        if (picked) this.store.selectAgent(picked.id);
+        this.store.update((s) => ({ ...s, activeModal: "none", focus: "composer" }));
+      }
+    } else if (state.activeModal === "select-workflow") {
+      const workflows = state.availableWorkflows;
+      if (key.name === "up") {
+        this.selectModalIndex = Math.max(0, this.selectModalIndex - 1);
+      } else if (key.name === "down") {
+        this.selectModalIndex = Math.min(workflows.length - 1, this.selectModalIndex + 1);
+      } else if (key.name === "return") {
+        const picked = workflows[this.selectModalIndex];
+        if (picked) this.store.selectWorkflow(picked.id);
+        this.store.update((s) => ({ ...s, activeModal: "none", focus: "composer" }));
+      }
+    } else if (state.activeModal === "history") {
+      const convs = this.store.controller.getState().conversations;
+      if (key.name === "up") {
+        this.selectModalIndex = Math.max(0, this.selectModalIndex - 1);
+      } else if (key.name === "down") {
+        this.selectModalIndex = Math.min(Math.max(0, convs.length - 1), this.selectModalIndex + 1);
+      } else if (key.name === "return") {
+        const picked = convs[this.selectModalIndex];
+        if (picked) this.store.controller.selectConversation(picked.id);
+        this.store.update((s) => ({ ...s, activeModal: "none", focus: "composer" }));
+      }
     }
   }
 
@@ -324,6 +352,7 @@ export class KeyboardManager {
     const commands = [
       { id: "agent", action: () => this.store.update((s) => ({ ...s, activeModal: "select-agent" })) },
       { id: "workflow", action: () => this.store.update((s) => ({ ...s, activeModal: "select-workflow" })) },
+      { id: "history", action: () => this.store.update((s) => ({ ...s, activeModal: "history" })) },
       { id: "cancel", action: () => this.client && this.client.requestCancel(this.store.get().runId) },
       { id: "help", action: () => this.store.update((s) => ({ ...s, activeModal: "help" })) },
       { id: "quit", action: () => this.onExit && this.onExit() },

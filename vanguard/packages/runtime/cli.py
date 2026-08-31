@@ -167,6 +167,43 @@ def cmd_run(args: argparse.Namespace) -> int:
     return EXIT_OK if res.outcome in ("completed", "success", "succeeded") else EXIT_TASK_FAILED
 
 
+def _result_payload(value: Any) -> Any:
+    """Serialize shared result objects uniformly (``to_dict`` or plain value)."""
+    to_dict = getattr(value, "to_dict", None)
+    return to_dict() if callable(to_dict) else value
+
+
+def cmd_code(args: argparse.Namespace) -> int:
+    """Coding Max facade; all operations delegate to ApplicationService."""
+    workspace = find_workspace_root(Path(args.workspace).resolve())
+    app = ApplicationService(workspace=workspace)
+    state_dir = getattr(args, "state_dir", None)
+    try:
+        if args.code_command == "run":
+            manifest = Path(__file__).resolve().parents[1] / "agency" / "manifests" / f"vg-code-{args.preset}" / "manifest.json"
+            result = app.run(brief=args.task, manifest_path=manifest, profile_id=args.profile,
+                             run_id=args.run_id, model_port=args.model_port,
+                             planner_model=args.model, state_dir=state_dir,
+                             interactive=not args.non_interactive, max_turns=args.max_turns)
+            print(json.dumps(result.to_dict(), indent=2))
+            return EXIT_OK if result.outcome == "completed" else EXIT_TASK_FAILED
+        if args.code_command == "status":
+            print(json.dumps(app.status(args.run_id, state_dir=state_dir).to_dict(), indent=2))
+            return EXIT_OK
+        if args.code_command == "resume":
+            result = app.resume(run_id=args.run_id, profile_id=args.profile, state_dir=state_dir)
+            print(json.dumps(result.to_dict(), indent=2))
+            return EXIT_OK if result.outcome == "completed" else EXIT_TASK_FAILED
+        if args.code_command == "evidence":
+            print(json.dumps(_result_payload(app.evidence(args.run_id, state_dir=state_dir)), indent=2))
+            return EXIT_OK
+        print(json.dumps(_result_payload(app.cost(args.run_id, state_dir=state_dir)), indent=2))
+        return EXIT_OK
+    except (ValueError, FileNotFoundError, OSError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return EXIT_TASK_FAILED
+
+
 def cmd_resume(args: argparse.Namespace) -> int:
     workspace = find_workspace_root(Path(args.workspace).resolve())
     app = ApplicationService(workspace=workspace)
@@ -353,6 +390,30 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--non-interactive", action="store_true", help="disable interactive human review")
     run.add_argument("--traceback", action="store_true")
     run.set_defaults(handler=cmd_run)
+
+    code = sub.add_parser("code", help="Coding Max backend facade")
+    code_sub = code.add_subparsers(dest="code_command", required=True)
+    code_run = code_sub.add_parser("run")
+    code_run.add_argument("task")
+    code_run.add_argument("-w", "--workspace", default=".")
+    code_run.add_argument("--preset", choices=("fast", "balanced", "max"), default="balanced")
+    code_run.add_argument("--profile", default="local")
+    code_run.add_argument("--model", default=None)
+    code_run.add_argument("--model-port", default="fake")
+    code_run.add_argument("--run-id", default=None)
+    code_run.add_argument("--max-turns", type=int, default=20)
+    code_run.add_argument("--non-interactive", action="store_true")
+    code_run.add_argument("--state-dir", default=None,
+                          help="durable state directory (defaults to <workspace>/.vanguard)")
+    code_run.set_defaults(handler=cmd_code)
+    for name in ("status", "resume", "evidence", "cost"):
+        subcmd = code_sub.add_parser(name)
+        subcmd.add_argument("run_id")
+        subcmd.add_argument("-w", "--workspace", default=".")
+        subcmd.add_argument("--profile", default="local")
+        subcmd.add_argument("--state-dir", default=None,
+                            help="durable state directory (defaults to <workspace>/.vanguard)")
+        subcmd.set_defaults(handler=cmd_code)
 
     # resume
     resume = sub.add_parser("resume", help="resume an existing run from durable ledger state")

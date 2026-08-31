@@ -18,6 +18,8 @@ plugins:
     ref: mhf.eval.oracle-gate@^1
     config:
       oracle: coding-oracle@3
+  completion:
+    ref: mhf.completion.code-default@^1
   toolkits:
     - ref: mhf.toolkit.fs@^1
     - ref: mhf.toolkit.ast-patch@^2

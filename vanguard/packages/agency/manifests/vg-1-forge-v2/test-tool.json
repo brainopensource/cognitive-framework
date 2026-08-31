@@ -1,0 +1,25 @@
+{
+  "name": "test",
+  "verb": "proc.exec",
+  "description": "Run unit tests via python3 or pytest to obtain fresh verification evidence (e.g. {\"argv\": [\"python3\", \"-m\", \"unittest\", \"discover\", \"-s\", \".\"]}).",
+  "selector": {
+    "kind": "generic",
+    "uriPattern": "proc://exec/allow/git,pytest,ruff,python3,python,ls,find"
+  },
+  "schema": {
+    "type": "object",
+    "properties": {
+      "argv": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Command arguments array"
+      }
+    },
+    "required": [
+      "argv"
+    ],
+    "additionalProperties": false
+  }
+}

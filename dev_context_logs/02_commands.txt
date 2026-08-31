@@ -1,0 +1,147 @@
+=== JUSTFILE RECIPES ===
+# AETHER Repository Control Surface & Developer Gates
+
+# Default recipe: fast local development check
+default: check
+
+# Fast normal development validation loop
+check:
+	python3 tools/linters/check_boundaries.py
+	python3 tools/linters/check_tcb_budget.py
+	python3 tools/linters/check_domain_blindness.py
+	python3 tools/linters/check_isolation_policy.py
+	python3 tools/linters/check_path_hygiene.py
+	just docs-check
+	@echo "AETHER CHECK: PASS"
+
+# Fast deterministic documentation checks (metadata, uniqueness, links, lint)
+docs-check:
+	python3 tools/linters/check_doc_metadata.py
+	python3 tools/linters/check_markdown_links.py
+	npx markdownlint-cli2 "docs/**/*.md" "README.md" "AGENTS.md" "VISION.md"
+
+# Build documentation site strictly with Material for MkDocs
+docs-build:
+	uv run mkdocs build --strict
+
+# Serve local documentation site with live reloading
+docs-serve:
+	uv run mkdocs serve
+
+# Regenerate permanent machine knowledge base (.generated/knowledge/)
+docs-knowledge:
+	python3 tools/generate_knowledge_base.py
+
+# Full CI documentation gate (check + zero-rebuild knowledge + strict build)
+docs-full: docs-check
+	python3 tools/generate_knowledge_base.py
+	uv run mkdocs build --strict
+
+# Experimental code intelligence diagram generation (.generated/diagrams/)
+docs-diagrams:
+	python3 tools/generate_exploratory_diagrams.py
+
+# Local RAG V0 query interface (CANONICAL agent retrieval surface)
+docs-rag QUERY:
+	python3 tools/docs_rag_v0.py "{{QUERY}}"
+
+# Reverse routing: production code path -> canonical owner docs + symbols
+docs-rag-file FILE:
+	python3 tools/docs_rag_v0.py --file "{{FILE}}"
+
+# Rebuild the LDA SQLite/FTS index (populate .lda/index.db before lda-query/lda-context)
+lda-index:
+	uv run lda index
+
+# LDA thin orchestration wrappers.
+# NOTE: `lda query` / `lda context` are EXPERIMENTAL for agent retrieval until
+# `just lda-doctor` reports index_healthy=true; prefer `just docs-rag` which
+# ranks the canonical .generated/knowledge/ catalog with authority boosting.
+lda:
+	uv run lda serve
+lda-status:
+	uv run lda status
+lda-scan:
+	uv run lda scan
+lda-check:
+	uv run lda check
+lda-query QUERY:
+	uv run lda query "{{QUERY}}"
+lda-context TASK:
+	uv run lda context "{{TASK}}"
+lda-doctor:
+	uv run lda doctor
+
+# Canonical local/CI qualification gate before PR completion or sprint closure
+verify:
+	uv lock --check
+	uv sync --frozen
+	python3 tools/linters/check_boundaries.py
+	python3 tools/linters/check_tcb_budget.py
+	python3 tools/linters/check_domain_blindness.py
+	python3 tools/linters/check_isolation_policy.py
+	python3 tools/linters/check_path_hygiene.py
+	python3 tools/linters/check_event_coverage.py
+	python3 tools/linters/check_execution_truth.py
+	python3 tools/linters/check_falsifier_ids.py
+	python3 tools/linters/scan_secrets.py
+	python3 -m unittest discover -s test/kernel -t .
+	python3 -m unittest discover -s test/agency -t .
+	python3 -m unittest discover -s test/contracts -t .
+	npm run typecheck
+	npm test
+	just docs-full
+	@echo "AETHER VERIFY: PASS"
+
+# Release candidate qualification wrapper
+release-verify SUBJECT ENVELOPE GIT_RECEIPT:
+	python3 tools/release_qualification.py --subject "{{SUBJECT}}" --envelope "{{ENVELOPE}}" --git-receipt "{{GIT_RECEIPT}}"
+	@echo "AETHER RELEASE VERIFY: PASS"
+
+=== MAKEFILE TARGETS ===
+1:.PHONY: clean clean-py clean-benchmark-cache clean-js clean-build clean-test clean-cache clean-wsl clean-all help dev-context
+3:help:
+19:clean-benchmark-cache:
+25:clean-py:
+43:clean-js:
+52:clean-build:
+62:clean-test:
+72:clean-cache:
+83:clean-wsl:
+89:clean: clean-py clean-js clean-build clean-test clean-cache clean-wsl
+95:clean-all: clean
+103:dev-context:
+
+=== NPM SCRIPTS ===
+{
+  "vg": "npm --workspace @vanguard/cli run vg --",
+  "aether-tui": "npm --workspace @aether/tui run tui --",
+  "build": "npm run build:contracts && npm run build:projections && npm run build:client && npm run build:ui-web && npm run build:tui && npm run build:desktop && npm run build:lab && npm run build:client-core && npm run build:cli && npm run build:studio && npm run build:studio-browser",
+  "build:contracts": "npm --workspace @aether/contracts run build",
+  "build:projections": "npm --workspace @aether/projections run build",
+  "build:client": "npm --workspace @aether/client run build",
+  "build:ui-web": "npm --workspace @aether/ui-web run build",
+  "build:tui": "npm --workspace @aether/tui run build",
+  "build:desktop": "npm --workspace @aether/desktop run build",
+  "build:lab": "npm --workspace @aether/lab run build",
+  "build:client-core": "npm --workspace @vanguard/client-core run build",
+  "build:cli": "npm --workspace @vanguard/cli run build",
+  "build:studio": "npm --workspace @vanguard/studio run build",
+  "build:studio-browser": "npm --workspace @vanguard/studio run build:browser",
+  "typecheck": "npm run typecheck:contracts && npm run typecheck:projections && npm run typecheck:client && npm run typecheck:ui-web && npm run typecheck:tui && npm run typecheck:desktop && npm run typecheck:lab && npm --workspace @vanguard/client-core run typecheck && npm --workspace @vanguard/cli run typecheck && npm --workspace @vanguard/studio run typecheck",
+  "typecheck:contracts": "npm --workspace @aether/contracts run typecheck",
+  "typecheck:projections": "npm --workspace @aether/projections run typecheck",
+  "typecheck:client": "npm --workspace @aether/client run typecheck",
+  "typecheck:ui-web": "npm --workspace @aether/ui-web run typecheck",
+  "typecheck:tui": "npm --workspace @aether/tui run typecheck",
+  "typecheck:desktop": "npm --workspace @aether/desktop run typecheck",
+  "typecheck:lab": "npm --workspace @aether/lab run typecheck",
+  "test": "npm run test:contracts && npm run test:projections && npm run test:client && npm run test:ui-web && npm run test:tui && npm run test:desktop && npm run test:lab && npm --workspace @vanguard/client-core test && npm --workspace @vanguard/cli test && npm --workspace @vanguard/studio test",
+  "test:contracts": "npm --workspace @aether/contracts test",
+  "test:projections": "npm --workspace @aether/projections test",
+  "test:client": "npm --workspace @aether/client test",
+  "test:ui-web": "npm --workspace @aether/ui-web test",
+  "test:tui": "npm --workspace @aether/tui test",
+  "test:desktop": "npm --workspace @aether/desktop test",
+  "test:lab": "npm --workspace @aether/lab test"
+}

@@ -64,6 +64,7 @@ This document is the canonical architecture owner for the end-to-end runtime lif
 
 ## AS_BUILT Status
 - `IMPLEMENTED` — Single runtime authority (`HarnessSession`) orchestrates all composition, activation, execution, and teardown across the substrate (`RF-94`).
+- `PARTIAL` — Current composition exposes context/index seams, registered Coding Max presets, mediated completion admission for those presets, and semantic task-state continuation seams. Full task-state persistence and repository-scale qualification remain open gates.
 
 ---
 
@@ -131,6 +132,48 @@ When a run is resumed from disk (`vanguard resume --run-id <ID>`):
 ## 5. Compatibility Seam (`UNR-B-004`)
 
 - `Runtime.execute_harness` (`vanguard/packages/runtime/compose.py`) is an obsolete legacy entry point that remains in the codebase for backwards compatibility and test verification. All production paths invoke `HarnessSession` directly.
+
+---
+
+## 6. Context and Completion Policy Binding
+
+The existing single composition root remains authoritative. Code-pack preset overlays compile through the same composition path and only change bounded cognition/context ceilings; they do not widen capabilities or create a second runtime.
+
+`HarnessSession` should bind the manifest-resolved context policy into `ContextCompiler` and optionally bind an `IContextManager` backed by `IndexPort`. Repository intelligence is provider-neutral and authority-free:
+
+```text
+Task + repository snapshot
+        -> code-pack IContextManager
+        -> optional IndexPort/provider adapter
+        -> bounded ContextPacket
+        -> existing ContextCompiler
+```
+
+LDA, SCIP-style indexes, and future providers are substitutable adapters/projections. Vanguard must not import or require LDA. A deterministic filesystem index remains the fallback when an external index is absent, empty, stale, or invalid. Provider output selects references; it cannot propose effects, grant capabilities, or override canonical documentation, source, tests, or ledger facts.
+
+The target `ContextPacket` records at minimum the task digest, repository snapshot digest, provider identity/version, query digest, selected documents/symbols/files/tests/dependency edges, estimated tokens, omissions, and an overall packet digest. It is bounded by the manifest context budget and captured as evidence sufficient to reproduce selection.
+
+The same composition path binds a generic completion-admission policy. `EpisodeEngine` asks whether completion is admissible; the code pack interprets coding verification, while runtime records the decision and its evidence reference. External evaluation remains a later, independent lifecycle stage.
+
+Workspace verification freshness is bound to a material snapshot digest. For a
+Git environment that digest covers the current HEAD and porcelain worktree
+state; observation counters belong only to the snapshot identifier and MUST NOT
+change the digest of an otherwise unchanged workspace. This permits a second
+read to validate a receipt while still invalidating it immediately after a
+material patch.
+
+The backend facade exposes `vg code run`, `status`, `resume`, `evidence`, and
+`cost`. These commands are thin clients of `ApplicationService`; preset names
+resolve to `vg-code-fast`, `vg-code-balanced`, or `vg-code-max` manifests and
+do not create a second runtime or persistence path. Coding Max completion is
+admitted only after mediated patch and test facts have produced a fresh
+workspace-bound verification receipt.
+
+`D_H` must change when component bindings or durable context/admission policy change. Runtime evidence must retain enough identity to distinguish control and treatment configurations in benchmark comparisons.
+
+## 7. Semantic Continuation
+
+Cold resume already reconstructs safety/accounting state and reconciles effects. `CodingTaskState` now provides the compact durable continuation value: task class, completion requirements, plan/discoveries/dead ends, implicated and modified files, route decisions, evidence-gated TODOs, latest verification, settled effects, next action, and remaining budgets. This packet is derived state; missing evidence must fail explicitly or trigger regrounding rather than silently invent context.
 
 ---
 

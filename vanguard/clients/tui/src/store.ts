@@ -14,9 +14,10 @@ import {
   type FrontendCapabilityFlags,
   type FailureDiagnostics,
 } from "@aether/projections";
-import type { EventEnvelope, AgentDescriptor, WorkflowDescriptor, SemanticActivityItem } from "@aether/contracts";
+import type { EventEnvelope, AgentDescriptor, WorkflowDescriptor, SemanticActivityItem, ModelProviderConfig, FrontendSettings } from "@aether/contracts";
 import type { RuntimeClient } from "@aether/client";
-import { FrontendAppController, DEFAULT_AGENTS, DEFAULT_WORKFLOWS } from "@aether/client";
+import { FrontendAppController, DEFAULT_AGENTS, DEFAULT_WORKFLOWS, NodeFsPersistenceAdapter, DEFAULT_PROVIDERS } from "@aether/client";
+import { DEFAULT_FRONTEND_SETTINGS } from "@aether/projections";
 
 // Fine-grained Signal primitive
 export type Signal<T> = {
@@ -69,6 +70,8 @@ export type TuiStoreState = {
   // Catalog
   availableAgents: AgentDescriptor[];
   availableWorkflows: WorkflowDescriptor[];
+  providers: ModelProviderConfig[];
+  selectedProviderId: string;
 
   // Runtime & Stream status
   connectionState: ConnectionState;
@@ -90,20 +93,24 @@ export type TuiStoreState = {
   scrollOffset: number;
   followStream: boolean;
   expandedCardIds: Set<string>;
-  activeModal: "none" | "command-palette" | "help" | "diff-viewer" | "select-agent" | "select-workflow";
+  activeModal: "none" | "command-palette" | "help" | "diff-viewer" | "select-agent" | "select-workflow" | "history";
   diffViewerContent: string;
   statusMessage: string;
   activeCommandQuery: string;
+  settings: FrontendSettings;
 };
 
 export class TuiStore {
   public readonly controller: FrontendAppController;
+  public readonly persistence: NodeFsPersistenceAdapter;
   public readonly state: Signal<TuiStoreState>;
   private abortController: AbortController | null = null;
 
   constructor(initial: Partial<TuiStoreState> = {}, client?: RuntimeClient) {
+    this.persistence = new NodeFsPersistenceAdapter();
     this.controller = new FrontendAppController({
       client,
+      persistence: this.persistence,
       initialWorkspace: initial.workspacePath ?? ".",
       initialAgentId: initial.agentId ?? "coding-agent",
     });
@@ -118,6 +125,8 @@ export class TuiStore {
       runId: initial.runId ?? ctrlState.activeRunId,
       availableAgents: DEFAULT_AGENTS,
       availableWorkflows: DEFAULT_WORKFLOWS,
+      providers: ctrlState.providers.length > 0 ? ctrlState.providers : DEFAULT_PROVIDERS,
+      selectedProviderId: ctrlState.selectedProviderId,
       connectionState: initial.connectionState ?? "connected",
       capabilities: ctrlState.capabilities,
       lastFailure: ctrlState.lastFailure,
@@ -139,7 +148,37 @@ export class TuiStore {
       diffViewerContent: "",
       statusMessage: "Ready",
       activeCommandQuery: "",
+      settings: ctrlState.settings ?? DEFAULT_FRONTEND_SETTINGS,
     });
+
+    this.controller.subscribe((cState) => {
+      this.syncFromController(cState);
+    });
+
+    this.initPersistence();
+  }
+
+  private async initPersistence(): Promise<void> {
+    await this.controller.restoreFromPersistence();
+  }
+
+  private syncFromController(cState: any): void {
+    this.update((prev) => ({
+      ...prev,
+      workspacePath: cState.currentWorkspace,
+      agentId: cState.selectedAgentId,
+      workflowId: cState.selectedWorkflowId,
+      runId: cState.activeRunId,
+      turns: cState.turns,
+      events: cState.events,
+      snapshot: cState.snapshot,
+      activities: cState.activities,
+      approvalState: cState.approvalState,
+      pendingApproval: cState.pendingApproval,
+      providers: cState.providers,
+      selectedProviderId: cState.selectedProviderId,
+      settings: cState.settings,
+    }));
   }
 
   public get(): TuiStoreState {
@@ -218,9 +257,18 @@ export class TuiStore {
     }));
 
     if (client) {
-      this.startRun(client, text);
+      if (this.get().turns.length > 0) {
+        this.submitFollowUp(client, text);
+      } else {
+        this.startRun(client, text);
+      }
     }
     return text;
+  }
+
+  public async submitFollowUp(client: RuntimeClient, prompt: string): Promise<void> {
+    this.controller.setClient(client);
+    await this.controller.submitFollowUp(prompt);
   }
 
   public selectAgent(agentId: string): void {
@@ -239,6 +287,99 @@ export class TuiStore {
       workflowId,
       statusMessage: `Workflow switched to ${workflowId}`,
     }));
+  }
+
+  public selectWorkspace(wsPath: string): void {
+    this.controller.selectWorkspace(wsPath);
+    this.update((prev) => ({
+      ...prev,
+      workspacePath: wsPath,
+      statusMessage: `Workspace switched to ${wsPath}`,
+    }));
+  }
+
+  public executeSlashCommand(input: string, client?: RuntimeClient): void {
+    const parts = input.slice(1).trim().split(/\s+/);
+    const cmd = parts[0]?.toLowerCase() ?? "";
+    const arg = parts.slice(1).join(" ");
+
+    switch (cmd) {
+      case "agent":
+        if (arg) {
+          this.selectAgent(arg);
+        } else {
+          this.update((s) => ({ ...s, activeModal: "select-agent" }));
+        }
+        break;
+      case "workflow":
+        if (arg) {
+          this.selectWorkflow(arg);
+        } else {
+          this.update((s) => ({ ...s, activeModal: "select-workflow" }));
+        }
+        break;
+      case "workspace":
+        if (arg) {
+          this.selectWorkspace(arg);
+        } else {
+          this.update((s) => ({ ...s, statusMessage: `Workspace: ${s.workspacePath}` }));
+        }
+        break;
+      case "provider":
+        if (arg) {
+          this.controller.setDefaultProvider(arg);
+          this.update((s) => ({ ...s, selectedProviderId: arg, statusMessage: `Default provider: ${arg}` }));
+        } else {
+          const cur = this.get();
+          this.update((s) => ({ ...s, statusMessage: `Provider: ${cur.selectedProviderId}` }));
+        }
+        break;
+      case "model":
+        if (arg) {
+          this.update((s) => ({ ...s, model: arg, statusMessage: `Model: ${arg}` }));
+        } else {
+          const cur = this.get();
+          this.update((s) => ({ ...s, statusMessage: `Model: ${cur.model}` }));
+        }
+        break;
+      case "runtime":
+        this.update((s) => ({
+          ...s,
+          statusMessage: `Runtime: ${s.settings.runtime?.socketPath ?? "/tmp/vanguard-runtime.sock"} [${s.connectionState}]`,
+        }));
+        break;
+      case "history":
+        this.update((s) => ({ ...s, activeModal: "history" }));
+        break;
+      case "new":
+        this.controller.newChat();
+        this.update((s) => ({
+          ...s,
+          turns: [],
+          events: [],
+          snapshot: emptyRunSnapshot(),
+          statusMessage: "New conversation started.",
+        }));
+        break;
+      case "clear":
+        this.update((s) => ({ ...s, turns: [], statusMessage: "Transcript view cleared." }));
+        break;
+      case "help":
+        this.update((s) => ({ ...s, activeModal: "help" }));
+        break;
+      case "attach":
+        if (arg && client) {
+          this.attachStream(client, arg);
+        }
+        break;
+      case "resume":
+        if (client) {
+          this.controller.resumeRun(arg || undefined);
+        }
+        break;
+      default:
+        this.update((s) => ({ ...s, statusMessage: `Unknown slash command: /${cmd}` }));
+    }
   }
 
   public async startRun(client: RuntimeClient, prompt: string): Promise<void> {

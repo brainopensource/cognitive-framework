@@ -97,7 +97,7 @@ permit a control before it appears as enabled.
 - No cloud, no multi-tenant server, no auth system. Local-first, single operator, `0600` socket.
 - No workflow *execution* in the frontend. The frontend may **author** a static composition graph;
   it must never become a dynamic control-flow DAG engine — that is an explicit architectural refusal
-  in [`SPEC.md`](../../SPEC.md#architectural-refusals), and violating it in the UI would smuggle the
+  in [`SPEC.md`](../../SPEC.md#refusals), and violating it in the UI would smuggle the
   refused engine in through the back door.
 - No mutation of ledger history. The UI is append-only-respecting: it issues *commands*, it never
   edits *events*.
@@ -595,7 +595,7 @@ Scaffold now, so the corpus is right later.
   recency-window`, `prefix_freeze: true`) becomes a live, inspectable, tunable object with a
   measured effect on outcomes.
 
-> **Explicit scope boundary.** Per [`SPEC.md`](../../SPEC.md#milestone-compatibility), retrieval,
+> **Explicit scope boundary.** Per [`SPEC.md`](../../SPEC.md#product-and-release-boundary), retrieval,
 > macros, Active Inference and meta-cognition are **M-9+ post-v1 research and non-authorizing**.
 > The Second Brain surface is therefore a *corpus-shaping and inspection* tool at beta. It reads. It
 > does not steer the substrate.

@@ -227,7 +227,6 @@ class RuntimeChildRunner:
         by the trajectory contract, and a child reporting a cost it did not
         measure is precisely the fabrication this package removed.
         """
-        from ..domain.ledger.agent_view import fold_agent_view
         from ..ports.child_runtime import CHILD_ADDITIVE_DIMENSIONS
 
         # ``RunResult.events`` is the in-process ``Event`` projection and has
@@ -244,15 +243,53 @@ class RuntimeChildRunner:
                 event for event in getattr(result, "events", ())
                 if hasattr(event, "seq")
             )
-            consumed = (fold_agent_view(None, envelopes).budget_consumed
-                        if envelopes else {})
+            consumed = self._actual_cost_from_settlements(envelopes)
         else:
             read = store.read(EventRange(episode_id=plan.child_episode_id))
             if not read.ok or read.value is None:
                 raise RuntimeError("child ledger is unreadable; cost is unknown")
-            consumed = fold_agent_view(None, tuple(read.value)).budget_consumed
+            consumed = self._actual_cost_from_settlements(tuple(read.value))
         return {
             dimension: int(consumed.get(dimension, 0) or 0)
             for dimension in CHILD_ADDITIVE_DIMENSIONS
             if consumed.get(dimension)
         }
+
+    @staticmethod
+    def _actual_cost_from_settlements(events: tuple[Any, ...]) -> Mapping[str, int]:
+        """Project spend from the kernel's settlement facts.
+
+        A committed lease records the amount returned to the parent budget;
+        the child's actual spend is therefore ``reserved - settlement``.
+        Feeding settlement directly into the general AgentView reducer would
+        interpret a refund as negative consumption and make child projection
+        fail closed for an otherwise successful run.
+        """
+        reserved_by_lease: dict[str, Mapping[str, int]] = {}
+        total: dict[str, int] = {}
+        for envelope in events:
+            event_type = getattr(envelope, "event_type", None)
+            payload = getattr(envelope, "payload", None)
+            if not isinstance(payload, Mapping):
+                continue
+            if event_type == "BudgetReserved":
+                lease_id = payload.get("lease_id")
+                dimensions = payload.get("reserved", {})
+                if isinstance(lease_id, str) and isinstance(dimensions, Mapping):
+                    reserved_by_lease[lease_id] = {
+                        str(key): int(value) for key, value in dimensions.items()
+                    }
+                continue
+            if event_type != "BudgetCommitted":
+                continue
+            settlement = payload.get("settlement", {})
+            lease_id = payload.get("lease_id")
+            if not isinstance(settlement, Mapping):
+                continue
+            reserved = reserved_by_lease.get(lease_id, {})
+            for key, value in settlement.items():
+                dimension = str(key)
+                amount = int(value)
+                spent = int(reserved.get(dimension, 0)) - amount
+                total[dimension] = total.get(dimension, 0) + spent
+        return total

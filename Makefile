@@ -1,7 +1,8 @@
-.PHONY: clean clean-py clean-benchmark-cache clean-js clean-build clean-test clean-cache clean-wsl clean-all help
+.PHONY: clean clean-py clean-benchmark-cache clean-js clean-build clean-test clean-cache clean-wsl clean-all help dev-context
 
 help:
-	@echo "Repository Cleanup Targets:"
+	@echo "Repository Targets:"
+	@echo "  make dev-context    - Run developer context and read-only evidence collection"
 	@echo "  make clean-py       - Remove Python cache & artifacts (__pycache__, *.pyc, .pytest_cache, etc)"
 	@echo "  make clean-benchmark-cache - Remove only Python bytecode caches between benchmark rows"
 	@echo "  make clean-js       - Remove JavaScript cache & artifacts (node_modules, .next, dist, build)"
@@ -12,7 +13,7 @@ help:
 	@echo "  make clean          - Run all cleanup targets (safe for benchmarking)"
 	@echo "  make clean-all      - NUCLEAR: Remove everything including node_modules & build dirs"
 	@echo ""
-	@echo "Usage: make clean-py  OR  make clean-all"
+	@echo "Usage: make dev-context  OR  make clean-py"
 
 ## Python cleanup
 clean-benchmark-cache:
@@ -97,3 +98,8 @@ clean-all: clean
 	rm -rf node_modules 2>/dev/null || true
 	find . -type d -name "node_modules" -exec rm -rf {} + 2>/dev/null || true
 	@echo "✅ Total repo reset complete!"
+
+## Developer context and read-only evidence collection
+dev-context:
+	@bash collect_dev_context.sh
+

@@ -19,4 +19,10 @@ capabilities:
       root: /workspace
       paths:
         - /workspace
+  - verb: fs.list
+    selector:
+      kind: fs
+      root: /workspace
+      paths:
+        - /workspace
 entry: toolkits/fs_toolkit.py:FsToolkit

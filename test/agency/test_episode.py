@@ -152,7 +152,7 @@ class Terminals(unittest.TestCase):
     def test_an_unbounded_run_is_abandoned_rather_than_unbounded(self) -> None:
         """`VG-03 §6.5`: every turn is bounded. A cassette that never finishes
         terminates on the turn bound, and the run state says so."""
-        harness, engine = build([doubles.effect() for _ in range(20)],
+        harness, engine = build([doubles.effect(path=f"/workspace/src/a_{i}.ts") for i in range(20)],
                                 ceilings={"usd_micros": 10_000_000, "millis": 10_000_000})
         outcome = run(engine, harness)
         self.assertIs(outcome.terminal, RunTermination.ABANDONED)

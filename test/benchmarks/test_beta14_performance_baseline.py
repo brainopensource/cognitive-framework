@@ -73,7 +73,10 @@ class TestBeta14PerformanceBaseline(unittest.TestCase):
                     "kind": "effect",
                     "action": "fs.read",
                     "resource": {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]},
-                    "args": {"path": "data.txt"},
+                    # Vary the read window so the no-progress detector does
+                    # not correctly classify this synthetic workload as a
+                    # livelock before the requested turn count.
+                    "args": {"path": "data.txt", "offset": i},
                     "note": f"Turn {i}: inspecting data",
                 })
             proposals.append({

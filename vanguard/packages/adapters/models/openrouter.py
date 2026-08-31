@@ -284,7 +284,13 @@ def _redact(text: str, secret: str | None, ref: str) -> str:
 
 
 def _messages(context: ContextBundle) -> list[dict[str, Any]]:
-    if isinstance(context, Mapping) and "messages" in context and isinstance(context["messages"], list):
+    # `list` alone is wrong here: `PromptAssembler` publishes this key as a
+    # *tuple* (immutable bundle), so an exact `list` check silently missed the
+    # assembled conversation and fell through to the lossy block rendering
+    # below -- dropping tool-call structure and the protocol-recovery nudge on
+    # every single live turn. Accept any non-str sequence.
+    if isinstance(context, Mapping) and isinstance(
+            context.get("messages"), (list, tuple)):
         return [dict(item) for item in context["messages"]]
 
     messages: list[dict[str, Any]] = []
@@ -374,6 +380,11 @@ def _tools_payload(tools: ToolSchemas) -> list[dict[str, Any]]:
                 "type": "function",
                 "function": {
                     "name": tool.get("name", ""),
+                    # The manifest's description is the tool contract the
+                    # model's function-calling head actually reads. Dropping it
+                    # made every carefully-worded manifest description
+                    # decorative on the wire.
+                    "description": tool.get("description", ""),
                     "parameters": tool.get("schema") or {"type": "object"},
                 },
             }

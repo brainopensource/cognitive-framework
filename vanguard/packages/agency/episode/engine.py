@@ -256,6 +256,8 @@ class EpisodeEngine:
         depth: int = 1,
         is_cancelled: Any = None,
         receipt_labeller: Any = None,
+        prior_turns: Sequence[Turn] = (),
+        prior_seen_verbs: Sequence[str] = (),
     ) -> EpisodeOutcome:
         """Reduce turns until the episode is terminal. It always terminates.
 
@@ -266,9 +268,19 @@ class EpisodeEngine:
         also grows across turns and is never reset: resetting it each round is
         exactly the defect `VG-03 §6.5` records, where the injection defence
         became unreachable dead code.
+
+        `prior_turns` carries the turn history of earlier segments of the same
+        episode. A run that suspends for approval re-enters through a *new*
+        engine (`session.py`), and without this the episode's whole memory of
+        what it had already done was discarded on every approval round-trip:
+        turn indices restarted at 0, and no-progress detection could never
+        accumulate the consecutive history it needs. The bound stays a bound on
+        the episode, not on each segment of it -- the caller sizes `max_turns`
+        to include what `prior_turns` already spent.
         """
         episode = Episode(episode_id=episode_id, run_id=run_id,
-                          principal=principal, brief=brief, depth=depth)
+                          principal=principal, brief=brief, depth=depth,
+                          turns=tuple(prior_turns))
         dispatches: list[Any] = []
         accumulated: tuple[Span, ...] = tuple(spans)
         recovery_state = ProtocolRecoveryState()
@@ -277,11 +289,15 @@ class EpisodeEngine:
         #: Repeated-action escalation (`CMX-03`). Tracked across turns because
         #: a livelock is a property of the *sequence* of proposals, not of any
         #: one of them.
-        last_effect_descriptor: str | None = None
-        last_dispatch_signal: str | None = None
         repeat_count = 0
         forced_tool_policy: ToolPolicy | None = None
-        seen_verbs: set[str] = set()
+        # Phase is derived from the verbs already attempted. Like the turn
+        # history, this must survive the engine being rebuilt around an
+        # approval suspension: without it the ladder snapped back to `inspect`
+        # mid-run and un-offered the very tool the model was already using --
+        # `patch.apply` suspends for approval, so the turn straight after a
+        # patch lost the patch tool and failed as an undeclared-tool error.
+        seen_verbs: set[str] = {str(v) for v in prior_seen_verbs if v}
         for span in accumulated:
             span_verb = getattr(span, "verb", None) or getattr(span, "action", None)
             if span_verb:
@@ -419,19 +435,49 @@ class EpisodeEngine:
             # on the first repeat — corrective feedback first, then a tool set
             # that no longer offers the verb it cannot stop calling.
             if proposal.kind == ProposalKind.EFFECT:
+                # The streak is read back off the episode's own turn history,
+                # not held in a local counter, so it survives the engine being
+                # rebuilt around an approval suspension -- which is exactly
+                # when a livelocked run used to lose its memory and start over.
+                #
                 # Re-proposing an action whose last dispatch did *not* succeed
                 # is legitimate retry, not livelock: the receipt it holds is a
-                # failure, and the next attempt may well differ. Only an
-                # action that keeps succeeding identically is stuck.
-                if (proposal.descriptor == last_effect_descriptor
-                        and last_dispatch_signal == "ok"):
-                    repeat_count += 1
+                # failure, and the next attempt may well differ. Only an action
+                # that keeps succeeding identically is stuck.
+                #
+                # Counted over a *window*, not as a strict consecutive run. A
+                # livelocked model rarely repeats one call cleanly: nudged, it
+                # varies for a turn and then falls straight back. A trailing
+                # streak resets on that one different turn and the guard never
+                # escalates, which is exactly what was observed live.
+                window = [t for t in episode.turns
+                          if not str(t.progress_signal).startswith("recovery_")]
+                window = window[-(2 * self._no_progress_limit):]
+                same = [t for t in window
+                        if t.proposal_descriptor == proposal.descriptor]
+                # Livelock is "the outcome stopped changing", not "the outcome
+                # was ok". An action that keeps suspending for approval, or
+                # keeps being denied identically, is just as stuck as one that
+                # keeps succeeding identically -- and approval-suspended
+                # repeats are what a real run actually produces, because every
+                # privileged effect round-trips through approval. If the
+                # outcome *did* move between attempts the signatures differ,
+                # which is the legitimate-retry carve-out.
+                if same and all(t.signature == same[-1].signature for t in same):
+                    repeat_count = len(same) + 1
                 else:
-                    last_effect_descriptor = proposal.descriptor
                     repeat_count = 1
+                if repeat_count == 1:
                     forced_tool_policy = None
                 if repeat_count >= self._no_progress_limit:
-                    if recovery_state.effect_retries >= recovery_state.max_effect_retries:
+                    # Two bounds, because they catch different shapes. The
+                    # window bound catches a model that keeps *dispatching* the
+                    # same call; the retry bound catches one that keeps
+                    # proposing it after being blocked, which adds nudge turns
+                    # but no new dispatches for the window to count.
+                    if (repeat_count >= 2 * self._no_progress_limit
+                            or recovery_state.effect_retries
+                            >= recovery_state.max_effect_retries):
                         detail = (f"repeated action {proposal.action} over "
                                   f"{repeat_count} turns")
                         episode = episode.terminated(RunTermination.ABANDONED, detail)
@@ -441,7 +487,7 @@ class EpisodeEngine:
                     # Guarded: never narrow to an empty set, which would strand
                     # the episode with nothing left to propose.
                     narrowed = tuple(sorted(declared_tool_names - {proposal.action}))
-                    if recovery_state.effect_retries > 1 and narrowed:
+                    if narrowed:
                         forced_tool_policy = ToolPolicy(mode="required", allowed=narrowed)
                     if not _apply_retry(
                         RecoveryDecision(
@@ -674,15 +720,29 @@ class EpisodeEngine:
             )
             repeats = episode.repeats(turn, limit=self._no_progress_limit)
             episode = episode.with_turn(turn)
-            last_dispatch_signal = turn.progress_signal
 
             terminal = _TERMINAL_FOR_FAILURE.get(outcome.failure)
             if terminal is not None:
                 episode = episode.terminated(terminal, outcome.detail)
                 break
             if repeats:
-                # `VG-03 §6.4`: the same transition without a change in state
-                # or progress signal, for the configured limit.
+                if recovery_state.effect_retries < recovery_state.max_effect_retries:
+                    recovery_state = recovery_state.with_effect_retry()
+                    if _apply_retry(
+                        RecoveryDecision(
+                            status="retry_model",
+                            retry_reason="NO_PROGRESS_RECOVERY",
+                            retry_feedback={
+                                "repeatedAction": proposal.action,
+                                "message": (
+                                    f"Action {proposal.action} produced no new state change. "
+                                    "Inspect the workspace files or apply your bugfix patch next."
+                                ),
+                            },
+                        ),
+                        base_sampling=turn_sampling,
+                    ):
+                        continue
                 episode = episode.terminated(
                     RunTermination.ABANDONED,
                     f"no progress over {self._no_progress_limit} turns")

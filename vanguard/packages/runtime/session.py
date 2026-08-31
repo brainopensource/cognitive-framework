@@ -104,7 +104,26 @@ from .wiring import (
 #: this set is a governance decision to be recorded in
 #: ``docs/execution/active.md`` -- it is pinned by
 #: ``test/falsifiers/test_completion_gate_scope.py``, never changed silently.
-ADMISSION_GATED_HARNESSES = frozenset({"vg-code-fast", "vg-code-balanced", "vg-code-max"})
+ADMISSION_GATED_HARNESSES = frozenset(
+    {"vg-code-fast", "vg-code-balanced", "vg-code-max", "vg-code-max-v2",
+     "vg-code-max-v3"})
+
+#: Presets deliberately exempt from capability-derived gating. Only shrinks.
+ADMISSION_GATE_EXEMPT = frozenset({"vg-code-default"})
+
+
+def admission_required(harness: Any) -> bool:
+    """Gate completion by declared capability, not by preset name.
+
+    A name allowlist meant every new preset shipped ungated until someone
+    remembered to edit the set, so a bare `finish` with zero effects scored as
+    a completed run. Any harness granted `patch.apply` has a completion claim
+    that must be admitted against real evidence.
+    """
+    name = getattr(harness, "harness", "")
+    if name in ADMISSION_GATE_EXEMPT:
+        return False
+    return "patch.apply" in set(getattr(harness, "verbs", ()) or ())
 
 _CONTROLLER_BUDGET_KEYS: Mapping[str, str] = {
     "usd_micros": "usd_micros",
@@ -959,6 +978,16 @@ class HarnessSession:
         # Re-entry is now driven by the ledger: `max_turns` bounds the episode,
         # not each segment of it, and an exhausted budget is terminal.
         delayed = DelayedTerminalEmitter(self.ledger)
+        # The episode's turn history spans approval re-entries. Rebuilding the
+        # engine with an empty `Episode` discarded it every round-trip, so turn
+        # indices restarted at 0 and no-progress detection could never see two
+        # consecutive turns of the same run (`CMX-03`).
+        prior_turns: tuple[Any, ...] = ()
+        # `_record` clears `self.calls`, so the attempted-verb set has to be
+        # accumulated here or the phase ladder resets to `inspect` on every
+        # approval re-entry -- which un-offers `patch` on the turn right after
+        # a patch, the exact shape of the observed instrument error.
+        seen_verbs_acc: set[str] = set()
         while True:
             remaining = task.max_turns - self.turns_consumed()
             if remaining <= 0:
@@ -970,13 +999,14 @@ class HarnessSession:
             engine = EpisodeEngine(
                 kernel=self, model=self.operator, clock=ports.clock,
                 events=delayed, scope=self.scope, tools=harness.tool_schemas,
-                max_turns=remaining, spawn_dispatcher=self.dispatch,
+                max_turns=len(prior_turns) + remaining,
+                spawn_dispatcher=self.dispatch,
                 preset_mode=getattr(harness, "tool_policy_preset", None),
                 protocol_decoders=decoders,
                 patch_detector=patch_detector,
                 truncation_detector=truncation_detector,
                 completion_admitter=(self._admit_completion
-                                     if harness.harness in ADMISSION_GATED_HARNESSES
+                                     if admission_required(harness)
                                      else None))
             outcome = engine.run(
                 episode_id=task.episode_id, run_id=task.run_id,
@@ -984,7 +1014,12 @@ class HarnessSession:
                 spans=(_operator_span(),),
                 receipt_labeller=lambda turn, dispatch: _admit_turn_result(
                     self.operator, turn, dispatch,
-                    on_dispatch=self._observe_completion_dispatch))
+                    on_dispatch=self._observe_completion_dispatch),
+                prior_turns=prior_turns,
+                prior_seen_verbs=tuple(sorted(seen_verbs_acc)))
+            seen_verbs_acc.update(
+                str(getattr(req, "action", "")) for req, _ in self.calls)
+            prior_turns = outcome.episode.turns
             terminal, detail = outcome.terminal, outcome.episode.detail
             suspended = _suspension(self.calls)
             _record(receipts, self.operator, self.calls)
@@ -999,6 +1034,7 @@ class HarnessSession:
             # `K-14`: the approved request re-enters at S1, not at S6, and the
             # model is not asked to re-propose what a human already approved.
             self.policy.bind(authorization)
+            seen_verbs_acc.add(str(getattr(request, "action", "")))
             approved_dispatch = self.dispatch(
                 request, requested_scope=self.scope,
                 reservation=_reservation_for(harness.budget,

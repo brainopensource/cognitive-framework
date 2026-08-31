@@ -5,6 +5,8 @@
     {"name":"vg-code-fast","path":"vg-code-fast/manifest.json","undeletable":false,"role":"coding-max-preset"},
     {"name":"vg-code-balanced","path":"vg-code-balanced/manifest.json","undeletable":false,"role":"coding-max-preset"},
     {"name":"vg-code-max","path":"vg-code-max/manifest.json","undeletable":false,"role":"coding-max-preset"},
+    {"name":"vg-code-max-v2","path":"vg-code-max-v2/manifest.json","undeletable":false,"role":"coding-max-preset"},
+    {"name":"vg-code-max-v3","path":"vg-code-max-v3/manifest.json","undeletable":false,"role":"coding-max-preset"},
     {"name":"vg-code-claude-shaped","path":"vg-code-claude-shaped/manifest.json","undeletable":false,"role":"reconstruction"},
     {"name":"vg-code-opencode-shaped","path":"vg-code-opencode-shaped/manifest.json","undeletable":false,"role":"reconstruction"},
     {"name":"vg-code-swe-mini","path":"vg-code-swe-mini/manifest.json","undeletable":false,"role":"reconstruction"},

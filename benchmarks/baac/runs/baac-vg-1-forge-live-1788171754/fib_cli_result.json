@@ -1,0 +1,26 @@
+{
+  "challengeId": "fib_cli",
+  "tier": "easy",
+  "preset": "vg-1-forge",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "mode": "live",
+  "status": "PASS",
+  "attribution": "PASS",
+  "turns": 8,
+  "promptTokens": 15877,
+  "completionTokens": 3324,
+  "totalTokens": 19201,
+  "costUsd": 0.001191,
+  "durationSeconds": 93.34,
+  "oracle": {
+    "passed": true,
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "test_cli_execution (__main__.TestFibOracle.test_cli_execution) ... ok\ntest_fib_exceptions (__main__.TestFibOracle.test_fib_exceptions) ... ok\ntest_fib_values (__main__.TestFibOracle.test_fib_values) ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.068s\n\nOK\n",
+    "durationSeconds": 0.133,
+    "error": null,
+    "assertionCount": 3,
+    "failingAssertions": []
+  },
+  "diagnosis": "All falsifiers green"
+}

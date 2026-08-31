@@ -171,7 +171,10 @@ def run_row(challenge_id: str, preset: str, executor: Executor, *, timeout: floa
             resolved_root.mkdir(parents=True, exist_ok=True)
             workspace = Path(tempfile.mkdtemp(
                 prefix=f"{challenge_id}-{preset}-", dir=resolved_root))
-            stack.callback(shutil.rmtree, workspace, True)
+            # An explicitly supplied root is the caller's durable capture
+            # location.  Keep the materialized workspace and TASK.md there so
+            # a caller can inspect receipts/logs after run_row returns.  The
+            # default benchmark root remains disposable via TemporaryDirectory.
         _materialize_public(challenge, workspace)
         public_files = snapshot(workspace)
         oracle_digest = digest_bytes(challenge.oracle_code.encode())

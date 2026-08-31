@@ -416,6 +416,21 @@ class GitEnvironment:
                             matches.append({"file": f_path, "line": l_num, "content": snippet_text})
                             file_match_counts[f_path] += 1
 
+            if not matches:
+                glob_pat = pattern if pattern not in ("", ".", ".*") else "*"
+                found_files = []
+                for p in self._working_dir.rglob(glob_pat):
+                    if p.is_file() and not any(part.startswith(".") or part == "__pycache__" for part in p.parts):
+                        try:
+                            rel = str(p.relative_to(self._working_dir)).replace("\\", "/")
+                            found_files.append(rel)
+                        except ValueError:
+                            pass
+                if found_files:
+                    matching_files = sorted(found_files)[:max_results]
+                    for f in matching_files:
+                        matches.append({"file": f, "line": 1, "content": f"<file: {f}>"})
+
             return Result.success(
                 Observation(
                     action=action,

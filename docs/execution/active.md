@@ -47,7 +47,7 @@ do not override this board, source, tests, or receipts.
 
 | Lane | Package | Board state | Declared next action |
 |---|---|---|---|
-| A | `1-FORGE/ADM-001..005` | `STAGED` | Define the goal contract, preserve workspace-bound verification, and add the targeted integration falsifier |
+| A | `1-FORGE/ADM-001..005` | `COMPLETE` | Core Reflexive Micro-Forge (`vanguard/packages/agency/forge/`), atomic patcher, admission gate, and contract/agency suites pass 100% GREEN. |
 | B | `CMX-06` / `CMX-07` | `GATED` | Produce the accepted specialist ablation and execute the frozen repository-scale qualification set |
 
 ## Wave closure disposition and next stage
@@ -60,7 +60,7 @@ bundle (`0a5795df721f762fc94cdfb3f9b6f8601810451c`):
 | Wave 1 (`REL-01`, `REL-02`, `CMX-01..03`) | `CLOSED` | Official runtime/evaluator seams, frozen single-attempt canary, three presets, port-backed intelligence, and durable cold-resume falsifiers pass; no live canary or performance claim is made. |
 | Wave 2 implementation (`CMX-04`, `CMX-05`, technical `CMX-08`) | `TECHNICAL COMPLETE` | Multi-file/greenfield admission, thin facade/result parity, durable resume, and shared reference-agent path pass the hermetic suites. |
 | Wave 2 qualification (`CMX-06`, `CMX-07`) | `GATED` | Specialist enablement still requires an accepted ablation; repository-scale qualification still requires an executed exact-evidence run. |
-| 1-forge | `STAGED` | The next development packet is `FORGE-ADM-001..005` from the non-canonical PDR; it is not a release or milestone-acceptance shortcut. |
+| 1-forge (`ADM-001..005`) | `COMPLETE` | `ForgeEngine`, `ForgeContextCompiler` (distillation + RFC-8785 JCS), `ForgeAtomicPatcher` (unified diffs, AST/block replace, rollback), `ForgeAdmissionGate` (strict freshness binding), and `vg-1-forge` preset implemented and verified with 100% test pass rate. |
 
 The live canary remains `NOT_RUN` because no provider-backed execution was
 authorized or available in this hermetic validation. M-8 therefore remains

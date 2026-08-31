@@ -1,0 +1,478 @@
+{
+  "challenge": "tier1_lru_ttl_cache",
+  "tier": "easy",
+  "title": "Thread-Safe LRU Cache with Monotonic TTL",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "manifest": "vg-code-max-v3",
+  "status": "PASS",
+  "llm_calls": 15,
+  "turns": 15,
+  "terminal_state": "abandoned",
+  "cost_usd": 0.003541,
+  "latency_s": 34.67,
+  "files_modified": [
+    "lru/cache.py",
+    "lru/entry.py"
+  ],
+  "oracle_output": "",
+  "error": "",
+  "terminal_detail": "max_turns (15) exhausted across approval",
+  "run_fields": {},
+  "cassette": "benchmarks/artifacts/ladder/tier1_lru_ttl_cache__deepseek_deepseek-v4-flash-0731.cassette.json",
+  "trajectory": [
+    {
+      "turn": 0,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "lru/cache.py"
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 2393,
+        "completion_tokens": 80,
+        "cached_tokens": 0,
+        "total_tokens": 2473,
+        "cost_usd": 0.000357,
+        "usd_micros": 357,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000357,
+      "prior_tool_result": null,
+      "recovery_feedback": null
+    },
+    {
+      "turn": 1,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "lru/entry.py"
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 3105,
+        "completion_tokens": 47,
+        "cached_tokens": 0,
+        "total_tokens": 3152,
+        "cost_usd": 0.000447,
+        "usd_micros": 447,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000447,
+      "prior_tool_result": "tool result turn=0 digest=sha256:d26b815e172477da9f6db0f3c60f7d0340a79d72586d47a6109ecd3e59cc7b52\nimport time\nimport threading\nfrom collections import OrderedDict\nfrom typing import Any, Optional\nfrom .entry import CacheEntry\n\nclass LRUCache:\n    def __init__(self, capacity: int, default_ttl: Optional[float] = None):\n        if capacity <= 0:\n            raise ValueError('Capacity must be positive')\n        self.capacity = capacity\n        self.default_ttl = default_ttl\n        self._store: OrderedDict[str, CacheEntry] = OrderedDict()\n        self._lock = threading.RLock()\n\n    def get(self, key: str) -> Optional[Any]:\n        with self._lock:\n            if key not in self._store:\n                return None\n            entry = self._store[key]\n            now = time.monotonic()\n            if entry.is_expired(now):\n                del self._store[key]\n                return None\n            self._store.move_to_end(key)\n            return entry.value\n\n    def put(self, key: str, value: Any, ttl: Optional[float] = None) -> None:\n        with self._lock:\n            now = time.monotonic()\n            effective_ttl = ttl if ttl is not None else self.default_ttl\n            if key in self._store:\n                self._store.move_to_end(key)\n            self._store[key] = CacheEntry(key, value, effective_ttl, now)\n            if len(self._store) > self.capacity:\n                self._store.popitem(last=False)\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 2,
+      "kind": "effect",
+      "action": "patch.apply",
+      "args": {
+        "path": "lru/entry.py",
+        "content": "import time\nfrom dataclasses import dataclass\nfrom typing import Any, Optional\n\n@dataclass\nclass CacheEntry:\n    key: str\n    value: Any\n    ttl_seconds: Optional[float]\n    created_at: float\n\n    def is_expired(self, current_time: float) -> bool:\n        if self.ttl_seconds is None:\n            return False\n        return current_time - self.created_at > self.ttl_seconds"
+      },
+      "note": "",
+      "text": "The bug is in `entry.py` - `is_expired` always returns `False`. Let me fix it.",
+      "usage": {
+        "prompt_tokens": 3312,
+        "completion_tokens": 183,
+        "cached_tokens": 0,
+        "total_tokens": 3495,
+        "cost_usd": 0.000514,
+        "usd_micros": 514,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000514,
+      "prior_tool_result": "tool result turn=1 digest=sha256:3dd18c2d9534c4843d88d1375851bba0c621da4dc0094ccb7d66a76dbc0c5fa2\nimport time\nfrom dataclasses import dataclass\nfrom typing import Any, Optional\n\n@dataclass\nclass CacheEntry:\n    key: str\n    value: Any\n    ttl_seconds: Optional[float]\n    created_at: float\n\n    def is_expired(self, current_time: float) -> bool:\n        # BUG: Fails to check expiration properly\n        if self.ttl_seconds is None:\n            return False\n        return False\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 3,
+      "kind": "effect",
+      "action": "patch.apply",
+      "args": {
+        "content": "import time\nimport threading\nfrom collections import OrderedDict\nfrom typing import Any, Optional\nfrom .entry import CacheEntry\n\nclass LRUCache:\n    def __init__(self, capacity: int, default_ttl: Optional[float] = None):\n        if capacity <= 0:\n            raise ValueError('Capacity must be positive')\n        self.capacity = capacity\n        self.default_ttl = default_ttl\n        self._store: OrderedDict[str, CacheEntry] = OrderedDict()\n        self._lock = threading.RLock()\n\n    def _purge_expired(self, now: float) -> None:\n        expired = [k for k, e in self._store.items() if e.is_expired(now)]\n        for k in expired:\n            del self._store[k]\n\n    def get(self, key: str) -> Optional[Any]:\n        with self._lock:\n            now = time.monotonic()\n            self._purge_expired(now)\n            if key not in self._store:\n                return None\n            entry = self._store[key]\n            self._store.move_to_end(key)\n            return entry.value\n\n    def put(self, key: str, value: Any, ttl: Optional[float] = None) -> None:\n        with self._lock:\n            now = time.monotonic()\n            self._purge_expired(now)\n            effective_ttl = ttl if ttl is not None else self.default_ttl\n            if key in self._store:\n                self._store.move_to_end(key)\n            self._store[key] = CacheEntry(key, value, effective_ttl, now)\n            while len(self._store) > self.capacity:\n                self._store.popitem(last=False)",
+        "path": "lru/cache.py"
+      },
+      "note": "",
+      "text": "Now let me also ensure the cache purges stale items on `put()`. The current `put()` doesn't purge stale entries before checking capacity. Let me update `cache.py` to purge stale items on both `get()` and `put()`.",
+      "usage": {
+        "prompt_tokens": 3524,
+        "completion_tokens": 481,
+        "cached_tokens": 0,
+        "total_tokens": 4005,
+        "cost_usd": 0.000628,
+        "usd_micros": 628,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000628,
+      "prior_tool_result": "tool result turn=1 digest=sha256:3dd18c2d9534c4843d88d1375851bba0c621da4dc0094ccb7d66a76dbc0c5fa2\nimport time\nfrom dataclasses import dataclass\nfrom typing import Any, Optional\n\n@dataclass\nclass CacheEntry:\n    key: str\n    value: Any\n    ttl_seconds: Optional[float]\n    created_at: float\n\n    def is_expired(self, current_time: float) -> bool:\n        # BUG: Fails to check expiration properly\n        if self.ttl_seconds is None:\n            return False\n        return False\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 4,
+      "kind": "effect",
+      "action": "proc.exec",
+      "args": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "."
+        ]
+      },
+      "note": "",
+      "text": "\n\n\n",
+      "usage": {
+        "prompt_tokens": 4052,
+        "completion_tokens": 62,
+        "cached_tokens": 0,
+        "total_tokens": 4114,
+        "cost_usd": 0.000584,
+        "usd_micros": 584,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000584,
+      "prior_tool_result": "tool result turn=1 digest=sha256:3dd18c2d9534c4843d88d1375851bba0c621da4dc0094ccb7d66a76dbc0c5fa2\nimport time\nfrom dataclasses import dataclass\nfrom typing import Any, Optional\n\n@dataclass\nclass CacheEntry:\n    key: str\n    value: Any\n    ttl_seconds: Optional[float]\n    created_at: float\n\n    def is_expired(self, current_time: float) -> bool:\n        # BUG: Fails to check expiration properly\n        if self.ttl_seconds is None:\n            return False\n        return False\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 5,
+      "kind": "effect",
+      "action": "proc.exec",
+      "args": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "."
+        ]
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 4053,
+        "completion_tokens": 62,
+        "cached_tokens": 3840,
+        "total_tokens": 4115,
+        "cost_usd": 0.0001,
+        "usd_micros": 100,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.0001,
+      "prior_tool_result": "tool result turn=1 digest=sha256:3dd18c2d9534c4843d88d1375851bba0c621da4dc0094ccb7d66a76dbc0c5fa2\nimport time\nfrom dataclasses import dataclass\nfrom typing import Any, Optional\n\n@dataclass\nclass CacheEntry:\n    key: str\n    value: Any\n    ttl_seconds: Optional[float]\n    created_at: float\n\n    def is_expired(self, current_time: float) -> bool:\n        # BUG: Fails to check expiration properly\n        if self.ttl_seconds is None:\n            return False\n        return False\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 6,
+      "kind": "effect",
+      "action": "proc.exec",
+      "args": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "."
+        ]
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 4118,
+        "completion_tokens": 62,
+        "cached_tokens": 3840,
+        "total_tokens": 4180,
+        "cost_usd": 0.00011,
+        "usd_micros": 110,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.00011,
+      "prior_tool_result": "tool result turn=1 digest=sha256:3dd18c2d9534c4843d88d1375851bba0c621da4dc0094ccb7d66a76dbc0c5fa2\nimport time\nfrom dataclasses import dataclass\nfrom typing import Any, Optional\n\n@dataclass\nclass CacheEntry:\n    key: str\n    value: Any\n    ttl_seconds: Optional[float]\n    created_at: float\n\n    def is_expired(self, current_time: float) -> bool:\n        # BUG: Fails to check expiration properly\n        if self.ttl_seconds is None:\n            return False\n        return False\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 7,
+      "kind": "effect",
+      "action": "proc.exec",
+      "args": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "."
+        ]
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 4180,
+        "completion_tokens": 62,
+        "cached_tokens": 4096,
+        "total_tokens": 4242,
+        "cost_usd": 8.6e-05,
+        "usd_micros": 86,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 8.6e-05,
+      "prior_tool_result": "tool result turn=1 digest=sha256:3dd18c2d9534c4843d88d1375851bba0c621da4dc0094ccb7d66a76dbc0c5fa2\nimport time\nfrom dataclasses import dataclass\nfrom typing import Any, Optional\n\n@dataclass\nclass CacheEntry:\n    key: str\n    value: Any\n    ttl_seconds: Optional[float]\n    created_at: float\n\n    def is_expired(self, current_time: float) -> bool:\n        # BUG: Fails to check expiration properly\n        if self.ttl_seconds is None:\n            return False\n        return False\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 8,
+      "kind": "effect",
+      "action": "proc.exec",
+      "args": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "."
+        ]
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 4242,
+        "completion_tokens": 62,
+        "cached_tokens": 4096,
+        "total_tokens": 4304,
+        "cost_usd": 9.5e-05,
+        "usd_micros": 95,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 9.5e-05,
+      "prior_tool_result": "tool result turn=1 digest=sha256:3dd18c2d9534c4843d88d1375851bba0c621da4dc0094ccb7d66a76dbc0c5fa2\nimport time\nfrom dataclasses import dataclass\nfrom typing import Any, Optional\n\n@dataclass\nclass CacheEntry:\n    key: str\n    value: Any\n    ttl_seconds: Optional[float]\n    created_at: float\n\n    def is_expired(self, current_time: float) -> bool:\n        # BUG: Fails to check expiration properly\n        if self.ttl_seconds is None:\n            return False\n        return False\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 9,
+      "kind": "effect",
+      "action": "proc.exec",
+      "args": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "."
+        ]
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 4304,
+        "completion_tokens": 62,
+        "cached_tokens": 4096,
+        "total_tokens": 4366,
+        "cost_usd": 0.000103,
+        "usd_micros": 103,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000103,
+      "prior_tool_result": "tool result turn=1 digest=sha256:3dd18c2d9534c4843d88d1375851bba0c621da4dc0094ccb7d66a76dbc0c5fa2\nimport time\nfrom dataclasses import dataclass\nfrom typing import Any, Optional\n\n@dataclass\nclass CacheEntry:\n    key: str\n    value: Any\n    ttl_seconds: Optional[float]\n    created_at: float\n\n    def is_expired(self, current_time: float) -> bool:\n        # BUG: Fails to check expiration properly\n        if self.ttl_seconds is None:\n            return False\n        return False\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 10,
+      "kind": "effect",
+      "action": "proc.exec",
+      "args": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "."
+        ]
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 4366,
+        "completion_tokens": 62,
+        "cached_tokens": 4096,
+        "total_tokens": 4428,
+        "cost_usd": 0.000112,
+        "usd_micros": 112,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000112,
+      "prior_tool_result": "tool result turn=1 digest=sha256:3dd18c2d9534c4843d88d1375851bba0c621da4dc0094ccb7d66a76dbc0c5fa2\nimport time\nfrom dataclasses import dataclass\nfrom typing import Any, Optional\n\n@dataclass\nclass CacheEntry:\n    key: str\n    value: Any\n    ttl_seconds: Optional[float]\n    created_at: float\n\n    def is_expired(self, current_time: float) -> bool:\n        # BUG: Fails to check expiration properly\n        if self.ttl_seconds is None:\n            return False\n        return False\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 11,
+      "kind": "effect",
+      "action": "proc.exec",
+      "args": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "."
+        ]
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 4428,
+        "completion_tokens": 62,
+        "cached_tokens": 4352,
+        "total_tokens": 4490,
+        "cost_usd": 8.8e-05,
+        "usd_micros": 88,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 8.8e-05,
+      "prior_tool_result": "tool result turn=1 digest=sha256:3dd18c2d9534c4843d88d1375851bba0c621da4dc0094ccb7d66a76dbc0c5fa2\nimport time\nfrom dataclasses import dataclass\nfrom typing import Any, Optional\n\n@dataclass\nclass CacheEntry:\n    key: str\n    value: Any\n    ttl_seconds: Optional[float]\n    created_at: float\n\n    def is_expired(self, current_time: float) -> bool:\n        # BUG: Fails to check expiration properly\n        if self.ttl_seconds is None:\n            return False\n        return False\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 12,
+      "kind": "effect",
+      "action": "proc.exec",
+      "args": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "."
+        ]
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 4490,
+        "completion_tokens": 62,
+        "cached_tokens": 4352,
+        "total_tokens": 4552,
+        "cost_usd": 9.7e-05,
+        "usd_micros": 97,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 9.7e-05,
+      "prior_tool_result": "tool result turn=1 digest=sha256:3dd18c2d9534c4843d88d1375851bba0c621da4dc0094ccb7d66a76dbc0c5fa2\nimport time\nfrom dataclasses import dataclass\nfrom typing import Any, Optional\n\n@dataclass\nclass CacheEntry:\n    key: str\n    value: Any\n    ttl_seconds: Optional[float]\n    created_at: float\n\n    def is_expired(self, current_time: float) -> bool:\n        # BUG: Fails to check expiration properly\n        if self.ttl_seconds is None:\n            return False\n        return False\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 13,
+      "kind": "effect",
+      "action": "proc.exec",
+      "args": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "."
+        ]
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 4552,
+        "completion_tokens": 62,
+        "cached_tokens": 4352,
+        "total_tokens": 4614,
+        "cost_usd": 0.000106,
+        "usd_micros": 106,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000106,
+      "prior_tool_result": "tool result turn=1 digest=sha256:3dd18c2d9534c4843d88d1375851bba0c621da4dc0094ccb7d66a76dbc0c5fa2\nimport time\nfrom dataclasses import dataclass\nfrom typing import Any, Optional\n\n@dataclass\nclass CacheEntry:\n    key: str\n    value: Any\n    ttl_seconds: Optional[float]\n    created_at: float\n\n    def is_expired(self, current_time: float) -> bool:\n        # BUG: Fails to check expiration properly\n        if self.ttl_seconds is None:\n            return False\n        return False\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 14,
+      "kind": "effect",
+      "action": "proc.exec",
+      "args": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "."
+        ]
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 4614,
+        "completion_tokens": 62,
+        "cached_tokens": 4352,
+        "total_tokens": 4676,
+        "cost_usd": 0.000114,
+        "usd_micros": 114,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000114,
+      "prior_tool_result": "tool result turn=1 digest=sha256:3dd18c2d9534c4843d88d1375851bba0c621da4dc0094ccb7d66a76dbc0c5fa2\nimport time\nfrom dataclasses import dataclass\nfrom typing import Any, Optional\n\n@dataclass\nclass CacheEntry:\n    key: str\n    value: Any\n    ttl_seconds: Optional[float]\n    created_at: float\n\n    def is_expired(self, current_time: float) -> bool:\n        # BUG: Fails to check expiration properly\n        if self.ttl_seconds is None:\n            return False\n        return False\n",
+      "recovery_feedback": null
+    }
+  ]
+}

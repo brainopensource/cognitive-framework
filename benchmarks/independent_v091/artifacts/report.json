@@ -26,7 +26,7 @@
       ],
       "receipts": 3,
       "terminal": "completed",
-      "trajectory_digest": "sha256:feede4b8e35d87d47fe09136123277a792f3df508019335c7f8fd156d28d5619"
+      "trajectory_digest": "sha256:51e19381cea25b5df7b7b3b21c263849c82f5f148f7bcc40313a24ea3a5d2f8f"
     },
     {
       "baseline_passed": false,
@@ -55,7 +55,7 @@
       ],
       "receipts": 4,
       "terminal": "completed",
-      "trajectory_digest": "sha256:e1ed2da5bfa03d00658b3a5838b11e229aa6ab9991498328d45e3b5c25f47fff"
+      "trajectory_digest": "sha256:125f83864aa5b5e59e11ce16f2d114e352887d5c99f67cd1f28d921c2083be0e"
     },
     {
       "admissible": true,
@@ -89,7 +89,7 @@
       "receipts": 3,
       "structural_passed": true,
       "terminal": "completed",
-      "trajectory_digest": "sha256:8127aeb027aa51ac74bd9c8c8bb05ba86ab4869d9ee286527cea57e7b989282b",
+      "trajectory_digest": "sha256:39072c46da219f16b5a70025202c7a7e63f479bbeb593132f751e75c8828a61b",
       "workspace_effectively_empty": true
     },
     {
@@ -114,7 +114,7 @@
       "lam_deterministic": true,
       "lam_scenarios_listed": 254,
       "lam_sqlite_calls": 1,
-      "lda_head": "68ecf43701c4d5dbefb2f4a8e796394c37e10a80",
+      "lda_head": "8d9e37e6d16129dec080618674ae962b64270803",
       "lda_index_healthy": true,
       "passed": true
     }

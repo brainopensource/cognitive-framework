@@ -47,6 +47,10 @@ from vanguard.packages.runtime.root import (
     get_pricing_usd_table,
     resolve_model,
     load_model_registry,
+    FORGE_PRESET_NAME,
+    ForgeConfig,
+    ForgeFacade,
+    GoalContract,
 )
 
 try:
@@ -199,16 +203,54 @@ def extract_tool_calls_from_content(content: str) -> List[Dict[str, Any]]:
     return calls
 
 
+class BenchmarkOpenRouterModelPort:
+    """ModelPort adapter for BenchmarkRunner executing via OpenRouter."""
+
+    def __init__(self, runner: BenchmarkRunner, scenario_key: str, cassettes: list[dict[str, Any]]) -> None:
+        self.runner = runner
+        self.scenario_key = scenario_key
+        self.cassettes = cassettes
+        self.turn_counter = 0
+        self.total_cost = 0.0
+        self.total_prompt_tok = 0
+        self.total_comp_tok = 0
+
+    def propose(self, context: Any, tools: Any, sampling: Any) -> Any:
+        self.turn_counter += 1
+        messages = list(context.get("messages", []))
+        resp_json, cassette_entry, cost = self.runner.call_model(
+            messages=messages,
+            scenario_key=self.scenario_key,
+            turn=self.turn_counter,
+        )
+        self.cassettes.append(cassette_entry)
+        self.total_cost += cost
+        choice = resp_json.get("choices", [{}])[0]
+        msg = choice.get("message", {})
+        usage = resp_json.get("usage", {})
+        p_tok = usage.get("prompt_tokens", 0)
+        c_tok = usage.get("completion_tokens", 0)
+        self.total_prompt_tok += p_tok
+        self.total_comp_tok += c_tok
+        usage["cost"] = cost
+        return {
+            "message": msg,
+            "usage": usage,
+        }
+
+
 class BenchmarkRunner:
     def __init__(
         self,
         model_name: Optional[str] = None,
+        preset: str = "vg-code-max",
         max_turns: int = 8,
         budget_limit_usd: float = 0.20,
         recorder: Optional[Any] = None,
     ):
         # Use Centralized Config as authoritative source
         self.model_name = resolve_model(model_name) if model_name else get_default_paid_model()
+        self.preset = preset
         self.max_turns = max_turns
         self.budget_limit_usd = budget_limit_usd
         self.total_cost_usd = 0.0
@@ -354,7 +396,7 @@ class BenchmarkRunner:
                 # Use centralized pricing table if available or upstream reported cost
                 if self.model_name in self.pricing_table:
                     p_rate, c_rate, _ = self.pricing_table[self.model_name]
-                    cost = (prompt_tokens * p_rate) + (completion_tokens * c_rate)
+                    cost = ((prompt_tokens * p_rate) + (completion_tokens * c_rate)) / 1_000_000.0
                 else:
                     cost = usage.get("cost", 0.0) or 0.0
 
@@ -458,6 +500,75 @@ class BenchmarkRunner:
                     "2. Implement the required module(s) in `src/` using `edit_file`.\n"
                     "3. Run the test suite with `run_command` (e.g. `python3 -m unittest discover -s test`) until 100% PASS.\n"
                     "4. Call `finish_task`."
+                )
+
+            if self.preset in (FORGE_PRESET_NAME, "vg-1-forge"):
+                cassettes = []
+                model_adapter = BenchmarkOpenRouterModelPort(self, cname, cassettes)
+
+                def local_command_runner(cmd: str, cwd: Path) -> Tuple[int, str]:
+                    env = {
+                        **os.environ,
+                        "PYTHONPATH": f"{str(cwd.resolve())}:{str((cwd / 'src').resolve())}",
+                        "PYTHONDONTWRITEBYTECODE": "1",
+                    }
+                    proc = subprocess.run(
+                        cmd,
+                        shell=True,
+                        cwd=cwd,
+                        env=env,
+                        capture_output=True,
+                        text=True,
+                        timeout=30,
+                    )
+                    return proc.returncode, (proc.stdout + "\n" + proc.stderr).strip()
+
+                cfg = ForgeConfig(
+                    max_turns=self.max_turns,
+                    budget_limit_usd=max(0.0, self.budget_limit_usd - self.total_cost_usd),
+                    require_patch_for_write=True,
+                    model_name=self.model_name,
+                )
+                goal = GoalContract(
+                    task_digest=hashlib.sha256(cname.encode()).hexdigest(),
+                    mode="bugfix" if is_brownfield else "greenfield",
+                )
+                engine = ForgeFacade.create_engine(
+                    workspace_root=ws_path,
+                    model_port=model_adapter,
+                    config=cfg,
+                    command_runner=local_command_runner,
+                )
+                outcome = engine.run_episode(task_brief=user_brief, goal_contract=goal)
+
+                # Final Oracle Evaluation
+                oracle_passed, test_summary = self.check_workspace_tests(ws_path)
+                status = "PASS" if oracle_passed else "FAIL"
+                diagnosis = "All falsifiers green" if oracle_passed else (test_summary[:120].replace("\n", " ") if test_summary else "Unknown failure")
+
+                total_latency = time.perf_counter() - t_start
+                challenge_cost = model_adapter.total_cost
+                self.total_cost_usd += challenge_cost
+
+                # Save Cassette
+                cassette_file = CAPTURES_DIR / f"{cname}_cassette.json"
+                cassette_file.write_text(json.dumps(cassettes, indent=2), encoding="utf-8")
+
+                print(f"  Result [1-Forge]: [{status}] in {outcome.turns} turns | {model_adapter.total_prompt_tok + model_adapter.total_comp_tok} tokens | ${challenge_cost:.5f} | {total_latency:.2f}s")
+
+                return ChallengeResult(
+                    challenge_id=cname,
+                    kind=kind,
+                    model=self.model_name,
+                    status=status,
+                    turns=outcome.turns,
+                    prompt_tokens=model_adapter.total_prompt_tok,
+                    completion_tokens=model_adapter.total_comp_tok,
+                    total_tokens=model_adapter.total_prompt_tok + model_adapter.total_comp_tok,
+                    cost_usd=challenge_cost,
+                    latency_seconds=round(total_latency, 2),
+                    diagnosis=diagnosis,
+                    trajectory=outcome.trajectory,
                 )
 
             messages = [
@@ -661,6 +772,7 @@ def print_results_matrix(results: List[ChallengeResult], total_cost: float, tota
 def main():
     parser = argparse.ArgumentParser(description="Run Benchmark 20 Suite")
     parser.add_argument("--model", default=None, help="Model identifier or alias (defaults to centralized config: get_default_paid_model())")
+    parser.add_argument("--preset", default="vg-code-max", choices=["vg-code-max", "vg-1-forge"], help="Harness preset (vg-code-max or vg-1-forge)")
     parser.add_argument("--max-turns", type=int, default=8, help="Max turns per challenge")
     parser.add_argument("--budget", type=float, default=0.20, help="Max USD budget")
     parser.add_argument("--single", default=None, help="Run single challenge name for debugging")
@@ -669,6 +781,7 @@ def main():
     recorder = MockRecorder(LAM_SQLITE_PATH) if MockRecorder else None
     runner = BenchmarkRunner(
         model_name=args.model,
+        preset=args.preset,
         max_turns=args.max_turns,
         budget_limit_usd=args.budget,
         recorder=recorder,
@@ -694,7 +807,7 @@ def main():
     report_data = {
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "model": runner.model_name,
-        "harness": "vanguard-vg-code-max",
+        "harness": f"vanguard-{runner.preset}",
         "pass_rate_pct": round((sum(1 for r in results if r.status == 'PASS') / len(results)) * 100, 1),
         "total_cost_usd": round(runner.total_cost_usd, 6),
         "total_duration_seconds": round(total_duration, 2),
@@ -712,7 +825,10 @@ def main():
             for r in results
         ]
     }
-    (SUITE_ROOT / "benchmark_20_results.json").write_text(json.dumps(report_data, indent=2), encoding="utf-8")
+    out_file = SUITE_ROOT / f"benchmark_20_results_{runner.preset.replace('-', '_')}.json"
+    out_file.write_text(json.dumps(report_data, indent=2), encoding="utf-8")
+    if runner.preset == "vg-code-max":
+        (SUITE_ROOT / "benchmark_20_results.json").write_text(json.dumps(report_data, indent=2), encoding="utf-8")
 
 
 if __name__ == "__main__":

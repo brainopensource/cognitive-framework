@@ -164,7 +164,7 @@ def evaluate_challenge(
 
         manifest_p = (
             ROOT
-            / "vanguard/packages/agency/manifests/vg-code-max/manifest.json"
+            / "vanguard/packages/agency/manifests/vg-code-max-v2/manifest.json"
         )
 
         try:

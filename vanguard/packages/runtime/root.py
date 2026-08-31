@@ -19,6 +19,8 @@ from ..adapters.environment.git import GitEnvironmentAdapter
 from ..adapters.sandbox.rootless import RootlessSandboxRunner
 from ..adapters.sandbox.worker import WorkerProtocol
 from ..adapters.stores.event_store import SqliteEventStore
+from ..adapters.models.cassette import Cassette, CassetteRecorder
+from ..adapters.models.openrouter import OpenRouterModel
 from ..domain.canonicalisation.digest import digest_of
 from .workspace import (
     controlled_environment,
@@ -61,6 +63,12 @@ from ..ports.memory import MemoryBinding
 from ..ports.event_store import Result
 from .child_runtime import RuntimeChildRunner
 from .delegation import SPAWN_VERB
+from ..agency.forge import (
+    FORGE_PRESET_NAME,
+    ForgeConfig,
+    ForgeFacade,
+    GoalContract,
+)
 from .wiring import (
     BindingContext,
     BindingResolver,
@@ -748,4 +756,11 @@ __all__ = [
     "get_workspace_path",
     "get_workspace_root",
     "validate_workspace_path",
+    "FORGE_PRESET_NAME",
+    "ForgeConfig",
+    "ForgeFacade",
+    "GoalContract",
+    "Cassette",
+    "CassetteRecorder",
+    "OpenRouterModel",
 ]

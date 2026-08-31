@@ -6,14 +6,13 @@
       "vg-code-max-v3luna/read-tool.json",
       "vg-code-max-v3luna/search-tool.json",
       "vg-code-max-v3luna/patch-tool.json",
-      "vg-code-max-v3luna/test-tool.json",
-      "vg-code-max-v3luna/finish-tool.json"
+      "vg-code-max-v3luna/finish-tool.json",
+      "vg-code-max-v3luna/test-tool.json"
     ],
     "context_policy": ["vg-code-max-v3luna/context-policy.json"],
     "routing_policy": ["vg-code-max-v3luna/routing-policy.json"],
     "approval_policy": ["vg-code-max-v3luna/approval-policy.json"],
-    "retrieval_policy": ["vg-code-max-v3luna/retrieval-policy.json"],
-    "repo_index": ["vg-code-max-v3luna/repo-index.json"]
+    "retrieval_policy": ["vg-code-max-v3luna/retrieval-policy.json"]
   },
   "capabilities": [
     {"verb":"fs.read","sink":"observation","selector":{"kind":"fs","root":"/workspace","paths":["/workspace"]},"risk":"low"},

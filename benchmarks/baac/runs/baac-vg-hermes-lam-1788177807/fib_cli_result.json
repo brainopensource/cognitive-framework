@@ -1,0 +1,26 @@
+{
+  "challengeId": "fib_cli",
+  "tier": "easy",
+  "preset": "vg-hermes",
+  "model": "lam-mock",
+  "mode": "lam",
+  "status": "PASS",
+  "attribution": "PASS",
+  "turns": 8,
+  "promptTokens": 1200,
+  "completionTokens": 240,
+  "totalTokens": 1440,
+  "costUsd": 0.0,
+  "durationSeconds": 0.16,
+  "oracle": {
+    "passed": true,
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "test_cli_execution (__main__.TestFibOracle.test_cli_execution) ... ok\ntest_fib_exceptions (__main__.TestFibOracle.test_fib_exceptions) ... ok\ntest_fib_values (__main__.TestFibOracle.test_fib_values) ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.063s\n\nOK\n",
+    "durationSeconds": 0.117,
+    "error": null,
+    "assertionCount": 3,
+    "failingAssertions": []
+  },
+  "diagnosis": "All falsifiers green"
+}

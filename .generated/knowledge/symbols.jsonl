@@ -46,9 +46,11 @@
 {"symbol": "AuthoritySeparationError", "kind": "class", "defined_in": "vanguard/packages/runtime/skill_evaluation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "AuthorityTrace", "kind": "class", "defined_in": "vanguard/packages/runtime/authority_audit.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "AutonomousGrant", "kind": "class", "defined_in": "vanguard/packages/runtime/autonomous_grant.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "BanditArm", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/router.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "BaselineActor", "kind": "class", "defined_in": "vanguard/packages/domain/evidence/baseline.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "BaselineManifest", "kind": "class", "defined_in": "vanguard/packages/domain/evidence/baseline.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "BaselineVerificationResult", "kind": "class", "defined_in": "vanguard/packages/domain/evidence/baseline.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "BestFirstEngineeringSearch", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/search.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "Binding", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "BindingContext", "kind": "class", "defined_in": "vanguard/packages/runtime/wiring.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "BindingProvider", "kind": "protocol", "defined_in": "vanguard/packages/adapters/bindings/base.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -62,6 +64,7 @@
 {"symbol": "BudgetProjection", "kind": "class", "defined_in": "vanguard/packages/runtime/ledger/projections.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "CacheBreakpointCeilingExceeded", "kind": "class", "defined_in": "vanguard/packages/agency/context/compiler.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "CalculatorOracle", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/suites/bug-001-single-file/test_oracle.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "CalibratedConfidence", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/blackboard.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "CancellationRequested", "kind": "class", "defined_in": "vanguard/packages/runtime/service/service.py", "canonical_owner": "docs/backend/architecture/application-interfaces.md"}
 {"symbol": "CanonicalManifest", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/manifest.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "CanonicalisationError", "kind": "class", "defined_in": "vanguard/packages/domain/canonicalisation/jcs.py", "canonical_owner": "docs/backend/reference/schemas.md"}
@@ -86,6 +89,12 @@
 {"symbol": "ChildRunPlan", "kind": "class", "defined_in": "vanguard/packages/ports/child_runtime.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "ChildRunResult", "kind": "class", "defined_in": "vanguard/packages/ports/child_runtime.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "ChildRuntimePort", "kind": "protocol", "defined_in": "vanguard/packages/ports/child_runtime.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "ChimeraAtomicPatcher", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/patcher.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "ChimeraConfig", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/facade.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "ChimeraContextCompiler", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/compiler.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "ChimeraEngine", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/engine.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "ChimeraFacade", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/facade.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "ChimeraOutcome", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/engine.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "Claim", "kind": "class", "defined_in": "vanguard/packages/domain/evidence/claim.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "ClaimError", "kind": "class", "defined_in": "vanguard/packages/domain/evidence/claim.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "ClaimRef", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
@@ -97,6 +106,11 @@
 {"symbol": "CodeBindingProvider", "kind": "class", "defined_in": "vanguard/packages/adapters/bindings/code.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "CodeEffectAdapter", "kind": "class", "defined_in": "vanguard/packages/adapters/bindings/code.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "CodingTaskState", "kind": "class", "defined_in": "vanguard/packages/runtime/task_state.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "CognitiveBlackboard", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/blackboard.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "CognitiveBudget", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/blackboard.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "CognitiveDirective", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/blackboard.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "CognitiveDirectiveKind", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/blackboard.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "CognitiveRouter", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/router.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "ColoringVerificationResult", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/suites/formal_graph_coloring.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "Commit", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/graph.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "CompactionReport", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
@@ -161,6 +175,7 @@
 {"symbol": "EffectRequest", "kind": "class", "defined_in": "vanguard/packages/kernel/model.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "EffectRequest", "kind": "class", "defined_in": "vanguard/packages/ports/environment.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "EffectiveExecutionProfile", "kind": "class", "defined_in": "vanguard/packages/runtime/profiles.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "EngineeringState", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/search.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "EnvLoadResult", "kind": "class", "defined_in": "vanguard/packages/adapters/models/env_loader.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "EnvironmentAdapter", "kind": "protocol", "defined_in": "vanguard/packages/ports/environment.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "EnvironmentProfile", "kind": "class", "defined_in": "vanguard/packages/ports/environment.py", "canonical_owner": "docs/backend/reference/ports.md"}
@@ -219,6 +234,7 @@
 {"symbol": "ExperiencePort", "kind": "protocol", "defined_in": "vanguard/packages/ports/memory.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "Explanation", "kind": "class", "defined_in": "vanguard/packages/runtime/explain.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ExteriorJudgeAdapter", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/gate.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "Fact", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/blackboard.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "FailureFingerprint", "kind": "class", "defined_in": "vanguard/packages/agency/forge/engine.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "FailurePath", "kind": "class", "defined_in": "vanguard/packages/kernel/model.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "FakeEnvironment", "kind": "class", "defined_in": "vanguard/packages/adapters/environment/fake.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -256,12 +272,14 @@
 {"symbol": "GoalContract", "kind": "class", "defined_in": "vanguard/packages/agency/forge/engine.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "GoalDeclaredPayload", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "Governor", "kind": "class", "defined_in": "vanguard/packages/kernel/budget.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
+{"symbol": "GovernorPolicy", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/governor.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "Grant", "kind": "class", "defined_in": "vanguard/packages/kernel/grants.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "GrantIssuer", "kind": "class", "defined_in": "vanguard/packages/kernel/grants.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "GrantVerification", "kind": "class", "defined_in": "vanguard/packages/kernel/grants.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "Graph", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/suites/formal_graph_coloring.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "GraphColoringEvaluator", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/suites/formal_graph_coloring.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "GraphError", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/graph.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "GraphHeuristicProvider", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/retrieval.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "GreenfieldWebappOracle", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/suites/oracle_greenfield_webapp.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "Harness", "kind": "class", "defined_in": "vanguard/packages/runtime/compose.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "HarnessManifest", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/manifest.py", "canonical_owner": "docs/backend/reference/schemas.md"}
@@ -271,6 +289,7 @@
 {"symbol": "HeldAuthority", "kind": "class", "defined_in": "vanguard/packages/kernel/classifier.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "HeldOutEvaluator", "kind": "class", "defined_in": "vanguard/packages/runtime/skill_evaluation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "HmacAuthenticator", "kind": "class", "defined_in": "vanguard/packages/kernel/grants.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
+{"symbol": "Hypothesis", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/blackboard.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "ICompletionPolicy", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "IContextManager", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "IEvaluationGate", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
@@ -288,6 +307,7 @@
 {"symbol": "InsecureKeyMaterial", "kind": "class", "defined_in": "vanguard/packages/runtime/keys.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "InvalidScopeAttenuation", "kind": "class", "defined_in": "vanguard/packages/domain/execution/scope.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "InvalidationCondition", "kind": "class", "defined_in": "vanguard/packages/domain/evidence/claim.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "InvariantSolution", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/symbolic.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "IsolatedEvaluator", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/isolated.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "JSONArgumentNormalizerPlugin", "kind": "class", "defined_in": "vanguard/packages/domain/transforms/protocol/response_wrangler.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "JsonRpcError", "kind": "class", "defined_in": "vanguard/packages/domain/wire/jsonrpc.py", "canonical_owner": "docs/backend/reference/schemas.md"}
@@ -307,6 +327,7 @@
 {"symbol": "LedgerState", "kind": "class", "defined_in": "vanguard/packages/domain/ledger/state.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "LexPolyglotReproducer", "kind": "class", "defined_in": "vanguard/packages/adapters/bindings/lex_reproducer.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "LexSurgicalEditor", "kind": "class", "defined_in": "vanguard/packages/adapters/bindings/lex_surgical_editor.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "LexicalRetrievalProvider", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/retrieval.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "LineageRef", "kind": "class", "defined_in": "vanguard/packages/domain/execution/lineage.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "LoadedManifestPack", "kind": "class", "defined_in": "vanguard/packages/agency/manifests/loader.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "LocalFileMemoryAdapter", "kind": "class", "defined_in": "vanguard/packages/adapters/stores/memory_engine.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -328,6 +349,7 @@
 {"symbol": "MemoryQuery", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "MemoryRecord", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "MemoryResult", "kind": "class", "defined_in": "vanguard/packages/ports/memory.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "MetaCognitiveGovernor", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/governor.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "MetaController", "kind": "protocol", "defined_in": "vanguard/packages/ports/meta_controller.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "MissingDescriptorBinding", "kind": "class", "defined_in": "vanguard/packages/kernel/grants.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "Mode", "kind": "class", "defined_in": "vanguard/packages/kernel/policy.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
@@ -367,11 +389,14 @@
 {"symbol": "ParetoProfile", "kind": "class", "defined_in": "vanguard/packages/runtime/pareto_measurement.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ParseError", "kind": "class", "defined_in": "vanguard/packages/domain/primitives/primitives.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "ParserOracle", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/suites/bug-003-test-reaction/test_oracle.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "PatchCandidate", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/blackboard.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "PatchError", "kind": "class", "defined_in": "vanguard/packages/agency/forge/patcher.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "PatchHunk", "kind": "class", "defined_in": "vanguard/packages/agency/forge/patcher.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "PatchOutcome", "kind": "class", "defined_in": "vanguard/packages/agency/forge/resilient_patcher.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "PatchReceipt", "kind": "class", "defined_in": "vanguard/packages/adapters/bindings/lex_surgical_editor.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "PatchResult", "kind": "class", "defined_in": "vanguard/packages/agency/forge/patcher.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "PatchRiskAssessment", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/verification.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "PatcherResult", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/patcher.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "PermissionDeniedError", "kind": "class", "defined_in": "vanguard/packages/runtime/service/contract.py", "canonical_owner": "docs/backend/architecture/application-interfaces.md"}
 {"symbol": "PlanRevisedPayload", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "PlanningNodeRunner", "kind": "class", "defined_in": "vanguard/packages/runtime/staged_workflow.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -422,6 +447,9 @@
 {"symbol": "ProviderHealthStats", "kind": "class", "defined_in": "vanguard/packages/runtime/provider_health.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ProviderHealthTracker", "kind": "class", "defined_in": "vanguard/packages/runtime/provider_health.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "RandomPort", "kind": "protocol", "defined_in": "vanguard/packages/ports/determinism.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "RankedFile", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/blackboard.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "RankedSymbol", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/blackboard.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "RankedTest", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/blackboard.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "ReadyOperation", "kind": "class", "defined_in": "vanguard/packages/runtime/scheduler.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "Receipt", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "Receipt", "kind": "class", "defined_in": "vanguard/packages/runtime/compose.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -447,6 +475,8 @@
 {"symbol": "ResponseWrangler", "kind": "class", "defined_in": "vanguard/packages/domain/transforms/protocol/response_wrangler.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "Result", "kind": "class", "defined_in": "vanguard/packages/ports/event_store.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "ResultEvictionStrategy", "kind": "class", "defined_in": "vanguard/packages/agency/context/compaction.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "RetrievalBid", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/retrieval.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "RetrievalMarket", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/retrieval.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "RetrievalProvenance", "kind": "class", "defined_in": "vanguard/packages/ports/memory.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "RoleAwareRouter", "kind": "class", "defined_in": "vanguard/packages/runtime/tier_escalation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "RoleScopedEmitter", "kind": "class", "defined_in": "vanguard/packages/runtime/ledger_emitter.py", "canonical_owner": "docs/backend/architecture/causal-state.md"}
@@ -486,6 +516,7 @@
 {"symbol": "ScheduleError", "kind": "class", "defined_in": "vanguard/packages/runtime/scheduler.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "SchedulerPolicy", "kind": "protocol", "defined_in": "vanguard/packages/runtime/scheduler.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "Scope", "kind": "class", "defined_in": "vanguard/packages/kernel/attenuation.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
+{"symbol": "SearchNode", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/search.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "SecretRedactor", "kind": "class", "defined_in": "vanguard/packages/runtime/artifacts.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "SeededRandom", "kind": "class", "defined_in": "vanguard/packages/runtime/determinism.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "SelectedModel", "kind": "class", "defined_in": "vanguard/packages/runtime/model_selection.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -505,6 +536,7 @@
 {"symbol": "SinkClass", "kind": "class", "defined_in": "vanguard/packages/kernel/model.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "SinkMismatch", "kind": "class", "defined_in": "vanguard/packages/kernel/classifier.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "SinkRegistry", "kind": "class", "defined_in": "vanguard/packages/kernel/classifier.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
+{"symbol": "Skill", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/skills.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "SkillCandidate", "kind": "class", "defined_in": "vanguard/packages/runtime/skill_lifecycle.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "SkillCard", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/skill_index.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "SkillEntry", "kind": "class", "defined_in": "vanguard/packages/runtime/skill_index.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -515,6 +547,7 @@
 {"symbol": "SkillIndexError", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/skill_index.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "SkillLibrary", "kind": "protocol", "defined_in": "vanguard/packages/ports/memory.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "SkillPromoter", "kind": "protocol", "defined_in": "vanguard/packages/runtime/skill_lifecycle.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "SkillRegistry", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/skills.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "Span", "kind": "class", "defined_in": "vanguard/packages/kernel/model.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "SpawnAdapter", "kind": "class", "defined_in": "vanguard/packages/runtime/delegation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "SpawnIntent", "kind": "class", "defined_in": "vanguard/packages/runtime/delegation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -546,6 +579,8 @@
 {"symbol": "SubprocessToolkitAdapter", "kind": "class", "defined_in": "vanguard/packages/adapters/sandbox/toolkit.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "SuspensionToken", "kind": "class", "defined_in": "vanguard/packages/kernel/dispatch.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "Symbol", "kind": "class", "defined_in": "vanguard/packages/ports/index.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "SymbolicCortex", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/symbolic.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "SyntaxCheckResult", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/symbolic.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "SystemClock", "kind": "class", "defined_in": "vanguard/packages/runtime/determinism.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "SystemRandom", "kind": "class", "defined_in": "vanguard/packages/runtime/determinism.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "TableAdapterOutcome", "kind": "class", "defined_in": "vanguard/packages/adapters/bindings/table.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -557,6 +592,7 @@
 {"symbol": "TableWorldEnvironment", "kind": "class", "defined_in": "vanguard/packages/adapters/environment/tableworld.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "TableWorldEvaluator", "kind": "class", "defined_in": "vanguard/packages/adapters/environment/tableworld.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "TaskContext", "kind": "class", "defined_in": "vanguard/packages/runtime/compose.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "TaskFeatures", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/blackboard.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "TaskReport", "kind": "class", "defined_in": "vanguard/packages/runtime/dogfood.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "TierAttempt", "kind": "class", "defined_in": "vanguard/packages/runtime/tier_escalation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "TierEscalationRouter", "kind": "class", "defined_in": "vanguard/packages/adapters/models/routing.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -576,6 +612,7 @@
 {"symbol": "TrajectoryReader", "kind": "class", "defined_in": "vanguard/packages/runtime/trajectory_reader.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "TrajectoryRef", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "TrajectorySkillGenerator", "kind": "class", "defined_in": "vanguard/packages/runtime/skill_evaluation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "TrajectorySummary", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/blackboard.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "TrajectoryTurn", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "TrajectoryTurnV2", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "TrajectoryV2", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
@@ -593,6 +630,7 @@
 {"symbol": "UnauthenticatedError", "kind": "class", "defined_in": "vanguard/packages/runtime/service/contract.py", "canonical_owner": "docs/backend/architecture/application-interfaces.md"}
 {"symbol": "UnavailableEvaluator", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/unavailable.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "Uncertainty", "kind": "class", "defined_in": "vanguard/packages/domain/evidence/claim.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "UncertaintyProfile", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/blackboard.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "UnifiedDiffParser", "kind": "class", "defined_in": "vanguard/packages/agency/forge/patcher.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "UnknownCompactionStrategyError", "kind": "class", "defined_in": "vanguard/packages/agency/context/compaction.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "ValidatedCommand", "kind": "class", "defined_in": "vanguard/packages/runtime/service/contract.py", "canonical_owner": "docs/backend/architecture/application-interfaces.md"}
@@ -600,9 +638,12 @@
 {"symbol": "Verdict", "kind": "class", "defined_in": "vanguard/packages/ports/evaluator.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "VerdictRecord", "kind": "class", "defined_in": "vanguard/packages/domain/ledger/state.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "VerdictSigner", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/signing.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "VerificationCortex", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/verification.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "VerificationLevel", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/verification.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "VerificationNodeRunner", "kind": "class", "defined_in": "vanguard/packages/runtime/staged_workflow.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "VerificationReceipt", "kind": "class", "defined_in": "vanguard/packages/agency/episode/admission_gate.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "VerificationReceipt", "kind": "class", "defined_in": "vanguard/packages/agency/forge/engine.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "VerificationRecord", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/blackboard.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "VerificationResult", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/suites/formal_sat.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "WalContentionMetrics", "kind": "class", "defined_in": "vanguard/packages/runtime/pareto_measurement.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "WireError", "kind": "class", "defined_in": "vanguard/packages/domain/wire/contracts.py", "canonical_owner": "docs/backend/reference/schemas.md"}

@@ -288,8 +288,7 @@ def parse_test_output(output: str, exit_code: int) -> Tuple[int, tuple[str, ...]
 
     # If all passed and exit_code == 0, fallback test_count to at least 1
     if exit_code == 0 and test_count == 0:
-        if "OK" in output or "PASSED" in output or "pass" in output.lower():
-            test_count = 1
+        test_count = 1
 
     # Extract FAIL/ERROR test names
     for line in output.splitlines():
@@ -312,6 +311,49 @@ def parse_test_output(output: str, exit_code: int) -> Tuple[int, tuple[str, ...]
         top_frame = f"{frame_m.group(1)}:{frame_m.group(2)} ({frame_m.group(3)})"
 
     return test_count, tuple(dict.fromkeys(failing)), exc_type, top_frame
+
+
+def extract_fallback_tool_calls(content: str) -> list[dict[str, Any]]:
+    """Extract tool calls from markdown code blocks or structured text emitted by models."""
+    extracted: list[dict[str, Any]] = []
+
+    # 1. JSON blocks with tool calls or function calls
+    for match in re.finditer(r"```(?:json)?\s*(\{[^`]+\}|\[[^`]+\])\s*```", content, re.DOTALL):
+        try:
+            data = json.loads(match.group(1))
+            if isinstance(data, dict):
+                name = data.get("name") or data.get("tool") or data.get("function")
+                args = data.get("arguments") or data.get("args") or data.get("parameters") or {}
+                if name:
+                    extracted.append({"function": {"name": name, "arguments": args}})
+            elif isinstance(data, list):
+                for item in data:
+                    if isinstance(item, dict) and ("name" in item or "tool" in item):
+                        name = item.get("name") or item.get("tool")
+                        args = item.get("arguments") or item.get("args") or {}
+                        extracted.append({"function": {"name": name, "arguments": args}})
+        except Exception:
+            pass
+
+    if extracted:
+        return extracted
+
+    # 2. Bash / shell command blocks
+    bash_matches = re.findall(r"```(?:bash|sh|shell|console)\s*\n(.*?)\n```", content, re.DOTALL)
+    for cmd in bash_matches:
+        cmd_clean = cmd.strip()
+        if cmd_clean and not cmd_clean.startswith("#"):
+            extracted.append({"function": {"name": "run_command", "arguments": {"command": cmd_clean}}})
+
+    # 3. Python code blocks with file path hints
+    py_matches = re.finditer(r"(?:###?\s*[`\"']?([a-zA-Z0-9_\-./]+\.py)[`\"']?|#\s*([a-zA-Z0-9_\-./]+\.py))\s*\n```(?:python)?\s*\n(.*?)\n```", content, re.DOTALL)
+    for m in py_matches:
+        path = m.group(1) or m.group(2)
+        code = m.group(3)
+        if path and code:
+            extracted.append({"function": {"name": "edit_file", "arguments": {"path": path.strip(), "content": code}}})
+
+    return extracted
 
 
 @dataclass
@@ -411,8 +453,8 @@ class ForgeEngine:
 
             elif tool_name in ("surgical_patch", "patch_chunk", "resilient_patch"):
                 path_str = args.get("path", "")
-                target = args.get("target", "")
-                replacement = args.get("replacement", "")
+                target = args.get("target_chunk") or args.get("target") or args.get("old_str") or args.get("original") or ""
+                replacement = args.get("replacement_chunk") or args.get("replacement") or args.get("new_str") or ""
                 res = self.patcher.apply_resilient_patch(path_str, target, replacement)
                 if res.success:
                     for cf in res.changed_files:
@@ -617,8 +659,26 @@ class ForgeEngine:
             )
 
             if not tool_calls:
-                # Model provided conversational response without tools
+                # Attempt to extract fallback tool calls from markdown/plaintext
+                tool_calls = extract_fallback_tool_calls(content)
+
+            if not tool_calls:
+                # Model provided conversational response without tools - inject directive feedback
                 turns_since_progress += 1
+                dialogue_blocks.append(
+                    Block(
+                        layer=Layer.DIALOGUE,
+                        source="tool",
+                        label="directive_feedback",
+                        text=(
+                            "[DIRECTIVE FEEDBACK]: No tool calls detected. You MUST invoke tools "
+                            "(e.g. `view_file`, `edit_file`, `surgical_patch`, `run_command`, `finish_task`) "
+                            "to inspect files, apply code modifications, and execute tests. "
+                            "Conversational text alone will NOT complete the task."
+                        ),
+                        evictable=True,
+                    )
+                )
                 trajectory.append({"turn": turn, "model_text": content})
                 continue
 

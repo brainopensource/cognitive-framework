@@ -1,0 +1,10 @@
+{
+  "read": "fs.read",
+  "search": "fs.search",
+  "patch": "patch.apply",
+  "test": "proc.exec",
+  "fs.read": "fs.read",
+  "fs.search": "fs.search",
+  "patch.apply": "patch.apply",
+  "proc.exec": "proc.exec"
+}

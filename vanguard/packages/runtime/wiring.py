@@ -235,6 +235,7 @@ DEFAULT_BINDINGS: Mapping[str, EffectBinding] = {
     "proc.exec": EffectBinding(_sandbox_effector),
     "agent.spawn": EffectBinding(_spawn_effector),
     "web.distill": EffectBinding(_environment_observer),
+    "agency.finish": EffectBinding(_environment_effector),
 }
 
 

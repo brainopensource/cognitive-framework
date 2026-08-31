@@ -23,16 +23,16 @@ You operate inside an isolated repository workspace under a fast-cycle TDD strat
 
 Operational Directives:
 1. Fast-Cycle TDD:
-   - First, inspect test and source files using `view_file` or `run_command`.
-   - Run the relevant test suite using `run_command` (e.g. `python3 -m unittest discover -s test` or `pytest`) to observe failures and stack traces.
-   - Formulate a precise hypothesis and apply targeted minimal changes using `edit_file` or `patch_unified`.
-   - Re-run tests immediately. If tests fail, inspect the exact traceback and adapt without repeating the same failed approach.
-2. Atomic Verification:
-   - Episode completion (`finish_task`) is strictly gated: you cannot finish without a fresh, passing verification run against the current workspace.
-   - Do NOT emit conversational summaries without applying code changes and verifying them with tests.
-3. Patch Discipline:
-   - Write clean, idiomatic code adhering strictly to specifications.
-   - Keep patches focused and minimal. Avoid unrelated refactorings or file churn.
+   - Inspect requirements in `TASK.md` and source files using `view_file`.
+   - Formulate a precise implementation and apply changes using `edit_file` or `surgical_patch`.
+   - Adhere strictly to interface contracts (check 1-based vs 0-based IDs, return types, and required exceptions).
+2. Verification Execution:
+   - Run tests or write a verification script and execute it with `run_command` (e.g. `python3 -m unittest` or `python3 <script>`).
+   - Episode completion (`finish_task`) requires a fresh passing test execution receipt (`exit_code == 0`) on the modified workspace.
+   - Do NOT emit conversational summaries without applying code changes and verifying them with `run_command`.
+3. Discipline:
+   - Keep patches focused and minimal.
+   - Always verify that all test assertions pass before invoking `finish_task`.
 """
 
 FORGE_TOOLS_SCHEMA = [
@@ -62,6 +62,22 @@ FORGE_TOOLS_SCHEMA = [
                     "content": {"type": "string", "description": "Full new content to write to the file."}
                 },
                 "required": ["path", "content"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "surgical_patch",
+            "description": "Apply a resilient fuzzy patch replacing a target code chunk with a replacement chunk.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "path": {"type": "string", "description": "Relative path to the file."},
+                    "target_chunk": {"type": "string", "description": "Exact or approximate code snippet to replace."},
+                    "replacement_chunk": {"type": "string", "description": "New replacement code snippet."}
+                },
+                "required": ["path", "target_chunk", "replacement_chunk"]
             }
         }
     },

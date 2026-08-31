@@ -136,6 +136,7 @@ class ApplicationService:
         interactive: bool = True,
         max_turns: int = 40,
         autonomous_approval: bool = False,
+        allow_paid: bool = False,
     ) -> RunResult:
         """Execute a new run through the canonical runtime pipeline.
 
@@ -175,6 +176,7 @@ class ApplicationService:
                     selected_model = select_model(
                         model_port,
                         model_name=planner_model,
+                        allow_paid=allow_paid,
                     ).model
                 else:
                     selected_model = model_port
@@ -182,7 +184,7 @@ class ApplicationService:
                 from ..adapters.models.fake import FakeModel
                 selected_model = FakeModel([{"kind": "finish", "note": "local preview"}])
             else:
-                selected_model = select_model("openrouter", model_name=planner_model).model
+                selected_model = select_model("openrouter", model_name=planner_model, allow_paid=allow_paid).model
         else:
             selected_model = model
 

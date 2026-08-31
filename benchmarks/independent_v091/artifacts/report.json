@@ -1,0 +1,78 @@
+{
+  "cases": [
+    {
+      "baseline_passed": false,
+      "events": 90,
+      "id": "agent_basic",
+      "oracle_passed": false,
+      "passed": false,
+      "proposal_events": 3,
+      "reason": "external_oracle_failed",
+      "receipts": 1,
+      "terminal": "escalated",
+      "trajectory_digest": "sha256:d5d7c914e480063453cee35b36c86ba0887a358a861af3acee19c575d461fe4f"
+    },
+    {
+      "baseline_passed": false,
+      "events": 100,
+      "id": "agent_multifile",
+      "oracle_passed": false,
+      "passed": false,
+      "proposal_events": 4,
+      "reason": "external_oracle_failed",
+      "receipts": 2,
+      "terminal": "escalated",
+      "trajectory_digest": "sha256:06e6a11d1dc896a69b92e96b8d402e8502da43eba17a53e454e9257e7e145b09"
+    },
+    {
+      "admissible": false,
+      "baseline_passed": false,
+      "baseline_recorded": true,
+      "behavioral_passed": false,
+      "events": 80,
+      "greenfield_admitted": false,
+      "greenfield_reason": "STRUCTURAL_EVIDENCE_REQUIRED",
+      "id": "agent_greenfield",
+      "oracle_passed": false,
+      "passed": false,
+      "proposal_events": 2,
+      "reason": "external_oracle_failed",
+      "receipts": 0,
+      "structural_passed": false,
+      "terminal": "escalated",
+      "trajectory_digest": "sha256:2d014c82b92794f144a850bb12e40348b7e217d74b0575b697d6a3702a97924b",
+      "workspace_effectively_empty": true
+    },
+    {
+      "empty_rejections": [
+        "IMPLICATED_SET_EMPTY"
+      ],
+      "id": "framework_fail_closed",
+      "incomplete_rejections": [
+        "PUBLIC_INTERFACE_CALLERS_UNRESOLVED"
+      ],
+      "migration_rejections": [
+        "MIGRATION_EVIDENCE_INCOMPLETE"
+      ],
+      "passed": true,
+      "truncated_rejections": [
+        "IMPLICATED_FILES_NOT_INSPECTED:1",
+        "CHANGE_SURFACE_TRUNCATED"
+      ]
+    },
+    {
+      "id": "lam_lda_contract",
+      "lam_deterministic": true,
+      "lam_scenarios_listed": 254,
+      "lam_sqlite_calls": 1,
+      "lda_head": null,
+      "lda_index_healthy": false,
+      "passed": false
+    }
+  ],
+  "evaluator": "independent-v091",
+  "non_empirical": false,
+  "passed": 1,
+  "schema": "aether.independent-benchmark/1",
+  "total": 5
+}

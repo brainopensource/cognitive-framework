@@ -753,6 +753,21 @@ class OpenRouterModel:
             value = self._environ.get(self.api_key_ref)
         else:
             value = os.environ.get(self.api_key_ref)
+        if not value:
+            from pathlib import Path
+            root = Path(__file__).resolve().parents[4]
+            env_p = root / ".env"
+            if env_p.is_file():
+                try:
+                    for line in env_p.read_text(encoding="utf-8").splitlines():
+                        line = line.strip()
+                        if line and not line.startswith("#") and "=" in line:
+                            k, v = line.split("=", 1)
+                            if k.strip() == self.api_key_ref:
+                                value = v.strip().strip("'\"")
+                                break
+                except Exception:
+                    pass
         return value if value else None
 
     def _execute_transport(

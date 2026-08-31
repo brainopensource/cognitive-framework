@@ -69,6 +69,27 @@ class SelectedModel:
         return {"modelPort": self.port, "modelLabel": self.label}
 
 
+def _find_env_key(key_name: str, environ: Any) -> str | None:
+    if hasattr(environ, "get"):
+        val = environ.get(key_name)
+        if val:
+            return str(val)
+    from pathlib import Path
+    root = Path(__file__).resolve().parents[3]
+    env_p = root / ".env"
+    if env_p.is_file():
+        try:
+            for line in env_p.read_text(encoding="utf-8").splitlines():
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, v = line.split("=", 1)
+                    if k.strip() == key_name:
+                        return v.strip().strip("'\"")
+        except Exception:
+            pass
+    return None
+
+
 def select_model(
     port: str = "mock",
     *,
@@ -172,7 +193,7 @@ def select_model(
     if choice in {"openrouter", "deepseek"}:
         from ..adapters.models.openrouter import OpenRouterModel
 
-        key = environ.get("OPENROUTER_API_KEY")
+        key = _find_env_key("OPENROUTER_API_KEY", environ)
         if not key:
             raise ModelUnavailable(choice, "OPENROUTER_API_KEY is not set")
         if paid_allowed or models:

@@ -77,6 +77,19 @@ from .wiring import (
 )
 
 
+def application_service(*args: Any, **kwargs: Any) -> Any:
+    """Return the application boundary without creating an import cycle.
+
+    The runtime root is the only public composition seam for clients such as
+    benchmark harnesses.  The import stays lazy because ``app_service`` uses
+    ``Runtime`` during its own initialization.
+    """
+    import importlib
+
+    service_module = importlib.import_module("vanguard.packages.runtime.app_service")
+    return service_module.ApplicationService(*args, **kwargs)
+
+
 class Runtime(_ComposedRuntime):
     """Public runtime: compose, then run one episode (`execute_harness`)."""
 
@@ -425,6 +438,7 @@ class _TopologyModel:
         self._brief = task.brief
         self._harness = harness
         self._blobs = blobs
+        self._task_max_turns = task.max_turns
         self._operations = tuple(lowered.get("roleOperations", ()))
         self._roles = {
             str(item["role"]): item
@@ -466,7 +480,7 @@ class _TopologyModel:
             if dimension in {"usd_micros", "millis", "tokens", "bytes"}
         }
         max_turns = int(template.get("budget", {}).get(
-            "maxTurns", template.get("budget", {}).get("turns", 1)))
+            "maxTurns", template.get("budget", {}).get("turns", getattr(self, "_task_max_turns", 15))))
         max_turns = max(max_turns, 1)
         # The generic selector is declared by the manifest for agent.spawn;
         # it is selected from that declaration, never fabricated as authority.

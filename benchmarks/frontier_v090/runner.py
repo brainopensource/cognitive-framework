@@ -171,6 +171,7 @@ def run_row(challenge_id: str, preset: str, executor: Executor, *, timeout: floa
             resolved_root.mkdir(parents=True, exist_ok=True)
             workspace = Path(tempfile.mkdtemp(
                 prefix=f"{challenge_id}-{preset}-", dir=resolved_root))
+            stack.callback(shutil.rmtree, workspace, True)
         _materialize_public(challenge, workspace)
         public_files = snapshot(workspace)
         oracle_digest = digest_bytes(challenge.oracle_code.encode())

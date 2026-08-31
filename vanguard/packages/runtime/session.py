@@ -360,6 +360,10 @@ class SessionPorts:
     memory: MemoryBinding | None = None
     #: Optional point-of-use authorized experience sink on successful runs.
     experience: MemoryBinding | None = None
+    #: Pack-composed terminal admission policy. ``None`` retains the strict
+    #: built-in gate for legacy harnesses; production coding packs bind their
+    #: repository/greenfield policy here.
+    completion_policy: Any = None
     #: `M-6`. The runtime that executes child episodes. `None` is legal for a
     #: composition that never declares `agent.spawn`; for one that does, the
     #: binding fails closed at composition rather than substituting a fake.
@@ -433,10 +437,12 @@ class HarnessSession:
         self._episode_begun_here = False
         self._completion_gate = AdmissionGate()
         self._completion_changed_files: set[str] = set()
+        self._completion_inspected_files: set[str] = set()
         self._completion_verification: VerificationReceipt | None = None
 
         repo = Path(task.repo_path)
         self.repo = repo
+        self._completion_scaffold_baseline = self._empty_workspace_baseline()
         self.ledger = LedgerEmitter(
             ports.store,
             episode_id=task.episode_id,
@@ -533,6 +539,10 @@ class HarnessSession:
                     for ref in task.artifact_refs))
         if discovered_env:
             env_parts.append(discovered_env)
+        if task.resume_state:
+            env_parts.append(
+                "=== Durable Coding Task State ===\n"
+                + json.dumps(dict(task.resume_state), sort_keys=True, default=str))
         if self.index is not None:
             files_res = self.index.files()
             if files_res.ok and files_res.value is not None:
@@ -633,6 +643,18 @@ class HarnessSession:
         read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
         envelopes = read.value if read.ok and read.value is not None else ()
         return reconstruct_state(envelopes)
+
+    def _empty_workspace_baseline(self) -> bool:
+        """Record whether the target was empty before product generation."""
+        ignored = {
+            ".git", ".vanguard", ".pytest_cache", "__pycache__", ".gitignore",
+            ".editorconfig", "README.md", "TASK.md", "pyproject.toml",
+            "package.json", "package-lock.json", "uv.lock",
+        }
+        try:
+            return not any(item.name not in ignored for item in self.repo.iterdir())
+        except OSError:
+            return False
 
     def _controller_remaining_budget(self, view: AgentView) -> Mapping[str, int]:
         return remaining_budget(
@@ -850,6 +872,9 @@ class HarnessSession:
             principal=self.task.principal,
             payload={
                 "episodeId": self.task.episode_id,
+                "objective": self.task.brief,
+                "budgetCeiling": dict(self.harness.budget),
+                "scaffoldBaselineRecorded": self._completion_scaffold_baseline,
                 "harness": self.harness.harness,
                 "compositionDigest": self.harness.composition_digest,
                 "activationDigest": getattr(self.run_plan, "activation_digest", ""),
@@ -882,6 +907,10 @@ class HarnessSession:
             self.begin_episode()
         else:
             scanner = RecoveryScanner(controller_principal=task.principal)
+            # Checkpoints accelerate the fold but never replace the event
+            # stream. A cold continuation proves the checkpoint/state parity
+            # before the planner sees the restored task context.
+            self.reconstruct(verify=True)
             scanner.reconcile_open_intents(
                 ports.store, occurred_at=ports.clock.now(),
                 project_id=task.project_id,
@@ -1143,7 +1172,11 @@ class HarnessSession:
         if result.failure is not FailurePath.OK or result.outcome is None:
             return
         outcome = result.outcome
-        if request.action in {"patch", "write", "delete"}:
+        if request.action in {"read", "search"} or request.action == "fs.read":
+            path = request.args.get("path")
+            if isinstance(path, str) and path and not path.startswith(("/", "\\")):
+                self._completion_inspected_files.add(path.replace("\\", "/"))
+        if request.action in {"patch", "patch.apply", "fs.patch", "write", "fs.write", "delete"}:
             path = request.args.get("path")
             if isinstance(path, str) and path and not path.startswith(("/", "\\")):
                 self._completion_changed_files.add(path.replace("\\", "/"))
@@ -1170,14 +1203,31 @@ class HarnessSession:
 
     def _admit_completion(self, _episode: Any, _proposal: Any) -> AdmissionVerdict:
         """Apply the coding completion contract before reducing ``finish``."""
-        return self._completion_gate.evaluate(
-            self.harness.harness,
-            tuple(sorted(self._completion_changed_files)),
-            {"kind": "finish"},
+        policy = self.ports.completion_policy or self._completion_gate
+        verdict = policy.evaluate(
+            preset_name=self.harness.harness,
+            changed_files=tuple(sorted(self._completion_changed_files)),
+            proposal={"kind": "finish"},
             verification=self._completion_verification,
             current_workspace_digest=self._workspace_digest(),
-            task_requirements_satisfied=True,
+            inspected_files=tuple(sorted(self._completion_inspected_files)),
+            task_text=self.task.brief,
+            greenfield_evidence={
+                "baseline_recorded": self._completion_scaffold_baseline,
+                "structural_passed": bool(self._completion_verification and self._completion_verification.passed),
+                "smoke_test_created": any("test" in path.lower() for path in self._completion_changed_files),
+                "behavioral_passed": bool(self._completion_verification and self._completion_verification.passed),
+            },
         )
+        if isinstance(verdict, AdmissionVerdict):
+            return verdict
+        if isinstance(verdict, Mapping):
+            return AdmissionVerdict(
+                bool(verdict.get("admissible", verdict.get("admitted", False))),
+                str(verdict.get("reason", "COMPLETION_POLICY_REJECTED")),
+                verdict.get("rejection_feedback"),
+            )
+        return AdmissionVerdict(False, "COMPLETION_POLICY_INVALID_VERDICT")
 
 
 def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any,

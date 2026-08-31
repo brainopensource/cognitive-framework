@@ -56,6 +56,15 @@ class TestAppServiceAndCli(unittest.TestCase):
         self.assertEqual(events_res.total, status_res.event_count)
         self.assertTrue(len(events_res.events) > 0)
 
+        # Resume test asserting original brief preservation
+        resume_res = app.resume(
+            run_id="run-test-1",
+            state_dir=self.state_dir,
+            model=FakeModel([{"kind": "finish", "note": "resumed smoke test completed"}]),
+        )
+        self.assertEqual(resume_res.run_id, "run-test-1")
+        self.assertEqual(resume_res.outcome, "completed")
+
     def test_artifact_retrieval_and_digest_verification(self) -> None:
         app = ApplicationService(workspace=self.workspace)
         blobs = FileBlobStore(self.state_dir / "blobs")

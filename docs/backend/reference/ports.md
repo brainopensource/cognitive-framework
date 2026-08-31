@@ -40,11 +40,11 @@ confidence: high
 # Hexagonal Ports & SPI Reference
 
 ## Purpose
-This document is the canonical reference owner for all hexagonal port protocols (`vanguard.packages.ports`), the five frozen Service Provider Interfaces (SPIs), and their concrete adapter mappings and test doubles.
+This document is the canonical reference owner for all hexagonal port protocols (`vanguard.packages.ports`), the frozen Service Provider Interfaces (SPIs), and their concrete adapter mappings and test doubles.
 
 ## Scope
 - Port protocol signatures in `vanguard/packages/ports/`.
-- The five SPI protocols defined in `vanguard/packages/ports/spi.py` (`IPlanner`, `IContextManager`, `IToolkit`, `IMemoryEngine`, `IEvaluationGate`).
+- The six SPI protocols defined in `vanguard/packages/ports/spi.py` (`IPlanner`, `IContextManager`, `IToolkit`, `IMemoryEngine`, `IEvaluationGate`, `ICompletionPolicy`).
 - Mapping of ports to concrete production adapters (`vanguard/packages/adapters/`) and test fakes.
 - Standard port exception and failure hierarchies.
 
@@ -58,9 +58,9 @@ This document is the canonical reference owner for all hexagonal port protocols 
 
 ---
 
-## 1. The Five Frozen SPI Protocols (`ports/spi.py`)
+## 1. The Frozen SPI Protocols (`ports/spi.py`)
 
-The five SPI protocols represent the client interfaces of the agent substrate:
+The SPI protocols represent the client interfaces of the agent substrate:
 
 ```python
 from vanguard.packages.ports.spi import (
@@ -69,6 +69,7 @@ from vanguard.packages.ports.spi import (
     IToolkit,
     IMemoryEngine,
     IEvaluationGate,
+    ICompletionPolicy,
 )
 ```
 
@@ -79,6 +80,7 @@ from vanguard.packages.ports.spi import (
 | `IToolkit` | `verbs()`<br>`execute(request, ctx)`<br>`compensate(receipt)`<br>`health()` | `EffectRequest`, `EffectContext`<br>$	o$ `Result[Receipt]`, `Health` | Physical effect execution (leased work only, never grants). |
 | `IMemoryEngine` | `query(q)`<br>`store(record)`<br>`consolidate(hits)`<br>`prune(criteria)` | `MemoryQuery`, `MemoryRecord`<br>$	o$ `Result[Sequence[MemoryHit]]` | Episodic and semantic retrieval with scoped authorization. |
 | `IEvaluationGate` | `evaluate(req)`<br>`rubrics()` | `EvaluationSubject`<br>$	o$ `Result[SignedVerdict]` | Exterior evaluation verdict provider. |
+| `ICompletionPolicy` | `evaluate(**observations)` | Runtime completion observations<br>$	o$ admission verdict | Pack-composed terminal admission policy for repository closure and greenfield evidence. |
 
 ---
 

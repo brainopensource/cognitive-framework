@@ -92,11 +92,49 @@ uv run lda standardize vanguard/packages/kernel/budget.py
 ```
 
 ### 12. Rebuild vs. Incremental (`lda index`)
-`lda index --rebuild` purges all facts first (kills stale/orphan FTS rows found by `lda_check`), then re-indexes every profile-declared code/doc extension:
+### 13. Structural Repository Map (`lda_repomap`)
+Generate a dense, graph-centrality (PageRank) ranked repository overview containing structural skeletons within a token budget:
 ```bash
-uv run lda index --rebuild --json
-uv run lda index --incremental --json
+# CLI execution
+uv run lda repomap --budget 2000 --json
 ```
+```json
+// MCP JSON-RPC execution
+{"method": "tools/call", "params": {"name": "lda_repomap", "arguments": {"budget": 2000}}}
+```
+
+### 14. Targeted Test Selection (`lda_focused_tests` / `lda tests`)
+Discover the exact unit tests and falsifiers associated with touched or modified files (avoids full suite overhead):
+```bash
+# CLI execution
+uv run lda tests vanguard/packages/kernel/budget.py
+```
+```json
+// MCP JSON-RPC execution
+{"method": "tools/call", "params": {"name": "lda_focused_tests", "arguments": {"touched_files": ["vanguard/packages/kernel/budget.py"]}}}
+```
+
+### 15. SOTA Graph Diffusion & Submodular Strategy
+`lda context` defaults to `ppr_submodular` (Markov spreading activation + Minoux submodular knapsack), but supports fallback to `fts5_bm25`:
+```bash
+uv run lda context "kernel budget" --strategy ppr_submodular --budget 4000
+```
+
+---
+
+## Autonomous Agent Coding Recipes
+
+### Recipe 1: Fast Bug Fix & Surgical Test Validation
+1. **Locate Context**: Run `lda_context` with the error trace or bug description to retrieve relevant AST symbols and canonical docs.
+2. **Inspect Skeletons**: Inspect the type signatures and docstrings returned in `symbols` to identify the bug root cause without reading entire multi-thousand line files.
+3. **Edit Code**: Apply the targeted patch strictly to the offending module.
+4. **Targeted Verification**: Run `lda_focused_tests` (or `uv run lda tests <modified_file>`) to run only the 1-3 falsifiers covering your changes in <0.2s instead of the entire 10s suite.
+
+### Recipe 2: Feature Extension & Architecture Onboarding
+1. **Global Orientation**: Run `lda_repomap --budget 2000` to obtain a dense structural map of all key interfaces, structs, and modules across the codebase.
+2. **Interface Pinning**: Use `lda_symbol` on the target protocol/interface (e.g. `ModelPort`, `Governor`) to get exact contracts.
+3. **Trace Impact**: Run `lda_callers` on affected methods to check which callers must be maintained.
+4. **Verify**: Run `lda_focused_tests` to ensure no regressions were introduced.
 
 ---
 
@@ -104,9 +142,10 @@ uv run lda index --incremental --json
 
 When assigned any coding, debugging, or refactoring task:
 
-0. **Health Gate**: Run `lda_doctor` / `lda_check` first. If `index_healthy` is `false` (or `lda_check` reports DEGRADED), fall back to `python3 tools/docs_rag_v0.py "<query>"` and `rg` — never trust packet facts from a cold/dirty index. If `lda_check` reports orphan/stale/low-signal hygiene warnings, run `lda index --rebuild` to purge them.
-1. **Acquire Context**: Run `lda_context` with your task prompt. Check `source_head_sha` against the workspace HEAD (`git rev-parse HEAD`); on mismatch, recompile — never serve stale line numbers or symbols.
+0. **Health Gate**: Run `lda_doctor` / `lda_check` first. If `index_healthy` is `false`, fall back to `python3 tools/docs_rag_v0.py "<query>"` and `rg`.
+1. **Acquire Context**: Run `lda_context` with your task prompt. Check `source_head_sha` against the workspace HEAD; on mismatch, recompile.
 2. **Verify Dependencies**: Pin symbols with `lda_symbol` and trace callers with `lda_callers`.
-3. **Execute & Falsify**: Apply surgical diffs, run the tests identified in Step 1, and update all documentation debt obligations returned by `lda_context`.
+3. **Execute & Falsify**: Apply surgical diffs, run the tests identified in `lda_focused_tests`, and update all documentation debt obligations returned by `lda_context`.
 
-> Invariant: CLI and MCP serve the **same** fact graph and packet dialect — there is exactly one emitter (the canonical knowledge-base generator) and one freshness contract (`provenance.source_head_sha`).
+> Invariant: CLI and MCP serve the **same** fact graph and packet dialect — there is exactly one emitter and one freshness contract (`provenance.source_head_sha`).
+

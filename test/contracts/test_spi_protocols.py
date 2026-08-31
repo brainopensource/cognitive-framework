@@ -27,10 +27,10 @@ class _StubModel:
 
 
 class SpiProtocolIdentityTests(unittest.TestCase):
-    def test_exactly_five_protocols_no_sixth_spi(self) -> None:
+    def test_canonical_spi_protocols(self) -> None:
         self.assertEqual(
             set(spi.__all__),
-            {"IPlanner", "IContextManager", "IToolkit", "IMemoryEngine", "IEvaluationGate"},
+            {"ICompletionPolicy", "IPlanner", "IContextManager", "IToolkit", "IMemoryEngine", "IEvaluationGate"},
         )
 
     def test_ok_err_come_from_one_module_not_two(self) -> None:

@@ -1,3 +1,14 @@
+---
+id: report.electroweak.n-chimera.aether-chimera-neurosymbolic-meta-harness-prd
+class: report
+authority: non-canonical
+canonical_for: []
+status: proposal
+owner: repository-governance
+version: 0.9.2a2
+last_verified: 2026-08-31
+---
+
 # AETHER — ELECTROWEAK / Vanguard
 # CHIMERA: Neuro-Symbolic Adaptive Meta-Harness
 ## Principal Engineering PRD, Research Architecture & Development Guide

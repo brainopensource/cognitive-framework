@@ -53,6 +53,7 @@ from .evidence_errors import (
     EvidenceSink,
 )
 from .index import DependencyEdge, IndexPort, RepositoryMap, Symbol, TestAssociation
+from .spi import ICompletionPolicy, IContextManager, IEvaluationGate, IMemoryEngine, IPlanner, IToolkit
 
 __all__ = [
     "AffectedResource",
@@ -97,4 +98,10 @@ __all__ = [
     "RepositoryMap",
     "Symbol",
     "TestAssociation",
+    "ICompletionPolicy",
+    "IContextManager",
+    "IEvaluationGate",
+    "IMemoryEngine",
+    "IPlanner",
+    "IToolkit",
 ]

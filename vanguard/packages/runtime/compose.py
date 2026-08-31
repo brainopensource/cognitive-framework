@@ -111,6 +111,8 @@ class TaskContext:
     scope_override: Any = None
     #: Authority-free references admitted by a mediated topology edge.
     artifact_refs: tuple[Mapping[str, str], ...] = ()
+    #: Reconstructed semantic state supplied only on cold continuation.
+    resume_state: Mapping[str, Any] | None = None
 
 
 @dataclass(frozen=True, slots=True)

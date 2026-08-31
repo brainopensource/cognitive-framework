@@ -160,6 +160,9 @@ def load_entry(entry: str, pack_root: Path | None = None) -> Any:
         if spec is None or spec.loader is None:
             raise ImportError(f"cannot load {path}")
         module = importlib.util.module_from_spec(spec)
+        # Dataclasses and other reflection-based decorators resolve the
+        # module through sys.modules while the standalone plugin is loading.
+        sys.modules[spec.name] = module
         spec.loader.exec_module(module)
         return getattr(module, attr)
     module = importlib.import_module(module_part)

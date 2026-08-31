@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-08-31T07:58:00Z",
+  "model": "deepseek/deepseek-chat",
+  "harness": "vanguard-vg-code-max",
+  "pass_rate_pct": 0.0,
+  "total_cost_usd": 0.003839,
+  "total_duration_seconds": 44.98,
+  "results": [
+    {
+      "id": "01_rate_limiter_lease_recovery",
+      "kind": "Brownfield",
+      "status": "FAIL",
+      "turns": 5,
+      "tokens": 7870,
+      "cost_usd": 0.003839,
+      "latency_s": 44.98,
+      "diagnosis": "test_limiter.py FAILED: Traceback (most recent call last):   File \"/tmp/bench-run-01_rate_limiter_lease_recovery-zh8tcz2"
+    }
+  ]
+}

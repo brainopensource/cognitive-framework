@@ -61,11 +61,11 @@ class TestWave1AuditFalsifiers(unittest.TestCase):
         self.assertNotIn("_DEFINITIONS", content)
         self.assertNotIn("text[:budget]", content)
 
-    def test_falsify_app_service_resume_clobbers_brief(self) -> None:
-        """Falsifier: ApplicationService.resume overwrites brief and does not restore CodingTaskState."""
+    def test_app_service_resume_preserves_brief(self) -> None:
+        """Verify: ApplicationService.resume recovers original brief from event history."""
         app_service_source = inspect.getsource(ApplicationService.resume)
-        self.assertIn('brief=f"Resume run {run_id}"', app_service_source)
-        self.assertNotIn("CodingTaskState", app_service_source)
+        self.assertIn("recovered_brief", app_service_source)
+        self.assertIn("brief=brief", app_service_source)
 
     def test_coding_task_state_invariants(self) -> None:
         """Verify CodingTaskState validation and digest determinism."""

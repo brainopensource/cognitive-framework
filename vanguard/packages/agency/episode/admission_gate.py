@@ -49,8 +49,10 @@ class AdmissionGate:
         verification_passed: bool | None = None,
         verification: VerificationReceipt | Mapping[str, Any] | None = None,
         current_workspace_digest: str | None = None,
-        task_requirements_satisfied: bool = True,
+        task_requirements_satisfied: bool | None = None,
         model_requested_finish: bool = True,
+        inspected_files: Sequence[str] = (),
+        **_: Any,
     ) -> AdmissionVerdict:
         is_write_preset = any(prefix in preset_name for prefix in ("code", "bugfix", "write"))
         is_read_only = any(prefix in preset_name for prefix in ("tutor", "research", "read"))
@@ -62,7 +64,7 @@ class AdmissionGate:
         # requirements still must be satisfied. This keeps Tutor/Research
         # separate from coding/bugfix completion semantics.
         if is_read_only or not self.require_patch_for_write_presets:
-            if not task_requirements_satisfied:
+            if task_requirements_satisfied is False:
                 return AdmissionVerdict(False, "TASK_REQUIREMENTS_UNSATISFIED")
             return AdmissionVerdict(admissible=True, reason="read_only_preset_admissible")
 
@@ -78,7 +80,14 @@ class AdmissionGate:
                 ),
             )
 
-        if not task_requirements_satisfied:
+        # Every changed file is itself part of the evidence surface. This is
+        # the runtime fallback for packs that do not bind a richer repository
+        # completion policy, and prevents a write receipt from standing in for
+        # an inspection receipt.
+        if any(path not in set(inspected_files) for path in changed_files):
+            return AdmissionVerdict(False, "MODIFIED_FILE_NOT_INSPECTED")
+
+        if task_requirements_satisfied is False:
             return AdmissionVerdict(False, "TASK_REQUIREMENTS_UNSATISFIED")
 
         receipt = verification

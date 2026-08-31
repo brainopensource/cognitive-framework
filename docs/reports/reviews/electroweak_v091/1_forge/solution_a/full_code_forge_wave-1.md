@@ -1,3 +1,14 @@
+---
+id: report.electroweak.solution-a.full-code-forge-wave-1
+class: report
+authority: non-canonical
+canonical_for: []
+status: proposal
+owner: repository-governance
+version: 0.9.2a2
+last_verified: 2026-08-31
+---
+
 # AETHER FORGE — Full Code Manifest — Wave 1
 
 ## Delivery contract

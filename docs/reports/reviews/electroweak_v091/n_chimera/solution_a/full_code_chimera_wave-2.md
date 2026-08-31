@@ -1,3 +1,14 @@
+---
+id: report.electroweak.solution-a.full-code-chimera-wave-2
+class: report
+authority: non-canonical
+canonical_for: []
+status: proposal
+owner: repository-governance
+version: 0.9.2a2
+last_verified: 2026-08-31
+---
+
 # AETHER CHIMERA — Full Code Manifest — Wave 2
 
 ## Delivery contract

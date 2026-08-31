@@ -1,3 +1,14 @@
+---
+id: report.electroweak.solution-a.full-code-forge-wave-8
+class: report
+authority: non-canonical
+canonical_for: []
+status: proposal
+owner: repository-governance
+version: 0.9.2a2
+last_verified: 2026-08-31
+---
+
 # AETHER FORGE — Full Code Completion Manifest — Wave 8
 
 ## Real coding execution, patch application, verification receipts, benchmark integrity, release gates, and end-to-end acceptance

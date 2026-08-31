@@ -15,6 +15,9 @@ from middleware.repository.context_ranker import rank_repository_context
 from middleware.repository.import_graph import extract_file_imports
 from middleware.repository.multi_file_completeness import check_multi_file_completeness
 from middleware.repository.symbol_indexer import index_python_source
+from middleware.repository.task_classifier import classify_task
+from middleware.repository.implicated_files import ImplicatedFileSetBuilder
+from vanguard.packages.adapters.stores.repo_index import InMemoryRepoIndex
 
 
 class TestRepositoryMiddleware(unittest.TestCase):
@@ -68,6 +71,25 @@ from math import sqrt, pi
         )
         self.assertFalse(report.is_complete)
         self.assertIn("src/b.py", report.missing_inspections)
+
+    def test_classify_task_prefers_specific_migration_signal(self) -> None:
+        result = classify_task("Migrate the API and add backward compatibility for old clients")
+        self.assertEqual(result.kind, "migration")
+        self.assertIn("migrate", result.signals)
+        self.assertFalse(result.ambiguous)
+
+    def test_implicated_file_builder_closes_dependencies_and_tests(self) -> None:
+        index = InMemoryRepoIndex({
+            "pkg/api.py": "from pkg.service import Service\n",
+            "pkg/service.py": "class Service: pass\n",
+            "tests/test_api.py": "from pkg.api import api\n",
+        })
+        result = ImplicatedFileSetBuilder().build("Fix pkg/api.py", index, max_depth=1)
+        self.assertEqual(result.paths, ("pkg/api.py", "pkg/service.py", "tests/test_api.py"))
+        reasons = {item.path: item.reasons for item in result.files}
+        self.assertIn("task_path", reasons["pkg/api.py"])
+        self.assertIn("dependency:depth_1", reasons["pkg/service.py"])
+        self.assertIn("test_for:pkg/api.py", reasons["tests/test_api.py"])
 
 
 if __name__ == "__main__":

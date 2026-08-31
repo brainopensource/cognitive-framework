@@ -254,6 +254,7 @@
 {"symbol": "HeldAuthority", "kind": "class", "defined_in": "vanguard/packages/kernel/classifier.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "HeldOutEvaluator", "kind": "class", "defined_in": "vanguard/packages/runtime/skill_evaluation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "HmacAuthenticator", "kind": "class", "defined_in": "vanguard/packages/kernel/grants.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
+{"symbol": "ICompletionPolicy", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "IContextManager", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "IEvaluationGate", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "IMemoryEngine", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
@@ -436,8 +437,8 @@
 {"symbol": "RunPlanError", "kind": "class", "defined_in": "vanguard/packages/runtime/run_plan.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "RunPlanExtension", "kind": "class", "defined_in": "vanguard/packages/runtime/topology.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "RunRef", "kind": "class", "defined_in": "vanguard/packages/ports/evaluator.py", "canonical_owner": "docs/backend/reference/ports.md"}
-{"symbol": "RunResult", "kind": "class", "defined_in": "vanguard/packages/runtime/app_service.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "RunResult", "kind": "class", "defined_in": "vanguard/packages/runtime/compose.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "RunResult", "kind": "class", "defined_in": "vanguard/packages/runtime/results.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "RunSummaryProjection", "kind": "class", "defined_in": "vanguard/packages/runtime/ledger/projections.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "RunTelemetry", "kind": "class", "defined_in": "vanguard/packages/runtime/telemetry.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "RunTermination", "kind": "class", "defined_in": "vanguard/packages/agency/episode/state.py", "canonical_owner": "docs/backend/architecture/agency.md"}
@@ -507,7 +508,7 @@
 {"symbol": "StateDirectoryReport", "kind": "class", "defined_in": "vanguard/packages/runtime/state_contract.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "StateDirectoryUnwritableError", "kind": "class", "defined_in": "vanguard/packages/runtime/state_contract.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "StateReconstructionAssessment", "kind": "class", "defined_in": "vanguard/packages/runtime/reproducibility.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
-{"symbol": "StatusResult", "kind": "class", "defined_in": "vanguard/packages/runtime/app_service.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "StatusResult", "kind": "class", "defined_in": "vanguard/packages/runtime/results.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "StochasticModelAdapter", "kind": "class", "defined_in": "vanguard/packages/adapters/models/stochastic.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "StopReason", "kind": "class", "defined_in": "vanguard/packages/runtime/repair.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "StrategyChangedPayload", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}

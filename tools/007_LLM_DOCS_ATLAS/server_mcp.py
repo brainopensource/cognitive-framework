@@ -77,8 +77,31 @@ class LDAMCPServer:
                                 "properties": {
                                     "query": {"type": "string", "description": "Task keywords or error message."},
                                     "budget": {"type": "integer", "description": "Token budget (default: 4000).", "default": 4000},
+                                    "strategy": {"type": "string", "description": "Strategy: 'ppr_submodular' (default) or 'fts5_bm25'.", "default": "ppr_submodular"},
                                 },
                                 "required": ["query"],
+                            },
+                        },
+                        {
+                            "name": "lda_repomap",
+                            "description": "Generate dense PageRank-ranked repository structural map with multi-file skeletons within a token budget.",
+                            "inputSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "focus_files": {"type": "array", "items": {"type": "string"}, "description": "Optional list of files to prioritize."},
+                                    "budget": {"type": "integer", "description": "Token budget for repo map (default: 2000).", "default": 2000},
+                                },
+                            },
+                        },
+                        {
+                            "name": "lda_focused_tests",
+                            "description": "Find targeted tests and falsifiers for a list of modified or touched files (Requirement R2).",
+                            "inputSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "touched_files": {"type": "array", "items": {"type": "string"}, "description": "List of touched or modified file paths."},
+                                },
+                                "required": ["touched_files"],
                             },
                         },
                         {
@@ -204,6 +227,7 @@ class LDAMCPServer:
         if name == "lda_context":
             query = args.get("query", "")
             budget = args.get("budget", 4000)
+            strategy = args.get("strategy", "ppr_submodular")
             head = self._head_sha()
             healthy = self._index_health()
             if healthy:
@@ -212,7 +236,7 @@ class LDAMCPServer:
                 from .atlas import compile_task_context
                 from .core.models import serialise
 
-                packet = compile_task_context(self._root, query, budget=budget)
+                packet = compile_task_context(self._root, query, budget=budget, strategy=strategy)
                 payload = serialise(packet)
                 payload["bounded_context"] = {
                     "documents": [
@@ -231,6 +255,24 @@ class LDAMCPServer:
             payload["source_head_sha"] = head
             payload["profile"] = self._ctx.profile.name
             return payload
+
+        elif name == "lda_repomap":
+            from .atlas import generate_repository_map
+
+            focus_files = args.get("focus_files")
+            budget = args.get("budget", 2000)
+            repomap_text = generate_repository_map(self._root, focus_files=focus_files, budget=budget)
+            return {
+                "repository_map": repomap_text,
+                "source_head_sha": self._head_sha(),
+                "budget": budget,
+            }
+
+        elif name == "lda_focused_tests":
+            from .atlas import find_associated_tests
+
+            touched_files = args.get("touched_files", [])
+            return find_associated_tests(self._root, touched_files=touched_files)
 
         elif name == "lda_symbol":
             sym_name = args.get("symbol_name", "")

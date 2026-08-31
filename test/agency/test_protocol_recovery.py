@@ -30,7 +30,10 @@ class TestProtocolRecoveryAndAdmissionGate(unittest.TestCase):
 
         # Proposal with changed files
         verdict_ok = gate.evaluate(
-            "vg-code-v090-react-control", changed_files=("lru/entry.py",), proposal={"text": "done"},
+            "vg-code-v090-react-control",
+            changed_files=("lru/entry.py",),
+            inspected_files=("lru/entry.py",),
+            proposal={"text": "done"},
             verification=VerificationReceipt(0, 1, "sha256:workspace"),
             current_workspace_digest="sha256:workspace",
         )

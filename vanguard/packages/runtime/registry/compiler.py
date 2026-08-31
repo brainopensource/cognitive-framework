@@ -44,7 +44,7 @@ class ComposeError(ValueError):
         self.path = path
 
 
-_SPI_SLOTS = ("planner", "context", "memory", "evaluation")
+_SPI_SLOTS = ("planner", "context", "memory", "evaluation", "completion")
 
 
 def compose(
@@ -155,6 +155,7 @@ def _parse(raw: Mapping[str, object]) -> HarnessManifest:
         context=_ref(plugins_raw.get("context")),
         memory=_ref(plugins_raw.get("memory")),
         evaluation=_ref(plugins_raw.get("evaluation")),
+        completion=_ref(plugins_raw.get("completion")),
         toolkits=tuple(_ref(item) for item in list(plugins_raw.get("toolkits") or []) if item),
         model_routes=tuple(routes),
     )

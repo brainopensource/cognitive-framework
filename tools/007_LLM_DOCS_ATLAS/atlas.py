@@ -3,13 +3,15 @@ from __future__ import annotations
 
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Sequence
 
 from .core.compiler import ContextCompiler
 from .core.config import AtlasContext
 from .core.models import ContextPacket, ProviderResult
 from .core.profile import RepositoryProfile
+from .core.repo_map import RepositoryMapGenerator
 from .core.storage import FactGraphStorage
+from .core.test_association import TestAssociationEngine
 from .providers.code_ast import CodeASTProvider
 from .providers.filesystem import FilesystemProvider
 from .providers.git import GitProvider
@@ -30,7 +32,7 @@ def collect(ctx: AtlasContext) -> List[ProviderResult]:
         MarkdownDocProvider(),
         CodeASTProvider(),
         GitProvider(),
-        KnowledgeProvider()
+        KnowledgeProvider(),
     ]
     results = []
     for p in providers:
@@ -42,14 +44,7 @@ def collect(ctx: AtlasContext) -> List[ProviderResult]:
 
 
 def rescan_catalog(ctx: AtlasContext) -> Dict[str, Any]:
-    """Read-only, in-memory catalog collection (Single Emitter invariant).
-
-    LDA NEVER writes <generated_root>/knowledge/*: that directory is owned by
-    the canonical repository generator (in AETHER:
-    tools/generate_knowledge_base.py), which is the Single Emitter of record.
-    LDA consumes it as a downstream projection; a "rescan" only reports what a
-    fresh filesystem scan would see, without mutating any contract file.
-    """
+    """Read-only, in-memory catalog collection (Single Emitter invariant)."""
     provider = FilesystemProvider()
     res = provider.collect(ctx)
     docs = [
@@ -64,13 +59,7 @@ def index_repository(
     incremental: bool = False,
     rebuild: bool = False,
 ) -> Dict[str, Any]:
-    """Execute complete repository indexing into SQLite + FTS5 fact graph.
-
-    ``rebuild=True`` purges every existing fact first (fixes orphan/stale rows
-    without relying on incremental diffing); ``incremental=True`` reuses file
-    content hashes to touch only changed files. The knowledge base itself is
-    never written (Single Emitter invariant).
-    """
+    """Execute complete repository indexing into SQLite + FTS5 fact graph."""
     start_time = time.time()
     ctx = AtlasContext.discover(Path(repo_root))
     repo_root = ctx.root
@@ -79,7 +68,7 @@ def index_repository(
         storage.purge_all()
 
     file_states = storage.get_all_file_states() if incremental and not rebuild else {}
-    
+
     # 1. Discover filesystem files (profile-aware exclusions via the context)
     fs_provider = FilesystemProvider()
     fs_res = fs_provider.collect(ctx, incremental=incremental, file_states=file_states)
@@ -121,10 +110,7 @@ def index_repository(
     ast_provider = CodeASTProvider()
     ast_res = ast_provider.collect(ctx)
 
-    # 3. Insert general entities FIRST: documents and symbols carry foreign
-    # keys into entities(id), so parent rows must exist before children.
-    # (Fixes a pre-existing ordering bug that made fresh indexes fail with
-    # "FOREIGN KEY constraint failed" — the root cause of empty .lda/index.db.)
+    # 3. Insert general entities
     from .core.ir import EntityKind, IREntity, Provenance
     for e in fs_res.entities + md_res.entities + ast_res.entities:
         ir_ent = IREntity(
@@ -134,16 +120,13 @@ def index_repository(
             locator=e.locator,
             provenance=Provenance("provider", "lda", e.locator),
             authority=e.authority,
-            metadata=dict(e.metadata)
+            metadata=dict(e.metadata),
         )
         storage.insert_entity(ir_ent)
 
     md_docs = md_res.metadata.get("ir_documents", [])
     ast_syms = ast_res.metadata.get("ir_symbols", [])
 
-    # 2b. Guarantee parent entity rows for every document and symbol: legacy
-    # provider entity ids may diverge from the IR child ids (canonical_id vs
-    # path, sym:<hash> vs name), and child tables reference entities(id).
     known_entity_ids = {e.id for e in fs_res.entities + md_res.entities + ast_res.entities}
     for doc in md_docs:
         if doc.id not in known_entity_ids:
@@ -165,15 +148,12 @@ def index_repository(
                 provenance=Provenance("code_ast", "lda", sym.file_path),
             ))
 
-    # 3. Extract & store Markdown Documentation (profile-aware via the context)
+    # 4. Extract & store Markdown Documentation
     for doc in md_docs:
         sections = [s for s in md_res.metadata.get("ir_doc_sections", []) if s.doc_id == doc.id]
         storage.insert_document(doc, sections)
-    for rel in md_res.relations:
-        # insert doc relations
-        pass
 
-    # 4. Extract & store Code AST & Symbols (profile-aware via the context)
+    # 5. Extract & store Code AST & Symbols
     for sym in ast_syms:
         storage.insert_symbol(sym)
     for rel in ast_res.metadata.get("ir_relations", []):
@@ -197,7 +177,7 @@ def index_repository(
         "total_documents": stats.get("documents", 0),
         "total_relations": stats.get("relations", 0),
         "duration_seconds": round(elapsed, 4),
-        "database_path": str(storage.db_path)
+        "database_path": str(storage.db_path),
     }
 
 
@@ -226,20 +206,46 @@ def get_repository_map(repo_root: Path) -> Dict[str, Any]:
     return storage.get_topology_map()
 
 
+def generate_repository_map(
+    repo_root: Path,
+    focus_files: Sequence[str] | None = None,
+    budget: int = 2000,
+) -> str:
+    """Generate a dense, graph-centrality ranked structural repository map."""
+    storage = get_storage(repo_root)
+    stats = storage.get_stats()
+    if stats["files"] == 0:
+        index_repository(repo_root, incremental=False)
+    gen = RepositoryMapGenerator(storage)
+    return gen.generate_map(focus_files=focus_files, token_budget=budget)
+
+
+def find_associated_tests(
+    repo_root: Path,
+    touched_files: Sequence[str],
+    touched_symbols: Sequence[str] | None = None,
+) -> Dict[str, Any]:
+    """Find targeted tests and falsifiers for touched files (Requirement R2)."""
+    storage = get_storage(repo_root)
+    engine = TestAssociationEngine(storage)
+    return engine.find_associated_tests(touched_files, touched_symbols)
+
+
 def compile_task_context(
     repo_root: Path,
     task: str,
     budget: int = 8000,
+    strategy: str = "ppr_submodular",
     profile: Optional[RepositoryProfile] = None,
     head_sha: Optional[str] = None,
+    use_cache: bool = True,
 ) -> ContextPacket:
     ctx = AtlasContext.discover(Path(repo_root))
     profile = profile or ctx.profile
     head_sha = head_sha if head_sha is not None else ctx.head_sha
     storage = get_storage(repo_root)
-    # Ensure index exists
     stats = storage.get_stats()
     if stats["files"] == 0:
         index_repository(repo_root, incremental=False)
     compiler = ContextCompiler(repo_root, storage, profile=profile, head_sha=head_sha)
-    return compiler.compile(task, budget=budget)
+    return compiler.compile(task, budget=budget, strategy=strategy, use_cache=use_cache)

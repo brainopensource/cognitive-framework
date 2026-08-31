@@ -10,6 +10,8 @@ from pathlib import Path
 from .atlas import (
     collect,
     compile_task_context,
+    find_associated_tests,
+    generate_repository_map,
     get_callers,
     get_references,
     get_repository_map,
@@ -114,12 +116,24 @@ def main(argv=None):
     ctx_p = sub.add_parser("context", help="Compile token-budgeted high-signal ContextPacket for an AI agent")
     ctx_p.add_argument("task", type=str)
     ctx_p.add_argument("--budget", type=int, default=8000)
+    ctx_p.add_argument("--strategy", type=str, default="ppr_submodular", choices=["ppr_submodular", "fts5_bm25"], help="Context compilation strategy")
+    ctx_p.add_argument("--no-cache", action="store_true", help="Bypass packet cache")
     ctx_p.add_argument("--json", action="store_true")
     ctx_p.add_argument("--include-research", action="store_true")
 
-    # 8. Map
+    # 8. Map & RepoMap
     map_p = sub.add_parser("map", help="Display repository architectural topology map")
     map_p.add_argument("--json", action="store_true")
+
+    repomap_p = sub.add_parser("repomap", help="Generate dense PageRank-ranked repository structural map with multi-file skeletons")
+    repomap_p.add_argument("--budget", type=int, default=2000, help="Token budget for repomap")
+    repomap_p.add_argument("--focus", type=str, nargs="*", default=None, help="Files to prioritize")
+    repomap_p.add_argument("--json", action="store_true")
+
+    # 8b. Tests Association (Requirement R2)
+    tests_p = sub.add_parser("tests", help="Find targeted tests and falsifiers for touched or modified files")
+    tests_p.add_argument("files", type=str, nargs="+", help="Touched file paths")
+    tests_p.add_argument("--json", action="store_true")
 
     # 9. Inspect
     i_p = sub.add_parser("inspect", help="Inspect a specific document or canonical ID")
@@ -157,10 +171,24 @@ def main(argv=None):
     elif args.command == "references":
         result = get_references(repo_root, args.symbol_id)
     elif args.command == "context":
-        packet = compile_task_context(repo_root, args.task, budget=args.budget)
+        packet = compile_task_context(
+            repo_root,
+            args.task,
+            budget=args.budget,
+            strategy=getattr(args, "strategy", "ppr_submodular"),
+            use_cache=not getattr(args, "no_cache", False),
+        )
         result = serialise(packet)
     elif args.command == "map":
         result = get_repository_map(repo_root)
+    elif args.command == "repomap":
+        result = generate_repository_map(
+            repo_root,
+            focus_files=getattr(args, "focus", None),
+            budget=getattr(args, "budget", 2000),
+        )
+    elif args.command == "tests":
+        result = find_associated_tests(repo_root, touched_files=args.files)
     elif args.command == "inspect":
         result = next((r for r in _rows(ctx, "catalog.jsonl") if args.target in {r.get("path"), r.get("canonical_id")}), {"error": "not found", "target": args.target})
     elif args.command == "doctor":

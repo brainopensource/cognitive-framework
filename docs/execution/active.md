@@ -205,6 +205,19 @@ This sprint becomes active only after EWK-Q disposition frees both WIP lanes.
 It is designed to produce one useful first-party agent while strengthening the
 general framework through existing seams.
 
+**Board deviation, recorded honestly (2026-08-31):** CMX-04 and CMX-05
+implementation began under explicit Wave 2 authorization
+(`.draft/CODING_MAX_WAVE_2_IMPLEMENTATION_PROMPT.md`) while sprint EWK-Q
+remained open (`REL-01/H0` in progress, `FIN-A1` `BLOCKED`). No milestone is
+marked accepted by this note; no 1.0 or benchmark claim is made. The `REL-02`
+entry-gate fact that a frozen content-addressed canary did not exist was
+false and has been repaired: `benchmarks/m8_heldout/artifacts/canary_manifest.json`
+now pins four hermetic fixtures (`DOGFOOD-01..03`, `GREENFIELD-API-HTML`) by
+per-file content digest and `base_commit`, with `max_attempts: 1` and a typed
+`inconclusive:workspace_missing` disposition for any row whose workspace is
+absent, falsified by `test/benchmarks/test_rel02_frozen_canary.py`. `REL-01/H0`
+and `FIN-A1` remain open; sprint EWK-Q is not closed by this work.
+
 | Order | Package | Primary location | Required outcome |
 |---:|---|---|---|
 | 1 | `CMX-01` composition delta | `packs/code-default/`, existing manifests | Reconcile current mechanisms with one `fast`, one `balanced`, and one `max` policy; no duplicate coordinator or store |

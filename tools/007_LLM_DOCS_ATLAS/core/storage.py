@@ -557,6 +557,16 @@ class FactGraphStorage:
         )
         return [dict(r) for r in cur.fetchall()]
 
+    def get_all_symbols(self) -> List[Dict[str, Any]]:
+        con = self.get_connection()
+        cur = con.execute("SELECT * FROM symbols")
+        return [dict(r) for r in cur.fetchall()]
+
+    def get_all_relations(self) -> List[Dict[str, Any]]:
+        con = self.get_connection()
+        cur = con.execute("SELECT * FROM relations")
+        return [dict(r) for r in cur.fetchall()]
+
     def get_topology_map(self) -> Dict[str, Any]:
         con = self.get_connection()
         cur = con.execute("SELECT language, COUNT(*) as file_count, SUM(size_bytes) as total_bytes FROM files GROUP BY language")

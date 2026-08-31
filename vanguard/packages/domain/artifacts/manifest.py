@@ -21,7 +21,7 @@ _V2_COMPONENT_FIELDS = frozenset({
 _V2_TOP_FIELDS = frozenset({"api", "id", "components", "bindings", "entrypoints", "profiles", "ceiling",
                             "capabilities", "model_routes", "budget", "system_prompt", "approval_policy",
                             "guardrails", "evaluation", "undeletable"})
-_SPI_KINDS = frozenset({"IPlanner", "IMemoryEngine", "IToolkit", "IContextManager", "IEvaluationGate"})
+_SPI_KINDS = frozenset({"IPlanner", "IMemoryEngine", "IToolkit", "IContextManager", "IEvaluationGate", "ICompletionPolicy"})
 _ISOLATION = frozenset({"in_process", "subprocess", "container", "wasm"})
 
 
@@ -187,7 +187,7 @@ def _parse_named_component_map(raw: Mapping[str, Any], rows: Mapping[str, Any]) 
     components: list[NamedComponent] = []
     names: set[str] = set()
     kind_map = {"planner": "IPlanner", "context": "IContextManager", "memory": "IMemoryEngine",
-                "toolkit": "IToolkit", "evaluation": "IEvaluationGate"}
+                "toolkit": "IToolkit", "evaluation": "IEvaluationGate", "completion": "ICompletionPolicy"}
     for name, row in rows.items():
         if not isinstance(name, str) or not name or name in names or not isinstance(row, dict):
             raise ManifestError("components must be unique named objects")
@@ -989,6 +989,7 @@ SPI_ARTIFACT_KIND: Mapping[str, str] = {
     "IMemoryEngine": "retrieval_policy",
     "IPlanner": "routing_policy",
     "IEvaluationGate": "approval_policy",
+    "ICompletionPolicy": "completion_policy",
 }
 
 

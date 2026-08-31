@@ -1,3 +1,14 @@
+---
+id: report.electroweak.1-forge.aether-forge-reflexive-harness-pdr
+class: report
+authority: non-canonical
+canonical_for: []
+status: proposal
+owner: repository-governance
+version: 0.9.2a2
+last_verified: 2026-08-31
+---
+
 
 # 81. Implementation Phase 2 — Strong Stop Gate
 

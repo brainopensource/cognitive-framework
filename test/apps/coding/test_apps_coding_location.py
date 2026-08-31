@@ -8,12 +8,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 RUNTIME = ROOT / "vanguard" / "packages" / "runtime"
 APPS_CODING = ROOT / "vanguard" / "packages" / "apps" / "coding"
+APPS_CODING_MAX = ROOT / "vanguard" / "packages" / "apps" / "coding_max"
 PACK = ROOT / "packs" / "code-default"
 
 
 class CodingCellLocation(unittest.TestCase):
     def test_apps_coding_is_retired(self) -> None:
         self.assertFalse(APPS_CODING.exists())
+
+    def test_thin_coding_max_facade_is_the_allowed_app_slot(self) -> None:
+        self.assertTrue((APPS_CODING_MAX / "facade.py").is_file())
 
     def test_pack_frame_exists(self) -> None:
         self.assertTrue((PACK / "harness.yaml").is_file())

@@ -95,6 +95,7 @@ class Runtime(_ComposedRuntime):
         controller_confidence: tuple[Any, ...] = (),
         memory: MemoryBinding | None = None,
         experience: MemoryBinding | None = None,
+        completion_policy: Any = None,
     ) -> RunResult:
         """Compose, run one episode, resolve approvals, and evaluate exterior.
 
@@ -184,7 +185,8 @@ class Runtime(_ComposedRuntime):
         )
         try:
             return cls.run_composed(
-                harness, ports, task_context, on_terminal=on_terminal, release=release
+                harness, ports, task_context, on_terminal=on_terminal, release=release,
+                completion_policy=completion_policy,
             )
         finally:
             if sealed_dir is not None:
@@ -214,6 +216,7 @@ class Runtime(_ComposedRuntime):
         controller_confidence: tuple[Any, ...] = (),
         memory: MemoryBinding | None = None,
         experience: MemoryBinding | None = None,
+        completion_policy: Any = None,
     ) -> RunResult:
         """Compose and run one episode through the `RuntimeBootstrap` seam.
 
@@ -258,6 +261,7 @@ class Runtime(_ComposedRuntime):
             return cls.run_composed(
                 harness, ports, task_context, on_terminal=on_terminal,
                 release=release, profile=deps.profile,
+                completion_policy=completion_policy,
             )
         finally:
             deps.cleanup()
@@ -272,6 +276,7 @@ class Runtime(_ComposedRuntime):
         on_terminal: Callable[[HarnessSession], Any] | None = None,
         release: bool = False,
         profile: Any | None = None,
+        completion_policy: Any = None,
     ) -> RunResult:
         """Run an already composed harness through the sole activation boundary.
 
@@ -366,6 +371,8 @@ class Runtime(_ComposedRuntime):
                 harness=harness, parent_ports=ports, parent_task=task_context,
                 profile=profile, release=release,
             ))
+        if completion_policy is not None:
+            ports = replace(ports, completion_policy=completion_policy)
         session = HarnessSession(
             harness, ports, task_context, on_terminal=on_terminal, run_plan=run_plan
         )

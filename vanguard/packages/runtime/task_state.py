@@ -8,7 +8,7 @@ from typing import Any, Mapping, Sequence
 
 from ..domain.canonicalisation.digest import digest_of
 
-__all__ = ["CodingTaskState", "DeadEnd", "Discovery", "RouteDecision", "TodoItem"]
+__all__ = ["CodingTaskState", "DeadEnd", "Discovery", "RouteDecision", "TodoItem", "fold_task_state"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -213,3 +213,106 @@ class CodingTaskState:
         if not found:
             raise KeyError(todo_id)
         return dataclasses.replace(self, todo_items=tuple(updated), next_action=None if status == "complete" else self.next_action)
+
+
+def fold_task_state(events: Sequence[Any], *, objective: str = "") -> CodingTaskState:
+    """Project durable coding facts without replaying any effect.
+
+    The ledger remains authoritative for effects; this projection only records
+    what a fresh process should tell the next planner. Unknown payload fields
+    are ignored so older runs remain readable.
+    """
+    state: dict[str, Any] = {"objective": objective or "", "remainingBudgets": {}}
+    inspected: set[str] = set()
+    modified: set[str] = set()
+    settled: set[str] = set()
+    discoveries: list[Discovery] = []
+    dead_ends: list[DeadEnd] = []
+    todo_items: tuple[TodoItem, ...] = ()
+    last_verification: dict[str, Any] = {}
+    for event in events:
+        payload = getattr(event, "payload", {})
+        if not isinstance(payload, Mapping):
+            continue
+        kind = str(payload.get("kind") or getattr(event, "mhf_kind", ""))
+        if isinstance(payload.get("plan"), Sequence) and not isinstance(payload.get("plan"), (str, bytes)):
+            state["plan"] = [str(item) for item in payload["plan"]]
+        if isinstance(payload.get("nextAction"), str):
+            state["nextAction"] = payload["nextAction"]
+        if isinstance(payload.get("lastVerification"), Mapping):
+            state["lastVerification"] = dict(payload["lastVerification"])
+        for path in payload.get("modifiedFiles", ()) if isinstance(payload.get("modifiedFiles"), Sequence) else ():
+            if isinstance(path, str):
+                modified.add(path)
+        for path in payload.get("inspectedFiles", ()) if isinstance(payload.get("inspectedFiles"), Sequence) else ():
+            if isinstance(path, str):
+                inspected.add(path)
+        if isinstance(payload.get("remainingBudgets"), Mapping):
+            state["remainingBudgets"] = {
+                str(k): int(v) for k, v in payload["remainingBudgets"].items()
+                if isinstance(v, int) and v >= 0
+            }
+        for descriptor in payload.get("settledEffects", ()) if isinstance(payload.get("settledEffects"), Sequence) else ():
+            if isinstance(descriptor, str):
+                settled.add(descriptor)
+        raw_discoveries = payload.get("discoveries", ())
+        if isinstance(raw_discoveries, Mapping):
+            raw_discoveries = (raw_discoveries,)
+        for item in raw_discoveries if isinstance(raw_discoveries, Sequence) else ():
+            if isinstance(item, Mapping) and item.get("fact") and item.get("source"):
+                discoveries.append(Discovery(str(item["fact"]), str(item["source"]), float(item.get("confidence", 1.0))))
+        raw_dead_ends = payload.get("deadEnds", ())
+        if isinstance(raw_dead_ends, Mapping):
+            raw_dead_ends = (raw_dead_ends,)
+        for item in raw_dead_ends if isinstance(raw_dead_ends, Sequence) else ():
+            if isinstance(item, Mapping) and item.get("attempt") and item.get("reason"):
+                dead_ends.append(DeadEnd(str(item["attempt"]), str(item["reason"]), str(item.get("evidence", ""))))
+        raw_todos = payload.get("todoItems", ())
+        if isinstance(raw_todos, Sequence) and not isinstance(raw_todos, (str, bytes)):
+            todo_items = tuple(
+                TodoItem(str(item["todoId"]), str(item["description"]), str(item.get("status", "pending")), item.get("receiptDigest"))
+                for item in raw_todos if isinstance(item, Mapping) and item.get("todoId") and item.get("description")
+            )
+        candidate = payload.get("objective") or payload.get("brief") or payload.get("goal")
+        if isinstance(candidate, str) and candidate.strip() and not candidate.startswith("Resume run "):
+            state["objective"] = candidate.strip()
+        if kind == "EpisodeStarted":
+            budgets = payload.get("budgetCeiling") or payload.get("budget")
+            if isinstance(budgets, Mapping):
+                state["remainingBudgets"] = {str(k): int(v) for k, v in budgets.items() if isinstance(v, int) and v >= 0}
+        if kind == "ObservationProduced":
+            path = payload.get("path")
+            if isinstance(path, str) and path:
+                inspected.add(path)
+            for path in payload.get("inspectedFiles", ()) if isinstance(payload.get("inspectedFiles"), Sequence) else ():
+                if isinstance(path, str):
+                    inspected.add(path)
+        if kind in {"EffectCompleted", "EffectFailed"}:
+            descriptor = payload.get("descriptorDigest")
+            if isinstance(descriptor, str) and kind == "EffectCompleted":
+                settled.add(descriptor)
+            path = payload.get("path")
+            action = str(payload.get("action", ""))
+            if isinstance(path, str) and action in {"patch.apply", "fs.patch", "fs.write", "write", "patch"}:
+                modified.add(path)
+        if kind == "ProposalProduced":
+            action = payload.get("action")
+            if isinstance(action, str):
+                state["nextAction"] = action
+            diagnostics = payload.get("diagnostics")
+            if isinstance(diagnostics, Mapping):
+                state["lastVerification"] = dict(diagnostics) if isinstance(action, str) and "test" in action.lower() else state.get("lastVerification", {})
+        if kind in {"VerificationCompleted", "VerificationPassed", "VerificationFailed"}:
+            last_verification = dict(payload)
+        if kind in {"EpisodeCompleted", "RunCompleted"}:
+            state["nextAction"] = None
+
+    state["inspectedFiles"] = sorted(inspected)
+    state["modifiedFiles"] = sorted(modified)
+    state["settledEffects"] = sorted(settled)
+    state["lastVerification"] = last_verification or state.get("lastVerification", {})
+    state["discoveries"] = [item.to_dict() for item in discoveries]
+    state["deadEnds"] = [item.to_dict() for item in dead_ends]
+    state["todoItems"] = [{"todoId": item.todo_id, "description": item.description, "status": item.status}
+                           for item in todo_items]
+    return CodingTaskState.from_mapping(state)

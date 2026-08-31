@@ -1,15 +1,15 @@
 """Frozen SPI protocols (SPEC §2.2, ADR-M0-03).
 
 Owning contract: Wave-2 2.1-C. Moved from `layer0/spi/interfaces.py`
-(ADR-0069, ADR-0072): the five Protocols are client conveniences of the wire,
-not a sixth authority surface, so they land here as ports -- interfaces only,
+(ADR-0069, ADR-0072): the six Protocols are client conveniences of the wire,
+not a new authority surface, so they land here as ports -- interfaces only,
 importing only the generated wire types and the SPI `Result` ADT from
-`domain/wire/`. No sixth SPI is added by this move (ADR-M0-03).
+`domain/wire/`. The completion policy is the pack-composed admission seam.
 """
 
 from __future__ import annotations
 
-from typing import ClassVar, Mapping, Protocol, Sequence, runtime_checkable
+from typing import Any, ClassVar, Mapping, Protocol, Sequence, runtime_checkable
 
 from ..domain.wire.result import Result
 from ..domain.wire.types_gen import (
@@ -42,12 +42,28 @@ from ..domain.wire.types_gen import (
 )
 
 __all__ = [
+    "ICompletionPolicy",
     "IContextManager",
     "IEvaluationGate",
     "IMemoryEngine",
     "IPlanner",
     "IToolkit",
 ]
+
+
+@runtime_checkable
+class ICompletionPolicy(Protocol):
+    """Composed admission policy for terminal task completion.
+
+    The runtime supplies observations only; the pack-owned implementation
+    returns an ``AdmissionVerdict``-shaped value without gaining effect
+    authority. Keyword arguments keep the seam extensible for repository
+    closure, greenfield, and future task-specific evidence.
+    """
+
+    spi_version: ClassVar[str]
+
+    def evaluate(self, **observations: Any) -> Any: ...
 
 
 @runtime_checkable

@@ -79,6 +79,22 @@
     "./application/coding-receipts.js": {
       "types": "./dist/src/application/coding-receipts.d.ts",
       "default": "./dist/src/application/coding-receipts.js"
+    },
+    "./application/corrections.js": {
+      "types": "./dist/src/application/corrections.d.ts",
+      "default": "./dist/src/application/corrections.js"
+    },
+    "./application/why.js": {
+      "types": "./dist/src/application/why.d.ts",
+      "default": "./dist/src/application/why.js"
+    },
+    "./application/resume.js": {
+      "types": "./dist/src/application/resume.d.ts",
+      "default": "./dist/src/application/resume.js"
+    },
+    "./application/commands.js": {
+      "types": "./dist/src/application/commands.d.ts",
+      "default": "./dist/src/application/commands.js"
     }
   },
   "files": [

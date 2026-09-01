@@ -22,13 +22,13 @@ import { performResume } from "../src/composition/resume-session.js";
 import { whyText } from "../src/tui/why-display.js";
 import { HELP_TEXT } from "../src/tui/focus.js";
 import { subscribeRun } from "@vanguard/client-core";
-import type {
-  CorrectionRecord,
-  EventEnvelope,
-  Result,
-  ResolveApprovalRequest,
-  RuntimeClient,
-} from "../src/contract/types.js";
+import type { CorrectionRecord, EventEnvelope, Result as CoreResult } from "../src/contract/types.js";
+// F4 Phase 2: dispatchApproval is now ported to @aether/client, typed against
+// @aether/contracts's ResolveApprovalRequest/CommandReceipt (approvalId is
+// optional there vs. required in this package's own contract/types.js).
+// recordCorrection stays on this package's own CorrectionRecord shape --
+// corrections.ts is deliberately not shimmed yet (see F4 plan).
+import type { CommandReceipt, ResolveApprovalRequest, Result } from "@aether/contracts";
 
 const DIGEST_A = "sha256:1111111111111111111111111111111111111111111111111111111111111111";
 const DIGEST_B = "sha256:2222222222222222222222222222222222222222222222222222222222222222";
@@ -58,16 +58,16 @@ function envelope(kind: string, payload: Record<string, unknown> = {}, extra: Pa
   };
 }
 
-class RecordingClient implements Pick<RuntimeClient, "resolveApproval" | "recordCorrection"> {
+class RecordingClient {
   readonly approvals: ResolveApprovalRequest[] = [];
   readonly corrections: CorrectionRecord[] = [];
 
-  async resolveApproval(request: ResolveApprovalRequest): Promise<Result<{ runId: string; command: "resolve_approval"; status: "requested" }>> {
+  async resolveApproval(request: ResolveApprovalRequest): Promise<Result<CommandReceipt>> {
     this.approvals.push(request);
-    return { ok: true, value: { runId: "run-1", command: "resolve_approval", status: "requested" } };
+    return { ok: true, value: { commandId: "cmd-resolve-approval", runId: "run-1", status: "completed" } };
   }
 
-  async recordCorrection(record: CorrectionRecord): Promise<Result<{ runId: string; command: "record_correction"; status: "requested" }>> {
+  async recordCorrection(record: CorrectionRecord): Promise<CoreResult<{ runId: string; command: "record_correction"; status: "requested" }>> {
     this.corrections.push(record);
     return { ok: true, value: { runId: "run-1", command: "record_correction", status: "requested" } };
   }

@@ -16,6 +16,14 @@ import {
   fail,
 } from "../src/index.js";
 import type { EventEnvelope, Result, RunRef, ArtifactExplanation } from "../src/index.js";
+// F4 Phase 3: whyFromResult/formatExplanation are now shimmed onto
+// @aether/client, which types ArtifactExplanation per @aether/contracts
+// (activatedBy/demotedBy: string[]) rather than this package's own richer
+// shape (ReadonlyArray<{evidence, strength?}>/{condition, effect}>). Neither
+// formatExplanation nor whyFromResult reads those inner fields (only
+// .length), so this is a structural test-fixture mismatch, not a behavior
+// change -- cast at the boundary rather than widen production types.
+import type { ArtifactExplanation as WireArtifactExplanation, Result as WireResult } from "@aether/contracts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const WHY_FIXTURE_PATH = path.resolve(__dirname, "../../../cli/fixtures/sessions/why-typed-tools.jsonl");
@@ -58,25 +66,23 @@ describe("FE-1-9 — Task A1: Resume Helpers", () => {
 
 describe("FE-1-10 — Task A2: Why & Artifact Projection", () => {
   it("formatExplanation detects empty vs non-empty explanation", () => {
-    const emptyExp: ArtifactExplanation = {
+    const emptyExp: WireArtifactExplanation = {
       artifactId: "art-1",
       status: "unknown",
       prediction: "",
       activatedBy: [],
       demotedBy: [],
-      freshness: { source: "replay" },
     };
     const f1 = formatExplanation(emptyExp);
     assert.equal(f1.status, "unknown");
     assert.ok(f1.empty);
 
-    const activeExp: ArtifactExplanation = {
+    const activeExp: WireArtifactExplanation = {
       artifactId: "art-2",
       status: "active",
-      activatedBy: [{ evidence: "evt-1" }],
+      activatedBy: ["evt-1"],
       demotedBy: [],
       prediction: "Keep active",
-      freshness: { source: "replay" },
     };
     const f2 = formatExplanation(activeExp);
     assert.equal(f2.status, "active");
@@ -85,7 +91,7 @@ describe("FE-1-10 — Task A2: Why & Artifact Projection", () => {
   });
 
   it("whyFromResult never synthesizes ActivationChanged on failure", () => {
-    const errRes: Result<ArtifactExplanation> = fail("not_found", "artifact missing", false);
+    const errRes = fail("not_found", "artifact missing", false) as WireResult<WireArtifactExplanation>;
     const res = whyFromResult(errRes);
     assert.ok(!res.ok);
     if (!res.ok) {
@@ -97,7 +103,7 @@ describe("FE-1-10 — Task A2: Why & Artifact Projection", () => {
     const text = fs.readFileSync(WHY_FIXTURE_PATH, "utf8");
     const client = ReplayRuntimeClient.fromJsonl(text);
     const expResult = await client.explainArtifact("typed-tools");
-    const whyRes = whyFromResult(expResult);
+    const whyRes = whyFromResult(expResult as unknown as WireResult<WireArtifactExplanation>);
     assert.ok(whyRes.ok);
     if (whyRes.ok) {
       assert.equal(whyRes.value.status, "active");
@@ -105,7 +111,7 @@ describe("FE-1-10 — Task A2: Why & Artifact Projection", () => {
     }
 
     const missingResult = await client.explainArtifact("missing-artifact");
-    const missingWhy = whyFromResult(missingResult);
+    const missingWhy = whyFromResult(missingResult as unknown as WireResult<WireArtifactExplanation>);
     assert.ok(missingWhy.ok);
     if (missingWhy.ok) {
       assert.equal(missingWhy.value.status, "unknown");

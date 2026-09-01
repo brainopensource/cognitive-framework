@@ -77,6 +77,16 @@ exact-subject qualification run, and live SOTA/SWE-bench claims remain
 `GATED` pending the official reproducible evaluator and independently accepted
 receipts.
 
+CMX-06 is technically complete on hermetic evidence. The mediated specialist
+contracts provide advisory Reviewer, bounded Localizer, and test-scoped Test
+Investigator layers over the existing artifact and child-runtime seams.
+Reviewer verdicts are digest-addressed and advisory; Verifier retains sole
+admission authority. The CMX-06 preregistration fixes one attempt per arm and
+requires treatment cost-adjusted success to be no worse than control.
+The CMX-06 focused topology/specialist/composition suite is 23/23 green.
+The two LAM arms each remain 9/9 green with 17,100 tokens and $0 provider
+spend; LAM is instrumentation evidence only.
+
 The BEP-04 qualification implementation now exposes the three bounded
 authority-free graph templates (`sequential`, `reviewer_in_loop`, and
 `parallel_investigators`) through the existing topology lowerer and scheduler.

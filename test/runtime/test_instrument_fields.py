@@ -221,9 +221,24 @@ class NoVerbLacksABinding(unittest.TestCase):
     def test_every_bound_verb_has_a_worker_operation_or_an_environment_one(self) -> None:
         from vanguard.packages.adapters.sandbox.worker import WorkerProtocol
         from vanguard.packages.runtime.root import DEFAULT_BINDINGS
+        from vanguard.packages.runtime.wiring import (
+            _environment_observer,
+            _environment_effector,
+        )
 
-        # Sandbox worker operations plus in-process mediated delegation (M-6 agent.spawn)
-        supported = set(WorkerProtocol.SUPPORTED_OPERATIONS) | {"agent.spawn"}
+        # Sandbox worker operations plus in-process verbs:
+        #   - agent.spawn: mediated delegation (M-6)
+        #   - environment-observer/effector verbs: handled in-process by the
+        #     runtime environment, NOT the sandbox worker. Examples: web.distill
+        #     (read-only context observation) and agency.finish (protocol
+        #     completion signal). These are legitimately absent from
+        #     WorkerProtocol.SUPPORTED_OPERATIONS by design.
+        environment_verbs = {
+            verb
+            for verb, binding in DEFAULT_BINDINGS.items()
+            if binding.factory in (_environment_observer, _environment_effector)
+        }
+        supported = set(WorkerProtocol.SUPPORTED_OPERATIONS) | {"agent.spawn"} | environment_verbs
         self.assertTrue(set(DEFAULT_BINDINGS) <= supported,
                         f"bound but unsupported: {sorted(set(DEFAULT_BINDINGS) - supported)}")
 

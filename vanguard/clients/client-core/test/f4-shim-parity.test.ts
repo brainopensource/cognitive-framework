@@ -28,7 +28,7 @@ describe("F4 Phase 1 — client-core shims resolve to @aether/client (no fork)",
     assert.equal(fromShim.toTraceGraph, fromClient.toTraceGraph);
   });
 
-  it("budget, coding-types, graph-model, mcnemar, projection-model, approvals, subscribe-run, selectors, coding-receipts modules resolve identically", async () => {
+  it("budget, coding-types, graph-model, mcnemar, projection-model, approvals, subscribe-run, selectors, coding-receipts, why modules resolve identically", async () => {
     const modules = [
       "budget.js",
       "coding-types.js",
@@ -39,6 +39,7 @@ describe("F4 Phase 1 — client-core shims resolve to @aether/client (no fork)",
       "subscribe-run.js",
       "selectors.js",
       "coding-receipts.js",
+      "why.js",
     ];
     for (const file of modules) {
       const fromClient = (await import(`@aether/client/application/${file}`)) as Record<string, unknown>;

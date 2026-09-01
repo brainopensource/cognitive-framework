@@ -370,7 +370,10 @@ def qualification_topology(name: str) -> Topology:
         "api": TOPOLOGY_SCHEMA, "topologyId": topology_id, "version": "1.0.0",
         "entryRole": entry,
         "roles": [{"id": role, "policyRef": f"bep04/{role}@1",
-                   "budget": {"turns": 1, "tokens": 1000}}
+                   "budget": {"turns": 1, "tokens": {
+                       "reviewer": 500, "investigator_a": 500,
+                       "investigator_b": 500, "synthesizer": 250,
+                       "verifier": 125}.get(role, 1000)}}
                   for role in role_ids],
         "edges": [{"from": source, "to": target, "relation": relation}
                   for source, target, relation in edge_rows],

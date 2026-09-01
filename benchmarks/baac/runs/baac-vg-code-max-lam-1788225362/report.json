@@ -1,0 +1,584 @@
+{
+  "runId": "baac-vg-code-max-lam-1788225362",
+  "timestamp": "2026-09-01T01:16:02Z",
+  "preset": "vg-code-max",
+  "model": "lam-mock",
+  "mode": "lam",
+  "metadata": {},
+  "summary": {
+    "totalChallenges": 9,
+    "passedCount": 9,
+    "overallPassRatePct": 100.0,
+    "totalTokens": 17100,
+    "totalCostUsd": 0.0,
+    "totalDurationSeconds": 1.0,
+    "attribution": {
+      "PASS": 9,
+      "LLM_COGNITIVE_ERROR": 0,
+      "HARNESS_ERROR": 0,
+      "BUDGET_EXHAUSTED": 0,
+      "DATASET_INVALID": 0
+    }
+  },
+  "results": [
+    {
+      "challengeId": "bench_single_2K_tier-1_calculator",
+      "tier": "tier-1",
+      "scope": "single",
+      "contextBracket": "2K",
+      "preset": "vg-code-max",
+      "model": "lam-mock",
+      "mode": "lam",
+      "status": "PASS",
+      "attribution": "PASS",
+      "turns": 10,
+      "promptTokens": 1500,
+      "completionTokens": 400,
+      "totalTokens": 1900,
+      "costUsd": 0.0,
+      "durationSeconds": 0.11,
+      "changedFiles": [
+        "src/calculator.py"
+      ],
+      "diffPatch": "--- a/calculator.py\n+++ b/calculator.py\n@@ -1,3 +1,2 @@\n def calculate_value(A: float, B: float) -> float:\n-    resultado = (A + B) + B\n-    return resultado\n+    return (A + B) * B\n",
+      "oracle": {
+        "passed": true,
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_calc (__main__.TestCalc.test_calc) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+        "durationSeconds": 0.036,
+        "error": null,
+        "assertionCount": 1,
+        "failingAssertions": []
+      },
+      "aiJudgeScore": null,
+      "diagnosis": "All falsifiers green",
+      "metadata": {
+        "id": "bench_single_2K_tier-1_calculator",
+        "name": "Single-File Formula Repair",
+        "scope": "single",
+        "context_bracket": "2K",
+        "tier": "tier-1",
+        "difficulty": 1,
+        "timeout_seconds": 35,
+        "entrypoint": "src/main.py",
+        "eval_type": "oracle",
+        "tags": [
+          "math",
+          "single_file",
+          "formula"
+        ],
+        "metadata": {},
+        "cli_args": {
+          "command": "run",
+          "preset": "vg-code-max",
+          "mode": "lam",
+          "model": null,
+          "tier": "all",
+          "single": null,
+          "max_turns": 10,
+          "max_requests": 500,
+          "budget": 0.1,
+          "keep_scratch": false
+        }
+      }
+    },
+    {
+      "challengeId": "bench_single_2K_tier-1_fib_cli",
+      "tier": "tier-1",
+      "scope": "single",
+      "contextBracket": "2K",
+      "preset": "vg-code-max",
+      "model": "lam-mock",
+      "mode": "lam",
+      "status": "PASS",
+      "attribution": "PASS",
+      "turns": 10,
+      "promptTokens": 1500,
+      "completionTokens": 400,
+      "totalTokens": 1900,
+      "costUsd": 0.0,
+      "durationSeconds": 0.11,
+      "changedFiles": [
+        "src/fib.py"
+      ],
+      "diffPatch": "--- a/fib.py\n+++ b/fib.py\n@@ -1,2 +1,34 @@\n+\"\"\"Fibonacci Module.\"\"\"\n+from __future__ import annotations\n+import sys\n+import argparse\n+\n def fib(n: int) -> int:\n-    pass\n+    if not isinstance(n, int) or isinstance(n, bool):\n+        raise TypeError(\"n must be an integer\")\n+    if n < 0:\n+        raise ValueError(\"n must be non-negative\")\n+    if n == 0:\n+        return 0\n+    if n == 1:\n+        return 1\n+    a, b = 0, 1\n+    for _ in range(2, n + 1):\n+        a, b = b, a + b\n+    return b\n+\n+def main() -> int:\n+    parser = argparse.ArgumentParser()\n+    parser.add_argument(\"--n\", type=int, required=True)\n+    args = parser.parse_args()\n+    if args.n < 0:\n+        sys.stderr.write(\"Error: negative n\\n\")\n+        return 1\n+    print(fib(args.n))\n+    return 0\n+\n+if __name__ == \"__main__\":\n+    try:\n+        sys.exit(main())\n+    except Exception:\n+        sys.exit(1)\n",
+      "oracle": {
+        "passed": true,
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_fib (__main__.TestFib.test_fib) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK\n",
+        "durationSeconds": 0.037,
+        "error": null,
+        "assertionCount": 1,
+        "failingAssertions": []
+      },
+      "aiJudgeScore": null,
+      "diagnosis": "All falsifiers green",
+      "metadata": {
+        "id": "bench_single_2K_tier-1_fib_cli",
+        "name": "Fibonacci CLI and Pure Function",
+        "scope": "single",
+        "context_bracket": "2K",
+        "tier": "tier-1",
+        "difficulty": 1,
+        "timeout_seconds": 35,
+        "entrypoint": "src/main.py",
+        "eval_type": "oracle",
+        "tags": [
+          "math",
+          "cli",
+          "basics"
+        ],
+        "metadata": {},
+        "cli_args": {
+          "command": "run",
+          "preset": "vg-code-max",
+          "mode": "lam",
+          "model": null,
+          "tier": "all",
+          "single": null,
+          "max_turns": 10,
+          "max_requests": 500,
+          "budget": 0.1,
+          "keep_scratch": false
+        }
+      }
+    },
+    {
+      "challengeId": "bench_single_2K_tier-1_string_dedupe",
+      "tier": "tier-1",
+      "scope": "single",
+      "contextBracket": "2K",
+      "preset": "vg-code-max",
+      "model": "lam-mock",
+      "mode": "lam",
+      "status": "PASS",
+      "attribution": "PASS",
+      "turns": 10,
+      "promptTokens": 1500,
+      "completionTokens": 400,
+      "totalTokens": 1900,
+      "costUsd": 0.0,
+      "durationSeconds": 0.1,
+      "changedFiles": [
+        "src/dedupe.py"
+      ],
+      "diffPatch": "--- a/dedupe.py\n+++ b/dedupe.py\n@@ -1,2 +1,8 @@\n def remove_consecutive_duplicates(s: str) -> str:\n-    pass\n+    if not s:\n+        return \"\"\n+    res = [s[0]]\n+    for ch in s[1:]:\n+        if ch != res[-1]:\n+            res.append(ch)\n+    return \"\".join(res)\n",
+      "oracle": {
+        "passed": true,
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_dedupe (__main__.TestDedupe.test_dedupe) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+        "durationSeconds": 0.036,
+        "error": null,
+        "assertionCount": 1,
+        "failingAssertions": []
+      },
+      "aiJudgeScore": null,
+      "diagnosis": "All falsifiers green",
+      "metadata": {
+        "id": "bench_single_2K_tier-1_string_dedupe",
+        "name": "Consecutive String Deduplication",
+        "scope": "single",
+        "context_bracket": "2K",
+        "tier": "tier-1",
+        "difficulty": 1,
+        "timeout_seconds": 35,
+        "entrypoint": "src/main.py",
+        "eval_type": "oracle",
+        "tags": [
+          "string",
+          "algorithms",
+          "single_file"
+        ],
+        "metadata": {},
+        "cli_args": {
+          "command": "run",
+          "preset": "vg-code-max",
+          "mode": "lam",
+          "model": null,
+          "tier": "all",
+          "single": null,
+          "max_turns": 10,
+          "max_requests": 500,
+          "budget": 0.1,
+          "keep_scratch": false
+        }
+      }
+    },
+    {
+      "challengeId": "bench_greenfield_8K_tier-2_quiz_game",
+      "tier": "tier-2",
+      "scope": "greenfield",
+      "contextBracket": "8K",
+      "preset": "vg-code-max",
+      "model": "lam-mock",
+      "mode": "lam",
+      "status": "PASS",
+      "attribution": "PASS",
+      "turns": 10,
+      "promptTokens": 1500,
+      "completionTokens": 400,
+      "totalTokens": 1900,
+      "costUsd": 0.0,
+      "durationSeconds": 0.12,
+      "changedFiles": [
+        "src/quiz_engine.py"
+      ],
+      "diffPatch": "--- a/quiz_engine.py\n+++ b/quiz_engine.py\n@@ -1,2 +1,83 @@\n+\"\"\"Quiz Game Engine.\"\"\"\n+from __future__ import annotations\n+from dataclasses import dataclass\n+import json\n+from pathlib import Path\n+from typing import Any, List, Optional\n+\n+@dataclass\n+class Question:\n+    id: str\n+    prompt: str\n+    options: list[str]\n+    correct_choice: str\n+    points: int = 10\n+\n class QuizEngine:\n-    pass\n+    def __init__(self, questions: list[Question | dict]) -> None:\n+        if not questions:\n+            raise ValueError(\"questions list cannot be empty\")\n+        self.questions: list[Question] = []\n+        for q in questions:\n+            if isinstance(q, Question):\n+                self.questions.append(q)\n+            elif isinstance(q, dict):\n+                self.questions.append(\n+                    Question(\n+                        id=str(q[\"id\"]),\n+                        prompt=str(q[\"prompt\"]),\n+                        options=list(q[\"options\"]),\n+                        correct_choice=str(q[\"correct_choice\"]),\n+                        points=int(q.get(\"points\", 10)),\n+                    )\n+                )\n+        self.index = 0\n+        self.earned_points = 0\n+        self.answered_count = 0\n+\n+    def current_question(self) -> Question | None:\n+        if self.index < len(self.questions):\n+            return self.questions[self.index]\n+        return None\n+\n+    def submit_answer(self, choice: str) -> dict[str, Any]:\n+        if self.is_finished():\n+            raise RuntimeError(\"Quiz is already finished\")\n+        q = self.questions[self.index]\n+        clean_choice = str(choice).strip().lower()\n+        is_correct = clean_choice == str(q.correct_choice).strip().lower()\n+        points = q.points if is_correct else 0\n+        self.earned_points += points\n+        self.answered_count += 1\n+        self.index += 1\n+        return {\n+            \"correct\": is_correct,\n+            \"earned_points\": points,\n+            \"correct_choice\": q.correct_choice,\n+            \"question_id\": q.id,\n+        }\n+\n+    def get_score(self) -> dict[str, Any]:\n+        total_pts = sum(q.points for q in self.questions)\n+        pct = (self.earned_points / total_pts * 100.0) if total_pts > 0 else 0.0\n+        return {\n+            \"total_points\": total_pts,\n+            \"earned_points\": self.earned_points,\n+            \"score_pct\": pct,\n+            \"answered\": self.answered_count,\n+            \"total_questions\": len(self.questions),\n+        }\n+\n+    def is_finished(self) -> bool:\n+        return self.index >= len(self.questions)\n+\n+    def reset(self) -> None:\n+        self.index = 0\n+        self.earned_points = 0\n+        self.answered_count = 0\n+\n+    @classmethod\n+    def load_from_json(cls, json_path: str | Path) -> QuizEngine:\n+        p = Path(json_path)\n+        data = json.loads(p.read_text(encoding=\"utf-8\"))\n+        return cls(data)\n",
+      "oracle": {
+        "passed": true,
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_quiz (__main__.TestQuiz.test_quiz) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.005s\n\nOK\n",
+        "durationSeconds": 0.045,
+        "error": null,
+        "assertionCount": 1,
+        "failingAssertions": []
+      },
+      "aiJudgeScore": null,
+      "diagnosis": "All falsifiers green",
+      "metadata": {
+        "id": "bench_greenfield_8K_tier-2_quiz_game",
+        "name": "Greenfield Quiz Game Engine",
+        "scope": "greenfield",
+        "context_bracket": "8K",
+        "tier": "tier-2",
+        "difficulty": 2,
+        "timeout_seconds": 35,
+        "entrypoint": "src/main.py",
+        "eval_type": "oracle",
+        "tags": [
+          "greenfield",
+          "state_machine",
+          "oop"
+        ],
+        "metadata": {},
+        "cli_args": {
+          "command": "run",
+          "preset": "vg-code-max",
+          "mode": "lam",
+          "model": null,
+          "tier": "all",
+          "single": null,
+          "max_turns": 10,
+          "max_requests": 500,
+          "budget": 0.1,
+          "keep_scratch": false
+        }
+      }
+    },
+    {
+      "challengeId": "bench_multi_8K_tier-2_json_todo_store",
+      "tier": "tier-2",
+      "scope": "multi",
+      "contextBracket": "8K",
+      "preset": "vg-code-max",
+      "model": "lam-mock",
+      "mode": "lam",
+      "status": "PASS",
+      "attribution": "PASS",
+      "turns": 10,
+      "promptTokens": 1500,
+      "completionTokens": 400,
+      "totalTokens": 1900,
+      "costUsd": 0.0,
+      "durationSeconds": 0.11,
+      "changedFiles": [
+        "src/todo.py"
+      ],
+      "diffPatch": "--- a/todo.py\n+++ b/todo.py\n@@ -1,2 +1,57 @@\n+\"\"\"JSON-Backed Todo Store.\"\"\"\n+from __future__ import annotations\n+import json\n+from pathlib import Path\n+from typing import Any, List, Optional\n+\n class TodoStore:\n-    pass\n+    def __init__(self, filepath: str | Path) -> None:\n+        self.filepath = Path(filepath)\n+        self.items: list[dict[str, Any]] = []\n+        if self.filepath.is_file():\n+            try:\n+                self.items = json.loads(self.filepath.read_text(encoding=\"utf-8\"))\n+            except Exception:\n+                self.items = []\n+        else:\n+            self._save()\n+\n+    def _save(self) -> None:\n+        self.filepath.parent.mkdir(parents=True, exist_ok=True)\n+        self.filepath.write_text(json.dumps(self.items, indent=2), encoding=\"utf-8\")\n+\n+    def add(self, title: str, tags: list[str] | None = None) -> int:\n+        if not title or not title.strip():\n+            raise ValueError(\"title cannot be empty\")\n+        next_id = max([item[\"id\"] for item in self.items], default=0) + 1\n+        item = {\n+            \"id\": next_id,\n+            \"title\": title.strip(),\n+            \"completed\": False,\n+            \"tags\": list(tags or []),\n+        }\n+        self.items.append(item)\n+        self._save()\n+        return next_id\n+\n+    def complete(self, item_id: int) -> bool:\n+        for item in self.items:\n+            if item[\"id\"] == item_id:\n+                item[\"completed\"] = True\n+                self._save()\n+                return True\n+        return False\n+\n+    def get(self, item_id: int) -> dict | None:\n+        for item in self.items:\n+            if item[\"id\"] == item_id:\n+                return dict(item)\n+        return None\n+\n+    def list_pending(self) -> list[dict]:\n+        pending = [dict(item) for item in self.items if not item[\"completed\"]]\n+        return sorted(pending, key=lambda x: x[\"id\"])\n+\n+    def list_by_tag(self, tag: str) -> list[dict]:\n+        matching = [dict(item) for item in self.items if tag in item.get(\"tags\", [])]\n+        return sorted(matching, key=lambda x: x[\"id\"])\n",
+      "oracle": {
+        "passed": true,
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_todo (__main__.TestTodo.test_todo) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.005s\n\nOK\n",
+        "durationSeconds": 0.045,
+        "error": null,
+        "assertionCount": 1,
+        "failingAssertions": []
+      },
+      "aiJudgeScore": null,
+      "diagnosis": "All falsifiers green",
+      "metadata": {
+        "id": "bench_multi_8K_tier-2_json_todo_store",
+        "name": "JSON-Backed Todo Store",
+        "scope": "multi",
+        "context_bracket": "8K",
+        "tier": "tier-2",
+        "difficulty": 2,
+        "timeout_seconds": 35,
+        "entrypoint": "src/main.py",
+        "eval_type": "oracle",
+        "tags": [
+          "storage",
+          "json",
+          "multi_file"
+        ],
+        "metadata": {},
+        "cli_args": {
+          "command": "run",
+          "preset": "vg-code-max",
+          "mode": "lam",
+          "model": null,
+          "tier": "all",
+          "single": null,
+          "max_turns": 10,
+          "max_requests": 500,
+          "budget": 0.1,
+          "keep_scratch": false
+        }
+      }
+    },
+    {
+      "challengeId": "bench_multi_16K_tier-3_event_bus",
+      "tier": "tier-3",
+      "scope": "multi",
+      "contextBracket": "16K",
+      "preset": "vg-code-max",
+      "model": "lam-mock",
+      "mode": "lam",
+      "status": "PASS",
+      "attribution": "PASS",
+      "turns": 10,
+      "promptTokens": 1500,
+      "completionTokens": 400,
+      "totalTokens": 1900,
+      "costUsd": 0.0,
+      "durationSeconds": 0.12,
+      "changedFiles": [
+        "src/event_bus.py"
+      ],
+      "diffPatch": "--- a/event_bus.py\n+++ b/event_bus.py\n@@ -1,2 +1,31 @@\n+\"\"\"Asynchronous Event Bus.\"\"\"\n+from typing import Callable, Any, Dict, List\n+\n class EventBus:\n-    pass\n+    def __init__(self):\n+        self._handlers = {}\n+        self._next_id = 1\n+\n+    def subscribe(self, topic: str, handler: Callable[[Any], None]) -> int:\n+        sub_id = self._next_id\n+        self._next_id += 1\n+        if topic not in self._handlers:\n+            self._handlers[topic] = []\n+        self._handlers[topic].append((sub_id, handler))\n+        return sub_id\n+\n+    def publish(self, topic: str, payload: Any) -> int:\n+        count = 0\n+        for top, handlers in list(self._handlers.items()):\n+            if top == topic or top == \"*\":\n+                for _, h in handlers:\n+                    h(payload)\n+                    count += 1\n+        return count\n+\n+    def unsubscribe(self, sub_id: int) -> bool:\n+        for top in list(self._handlers.keys()):\n+            self._handlers[top] = [(sid, h) for sid, h in self._handlers[top] if sid != sub_id]\n+            if not self._handlers[top]:\n+                del self._handlers[top]\n+        return True\n",
+      "oracle": {
+        "passed": true,
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_bus (__main__.TestEventBus.test_bus) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.003s\n\nOK\n",
+        "durationSeconds": 0.041,
+        "error": null,
+        "assertionCount": 1,
+        "failingAssertions": []
+      },
+      "aiJudgeScore": null,
+      "diagnosis": "All falsifiers green",
+      "metadata": {
+        "id": "bench_multi_16K_tier-3_event_bus",
+        "name": "Asynchronous In-Memory Event Bus",
+        "scope": "multi",
+        "context_bracket": "16K",
+        "tier": "tier-3",
+        "difficulty": 3,
+        "timeout_seconds": 35,
+        "entrypoint": "src/main.py",
+        "eval_type": "oracle",
+        "tags": [
+          "events",
+          "pubsub",
+          "patterns"
+        ],
+        "metadata": {},
+        "cli_args": {
+          "command": "run",
+          "preset": "vg-code-max",
+          "mode": "lam",
+          "model": null,
+          "tier": "all",
+          "single": null,
+          "max_turns": 10,
+          "max_requests": 500,
+          "budget": 0.1,
+          "keep_scratch": false
+        }
+      }
+    },
+    {
+      "challengeId": "bench_multi_32K_tier-4_circuit_breaker",
+      "tier": "tier-4",
+      "scope": "multi",
+      "contextBracket": "32K",
+      "preset": "vg-code-max",
+      "model": "lam-mock",
+      "mode": "lam",
+      "status": "PASS",
+      "attribution": "PASS",
+      "turns": 10,
+      "promptTokens": 1500,
+      "completionTokens": 400,
+      "totalTokens": 1900,
+      "costUsd": 0.0,
+      "durationSeconds": 0.11,
+      "changedFiles": [
+        "src/circuit.py"
+      ],
+      "diffPatch": "--- a/circuit.py\n+++ b/circuit.py\n@@ -1,2 +1,18 @@\n class CircuitBreaker:\n-    pass\n+    def __init__(self, threshold: int = 2):\n+        self.threshold = threshold\n+        self.failures = 0\n+        self.state = \"CLOSED\"\n+\n+    def call(self, func):\n+        if self.state == \"OPEN\":\n+            raise RuntimeError(\"Circuit is OPEN\")\n+        try:\n+            res = func()\n+            self.failures = 0\n+            return res\n+        except Exception:\n+            self.failures += 1\n+            if self.failures >= self.threshold:\n+                self.state = \"OPEN\"\n+            raise\n",
+      "oracle": {
+        "passed": true,
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_circuit (__main__.TestCircuit.test_circuit) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+        "durationSeconds": 0.037,
+        "error": null,
+        "assertionCount": 1,
+        "failingAssertions": []
+      },
+      "aiJudgeScore": null,
+      "diagnosis": "All falsifiers green",
+      "metadata": {
+        "id": "bench_multi_32K_tier-4_circuit_breaker",
+        "name": "Stateful Service Circuit Breaker",
+        "scope": "multi",
+        "context_bracket": "32K",
+        "tier": "tier-4",
+        "difficulty": 4,
+        "timeout_seconds": 35,
+        "entrypoint": "src/main.py",
+        "eval_type": "oracle",
+        "tags": [
+          "fault_tolerance",
+          "resilience",
+          "patterns"
+        ],
+        "metadata": {},
+        "cli_args": {
+          "command": "run",
+          "preset": "vg-code-max",
+          "mode": "lam",
+          "model": null,
+          "tier": "all",
+          "single": null,
+          "max_turns": 10,
+          "max_requests": 500,
+          "budget": 0.1,
+          "keep_scratch": false
+        }
+      }
+    },
+    {
+      "challengeId": "bench_multi_64K_tier-5_immutable_trie",
+      "tier": "tier-5",
+      "scope": "multi",
+      "contextBracket": "64K",
+      "preset": "vg-code-max",
+      "model": "lam-mock",
+      "mode": "lam",
+      "status": "PASS",
+      "attribution": "PASS",
+      "turns": 10,
+      "promptTokens": 1500,
+      "completionTokens": 400,
+      "totalTokens": 1900,
+      "costUsd": 0.0,
+      "durationSeconds": 0.11,
+      "changedFiles": [
+        "src/trie.py"
+      ],
+      "diffPatch": "--- a/trie.py\n+++ b/trie.py\n@@ -1,2 +1,17 @@\n+from dataclasses import dataclass, field\n+from typing import Dict\n+\n+@dataclass(frozen=True)\n class TrieNode:\n-    pass\n+    is_end: bool = False\n+    children: Dict[str, \"TrieNode\"] = field(default_factory=dict)\n+\n+def insert(root: TrieNode, word: str) -> TrieNode:\n+    if not word:\n+        return TrieNode(is_end=True, children=root.children)\n+    ch = word[0]\n+    child = root.children.get(ch, TrieNode())\n+    new_child = insert(child, word[1:])\n+    new_children = dict(root.children)\n+    new_children[ch] = new_child\n+    return TrieNode(is_end=root.is_end, children=new_children)\n",
+      "oracle": {
+        "passed": true,
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_trie (__main__.TestTrie.test_trie) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.004s\n\nOK\n",
+        "durationSeconds": 0.04,
+        "error": null,
+        "assertionCount": 1,
+        "failingAssertions": []
+      },
+      "aiJudgeScore": null,
+      "diagnosis": "All falsifiers green",
+      "metadata": {
+        "id": "bench_multi_64K_tier-5_immutable_trie",
+        "name": "Persistent Immutable Prefix Trie",
+        "scope": "multi",
+        "context_bracket": "64K",
+        "tier": "tier-5",
+        "difficulty": 5,
+        "timeout_seconds": 35,
+        "entrypoint": "src/main.py",
+        "eval_type": "oracle",
+        "tags": [
+          "data_structures",
+          "immutability",
+          "persistent_trees"
+        ],
+        "metadata": {},
+        "cli_args": {
+          "command": "run",
+          "preset": "vg-code-max",
+          "mode": "lam",
+          "model": null,
+          "tier": "all",
+          "single": null,
+          "max_turns": 10,
+          "max_requests": 500,
+          "budget": 0.1,
+          "keep_scratch": false
+        }
+      }
+    },
+    {
+      "challengeId": "bench_multi_128K_tier-6_mvcc_db",
+      "tier": "tier-6",
+      "scope": "multi",
+      "contextBracket": "128K",
+      "preset": "vg-code-max",
+      "model": "lam-mock",
+      "mode": "lam",
+      "status": "PASS",
+      "attribution": "PASS",
+      "turns": 10,
+      "promptTokens": 1500,
+      "completionTokens": 400,
+      "totalTokens": 1900,
+      "costUsd": 0.0,
+      "durationSeconds": 0.11,
+      "changedFiles": [
+        "src/mvcc.py"
+      ],
+      "diffPatch": "--- a/mvcc.py\n+++ b/mvcc.py\n@@ -1,2 +1,13 @@\n class MVCCStore:\n-    pass\n+    def __init__(self):\n+        self.store = {}\n+\n+    def put(self, key: str, val: str, tx_id: int):\n+        if key not in self.store:\n+            self.store[key] = []\n+        self.store[key].append((tx_id, val))\n+\n+    def get(self, key: str, tx_id: int) -> str:\n+        versions = self.store.get(key, [])\n+        valid = [v for ver_tx, v in versions if ver_tx <= tx_id]\n+        return valid[-1] if valid else \"\"\n",
+      "oracle": {
+        "passed": true,
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_mvcc (__main__.TestMVCC.test_mvcc) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK\n",
+        "durationSeconds": 0.037,
+        "error": null,
+        "assertionCount": 1,
+        "failingAssertions": []
+      },
+      "aiJudgeScore": null,
+      "diagnosis": "All falsifiers green",
+      "metadata": {
+        "id": "bench_multi_128K_tier-6_mvcc_db",
+        "name": "Multi-Version Concurrency Control (MVCC) In-Memory Store",
+        "scope": "multi",
+        "context_bracket": "128K",
+        "tier": "tier-6",
+        "difficulty": 6,
+        "timeout_seconds": 35,
+        "entrypoint": "src/main.py",
+        "eval_type": "oracle",
+        "tags": [
+          "database",
+          "mvcc",
+          "concurrency",
+          "frontier"
+        ],
+        "metadata": {},
+        "cli_args": {
+          "command": "run",
+          "preset": "vg-code-max",
+          "mode": "lam",
+          "model": null,
+          "tier": "all",
+          "single": null,
+          "max_turns": 10,
+          "max_requests": 500,
+          "budget": 0.1,
+          "keep_scratch": false
+        }
+      }
+    }
+  ]
+}

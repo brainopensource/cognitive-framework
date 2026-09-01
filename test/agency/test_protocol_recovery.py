@@ -3,7 +3,9 @@
 import unittest
 
 from vanguard.packages.agency.episode.admission_gate import AdmissionGate, VerificationReceipt
-from vanguard.packages.agency.episode.protocol_recovery import ProtocolRecoveryPolicy, RecoveryState
+from vanguard.packages.agency.episode.protocol_recovery import (
+    FailureClass, ProtocolRecoveryPolicy, RecoveryState, semantic_attempt_fingerprint,
+)
 
 
 class TestProtocolRecoveryAndAdmissionGate(unittest.TestCase):
@@ -19,6 +21,22 @@ class TestProtocolRecoveryAndAdmissionGate(unittest.TestCase):
         self.assertEqual(decision.action, "retry_model")
         self.assertEqual(decision.reason, "PATCH_REQUIRED_BUT_TEXT_EMITTED")
         self.assertIn("patch.apply", decision.feedback_message or "")
+
+    def test_permission_denial_has_zero_automatic_retries(self) -> None:
+        policy = ProtocolRecoveryPolicy()
+        decision, state = policy.decide_failure("permission denied", RecoveryState(), action="fs.write")
+        self.assertEqual(policy.classify("permission denied"), FailureClass.PERMISSION)
+        self.assertEqual(decision.status, "fail_instrument")
+        self.assertEqual(state.spent_decisions, ("no_retry",))
+
+    def test_unchanged_semantic_attempt_is_not_repeated_after_resume(self) -> None:
+        policy = ProtocolRecoveryPolicy()
+        fp = semantic_attempt_fingerprint("patch.apply", {"path": "a.py"}, "sha256:ws")
+        resumed = RecoveryState().record_attempt(fp, "retry")
+        decision, _ = policy.decide_failure(
+            "hunk does not apply", resumed, action="patch.apply",
+            arguments={"path": "a.py"}, workspace_digest="sha256:ws")
+        self.assertEqual(decision.status, "fail_instrument")
 
     def test_admission_gate_write_preset(self) -> None:
         gate = AdmissionGate()

@@ -270,8 +270,8 @@ def main() -> None:
     p_run.add_argument("--tier", default="all", help="Challenge tier (tier-1 to tier-6, all)")
     p_run.add_argument("--single", default=None, help="Single challenge name")
     p_run.add_argument("--max-turns", type=int, default=10, help="Max turns per challenge")
-    p_run.add_argument("--max-requests", type=int, default=300, help="Max requests cap")
-    p_run.add_argument("--budget", type=float, default=0.50, help="Max USD budget cap")
+    p_run.add_argument("--max-requests", type=int, default=500, help="Max requests cap")
+    p_run.add_argument("--budget", type=float, default=0.10, help="Max USD budget cap")
     p_run.add_argument("--keep-scratch", action="store_true", help="Do not delete scratch workspace on exit")
 
     # cycle
@@ -282,8 +282,8 @@ def main() -> None:
     p_cycle.add_argument("--tier", default="all")
     p_cycle.add_argument("--single", default=None)
     p_cycle.add_argument("--max-turns", type=int, default=10)
-    p_cycle.add_argument("--max-requests", type=int, default=300)
-    p_cycle.add_argument("--budget", type=float, default=0.50)
+    p_cycle.add_argument("--max-requests", type=int, default=500)
+    p_cycle.add_argument("--budget", type=float, default=0.10)
     p_cycle.add_argument("--keep-scratch", action="store_true")
 
     # report

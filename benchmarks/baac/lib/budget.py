@@ -1,8 +1,8 @@
 """BaaC Fail-Closed Budget and Request Guard.
 
 Enforces:
-1. Strict Request Caps (configurable, default: max 300 requests per run).
-2. Strict Cost Caps (configurable, default: max $0.50 USD per challenge for frontier / $0.10 for cheap).
+1. Strict Request Caps (configurable, default: max 500 requests per campaign).
+2. Strict Cost Caps (configurable, default: max $0.10 per campaign).
 3. Open/Configurable Model Allowlist (supports frontier, mid, cheap, free, local, and mock models).
 4. Pre-call assertion: Aborts fail-closed BEFORE issuing any provider request if caps are met.
 """
@@ -66,8 +66,8 @@ class UnknownUsageError(RuntimeError):
 class BudgetCapConfig:
     """Configurable budget, token, and request limits."""
 
-    max_requests: int = 300
-    max_cost_usd: float = 0.50
+    max_requests: int = 500
+    max_cost_usd: float = 0.10
     max_tokens: int = 1_000_000
     max_turns: int = 12
     allowed_models: Optional[tuple[str, ...]] = None  # None means all models permitted

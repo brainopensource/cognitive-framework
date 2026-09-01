@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 import urllib.error
 import urllib.request
 
-from .budget import BudgetTracker
+from .budget import BudgetTracker, UnknownUsageError
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -101,14 +101,18 @@ class OpenRouterModelPort:
         choice = resp_json.get("choices", [{}])[0]
         msg = choice.get("message", {})
         usage = resp_json.get("usage", {})
-        p_tok = usage.get("prompt_tokens", 0)
-        c_tok = usage.get("completion_tokens", 0)
+        if not isinstance(usage, Mapping) or "prompt_tokens" not in usage or "completion_tokens" not in usage:
+            raise UnknownUsageError("provider omitted prompt/completion usage")
+        p_tok = usage["prompt_tokens"]
+        c_tok = usage["completion_tokens"]
+        cached_tok = usage.get("cached_tokens", 0)
         reported_cost = usage.get("cost", 0.0) or 0.0
 
         cost = self.budget_tracker.record_request(
             model=self.model_name,
             prompt_tokens=p_tok,
             completion_tokens=c_tok,
+            cached_tokens=cached_tok,
             reported_cost=reported_cost,
         )
 
@@ -169,13 +173,17 @@ class OllamaModelPort:
         choice = resp_json.get("choices", [{}])[0]
         msg = choice.get("message", {})
         usage = resp_json.get("usage", {})
-        p_tok = usage.get("prompt_tokens", 0)
-        c_tok = usage.get("completion_tokens", 0)
+        if not isinstance(usage, Mapping) or "prompt_tokens" not in usage or "completion_tokens" not in usage:
+            raise UnknownUsageError("provider omitted prompt/completion usage")
+        p_tok = usage["prompt_tokens"]
+        c_tok = usage["completion_tokens"]
+        cached_tok = usage.get("cached_tokens", 0)
 
         self.budget_tracker.record_request(
             model=f"ollama/{self.model_name}",
             prompt_tokens=p_tok,
             completion_tokens=c_tok,
+            cached_tokens=cached_tok,
             reported_cost=0.0,
         )
 

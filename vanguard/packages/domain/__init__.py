@@ -58,6 +58,7 @@ from .artifacts import (
     FrozenHarness, GraphError, HarnessManifest, KindRegistry, LogicalEdit,
     ManifestError, ManifestRegistry, RegisteredManifest, Workspace, compose, parse_manifest,
 )
+from .models import ModelCapabilityProfile, ToolCallStyle, profile_for
 
 __all__ = [
     "CanonicalisationError", "canonicalise", "canonicalise_text", "canonical_bytes",
@@ -78,4 +79,5 @@ __all__ = [
     "KindRegistry", "LogicalEdit", "ManifestError", "ManifestRegistry",
     "RegisteredManifest", "Workspace", "compose",
     "parse_manifest",
+    "ModelCapabilityProfile", "ToolCallStyle", "profile_for",
 ]

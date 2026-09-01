@@ -16,6 +16,7 @@ from typing import Any, Callable, Mapping, Sequence
 
 from ..adapters.stores.repo_index import FileRepoIndex
 from ..agency import EpisodeEngine, RunTermination
+from ..agency.episode import ProtocolRecoveryState
 from ..agency.episode.admission_gate import AdmissionGate, AdmissionVerdict, VerificationReceipt
 from ..agency.context import (
     CompetencePriorRecorder,
@@ -984,6 +985,9 @@ class HarnessSession:
         # indices restarted at 0 and no-progress detection could never see two
         # consecutive turns of the same run (`CMX-03`).
         prior_turns: tuple[Any, ...] = ()
+        prior_recovery_state = ProtocolRecoveryState.from_dict(
+            task.resume_state.get("recoveryState", {})
+            if isinstance(task.resume_state, Mapping) else {})
         # `_record` clears `self.calls`, so the attempted-verb set has to be
         # accumulated here or the phase ladder resets to `inspect` on every
         # approval re-entry -- which un-offers `patch` on the turn right after
@@ -1017,10 +1021,12 @@ class HarnessSession:
                     self.operator, turn, dispatch,
                     on_dispatch=self._observe_completion_dispatch),
                 prior_turns=prior_turns,
-                prior_seen_verbs=tuple(sorted(seen_verbs_acc)))
+                prior_seen_verbs=tuple(sorted(seen_verbs_acc)),
+                prior_recovery_state=prior_recovery_state)
             seen_verbs_acc.update(
                 str(getattr(req, "action", "")) for req, _ in self.calls)
             prior_turns = outcome.episode.turns
+            prior_recovery_state = outcome.recovery_state
             terminal, detail = outcome.terminal, outcome.episode.detail
             suspended = _suspension(self.calls)
             _record(receipts, self.operator, self.calls)

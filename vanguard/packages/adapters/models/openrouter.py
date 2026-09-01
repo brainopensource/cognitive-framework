@@ -22,6 +22,8 @@ from ...ports.event_store import Result
 from ...ports.model import ContextBundle, Proposal, Sampling, ToolSchemas
 from .cassette import Cassette, CassettePlayer, CassetteRecorder
 from .invocation import ProposalTranslator
+from .dialect import ModelIntent, compile_intent
+from ...domain.models.profile import profile_for
 from .routing import resolve_route, preflight_check
 
 __all__ = [
@@ -759,6 +761,11 @@ class OpenRouterModel:
     def mode(self) -> str:
         return self._mode
 
+    @property
+    def capability_profile(self):
+        """Versioned protocol profile used for attribution, not pricing."""
+        return profile_for(self._model)
+
     def _lookup_secret(self) -> str | None:
         if self._environ is not None:
             value = self._environ.get(self.api_key_ref)
@@ -1001,9 +1008,14 @@ class OpenRouterModel:
                 message=f"secret reference {self.api_key_ref} is unset",
             )
         target_model = self._models[0] if self._models else route.resolved_model
+        dialect = compile_intent(
+            ModelIntent(system="", messages=tuple(_messages(context)),
+                        tools=tuple(tools), sampling=dict(sampling)),
+            self.capability_profile,
+        )
         body_obj: dict[str, Any] = {
             "model": target_model,
-            "messages": _messages(context),
+            "messages": list(dialect.messages),
             # 0.0 (fully greedy) reliably drove small/fast models into an
             # exact-repetition trap once two or three near-identical
             # (tool_call, tool_result) pairs sat in context: every subsequent
@@ -1034,13 +1046,14 @@ class OpenRouterModel:
             body_obj["models"] = list(self._models)
         if self._reasoning_effort is not None:
             body_obj["reasoning"] = {"effort": self._reasoning_effort}
-        if self._stream:
+        if self._stream and dialect.sampling.get("stream", True):
             body_obj["stream"] = True
             body_obj["stream_options"] = {"include_usage": True}
-        tool_payload = _tools_payload(tools)
+        tool_payload = list(dialect.tools)
         if tool_payload:
             body_obj["tools"] = tool_payload
-            body_obj["parallel_tool_calls"] = False
+            body_obj["parallel_tool_calls"] = bool(
+                dialect.sampling.get("parallel_tool_calls", False))
             tool_choice = sampling.get("toolChoice") or sampling.get("tool_choice")
             if tool_choice is not None:
                 if isinstance(tool_choice, str):

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
+from enum import Enum
 from typing import Any, Literal, Mapping, Sequence
 
 from ...domain.canonicalisation.digest import digest_of
@@ -10,6 +11,30 @@ from ...domain.transforms.contracts import ProposalDecoderProtocol
 from .state import Proposal, ProposalKind, ProposalMalformed, parse_proposal
 
 RecoveryStatus = Literal["accept", "retry_model", "fail_instrument"]
+
+
+class FailureClass(str, Enum):
+    TRANSPORT = "transport"
+    PROVIDER = "provider"
+    PROTOCOL = "protocol"
+    TRUNCATION = "truncation"
+    TOOL = "tool"
+    PATCH = "patch"
+    VERIFICATION = "verification"
+    PERMISSION = "permission"
+    BUDGET = "budget"
+
+
+def semantic_attempt_fingerprint(
+    action: str, arguments: Mapping[str, Any] | None = None,
+    workspace_digest: str = "",
+) -> str:
+    """Fingerprint the attempted operation, excluding transcript history."""
+    return digest_of({
+        "action": str(action),
+        "arguments": dict(arguments or {}),
+        "workspaceDigest": workspace_digest,
+    })
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,6 +76,10 @@ class ProtocolRecoveryState:
     max_protocol_retries: int = 2
     max_truncation_retries: int = 1
     max_effect_retries: int = 2
+    #: Durable semantic attempt history. Tuple keeps checkpoint serialization
+    #: deterministic and prevents an unchanged failed action from repeating.
+    attempted_fingerprints: tuple[str, ...] = ()
+    spent_decisions: tuple[str, ...] = ()
 
     def with_protocol_retry(self) -> ProtocolRecoveryState:
         return replace(self, protocol_retries=self.protocol_retries + 1)
@@ -63,6 +92,39 @@ class ProtocolRecoveryState:
 
     def with_effect_retry(self) -> ProtocolRecoveryState:
         return replace(self, effect_retries=self.effect_retries + 1)
+
+    def record_attempt(self, fingerprint: str, decision: str = "") -> ProtocolRecoveryState:
+        if not fingerprint:
+            raise ValueError("attempt fingerprint is required")
+        return replace(
+            self,
+            attempted_fingerprints=self.attempted_fingerprints + (fingerprint,),
+            spent_decisions=(self.spent_decisions + (decision,)) if decision else self.spent_decisions,
+        )
+
+    def has_attempted(self, fingerprint: str) -> bool:
+        return fingerprint in self.attempted_fingerprints
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "transportRetries": self.transport_retries,
+            "protocolRetries": self.protocol_retries,
+            "truncationRetries": self.truncation_retries,
+            "effectRetries": self.effect_retries,
+            "attemptedFingerprints": list(self.attempted_fingerprints),
+            "spentDecisions": list(self.spent_decisions),
+        }
+
+    @classmethod
+    def from_dict(cls, raw: Mapping[str, Any]) -> "ProtocolRecoveryState":
+        return cls(
+            transport_retries=int(raw.get("transportRetries", raw.get("transport_retries", 0))),
+            protocol_retries=int(raw.get("protocolRetries", raw.get("protocol_retries", 0))),
+            truncation_retries=int(raw.get("truncationRetries", raw.get("truncation_retries", 0))),
+            effect_retries=int(raw.get("effectRetries", raw.get("effect_retries", 0))),
+            attempted_fingerprints=tuple(str(x) for x in raw.get("attemptedFingerprints", ())),
+            spent_decisions=tuple(str(x) for x in raw.get("spentDecisions", ())),
+        )
 
 
 RecoveryState = ProtocolRecoveryState
@@ -129,6 +191,39 @@ class ProtocolRecoveryPolicy:
 
         # 5. Default: Accept as conversational completion if no patch is strictly required
         return RecoveryDecision(status="accept", retry_reason="conversational_accepted")
+
+    def classify(self, detail: str) -> FailureClass:
+        text = (detail or "").lower()
+        for kind, markers in (
+            (FailureClass.PERMISSION, ("permission", "forbidden", "denied")),
+            (FailureClass.BUDGET, ("budget", "quota")),
+            (FailureClass.TRUNCATION, ("truncated", "max_tokens", "length")),
+            (FailureClass.PATCH, ("patch", "hunk")),
+            (FailureClass.VERIFICATION, ("test", "verification")),
+            (FailureClass.TOOL, ("tool", "command")),
+            (FailureClass.TRANSPORT, ("timeout", "connection", "socket")),
+            (FailureClass.PROVIDER, ("provider", "http ")),
+        ):
+            if any(marker in text for marker in markers):
+                return kind
+        return FailureClass.PROTOCOL
+
+    def decide_failure(
+        self, detail: str, state: ProtocolRecoveryState, *, action: str = "",
+        arguments: Mapping[str, Any] | None = None, workspace_digest: str = "",
+    ) -> tuple[RecoveryDecision, ProtocolRecoveryState]:
+        kind = self.classify(detail)
+        fingerprint = semantic_attempt_fingerprint(action or kind.value, arguments, workspace_digest)
+        if state.has_attempted(fingerprint) or kind in {FailureClass.PERMISSION, FailureClass.BUDGET}:
+            return RecoveryDecision(status="fail_instrument", failure_code=kind.value), state.record_attempt(fingerprint, "no_retry")
+        next_state = state.record_attempt(fingerprint, "retry")
+        if kind is FailureClass.TRUNCATION and next_state.truncation_retries <= self.max_truncation_retries:
+            next_state = next_state.with_truncation_retry()
+        elif next_state.protocol_retries < self.max_protocol_retries:
+            next_state = next_state.with_protocol_retry()
+        else:
+            return RecoveryDecision(status="fail_instrument", failure_code=kind.value), next_state
+        return RecoveryDecision(status="retry_model", retry_reason=kind.value), next_state
 
 
 def recover_proposal(

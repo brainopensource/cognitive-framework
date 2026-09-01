@@ -145,6 +145,11 @@ class BaaCReport:
         pct = round((passed / total * 100), 1) if total else 0.0
         return passed, total, pct
 
+    def is_tier_promoted(self, tier: str, *, threshold_pct: float = 80.0) -> bool:
+        """Return whether a tier meets the explicit held-out promotion bar."""
+        _, total, rate = self.tier_pass_rate(tier)
+        return total > 0 and rate >= threshold_pct
+
     def attribution_breakdown(self) -> Dict[str, int]:
         counts = {
             "PASS": 0,

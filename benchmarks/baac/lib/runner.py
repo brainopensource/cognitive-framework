@@ -102,6 +102,9 @@ class BaaCRunner:
         self.budget_config = budget_config or BudgetCapConfig()
         self.run_id = run_id or f"baac-run-{int(time.time())}"
         self.extra_metadata = extra_metadata or {}
+        # One tracker spans the whole campaign, not one tracker per challenge.
+        # This makes the $0.10/1M-token/500-call ceiling cumulative.
+        self.campaign_budget = BudgetTracker(self.budget_config)
         self.api_key = load_openrouter_api_key() if mode == "live" else ""
         self.run_dir = BAAC_RUNS_DIR / self.run_id
         self.run_dir.mkdir(parents=True, exist_ok=True)
@@ -167,7 +170,10 @@ class BaaCRunner:
         try:
             materialize_scratch_workspace(challenge_dir, scratch_dir)
 
-            budget_tracker = BudgetTracker(self.budget_config)
+            budget_tracker = self.campaign_budget
+            before_prompt = budget_tracker.total_prompt_tokens
+            before_completion = budget_tracker.total_completion_tokens
+            before_cost = budget_tracker.total_cost_usd
             cassettes: List[Dict[str, Any]] = []
 
             # 4. Step 4: Setup ModelPort based on mode
@@ -285,10 +291,11 @@ class BaaCRunner:
                 status=status,
                 attribution=attribution,
                 turns=turns,
-                prompt_tokens=budget_tracker.total_prompt_tokens,
-                completion_tokens=budget_tracker.total_completion_tokens,
-                total_tokens=budget_tracker.total_tokens,
-                cost_usd=budget_tracker.total_cost_usd,
+                prompt_tokens=budget_tracker.total_prompt_tokens - before_prompt,
+                completion_tokens=budget_tracker.total_completion_tokens - before_completion,
+                total_tokens=(budget_tracker.total_prompt_tokens - before_prompt
+                              + budget_tracker.total_completion_tokens - before_completion),
+                cost_usd=budget_tracker.total_cost_usd - before_cost,
                 duration_seconds=total_duration,
                 changed_files=changed_files,
                 diff_patch=diff_patch,

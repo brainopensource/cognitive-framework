@@ -1,0 +1,88 @@
+{
+  "runId": "baac-vg-1-forge-live-1788223558",
+  "timestamp": "2026-09-01T00:45:58Z",
+  "preset": "vg-1-forge",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "mode": "live",
+  "metadata": {},
+  "summary": {
+    "totalChallenges": 1,
+    "passedCount": 0,
+    "overallPassRatePct": 0.0,
+    "totalTokens": 0,
+    "totalCostUsd": 0.0,
+    "totalDurationSeconds": 0.06,
+    "attribution": {
+      "PASS": 0,
+      "LLM_COGNITIVE_ERROR": 0,
+      "HARNESS_ERROR": 1,
+      "BUDGET_EXHAUSTED": 0,
+      "DATASET_INVALID": 0
+    }
+  },
+  "results": [
+    {
+      "challengeId": "bench_single_2K_tier-1_calculator",
+      "tier": "tier-1",
+      "scope": "single",
+      "contextBracket": "2K",
+      "preset": "vg-1-forge",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "mode": "live",
+      "status": "FAIL",
+      "attribution": "HARNESS_ERROR",
+      "turns": 1,
+      "promptTokens": 0,
+      "completionTokens": 0,
+      "totalTokens": 0,
+      "costUsd": 0.0,
+      "durationSeconds": 0.06,
+      "changedFiles": [],
+      "diffPatch": "",
+      "oracle": {
+        "passed": false,
+        "exitCode": 1,
+        "stdout": "",
+        "stderr": "test_calc (__main__.TestCalc.test_calc) ... FAIL\n\n======================================================================\nFAIL: test_calc (__main__.TestCalc.test_calc)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rocha/Coding/Aether-D-System/benchmarks/baac/challenges/tier-1/bench_single_2K_tier-1_calculator/oracle/verify.py\", line 8, in test_calc\n    self.assertEqual(calculate_value(2, 3), 15)\nAssertionError: 8 != 15\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)\n",
+        "durationSeconds": 0.037,
+        "error": "test_calc (__main__.TestCalc.test_calc) ... FAIL\n\n======================================================================\nFAIL: test_calc (__main__.TestCalc.test_calc)\n---------------------------------",
+        "assertionCount": 1,
+        "failingAssertions": [
+          "test_calc",
+          "(failures=1)"
+        ]
+      },
+      "aiJudgeScore": null,
+      "diagnosis": "test_calc (__main__.TestCalc.test_calc) ... FAIL\n\n======================================================================\nFAIL: test_calc (__main__.TestCalc.test_calc)\n---------------------------------",
+      "metadata": {
+        "id": "bench_single_2K_tier-1_calculator",
+        "name": "Single-File Formula Repair",
+        "scope": "single",
+        "context_bracket": "2K",
+        "tier": "tier-1",
+        "difficulty": 1,
+        "timeout_seconds": 35,
+        "entrypoint": "src/main.py",
+        "eval_type": "oracle",
+        "tags": [
+          "math",
+          "single_file",
+          "formula"
+        ],
+        "metadata": {},
+        "cli_args": {
+          "command": "run",
+          "preset": "vg-1-forge",
+          "mode": "live",
+          "model": "deepseek/deepseek-v4-flash-0731",
+          "tier": "all",
+          "single": "bench_single_2K_tier-1_calculator",
+          "max_turns": 1,
+          "max_requests": 1,
+          "budget": 0.1,
+          "keep_scratch": false
+        }
+      }
+    }
+  ]
+}

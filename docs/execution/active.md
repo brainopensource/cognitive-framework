@@ -47,7 +47,7 @@ do not override this board, source, tests, or receipts.
 
 | Lane | Package | Board state | Declared next action |
 |---|---|---|---|
-| A | `BEP-01` | `READY` | Close task/composition verification-receipt binding through the existing `RunPlan` -> runtime -> `AdmissionGate` seam; do not copy the report-tree implementation wholesale. |
+| A | `BEP-01..03` | `TECHNICAL COMPLETE` | Subject-bound completion evidence, versioned model capabilities/dialect projection, and typed semantic recovery are implemented and validated through the existing runtime seams. |
 | B | `CMX-06` / `CMX-07` | `GATED` | Produce the accepted specialist ablation and execute the frozen repository-scale qualification set |
 
 ## Wave closure disposition and next stage
@@ -67,6 +67,15 @@ authorized or available in this hermetic validation. M-8 therefore remains
 subject to its existing empirical gate, and no 1.0, SWE-bench, or SOTA claim
 is made. The first 1-forge change must preserve the existing `AdmissionGate`
 and express the missing goal contract through the current runtime seam.
+
+The BEP-01..03 technical verification bundle is green on the current
+implementation subject: Kernel 97 tests, Agency 181 tests, Contracts 438
+tests, Adapters 161 tests, and Benchmarks 53 tests. The bounded LAM campaign
+also passed 9/9 challenges with zero provider spend. These are technical and
+instrumentation results only. CMX-07 remains `GATED` pending a containerized,
+exact-subject qualification run, and live SOTA/SWE-bench claims remain
+`GATED` pending the official reproducible evaluator and independently accepted
+receipts.
 
 ## Reconciled state and convergence rule
 

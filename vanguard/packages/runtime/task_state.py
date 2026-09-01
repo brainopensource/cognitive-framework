@@ -240,7 +240,8 @@ def fold_task_state(events: Sequence[Any], *, objective: str = "") -> CodingTask
         payload = getattr(event, "payload", {})
         if not isinstance(payload, Mapping):
             continue
-        kind = str(payload.get("kind") or getattr(event, "mhf_kind", ""))
+        kind = str(payload.get("kind") or getattr(event, "mhf_kind", "")
+                   or getattr(event, "kind", ""))
         if isinstance(payload.get("plan"), Sequence) and not isinstance(payload.get("plan"), (str, bytes)):
             state["plan"] = [str(item) for item in payload["plan"]]
         if isinstance(payload.get("nextAction"), str):

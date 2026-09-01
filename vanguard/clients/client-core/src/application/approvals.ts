@@ -1,23 +1,4 @@
-import { fail } from "../contract/parse.js";
-import type { CommandReceipt, Result, RuntimeClient } from "../contract/types.js";
-
-export type ApprovalAction = "approve" | "reject" | "correct";
-
-export function approvalActionForKey(key: string): ApprovalAction | undefined {
-  if (key === "y") return "approve";
-  if (key === "n") return "reject";
-  if (key === "c") return "correct";
-  return undefined;
-}
-
-export async function dispatchApproval(
-  client: Pick<RuntimeClient, "resolveApproval">,
-  approvalId: string,
-  key: string,
-): Promise<Result<CommandReceipt>> {
-  const action = approvalActionForKey(key);
-  if (action !== "approve" && action !== "reject") {
-    return fail("invalid_request", `key ${key} is not an approval decision`);
-  }
-  return client.resolveApproval({ approvalId, decision: action });
-}
+// F4 Phase 2: ported to @aether/client (the converged AETHER client SDK).
+// This re-export shim keeps every existing @vanguard/client-core consumer
+// working unchanged while there is exactly one implementation underneath.
+export * from "@aether/client/application/approvals.js";

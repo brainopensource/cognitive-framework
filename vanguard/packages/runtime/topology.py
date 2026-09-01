@@ -23,6 +23,7 @@ __all__ = [
     "TopologyRole",
     "lower_topology",
     "parse_topology",
+    "qualification_topology",
 ]
 
 TOPOLOGY_SCHEMA = "mhf.topology/1"
@@ -339,6 +340,47 @@ def parse_topology(raw: Mapping[str, Any]) -> Topology:
     )
 
 
+def qualification_topology(name: str) -> Topology:
+    """Return one frozen, authority-free BEP-04 qualification graph."""
+    graphs = {
+        "sequential": ("bep04-sequential", "planner",
+                       ("planner", "implementer", "verifier"),
+                       (("planner", "implementer", "may_delegate_to"),
+                        ("implementer", "verifier", "may_delegate_to"))),
+        "reviewer_in_loop": ("bep04-reviewer-in-loop", "planner",
+                             ("planner", "implementer", "reviewer", "verifier"),
+                             (("planner", "implementer", "may_delegate_to"),
+                              ("implementer", "reviewer", "reviews"),
+                              ("reviewer", "verifier", "may_delegate_to"))),
+        "parallel_investigators": (
+            "bep04-parallel-investigators", "coordinator",
+            ("coordinator", "investigator_a", "investigator_b",
+             "synthesizer", "verifier"),
+            (("coordinator", "investigator_a", "may_delegate_to"),
+             ("coordinator", "investigator_b", "may_delegate_to"),
+             ("investigator_a", "synthesizer", "may_delegate_to"),
+             ("investigator_b", "synthesizer", "may_delegate_to"),
+             ("synthesizer", "verifier", "may_delegate_to"))),
+    }
+    graph = graphs.get(str(name))
+    if graph is None:
+        raise TopologyError(f"unknown BEP-04 qualification topology: {name!r}")
+    topology_id, entry, role_ids, edge_rows = graph
+    return parse_topology({
+        "api": TOPOLOGY_SCHEMA, "topologyId": topology_id, "version": "1.0.0",
+        "entryRole": entry,
+        "roles": [{"id": role, "policyRef": f"bep04/{role}@1",
+                   "budget": {"turns": 1, "tokens": 1000}}
+                  for role in role_ids],
+        "edges": [{"from": source, "to": target, "relation": relation}
+                  for source, target, relation in edge_rows],
+        "artifactFlows": [{"artifact": f"{source}-to-{target}",
+                           "from": source, "to": target,
+                           "schemaId": "bep04.artifact/1"}
+                          for source, target, _ in edge_rows],
+    })
+
+
 def _role_order(topology: Topology) -> tuple[str, ...]:
     graph: dict[str, list[str]] = {role.role_id: [] for role in topology.roles}
     incoming: dict[str, int] = {role.role_id: 0 for role in topology.roles}
@@ -388,12 +430,29 @@ def _validate_composition(topology: Topology, composition: Any | None) -> None:
                     f"above composition ceiling {allowed}")
 
 
+def _validate_attenuation(topology: Topology) -> None:
+    roles = {role.role_id: role for role in topology.roles}
+    for edge in topology.edge_records:
+        if edge.relation != "may_delegate_to":
+            continue
+        parent, child = roles[edge.source], roles[edge.target]
+        for dimension in ("usd_micros", "millis", "tokens", "bytes", "turns", "depth"):
+            parent_limit = parent.budget_template.get(dimension)
+            child_limit = child.budget_template.get(dimension)
+            if (parent_limit is not None and child_limit is not None
+                    and child_limit > parent_limit):
+                raise TopologyError(
+                    f"delegated role {child.role_id!r} exceeds parent "
+                    f"{parent.role_id!r} budget for {dimension}")
+
+
 def lower_topology(
     topology: Topology,
     composition: Any | None = None,
 ) -> dict[str, Any]:
     """Compile routing data into a sequential ``RunPlanExtension`` value."""
     _validate_composition(topology, composition)
+    _validate_attenuation(topology)
     order = _role_order(topology)
     role_by_id = {role.role_id: role for role in topology.roles}
     parents = {role_id: [] for role_id in order}
@@ -425,6 +484,7 @@ def lower_topology(
             str(flow["artifact"]) for flow in topology.artifact_flows
             if str(flow["from"]) == role_id)),
     } for ordinal, role_id in enumerate(order))
+    is_parallel = topology.topology_id == "bep04-parallel-investigators"
     extension = RunPlanExtension(
         topology_digest=topology.digest(),
         composition_digest=_composition_digest(composition),
@@ -437,5 +497,8 @@ def lower_topology(
         ),
         artifact_flows=topology.artifact_flows,
         role_operations=operations,
+        execution_mode=("bounded_parallel" if is_parallel else "sequential"),
+        scheduler_policy=("bounded-parallel-reference" if is_parallel
+                           else "sequential-reference"),
     )
     return extension.to_dict()

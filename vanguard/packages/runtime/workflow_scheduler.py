@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable, Mapping
 
 from ..domain.workflows.contracts import WorkflowNode, WorkflowSpec
@@ -39,8 +40,15 @@ class WorkflowScheduler:
         self,
         workflow_id: str,
         initial_artifact_digest: str | None = None,
+        *,
+        cancelled: Callable[[], bool] | None = None,
     ) -> WorkflowExecutionOutcome:
         """Run workflow from entry node to terminal settlement."""
+        if self._spec.execution_mode == "bounded_parallel":
+            return self._run_bounded_parallel(
+                workflow_id, initial_artifact_digest, cancelled=cancelled)
+        if self._spec.execution_mode != "sequential":
+            raise ValueError(f"unsupported workflow execution mode: {self._spec.execution_mode}")
         state = WorkflowState(
             workflow_id=workflow_id,
             topology_id=self._spec.topology_id,
@@ -121,3 +129,83 @@ class WorkflowScheduler:
             result_digest=state.result_digest,
             events=tuple(events),
         )
+
+    def _execute_node(
+        self, node: WorkflowNode, input_digest: str | None,
+    ) -> tuple[str | None, str]:
+        if node.kind == "transform":
+            if input_digest:
+                result = self._transform_runtime.execute(
+                    node.policy_ref, input_digest)
+                return result.output_digest, result.status
+            return None, "skipped_empty_input"
+        executor = self._executors.get(node.id) or self._executors.get(node.kind)
+        if executor is not None:
+            return executor(node, input_digest)
+        return input_digest, "passed"
+
+    def _run_bounded_parallel(
+        self, workflow_id: str, initial_artifact_digest: str | None,
+        *, cancelled: Callable[[], bool] | None = None,
+    ) -> WorkflowExecutionOutcome:
+        """Execute ready read/investigator nodes in a bounded join batch."""
+        state = WorkflowState(workflow_id=workflow_id,
+                              topology_id=self._spec.topology_id)
+        events: list[dict[str, Any]] = []
+        outputs: dict[str, str | None] = {}
+        pending = {node.id for node in self._spec.nodes}
+        pending.discard(self._spec.entry_node)
+        pending.add(self._spec.entry_node)
+        incoming = {node.id: {edge.from_node for edge in self._spec.edges
+                              if edge.to_node == node.id}
+                    for node in self._spec.nodes}
+        while pending and not state.completed and not state.suspended:
+            if cancelled is not None and cancelled():
+                state = state.suspend("CANCELLED")
+                events.append({"type": "WorkflowSuspended",
+                               "payload": {"reason": "CANCELLED"}})
+                break
+            ready = sorted(node_id for node_id in pending
+                           if incoming[node_id].issubset(set(state.settled_nodes)))
+            if not ready:
+                state = state.suspend("NO_READY_NODE")
+                events.append({"type": "WorkflowSuspended",
+                               "payload": {"reason": "NO_READY_NODE"}})
+                break
+            batch = ready[:max(1, int(self._spec.max_concurrency))]
+            for node_id in batch:
+                pending.remove(node_id)
+                payload = {"nodeId": node_id,
+                           "attempt": state.node_attempts.get(node_id, 0) + 1}
+                state = reduce_workflow(state, "NodeScheduled", payload)
+                events.append({"type": "LeaseAcquired", "payload": payload})
+                events.append({"type": "NodeScheduled", "payload": payload})
+            nodes = [self._spec.get_node(node_id) for node_id in batch]
+            nodes = [node for node in nodes if node is not None]
+            args = [(node, outputs.get(next(iter(incoming[node.id]), ""),
+                                      initial_artifact_digest))
+                    for node in nodes]
+            with ThreadPoolExecutor(max_workers=len(nodes)) as pool:
+                results = list(pool.map(lambda item: self._execute_node(*item),
+                                        args))
+            for node, (output_digest, condition) in zip(nodes, results):
+                outputs[node.id] = output_digest
+                payload = {"nodeId": node.id, "outputDigest": output_digest,
+                           "condition": condition}
+                state = reduce_workflow(state, "NodeSettled", payload)
+                events.append({"type": "NodeSettled", "payload": payload})
+                events.append({"type": "LeaseReleased",
+                               "payload": {"nodeId": node.id}})
+                for edge in self._spec.outgoing_edges(node.id):
+                    if edge.condition in (None, condition, "default"):
+                        pending.add(edge.to_node)
+        if not state.suspended and not state.completed:
+            result_digest = outputs.get(self._spec.nodes[-1].id
+                                       if self._spec.nodes else "")
+            state = state.complete(result_digest)
+            events.append({"type": "WorkflowCompleted",
+                           "payload": {"resultDigest": result_digest}})
+        return WorkflowExecutionOutcome(
+            workflow_id=workflow_id, completed=state.completed,
+            final_state=state, result_digest=state.result_digest,
+            events=tuple(events))

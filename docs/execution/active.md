@@ -77,6 +77,17 @@ exact-subject qualification run, and live SOTA/SWE-bench claims remain
 `GATED` pending the official reproducible evaluator and independently accepted
 receipts.
 
+The BEP-04 qualification implementation now exposes the three bounded
+authority-free graph templates (`sequential`, `reviewer_in_loop`, and
+`parallel_investigators`) through the existing topology lowerer and scheduler.
+The parallel treatment is capped at two concurrent investigators, joins only
+after both predecessors settle, and records lease acquisition/release events.
+BEP-05 parity vectors cover Coding Max, Research, and Tutor manifests; the
+read-mostly compositions do not declare patch or process-execution verbs.
+Hermetic LAM replay passed 9/9 challenges for both `vg-1-forge` and
+`vg-code-max` (17,100 tokens each, $0 provider spend). These results do not
+qualify CMX-07 or authorize live SOTA/SWE-bench claims.
+
 ## Reconciled state and convergence rule
 
 The subject above contains the generic completion, recovery, context, durable

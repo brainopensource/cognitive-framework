@@ -1,31 +1,4 @@
-/**
- * @file AUTO-GENERATED
- */
-
-export interface GraphNode {
-  readonly id: string;
-  readonly kind: string;
-  readonly label: string;
-  readonly status: string;
-  readonly refs: readonly string[];
-  readonly semanticClass: string;
-}
-
-export interface GraphEdge {
-  readonly id: string;
-  readonly source: string;
-  readonly target: string;
-  readonly relation: string;
-  readonly authoritative: boolean;
-}
-
-export function buildCausalGraph(events: readonly any[]): { nodes: readonly GraphNode[]; edges: readonly GraphEdge[] } {
-  return { nodes: [], edges: [] };
-}
-
-export function buildArchitectureGraph(
-  components: readonly any[],
-  activeRun?: any
-): { nodes: readonly GraphNode[]; edges: readonly GraphEdge[] } {
-  return { nodes: [], edges: [] };
-}
+// F4 Phase 1: ported to @aether/client (the converged AETHER client SDK).
+// This re-export shim keeps every existing @vanguard/client-core consumer
+// working unchanged while there is exactly one implementation underneath.
+export * from "@aether/client/application/graph-model.js";

@@ -48,6 +48,16 @@ class WorkflowSpec:
     entry_node: str
     api: str = "mhf.topology/2"
     max_cycles: int = 5
+    execution_mode: str = "sequential"
+    max_concurrency: int = 1
+
+    def __post_init__(self) -> None:
+        if self.execution_mode not in {"sequential", "bounded_parallel"}:
+            raise ValueError(f"unsupported workflow execution mode: {self.execution_mode}")
+        if self.max_concurrency < 1:
+            raise ValueError("max_concurrency must be positive")
+        if self.execution_mode == "sequential" and self.max_concurrency != 1:
+            raise ValueError("sequential workflows cannot request concurrency")
 
     def get_node(self, node_id: str) -> WorkflowNode | None:
         for node in self.nodes:

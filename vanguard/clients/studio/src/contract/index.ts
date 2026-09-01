@@ -3,18 +3,30 @@ export * from "@vanguard/client-core/contract/parse.js";
 export * from "@vanguard/client-core/adapters/web-signer.js";
 export * from "@vanguard/client-core/adapters/fake.js";
 export * from "@vanguard/client-core/adapters/http.js";
-export * from "@vanguard/client-core/application/run-view.js";
-export * from "@vanguard/client-core/application/approvals.js";
-export * from "@vanguard/client-core/application/budget.js";
-export * from "@vanguard/client-core/application/coding-types.js";
-export * from "@vanguard/client-core/application/coding-receipts.js";
+// F4 Phase 1: these 7 leaf modules are ported to @aether/client (no
+// cross-module or RuntimeClient dependencies).
+export * from "@aether/client/application/run-view.js";
+export * from "@aether/client/application/budget.js";
+export * from "@aether/client/application/coding-types.js";
+export * from "@aether/client/application/trace-graph.js";
+export * from "@aether/client/application/projection-model.js";
+export * from "@aether/client/application/graph-model.js";
+export * from "@aether/client/application/mcnemar.js";
+// F4 Phase 2: 4 of the 5 intermediate RuntimeClient-dependent modules are
+// ported. `corrections.ts` stays on @vanguard/client-core deliberately --
+// its CorrectionRecord shape (episodeId/proposedPatchDigest/reasonCodes/
+// magnitude/scope/correctingPrincipalRole) is a different, real, working
+// wire shape than @aether/contracts's CorrectionRecord (correctionId/runId/
+// targetEventId/reasonCode/scope local|general/recordedAt). The backend's
+// RecordCorrection command doesn't validate the correction object's inner
+// shape (service.py passes it through opaquely), so both are "valid" on the
+// wire -- but porting this module means picking one shape as canonical, not
+// a mechanical rename. That's a product/schema decision, not a Phase 2 port.
+export * from "@aether/client/application/approvals.js";
+export * from "@aether/client/application/subscribe-run.js";
+export * from "@aether/client/application/selectors.js";
+export * from "@aether/client/application/coding-receipts.js";
 export * from "@vanguard/client-core/application/corrections.js";
-export * from "@vanguard/client-core/application/selectors.js";
-export * from "@vanguard/client-core/application/trace-graph.js";
-export * from "@vanguard/client-core/application/subscribe-run.js";
-export * from "@vanguard/client-core/application/projection-model.js";
-export * from "@vanguard/client-core/application/graph-model.js";
-export * from "@vanguard/client-core/application/mcnemar.js";
 
 export type SourceClass =
   | "ledgered"

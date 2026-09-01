@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor
-from typing import Any, Callable, Mapping
+from typing import Any, Callable, Mapping, Sequence
 
 from ..domain.workflows.contracts import WorkflowNode, WorkflowSpec
 from ..domain.workflows.reducer import WorkflowState, reduce_workflow
@@ -36,27 +36,63 @@ class WorkflowScheduler:
         self._blob_store = blob_store
         self._executors = dict(node_executors or {})
 
+    def reconstruct_ready_state(
+        self, workflow_id: str, events: Sequence[Mapping[str, Any]] = (),
+    ) -> WorkflowState:
+        """Rebuild durable scheduling state before selecting ready nodes.
+
+        Resume consumes the event projection rather than the scheduler's
+        in-memory pending set. Replaying a settled node is therefore
+        impossible even when the process died between lease release and the
+        next scheduling decision.
+        """
+        state = WorkflowState(workflow_id=workflow_id,
+                              topology_id=self._spec.topology_id)
+        for event in events:
+            if not isinstance(event, Mapping):
+                raise ValueError("workflow events must be mappings")
+            kind = str(event.get("type", event.get("kind", "")))
+            payload = event.get("payload", {})
+            if isinstance(payload, Mapping):
+                state = reduce_workflow(state, kind, payload)
+        return state
+
     def run(
         self,
         workflow_id: str,
         initial_artifact_digest: str | None = None,
         *,
         cancelled: Callable[[], bool] | None = None,
+        prior_events: Sequence[Mapping[str, Any]] = (),
     ) -> WorkflowExecutionOutcome:
-        """Run workflow from entry node to terminal settlement."""
+        """Run workflow from durable state, never replaying settled effects."""
         if self._spec.execution_mode == "bounded_parallel":
             return self._run_bounded_parallel(
-                workflow_id, initial_artifact_digest, cancelled=cancelled)
+                workflow_id, initial_artifact_digest, cancelled=cancelled,
+                prior_events=prior_events)
         if self._spec.execution_mode != "sequential":
             raise ValueError(f"unsupported workflow execution mode: {self._spec.execution_mode}")
-        state = WorkflowState(
-            workflow_id=workflow_id,
-            topology_id=self._spec.topology_id,
-        )
+        state = self.reconstruct_ready_state(workflow_id, prior_events)
         events: list[dict[str, Any]] = []
 
         current_node_id: str | None = self._spec.entry_node
         current_input_digest: str | None = initial_artifact_digest
+
+        # A sequential resume follows the first unsettled outgoing path. The
+        # reducer is authoritative about which nodes already settled.
+        if state.settled_nodes:
+            settled_order = [str(event.get("payload", {}).get("nodeId"))
+                             for event in prior_events
+                             if str(event.get("type", event.get("kind", "")))
+                             == "NodeSettled"
+                             and isinstance(event.get("payload", {}), Mapping)]
+            last = next((node_id for node_id in reversed(settled_order)
+                         if node_id in state.settled_nodes), None)
+            if last is not None:
+                current_node_id = next((edge.to_node for edge in
+                                        self._spec.outgoing_edges(last)), None)
+                current_input_digest = state.node_outputs.get(last,
+                                                              current_input_digest)
 
         cycle_count = 0
         max_cycles = self._spec.max_cycles * len(self._spec.nodes)
@@ -147,13 +183,21 @@ class WorkflowScheduler:
     def _run_bounded_parallel(
         self, workflow_id: str, initial_artifact_digest: str | None,
         *, cancelled: Callable[[], bool] | None = None,
+        prior_events: Sequence[Mapping[str, Any]] = (),
     ) -> WorkflowExecutionOutcome:
         """Execute ready read/investigator nodes in a bounded join batch."""
-        state = WorkflowState(workflow_id=workflow_id,
-                              topology_id=self._spec.topology_id)
+        state = self.reconstruct_ready_state(workflow_id, prior_events)
         events: list[dict[str, Any]] = []
         outputs: dict[str, str | None] = {}
-        pending = {node.id for node in self._spec.nodes}
+        for event in prior_events:
+            if (str(event.get("type", event.get("kind", ""))) == "NodeSettled"
+                    and isinstance(event.get("payload", {}), Mapping)):
+                payload = event["payload"]
+                node_id = payload.get("nodeId")
+                if node_id is not None:
+                    outputs[str(node_id)] = payload.get("outputDigest")
+        pending = {node.id for node in self._spec.nodes
+                   if node.id not in state.settled_nodes}
         pending.discard(self._spec.entry_node)
         pending.add(self._spec.entry_node)
         incoming = {node.id: {edge.from_node for edge in self._spec.edges

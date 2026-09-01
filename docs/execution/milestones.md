@@ -13,8 +13,8 @@ purpose: Present stable TARGET milestone outcomes, dependencies, and acceptance 
 audience:
   - contributor
   - release-owner
-analysis_subject_sha: d639ec4bda5ea7d8836a182393498a31fc43ea1a
-version: 0.9.2a2
+analysis_subject_sha: ca47eef7da1b4075f8a69d238fe1626fa1ab4c8e
+version: 0.9.2a3
 last_verified: 2026-08-31
 normative_authority:
   - docs/03_execution/milestones.md
@@ -70,10 +70,10 @@ existing M-4–M-10 gates without silently closing them.
 |---|---|---|---|
 | W-092-0 | Canonical contracts and navigable implementation map | Cross-linked canonical owners; target/as-built labels; fresh navigation/index checks | `DONE` (Merged in Ancestry) |
 | W-092-1 | Valid benchmark subjects and lossless trajectory/projection evidence | Untouched-fixture preflight, immutable trajectory links, reducer compatibility vectors | `DONE` (Merged in Ancestry) |
-| W-092-2 | Coding completion admitted only by fresh applicable verification | Deterministic failure scenarios; task, composition, workspace postimage, command/test subject and receipt binding; exterior evaluator kept independent | `HARDENING DELTA OPEN` (BEP-01) |
+| W-092-2 | Coding completion admitted only by fresh applicable verification | Deterministic failure scenarios; task, composition, workspace postimage, command/test subject and receipt binding; exterior evaluator kept independent | `TECHNICAL COMPLETE / REVIEWING` (BEP-01) |
 | W-092-3 | Bounded provider-neutral repository context and durable coding state | Control/treatment trajectories with task, index, context and prompt identities | `DONE` (L1-L5 Radix Integrated) |
-| W-092-4 | Tool, patch, recovery, resume, and provider reliability | Patch corpus, versioned model/dialect vectors, typed failure ablations, semantic anti-thrashing, cold-restart parity and provider contract tests | `HARDENING DELTA OPEN` (BEP-02/03) |
-| W-092-5 | Evidence-qualified release disposition | Exact-subject checks, controlled real-model evidence and explicit SWE claim boundary | `ACTIVE` (Blocked on Empirical Canary) |
+| W-092-4 | Tool, patch, recovery, resume, and provider reliability | Patch corpus, versioned model/dialect vectors, typed failure ablations, semantic anti-thrashing, cold-restart parity and provider contract tests | `TECHNICAL COMPLETE / REVIEWING` (BEP-02/03) |
+| W-092-5 | Evidence-qualified release disposition | Exact-subject checks, controlled real-model evidence and explicit SWE claim boundary | `ACTIVE` (Release Gated) |
 
 No capability wave may close a milestone merely by passing its own component tests. Evidence MUST
 be evaluated under the milestone acceptance boundary to which it is offered.
@@ -86,6 +86,30 @@ vectors pass. Their benchmark campaign has one aggregate ceiling: `$0.10`,
 further execution.
 
 ## Post-M-10 1.0 qualification horizon
+
+## Three-wave SOTA backend overlay
+
+This overlay is subordinate to the gates above and to [execution.active](active.md).
+It describes evidence work on subject `ca47eef7da1b4075f8a69d238fe1626fa1ab4c8e`;
+it does not authorize M-8, M-9, or M-10.
+
+| Wave | Packages | Outcome |
+|---|---|---|
+| SOTA-W1 | SOTA-01..04 | Truth reconciliation, completion convergence, official benchmark bridge, frozen qualification |
+| SOTA-W2 | SOTA-05..08 | Long-context/multi-file hardening, multi-model economy, measured optimization |
+| SOTA-W3 | SOTA-09..12 | Qualified coordination, agent-builder integration, Hermes parity, release qualification |
+
+### B0–B6 claim ladder
+
+- B0 is hermetic instrumentation only; internal BAAC/LAM/CMX artifacts are not official benchmark results.
+- B1 targets 20/20 frozen internal easy tasks; B2 targets at least 27/30 frozen internal average tasks.
+- B3 is a 60% internal-hard research target, not a release promise.
+- B4 and B5 commit to official, reproducible scores without promising a score.
+- 75% on SWE-Bench Pro or DeepSWE is a research aspiration only.
+- B6 permits competitor claims only under matched protocols and exact evidence.
+
+The 30-task SWE-Bench Pro pilot remains a kill criterion: `<=2/30` falsifies
+the flash-primary path toward 75% and requires a recorded pivot.
 
 M-9 and M-10 keep their existing beta and `0.9.0` meanings. The following
 outcomes define a non-authorizing 1.0 horizon; they do not create new active

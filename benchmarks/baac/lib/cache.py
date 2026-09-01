@@ -24,14 +24,6 @@ def clean_scratch_directories(prefix: str = "baac-scratch-") -> int:
             shutil.rmtree(p, ignore_errors=True)
             cleaned += 1
 
-    # Also clean user workspace tmp if present
-    user_ws_tmp = Path("/home/rocha/Coding/Aether-D-System-Workspace/tmp")
-    if user_ws_tmp.exists():
-        for p in user_ws_tmp.glob("baac-*"):
-            if p.is_dir():
-                shutil.rmtree(p, ignore_errors=True)
-                cleaned += 1
-
     return cleaned
 
 

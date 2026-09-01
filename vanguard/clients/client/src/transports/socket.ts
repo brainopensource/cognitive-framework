@@ -278,6 +278,18 @@ export class SocketTransport implements RuntimeTransport {
             };
           }
         }
+        // The readline interface ended without throwing -- the peer closed
+        // the connection cleanly. That's still a drop from the caller's
+        // point of view (the stream wasn't explicitly aborted), so it must
+        // go through the same bounded-reconnect-with-backoff accounting as
+        // the error path below. Looping straight back to the top here was
+        // a busy-loop: an immediate reconnect-and-clean-close cycle with no
+        // exit condition, ignoring maxReconnects entirely.
+        reconnectAttempts++;
+        if (reconnectAttempts > this.maxReconnects || signal?.aborted) {
+          return;
+        }
+        await new Promise((r) => setTimeout(r, this.backoffMs * Math.pow(2, reconnectAttempts - 1)));
       } catch (err) {
         if (connected) {
           // Dropped mid-stream

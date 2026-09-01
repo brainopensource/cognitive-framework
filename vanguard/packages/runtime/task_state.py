@@ -50,9 +50,18 @@ class RouteDecision:
     route: str
     reason: str
     failure: str | None = None
+    trigger: str = ""
+    parent_episode_id: str | None = None
+    parent_state_digest: str | None = None
+    budget_snapshot: Mapping[str, int] = field(default_factory=dict)
+    provider_usage_status: str = "unknown"
 
     def to_dict(self) -> dict[str, str | None]:
-        return {"route": self.route, "reason": self.reason, "failure": self.failure}
+        return {"route": self.route, "reason": self.reason, "failure": self.failure,
+                "trigger": self.trigger, "parentEpisodeId": self.parent_episode_id,
+                "parentStateDigest": self.parent_state_digest,
+                "budgetSnapshot": dict(self.budget_snapshot),
+                "providerUsageStatus": self.provider_usage_status}
 
 
 @dataclass(frozen=True, slots=True)
@@ -173,7 +182,12 @@ class CodingTaskState:
                          for item in raw.get("deadEnds", ()) if isinstance(item, Mapping))
         todos = tuple(TodoItem(str(item["todoId"]), str(item["description"]), str(item.get("status", "pending")), item.get("receiptDigest"))
                       for item in raw.get("todoItems", ()) if isinstance(item, Mapping))
-        routes = tuple(RouteDecision(str(item["route"]), str(item["reason"]), item.get("failure"))
+        routes = tuple(RouteDecision(
+            str(item["route"]), str(item["reason"]), item.get("failure"),
+            str(item.get("trigger", "")), item.get("parentEpisodeId"),
+            item.get("parentStateDigest"),
+            dict(item.get("budgetSnapshot", {}) or {}),
+            str(item.get("providerUsageStatus", "unknown")))
                        for item in raw.get("routeDecisions", ()) if isinstance(item, Mapping))
         return cls(
             objective=str(raw.get("objective", "")),

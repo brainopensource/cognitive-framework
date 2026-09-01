@@ -523,6 +523,7 @@
 {"symbol": "Scope", "kind": "class", "defined_in": "vanguard/packages/kernel/attenuation.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "SearchNode", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/search.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "SecretRedactor", "kind": "class", "defined_in": "vanguard/packages/runtime/artifacts.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "SectionAddress", "kind": "class", "defined_in": "vanguard/packages/agency/context/packet.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "SeededRandom", "kind": "class", "defined_in": "vanguard/packages/runtime/determinism.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "SelectedModel", "kind": "class", "defined_in": "vanguard/packages/runtime/model_selection.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "Selector", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}

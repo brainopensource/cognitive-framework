@@ -5,7 +5,7 @@ class: execution
 authority: execution
 truth_plane: TARGET
 status: living
-implementation_status: WAVE_1_CLOSED_WAVE_2_TECHNICAL_COMPLETE_BACKEND_HARDENING_READY
+implementation_status: SOTA_BUILD_LANE_IN_PROGRESS
 owner: repository-governance
 canonical_for:
   - current work/state/ownership
@@ -13,8 +13,8 @@ purpose: Represent current execution intent exactly as the active board states i
 audience:
   - contributor
   - release-owner
-analysis_subject_sha: 0a5795df721f762fc94cdfb3f9b6f8601810451c
-version: 0.9.2a2
+analysis_subject_sha: ca47eef7da1b4075f8a69d238fe1626fa1ab4c8e
+version: 0.9.2a3
 last_verified: 2026-08-31
 normative_authority:
   - docs/03_execution/sprint_active.md
@@ -47,13 +47,26 @@ do not override this board, source, tests, or receipts.
 
 | Lane | Package | Board state | Declared next action |
 |---|---|---|---|
-| A | `BEP-01..03` | `TECHNICAL COMPLETE` | Subject-bound completion evidence, versioned model capabilities/dialect projection, and typed semantic recovery are implemented and validated through the existing runtime seams. |
-| B | `CMX-06` / `CMX-07` | `GATED` | Produce the accepted specialist ablation and execute the frozen repository-scale qualification set |
+| A | `SOTA-01 → 02 → 05 → 06 → 07 → 09 → 10 → 11` | `IN_PROGRESS` | Build lane; WIP=1, strictly dependency ordered. |
+| B | `SOTA-03 → SOTA-04 → SOTA-08` | `IN_PROGRESS` | Measurement lane; WIP=1, independently gated and budgeted. |
+
+## SOTA build/measurement lane re-cut
+
+The operator has authorized the build lane through SOTA-11 without waiting for
+measurement-lane acceptance. SOTA-04 and the authorized internal SOTA-08
+campaign may use a separate frozen budget of `$0.15`, 300,000 tokens, and 120
+OpenRouter calls, hard-stopped at the first limit. SWE-Bench Pro, DeepSWE,
+official SWE-bench Verified, frontier models, and campaigns above that budget
+remain unauthorized. Unknown usage is not zero and blocks paid routing.
+
+Internal BAAC/LAM/CMX artifacts are not official benchmark results. The
+inaccurate `4777e16` “complete BEP-01..03” commit message is recorded as
+history and is not rewritten. M-8 remains `BLOCKED`; M-9 and M-10 remain
+`UNAUTHORIZED` and require independent acceptance.
 
 ## Wave closure disposition and next stage
 
-As of the exact implementation subject recorded in the accepted evidence
-bundle (`0a5795df721f762fc94cdfb3f9b6f8601810451c`):
+As of the exact implementation subject `ca47eef7da1b4075f8a69d238fe1626fa1ab4c8e`:
 
 | Stage | Disposition | Evidence-backed boundary |
 |---|---|---|
@@ -182,9 +195,11 @@ campaign until reconciled rather than being treated as zero.
 
 ### Sprint EWK-Q — evidence integrity and current sprint closure
 
-The implementation portion of this sprint is closed. Its remaining M-8
-empirical disposition is a qualification gate, not a reason to reopen the
-completed Wave1/Wave2 technical packages.
+The current implementation work follows the authorized build lane through
+SOTA-11. Measurement work is separately scoped to SOTA-04 and authorized
+internal SOTA-08 rungs; the W2/W3 changes are technical slices and
+qualification scaffolding, not empirical acceptance or authorization for M-9
+or M-10.
 
 | Order | Package | Owner | Deliverable | Exit predicate |
 |---:|---|---|---|---|
@@ -192,6 +207,25 @@ completed Wave1/Wave2 technical packages.
 | 2 | `REL-02/H1` | Lane B | Frozen content-addressed canary with `max_attempts=1` and explicit missingness | Manifest digest is fixed before live execution; invalid/unavailable tasks cannot count as failures or passes |
 | 3 | `FIN-A1` | Lane A | Producer-signed M-8 bundle and independent disposition | Protocol, promotion separation, and rollback evidence are valid on one subject; the independent verdict is accepted as positive, negative, or undeterminable without reinterpretation |
 | 4 | `W-092-5` | Both | Exact-subject qualification record | Required checks execute; claims match receipts; no local canary is called official SWE-bench |
+
+### Build/measurement lane session disposition
+
+The build lane is authorized through SOTA-11 and has no provider dependency.
+SOTA-01 through SOTA-03 are implemented on hermetic evidence; SOTA-05 through
+SOTA-11 are implemented as additive extensions of existing context, routing,
+scheduler, composition, lifecycle, and manifest mechanisms and remain subject
+to their targeted qualification suites. The measurement lane has no accepted
+receipt in this session: SOTA-04 and SOTA-08 are authorized but not run, and
+SOTA-12 remains blocked by external-run authorization and independent
+acceptance. The frozen separate ledger is `$0.15 / 300,000 tokens / 120 calls`;
+observed spend is `$0.00 / 0 tokens / 0 calls`. Provider preflight resolved the
+authorized model IDs and prices, but no paid call was issued.
+
+Technical completion does not close M-8. M-8 remains `BLOCKED`, M-9 remains
+`UNAUTHORIZED`, and M-10 remains `UNAUTHORIZED`. Internal BAAC, LAM, CMX, and
+dry-run artifacts are not official benchmark results. The inaccurate `4777e16`
+commit message is recorded without rewriting history. Independent acceptance
+and all non-backend release predicates remain required.
 
 The integrity predicates pass for the implementation subject. The empirical
 treatment remains `NOT_RUN`; if it is later negative or undeterminable under

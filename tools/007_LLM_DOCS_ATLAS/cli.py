@@ -100,6 +100,7 @@ def main(argv=None):
     # 4. Symbol
     sym_p = sub.add_parser("symbol", help="Lookup detailed symbol information")
     sym_p.add_argument("symbol", type=str)
+    sym_p.add_argument("--exact", action="store_true", help="Suppress substring matches and match exact symbol name only")
     sym_p.add_argument("--json", action="store_true")
 
     # 5. Callers
@@ -194,7 +195,7 @@ def main(argv=None):
             ]
         result = fts_res
     elif args.command == "symbol":
-        result = get_symbol_details(repo_root, args.symbol)
+        result = get_symbol_details(repo_root, args.symbol, exact=getattr(args, "exact", False))
     elif args.command == "callers":
         result = get_callers(repo_root, args.symbol_id)
     elif args.command == "references":

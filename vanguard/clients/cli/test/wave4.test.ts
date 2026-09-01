@@ -7,7 +7,7 @@ import {
   ReplayRuntimeClient,
   ScenarioRuntimeClient,
   streamRun,
-} from "@vanguard/client-core";
+} from "@aether/client";
 import { emptyRunView } from "../src/application/run-view.js";
 import { clientFor } from "../src/composition/client-for.js";
 import { parseCliOptions } from "../src/composition/parse-cli.js";
@@ -23,12 +23,16 @@ function vg(args: string[]) {
   return spawnSync(process.execPath, [bin, ...args], { encoding: "utf8" });
 }
 
-test("clientFor demo is replay/mock; default and --yes are live attach (not Replay)", () => {
-  const demo = clientFor(parseCliOptions(["--demo", "--headless"]));
-  const replay = clientFor(parseCliOptions(["--replay", join(root(), "fixtures/successful-episode.jsonl")]));
-  const scenario = clientFor(parseCliOptions(["--scenario"]));
-  const live = clientFor(parseCliOptions(["--socket-path", "/tmp/missing-vg-wave4.sock"]));
-  const yes = clientFor(parseCliOptions(["--yes", "--socket-path", "/tmp/missing-vg-wave4.sock"]));
+test("clientFor demo is replay/mock; default and --yes are live attach (not Replay)", async () => {
+  // --headless on the live/--yes cases too: clientFor's non-headless path
+  // now spawns a real daemon via ManagedRuntimeHost (F4 Phase 5) -- this
+  // test checks client *class* selection, not connectivity, so it stays on
+  // the fail-fast headless path to avoid a real subprocess spawn here.
+  const demo = await clientFor(parseCliOptions(["--demo", "--headless"]));
+  const replay = await clientFor(parseCliOptions(["--replay", join(root(), "fixtures/successful-episode.jsonl")]));
+  const scenario = await clientFor(parseCliOptions(["--scenario"]));
+  const live = await clientFor(parseCliOptions(["--headless", "--socket-path", "/tmp/missing-vg-wave4.sock"]));
+  const yes = await clientFor(parseCliOptions(["--yes", "--headless", "--socket-path", "/tmp/missing-vg-wave4.sock"]));
   assert.equal(demo instanceof ReplayRuntimeClient, true);
   assert.equal(replay instanceof ReplayRuntimeClient, true);
   assert.equal(scenario instanceof ScenarioRuntimeClient, true);
@@ -39,7 +43,7 @@ test("clientFor demo is replay/mock; default and --yes are live attach (not Repl
 });
 
 test("headless live path without daemon is not_available and never source mock", async () => {
-  const client = clientFor(parseCliOptions(["--headless", "--socket-path", "/tmp/missing-vg-wave4.sock"]));
+  const client = await clientFor(parseCliOptions(["--headless", "--socket-path", "/tmp/missing-vg-wave4.sock"]));
   const lines: string[] = [];
   const code = await streamRun(client, parseCliOptions(["--headless", "--socket-path", "/tmp/missing-vg-wave4.sock"]), (l) =>
     lines.push(l)

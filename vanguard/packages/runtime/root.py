@@ -22,7 +22,7 @@ from ..adapters.stores.event_store import SqliteEventStore
 from ..adapters.models.cassette import Cassette, CassetteRecorder
 from ..adapters.models.openrouter import OpenRouterModel
 from ..domain.canonicalisation.digest import digest_of
-from .canonicalization import canonical_bytes
+from ..domain.canonicalisation.jcs import canonical_bytes
 from .workspace import (
     controlled_environment,
     get_workspace_path,

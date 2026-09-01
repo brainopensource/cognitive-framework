@@ -210,6 +210,7 @@ class EpisodeEngine:
         patch_detector: Any = None,
         truncation_detector: Any = None,
         completion_admitter: Any = None,
+        completion_allowed_tools: Sequence[str] | None = None,
     ) -> None:
         self._kernel = kernel
         #: True when this engine runs a spawned child under a narrowed grant.
@@ -243,6 +244,12 @@ class EpisodeEngine:
         #: proposal, while the harness pack supplies task-specific admission
         #: facts (patch and verification). No coding policy is imported here.
         self._completion_admitter = completion_admitter
+        # Runtime may narrow the advertised tools after redundant successful
+        # verification.  This is an offer-set restriction only; the kernel
+        # remains the authority if a model proposes anything else.
+        self._completion_allowed_tools = (
+            frozenset(str(item) for item in completion_allowed_tools)
+            if completion_allowed_tools is not None else None)
 
     # ------------------------------------------------------------------
 
@@ -381,6 +388,14 @@ class EpisodeEngine:
                     if str(tool.get("verb") or tool.get("name") or "") in policy.allowed)
                 if filtered:
                     offered_tools = filtered
+                turn_sampling["toolChoice"] = "required"
+            if self._completion_allowed_tools is not None:
+                narrowed = tuple(
+                    tool for tool in offered_tools
+                    if str(tool.get("verb") or tool.get("name") or "")
+                    in self._completion_allowed_tools)
+                if narrowed:
+                    offered_tools = narrowed
                 turn_sampling["toolChoice"] = "required"
             view = self._view(episode, recovery_feedback=recovery_feedback)
 

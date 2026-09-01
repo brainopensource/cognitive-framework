@@ -25,7 +25,7 @@ is a sequence of runs, and the caller decides what that sequence means.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Callable, Mapping, Sequence
 
@@ -57,6 +57,11 @@ class RouteDecision:
     reason: str
     episode_id: str
     pricing_known: bool
+    trigger: str = ""
+    parent_episode_id: str | None = None
+    parent_state_digest: str | None = None
+    budget_snapshot: Mapping[str, int] = field(default_factory=dict)
+    provider_usage_status: str = "unknown"
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -67,6 +72,11 @@ class RouteDecision:
             "reason": self.reason,
             "episodeId": self.episode_id,
             "pricingKnown": self.pricing_known,
+            "trigger": self.trigger,
+            "parentEpisodeId": self.parent_episode_id,
+            "parentStateDigest": self.parent_state_digest,
+            "budgetSnapshot": dict(self.budget_snapshot or {}),
+            "providerUsageStatus": self.provider_usage_status,
         }
 
 
@@ -90,7 +100,14 @@ class RoleAwareRouter:
 
     def choose(self, role: ModelRole, *, episode_id: str, reason: str,
                healthy_free_models: Sequence[str] = (),
-               allow_paid: bool = False) -> RouteDecision:
+               allow_paid: bool = False,
+               complexity: int = 0,
+               remaining_budget_micros: int | None = None,
+               healthy_models: Sequence[str] | None = None,
+               trigger: str = "",
+               parent_episode_id: str | None = None,
+               parent_state_digest: str | None = None,
+               budget_snapshot: Mapping[str, int] | None = None) -> RouteDecision:
         if role is ModelRole.EXECUTOR:
             candidates = tuple(healthy_free_models) or self._bands.get("free", ())
             if not candidates:
@@ -109,10 +126,20 @@ class RoleAwareRouter:
             raise ValueError(f"paid model {model!r} is not authorized for {role.value}")
         from ..adapters.models.routing import resolve_route
         route = resolve_route(model)
-        if band != "free" and not route.pricing_known:
+        if healthy_models is not None and model not in set(healthy_models):
+            raise ValueError(f"model {model!r} is not healthy")
+        if not route.resolved_model:
+            raise ValueError(f"model {model!r} did not resolve to a provider identity")
+        if not route.pricing_known:
             raise ValueError(f"pricing is unknown for paid model {model!r}")
+        if remaining_budget_micros is not None and band != "free":
+            estimated = route.estimated_cost_micros(max(1, complexity or 1))
+            if estimated > remaining_budget_micros:
+                raise ValueError(f"model {model!r} exceeds remaining paid budget")
         return RouteDecision(model, route.resolved_model, role, band, reason,
-                             episode_id, route.pricing_known)
+                             episode_id, route.pricing_known, trigger,
+                             parent_episode_id, parent_state_digest,
+                             dict(budget_snapshot or {}), "unknown")
 
 #: Stop reasons that mean "this tier could not drive the loop", worth trying
 #: the next tier for. Reasons *not* here (workspace_missing, paid_model_refused,

@@ -471,6 +471,8 @@ class HarnessSession:
         self._completion_inspected_files: set[str] = set()
         self._completion_verification: VerificationReceipt | None = None
         self._completion_verification_command: str | None = None
+        self._completion_redundant_verifications = 0
+        self._completion_allowed_tools: frozenset[str] | None = None
 
         repo = Path(task.repo_path)
         self.repo = repo
@@ -1012,7 +1014,8 @@ class HarnessSession:
                 truncation_detector=truncation_detector,
                 completion_admitter=(self._admit_completion
                                      if harness.harness in ADMISSION_GATED_HARNESSES
-                                     else None))
+                                     else None),
+                completion_allowed_tools=self._completion_allowed_tools)
             outcome = engine.run(
                 episode_id=task.episode_id, run_id=task.run_id,
                 principal=task.principal, brief=task.brief,
@@ -1252,6 +1255,7 @@ class HarnessSession:
         detail = str(outcome.detail or "")
         match = re.search(r"\[exit (-?\d+)\]", detail)
         exit_code = int(match.group(1)) if match else (0 if outcome.status == "ok" else 1)
+        previous_verification = self._completion_verification
         self._completion_verification = VerificationReceipt(
             exit_code=exit_code,
             executed_test_count=1,
@@ -1264,6 +1268,36 @@ class HarnessSession:
             verification_subject_digest=digest_of({"command": verification_command}),
         )
         self._completion_verification_command = verification_command
+        if previous_verification is not None and self._completion_verification.passed:
+            self._completion_redundant_verifications += 1
+            if self._completion_redundant_verifications == 1:
+                note = getattr(self.operator, "note", None)
+                if callable(note):
+                    note(
+                        label="completion-recovery-1",
+                        source="completion_policy",
+                        text=(
+                            "Completion evidence is already admissible and this "
+                            "verification succeeded redundantly. Request "
+                            "agency.finish now; do not rerun the same verification."
+                        ),
+                        evictable=False,
+                    )
+            elif self._completion_redundant_verifications >= 2:
+                self._completion_allowed_tools = frozenset(
+                    {"agency.finish", "fs.read", "fs.search"})
+                note = getattr(self.operator, "note", None)
+                if callable(note):
+                    note(
+                        label="completion-recovery-2",
+                        source="completion_policy",
+                        text=(
+                            "Repeated successful verification is settled. Only "
+                            "agency.finish, fs.read, and fs.search remain available; "
+                            "choose agency.finish or inspect the result."
+                        ),
+                        evictable=False,
+                    )
 
     def _admit_completion(self, _episode: Any, _proposal: Any) -> AdmissionVerdict:
         """Apply the coding completion contract before reducing ``finish``."""

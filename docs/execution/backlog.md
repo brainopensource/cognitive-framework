@@ -8,7 +8,7 @@ owner: repository-governance
 canonical_for:
   - repository-backlog
   - feature-lifecycle-tracking
-version: 0.9.2a2
+version: 0.9.2a3
 last_verified: 2026-08-31
 purpose: Track proposed, approved, in-progress, blocked, and deferred capability packages and engineering work outside the active sprint WIP=1 constraint.
 audience:
@@ -159,7 +159,7 @@ composition/lifecycle authority; infrastructure stays behind generic ports.
 | **CMX-04** | Multi-file and greenfield correctness | code-pack policies and fixtures | `DONE (hermetic)` | CMX-03 | Change-surface closure and affected-test selection pass multi-file fixtures; greenfield work uses an explicit scaffold/baseline/evidence policy and never silently bypasses admission |
 | **CMX-05** | Coding Max application facade | `apps/coding_max`, shared application service, `vg` | `DONE (hermetic)` | CMX-03 | CLI and API invoke the same composition; run/status/resume/evidence/cost results agree; app owns no execution loop or provider HTTP |
 | **CMX-06** | Conditional review and mediated specialist roles | manifests/topology/child runtime | `IMPLEMENTED (ABLATION PENDING)` | CMX-05 and accepted M-7 evidence | Reviewer/localizer/test-investigator roles exchange artifacts by digest, receive attenuated budgets, run sequentially by default, and cannot override the verifier |
-| **CMX-07** | Repository-scale qualification | benchmark program | `FROZEN (EXECUTION PENDING)` | CMX-04, CMX-05 | Frozen internal bugfix, multi-file, migration, and greenfield set reports success, missingness, tokens, cost, latency, retries, resume parity, and external verdicts |
+| **CMX-07** | Repository-scale internal qualification proxy | benchmark program | `FROZEN (EXECUTION PENDING)` | CMX-04, CMX-05 | Internal frozen bugfix, multi-file, migration, and greenfield set; not an official SWE-bench result |
 | **CMX-08** | First-party reference-agent portfolio | apps + independent packs/manifests | `TECHNICAL SLICE DONE` | M-10 and stable public composition contract | Coding Max plus two non-coding supported agents install, run, resume, and emit attributable evidence through the same public framework contract |
 
 ### 2.10 Backend evidence-hardening program
@@ -170,11 +170,11 @@ not source owners.
 
 | ID | Capability package | Primary owner | Status | Dependency | Acceptance gate |
 |---|---|---|---|---|---|
-| **BEP-01** | Subject-bound completion evidence | `agency/episode/admission_gate.py`, `runtime/run_plan.py`, runtime receipt producer | `APPROVED` | Existing W-092-2 admission path | Production write completion always supplies and verifies task, composition, workspace postimage, command/test subject, and receipt identities; missing/foreign/stale bindings fail closed; compatibility readers are explicit |
-| **BEP-02** | Versioned model capabilities and dialect projection | model port + `adapters/models` registry/invocation | `APPROVED` | BEP-01 and frozen control | One canonical intent is projected per provider without changing agency authority; capability provenance/version is recorded; unknown models are conservative; parse/no-patch rate improves without solved-task or reliability regression |
-| **BEP-03** | Unified typed recovery and anti-thrashing | existing protocol recovery + durable coding/task projection | `APPROVED` | BEP-02 observations | Provider/transport/protocol/tool/patch/verification/permission failures are typed; unchanged semantic attempts do not repeat; permission retry is zero; spent recovery survives cold resume; no second ledger or policy authority |
-| **BEP-04** | Bounded topology qualification | existing topology, child runtime, workflow scheduler, artifacts/events | `GATED` | BEP-03 and accepted M-7 mechanism evidence | Sequential planner/implementer/verifier is the control; reviewer and parallel investigation treatments require durable fairness, leases/backpressure, cancellation/resume and positive cost-adjusted held-out lift |
-| **BEP-05** | General-agent reference compositions | packs + thin first-party apps | `GATED` | BEP-01..04 as applicable, stable public harness contract | Coding Max, Research, and Tutor use one runtime and public contract; each has domain-specific completion and evaluator vectors; Research egress is explicit and Tutor is read-only by default |
+| **BEP-01** | Subject-bound completion evidence | `agency/episode/admission_gate.py`, `runtime/run_plan.py`, runtime receipt producer | `TECHNICAL COMPLETE / REVIEWING` | Existing W-092-2 admission path | Production write completion supplies and verifies task, composition, workspace postimage, command/test subject, and receipt identities |
+| **BEP-02** | Versioned model capabilities and dialect projection | model port + `adapters/models` registry/invocation | `TECHNICAL COMPLETE / REVIEWING` | BEP-01 and frozen control | One canonical intent is projected per provider; capability provenance/version is recorded and unknown models remain conservative |
+| **BEP-03** | Unified typed recovery and anti-thrashing | existing protocol recovery + durable coding/task projection | `TECHNICAL COMPLETE / REVIEWING` | BEP-02 observations | Typed failures, bounded semantic retry, zero permission retry, and cold-resume recovery persistence |
+| **BEP-04** | Bounded topology qualification | existing topology, child runtime, workflow scheduler, artifacts/events | `TECHNICAL SLICE / ABLATION PENDING` | BEP-03 and accepted M-7 mechanism evidence | Sequential control plus gated reviewer/parallel treatments with durable fairness, leases/backpressure, cancellation/resume and measured lift |
+| **BEP-05** | General-agent reference compositions | packs + thin first-party apps | `TECHNICAL SLICE / RELEASE GATED` | BEP-01..04 as applicable, stable public harness contract | Coding Max, Research, and Tutor use one runtime and public contract; domain completion/evaluator vectors remain release-gated |
 
 The aggregate validation campaign for this program stops at the first of
 `$0.10` provider spend, `1,000,000` tokens, or `500` model calls. Limits are
@@ -182,6 +182,47 @@ cumulative across controls, treatments, retries, mock smoke tests, and live
 diagnostics. Unknown usage is not zero and blocks further calls until
 reconciled. LAM and easy live tasks validate instrumentation only; capability
 claims require the frozen repository-scale and official benchmark programs.
+
+## 2.10 Three-wave SOTA backend completion
+
+The canonical next-up queue is dependency ordered and limited to SOTA-W1:
+
+| Wave | Packages | Outcome |
+|---|---|---|
+| SOTA-W1 | SOTA-01..04 | Truth reconciliation, completion convergence, official benchmark bridge, frozen qualification |
+| SOTA-W2 | SOTA-05..08 | Long-context/multi-file hardening, multi-model economy, measured optimization |
+| SOTA-W3 | SOTA-09..12 | Qualified coordination, agent-builder integration, Hermes parity, release qualification |
+
+| ID | Package | Depends on | Outcome |
+|---|---|---|---|
+| SOTA-01 | Truth reconciliation and activation falsifiers | BEP-01..03 | Real-session evidence and boundary truth |
+| SOTA-02 | Completion-aware convergence | SOTA-01 | Redundant green verification converges to requested finish |
+| SOTA-03 | Official benchmark protocol bridge | SOTA-01 | Normalized tasks, submissions, receipts, hermetic adapters |
+| SOTA-04 | Frozen W1 qualification | SOTA-02, SOTA-03 | CMX-06/07 and FIN-A1 preflight; live missingness remains NOT_RUN |
+| SOTA-05 | Long-context identity and retrieval | SOTA-04 | Selection identity, drift checks, bounded sections |
+| SOTA-06 | Multi-file patch/resume hardening | SOTA-05 | Stale/partial/ambiguous/escaping patch falsifiers |
+| SOTA-07 | Multi-model economy and escalation | SOTA-06 | Existing RouteDecision path with fail-closed pricing/usage |
+| SOTA-08 | Frozen internal and Pro pilot campaigns | SOTA-07 | Preregistered attribution and kill criterion |
+| SOTA-09 | Qualified coordination scheduler | SOTA-08 | Durable fairness, leases, backpressure, cancellation, joins |
+| SOTA-10 | Agent-builder integration | SOTA-09 | Immutable compositions and separated skill promotion authority |
+| SOTA-11 | Hermes, Research, and Tutor compositions | SOTA-10 | Same Runtime.compose path and bounded public capabilities |
+| SOTA-12 | Matched comparison and release qualification | SOTA-11 | Exact-subject official evidence; M-9/M-10 gates preserved |
+
+`OPEN-2` is `DONE`: observation digests are non-placeholder. Context packets,
+role-aware routing, the meta-controller, scheduler, and skill lifecycle are
+existing mechanisms, not duplicate implementation targets.
+
+SOTA-01 adds real-session falsifiers, truthful observation digests, canonical
+boundary cleanup, and one outbound schema per canonical verb. SOTA-02 makes
+admissible completion converge after redundant green verification without
+auto-finishing. SOTA-03 supplies normalized official-protocol task, submission,
+and receipt contracts over existing runtime/port seams. SOTA-04 is preflight-only
+until separate spend authority exists; missing live authority remains `NOT_RUN`.
+
+The existing context packet, role-aware routing, meta-controller, bounded
+scheduler, and signed skill lifecycle are mechanisms to integrate and qualify,
+not new parallel authorities. Experimental SBFL, mutation, branch search,
+swarm, and self-modification remain gated on measured lift.
 
 ### Next staged development: 1-forge
 

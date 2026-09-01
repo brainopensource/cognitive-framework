@@ -16,7 +16,13 @@ from .compiler import (
     ContextBudgetExceeded,
     ContextCompiler,
 )
-from .packet import ContextPacket, ContextPacketError, build_context_packet
+from .packet import (
+    ContextPacket,
+    ContextPacketError,
+    SectionAddress,
+    build_context_packet,
+    validate_resume_identity,
+)
 from .layers import (
     BREAKPOINT_LAYERS,
     LAYER_ORDER,
@@ -37,7 +43,8 @@ __all__ = [
     "CompiledContext",
     "ContextBudgetExceeded",
     "ContextCompiler",
-    "ContextPacket", "ContextPacketError", "build_context_packet",
+    "ContextPacket", "ContextPacketError", "SectionAddress",
+    "build_context_packet", "validate_resume_identity",
     "Fragment",
     "LAYER_ORDER",
     "Layer",

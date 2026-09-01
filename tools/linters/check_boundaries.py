@@ -355,7 +355,12 @@ def check(root: Path, s4_exit: bool) -> list[str]:
                         f"{source.relative_to(root)}:{line}: benchmarks may import only runtime.root + ports ({spec!r})"
                     )
                     continue
+                # Canonical JSON is a domain-owned client contract, not a
+                # runtime facade.  Permit the one pure domain import used to
+                # seal benchmark bytes now that the forwarding facade is gone.
                 if target_area is not None and target_area not in {"benchmarks", "runtime", "ports"}:
+                    if target_area == "domain" and spec == "vanguard.packages.domain.canonicalisation.jcs":
+                        continue
                     errors.append(
                         f"{source.relative_to(root)}:{line}: benchmarks may import only runtime.root + ports ({spec!r})"
                     )

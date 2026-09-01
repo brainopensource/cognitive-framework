@@ -40,7 +40,7 @@ describe("@aether/client — corrections (canonical vg.4 shape)", () => {
     if (!result.ok) return;
     assert.equal(result.value.runId, "run-42");
     assert.equal(result.value.reasonCode, "functional_defect");
-    assert.equal(result.value.scope, "general");
+    assert.equal(result.value.scope, "local");
     assert.equal(result.value.author, "operator");
     assert.ok(result.value.correctionId.length > 0);
     assert.ok(result.value.recordedAt.length > 0);

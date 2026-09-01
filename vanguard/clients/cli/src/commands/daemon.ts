@@ -9,7 +9,9 @@ import {
 
 export async function handleDaemon(args: string[], options: ParsedCli): Promise<number> {
   const action = args[0] || "status";
-  const client = await clientFor(options);
+  // Diagnostic/status command: must report what's actually there, never
+  // auto-spawn a daemon just to check on it (F4 Phase 5).
+  const client = await clientFor({ ...options, headless: true });
 
   if (action === "status") {
     const res = await client.getDaemonStatus();

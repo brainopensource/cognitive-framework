@@ -30,36 +30,51 @@ class TestAssociationEngine:
         all_relations = self.storage.get_all_relations()
         all_symbols = self.storage.get_all_symbols()
 
-        symbol_by_id = {s.get("symbol_id"): s for s in all_symbols if s.get("symbol_id")}
-        touched_files_set = set(touched_files)
+        symbol_by_id = {s.get("id") or s.get("symbol_id"): s for s in all_symbols if (s.get("id") or s.get("symbol_id"))}
+        touched_files_set = {str(Path(f)).replace("\\", "/") for f in touched_files}
         touched_sym_set = set(touched_symbols or [])
 
         # Find symbols in touched files
         for s in all_symbols:
-            if s.get("file_path") in touched_files_set:
-                touched_sym_set.add(s.get("symbol_id"))
+            s_file = str(Path(s.get("file_path", ""))).replace("\\", "/")
+            if s_file in touched_files_set:
+                sym_id = s.get("id") or s.get("symbol_id")
+                if sym_id:
+                    touched_sym_set.add(sym_id)
 
-        # Traverse relations for 'tests' and 'falsifies'
+        # Traverse relations for 'tests', 'falsifies', and 'calls'
         matched_test_files: Set[str] = set()
         matched_test_symbols: List[Dict[str, Any]] = []
 
+        seen_sym_ids: Set[str] = set()
         for rel in all_relations:
             src = rel.get("source_id") or rel.get("source")
             tgt = rel.get("target_id") or rel.get("target")
             kind = rel.get("kind", "")
+            src_path = rel.get("source_path") or ""
 
-            if kind in ("tests", "falsifies"):
-                # Either src tests tgt, or tgt tests src
+            is_test_rel = "test" in src_path.lower() or src_path.startswith("test")
+
+            if kind in ("tests", "falsifies", "calls"):
                 if tgt in touched_sym_set:
-                    test_sym = symbol_by_id.get(src)
-                    if test_sym:
-                        matched_test_symbols.append(test_sym)
-                        if test_sym.get("file_path"):
-                            matched_test_files.add(test_sym.get("file_path"))
-                elif src in touched_sym_set:
+                    if is_test_rel:
+                        if src_path:
+                            matched_test_files.add(src_path)
+                        test_sym = symbol_by_id.get(src)
+                        if test_sym:
+                            s_id = test_sym.get("id") or test_sym.get("symbol_id")
+                            if s_id and s_id not in seen_sym_ids:
+                                seen_sym_ids.add(s_id)
+                                matched_test_symbols.append(test_sym)
+                            if test_sym.get("file_path"):
+                                matched_test_files.add(test_sym.get("file_path"))
+                elif src in touched_sym_set and kind in ("tests", "falsifies"):
                     test_sym = symbol_by_id.get(tgt)
                     if test_sym:
-                        matched_test_symbols.append(test_sym)
+                        s_id = test_sym.get("id") or test_sym.get("symbol_id")
+                        if s_id and s_id not in seen_sym_ids:
+                            seen_sym_ids.add(s_id)
+                            matched_test_symbols.append(test_sym)
                         if test_sym.get("file_path"):
                             matched_test_files.add(test_sym.get("file_path"))
 

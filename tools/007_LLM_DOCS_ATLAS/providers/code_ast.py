@@ -44,9 +44,9 @@ class CodeASTProvider(BaseProvider):
         incremental: bool = False,
         file_states: Optional[Dict[str, Dict[str, Any]]] = None,
     ) -> ProviderResult:
-        root = repo_root.root if hasattr(repo_root, "root") else Path(repo_root)
+        root = Path(repo_root.root) if (hasattr(repo_root, "root") and not isinstance(repo_root, Path)) else Path(repo_root)
         profile = getattr(repo_root, "profile", None)
-        skip_dirs = {".git", ".venv", "node_modules", "__pycache__", "dist", "build", "site"} | (
+        skip_dirs = {".git", ".venv", "node_modules", "__pycache__", "dist", "build", "site", "runs"} | (
             set(profile.excluded_dirs) if profile else set()
         )
         code_exts = set(profile.code_extensions) if profile else set(
@@ -63,6 +63,18 @@ class CodeASTProvider(BaseProvider):
             and not any(x in p.parts for x in skip_dirs)
         ]
 
+        # Intermediate structures for Two-Pass AST resolution
+        parsed_py_files: Dict[str, tuple[ast.AST, str]] = {}
+        parsed_ts_files: Dict[str, tuple[str, List[IRSymbol]]] = {}
+        file_symbols: Dict[str, List[IRSymbol]] = {}
+        file_imports: Dict[str, Dict[str, str]] = {}
+        symbol_by_id: Dict[str, IRSymbol] = {}
+        symbol_by_qualname: Dict[str, IRSymbol] = {}
+        symbols_by_name: Dict[str, List[IRSymbol]] = {}
+
+        # =====================================================================
+        # PASS 1: Symbol, Import, and Definition Collection
+        # =====================================================================
         for fpath in code_files:
             rel_path = str(fpath.relative_to(root)).replace("\\", "/")
             ext = fpath.suffix.lower()
@@ -70,66 +82,120 @@ class CodeASTProvider(BaseProvider):
             try:
                 content = fpath.read_text(errors="replace")
                 lang = detect_language(rel_path)
+                file_syms: List[IRSymbol] = []
+                file_rels: List[IRRelation] = []
+
                 if ext == ".py":
-                    syms, rels = self._parse_python(rel_path, content)
+                    file_syms, file_rels, py_ast, py_imps = self._parse_python_pass1(rel_path, content)
+                    if py_ast is not None:
+                        parsed_py_files[rel_path] = (py_ast, content)
+                        file_imports[rel_path] = py_imps
                 elif ext in (".ts", ".tsx", ".js", ".jsx"):
-                    syms, rels = self._parse_tsjs(rel_path, content)
+                    file_syms, file_rels, ts_imps = self._parse_tsjs_pass1(rel_path, content)
+                    parsed_ts_files[rel_path] = (content, file_syms)
+                    file_imports[rel_path] = ts_imps
                 elif ext == ".rs":
-                    syms, rels = self._parse_rust(rel_path, content)
+                    file_syms, file_rels = self._parse_rust(rel_path, content)
                 elif ext == ".go":
-                    syms, rels = self._parse_go(rel_path, content)
+                    file_syms, file_rels = self._parse_go(rel_path, content)
                 elif lang == "text":
-                    syms, rels = [], []
+                    file_syms, file_rels = [], []
                 else:
-                    syms, rels = self._parse_generic(rel_path, content, lang)
+                    file_syms, file_rels = self._parse_generic(rel_path, content, lang)
 
-                symbols.extend(syms)
-                relations.extend(rels)
+                symbols.extend(file_syms)
+                relations.extend(file_rels)
+                file_symbols[rel_path] = file_syms
 
-                for s in syms:
-                    legacy_entities.append(
-                        Entity(
-                            id=s.symbol_id,
-                            kind=s.kind,
-                            locator=f"{s.file_path}#L{s.location.start_line if s.location else 1}",
-                            metadata={
-                                "name": s.name,
-                                "qualified_name": s.qualified_name,
-                                "kind": s.kind,
-                                "language": s.language,
-                                "file_path": s.file_path,
-                                "signature": s.signature,
-                                "docstring": s.docstring
-                            }
-                        )
-                    )
+                for s in file_syms:
+                    symbol_by_id[s.symbol_id] = s
+                    symbol_by_qualname[s.qualified_name] = s
+                    symbols_by_name.setdefault(s.name, []).append(s)
 
-                for r in rels:
-                    legacy_relations.append(
-                        Relation(
-                            source=r.source_id,
-                            target=r.target_id,
-                            kind=r.kind.value if isinstance(r.kind, RelationKind) else str(r.kind),
-                            evidence=r.evidence
-                        )
-                    )
             except Exception:
                 pass
+
+        # =====================================================================
+        # PASS 2: Calls & Targeted Tests Edge Resolution
+        # =====================================================================
+        # Python Pass 2
+        for rel_path, (py_ast, content) in parsed_py_files.items():
+            try:
+                call_rels = self._extract_python_calls_pass2(
+                    rel_path,
+                    py_ast,
+                    file_symbols.get(rel_path, []),
+                    file_imports.get(rel_path, {}),
+                    symbol_by_id,
+                    symbol_by_qualname,
+                    symbols_by_name,
+                )
+                relations.extend(call_rels)
+            except Exception:
+                pass
+
+        # TypeScript Pass 2
+        for rel_path, (content, ts_syms) in parsed_ts_files.items():
+            try:
+                call_rels = self._extract_ts_calls_pass2(
+                    rel_path,
+                    content,
+                    ts_syms,
+                    file_imports.get(rel_path, {}),
+                    symbol_by_qualname,
+                    symbols_by_name,
+                )
+                relations.extend(call_rels)
+            except Exception:
+                pass
+
+        # Build legacy representations for backward compatibility
+        for s in symbols:
+            legacy_entities.append(
+                Entity(
+                    id=s.symbol_id,
+                    kind=s.kind,
+                    locator=f"{s.file_path}#L{s.location.start_line if s.location else 1}",
+                    metadata={
+                        "name": s.name,
+                        "qualified_name": s.qualified_name,
+                        "kind": s.kind,
+                        "language": s.language,
+                        "file_path": s.file_path,
+                        "signature": s.signature,
+                        "docstring": s.docstring
+                    }
+                )
+            )
+
+        for r in relations:
+            legacy_relations.append(
+                Relation(
+                    source=r.source_id,
+                    target=r.target_id,
+                    kind=r.kind.value if isinstance(r.kind, RelationKind) else str(r.kind),
+                    evidence=r.evidence
+                )
+            )
 
         res = ProviderResult(provider=self.name, entities=legacy_entities, relations=legacy_relations)
         res.metadata["ir_symbols"] = symbols
         res.metadata["ir_relations"] = relations
         return res
 
-    def _parse_python(self, file_path: str, source: str) -> tuple[List[IRSymbol], List[IRRelation]]:
+    def _parse_python_pass1(
+        self, file_path: str, source: str
+    ) -> tuple[List[IRSymbol], List[IRRelation], Optional[ast.AST], Dict[str, str]]:
         symbols: List[IRSymbol] = []
         relations: List[IRRelation] = []
+        imports_map: Dict[str, str] = {}
         pkg = file_path.rsplit(".", 1)[0].replace("/", ".")
 
         try:
             tree = ast.parse(source)
         except Exception:
-            return self._parse_generic(file_path, source, "python")
+            syms, rels = self._parse_generic(file_path, source, "python")
+            return syms, rels, None, imports_map
 
         def format_args(args: ast.arguments) -> str:
             res = [a.arg for a in args.args]
@@ -139,7 +205,13 @@ class CodeASTProvider(BaseProvider):
             if isinstance(node, ast.ClassDef):
                 sym_id = compute_symbol_id("repo", "python", pkg, node.name, "class")
                 doc = ast.get_docstring(node)
-                bases = [ast.unparse(b) for b in node.bases]
+                bases = []
+                for b in node.bases:
+                    try:
+                        bases.append(ast.unparse(b))
+                    except Exception:
+                        if isinstance(b, ast.Name):
+                            bases.append(b.id)
                 sig = f"class {node.name}({', '.join(bases)}):" if bases else f"class {node.name}:"
                 loc = SourceLocation(file_path, node.lineno, getattr(node, "end_lineno", node.lineno))
 
@@ -222,32 +294,359 @@ class CodeASTProvider(BaseProvider):
                 )
                 symbols.append(sym)
 
-                # If this is a test function, link tests
-                if node.name.startswith("test_") or "test" in file_path.lower():
-                    target_candidate = node.name.replace("test_", "")
+            elif isinstance(node, (ast.Import, ast.ImportFrom)):
+                if isinstance(node, ast.ImportFrom):
+                    mod_name = node.module or ""
+                    if mod_name:
+                        relations.append(
+                            IRRelation(
+                                id=f"{file_path}:imports:{mod_name}",
+                                source_id=file_path,
+                                target_id=mod_name,
+                                kind=RelationKind.IMPORTS,
+                                confidence_tier=ConfidenceTier.COMPILER,
+                                source_path=file_path
+                            )
+                        )
+                    for alias in node.names:
+                        local_name = alias.asname or alias.name
+                        if local_name:
+                            full_target = f"{mod_name}.{alias.name}" if mod_name else alias.name
+                            imports_map[local_name] = full_target
+                elif isinstance(node, ast.Import):
+                    for alias in node.names:
+                        local_name = alias.asname or alias.name
+                        if local_name and alias.name:
+                            imports_map[local_name] = alias.name
+                            relations.append(
+                                IRRelation(
+                                    id=f"{file_path}:imports:{alias.name}",
+                                    source_id=file_path,
+                                    target_id=alias.name,
+                                    kind=RelationKind.IMPORTS,
+                                    confidence_tier=ConfidenceTier.COMPILER,
+                                    source_path=file_path
+                                )
+                            )
+
+        return symbols, relations, tree, imports_map
+
+    def _extract_python_calls_pass2(
+        self,
+        file_path: str,
+        tree: ast.AST,
+        local_symbols: List[IRSymbol],
+        imports_map: Dict[str, str],
+        symbol_by_id: Dict[str, IRSymbol],
+        symbol_by_qualname: Dict[str, IRSymbol],
+        symbols_by_name: Dict[str, List[IRSymbol]],
+    ) -> List[IRRelation]:
+        relations: List[IRRelation] = []
+        pkg = file_path.rsplit(".", 1)[0].replace("/", ".")
+        is_test_file = "test" in file_path.lower() or file_path.startswith("test")
+
+        local_sym_map = {s.name: s for s in local_symbols}
+
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ClassDef):
+                class_name = node.name
+                for item in node.body:
+                    if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                        method_qualname = f"{pkg}.{class_name}.{item.name}"
+                        m_sym = symbol_by_qualname.get(method_qualname)
+                        if not m_sym:
+                            continue
+                        self._collect_calls_in_function(
+                            m_sym.symbol_id,
+                            item,
+                            file_path,
+                            class_name,
+                            local_sym_map,
+                            imports_map,
+                            symbol_by_qualname,
+                            symbols_by_name,
+                            relations,
+                            is_test_file,
+                        )
+            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                fn_qualname = f"{pkg}.{node.name}"
+                fn_sym = symbol_by_qualname.get(fn_qualname)
+                if not fn_sym:
+                    continue
+                self._collect_calls_in_function(
+                    fn_sym.symbol_id,
+                    node,
+                    file_path,
+                    None,
+                    local_sym_map,
+                    imports_map,
+                    symbol_by_qualname,
+                    symbols_by_name,
+                    relations,
+                    is_test_file,
+                )
+
+        return relations
+
+    def _collect_calls_in_function(
+        self,
+        enclosing_id: str,
+        func_node: ast.AST,
+        file_path: str,
+        current_class: Optional[str],
+        local_sym_map: Dict[str, IRSymbol],
+        imports_map: Dict[str, str],
+        symbol_by_qualname: Dict[str, IRSymbol],
+        symbols_by_name: Dict[str, List[IRSymbol]],
+        relations: List[IRRelation],
+        is_test_file: bool,
+    ) -> None:
+        seen_calls: Set[str] = set()
+
+        for child in ast.walk(func_node):
+            if isinstance(child, ast.Call):
+                target_id = None
+                confidence = ConfidenceTier.HEURISTIC
+                call_name = ""
+
+                if isinstance(child.func, ast.Name):
+                    call_name = child.func.id
+                    # 1. Check local file symbols
+                    if call_name in local_sym_map:
+                        target_id = local_sym_map[call_name].symbol_id
+                        confidence = ConfidenceTier.COMPILER
+                    # 2. Check imported symbols
+                    elif call_name in imports_map:
+                        imp_qual = imports_map[call_name]
+                        if imp_qual in symbol_by_qualname:
+                            target_id = symbol_by_qualname[imp_qual].symbol_id
+                            confidence = ConfidenceTier.COMPILER
+                        elif call_name in symbols_by_name:
+                            target_id = symbols_by_name[call_name][0].symbol_id
+                            confidence = ConfidenceTier.STRUCTURED_DOC
+                    # 3. Check globally unique name
+                    elif call_name in symbols_by_name and len(symbols_by_name[call_name]) == 1:
+                        target_id = symbols_by_name[call_name][0].symbol_id
+                        confidence = ConfidenceTier.STRUCTURED_DOC
+                    else:
+                        target_id = f"name:{call_name}"
+
+                elif isinstance(child.func, ast.Attribute):
+                    attr_name = child.func.attr
+                    val_str = ""
+                    try:
+                        val_str = ast.unparse(child.func.value)
+                    except Exception:
+                        if isinstance(child.func.value, ast.Name):
+                            val_str = child.func.value.id
+
+                    call_name = f"{val_str}.{attr_name}" if val_str else attr_name
+
+                    # self.method() in class
+                    if val_str == "self" and current_class:
+                        pkg = file_path.rsplit(".", 1)[0].replace("/", ".")
+                        target_qual = f"{pkg}.{current_class}.{attr_name}"
+                        if target_qual in symbol_by_qualname:
+                            target_id = symbol_by_qualname[target_qual].symbol_id
+                            confidence = ConfidenceTier.COMPILER
+                        elif attr_name in local_sym_map:
+                            target_id = local_sym_map[attr_name].symbol_id
+                            confidence = ConfidenceTier.COMPILER
+                    elif val_str in imports_map:
+                        imp_qual = f"{imports_map[val_str]}.{attr_name}"
+                        if imp_qual in symbol_by_qualname:
+                            target_id = symbol_by_qualname[imp_qual].symbol_id
+                            confidence = ConfidenceTier.COMPILER
+                        elif attr_name in symbols_by_name:
+                            target_id = symbols_by_name[attr_name][0].symbol_id
+                            confidence = ConfidenceTier.STRUCTURED_DOC
+                    elif f"{val_str}.{attr_name}" in symbols_by_name:
+                        target_id = symbols_by_name[f"{val_str}.{attr_name}"][0].symbol_id
+                        confidence = ConfidenceTier.STRUCTURED_DOC
+                    elif attr_name in symbols_by_name:
+                        # Match method on class if val_str is a known class name
+                        candidates = [s for s in symbols_by_name[attr_name] if val_str in s.qualified_name]
+                        if candidates:
+                            target_id = candidates[0].symbol_id
+                            confidence = ConfidenceTier.STRUCTURED_DOC
+                        else:
+                            target_id = symbols_by_name[attr_name][0].symbol_id
+                            confidence = ConfidenceTier.HEURISTIC
+                    else:
+                        target_id = f"name:{call_name}"
+
+                if not target_id:
+                    continue
+
+                call_key = f"{enclosing_id}:{target_id}:{getattr(child, 'lineno', 1)}"
+                if call_key in seen_calls:
+                    continue
+                seen_calls.add(call_key)
+
+                loc = SourceLocation(
+                    file_path,
+                    getattr(child, "lineno", 1),
+                    getattr(child, "end_lineno", getattr(child, "lineno", 1)),
+                    getattr(child, "col_offset", 0),
+                )
+
+                relations.append(
+                    IRRelation(
+                        id=f"{enclosing_id}:calls:{target_id}:{getattr(child, 'lineno', 1)}",
+                        source_id=enclosing_id,
+                        target_id=target_id,
+                        kind=RelationKind.CALLS,
+                        confidence_tier=confidence,
+                        source_path=file_path,
+                        location=loc,
+                    )
+                )
+
+                if is_test_file and target_id.startswith("sym:"):
                     relations.append(
                         IRRelation(
-                            id=f"{fn_id}:tests:{target_candidate}",
-                            source_id=fn_id,
-                            target_id=target_candidate,
+                            id=f"{enclosing_id}:tests:{target_id}",
+                            source_id=enclosing_id,
+                            target_id=target_id,
                             kind=RelationKind.TESTS,
-                            confidence_tier=ConfidenceTier.STRUCTURED_DOC,
-                            source_path=file_path
+                            confidence_tier=confidence,
+                            source_path=file_path,
+                            location=loc,
                         )
                     )
 
-            elif isinstance(node, (ast.Import, ast.ImportFrom)):
-                if isinstance(node, ast.ImportFrom) and node.module:
+    def _parse_tsjs_pass1(
+        self, file_path: str, source: str
+    ) -> tuple[List[IRSymbol], List[IRRelation], Dict[str, str]]:
+        lang = detect_language(file_path)
+        pkg = file_path.rsplit(".", 1)[0].replace("/", ".")
+        symbols: List[IRSymbol] = []
+        relations: List[IRRelation] = []
+        imports_map: Dict[str, str] = {}
+        patterns = [
+            (r"^(?:export\s+)?(?:default\s+)?(?:abstract\s+)?class\s+([A-Za-z_$][\w$]*)", "class"),
+            (r"^(?:export\s+)?(?:default\s+)?(?:declare\s+)?interface\s+([A-Za-z_$][\w$]*)", "interface"),
+            (r"^(?:export\s+)?(?:default\s+)?type\s+([A-Za-z_$][\w$]*)\s*=", "type"),
+            (r"^(?:export\s+)?(?:const\s+)?enum\s+([A-Za-z_$][\w$]*)", "enum"),
+            (r"^(?:export\s+)?(?:default\s+)?(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(", "function"),
+            (r"^(?:export\s+)?(?:default\s+)?const\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?(?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*=>", "function"),
+            (r"^(?:export\s+)?const\s+([A-Za-z_$][\w$]*)\s*:", "const"),
+        ]
+        for idx, line in enumerate(source.splitlines(), 1):
+            trimmed = line.strip()
+            m_import = re.match(
+                r"^import\s+(?:type\s+)?(?:\{([^}]+)\}|([A-Za-z_$][\w$]*))\s+from\s+['\"]([^'\"]+)['\"]", trimmed)
+            if m_import:
+                mod_path = m_import.group(3)
+                self._add_import(relations, file_path, lang, mod_path)
+                if m_import.group(1):
+                    for item in m_import.group(1).split(","):
+                        item = item.strip()
+                        if " as " in item:
+                            orig, alias = item.split(" as ")
+                            imports_map[alias.strip()] = f"{mod_path}.{orig.strip()}"
+                        elif item:
+                            imports_map[item] = f"{mod_path}.{item}"
+                elif m_import.group(2):
+                    imports_map[m_import.group(2)] = mod_path
+                continue
+
+            for pat, kind in patterns:
+                m = re.match(pat, trimmed)
+                if m:
+                    symbols.append(self._mk_symbol(
+                        file_path, lang, pkg, m.group(1), kind, idx, trimmed))
+                    break
+        return symbols, relations, imports_map
+
+    def _extract_ts_calls_pass2(
+        self,
+        file_path: str,
+        source: str,
+        symbols: List[IRSymbol],
+        imports_map: Dict[str, str],
+        symbol_by_qualname: Dict[str, IRSymbol],
+        symbols_by_name: Dict[str, List[IRSymbol]],
+    ) -> List[IRRelation]:
+        relations: List[IRRelation] = []
+        is_test_file = "test" in file_path.lower() or file_path.endswith((".test.ts", ".spec.ts"))
+        local_sym_map = {s.name: s for s in symbols}
+
+        # Simple line-by-line call scanner for TS
+        current_sym = symbols[0] if symbols else None
+        call_pattern = re.compile(r"\b([A-Za-z_$][\w$]*)(?:\.([A-Za-z_$][\w$]*))?\s*\(")
+
+        for idx, line in enumerate(source.splitlines(), 1):
+            trimmed = line.strip()
+            # Update current enclosing symbol if line matches a symbol location
+            for s in symbols:
+                if s.location and s.location.start_line <= idx <= s.location.end_line:
+                    current_sym = s
+                    break
+
+            if not current_sym:
+                continue
+
+            for m in call_pattern.finditer(trimmed):
+                base_name = m.group(1)
+                attr_name = m.group(2)
+                if base_name in ("if", "for", "while", "switch", "catch", "import", "require", "super"):
+                    continue
+
+                call_expr = f"{base_name}.{attr_name}" if attr_name else base_name
+                target_id = None
+                conf = ConfidenceTier.HEURISTIC
+
+                if not attr_name:
+                    if base_name in local_sym_map:
+                        target_id = local_sym_map[base_name].symbol_id
+                        conf = ConfidenceTier.COMPILER
+                    elif base_name in imports_map:
+                        imp = imports_map[base_name]
+                        if imp in symbol_by_qualname:
+                            target_id = symbol_by_qualname[imp].symbol_id
+                            conf = ConfidenceTier.COMPILER
+                        elif base_name in symbols_by_name:
+                            target_id = symbols_by_name[base_name][0].symbol_id
+                            conf = ConfidenceTier.STRUCTURED_DOC
+                    elif base_name in symbols_by_name and len(symbols_by_name[base_name]) == 1:
+                        target_id = symbols_by_name[base_name][0].symbol_id
+                        conf = ConfidenceTier.STRUCTURED_DOC
+                    else:
+                        target_id = f"name:{base_name}"
+                else:
+                    if attr_name in symbols_by_name:
+                        target_id = symbols_by_name[attr_name][0].symbol_id
+                        conf = ConfidenceTier.STRUCTURED_DOC
+                    else:
+                        target_id = f"name:{call_expr}"
+
+                loc = SourceLocation(file_path, idx, idx)
+                relations.append(
+                    IRRelation(
+                        id=f"{current_sym.symbol_id}:calls:{target_id}:{idx}",
+                        source_id=current_sym.symbol_id,
+                        target_id=target_id,
+                        kind=RelationKind.CALLS,
+                        confidence_tier=conf,
+                        source_path=file_path,
+                        location=loc,
+                    )
+                )
+                if is_test_file and target_id.startswith("sym:"):
                     relations.append(
                         IRRelation(
-                            id=f"{file_path}:imports:{node.module}",
-                            source_id=file_path,
-                            target_id=node.module,
-                            kind=RelationKind.IMPORTS,
-                            confidence_tier=ConfidenceTier.COMPILER,
-                            source_path=file_path
+                            id=f"{current_sym.symbol_id}:tests:{target_id}",
+                            source_id=current_sym.symbol_id,
+                            target_id=target_id,
+                            kind=RelationKind.TESTS,
+                            confidence_tier=conf,
+                            source_path=file_path,
+                            location=loc,
                         )
                     )
+
+        return relations
 
         return symbols, relations
 

@@ -25,10 +25,10 @@ MODEL_PRICING_TABLE: Dict[str, Tuple[float, float, str]] = {
     "google/gemini-2.0-flash": (0.10, 0.40, "Gemini 2.0 Flash"),
     
     # Cheap / Fast Cloud Models
-    "deepseek/deepseek-v4-flash-0731": (0.14, 0.28, "DeepSeek V4 Flash"),
+    "deepseek/deepseek-v4-flash-0731": (0.065, 0.18, "DeepSeek V4 Flash"),
     "deepseek/deepseek-chat": (0.14, 0.28, "DeepSeek V3"),
     "deepseek/deepseek-r1": (0.55, 2.19, "DeepSeek R1"),
-    "z-ai/glm-5.3-flash": (0.10, 0.20, "GLM 5.3 Flash"),
+    "z-ai/glm-5.3-flash": (0.075, 0.25, "GLM 5.3 Flash"),
     "meta-llama/llama-3.3-70b-instruct": (0.12, 0.30, "Llama 3.3 70B"),
     
     # Free Cloud Models ($0.00)

@@ -1,0 +1,220 @@
+{
+  "timestamp": "2026-09-01T03:30:55Z",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "harness": "vanguard-vg-code-max",
+  "pass_rate_pct": 9.5,
+  "total_cost_usd": 0.002037,
+  "total_duration_seconds": 77.4,
+  "results": [
+    {
+      "id": "01_rate_limiter_lease_recovery",
+      "kind": "Brownfield",
+      "status": "FAIL",
+      "turns": 1,
+      "tokens": 1287,
+      "cost_usd": 0.000102,
+      "latency_s": 2.16,
+      "diagnosis": "test_limiter.py FAILED: .F ====================================================================== FAIL: test_clean_expir"
+    },
+    {
+      "id": "02_ed25519_signature_replay",
+      "kind": "Brownfield",
+      "status": "FAIL",
+      "turns": 1,
+      "tokens": 1240,
+      "cost_usd": 9.9e-05,
+      "latency_s": 11.21,
+      "diagnosis": "test_verifier.py FAILED: FF. ====================================================================== FAIL: test_duplicate"
+    },
+    {
+      "id": "03_trait_attenuation_escalation",
+      "kind": "Brownfield",
+      "status": "FAIL",
+      "turns": 1,
+      "tokens": 1259,
+      "cost_usd": 0.0001,
+      "latency_s": 2.69,
+      "diagnosis": "test_attenuation.py FAILED: F ====================================================================== FAIL: test_child_ca"
+    },
+    {
+      "id": "04_sqlite_wal_checkpoint_lock",
+      "kind": "Brownfield",
+      "status": "PASS",
+      "turns": 1,
+      "tokens": 1255,
+      "cost_usd": 0.0001,
+      "latency_s": 1.74,
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "id": "05_token_budget_clamping_drift",
+      "kind": "Brownfield",
+      "status": "PASS",
+      "turns": 1,
+      "tokens": 1282,
+      "cost_usd": 0.000105,
+      "latency_s": 1.95,
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "id": "06_fts5_stale_index_rebuild",
+      "kind": "Brownfield",
+      "status": "FAIL",
+      "turns": 1,
+      "tokens": 1224,
+      "cost_usd": 9.4e-05,
+      "latency_s": 1.19,
+      "diagnosis": "test_indexer_falsifier.py FAILED: F ====================================================================== FAIL: test_de"
+    },
+    {
+      "id": "07_context_lost_in_middle_prune",
+      "kind": "Brownfield",
+      "status": "FAIL",
+      "turns": 1,
+      "tokens": 1237,
+      "cost_usd": 9.5e-05,
+      "latency_s": 1.9,
+      "diagnosis": "test_context_allocator.py FAILED: F ====================================================================== FAIL: test_pr"
+    },
+    {
+      "id": "08_evaluator_oracle_timeout",
+      "kind": "Brownfield",
+      "status": "FAIL",
+      "turns": 1,
+      "tokens": 1196,
+      "cost_usd": 9.3e-05,
+      "latency_s": 5.32,
+      "diagnosis": "test_sandbox_timeout.py FAILED: F ====================================================================== FAIL: test_time"
+    },
+    {
+      "id": "09_model_port_streaming_chunk_drop",
+      "kind": "Brownfield",
+      "status": "FAIL",
+      "turns": 1,
+      "tokens": 1203,
+      "cost_usd": 9.3e-05,
+      "latency_s": 1.98,
+      "diagnosis": "test_streaming_falsifier.py FAILED: F ====================================================================== FAIL: test_"
+    },
+    {
+      "id": "10_graph_ppr_dangling_node_sink",
+      "kind": "Brownfield",
+      "status": "FAIL",
+      "turns": 1,
+      "tokens": 1215,
+      "cost_usd": 9.4e-05,
+      "latency_s": 8.1,
+      "diagnosis": "test_ppr_falsifier.py FAILED: F ====================================================================== FAIL: test_ppr_co"
+    },
+    {
+      "id": "11_kv_lru_ttl_store",
+      "kind": "Greenfield",
+      "status": "FAIL",
+      "turns": 1,
+      "tokens": 1325,
+      "cost_usd": 0.0001,
+      "latency_s": 4.62,
+      "diagnosis": "test_suite.py FAILED: Traceback (most recent call last):   File \"/tmp/bench-run-11_kv_lru_ttl_store-g6elemsu/test/test_s"
+    },
+    {
+      "id": "12_finite_state_machine_workflow",
+      "kind": "Greenfield",
+      "status": "FAIL",
+      "turns": 1,
+      "tokens": 1267,
+      "cost_usd": 9.7e-05,
+      "latency_s": 4.58,
+      "diagnosis": "test_suite.py FAILED: Traceback (most recent call last):   File \"/tmp/bench-run-12_finite_state_machine_workflow-ldihp3x"
+    },
+    {
+      "id": "13_semver_dependency_resolver",
+      "kind": "Greenfield",
+      "status": "FAIL",
+      "turns": 1,
+      "tokens": 1312,
+      "cost_usd": 0.0001,
+      "latency_s": 1.92,
+      "diagnosis": "test_suite.py FAILED: Traceback (most recent call last):   File \"/tmp/bench-run-13_semver_dependency_resolver-565w1ata/t"
+    },
+    {
+      "id": "14_merkle_tree_ledger",
+      "kind": "Greenfield",
+      "status": "FAIL",
+      "turns": 1,
+      "tokens": 1272,
+      "cost_usd": 9.7e-05,
+      "latency_s": 1.85,
+      "diagnosis": "test_suite.py FAILED: Traceback (most recent call last):   File \"/tmp/bench-run-14_merkle_tree_ledger-yvz_cxb_/test/test"
+    },
+    {
+      "id": "15_circuit_breaker_proxy",
+      "kind": "Greenfield",
+      "status": "FAIL",
+      "turns": 1,
+      "tokens": 1355,
+      "cost_usd": 0.000102,
+      "latency_s": 1.92,
+      "diagnosis": "test_suite.py FAILED: Traceback (most recent call last):   File \"/tmp/bench-run-15_circuit_breaker_proxy-hjfgl_np/test/t"
+    },
+    {
+      "id": "16_submodular_greedy_packer",
+      "kind": "Greenfield",
+      "status": "FAIL",
+      "turns": 1,
+      "tokens": 1295,
+      "cost_usd": 9.8e-05,
+      "latency_s": 1.97,
+      "diagnosis": "test_suite.py FAILED: Traceback (most recent call last):   File \"/tmp/bench-run-16_submodular_greedy_packer-7ie0fkc_/tes"
+    },
+    {
+      "id": "17_json_canonicalizer_jcs",
+      "kind": "Greenfield",
+      "status": "FAIL",
+      "turns": 1,
+      "tokens": 1268,
+      "cost_usd": 9.7e-05,
+      "latency_s": 6.89,
+      "diagnosis": "test_suite.py FAILED: Traceback (most recent call last):   File \"/tmp/bench-run-17_json_canonicalizer_jcs-gz1anej4/test/"
+    },
+    {
+      "id": "18_token_bucket_hierarchical",
+      "kind": "Greenfield",
+      "status": "FAIL",
+      "turns": 1,
+      "tokens": 1159,
+      "cost_usd": 8.9e-05,
+      "latency_s": 5.68,
+      "diagnosis": "test_suite.py FAILED: Traceback (most recent call last):   File \"/tmp/bench-run-18_token_bucket_hierarchical-4f3mio_t/te"
+    },
+    {
+      "id": "19_markdown_section_splitter",
+      "kind": "Greenfield",
+      "status": "FAIL",
+      "turns": 1,
+      "tokens": 1305,
+      "cost_usd": 0.000102,
+      "latency_s": 4.92,
+      "diagnosis": "test_suite.py FAILED: Traceback (most recent call last):   File \"/tmp/bench-run-19_markdown_section_splitter-zcfdeu5w/te"
+    },
+    {
+      "id": "20_event_bus_pubsub_channel",
+      "kind": "Greenfield",
+      "status": "FAIL",
+      "turns": 1,
+      "tokens": 1337,
+      "cost_usd": 0.000101,
+      "latency_s": 1.36,
+      "diagnosis": "test_suite.py FAILED: Traceback (most recent call last):   File \"/tmp/bench-run-20_event_bus_pubsub_channel-igsmyohy/tes"
+    },
+    {
+      "id": "__pycache__",
+      "kind": "Greenfield",
+      "status": "FAIL",
+      "turns": 1,
+      "tokens": 1054,
+      "cost_usd": 7.9e-05,
+      "latency_s": 3.44,
+      "diagnosis": "No test files found in test/"
+    }
+  ]
+}

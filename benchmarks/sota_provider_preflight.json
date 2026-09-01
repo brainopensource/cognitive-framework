@@ -1,0 +1,36 @@
+{
+  "schema": "aether.sota.provider-preflight/1",
+  "provider": "OpenRouter",
+  "endpoint": "https://openrouter.ai/api/v1/models",
+  "observed_at": "2026-08-31",
+  "models": {
+    "deepseek/deepseek-v4-flash-0731": {
+      "context_length": 1048576,
+      "prompt_usd_per_1m": 0.065,
+      "completion_usd_per_1m": 0.18,
+      "cache_read_usd_per_1m": 0.016,
+      "status": "AVAILABLE"
+    },
+    "z-ai/glm-5.3-flash": {
+      "context_length": 1310720,
+      "prompt_usd_per_1m": 0.075,
+      "completion_usd_per_1m": 0.25,
+      "cache_read_usd_per_1m": 0.015,
+      "status": "AVAILABLE"
+    },
+    "openrouter/free": {
+      "context_length": 200000,
+      "prompt_usd_per_1m": 0.0,
+      "completion_usd_per_1m": 0.0,
+      "status": "RESOLVED_ALIAS_NO_CAPABILITY_CLAIM"
+    },
+    "google/gemini-3.7-flash": {
+      "context_length": 1048576,
+      "prompt_usd_per_1m": 0.75,
+      "completion_usd_per_1m": 3.75,
+      "status": "UNAUTHORIZED_AND_EXCLUDED"
+    }
+  },
+  "paid_calls": 0,
+  "spent_usd": 0.0
+}

@@ -422,6 +422,8 @@ class FactGraphStorage:
                 pass
 
     def insert_relation(self, rel: IRRelation):
+        if not rel.source_id or not rel.target_id:
+            return
         con = self.get_connection()
         with con:
             loc_str = json.dumps(rel.location.to_reference()) if rel.location else None
@@ -493,73 +495,164 @@ class FactGraphStorage:
             )
             return [dict(r) for r in cur.fetchall()]
 
-    def get_symbol(self, query: str) -> List[Dict[str, Any]]:
+    def get_symbol(self, query: str, exact: bool = False) -> List[Dict[str, Any]]:
         con = self.get_connection()
-        cur = con.execute(
-            """
-            SELECT s.*, e.authority, e.confidence_tier
-            FROM symbols s
-            JOIN entities e ON s.entity_id = e.id
-            WHERE s.id = ? OR s.name = ? OR s.qualified_name LIKE ?
-            """,
-            (query, query, f"%{query}")
-        )
-        return [dict(r) for r in cur.fetchall()]
+        if exact:
+            cur = con.execute(
+                """
+                SELECT s.*, e.authority, e.confidence_tier
+                FROM symbols s
+                JOIN entities e ON s.entity_id = e.id
+                WHERE s.id = ? OR s.name = ? OR s.qualified_name = ?
+                """,
+                (query, query, query)
+            )
+        else:
+            cur = con.execute(
+                """
+                SELECT s.*, e.authority, e.confidence_tier
+                FROM symbols s
+                JOIN entities e ON s.entity_id = e.id
+                WHERE s.id = ? OR s.name = ? OR s.qualified_name = ?
+                   OR s.qualified_name LIKE ? OR s.name LIKE ?
+                """,
+                (query, query, query, f"%{query}%", f"%{query}%")
+            )
+        raw_results = [dict(r) for r in cur.fetchall()]
+
+        def symbol_rank_key(s: Dict[str, Any]) -> tuple:
+            name = s.get("name", "")
+            qname = s.get("qualified_name", "")
+            file_path = s.get("file_path", "")
+            kind = s.get("kind", "").lower()
+
+            # 1. Exact case-sensitive match
+            exact_cs = 1 if (name == query or qname == query) else 0
+            # 2. Exact case-insensitive match
+            exact_ci = 1 if (name.lower() == query.lower() or qname.lower() == query.lower()) else 0
+            # 3. Source path priority (production code > tools > tests > benchmarks)
+            f_lower = file_path.lower()
+            if any(k in f_lower for k in ("bench", "run", "scratch", "tmp")):
+                path_score = 1
+            elif any(k in f_lower for k in ("test", "spec", "fixture", "mock")):
+                path_score = 2
+            elif any(k in f_lower for k in ("tool", "script", "util")):
+                path_score = 3
+            else:
+                path_score = 4
+            # 4. Kind priority: class/interface > function/type > method > other
+            if kind in ("class", "interface"):
+                kind_score = 3
+            elif kind in ("function", "type", "struct", "enum"):
+                kind_score = 2
+            elif kind in ("method", "property"):
+                kind_score = 1
+            else:
+                kind_score = 0
+            # 5. Shorter qualified name
+            len_score = -len(qname)
+
+            return (exact_cs, exact_ci, path_score, kind_score, len_score)
+
+        return sorted(raw_results, key=symbol_rank_key, reverse=True)
 
     def get_callers(self, symbol_id: str) -> List[Dict[str, Any]]:
         con = self.get_connection()
+        # Resolve target candidates if symbol_id is a name or qualified name
+        target_ids = [symbol_id, f"name:{symbol_id}"]
+        if not symbol_id.startswith("sym:"):
+            matching = self.get_symbol(symbol_id, exact=False)
+            for m in matching:
+                target_ids.append(m["id"])
+            if "." in symbol_id:
+                target_ids.append(f"name:{symbol_id.split('.')[-1]}")
+
+        target_ids = list(dict.fromkeys(target_ids))
+        placeholders = ",".join("?" for _ in target_ids)
+
         cur = con.execute(
-            """
+            f"""
             SELECT r.id as relation_id, r.source_id, r.kind, r.confidence_tier, r.evidence, r.source_path, r.location_json,
                    s.name as caller_name, s.qualified_name as caller_qualified, s.file_path, s.start_line
             FROM relations r
             LEFT JOIN symbols s ON r.source_id = s.id
-            WHERE r.target_id = ? AND r.kind = 'calls'
+            WHERE r.kind = 'calls' AND (r.target_id IN ({placeholders}) OR r.target_id LIKE ?)
             ORDER BY r.confidence_tier DESC
             """,
-            (symbol_id,)
+            target_ids + [f"%{symbol_id}%"]
         )
         return [dict(r) for r in cur.fetchall()]
 
     def get_callees(self, symbol_id: str) -> List[Dict[str, Any]]:
         con = self.get_connection()
+        source_ids = [symbol_id]
+        if not symbol_id.startswith("sym:"):
+            matching = self.get_symbol(symbol_id, exact=False)
+            for m in matching:
+                source_ids.append(m["id"])
+
+        source_ids = list(dict.fromkeys(source_ids))
+        placeholders = ",".join("?" for _ in source_ids)
+
         cur = con.execute(
-            """
+            f"""
             SELECT r.id as relation_id, r.target_id, r.kind, r.confidence_tier, r.evidence, r.source_path,
                    s.name as callee_name, s.qualified_name as callee_qualified, s.file_path, s.start_line
             FROM relations r
             LEFT JOIN symbols s ON r.target_id = s.id
-            WHERE r.source_id = ? AND r.kind = 'calls'
+            WHERE r.kind = 'calls' AND (r.source_id IN ({placeholders}))
             ORDER BY r.confidence_tier DESC
             """,
-            (symbol_id,)
+            source_ids
         )
         return [dict(r) for r in cur.fetchall()]
 
     def get_references(self, symbol_id: str) -> List[Dict[str, Any]]:
         con = self.get_connection()
+        target_ids = [symbol_id, f"name:{symbol_id}"]
+        if not symbol_id.startswith("sym:"):
+            matching = self.get_symbol(symbol_id, exact=False)
+            for m in matching:
+                target_ids.append(m["id"])
+            if "." in symbol_id:
+                target_ids.append(f"name:{symbol_id.split('.')[-1]}")
+
+        target_ids = list(dict.fromkeys(target_ids))
+        placeholders = ",".join("?" for _ in target_ids)
+
         cur = con.execute(
-            """
+            f"""
             SELECT r.*, e.name as referencer_name, e.locator as referencer_locator
             FROM relations r
             LEFT JOIN entities e ON r.source_id = e.id
-            WHERE r.target_id = ? AND r.kind IN ('references', 'imports', 'calls')
+            WHERE r.kind IN ('references', 'imports', 'calls') AND (r.target_id IN ({placeholders}) OR r.target_id LIKE ?)
             ORDER BY r.confidence_tier DESC
             """,
-            (symbol_id,)
+            target_ids + [f"%{symbol_id}%"]
         )
         return [dict(r) for r in cur.fetchall()]
 
     def get_tests_for_symbol(self, symbol_id: str) -> List[Dict[str, Any]]:
         con = self.get_connection()
+        target_ids = [symbol_id, f"name:{symbol_id}"]
+        if not symbol_id.startswith("sym:"):
+            matching = self.get_symbol(symbol_id, exact=False)
+            for m in matching:
+                target_ids.append(m["id"])
+            if "." in symbol_id:
+                target_ids.append(f"name:{symbol_id.split('.')[-1]}")
+
+        target_ids = list(dict.fromkeys(target_ids))
+        placeholders = ",".join("?" for _ in target_ids)
+
         cur = con.execute(
-            """
+            f"""
             SELECT r.*, e.name as test_name, e.locator as test_locator
             FROM relations r
             JOIN entities e ON r.source_id = e.id
-            WHERE r.target_id = ? AND r.kind = 'tests'
+            WHERE r.kind IN ('tests', 'falsifies') AND (r.target_id IN ({placeholders}) OR r.target_id LIKE ?)
             """,
-            (symbol_id,)
+            target_ids + [f"%{symbol_id}%"]
         )
         return [dict(r) for r in cur.fetchall()]
 
@@ -689,6 +782,7 @@ class FactGraphStorage:
         with con:
             try:
                 con.execute("DELETE FROM fts_search")
+                con.execute("INSERT INTO fts_search(fts_search) VALUES('rebuild')")
             except Exception:
                 pass
             con.execute("DELETE FROM doc_sections")
@@ -711,11 +805,15 @@ class FactGraphStorage:
         return {"files": files, "symbols": symbols, "relations": relations}
 
     def count_orphan_fts(self) -> int:
-        """FTS rows whose entity no longer exists (set, not text, table)."""
+        """FTS rows whose entity or doc_section no longer exists."""
         con = self.get_connection()
         try:
             return int(con.execute(
-                "SELECT COUNT(*) FROM fts_search WHERE entity_id NOT IN (SELECT id FROM entities)"
+                """
+                SELECT COUNT(*) FROM fts_search
+                WHERE (kind = 'doc_section' AND entity_id NOT IN (SELECT id FROM doc_sections))
+                   OR (kind != 'doc_section' AND entity_id NOT IN (SELECT id FROM entities))
+                """
             ).fetchone()[0])
         except Exception:
             return -1

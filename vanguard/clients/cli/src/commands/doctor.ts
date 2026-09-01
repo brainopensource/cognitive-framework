@@ -9,7 +9,9 @@ import {
 } from "../output.js";
 
 export async function handleDoctor(args: string[], options: ParsedCli): Promise<number> {
-  const client = await clientFor(options) as any;
+  // Diagnostic command: must report what's actually there, never auto-spawn
+  // a daemon just to check on it (F4 Phase 5).
+  const client = await clientFor({ ...options, headless: true }) as any;
   const persistence = new NodeFsPersistenceAdapter();
 
   const [statusRes, capRes, settings, providers] = await Promise.all([

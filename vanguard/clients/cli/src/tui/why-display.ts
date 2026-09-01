@@ -1,4 +1,4 @@
-import { whyFromResult } from "@vanguard/client-core";
+import { whyFromResult } from "@aether/client";
 import type { ArtifactExplanation, Result } from "@aether/contracts";
 
 export function whyText(result: Result<ArtifactExplanation>): string {

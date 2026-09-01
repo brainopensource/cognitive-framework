@@ -63,7 +63,11 @@ export async function captureCorrection(
     runId: draft.runId,
     episodeId: draft.episodeId,
     reasonCode: reason,
-    scope: "general",
+    // Client-core's captureCorrection always scoped to "repo" (the
+    // narrowest unit), never letting an interactive TUI correction get
+    // promoted straight to general competence -- "local" is the canonical
+    // equivalent of that invariant, not "general".
+    scope: "local",
     recordedAt: new Date().toISOString(),
     author: draft.author ?? "operator",
     proposedPatchDigest: draft.proposedPatchDigest,

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Box, Text, useApp, useInput, useStdout } from "ink";
-import { captureCorrection, type RuntimeClient } from "@vanguard/client-core";
+import { captureCorrection, type RuntimeClient } from "@aether/client";
 import { submitInteractiveApproval } from "../../composition/operator-approval.js";
 import { DetailPane } from "../components/detail-pane.js";
 import { HelpOverlay } from "../components/help-overlay.js";
@@ -141,6 +141,7 @@ export function RunTui({
         return;
       }
       void captureCorrection(runtime, {
+        runId: activeRunId || approval.episodeId,
         episodeId: approval.episodeId,
         proposedPatchDigest: approval.proposedPatchDigest,
         acceptedPatchDigest: approval.proposedPatchDigest,
@@ -151,13 +152,7 @@ export function RunTui({
       return;
     }
     if (shouldDispatchApproval(mode, input) && view.pendingApproval) {
-      // F4 Phase 2: submitInteractiveApproval's client param is now typed
-      // against @aether/client's RuntimeClient (dispatchApproval was ported
-      // there). `runtime` here is a real client-core LiveRuntimeClient
-      // instance -- the same runtime object, just typed narrower on the
-      // client-core side (approvalId required vs. optional); the cast is a
-      // type-only bridge, not a behavior change.
-      void submitInteractiveApproval(runtime as unknown as Parameters<typeof submitInteractiveApproval>[0], view.pendingApproval, input);
+      void submitInteractiveApproval(runtime, view.pendingApproval, input);
       return;
     }
     if (shouldEnterCorrect(mode, input)) {
@@ -190,12 +185,7 @@ export function RunTui({
       }
       if (input === "w") {
         const artifactId = selected?.kind === "tool" ? selected.name : "unknown";
-        // F4 Phase 3: whyText's param is now typed against @aether/contracts's
-        // ArtifactExplanation (whyFromResult was ported there); runtime here
-        // returns client-core's own, structurally different ArtifactExplanation
-        // shape (activatedBy/demotedBy are richer objects, not strings) --
-        // whyText only reads .status/.prediction, so this is a type-only bridge.
-        void runtime.explainArtifact(artifactId).then((result) => setWhy(whyText(result as unknown as Parameters<typeof whyText>[0])));
+        void runtime.explainArtifact(artifactId).then((result) => setWhy(whyText(result)));
       }
     }
   });

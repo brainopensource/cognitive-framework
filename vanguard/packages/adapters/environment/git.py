@@ -332,6 +332,14 @@ class GitEnvironment:
                         metadata={
                             "bytes": len(content.encode("utf-8")),
                             "digest": _compute_file_digest(content),
+                            "preimage_digest": _compute_file_digest(content),
+                            "section_digest": _compute_file_digest(paginated_content),
+                            "section_address": {
+                                "path": norm_rel,
+                                "offset": offset,
+                                "limit": limit,
+                                "preimageDigest": _compute_file_digest(content),
+                            },
                             "total_lines": total_lines,
                             "offset": offset,
                             "limit": limit,
@@ -345,7 +353,10 @@ class GitEnvironment:
                     action="read",
                     content=content,
                     files=(norm_rel,),
-                    metadata={"bytes": len(content.encode("utf-8")), "digest": _compute_file_digest(content), "total_lines": total_lines},
+                    metadata={"bytes": len(content.encode("utf-8")),
+                              "digest": _compute_file_digest(content),
+                              "preimage_digest": _compute_file_digest(content),
+                              "total_lines": total_lines},
                 )
             )
 
@@ -615,7 +626,15 @@ class GitEnvironment:
                             return Result.fail(
                                 "conflict",
                                 f"hunk starts past end of {norm_rel} at line {target_idx}")
-                    elif hint is not None and _matches(hint):
+                    elif hint is not None:
+                        # A numbered anchor is a preimage claim, not a search
+                        # suggestion. Refuse drift at that exact location;
+                        # silently relocating a stale hunk can corrupt an
+                        # unrelated occurrence after resume.
+                        if not _matches(hint):
+                            return Result.fail(
+                                "conflict",
+                                f"stale patch anchor in {norm_rel} at line {hint + 1}")
                         target_idx = hint
                     else:
                         # Search forward from where the last hunk left off, so

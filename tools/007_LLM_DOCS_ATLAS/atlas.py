@@ -187,9 +187,9 @@ def query_repository(repo_root: Path, query: str) -> List[Dict[str, Any]]:
     return storage.search_fts(query)
 
 
-def get_symbol_details(repo_root: Path, symbol_query: str) -> List[Dict[str, Any]]:
+def get_symbol_details(repo_root: Path, symbol_query: str, exact: bool = False) -> List[Dict[str, Any]]:
     storage = get_storage(repo_root)
-    return storage.get_symbol(symbol_query)
+    return storage.get_symbol(symbol_query, exact=exact)
 
 
 def get_callers(repo_root: Path, symbol_id: str) -> List[Dict[str, Any]]:

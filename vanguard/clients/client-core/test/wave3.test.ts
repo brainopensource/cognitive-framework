@@ -45,7 +45,7 @@ describe("FE-1-9 — Task A1: Resume Helpers", () => {
     assert.ok(res.ok);
     if (res.ok) {
       assert.equal(res.value.runId, "run-123");
-      assert.equal(res.value.checkpointId, "chk-456");
+      assert.equal(res.value.options?.checkpointId, "chk-456");
     }
   });
 

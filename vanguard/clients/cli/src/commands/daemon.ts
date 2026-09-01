@@ -9,7 +9,7 @@ import {
 
 export async function handleDaemon(args: string[], options: ParsedCli): Promise<number> {
   const action = args[0] || "status";
-  const client = clientFor(options);
+  const client = await clientFor(options);
 
   if (action === "status") {
     const res = await client.getDaemonStatus();

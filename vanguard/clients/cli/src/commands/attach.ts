@@ -1,6 +1,6 @@
 import type { ParsedCli } from "../composition/parse-cli.js";
 import { clientFor } from "../composition/client-for.js";
-import { streamRun } from "@vanguard/client-core";
+import { streamRun } from "@aether/client";
 import {
   CLI_EXIT_CODES,
   logDiagnostic,
@@ -13,7 +13,7 @@ export async function handleAttach(args: string[], options: ParsedCli): Promise<
     return CLI_EXIT_CODES.INVALID_INPUT;
   }
 
-  const runtime = clientFor(options);
+  const runtime = await clientFor(options);
   options.runId = runId;
   options.headless = true;
 

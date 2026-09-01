@@ -1,1 +1,1 @@
-export * from "@vanguard/client-core/application/run-view.js";
+export * from "@aether/client/application/run-view.js";

@@ -1,1 +1,1 @@
-export * from "@vanguard/client-core/adapters/replay.js";
+export * from "@aether/client/transports/replay.js";

@@ -1,1 +1,1 @@
-export * from "@vanguard/client-core/adapters/transport.js";
+export * from "@aether/client/transports/transport.js";

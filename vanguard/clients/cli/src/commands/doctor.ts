@@ -9,7 +9,7 @@ import {
 } from "../output.js";
 
 export async function handleDoctor(args: string[], options: ParsedCli): Promise<number> {
-  const client = clientFor(options) as any;
+  const client = await clientFor(options) as any;
   const persistence = new NodeFsPersistenceAdapter();
 
   const [statusRes, capRes, settings, providers] = await Promise.all([

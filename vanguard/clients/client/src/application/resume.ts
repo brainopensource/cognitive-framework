@@ -1,14 +1,9 @@
-import { fail, type Result, type ResumeOptions, type RunRef } from "@aether/contracts";
+import { fail, type Result, type ResumeOptions } from "@aether/contracts";
 
 /**
- * Ported from @vanguard/client-core's resume.ts (F4 Phase 3), adapted to
+ * Ported from @vanguard/client-core's resume.ts (F4 Phase 5), adapted to
  * @aether/client's RuntimeClient.requestResume(runId, options) split-argument
- * convention -- client-core bundled {runId, checkpointId} into one object,
- * which is why this module is ported but NOT shimmed onto client-core: its
- * one real consumer (cli/src/composition/resume-session.ts) still calls
- * `client.requestResume(builtRequest)` with the bundled shape client-core's
- * RuntimeClient expects. Shimming happens alongside that call site's
- * migration in a later phase.
+ * convention -- client-core bundled {runId, checkpointId} into one object.
  */
 export function buildResumeRequest(
   runId: string,
@@ -23,7 +18,8 @@ export function buildResumeRequest(
   return { ok: true, value: { runId: trimmedRunId, options } };
 }
 
-export function describeResumeFailure(result: Result<RunRef>): string {
+/** Only reads `.error` on failure, so this accepts the result of any RuntimeClient resume call. */
+export function describeResumeFailure(result: Result<unknown>): string {
   if (result.ok) return "";
   const { code, message } = result.error;
   switch (code) {

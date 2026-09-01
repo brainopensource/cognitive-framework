@@ -9,7 +9,7 @@ import { clientFor } from "../composition/client-for.js";
 // vg composition activate <composition-id> [--json]
 export async function handleComposition(args: string[], options: ParsedCli): Promise<number> {
   const subcommand = args[0];
-  const client = clientFor(options);
+  const client = await clientFor(options);
 
   if (!subcommand) {
     console.error("Missing subcommand for composition (list, validate, freeze, diff, activate)");

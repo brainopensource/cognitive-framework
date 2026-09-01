@@ -17,7 +17,7 @@ export async function handleApprove(args: string[], options: ParsedCli): Promise
     return CLI_EXIT_CODES.INVALID_INPUT;
   }
 
-  const client = clientFor(options);
+  const client = await clientFor(options);
 
   try {
     const res = await client.resolveApproval({

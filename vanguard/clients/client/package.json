@@ -12,6 +12,10 @@
       "types": "./dist/src/index.d.ts",
       "default": "./dist/src/index.js"
     },
+    "./transports/transport.js": {
+      "types": "./dist/src/transports/transport.d.ts",
+      "default": "./dist/src/transports/transport.js"
+    },
     "./transports/socket.js": {
       "types": "./dist/src/transports/socket.d.ts",
       "default": "./dist/src/transports/socket.js"
@@ -35,6 +39,10 @@
     "./transports/fake.js": {
       "types": "./dist/src/transports/fake.d.ts",
       "default": "./dist/src/transports/fake.js"
+    },
+    "./transports/scenario.js": {
+      "types": "./dist/src/transports/scenario.d.ts",
+      "default": "./dist/src/transports/scenario.js"
     },
     "./application/run-view.js": {
       "types": "./dist/src/application/run-view.d.ts",

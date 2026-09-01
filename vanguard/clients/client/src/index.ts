@@ -4,6 +4,7 @@ export * from "./transports/socket.js";
 export * from "./transports/http.js";
 export * from "./transports/replay.js";
 export * from "./transports/fake.js";
+export * from "./transports/scenario.js";
 export * from "./application/run-view.js";
 export * from "./application/trace-graph.js";
 export * from "./application/budget.js";

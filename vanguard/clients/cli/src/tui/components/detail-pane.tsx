@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Text } from "ink";
-import type { PendingApproval } from "@vanguard/client-core";
+import type { PendingApproval } from "@aether/client";
 import type { TuiMode } from "../focus.js";
 import type { TranscriptRow } from "../transcript-window.js";
 import { ApprovalModal } from "./approval-modal.js";

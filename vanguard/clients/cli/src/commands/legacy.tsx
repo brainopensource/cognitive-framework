@@ -5,11 +5,10 @@ import {
   explain,
   manageDaemon,
   resumeRun,
-  runCodingCommand,
   streamRun,
   streamTrace,
-  type CodingRequest,
-} from "@vanguard/client-core";
+} from "@aether/client";
+import { runCodingCommand, type CodingRequest } from "@vanguard/client-core";
 import { clientFor } from "../composition/client-for.js";
 import { parseCliOptions, usage, type ParsedCli } from "../composition/parse-cli.js";
 import { RunTui } from "../tui/screens/run-tui.js";
@@ -51,7 +50,7 @@ function codingRequestFromParsed(
 }
 
 export async function handleRun(args: string[], parsed: ParsedCli): Promise<number> {
-  const runtime = clientFor(parsed);
+  const runtime = await clientFor(parsed);
   if (parsed.headless) {
     return await streamRun(runtime, parsed, console.log);
   } else {
@@ -95,14 +94,14 @@ export async function handleDoctor(args: string[], parsed: ParsedCli): Promise<n
 }
 
 export async function handleApprove(args: string[], parsed: ParsedCli): Promise<number> {
-  const runtime = clientFor(parsed);
+  const runtime = await clientFor(parsed);
   const runId = parsed.runId ?? args.find((a) => !a.startsWith("-"));
   if (!runId || !parsed.decision) usage();
   return await approveDecision(runtime, runId, parsed.decision, console.log);
 }
 
 export async function handleResume(args: string[], parsed: ParsedCli): Promise<number> {
-  const runtime = clientFor(parsed);
+  const runtime = await clientFor(parsed);
   const runId = parsed.runId ?? args.find((a) => !a.startsWith("-"));
   if (!runId) usage();
   if (parsed.socketPath || parsed.demo) {
@@ -117,19 +116,19 @@ export async function handleResume(args: string[], parsed: ParsedCli): Promise<n
 }
 
 export async function handleTrace(args: string[], parsed: ParsedCli): Promise<number> {
-  const runtime = clientFor(parsed);
+  const runtime = await clientFor(parsed);
   const target = args.find((arg) => !arg.startsWith("-") && arg !== parsed.demoScenario) ?? usage();
   return await streamTrace(runtime, target, console.log);
 }
 
 export async function handleWhy(args: string[], parsed: ParsedCli): Promise<number> {
-  const runtime = clientFor(parsed);
+  const runtime = await clientFor(parsed);
   const target = args.find((arg) => !arg.startsWith("-") && arg !== parsed.demoScenario) ?? usage();
   return await explain(runtime, target, console.log);
 }
 
 export async function handleDaemon(args: string[], parsed: ParsedCli): Promise<number> {
-  const runtime = clientFor(parsed);
+  const runtime = await clientFor(parsed);
   const action = args.find((a) => ["start", "status", "stop"].includes(a)) as
     | "start"
     | "status"

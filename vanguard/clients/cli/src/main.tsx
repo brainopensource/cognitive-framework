@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import type { RuntimeClient } from "@vanguard/client-core";
+import type { RuntimeClient } from "@aether/client";
 import { parseCliOptions, usage, USAGE } from "./composition/parse-cli.js";
 import { COMMANDS } from "./commands/index.js";
 

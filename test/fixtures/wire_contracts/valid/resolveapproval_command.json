@@ -1,0 +1,24 @@
+{
+  "version": "vg.4",
+  "frameType": "command",
+  "frameId": "frame-008",
+  "command": {
+    "name": "ResolveApproval",
+    "commandId": "cmd-008",
+    "idempotencyKey": "idem-008",
+    "runId": "run-001",
+    "actor": "operator",
+    "payload": {
+      "decision": {
+        "approvalId": "app-001",
+        "resolution": "approved",
+        "reviewer": "operator-01",
+        "argsDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "descriptorDigest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "expiresAt": "2026-12-31T23:59:59Z",
+        "keyId": "key-operator-01",
+        "signature": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    }
+  }
+}

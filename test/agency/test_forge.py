@@ -257,6 +257,10 @@ class TestForgeAdmissionGate(unittest.TestCase):
             exit_code=0,
             executed_test_count=5,
             workspace_digest="sha256:ws1",
+            task_digest=self.contract.task_digest,
+            receipt_digest="sha256:receipt",
+            command="python -m unittest",
+            verification_subject_digest="sha256:subject",
         )
         verdict = self.gate.evaluate(
             goal_contract=self.contract,

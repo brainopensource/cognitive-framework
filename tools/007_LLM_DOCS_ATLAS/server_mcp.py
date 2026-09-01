@@ -436,13 +436,18 @@ class LDAMCPServer:
                 from .core.ranking import catalog_fallback_candidates, load_catalog_metadata
 
                 catalog = load_catalog_metadata(self._root, self._ctx.profile.generated_root)
+                docs = [
+                    {"canonical_id": c.title, "path": c.locator, "authority": c.authority}
+                    for c in catalog_fallback_candidates(
+                        query, catalog, profile=self._ctx.profile
+                    )
+                ]
                 payload = {
-                    "documents": [
-                        {"canonical_id": c.title, "path": c.locator, "authority": c.authority}
-                        for c in catalog_fallback_candidates(
-                            query, catalog, profile=self._ctx.profile
-                        )
-                    ],
+                    "documents": docs,
+                    "bounded_context": {
+                        "documents": docs,
+                        "symbols": [],
+                    },
                     "degraded_mode": "catalog_routing",
                 }
             payload["index_healthy"] = healthy

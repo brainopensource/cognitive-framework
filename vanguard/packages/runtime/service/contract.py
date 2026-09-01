@@ -6,7 +6,7 @@ fields *before* they touch the command inbox or ledger, without depending on
 cross-file JSON-Schema ``$ref`` resolution (the ``referencing`` package that
 ``jsonschema`` needs for that is not present in every environment this runs
 in). ``ERROR_CODES`` is the single vocabulary shared, byte-for-byte, with
-``@vanguard/client-core``'s ``ClientFailure.code`` (TypeScript) and the
+``@aether/contracts``'s ``ClientFailure.code`` (TypeScript) and the
 ``ErrorCode`` enum in the schema file. The tables below are the
 Python half of a single frozen contract: they are checked field-for-field
 against ``schemas/v4/runtime-service.schema.json`` by
@@ -14,7 +14,7 @@ against ``schemas/v4/runtime-service.schema.json`` by
 cannot drift from the schema. A shared corpus of golden/negative vectors under
 ``schemas/v4/vectors/runtime-service/`` proves the Python and TypeScript
 readers agree (see ``test/contracts/test_runtime_service_vectors.py`` and
-``client-core/test/runtime-service-vectors.test.ts``).
+``vanguard/clients/contracts/test/runtime-service-vectors.test.ts``).
 
 Owning contract: ADR-0101, ADR-0103, docs/_archive/reviews/frontend/integration_plan.md §4.
 """

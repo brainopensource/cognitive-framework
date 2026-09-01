@@ -34,10 +34,35 @@ class TestProtocolRecoveryAndAdmissionGate(unittest.TestCase):
             changed_files=("lru/entry.py",),
             inspected_files=("lru/entry.py",),
             proposal={"text": "done"},
-            verification=VerificationReceipt(0, 1, "sha256:workspace"),
+            verification=VerificationReceipt(
+                0, 1, "sha256:workspace", task_digest="sha256:task",
+                composition_digest="sha256:composition", receipt_digest="sha256:receipt",
+                verification_command="python -m unittest",
+                verification_subject_digest="sha256:subject",
+            ),
             current_workspace_digest="sha256:workspace",
+            current_task_digest="sha256:task",
+            current_composition_digest="sha256:composition",
+            current_verification_command="python -m unittest",
+            current_verification_subject_digest="sha256:subject",
         )
         self.assertTrue(verdict_ok.admissible)
+
+        foreign = gate.evaluate(
+            "vg-code-v090-react-control", changed_files=("lru/entry.py",),
+            inspected_files=("lru/entry.py",), proposal={"text": "done"},
+            verification=VerificationReceipt(
+                0, 1, "sha256:workspace", task_digest="sha256:other",
+                composition_digest="sha256:composition", receipt_digest="sha256:receipt",
+                verification_command="python -m unittest",
+                verification_subject_digest="sha256:subject",
+            ),
+            current_workspace_digest="sha256:workspace", current_task_digest="sha256:task",
+            current_composition_digest="sha256:composition",
+            current_verification_command="python -m unittest",
+            current_verification_subject_digest="sha256:subject",
+        )
+        self.assertEqual(foreign.reason, "VERIFICATION_FOREIGN_TASK")
 
     def test_admission_gate_read_only_preset(self) -> None:
         gate = AdmissionGate()

@@ -167,7 +167,10 @@ The backend facade exposes `vg code run`, `status`, `resume`, `evidence`, and
 resolve to `vg-code-fast`, `vg-code-balanced`, or `vg-code-max` manifests and
 do not create a second runtime or persistence path. Coding Max completion is
 admitted only after mediated patch and test facts have produced a fresh
-workspace-bound verification receipt.
+verification receipt bound to the current task digest, frozen composition
+digest, workspace postimage, exact verification command/test subject, and
+receipt identity. Missing or foreign bindings fail closed; legacy receipt
+readers remain available only when no current binding is requested.
 
 `D_H` must change when component bindings or durable context/admission policy change. Runtime evidence must retain enough identity to distinguish control and treatment configurations in benchmark comparisons.
 

@@ -1,9 +1,9 @@
 {
   "status": "VALIDATED",
   "timestamp": "2026-08-30T01:00:00Z",
-  "total_documents": 120,
-  "canonical_ids_count": 120,
-  "links_count": 244,
+  "total_documents": 409,
+  "canonical_ids_count": 409,
+  "links_count": 547,
   "code_mappings_count": 12,
   "symbol_index_count": 669,
   "broken_links": 0,

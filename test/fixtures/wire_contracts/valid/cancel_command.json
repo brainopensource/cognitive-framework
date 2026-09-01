@@ -1,0 +1,16 @@
+{
+  "version": "vg.4",
+  "frameType": "command",
+  "frameId": "frame-005",
+  "command": {
+    "name": "Cancel",
+    "commandId": "cmd-005",
+    "idempotencyKey": "idem-005",
+    "runId": "run-001",
+    "actor": "operator",
+    "payload": {
+      "reason": "User requested abort",
+      "expectedSeq": 12
+    }
+  }
+}

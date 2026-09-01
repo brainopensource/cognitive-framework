@@ -212,8 +212,10 @@ class ChimeraEngine:
                     executed_test_count=ver_record.executed_tests,
                     workspace_digest=ws_digest,
                     task_digest=goal_contract.task_digest,
+                    composition_digest=goal_contract.composition_digest,
                     receipt_digest=digest_of({"cmd": cmd, "exit": exit_code, "ws": ws_digest}),
                     command=cmd,
+                    verification_subject_digest=digest_of({"command": cmd}),
                     test_summary=output[:500],
                 )
                 last_receipt_box[0] = receipt

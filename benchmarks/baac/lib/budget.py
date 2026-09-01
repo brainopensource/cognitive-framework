@@ -58,24 +58,30 @@ class DisallowedModelError(ValueError):
     """Raised when an unapproved model is requested."""
 
 
+class UnknownUsageError(RuntimeError):
+    """Raised when token usage is unknown or missing."""
+
+
 @dataclass(frozen=True, slots=True)
 class BudgetCapConfig:
-    """Configurable budget and request limits."""
+    """Configurable budget, token, and request limits."""
 
     max_requests: int = 300
     max_cost_usd: float = 0.50
+    max_tokens: int = 1_000_000
     max_turns: int = 12
     allowed_models: Optional[tuple[str, ...]] = None  # None means all models permitted
 
 
 class BudgetTracker:
-    """Tracks token consumption, request counts, and cost pre-call."""
+    """Tracks token consumption, request counts, cached tokens, and cost pre-call."""
 
     def __init__(self, config: BudgetCapConfig | None = None) -> None:
         self.config = config or BudgetCapConfig()
         self.request_count = 0
         self.total_prompt_tokens = 0
         self.total_completion_tokens = 0
+        self.total_cached_tokens = 0
         self.total_cost_usd = 0.0
         self.records: List[Dict[str, Any]] = []
 
@@ -84,7 +90,7 @@ class BudgetTracker:
         return self.total_prompt_tokens + self.total_completion_tokens
 
     def check_pre_call(self, model: str) -> None:
-        """Pre-flight check before making an LLM API call."""
+        """Pre-flight check before issuing any LLM API call."""
         # 1. Model Allowlist Check (if configured)
         if self.config.allowed_models and len(self.config.allowed_models) > 0:
             if "all" not in self.config.allowed_models:
@@ -100,7 +106,13 @@ class BudgetTracker:
                 f"Fail-closed abort: Request cap exceeded ({self.request_count}/{self.config.max_requests} requests)"
             )
 
-        # 3. Cost cap
+        # 3. Token count cap
+        if self.total_tokens >= self.config.max_tokens:
+            raise BudgetExceededError(
+                f"Fail-closed abort: Token cap exceeded ({self.total_tokens}/{self.config.max_tokens} tokens)"
+            )
+
+        # 4. Cost cap
         if self.total_cost_usd >= self.config.max_cost_usd:
             raise BudgetExceededError(
                 f"Fail-closed abort: Cost cap exceeded (${self.total_cost_usd:.5f} >= ${self.config.max_cost_usd:.5f} USD)"
@@ -111,12 +123,17 @@ class BudgetTracker:
         model: str,
         prompt_tokens: int,
         completion_tokens: int,
+        cached_tokens: int = 0,
         reported_cost: float | None = None,
     ) -> float:
         """Record an executed request and update cumulative budget metrics."""
+        if prompt_tokens is None or completion_tokens is None or prompt_tokens < 0 or completion_tokens < 0:
+            raise UnknownUsageError("Unknown or invalid token usage: usage cannot be None or negative and blocks execution.")
+
         self.request_count += 1
         self.total_prompt_tokens += prompt_tokens
         self.total_completion_tokens += completion_tokens
+        self.total_cached_tokens += max(0, cached_tokens)
 
         # Compute cost via centralized pricing table if reported cost not given
         if reported_cost is not None and reported_cost > 0.0:
@@ -137,6 +154,7 @@ class BudgetTracker:
             "model": model,
             "prompt_tokens": prompt_tokens,
             "completion_tokens": completion_tokens,
+            "cached_tokens": cached_tokens,
             "total_tokens": prompt_tokens + completion_tokens,
             "call_cost_usd": round(call_cost, 6),
             "cumulative_cost_usd": round(self.total_cost_usd, 6),
@@ -150,7 +168,9 @@ class BudgetTracker:
             "maxRequests": self.config.max_requests,
             "totalPromptTokens": self.total_prompt_tokens,
             "totalCompletionTokens": self.total_completion_tokens,
+            "totalCachedTokens": self.total_cached_tokens,
             "totalTokens": self.total_tokens,
+            "maxTokens": self.config.max_tokens,
             "totalCostUsd": round(self.total_cost_usd, 6),
             "maxCostUsd": self.config.max_cost_usd,
         }

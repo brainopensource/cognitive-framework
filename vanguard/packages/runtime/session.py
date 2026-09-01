@@ -469,6 +469,7 @@ class HarnessSession:
         self._completion_changed_files: set[str] = set()
         self._completion_inspected_files: set[str] = set()
         self._completion_verification: VerificationReceipt | None = None
+        self._completion_verification_command: str | None = None
 
         repo = Path(task.repo_path)
         self.repo = repo
@@ -1234,11 +1235,12 @@ class HarnessSession:
         if request.action not in {"test", "exec", "proc.exec"}:
             return
         argv = request.args.get("argv", request.args.get("command", ()))
-        if isinstance(argv, str):
-            argv = ()
-        executable = str(argv[0]) if isinstance(argv, Sequence) and argv else ""
+        verification_command = (
+            argv if isinstance(argv, str) else " ".join(str(item) for item in argv)
+        )
+        executable = str(argv[0]) if isinstance(argv, Sequence) and not isinstance(argv, str) and argv else ""
         is_test = executable.rsplit("/", 1)[-1] in {"pytest", "unittest"} or any(
-            "test" in str(item).lower() for item in (argv if isinstance(argv, Sequence) else ()))
+            "test" in str(item).lower() for item in (argv if isinstance(argv, Sequence) else (verification_command,)))
         if not is_test:
             return
         detail = str(outcome.detail or "")
@@ -1248,9 +1250,14 @@ class HarnessSession:
             exit_code=exit_code,
             executed_test_count=1,
             workspace_digest=self._workspace_digest(),
-            task_digest=digest_of({"runId": self.task.run_id, "brief": self.task.brief}),
+            task_digest=(self.run_plan.task_digest if self.run_plan is not None
+                         else digest_of({"task": self.task.brief})),
+            composition_digest=self.run_plan.composition_digest if self.run_plan is not None else self.harness.composition_digest,
             receipt_digest=outcome.result_digest or "",
+            verification_command=verification_command,
+            verification_subject_digest=digest_of({"command": verification_command}),
         )
+        self._completion_verification_command = verification_command
 
     def _admit_completion(self, _episode: Any, _proposal: Any) -> AdmissionVerdict:
         """Apply the coding completion contract before reducing ``finish``."""
@@ -1261,6 +1268,13 @@ class HarnessSession:
             proposal={"kind": "finish"},
             verification=self._completion_verification,
             current_workspace_digest=self._workspace_digest(),
+            current_task_digest=(self.run_plan.task_digest if self.run_plan is not None else digest_of({"runId": self.task.run_id, "brief": self.task.brief})),
+            current_composition_digest=(self.run_plan.composition_digest if self.run_plan is not None else self.harness.composition_digest),
+            current_verification_command=self._completion_verification_command,
+            current_verification_subject_digest=(
+                digest_of({"command": self._completion_verification_command})
+                if self._completion_verification_command else None
+            ),
             inspected_files=tuple(sorted(self._completion_inspected_files)),
             task_text=self.task.brief,
             greenfield_evidence={

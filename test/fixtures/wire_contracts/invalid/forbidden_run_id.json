@@ -1,0 +1,13 @@
+{
+  "version": "vg.4",
+  "frameType": "command",
+  "frameId": "frame-bad-4",
+  "command": {
+    "name": "ListRuns",
+    "commandId": "cmd-bad-4",
+    "idempotencyKey": "idem-bad-4",
+    "runId": "should-not-be-here",
+    "actor": "operator",
+    "payload": {}
+  }
+}

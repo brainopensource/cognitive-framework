@@ -2,8 +2,8 @@
 """AETHER Interactive PTY Human Simulator & TUI Driver.
 
 Simulates genuine human terminal behavior across pseudo-terminals (PTY):
-1. Allocates master/slave PTY pairs with standard terminal geometry (120x30).
-2. Simulates realistic human typing jitter, keyboard review pauses, and interactive approvals.
+1. Allocates master/slave PTY pairs with standard terminal geometry (120x35).
+2. Simulates realistic human typing jitter, keyboard review pauses, and interactive monitoring.
 3. Captures raw ANSI frames, strips escape sequences, and asserts visual & semantic state transitions.
 4. Executes real coding challenges using SOTA presets (vg-1-forge, vg-code-max).
 """
@@ -40,7 +40,7 @@ def strip_ansi(text: str) -> str:
 class PTYSession:
     """Manages an interactive process inside a Unix pseudo-terminal."""
 
-    def __init__(self, cmd: Sequence[str], cwd: Optional[Path] = None, rows: int = 30, cols: int = 120):
+    def __init__(self, cmd: Sequence[str], cwd: Optional[Path] = None, rows: int = 35, cols: int = 120):
         self.cmd = list(cmd)
         self.cwd = cwd or ROOT
         self.rows = rows
@@ -57,7 +57,7 @@ class PTYSession:
         """Spawn child process inside master/slave PTY."""
         self.master_fd, slave_fd = pty.openpty()
 
-        # Set terminal window geometry
+        # Set terminal window geometry (120x35)
         winsize = struct.pack("HHHH", self.rows, self.cols, 0, 0)
         fcntl.ioctl(slave_fd, termios.TIOCSWINSZ, winsize)
 
@@ -130,10 +130,7 @@ class PTYSession:
     def expect(self, pattern: str | re.Pattern, timeout: float = 15.0) -> bool:
         """Wait until pattern appears in clean buffer."""
         deadline = time.monotonic() + timeout
-        if isinstance(pattern, str):
-            regex = re.compile(re.escape(pattern))
-        else:
-            regex = pattern
+        regex = pattern if isinstance(pattern, re.Pattern) else re.compile(pattern)
 
         while time.monotonic() < deadline:
             text = self.get_clean_buffer()
@@ -200,29 +197,23 @@ def run_simulated_human_episode(
         time.sleep(0.5)
 
         print("[3/4] Awaiting agent turn execution and AST synthesis...")
-        found_result = pty_sess.expect(r"Result:\s*\[(PASS|FAIL)\]", timeout=30.0)
+        found_result = pty_sess.expect(r"Result:\s*\[PASS\]", timeout=15.0)
         if not found_result:
             print("[FAIL] Timeout waiting for agent episode completion.")
             return False
 
         buf = pty_sess.get_clean_buffer()
-        print("  [OK] Agent completed episode.")
+        print("  [OK] Agent completed episode successfully.")
 
         print("[4/4] Verifying visual TUI matrix rendered in PTY:")
         print("-" * 70)
-        # Print excerpt of clean buffer
         lines = [l for l in buf.splitlines() if l.strip()]
-        for line in lines[-15:]:
+        for line in lines[-12:]:
             print(f"  | {line}")
         print("-" * 70)
 
-        is_pass = "PASS" in buf
-        if is_pass:
-            print("[SUCCESS] Human PTY Simulation passed with 100% fidelity.")
-            return True
-        else:
-            print("[WARNING] Simulation completed with non-pass status.")
-            return False
+        print("[SUCCESS] Human PTY Simulation passed with 100% fidelity.")
+        return True
 
     finally:
         pty_sess.close()

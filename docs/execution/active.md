@@ -87,6 +87,15 @@ The CMX-06 focused topology/specialist/composition suite is 23/23 green.
 The two LAM arms each remain 9/9 green with 17,100 tokens and $0 provider
 spend; LAM is instrumentation evidence only.
 
+FIN-A1 producer-signed evidence infrastructure is `READY`: the dry-run emits
+only `NOT_RUN` records, the frozen canary preflight passes, and offline bundle
+sealing/verification plus promotion/rollback receipt falsifiers are covered.
+The FIN-A1 benchmark suite is 59/59 green (53 pre-existing plus six package
+falsifiers), and the runtime suite is 661/661 green with 7 skips in this
+environment.
+The live empirical M-8 run remains `NOT_RUN` and provider-gated; no lift,
+cost, token, or promotion claim is made from this preflight.
+
 The BEP-04 qualification implementation now exposes the three bounded
 authority-free graph templates (`sequential`, `reviewer_in_loop`, and
 `parallel_investigators`) through the existing topology lowerer and scheduler.

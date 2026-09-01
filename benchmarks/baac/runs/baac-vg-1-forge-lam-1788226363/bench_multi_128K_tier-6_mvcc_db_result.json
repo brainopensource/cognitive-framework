@@ -1,0 +1,63 @@
+{
+  "challengeId": "bench_multi_128K_tier-6_mvcc_db",
+  "tier": "tier-6",
+  "scope": "multi",
+  "contextBracket": "128K",
+  "preset": "vg-1-forge",
+  "model": "lam-mock",
+  "mode": "lam",
+  "status": "PASS",
+  "attribution": "PASS",
+  "turns": 10,
+  "promptTokens": 1500,
+  "completionTokens": 400,
+  "totalTokens": 1900,
+  "costUsd": 0.0,
+  "durationSeconds": 0.1,
+  "changedFiles": [
+    "src/mvcc.py"
+  ],
+  "diffPatch": "--- a/mvcc.py\n+++ b/mvcc.py\n@@ -1,2 +1,13 @@\n class MVCCStore:\n-    pass\n+    def __init__(self):\n+        self.store = {}\n+\n+    def put(self, key: str, val: str, tx_id: int):\n+        if key not in self.store:\n+            self.store[key] = []\n+        self.store[key].append((tx_id, val))\n+\n+    def get(self, key: str, tx_id: int) -> str:\n+        versions = self.store.get(key, [])\n+        valid = [v for ver_tx, v in versions if ver_tx <= tx_id]\n+        return valid[-1] if valid else \"\"\n",
+  "oracle": {
+    "passed": true,
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "test_mvcc (__main__.TestMVCC.test_mvcc) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+    "durationSeconds": 0.038,
+    "error": null,
+    "assertionCount": 1,
+    "failingAssertions": []
+  },
+  "aiJudgeScore": null,
+  "diagnosis": "All falsifiers green",
+  "metadata": {
+    "id": "bench_multi_128K_tier-6_mvcc_db",
+    "name": "Multi-Version Concurrency Control (MVCC) In-Memory Store",
+    "scope": "multi",
+    "context_bracket": "128K",
+    "tier": "tier-6",
+    "difficulty": 6,
+    "timeout_seconds": 35,
+    "entrypoint": "src/main.py",
+    "eval_type": "oracle",
+    "tags": [
+      "database",
+      "mvcc",
+      "concurrency",
+      "frontier"
+    ],
+    "metadata": {},
+    "cli_args": {
+      "command": "run",
+      "preset": "vg-1-forge",
+      "mode": "lam",
+      "model": null,
+      "tier": "all",
+      "single": null,
+      "max_turns": 10,
+      "max_requests": 500,
+      "budget": 0.1,
+      "keep_scratch": false
+    }
+  }
+}

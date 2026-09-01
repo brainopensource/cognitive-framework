@@ -26,11 +26,13 @@ if str(_REPO_ROOT) not in sys.path:
 
 from vanguard.packages.ports.evaluator import EvaluationProtocol, RunRef, Verdict
 from vanguard.packages.ports.event_store import Result
+from benchmarks.m8_heldout.receipts import PromotionReceipt, RollbackReceipt
 
 __all__ = [
     "BudgetLimits", "Disposition", "ExecutionRecord", "TaskAttempt",
     "TaskTelemetry", "WorkloadDefinition", "digest_of", "execute_empirical_run",
     "load_workload", "RuntimeTaskExecutor", "verify_bundle",
+    "PromotionReceipt", "RollbackReceipt",
 ]
 
 
@@ -623,9 +625,10 @@ def main() -> int:
     parser.add_argument("--workload", type=Path, default=None)
     parser.add_argument("--out", type=Path, default=None)
     parser.add_argument("--mode", choices=["dry-run", "cassette", "live"], default="dry-run")
+    parser.add_argument("--dry-run", action="store_true", help="explicit structural preflight alias for --mode dry-run")
     args = parser.parse_args()
     workload, tasks_meta = load_workload(args.workload)
-    bundle = execute_empirical_run(workload, tasks_meta, mode=args.mode)
+    bundle = execute_empirical_run(workload, tasks_meta, mode="dry-run" if args.dry_run else args.mode)
     out_json = json.dumps(bundle, indent=2) + "\n"
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)

@@ -5,7 +5,7 @@ class: execution
 authority: execution
 truth_plane: TARGET
 status: living
-implementation_status: SOTA_BUILD_LANE_IN_PROGRESS
+implementation_status: SOTA_BUILD_LANE_COMPLETE_MEASUREMENT_STOPPED
 owner: repository-governance
 canonical_for:
   - current work/state/ownership
@@ -13,9 +13,9 @@ purpose: Represent current execution intent exactly as the active board states i
 audience:
   - contributor
   - release-owner
-analysis_subject_sha: ca47eef7da1b4075f8a69d238fe1626fa1ab4c8e
+analysis_subject_sha: 43d9973b880be7a705199b75c03e0a6531aba265
 version: 0.9.2a3
-last_verified: 2026-08-31
+last_verified: 2026-09-01
 normative_authority:
   - docs/03_execution/sprint_active.md
   - docs/03_execution/backlog.md
@@ -66,7 +66,7 @@ history and is not rewritten. M-8 remains `BLOCKED`; M-9 and M-10 remain
 
 ## Wave closure disposition and next stage
 
-As of the exact implementation subject `ca47eef7da1b4075f8a69d238fe1626fa1ab4c8e`:
+As of the exact implementation subject `43d9973b880be7a705199b75c03e0a6531aba265`:
 
 | Stage | Disposition | Evidence-backed boundary |
 |---|---|---|
@@ -75,8 +75,9 @@ As of the exact implementation subject `ca47eef7da1b4075f8a69d238fe1626fa1ab4c8e
 | Wave 2 qualification (`CMX-06`, `CMX-07`) | `GATED` | Specialist enablement still requires an accepted ablation; repository-scale qualification still requires an executed exact-evidence run. |
 | 1-forge (`ADM-001..005`) | `COMPLETE` | `ForgeEngine`, `ForgeContextCompiler` (distillation + RFC-8785 JCS), `ForgeAtomicPatcher` (unified diffs, AST/block replace, rollback), `ForgeAdmissionGate` (strict freshness binding), and `vg-1-forge` preset implemented and verified with 100% test pass rate. |
 
-The live canary remains `NOT_RUN` because no provider-backed execution was
-authorized or available in this hermetic validation. M-8 therefore remains
+The frozen live canary remains `NOT_RUN`; the authorized B1 provider campaign
+was executed separately and invalidated by an unintended `__pycache__` task.
+M-8 therefore remains
 subject to its existing empirical gate, and no 1.0, SWE-bench, or SOTA claim
 is made. The first 1-forge change must preserve the existing `AdmissionGate`
 and express the missing goal contract through the current runtime seam.
@@ -218,8 +219,9 @@ to their targeted qualification suites. The measurement lane has no accepted
 receipt in this session: SOTA-04 and SOTA-08 are authorized but not run, and
 SOTA-12 remains blocked by external-run authorization and independent
 acceptance. The frozen separate ledger is `$0.15 / 300,000 tokens / 120 calls`;
-observed spend is `$0.00 / 0 tokens / 0 calls`. Provider preflight resolved the
-authorized model IDs and prices, but no paid call was issued.
+observed spend is `$0.002037315 / 26,347 tokens / 21 calls`. Provider preflight
+resolved the authorized model IDs and prices. B1 disposition is
+`INVALID_PREREGISTRATION_STOP`; B2 was not run.
 
 Technical completion does not close M-8. M-8 remains `BLOCKED`, M-9 remains
 `UNAUTHORIZED`, and M-10 remains `UNAUTHORIZED`. Internal BAAC, LAM, CMX, and

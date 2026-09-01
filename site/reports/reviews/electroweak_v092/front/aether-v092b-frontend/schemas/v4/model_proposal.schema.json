@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/v4/model_proposal.schema.json",
+  "$comment": "Owning contract: S6B-MD-001, REQ-PORT-006, CT-33. Canonical model proposal wire schema.",
+  "title": "ModelProposal",
+  "type": "object",
+  "required": ["kind"],
+  "properties": {
+    "kind": { "enum": ["effect", "finish"] },
+    "action": { "type": "string", "minLength": 1 },
+    "resource": {
+      "type": "object",
+      "properties": {
+        "kind": { "type": "string" },
+        "path": { "type": "string" },
+        "pattern": { "type": "string" },
+        "command": { "type": "string" }
+      }
+    },
+    "args": { "type": "object" },
+    "reservation": {
+      "type": "object",
+      "properties": {
+        "usd_micros": { "type": "integer" },
+        "millis": { "type": "integer" }
+      }
+    },
+    "note": { "type": "string" }
+  },
+  "additionalProperties": false
+}

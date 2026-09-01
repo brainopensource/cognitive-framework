@@ -1,0 +1,8 @@
+{
+  "kind": "fs",
+  "root": "/w",
+  "paths": [
+    "/w"
+  ],
+  "recursive": true
+}

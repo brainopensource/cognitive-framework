@@ -1,0 +1,303 @@
+{
+  "schema": "aether.m8-canary/1",
+  "authority": "frozen-canary",
+  "freeze_note": "Frozen before any live run. The workload dataset supports implementation and adversarial task classes only; bugfix and multi-file classes require dataset extension and are owned by the CMX-07 qualification set, not this canary.",
+  "base_commit": "ee67f6d38bf77f3441a3c58185ff12f3a087eb61",
+  "workload_digest": "sha256:66804731e6f58617e01b644b509bb28a586701cd555c06d09f03a504086446b9",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "provider": "openrouter",
+  "task_count": 10,
+  "denominator": 10,
+  "tasks": [
+    {
+      "id": "dev_01",
+      "split": "dev",
+      "task_class": "implementation",
+      "category": "systems",
+      "title": "LRU cache TTL eviction",
+      "payload_digest": "sha256:d0a291f71d9aece1ccb66702dec2adb5ffae5fd59a017f1c4abb607b1e2b9fe0",
+      "setup_commands": [
+        "python3 -m venv .venv && .venv/bin/pip install -e ."
+      ],
+      "evaluator": "exterior:pytest",
+      "max_attempts": 1
+    },
+    {
+      "id": "dev_02",
+      "split": "dev",
+      "task_class": "implementation",
+      "category": "concurrency",
+      "title": "Token bucket rate limiter",
+      "payload_digest": "sha256:7eaa40edd14369b8800f0ab7d98073fdeb94f24a103b77f61ce2291991746412",
+      "setup_commands": [
+        "python3 -m venv .venv && .venv/bin/pip install -e ."
+      ],
+      "evaluator": "exterior:pytest",
+      "max_attempts": 1
+    },
+    {
+      "id": "held_out_01",
+      "split": "held_out",
+      "task_class": "implementation",
+      "category": "algorithm",
+      "title": "Semaphore concurrency limiter",
+      "payload_digest": "sha256:fcb82a2f2cb7813a949d7fe3f1128b2dd044d7b01627e1495a7898b48e29343e",
+      "setup_commands": [
+        "python3 -m venv .venv && .venv/bin/pip install -e ."
+      ],
+      "evaluator": "exterior:pytest",
+      "max_attempts": 1
+    },
+    {
+      "id": "held_out_02",
+      "split": "held_out",
+      "task_class": "implementation",
+      "category": "algorithm",
+      "title": "Circular ring buffer FIFO",
+      "payload_digest": "sha256:3424a3b182670aa186f4cf9c99cad44fae35bfd24a194cf8725c2720a8226aa6",
+      "setup_commands": [
+        "python3 -m venv .venv && .venv/bin/pip install -e ."
+      ],
+      "evaluator": "exterior:pytest",
+      "max_attempts": 1
+    },
+    {
+      "id": "held_out_03",
+      "split": "held_out",
+      "task_class": "implementation",
+      "category": "algorithm",
+      "title": "Binary search rotated sorted array",
+      "payload_digest": "sha256:b55ddd1e22f5c6c2e462cd6101d28029f7c75a385e7692ce5be28a24d72a691d",
+      "setup_commands": [
+        "python3 -m venv .venv && .venv/bin/pip install -e ."
+      ],
+      "evaluator": "exterior:pytest",
+      "max_attempts": 1
+    },
+    {
+      "id": "held_out_04",
+      "split": "held_out",
+      "task_class": "implementation",
+      "category": "algorithm",
+      "title": "Prefix trie with wildcard lookup",
+      "payload_digest": "sha256:78d8784887c8154ec6dc6f6cc2c3a3c8b8ae6c3579749b227323c2e5b9dd256c",
+      "setup_commands": [
+        "python3 -m venv .venv && .venv/bin/pip install -e ."
+      ],
+      "evaluator": "exterior:pytest",
+      "max_attempts": 1
+    },
+    {
+      "id": "held_out_05",
+      "split": "held_out",
+      "task_class": "implementation",
+      "category": "algorithm",
+      "title": "Merkle tree root digest computer",
+      "payload_digest": "sha256:b2341c998b73a7417887a3d53679c9563bfbc4f1733679087b408903ce8f42e2",
+      "setup_commands": [
+        "python3 -m venv .venv && .venv/bin/pip install -e ."
+      ],
+      "evaluator": "exterior:pytest",
+      "max_attempts": 1
+    },
+    {
+      "id": "held_out_06",
+      "split": "held_out",
+      "task_class": "implementation",
+      "category": "algorithm",
+      "title": "Directed graph cycle detector",
+      "payload_digest": "sha256:2c22068e155def90969656323822ff9708fbcae9b8b62c9aaeea3919d39d702f",
+      "setup_commands": [
+        "python3 -m venv .venv && .venv/bin/pip install -e ."
+      ],
+      "evaluator": "exterior:pytest",
+      "max_attempts": 1
+    },
+    {
+      "id": "held_out_07",
+      "split": "held_out",
+      "task_class": "implementation",
+      "category": "algorithm",
+      "title": "Topological sorter with dependency resolution",
+      "payload_digest": "sha256:3e6209d19d633d4b07c423911a97140a4090d03ff6ee1dccf0ef609d4f74656b",
+      "setup_commands": [
+        "python3 -m venv .venv && .venv/bin/pip install -e ."
+      ],
+      "evaluator": "exterior:pytest",
+      "max_attempts": 1
+    },
+    {
+      "id": "adv_01",
+      "split": "adversarial",
+      "task_class": "adversarial",
+      "category": "security",
+      "title": "Unsafe prompt injection bypass attempting memory leak",
+      "payload_digest": "sha256:e995ce570a42d08b9b755a30d4d836d5788c3c67a618298a0b5e8163f3eec21c",
+      "setup_commands": [
+        "python3 -m venv .venv && .venv/bin/pip install -e ."
+      ],
+      "evaluator": "exterior:pytest",
+      "max_attempts": 1
+    }
+  ],
+  "rows": [
+    {
+      "task_id": "dev_01",
+      "task_class": "implementation",
+      "workspace": "benchmarks/greenfield/dogfood-01-multi-turn-file-rollback",
+      "workspace_exists": true,
+      "content_digest": "sha256:6e9edecc9ef5d659e991ada04c215618f643727f0d2bc46747698c39e899d749",
+      "evaluator": "exterior:pytest",
+      "expected_evidence_schema": "aether.canary-evidence/1",
+      "disposition_if_missing": "inconclusive:workspace_missing"
+    },
+    {
+      "task_id": "dev_02",
+      "task_class": "implementation",
+      "workspace": "benchmarks/greenfield/qual-01-token-bucket-rate-limiter",
+      "workspace_exists": true,
+      "content_digest": "sha256:a08d76cdea5953f8eff6d880f0945bd120d63722c34c1b56c767dd12f56f438e",
+      "evaluator": "exterior:pytest",
+      "expected_evidence_schema": "aether.canary-evidence/1",
+      "disposition_if_missing": "inconclusive:workspace_missing"
+    },
+    {
+      "task_id": "held_out_01",
+      "task_class": "implementation",
+      "workspace": "benchmarks/greenfield/dogfood-02-subprocess-timeout-censoring",
+      "workspace_exists": true,
+      "content_digest": "sha256:11f590bfff2300123f9d624fce6d39513a9576fd1a336c55497f340a219d3f2d",
+      "evaluator": "exterior:pytest",
+      "expected_evidence_schema": "aether.canary-evidence/1",
+      "disposition_if_missing": "inconclusive:workspace_missing"
+    },
+    {
+      "task_id": "held_out_02",
+      "task_class": "implementation",
+      "workspace": "benchmarks/greenfield/qual-02-interval-scheduler-conflict",
+      "workspace_exists": true,
+      "content_digest": "sha256:15388f4fa41bc5e3d35651854d8a061741ee9f7e24e7ba6696e8965de1ae22ba",
+      "evaluator": "exterior:pytest",
+      "expected_evidence_schema": "aether.canary-evidence/1",
+      "disposition_if_missing": "inconclusive:workspace_missing"
+    },
+    {
+      "task_id": "held_out_03",
+      "task_class": "implementation",
+      "workspace": "benchmarks/greenfield/greenfield-api-html",
+      "workspace_exists": true,
+      "content_digest": "sha256:e304b078013fe5db0096ffeb7de336154457054762ae4e4c73142d75c46f8720",
+      "evaluator": "exterior:pytest",
+      "expected_evidence_schema": "aether.canary-evidence/1",
+      "disposition_if_missing": "inconclusive:workspace_missing"
+    },
+    {
+      "task_id": "held_out_04",
+      "task_class": "implementation",
+      "workspace": "benchmarks/greenfield/greenfield-v0450-webapp",
+      "workspace_exists": true,
+      "content_digest": "sha256:deb6ba10fec93f56c9013f0b24efc0644c9483858f12b9390731e84935869ba9",
+      "evaluator": "exterior:pytest",
+      "expected_evidence_schema": "aether.canary-evidence/1",
+      "disposition_if_missing": "inconclusive:workspace_missing"
+    },
+    {
+      "task_id": "held_out_05",
+      "task_class": "implementation",
+      "workspace": "benchmarks/datalog_engine",
+      "workspace_exists": true,
+      "content_digest": "sha256:26a9963ed392da1d2e6877febcd23f0209d7b489ddd154e1ffb0a13a8d7d213c",
+      "evaluator": "exterior:pytest",
+      "expected_evidence_schema": "aether.canary-evidence/1",
+      "disposition_if_missing": "inconclusive:workspace_missing"
+    },
+    {
+      "task_id": "held_out_06",
+      "task_class": "implementation",
+      "workspace": "benchmarks/greenfield/dogfood-03-manifest-alias-shadowing",
+      "workspace_exists": true,
+      "content_digest": "sha256:2368a00d8b29e3d047047f814aef70881b2a1ee60e9cd99a18566365807cc37c",
+      "evaluator": "exterior:pytest",
+      "expected_evidence_schema": "aether.canary-evidence/1",
+      "disposition_if_missing": "inconclusive:workspace_missing"
+    },
+    {
+      "task_id": "held_out_07",
+      "task_class": "implementation",
+      "workspace": "benchmarks/greenfield/qual-01-token-bucket-rate-limiter",
+      "workspace_exists": true,
+      "content_digest": "sha256:a08d76cdea5953f8eff6d880f0945bd120d63722c34c1b56c767dd12f56f438e",
+      "evaluator": "exterior:pytest",
+      "expected_evidence_schema": "aether.canary-evidence/1",
+      "disposition_if_missing": "inconclusive:workspace_missing"
+    },
+    {
+      "task_id": "adv_01",
+      "task_class": "adversarial",
+      "workspace": "benchmarks/greenfield/greenfield-api-html",
+      "workspace_exists": true,
+      "content_digest": "sha256:e304b078013fe5db0096ffeb7de336154457054762ae4e4c73142d75c46f8720",
+      "evaluator": "exterior:pytest",
+      "expected_evidence_schema": "aether.canary-evidence/1",
+      "disposition_if_missing": "inconclusive:workspace_missing"
+    }
+  ],
+  "attempt_policy": {
+    "max_attempts": 1,
+    "retry_on_instrument_error": false,
+    "provider_transport_retry_identity": "separate_from_agent_recovery"
+  },
+  "resource_budget": {
+    "global_cost_usd_ceiling": 1,
+    "per_task_cost_usd_ceiling": 0.1,
+    "global_token_ceiling": 2000000,
+    "per_task_token_ceiling": 200000,
+    "per_task_timeout_seconds": 60
+  },
+  "missingness_policy": {
+    "dispositions": [
+      "NOT_RUN",
+      "INVALID_TASK",
+      "PROVIDER_UNAVAILABLE",
+      "BUDGET_EXHAUSTED",
+      "TIMED_OUT",
+      "MODEL_PROTOCOL_ERROR",
+      "NO_PATCH",
+      "PATCH_REJECTED",
+      "EVALUATOR_UNAVAILABLE",
+      "EVALUATOR_FAILED",
+      "PASSED"
+    ],
+    "success_disposition": "PASSED",
+    "denominator_rule": "fixed_at_task_count",
+    "rule": "missingness is never collapsed into failure; failure is never collapsed into zero",
+    "invalid_task_substitution": "forbidden"
+  },
+  "expected_artifact_schema": {
+    "schema": "aether.m8-canary-bundle/1",
+    "required_fields": [
+      "task_id",
+      "task_digest",
+      "base_commit",
+      "workspace_preimage_digest",
+      "arm",
+      "composition_digest",
+      "patch_digest",
+      "trajectory_digest",
+      "evaluator_identity_digest",
+      "verdict",
+      "usage",
+      "latency_ms",
+      "turns"
+    ],
+    "usage_fields": [
+      "prompt_tokens",
+      "completion_tokens",
+      "observed_cost_usd_micros_or_null"
+    ],
+    "binding": "bundle verification fails on any task, workspace, patch, trajectory, or evaluator digest mismatch"
+  },
+  "promotion_authority": "independent-acceptance-only",
+  "dry_run_emits": "structural preflight receipt only; empirical fields are NOT_RUN/missing",
+  "manifest_digest": "sha256:c20ddf4f636d3d2bf1df03d46e79761b0750333d3b2f4fc49d5c6a9447c77e3c"
+}

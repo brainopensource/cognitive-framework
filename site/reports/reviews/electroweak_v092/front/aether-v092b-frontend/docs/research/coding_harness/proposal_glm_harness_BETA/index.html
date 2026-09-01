@@ -1,0 +1,4749 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="General Event-Sourced Agentic Computation Framework & Substrate">
+      
+      
+        <meta name="author" content="AETHER Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../../../../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>GLM Review — v0.6.1 BETA - AETHER Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../../../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../../../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../../../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../../../../../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#glm-review-v061-beta" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../../../../../../.." title="AETHER Documentation" class="md-header__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AETHER Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              GLM Review — v0.6.1 BETA
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../../../../../../.." title="AETHER Documentation" class="md-nav__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AETHER Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Law & Norms
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Law & Norms
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../SPEC/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Specification (SPEC)
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions Index
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Overview
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../architecture/boundaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Boundaries
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../architecture/workflows/end-to-end-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-to-End Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../architecture/workflows/system-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Bootstrap
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/agency/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agency
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/application-interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Interfaces
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/assurance-evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Assurance & Evaluation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/causal-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Causal State
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/composition-extensibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Composition & Extensibility
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/delegation-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation & Topology
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kernel
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/memory-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory & Learning
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/runtime-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/workflows/request-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Request Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/workflows/agent-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/workflows/event-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/workflows/delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/workflows/recovery-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recovery & Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/guides/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/guides/compose-an-agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compose an Agent
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/guides/add-pack-or-tool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Pack or Tool
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/guides/add-adapter-or-provider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Adapter or Provider
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/guides/operate-runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operate Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/guides/run-and-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Run and Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/reference/schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schemas
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/reference/runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/reference/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Port Contracts
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/reference/api-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Reference
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/reference/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/reference/manifests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifests
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/reference/artifacts-memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Artifacts & Memory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../../../../../../../frontend/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product PRDs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Product PRDs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../product/frontend/FRONTEND_PRD_PLACEMENT_MANIFEST/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Placement Manifest
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../product/frontend/PRD_AETHER_CLI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD CLI
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../product/frontend/PRD_AETHER_DESKTOP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Desktop
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../product/frontend/PRD_AETHER_LAB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Lab
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../product/frontend/PRD_AETHER_TUI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD TUI
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../product/frontend/PRD_FRONTEND_PLATFORM/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Platform
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Execution
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../execution/active/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../execution/milestones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Milestones
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../execution/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & Reports
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & Reports
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../theory/agent-substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../benchmark/main/BENCHMARK_V090_FULL.MD" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmark Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/AI/openrouter_llm_models_suggested/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Models
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_2" id="__nav_9_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coding Harness
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Coding Harness
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/ARCHON_gemini_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Archon Gemini Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/DEKAS_claude_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dekas Claude Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/LLM_RESPONSE_WRANGLER/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Response Wrangler
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/LLM_benchmarkings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Benchmarking
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/RESEARCH_2308B_gm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research 2308B GM
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/RESEARCH_Harness_Builder_Framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Builder Framework
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/RESEARCH_META_COGNITIVE_ENGINEERING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Cognitive Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/RESEARCH_META_COGNITIVE_ENGINEERING_briefing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Cognitive Briefing
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/RESEARCH_META_FRAMEWORK_2408/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Framework 2408
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/RESEARCH_THEORETICAL_SYNTHESIS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theoretical Synthesis
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/RESEARCH_deepseek-harness_algorithms-ideas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deepseek Harness Algorithms
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/RESEARCH_harness_agentic_coding_builder_research_and_framework_B/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agentic Coding Builder Framework B
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/RESEARCH_higgs_2308/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Higgs 2308
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/RESEARCH_metaframework_2508_improved/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metaframework 2508
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/VANGUARD_FRONTIER_SWE_BENCH_AND_AGENTIC_METAFRAMEWORK_REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontier SWE Bench & Metaframework Report
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/VANGUARD_VS_LIM_INSIGHTS_SOTS_TECHNIQUES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vanguard vs LIM Insights
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/future_improvements_sota_harness_2808/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Future Improvements SOTA Harness
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/proposal_glm_harness_BETA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proposal GLM Harness Beta
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/proposal_hy3_improved/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proposal HY3 Improved
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/research_agentic_runtime_systems_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agentic Runtime Systems Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/research_harness_agentic_systems_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Agentic Systems Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/suggested_LIM_improvements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Suggested LIM Improvements
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/vanguard_body_detailed/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vanguard Body Detailed
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_3" id="__nav_9_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/frontend/AETHER_FRONTEND_MASTERPLAN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Masterplan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/frontend/frontend_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--experiment"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/frontend/frontend_prototype_beta_gem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Prototype Beta Gem
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--experiment"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/frontend/integration_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Plan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0-verdict-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0. Verdict first
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-what-the-goal-requires-restated-operationally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. What the goal requires, restated operationally
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-layer-1-foundation-built-and-built-right" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Layer 1 — Foundation: built, and built right
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-layer-2-proving-ground-universal-abstraction-the-gap-is-the-surface-not-the-machine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Layer 2 — Proving Ground &amp; Universal Abstraction: the gap is the surface, not the machine
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Layer 2 — Proving Ground &amp; Universal Abstraction: the gap is the surface, not the machine">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-the-fixed-slot-manifest-is-the-single-biggest-architectural-distance-to-goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 The fixed-slot manifest is the single biggest architectural distance-to-goal
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-agentspawn-as-a-mediated-verb-is-the-unlock-for-layer-3-and-correctly-design-only-now" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 agent.spawn as a mediated verb is the unlock for Layer 3 — and correctly design-only now
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-guardrails-absent-vs-forged-is-the-right-rule-for-the-visions-universality" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Guardrails: absent-vs-forged is the right rule for the vision's universality
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-domain-generality-is-a-fact-not-a-thesis-only-after-pack-2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Domain-generality is a fact, not a thesis — only after Pack #2
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-the-proving-ground-itself-vg-is-under-weighted-in-the-evidence-plan-glm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 The proving ground itself (vg) is under-weighted in the evidence plan [GLM]
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-layer-3-emergence-self-improvement-architecture-ready-corpus-at-risk" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Layer 3 — Emergence &amp; Self-Improvement: architecture ready, corpus at risk
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Layer 3 — Emergence &amp; Self-Improvement: architecture ready, corpus at risk">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-the-identity-architecture-is-the-visions-quiet-enabler" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 The identity architecture is the vision's quiet enabler
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-dual-process-reflex-expressible-today-measurable-only-later" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Dual-process reflex: expressible today, measurable only later
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-the-corpus-is-born-hollow-verified-and-the-highest-leverage-cheap-fix-open-today" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 The corpus is born hollow — verified, and the highest-leverage cheap fix open today
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-self-improvement-safety-posture-correctly-conservative" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Self-improvement safety posture: correctly conservative
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-as-built-claims-verified-on-disk-this-reviews-own-evidence-pass" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. As-built claims verified on disk (this review's own evidence pass)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-assessment-of-the-v061-alignment-roadmap-004" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Assessment of the v0.6.1 Alignment Roadmap (004)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-the-reference-research-corpus-adopt-adapt-refuse" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. The reference research corpus — adopt / adapt / refuse
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. The reference research corpus — adopt / adapt / refuse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#adopt-consistent-with-locked-law-several-already-scheduled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adopt (consistent with locked law; several already scheduled)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adapt-useful-but-must-be-re-expressed-within-the-law" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adapt (useful, but must be re-expressed within the law)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#refuse-contradict-locked-law-or-the-goal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Refuse (contradict locked law or the goal)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-what-should-be-done-about-it-priority-ordered" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. What should be done about it — priority-ordered
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-risk-register-goal-level" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Risk register (goal-level)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-decision-register" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Decision register
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-bottom-line" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Bottom line
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="glm-review-v061-beta">GLM Review — v0.6.1 BETA</h1>
+<p><strong>Classification:</strong> Independent advisory review (external model assessment).
+<strong>Subject:</strong> Can AETHER reach its stated goal — <em>a universal operating substrate and framework for building verifiably grounded, autonomous task-solving agents</em>, structured in three evolutionary layers — on the current v0.6.1 BETA trajectory?
+<strong>Evidence base:</strong> <code>docs/SPEC.md</code> (v0.6.0 Concept Lock); ADRs <code>0069</code>–<code>0076</code> (+ ADR-M0 namespace via <code>docs/05_adr/INDEX.md</code>); <code>docs/03_sprints/plans/000_CANONICAL_EXECUTION_PATH.md</code>; <code>docs/07_reviews/PRINCIPAL_STAFF_ENGINEER_REVIEW/005</code> (Substrate Generality Review), <code>004</code> (v0.6.1 Alignment Roadmap), <code>006</code> (substrate briefing); <code>sprint_active.md</code>; wave plans 1–4; live repository state at commit <code>83b5009</code> (verified on disk, listed in §5); reference research corpus under <code>docs/06_references/RESEARCH_*</code> (treated as <strong>input, not law</strong>, per the review mandate).
+<strong>Status:</strong> Advisory. Does not amend SPEC or any ADR. Where it agrees with <code>005</code>/<code>004</code> it says so rather than restating; where it adds or diverges, it is marked <strong>[GLM]</strong>.</p>
+<hr />
+<h2 id="0-verdict-first">0. Verdict first</h2>
+<p><strong>The goal is reachable on this trajectory, and the parts of the goal that are hardest to reverse are already built correctly. The parts that remain are mostly surface, sequencing, and one verified data-quality defect that would quietly poison the entire third layer if it survives to production.</strong></p>
+<p>The three-layer vision maps cleanly onto the programme:</p>
+<table>
+<thead>
+<tr>
+<th>Vision layer</th>
+<th>Programme mapping</th>
+<th>State (verified)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>1. Foundation</strong> — Decision/State/Evidence separation, domain-blind capability microkernel, rootless sandboxes, 6D resource leases</td>
+<td>Waves 0–2 (M-0 CI truth, M-1 trust spine, M-2 convergence)</td>
+<td><strong>M-0 and M-1 green; M-2 at closing gate</strong> (<code>layer0/</code> shrunk to <code>compose/</code> + <code>registry/</code> only; <code>root.py</code> split landed; CI runs <code>test/kernel</code> as subject of record)</td>
+</tr>
+<tr>
+<td><strong>2. Proving Ground &amp; Universal Abstraction</strong> — coding agent <code>vg</code> as stress-test; declarative manifests for any domain, zero core changes</td>
+<td>Waves 3–4 (M-3 extensibility, M-4 Foundation E2E) + M-5 (Pack #2 generality gate)</td>
+<td><strong>Half-built.</strong> The coding pack exists (<code>packs/code-default</code>), but the plugin lifecycle has never run on the canonical path, the manifest is a fixed-slot template, and domain-generality is declared, not demonstrated</td>
+</tr>
+<tr>
+<td><strong>3. High-Order Emergence &amp; Self-Improvement</strong> — stigmergic swarms, dual-process reflex, continuous learning</td>
+<td>M-6 through M-10 (deliberately blocked post-M-4)</td>
+<td><strong>Correctly deferred.</strong> The identity architecture (<code>D_H</code>/<code>D_R</code>/<code>D_X</code>) and signed-verdict evidence plane that make this layer <em>possible without cheating</em> are locked and mostly wired. The dataset this layer will learn from is currently <strong>born hollow</strong> (§4.3, verified on disk)</td>
+</tr>
+</tbody>
+</table>
+<p>Two headline findings <strong>[GLM]</strong>:</p>
+<ol>
+<li><strong>The Foundation is stronger than the vision's own vocabulary.</strong> The vision speaks of "thermodynamic" leases and "emergence"; the law speaks of typed budget algebra (additive <code>{usd_micros, tokens, bytes, charged millis}</code> vs structural <code>{depth, turns}</code>, ADR-0074 §2) and projections of events (ADR-0070). That translation is exact and correct — and the discipline that keeps vision language out of normative documents (ADR-M0-10) is itself one of the project's strengths. The vision is safe <em>as a vision</em> precisely because the law refuses to be the vision.</li>
+<li><strong>The single highest-leverage defect open today is not architectural.</strong> <code>vanguard/packages/runtime/trajectory.py</code> still emits a hard-coded <code>_ZERO_COST</code> vector (verified: lines 53 and 75). Every episode completed before F-12/NOVA-1 hardening lands produces a schema-valid, cryptographically attributable, and <strong>unusable</strong> training row. The third layer of the vision — skill cards, DPO, calibrated escalation (SPEC §5.3, §7) — is <em>undefined</em> without per-turn cost, model fingerprint, and embedded verdict. This is the exact failure shape I-9 was written to prevent, and it is live on the canonical path today.</li>
+</ol>
+<hr />
+<h2 id="1-what-the-goal-requires-restated-operationally">1. What the goal requires, restated operationally</h2>
+<p>The review mandate says: the vision statement is the only rule; the <code>RESEARCH_*</code> corpus is suggestion. Restating the vision as falsifiable engineering claims:</p>
+<ul>
+<li><strong>G1 (Grounded):</strong> No execution may grade itself; every capability claim must trace to an exterior, signed, request-bound verdict. → Separability thesis; <code>SignedVerdict</code> binding fields (ADR-0076 §5); <code>VerdictRecorded</code> gateway-only writer (ADR-0074 §3).</li>
+<li><strong>G2 (Autonomous):</strong> Agents must operate under bounded resources with monotonic authority — no unbounded delegation, no capability widening, no forged history. → S0–S12 reference monitor, attenuation, typed budget algebra, writer authority, <code>State = fold(events)</code> with cold replay (I-4).</li>
+<li><strong>G3 (Universal):</strong> A new domain (Math, Data Science, Security, Research) must arrive as data — manifests, plugins, oracles — with <strong>zero diffs under <code>domain/</code> and <code>kernel/</code></strong>. → Invariant I-7, gated on Pack #2 at M-5.</li>
+<li><strong>G4 (Task-solving, at scale):</strong> Many logical agents over bounded physical resources; coordination that does not cost O(N²) tokens; sub-100ms reflexes alongside frontier deliberation. → <code>spawn</code> as sole primitive; swarm-as-policy; <code>project_id</code> sharding; sequential-until-measured (I-11); model routes inside <code>D_H</code>.</li>
+<li><strong>G5 (Self-improving, safely):</strong> The system harvests its own signed trajectories into skills and fine-tuning data, and improves <em>only</em> through a promotion pipeline it cannot drive itself. → SPEC §5/§7 deferred blueprints; M-10; ADR-0073 deferral register; human-promotion discipline.</li>
+</ul>
+<h2 id="2-layer-1-foundation-built-and-built-right">2. Layer 1 — Foundation: built, and built right</h2>
+<p><strong>Assessment: the Foundation layer is essentially delivered.</strong> Verified on disk and in the board:</p>
+<ul>
+<li><strong>Three planes are real, not aspirational.</strong> <code>LedgerEmitter</code> (<code>runtime/ledger_emitter.py</code>, 331 LOC) is the single writer construction point; <code>evaluator_gateway.py</code> exists as the sole legal <code>VerdictRecorded</code> writer; <code>ColdReplayParity</code> in <code>test/runtime/test_ledger_truth.py</code> folds from a real WAL file in a fresh process — the strong version of I-4 (ADR-0071's replay taxonomy is honoured: the tautological same-list fold was deleted, per the Wave-1 adjudication in <code>sprint_active.md</code>).</li>
+<li><strong>One algebra, one canonicalisation, one wire.</strong> ADR-0076 §2/§3 settled the dual-artifact ambiguities; the Wave-2 board records the selector-conformance fix landing with <code>domain/selectors/</code> byte-unchanged — the fork conformed to the law, not vice versa. This is the drift-killing discipline the previous architecture died without.</li>
+<li><strong>The kernel gained nothing except tests</strong> (TCB gate 1359/1438 at the 1.3-C adjudication). The vision's "microkernel" claim survives contact with an actual LOC budget — rare.</li>
+<li><strong>The 6D lease maps exactly</strong> to the vision's "(USD, tokens, time, bytes, turns, depth)" — with the crucial correction that <code>millis</code> is <em>charged compute time</em>, not wall-clock, and <code>depth</code>/<code>turns</code> are structural ceilings, not additive quantities (ADR-0074 §2). "Thermodynamic" is acceptable shorthand for <em>conserved quantities under conservation laws</em>; the law's version is the one that survives adversarial review (sibling depths are not summed; unbounded child under bounded parent = deny).</li>
+</ul>
+<p><strong>Residual Layer-1 items (all already on the board):</strong> close M-2 (gate: duplication detector green, zero <code>layer0.*</code> imports, no behaviour change); the <code>_PROC_PATTERN</code> restatement fix (NOVA-3); the suspend/resume falsifier (NOVA-2) — which is really the <em>bridge</em> from Layer 1 to G4, because it is the test that decides whether future concurrency is a scheduling refactor or a rewrite.</p>
+<p><strong>[GLM] One caution:</strong> the Foundation's maturity creates a temptation to keep polishing it. The corpus already names this risk (governance mass, W6 in <code>005</code>). The Foundation is good enough to prove the framework claim; the framework claim is currently unproven. Attention must move to Wave 3.</p>
+<hr />
+<h2 id="3-layer-2-proving-ground-universal-abstraction-the-gap-is-the-surface-not-the-machine">3. Layer 2 — Proving Ground &amp; Universal Abstraction: the gap is the surface, not the machine</h2>
+<p><strong>Assessment: the machine can express the vision; the manifest cannot yet <em>ask for</em> it.</strong> This is <code>005</code>'s W1/W2/W4 triad, formalized in the <code>004</code> roadmap as M-3.3/M-3.5/M-3.4. The GLM review agrees with all three and adds weighting evidence:</p>
+<h3 id="31-the-fixed-slot-manifest-is-the-single-biggest-architectural-distance-to-goal">3.1 The fixed-slot manifest is the single biggest architectural distance-to-goal</h3>
+<p><code>harness.yaml</code>'s five named slots describe <em>the first pack</em>, not <em>the substrate</em>. Every vision-level capability in Layer 3 — debate, critic loops, tree search, evolutionary search, stigmergic swarms — is a composition of <em>N planners/evaluators with declared wiring</em>, which the current schema cannot name. The vision promises "anyone can construct task solvers for any domain"; today that promise is only executable for domains whose agent shape is ReAct-with-swappable-parts.</p>
+<p>The correction (component graph at 3.1-B, slots become pack convention, <code>D_H</code> covers the graph) is right, cheap now, and expensive after Wave 4 (every pack, every trajectory, every <code>D_H</code> attribution migrates). <strong>[GLM]</strong> The Director scope call (3.3-B) should be made at Wave-3 <em>entry</em>, not mid-wave: compose-v2 (3.1-B) is where the graph lands, and building it twice is the waste the roadmap exists to prevent.</p>
+<h3 id="32-agentspawn-as-a-mediated-verb-is-the-unlock-for-layer-3-and-correctly-design-only-now">3.2 <code>agent.spawn</code> as a mediated verb is the unlock for Layer 3 — and correctly design-only now</h3>
+<p>The vision's "stigmergic swarms" and "hierarchical decomposition" are <em>spawn topologies plus policy</em>. Today <code>spawn</code> is engine-owned, so recursive algorithms have no home except inside the engine — the exact outcome ADR-0070 was written to prevent. Exposing <code>agent.spawn</code> as a capability-mediated kernel verb (M-6) converts "a strong ReAct harness with a kernel" into "a framework for agentic algorithms." The roadmap's sequencing (design note at 3.5, decide at M-3, implement post-M-4) is correct: it touches the TCB, and Wave 4 must not absorb a kernel change.</p>
+<p><strong>[GLM] Stigmergy specifically:</strong> the O(N²)-avoidance claim is architecturally sound <em>because</em> coordination is projected from the ledger and blob store (shared environment artifacts) rather than agent-to-agent channels — swarm-as-policy (ADR-0070). But this must remain a <em>pack/policy</em>, never a "stigmergy engine" with pheromone machinery in the core; the research corpus's pheromone-decay formalism belongs, if anywhere, in a plugin's strategy code where it is measurable and replaceable.</p>
+<h3 id="33-guardrails-absent-vs-forged-is-the-right-rule-for-the-visions-universality">3.3 Guardrails: absent-vs-forged is the right rule for the vision's universality</h3>
+<p>A pure-math or research composition should not require a UID-10002 daemon and a preregistered oracle to run. "You may turn a guardrail off; you may never turn off the record that it was off" (M-3.4) preserves everything: unsigned verdicts stay categorically illegal, <code>D_H</code> records the absence, trajectories are marked non-attributable for promotion. This keeps the substrate <em>universal</em> (G3) without weakening G1. No divergence from <code>005</code> — recorded here because the vision's "universal" language makes this correction load-bearing.</p>
+<h3 id="34-domain-generality-is-a-fact-not-a-thesis-only-after-pack-2">3.4 Domain-generality is a fact, not a thesis — only after Pack #2</h3>
+<p>I-7 currently passes because nothing has tested it. The corpus is honest about this. Pack #2 at M-5 as an <strong>exit gate</strong> (zero diffs under <code>domain/</code>/<code>kernel/</code>) is the correct conversion of the vision's "zero core engine changes" promise into a falsifier. <strong>[GLM]</strong> Suggested addition when M-5 is entered: the Pack #2 gate should also assert <em>trajectory parity</em> — the non-coding pack must emit the same rich <code>mhf.trajectory/1</code> rows (cost, fingerprint, verdict-or-null) as the coding pack, or the M-10 learning loop will be coding-only in practice.</p>
+<h3 id="35-the-proving-ground-itself-vg-is-under-weighted-in-the-evidence-plan-glm">3.5 The proving ground itself (<code>vg</code>) is under-weighted in the evidence plan <strong>[GLM]</strong></h3>
+<p>The vision names the coding CLI as the <em>empirical stress-test</em> of the kernel ("against compilers, test suites, and git diffs"). Wave 4's nine-row E2E gate is one real run. That proves the spine fires once; it does not stress it. The reference corpus's Terminal-Bench evidence (same model, harness spread of ~14 points) cuts both ways: it validates <em>harness-as-substrate</em> as a thesis, and it implies AETHER's own harness quality must be measured against external benchmarks before Layer-3 claims. Recommendation: after M-4, before M-8, run the compiled <code>code-default</code> harness on a public terminal/coding benchmark with cost/latency telemetry — not to chase leaderboard position, but because a substrate whose first pack loses to a naive ReAct loop has a falsified composition surface, and that signal should arrive <em>before</em> Pack #2 and the M-8 validation compositions are built on the same surface.</p>
+<hr />
+<h2 id="4-layer-3-emergence-self-improvement-architecture-ready-corpus-at-risk">4. Layer 3 — Emergence &amp; Self-Improvement: architecture ready, corpus at risk</h2>
+<h3 id="41-the-identity-architecture-is-the-visions-quiet-enabler">4.1 The identity architecture is the vision's quiet enabler</h3>
+<p><code>D_H</code>/<code>D_R</code>/<code>D_X</code> (ADR-0071, completed by ADR-0074 §4) plus exterior-signed verdicts mean the future training signal is <strong>un-gameable by construction</strong> — the property the vision's "verifiably grounded" reduces to at scale, and the property no competitor pipeline has. Skill cards harvested from signed trajectories, DPO pairs keyed on <code>(task_digest, harness_digest, turn-prefix)</code>, calibrated escalation (SPEC §5.3): all of it consumes a corpus whose denominators were locked before any experiment existed. This is the strongest single argument that the three-layer vision is a programme rather than a narrative.</p>
+<h3 id="42-dual-process-reflex-expressible-today-measurable-only-later">4.2 Dual-process reflex: expressible today, measurable only later</h3>
+<p>The vision's "System 1 sub-100ms + System 2 frontier" is already <em>expressible</em> as composition data: <code>model_routes</code> with tier-1 local models (the Ollama adapter exists), escalation policy (<code>tier_escalation.py</code> survives in <code>runtime/</code>), all inside <code>D_H</code>. What does not exist: any measurement of the &lt;100 ms claim, plugin-cell IPC overhead, or container cold-start on the canonical path. The SPEC's tier latency table (~0 / 1–5 ms / 10–50 ms) is asserted, not measured. <strong>[GLM]</strong> M-9's measurement tasks (IPC, serialization, ledger pressure) are correctly sequenced; the review's only addition is that the System-1 latency claim should be stated as a <em>hypothesis with a named falsifier</em> now (e.g., "tier-1 local round-trip &lt; 100 ms p50 on commodity hardware, measured at M-9"), so it cannot silently degrade into marketing language — the same treatment <code>005</code> recommended for the loop-pluggability claim (its W3).</p>
+<h3 id="43-the-corpus-is-born-hollow-verified-and-the-highest-leverage-cheap-fix-open-today">4.3 The corpus is born hollow — verified, and the highest-leverage cheap fix open today</h3>
+<p>On disk at <code>83b5009</code>: <code>vanguard/packages/runtime/trajectory.py</code> builds both its turn records and its episode summary with <code>dict(_ZERO_COST)</code> (lines 53, 75). F-12 asserts schema validity; a zero-cost, fingerprint-less, verdict-less record satisfies it. Consequences, mapped to the vision:</p>
+<ul>
+<li><strong>Skill cards (SPEC §5.4):</strong> mining "recurring effect n-grams with high verdict-conditional lift" requires the verdict <em>and</em> cost per turn in the row. Not present.</li>
+<li><strong>DPO harvest (SPEC §7):</strong> prefix-attribution telemetry needs per-turn cost divergence. Not present.</li>
+<li><strong>Calibrated escalation (SPEC §5.3):</strong> <code>P(pass | action, context)</code> needs outcome + model identity per turn. Not present.</li>
+</ul>
+<p>NOVA-1 (roadmap task 2.2, status PRONTA) closes this. <strong>[GLM] Recommendation: promote NOVA-1 from "ready" to "next", ahead of any Wave-3 feature work.</strong> Rationale: every canonical-path episode that completes before the fix is a permanently degraded row in the only corpus Layer 3 will ever have; the fix is small; and M-4's NOVA-5 (confirming the real run carries non-zero cost) already depends on it. The cost of ordering it second is invisible until the day it is catastrophic.</p>
+<h3 id="44-self-improvement-safety-posture-correctly-conservative">4.4 Self-improvement safety posture: correctly conservative</h3>
+<p>The vision says the substrate should "safely improve its own models and configurations over time." The law says: no self-updating release pipeline (SPEC §9, SA-1…SA-6 refused), promotion is a signed event flipping a registry pointer after paired McNemar selection, and the outer loop is capability-restricted to manifest-mutation proposals / skill writes / oracle preregistration and can never touch the workspace (SPEC §5.1). <strong>[GLM]</strong> This is the right reading of "safely": the system may <em>propose</em>; the lab and a partial-order promotion frontier <em>decide</em>; the evidence chain stays attributable end-to-end (M-10.7-B is exactly the right final gate). No divergence.</p>
+<hr />
+<h2 id="5-as-built-claims-verified-on-disk-this-reviews-own-evidence-pass">5. As-built claims verified on disk (this review's own evidence pass)</h2>
+<p>Claims in this review were checked directly against the working tree at <code>83b5009</code>, not taken from documents:</p>
+<table>
+<thead>
+<tr>
+<th>Claim</th>
+<th>Verification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CI subject of record is wired</td>
+<td><code>.github/workflows/ci.yml:31</code> runs <code>unittest discover -s test/kernel</code>; board records M-0 closed</td>
+</tr>
+<tr>
+<td><code>layer0/</code> shrunk per 2.2-B</td>
+<td><code>layer0/</code> now contains only <code>compose/</code> and <code>registry/</code> (+ README/py.typed) — kernel, scheduler, events, spi are gone; deletion of the remainder is 3.1 scope, as triaged</td>
+</tr>
+<tr>
+<td><code>root.py</code> split in place (2.2-C)</td>
+<td><code>runtime/compose.py</code> (390), <code>session.py</code> (646), <code>wiring.py</code> (347) exist beside <code>root.py</code></td>
+</tr>
+<tr>
+<td>Single writer + gateway (ADR-0076 §5/§6)</td>
+<td><code>runtime/ledger_emitter.py</code> (331) and <code>runtime/evaluator_gateway.py</code> (58) exist</td>
+</tr>
+<tr>
+<td>Trajectory assembly exists (I-9)</td>
+<td><code>runtime/trajectory.py</code> (113) exists and emits <code>mhf.trajectory/1</code>-shaped rows</td>
+</tr>
+<tr>
+<td><strong>Trajectory content is hollow (W8 live)</strong></td>
+<td><code>runtime/trajectory.py:53</code> and <code>:75</code> both write <code>dict(_ZERO_COST)</code>; no model fingerprint; no embedded verdict found in the assembly path</td>
+</tr>
+<tr>
+<td>Coding pack is real</td>
+<td><code>packs/code-default/</code> contains <code>harness.yaml</code>, <code>plugin.yaml</code>, plugins, oracles, system prompt, approval policy</td>
+</tr>
+<tr>
+<td>Schema contracts exist</td>
+<td><code>schemas/mhf/</code> contains event_envelope, effect_request, spi_payloads (incl. <code>SignedVerdict</code>), harness_manifest, trajectory schemas</td>
+</tr>
+</tbody>
+</table>
+<p>The one material negative finding of the pass is the trajectory row. Everything else the documents claim about M-0/M-1/M-2 state was confirmed.</p>
+<hr />
+<h2 id="6-assessment-of-the-v061-alignment-roadmap-004">6. Assessment of the v0.6.1 Alignment Roadmap (<code>004</code>)</h2>
+<p>The roadmap is judged on its own terms: <em>make the documentation say what the review concluded, so developers can execute against it.</em></p>
+<p><strong>Correct and confirmed:</strong></p>
+<ul>
+<li><strong>Append-only discipline</strong> — new ADRs <code>0077+</code> for component graph, absent-vs-forged, <code>agent.spawn</code> design note; <code>0069</code>–<code>0076</code> untouched. Matches ADR-0000 and the <code>0076</code> precedent.</li>
+<li><strong>Wave-3 falsifier hardening (NOVA-4)</strong> — the six negatives (unknown-ref fails at compose, empty-ceiling denies, registry-exclusive write, faulted-cell-cannot-stay-active, <code>in_process</code>-requires-grant, frozen-composition-immutable) are first-class falsifiers. This is the single most important process correction in <code>004</code>, because Wave 3 carries the framework claim on the least-proven code in the tree (<code>layer0/registry/</code> + <code>layer0/compose/</code> have never run on the canonical path).</li>
+<li><strong>M-4 stop condition unchanged</strong>; <code>agent.spawn</code>, concurrency, Pack #2, M-5…M-10 all locked out of implementation until the nine-row gate is green on one real run.</li>
+<li><strong>Macro-roadmap M-5…M-10 at outcome/gate granularity only</strong> — correctly resists detailing unstarted work; the M-5→M-10 arc (consolidation+Pack #2 → delegation → concurrency → framework-builder proofs → scale → meta-cognition) is a faithful operationalization of the vision's Layer 3, in the right dependency order.</li>
+<li><strong>Documentation collapse scheduled post-M-4, not now</strong> — the governance corpus (seven authority tiers, ~3.4k lines) is a real and rising cost (W6), but mid-flight doc surgery during Wave 2/3 would be worse.</li>
+</ul>
+<p><strong>[GLM] Cautions and additions:</strong></p>
+<ol>
+<li><strong>Task-count asymmetry persists.</strong> NOVA-4 adds the <em>falsifiers</em> for Wave 3, but Wave 3's task list is still the thinnest relative to what it must prove (registry FSM + compose v2 + echo plugin + fault injection + broker + rlimits + pack migration + token sweep + component-graph design + guardrail schema + spawn design note). Compare Wave 1: seventeen tasks, fifteen falsifiers. If Wave 3 slips, the temptation will be to cut the echo plugin's full lifecycle or the negative suite — precisely the two things that constitute the proof.</li>
+<li><strong>The 3.3-B Director decision should be first, not parallel.</strong> Compose v2 (3.1-B) will be written once; if the component graph is decided after compose v2 solidifies around six keys, the graph becomes a v3. Decide at entry.</li>
+<li><strong>NOVA-1 ordering</strong> (§4.3 above): trajectory content hardening is currently "PRONTA" inside 2.2; it should be executed before Wave 3 opens, not as background hygiene.</li>
+<li><strong>The vision statement itself deserves one normative artifact slot.</strong> The corpus currently has no document that states the <em>goal</em> (the three-layer vision) as a first-class, versioned object distinct from SPEC's normative content. Risk: the goal lives only in prompts and review preambles, where it cannot be cited or tracked. Cheap fix: one page (README opening or a dedicated <code>docs/</code> page) explicitly marked non-normative vision, so every future review measures distance against the same sentence. (ADR-M0-10 stays satisfied: it bans metaphysics in architecture, not the existence of a goal.)</li>
+</ol>
+<hr />
+<h2 id="7-the-reference-research-corpus-adopt-adapt-refuse">7. The reference research corpus — adopt / adapt / refuse</h2>
+<p>The <code>RESEARCH_*</code> documents are suggestions. Judged strictly against the goal and the law:</p>
+<h3 id="adopt-consistent-with-locked-law-several-already-scheduled">Adopt (consistent with locked law; several already scheduled)</h3>
+<ul>
+<li><strong>Harness is the independent variable</strong> (Terminal-Bench spread; harness-builder framing) — this <em>is</em> the project's thesis; the corpus supplies external empirical support for it.</li>
+<li><strong>Flat composition surface at the composition layer</strong> (profile/stack of bundles) — already formalized as the component graph (M-3.3). Orthogonal to rigidity at the authority boundary; AETHER can and should have both.</li>
+<li><strong>Structural retrieval before semantic</strong> (Aider lesson; repo-map, AST, reference graphs) — already SPEC §4.2; ContextBench's recall-over-precision warning reinforces it.</li>
+<li><strong>"Delegation must pay rent"</strong> — matches <code>005</code> and the spawn-attenuation design; M-8's validation compositions (debate, critic loop, evolutionary search) are exactly the rent-paying proof.</li>
+<li><strong>Harness-native optimization</strong> (LEGO-RL; train where you infer) — converges with SPEC §7's DPO-on-own-trajectories, with the added property competitors lack: the training signal is exterior-signed and therefore un-gameable. Scheduled M-10.</li>
+<li><strong>Small-model channels</strong> (System-1 local models, error-signature classifiers, skill-card synthesizers) — all land as <em>plugins/policies above the wire</em>: model routes, outer-loop toolkits, memory capabilities. None requires core change.</li>
+</ul>
+<h3 id="adapt-useful-but-must-be-re-expressed-within-the-law">Adapt (useful, but must be re-expressed within the law)</h3>
+<ul>
+<li><strong>Sub-5 ms pre-flight filters on tool proposals</strong> — valuable as an <em>advisory</em> classifier that rejects malformed proposals before a process fork, but it MUST NOT become a second authorization path; S0–S12 remains the only mediator, and the filter's rejections must surface as ordinary kernel decisions (or planner-side, pre-proposal).</li>
+<li><strong>Elo-decayed skill cards with eviction thresholds</strong> — the dynamics are a reasonable <code>IMemoryEngine</code>/harvester strategy, but cards enter manifests only through the §5.2 selection pipeline (paired McNemar against the undeletable baseline); no free-text skill is ever trusted because it scored well.</li>
+<li><strong>Active-inference framing</strong> — SPEC §5.3 already operationalizes it as calibrated <code>P(pass | action, context)</code> + threshold policies; keep the math, drop the metaphysics (ADR-M0-10).</li>
+<li><strong>McNemar protocol</strong> — already law (<code>docs/04_annex/MEASUREMENT.md</code>); the research docs add nothing beyond restating it.</li>
+</ul>
+<h3 id="refuse-contradict-locked-law-or-the-goal">Refuse (contradict locked law or the goal)</h3>
+<ul>
+<li><strong>"No privileged core to patch"</strong> — the privileged core is the differentiation; a flat plugin graph with no authority boundary is a system whose evidence cannot be trusted. <code>005</code> said this first; this review concurs emphatically.</li>
+<li><strong>Swarm engine, workflow DAG engine, graph database</strong> — refused by ADR-0070/<code>REJ-01</code>; pheromone/stigmergy formalisms are plugin policy at most.</li>
+<li><strong>Vector database as core infrastructure</strong> — embeddings are an <code>IMemoryEngine</code> capability (SPEC §6.1), negotiated, not substrate.</li>
+<li><strong>RL / multi-agent-first sequencing</strong> — the corpus's own §76 ("do not start with swarm / RL / 30 adapters") matches ADR-0073's deferral register exactly. First stabilize the harness; then learn from it.</li>
+<li><strong>Biological/cosmological framing in documents</strong> — ADR-M0-10; the research corpus's neuroscience vocabulary (hippocampal buffers, dopaminergic TD) stays in references.</li>
+<li><strong>Benchmark scores as evidence without separability</strong> — a leaderboard pass by a self-graded harness is worthless as evidence (the project's own one-sentence identity).</li>
+</ul>
+<hr />
+<h2 id="8-what-should-be-done-about-it-priority-ordered">8. What should be done about it — priority-ordered</h2>
+<p>The mandate asks not just for assessment but prescription. Ordered by leverage-per-unit-cost, consistent with (not replacing) the <code>004</code> roadmap:</p>
+<ol>
+<li><strong>Close M-2.</strong> In flight; the remaining work (duplication detector, zero <code>layer0.*</code> imports, linter extension) is mechanical. Do not open anything else first.</li>
+<li><strong>Execute NOVA-1 immediately after (or within) M-2 closure.</strong> Trajectory rows must carry non-zero per-turn cost, model fingerprint, and embedded-or-explicitly-null verdict, with F-12 strengthened from schema-validity to content assertions. Verified gap; small fix; compounding cost every day it waits. Every Wave-3/4 episode that completes before this lands is a degraded row in the only corpus Layer 3 will ever train on.</li>
+<li><strong>Make the 3.3-B Director decision (component graph) at Wave-3 entry, before compose-v2 is written.</strong> This is the one decision whose cost compounds through every pack, trajectory, and <code>D_H</code> attribution after Wave 4.</li>
+<li><strong>Give Wave 3 the Wave-1 treatment.</strong> The NOVA-4 negative suite plus the full echo-plugin lifecycle on the canonical path <em>is</em> the extensibility proof; protect both from schedule pressure. If the wave must shed scope, shed breadth (fewer toolkits migrated), never the falsifiers.</li>
+<li><strong>Add the NOVA-2 suspend/resume falsifier before M-3 closes.</strong> Cheap now; decides whether M-7 concurrency is a refactor or a rewrite; nothing else on the board buys that much option value per test.</li>
+<li><strong>Hold the M-4 stop line exactly as written.</strong> The temptation after a green nine-row run will be to start <code>agent.spawn</code> or Pack #2 immediately. The roadmap is right: consolidate docs, then prove generality, then delegate, then scale, then learn — in that order.</li>
+<li><strong>State the vision as a versioned, non-normative artifact</strong> so future reviews and contributors measure against the same sentence (§6, caution 4).</li>
+<li><strong>Post-M-4 (already scheduled, keep):</strong> documentation collapse to SPEC + ADR log + one board; Pack #2 as the I-7 gate; <code>agent.spawn</code> implementation decision; then the M-6→M-10 arc.</li>
+</ol>
+<hr />
+<h2 id="9-risk-register-goal-level">9. Risk register (goal-level)</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Risk</th>
+<th>Likelihood</th>
+<th>Impact</th>
+<th>Mitigation (already on board unless noted)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R1</td>
+<td><strong>Hollow corpus survives to production</strong> — Layer 3 built on rows without cost/fingerprint/verdict</td>
+<td>Medium</td>
+<td>Fatal to Layer 3</td>
+<td>NOVA-1/F-12 hardening; <strong>[GLM] promote to next</strong></td>
+</tr>
+<tr>
+<td>R2</td>
+<td><strong>Wave 3 under-delivers the extensibility proof</strong> — echo plugin or negative suite cut under pressure</td>
+<td>Medium</td>
+<td>Fatal to Layer 2 claim</td>
+<td>NOVA-4; W7 rebalancing; <strong>[GLM] shed breadth, never falsifiers</strong></td>
+</tr>
+<tr>
+<td>R3</td>
+<td><strong><code>D_H</code> migration cost compounds</strong> — component graph decided late</td>
+<td>Medium</td>
+<td>High (every pack/trajectory re-attributed)</td>
+<td>3.3-B at Wave-3 entry <strong>[GLM]</strong></td>
+</tr>
+<tr>
+<td>R4</td>
+<td><strong>Governance mass grows faster than capability</strong> — docs cost rising (W6)</td>
+<td>Medium</td>
+<td>Medium (velocity, onboarding)</td>
+<td>Scheduled M-5 collapse; resist adding tiers before then</td>
+</tr>
+<tr>
+<td>R5</td>
+<td><strong>Latency claims degrade into marketing</strong> — &lt;100 ms System-1, ms-level tier costs asserted, never measured</td>
+<td>Medium</td>
+<td>Medium (credibility, M-9 rework)</td>
+<td><strong>[GLM]</strong> name the falsifiers now; measure at M-9</td>
+</tr>
+<tr>
+<td>R6</td>
+<td><strong>K ≪ N unproven</strong> — suspend/resume never tested; concurrency becomes a rewrite</td>
+<td>Low–Medium</td>
+<td>High (M-7/M-9 cost)</td>
+<td>NOVA-2 falsifier</td>
+</tr>
+<tr>
+<td>R7</td>
+<td><strong>M-4 stop-line erosion</strong> — product pressure before evidence</td>
+<td>Low</td>
+<td>High (repeats the dual-runtime failure mode)</td>
+<td>Roadmap discipline; Director owns the stop</td>
+</tr>
+<tr>
+<td>R8</td>
+<td><strong>First-pack quality unmeasured externally</strong> — composition surface falsified late</td>
+<td>Medium</td>
+<td>Medium</td>
+<td><strong>[GLM]</strong> post-M-4 external benchmark run with telemetry</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="10-decision-register">10. Decision register</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Call</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Foundation (three planes, S0–S12, typed budgets, exterior judge, WAL, sandboxes, one algebra/one JCS/one writer)</td>
+<td><strong>Keep as-is</strong> — verified delivered</td>
+<td>—</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Trajectory content assertions (NOVA-1: non-zero cost, fingerprint, verdict-or-null)</td>
+<td><strong>Execute next</strong> — verified hollow on disk</td>
+<td>M-2 close / Wave-3 entry</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Component-graph manifest (3.3)</td>
+<td><strong>Adopt</strong> — and decide 3.3-B at Wave-3 entry, before compose-v2</td>
+<td>Wave 3</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Absent-vs-forged guardrail policy (3.4)</td>
+<td><strong>Adopt</strong> as scheduled</td>
+<td>Wave 3</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>agent.spawn</code> as mediated verb</td>
+<td><strong>Design now, implement post-M-4</strong> — correct as scheduled</td>
+<td>M-3/M-6</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Suspend/resume falsifier (NOVA-2)</td>
+<td><strong>Add before M-3 closes</strong></td>
+<td>Wave 2/3</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Wave-3 falsifier set (NOVA-4) + full echo lifecycle</td>
+<td><strong>Non-negotiable scope</strong></td>
+<td>Wave 3</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Pack #2 as I-7 gate, with trajectory parity</td>
+<td><strong>Adopt</strong> (+ parity assertion)</td>
+<td>M-5</td>
+</tr>
+<tr>
+<td>9</td>
+<td>External benchmark run of <code>code-default</code> with telemetry</td>
+<td><strong>Add</strong> — composition-surface falsification signal</td>
+<td>Post-M-4, pre-M-8</td>
+</tr>
+<tr>
+<td>10</td>
+<td>System-1 latency and tier-cost claims as named hypotheses</td>
+<td><strong>Add</strong> (falsifier wording now, measurement M-9)</td>
+<td>Now / M-9</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Vision statement as versioned non-normative artifact</td>
+<td><strong>Add</strong> (one page)</td>
+<td>Any time; cheap</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Documentation collapse</td>
+<td><strong>Keep scheduled</strong> post-M-4</td>
+<td>M-5</td>
+</tr>
+<tr>
+<td>13</td>
+<td>"No privileged core", swarm/DAG/graph-DB engines, vector DB as core, RL-first, metaphysics in docs</td>
+<td><strong>Reject</strong> — already correctly refused; nothing here reopens them</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="11-bottom-line">11. Bottom line</h2>
+<p>Measured strictly against the stated goal — a universal operating substrate for verifiably grounded autonomous task-solving agents — <strong>AETHER is not a thesis wearing an architecture; it is an architecture that has not yet finished earning its thesis.</strong> The irreversible decisions (exterior unforgeable evidence, one recursion primitive under monotonic attenuation, state as cold-replayable fold, identity split three ways, a kernel small enough to audit) were all made in the general form, before product pressure, and have survived an unusually honest falsifier culture. Layer 1 of the vision is effectively built. Layer 2 is one well-scoped wave away from being <em>provable</em>, provided the component-graph decision is made early and Wave 3 keeps its falsifiers. Layer 3 is correctly deferred and — uniquely among systems of this ambition — rests on a training signal that its own agents cannot corrupt.</p>
+<p>The two things this review adds to the existing register are both cheap and both urgent in the compounding sense: <strong>make the trajectory corpus real before another episode completes</strong> (verified: it is currently born hollow), and <strong>make the one decision (3.3-B) whose cost grows with every pack written against the current manifest shape.</strong> Everything else on the board is in the right order.</p>
+<hr />
+<p><em>Report generated 2026-08-21 from the working tree at <code>83b5009</code>. Advisory only: on conflict, <code>docs/SPEC.md</code> and <code>docs/05_adr/</code> win.</em></p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../../../../../../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../../../../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../../../../../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,37 @@
+{
+  "tier": "easy",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "manifest": "vg-chimera-v1",
+  "max_turns": 15,
+  "total": 1,
+  "passed": 1,
+  "pass_rate": "1/1",
+  "spend_usd": 0.003628,
+  "llm_calls": 15,
+  "budget_usd": 0.02,
+  "max_calls": 30,
+  "rows": [
+    {
+      "challenge": "tier1_lru_ttl_cache",
+      "tier": "easy",
+      "title": "Thread-Safe LRU Cache with Monotonic TTL",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "manifest": "vg-chimera-v1",
+      "status": "PASS",
+      "llm_calls": 15,
+      "turns": 15,
+      "terminal_state": "abandoned",
+      "cost_usd": 0.003628,
+      "latency_s": 117.7,
+      "files_modified": [
+        "lru/cache.py",
+        "lru/entry.py"
+      ],
+      "oracle_output": "",
+      "error": "",
+      "terminal_detail": "turn bound 15 reached",
+      "run_fields": {},
+      "cassette": "benchmarks/artifacts/ladder/chimera_test__tier1_lru_ttl_cache__deepseek_deepseek-v4-flash-0731.cassette.json"
+    }
+  ]
+}

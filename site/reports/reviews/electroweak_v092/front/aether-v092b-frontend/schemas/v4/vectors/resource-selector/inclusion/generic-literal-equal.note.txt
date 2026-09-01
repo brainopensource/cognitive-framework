@@ -1,0 +1,1 @@
+Literal equality of uriPattern only.

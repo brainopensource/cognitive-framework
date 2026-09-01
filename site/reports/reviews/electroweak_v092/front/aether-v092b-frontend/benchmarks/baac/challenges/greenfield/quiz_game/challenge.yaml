@@ -1,0 +1,10 @@
+id: quiz_game
+tier: greenfield
+name: Greenfield Interactive Quiz Engine
+timeout_seconds: 35
+entrypoint: src/quiz_engine.py
+tags:
+  - greenfield
+  - engine
+  - interactive
+  - state_machine

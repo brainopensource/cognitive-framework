@@ -1,0 +1,18 @@
+{
+  "timestamp": "20260816_165320",
+  "provider": "groq",
+  "model": "llama-3.1-8b-instant",
+  "requested_model": "fast",
+  "temperature": 0.2,
+  "prompt": "the square root of 144, in one small phrase like 'the value is {answer}' ",
+  "latency_ms": 252,
+  "ttft_ms": 252,
+  "tokens": {
+    "prompt": 55,
+    "completion": 7,
+    "total": 62
+  },
+  "cost_usd_micros": 3,
+  "cost_usd": 3e-06,
+  "response_file": "tools/001_LLM_API_ROUTER/outputs/20260816_165320_groq_llama-3.1-8b-instant_response.md"
+}

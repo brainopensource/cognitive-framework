@@ -1,0 +1,55 @@
+{
+  "id": "t2-config-override",
+  "tier": 2,
+  "title": "Merge nested configuration dictionary overrides",
+  "workspace": {
+    "config.py": "def merge_config(base: dict, override: dict) -> dict:\n    res = base.copy()\n    res.update(override)\n    return res\n",
+    "test_config.py": "from config import merge_config\n\ndef test_merge_config():\n    base = {'db': {'host': 'localhost', 'port': 5432}, 'debug': False}\n    over = {'db': {'port': 5433}}\n    merged = merge_config(base, over)\n    assert merged['db']['host'] == 'localhost'\n    assert merged['db']['port'] == 5433\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"config.py\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 1,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"path\": \"config.py\", \"target\": \"    res = base.copy()\\n    res.update(override)\\n    return res\", \"replacement\": \"    res = base.copy()\\n    for k, v in override.items():\\n        if k in res and isinstance(res[k], dict) and isinstance(v, dict):\\n            res[k] = merge_config(res[k], v)\\n        else:\\n            res[k] = v\\n    return res\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 2,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"pytest\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 3,
+      "tool_calls": [],
+      "finish_reason": "stop"
+    }
+  ]
+}

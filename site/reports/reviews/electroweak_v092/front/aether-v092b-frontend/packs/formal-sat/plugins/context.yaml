@@ -1,0 +1,10 @@
+api: mhf.plugin/1
+id: mhf.context.formal-sat
+version: 1.0.0
+provides:
+  - spi: IContextPolicy
+    spi_version: ">=1.0,<2"
+requires: []
+isolation: in_process
+capabilities: []
+entry: context_policy.py:FormalSatContextPolicy

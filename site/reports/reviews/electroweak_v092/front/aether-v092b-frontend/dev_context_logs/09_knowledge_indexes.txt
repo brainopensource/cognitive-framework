@@ -1,0 +1,98 @@
+=== KNOWLEDGE FILES ===
+catalog.jsonl  272619 bytes
+code-map.jsonl  1820 bytes
+links.jsonl  48072 bytes
+ownership.jsonl  12631 bytes
+report.json  346 bytes
+symbols.jsonl  1750 bytes
+
+=== ROW COUNTS ===
+  1391 .generated/knowledge/catalog.jsonl
+    12 .generated/knowledge/code-map.jsonl
+   225 .generated/knowledge/links.jsonl
+    80 .generated/knowledge/ownership.jsonl
+    11 .generated/knowledge/symbols.jsonl
+  1719 total
+
+=== CODE MAP SAMPLE ===
+{"subsystem": "SUB-B-01 Domain", "package_path": "vanguard/packages/domain/", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"subsystem": "SUB-B-02 Ports", "package_path": "vanguard/packages/ports/", "canonical_owner": "docs/backend/reference/ports.md"}
+{"subsystem": "SUB-B-03 Kernel Core", "package_path": "vanguard/packages/kernel/", "canonical_owner": "docs/backend/architecture/kernel.md"}
+{"subsystem": "SUB-B-04 Agency Engine", "package_path": "vanguard/packages/agency/", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"subsystem": "SUB-B-05 Causal State", "package_path": "vanguard/packages/runtime/ledger_emitter.py", "canonical_owner": "docs/backend/architecture/causal-state.md"}
+{"subsystem": "SUB-B-06 Composition", "package_path": "vanguard/packages/runtime/compose.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"subsystem": "SUB-B-07 Delegation", "package_path": "vanguard/packages/agency/spawn.py", "canonical_owner": "docs/backend/architecture/delegation-topology.md"}
+{"subsystem": "SUB-B-08 Governed Memory", "package_path": "vanguard/packages/runtime/governance/learning.py", "canonical_owner": "docs/backend/architecture/memory-learning.md"}
+{"subsystem": "SUB-B-09 Assurance & Evaluation", "package_path": "vanguard/packages/runtime/evaluator_gateway.py", "canonical_owner": "docs/backend/architecture/assurance-evaluation.md"}
+{"subsystem": "SUB-B-10 Domain Packs", "package_path": "packs/", "canonical_owner": "docs/backend/reference/manifests.md"}
+{"subsystem": "SUB-B-11 Application Interfaces", "package_path": "vanguard/packages/runtime/service/", "canonical_owner": "docs/backend/architecture/application-interfaces.md"}
+{"subsystem": "SUB-B-12 Schemas", "package_path": "schemas/", "canonical_owner": "docs/backend/reference/schemas.md"}
+
+=== SYMBOL SAMPLE ===
+{"symbol": "Kernel", "kind": "class", "defined_in": "vanguard/packages/kernel/dispatch.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
+{"symbol": "EpisodeEngine", "kind": "class", "defined_in": "vanguard/packages/agency/turns.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "HarnessSession", "kind": "class", "defined_in": "vanguard/packages/runtime/session.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "SqliteEventStore", "kind": "class", "defined_in": "vanguard/packages/adapters/stores/sqlite_store.py", "canonical_owner": "docs/backend/architecture/causal-state.md"}
+{"symbol": "EvidenceCaptureService", "kind": "class", "defined_in": "vanguard/packages/runtime/evidence.py", "canonical_owner": "docs/backend/architecture/assurance-evaluation.md"}
+{"symbol": "RuntimeService", "kind": "class", "defined_in": "vanguard/packages/runtime/service/contract.py", "canonical_owner": "docs/backend/reference/runtime-service.md"}
+{"symbol": "IPlanner", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "IContextManager", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "IToolkit", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "IMemoryEngine", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "IEvaluationGate", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
+
+=== LINKS SAMPLE ===
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "repo-root-readme", "target_path": "README.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "repo-root-vision", "target_path": "VISION.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "repo-agents-contract", "target_path": "AGENTS.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "spec.core", "target_path": "docs/SPEC.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "decision.index", "target_path": "docs/decisions.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "execution.active", "target_path": "docs/execution/active.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "repo-root-vision", "target_path": "VISION.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "spec.core", "target_path": "docs/SPEC.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "decision.index", "target_path": "docs/decisions.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "execution.active", "target_path": "docs/execution/active.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "architecture", "target_path": "docs/architecture", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "backend", "target_path": "docs/backend", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "frontend", "target_path": "docs/frontend", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "product", "target_path": "docs/product", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "execution.milestones", "target_path": "docs/execution/milestones.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "theory", "target_path": "docs/theory", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "research", "target_path": "docs/research", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "reports", "target_path": "docs/reports", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "arch.system.overview", "target_path": "docs/architecture/overview.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "README", "target_path": "test/README.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "repo-agents-contract", "target_path": "AGENTS.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "0095-vision-as-law-zero-and-roadmap-reconciliation", "target_path": "docs/02_decisions/0095-vision-as-law-zero-and-roadmap-reconciliation.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "spec.core", "target_path": "docs/SPEC.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "01_law", "target_path": "docs/01_law", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "02_decisions", "target_path": "docs/02_decisions", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "05_contracts", "target_path": "docs/05_contracts", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "06_protocols", "target_path": "docs/06_protocols", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "milestones", "target_path": "docs/03_execution/milestones.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "backlog", "target_path": "docs/03_execution/backlog.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "sprint_active", "target_path": "docs/03_execution/sprint_active.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "04_architecture", "target_path": "docs/04_architecture", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "07_engineering", "target_path": "docs/07_engineering", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "08_theory", "target_path": "docs/08_theory", "relationship_type": "markdown_link"}
+{"source_id": "nav.home", "source_path": "docs/README.md", "target_id": "repo-root-vision", "target_path": "VISION.md", "relationship_type": "markdown_link"}
+{"source_id": "nav.home", "source_path": "docs/README.md", "target_id": "repo-agents-contract", "target_path": "AGENTS.md", "relationship_type": "markdown_link"}
+{"source_id": "nav.home", "source_path": "docs/README.md", "target_id": "repo-root-readme", "target_path": "README.md", "relationship_type": "markdown_link"}
+{"source_id": "nav.home", "source_path": "docs/README.md", "target_id": "spec.core", "target_path": "docs/SPEC.md", "relationship_type": "markdown_link"}
+{"source_id": "nav.home", "source_path": "docs/README.md", "target_id": "decision.index", "target_path": "docs/decisions.md", "relationship_type": "markdown_link"}
+{"source_id": "nav.home", "source_path": "docs/README.md", "target_id": "arch.system.overview", "target_path": "docs/architecture/overview.md", "relationship_type": "markdown_link"}
+{"source_id": "nav.home", "source_path": "docs/README.md", "target_id": "arch.runtime.execution", "target_path": "docs/backend/architecture/runtime-execution.md", "relationship_type": "markdown_link"}
+
+=== REPORT ===
+{
+    "status": "VALIDATED",
+    "timestamp": "2026-08-30T01:00:00Z",
+    "total_documents": 80,
+    "canonical_ids_count": 80,
+    "links_count": 225,
+    "code_mappings_count": 12,
+    "symbol_index_count": 11,
+    "broken_links": 0,
+    "stale_paths": 0,
+    "validation_summary": "Permanent deterministic knowledge base built directly from repository sources."
+}

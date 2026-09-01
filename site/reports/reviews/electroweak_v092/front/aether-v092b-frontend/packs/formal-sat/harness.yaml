@@ -1,0 +1,36 @@
+api: mhf.harness/1
+id: formal-sat
+plugins:
+  context:
+    ref: mhf.context.formal-sat@^1
+  evaluation:
+    ref: mhf.eval.formal-sat-exterior@^1
+  toolkits:
+    - ref: mhf.toolkit.formal-sat-witness@^1
+system_prompt: ./system-prompt.txt
+capabilities:
+  - verb: fs.read
+    selector:
+      kind: fs
+      root: /workspace
+      paths:
+        - /workspace
+  - verb: patch.apply
+    selector:
+      kind: fs
+      root: /workspace
+      paths:
+        - /workspace
+  - verb: proc.exec
+    selector:
+      kind: generic
+      uriPattern: proc://exec/allow/python3
+budget:
+  usd_micros: 100000
+  millis: 300000
+  tokens: 16000
+  bytes: 0
+  turns: 12
+  depth: 1
+approval_policy: ./approval-policy.json
+undeletable: false

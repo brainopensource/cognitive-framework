@@ -1,0 +1,42 @@
+{
+  "without_lda": {
+    "mode": "WITHOUT_LDA",
+    "manifest": "vg-code-max-v3luna",
+    "model": "deepseek/deepseek-v4-flash-0731",
+    "status": "PASS",
+    "oracle_pass": true,
+    "total_time_s": 47.84,
+    "turns": 15,
+    "search_turns": 5,
+    "execution_turns": 10,
+    "llm_calls": 15,
+    "prompt_tokens": 93560,
+    "completion_tokens": 1759,
+    "cached_tokens": 58624,
+    "total_tokens": 95319,
+    "tokens_per_sec": 1992.5,
+    "cost_usd": 0.006194,
+    "terminal_state": "completed",
+    "cassette": "benchmarks/artifacts/lda_ab_test/lda_ab__WITHOUT_LDA__vg-code-max-v3luna__deepseek_deepseek-v4-flash-0731.cassette.json"
+  },
+  "with_lda": {
+    "mode": "WITH_LDA",
+    "manifest": "vg-code-max-v3luna",
+    "model": "deepseek/deepseek-v4-flash-0731",
+    "status": "PASS",
+    "oracle_pass": true,
+    "total_time_s": 19.94,
+    "turns": 11,
+    "search_turns": 6,
+    "execution_turns": 5,
+    "llm_calls": 11,
+    "prompt_tokens": 65772,
+    "completion_tokens": 1234,
+    "cached_tokens": 57856,
+    "total_tokens": 67006,
+    "tokens_per_sec": 3360.4,
+    "cost_usd": 0.002259,
+    "terminal_state": "completed",
+    "cassette": "benchmarks/artifacts/lda_ab_test/lda_ab__WITH_LDA__vg-code-max-v3luna__deepseek_deepseek-v4-flash-0731.cassette.json"
+  }
+}

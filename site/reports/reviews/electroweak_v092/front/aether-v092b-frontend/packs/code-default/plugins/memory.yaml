@@ -1,0 +1,10 @@
+api: mhf.plugin/1
+id: mhf.memory.sqlite-kv
+version: 1.0.0
+provides:
+  - spi: IMemoryEngine
+    spi_version: ">=1.0,<2"
+requires: []
+isolation: in_process
+capabilities: []
+entry: vanguard.packages.adapters.stores.memory_engine:LocalFileMemoryAdapter

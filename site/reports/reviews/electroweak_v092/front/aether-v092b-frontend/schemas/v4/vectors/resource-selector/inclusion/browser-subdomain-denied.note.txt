@@ -1,0 +1,1 @@
+04 §5.3.1: no subdomain containment. Origin is the browser's trust unit.

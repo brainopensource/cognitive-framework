@@ -1,0 +1,7 @@
+api: mhf.plugin-catalog/1
+id: formal-sat
+version: 1.0.0
+plugins:
+  - plugins/context.yaml
+  - plugins/evaluation.yaml
+  - plugins/witness.yaml

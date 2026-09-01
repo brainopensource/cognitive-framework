@@ -1,0 +1,16 @@
+# Generic LDA repository profile — zero project-specific assumptions.
+# Selected automatically only when neither lda.yaml 'profile:' nor
+# $LDA_PROFILE names an explicit profile.
+name = "generic"
+
+# Default code/document extension sets (profile-agnostic, from the standardizer).
+code_extensions = [".py", ".ts", ".tsx", ".mts", ".cts", ".js", ".jsx", ".mjs", ".rs", ".go", ".java", ".kt", ".kts", ".cs", ".c", ".h", ".cpp", ".hpp", ".cc", ".rb", ".php", ".sh", ".bash", ".sql"]
+document_extensions = [".md", ".mdx", ".rst", ".txt"]
+
+# Bounded-growth invariant: cap globally ranked symbols at Top-K.
+max_global_symbols = 500
+
+# Context packets bind to the live workspace git HEAD (fail-closed freshness).
+require_head_match = true
+
+[labels]

@@ -4174,7 +4174,7 @@
 <p>Solution C introduces a <strong>5-Layer Radix Cache Compiler</strong> and an <strong>Anti-Thrashing Protocol Recovery Policy</strong>:
 1. <strong>Radix L1–L5 Prefix Cache Alignment</strong>: Strictly partitions the prompt into static, quasi-static, and dynamic layers, ensuring 80–90% KV cache reuse on Anthropic and DeepSeek.
 2. <strong>Structured Compaction (<code>StructuredConsolidateStrategy</code>)</strong>: Condenses older conversation turns without breaking strict tool-call ID pairing invariants and without losing dead-end attempt memory.
-3. <strong>DSML &amp; JSON Protocol Recovery (<code>ProtocolRecoveryPolicy</code>)</strong>: Intercepts malformed XML/markdown tags emitted by open-weight models (DeepSeek-V3, Qwen-2.5) and repairs them transparently without failing the turn.</p>
+3. <strong>DSML &amp; JSON Protocol Recovery (<code>ProtocolRecoveryPolicy</code>)</strong>: Intercepts malformed XML/markdown tags emitted by open-weight models (DeepSeek-V4-Flash, Qwen-2.5) and repairs them transparently without failing the turn.</p>
 <pre class="mermaid"><code>graph TD
     subgraph RadixContext["5-Layer Radix Prefix Context Compiler"]
         L1["L1: Core System &amp; Tool Contracts (Static - 100% Cache Hit)"]

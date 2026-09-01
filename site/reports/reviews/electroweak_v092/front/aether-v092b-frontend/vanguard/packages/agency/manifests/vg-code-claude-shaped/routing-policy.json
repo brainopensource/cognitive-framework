@@ -1,0 +1,6 @@
+{
+  "strategy": "tier-escalation",
+  "primary_model": "tier2",
+  "escalation_model": "tier3",
+  "escalate_after_attempts": 2
+}

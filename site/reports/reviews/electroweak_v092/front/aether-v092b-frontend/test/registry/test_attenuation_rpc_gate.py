@@ -1,0 +1,131 @@
+"""Capability leakage gate: RPC must not deliver over-broad work to a plugin cell."""
+
+from __future__ import annotations
+
+import unittest
+
+from vanguard.packages.adapters.stores.event_store import InMemoryEventStore
+from vanguard.packages.runtime.ledger_emitter import LedgerEmitter
+from vanguard.packages.runtime.registry.broker import PluginIsolationBroker
+from vanguard.packages.runtime.registry.sandbox import SandboxLimits
+from vanguard.packages.domain.wire.types_gen import EventKind, SinkClass
+
+_FS = {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}
+_FS_CHILD = {"kind": "fs", "root": "/workspace", "paths": ["/workspace/README.md"]}
+_FS_ETC = {"kind": "fs", "root": "/etc", "paths": ["/etc"]}
+_PROC_DENIED = {"kind": "generic", "uriPattern": "proc://exec/allow/id"}
+_CEILING = (
+    {"verb": "echo", "selector": _FS},
+    {"verb": "fs.read", "selector": _FS},
+)
+_LIMITS = SandboxLimits(
+    cpu_seconds=2,
+    address_space_bytes=256 * 1024 * 1024,
+    max_open_files=32,
+    max_processes=64,
+)
+_DUMMY_HARNESS = "sha256:" + "0" * 64
+
+
+class AttenuationRpcGateTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.store = InMemoryEventStore()
+        self.emitter = LedgerEmitter(
+            self.store,
+            episode_id="ep-att",
+            project_id="proj-att",
+            principal_id="agent-1",
+            harness_digest=_DUMMY_HARNESS,
+        )
+        self.broker = PluginIsolationBroker(
+            emitter=self.emitter,
+            run_id="run-att",
+            principal="agent-1",
+        )
+        self.cell = self.broker.bind(
+            "mhf.toolkit.echo",
+            limits=_LIMITS,
+            capabilities=_CEILING,
+        )
+        self.broker.start(self.cell)
+
+    def tearDown(self) -> None:
+        self.broker.shutdown()
+
+    def test_allowed_verb_is_delivered(self) -> None:
+        response = self.broker.call(
+            self.cell,
+            "execute",
+            {
+                "verb": "echo",
+                "args": {"text": "ok"},
+                "selector": _FS,
+                "sink": SinkClass.OBSERVATION.value,
+            },
+        )
+        self.assertTrue(response.ok)
+        self.assertEqual(response.result["echo"], "ok")
+        health = self.broker.call(self.cell, "health", {})
+        self.assertEqual(health.result["execute_count"], 1)
+
+    def test_unknown_verb_is_denied_before_plugin(self) -> None:
+        response = self.broker.call(
+            self.cell,
+            "execute",
+            {
+                "verb": "proc.exec",
+                "args": {"command": ["id"]},
+                "selector": _PROC_DENIED,
+                "sink": SinkClass.PRIVILEGED.value,
+            },
+        )
+        self.assertFalse(response.ok)
+        self.assertEqual(response.error["code"], "attenuation_denied")
+        health = self.broker.call(self.cell, "health", {})
+        self.assertEqual(health.result["execute_count"], 0)
+
+    def test_selector_outside_ceiling_is_denied(self) -> None:
+        response = self.broker.call(
+            self.cell,
+            "execute",
+            {
+                "verb": "fs.read",
+                "args": {"path": "/etc/passwd"},
+                "selector": _FS_ETC,
+                "sink": SinkClass.OBSERVATION.value,
+            },
+        )
+        self.assertFalse(response.ok)
+        self.assertEqual(response.error["code"], "attenuation_denied")
+        health = self.broker.call(self.cell, "health", {})
+        self.assertEqual(health.result["execute_count"], 0)
+
+    def test_plugin_cannot_widen_via_host_callback(self) -> None:
+        response = self.broker.call(
+            self.cell,
+            "host.grant",
+            {"verb": "proc.exec", "selector": _PROC_DENIED},
+        )
+        self.assertFalse(response.ok)
+        self.assertEqual(response.error["code"], "attenuation_denied")
+        kinds = [envelope.payload.get("kind") for envelope in self.store._events]
+        self.assertNotIn(EventKind.CAPABILITY_GRANTED.value, kinds)
+
+    def test_in_ceiling_fs_read_is_delivered(self) -> None:
+        response = self.broker.call(
+            self.cell,
+            "execute",
+            {
+                "verb": "fs.read",
+                "args": {"path": "/workspace/README.md"},
+                "selector": _FS_CHILD,
+                "sink": SinkClass.OBSERVATION.value,
+            },
+        )
+        self.assertTrue(response.ok)
+        health = self.broker.call(self.cell, "health", {})
+        self.assertEqual(health.result["execute_count"], 1)
+
+
+if __name__ == "__main__":
+    unittest.main()

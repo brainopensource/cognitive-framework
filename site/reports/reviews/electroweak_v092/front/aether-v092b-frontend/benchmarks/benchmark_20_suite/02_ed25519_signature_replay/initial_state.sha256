@@ -1,0 +1,4 @@
+97b719d9fe11b0ac4cb8d4f084b0e28c95b16cae4e1a7014eee6829c246cd044  docs/SPEC.md
+f7a7e1e0d0858f46a6a557bb6d72e612a183d44e3e9c33c978c3d45a6c9f020e  src/signer.py
+e55e9efcc6523dafc0ab918ef41de90b355e0f53a4adc67024cae8c92aea213b  src/verifier.py
+2f139cd918654a52c096cee37d72dc96e8c447ec2640dd98a5fa96d8918a7a47  test/test_verifier.py

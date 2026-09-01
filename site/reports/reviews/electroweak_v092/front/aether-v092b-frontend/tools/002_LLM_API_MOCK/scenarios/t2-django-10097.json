@@ -1,0 +1,64 @@
+{
+  "atoms_used": [
+    "view_file",
+    "edit_file",
+    "run_command"
+  ],
+  "created_from": "benchmarks/swe_bench::t2-django-10097",
+  "id": "t2-django-10097",
+  "tier": 2,
+  "title": "Django: Make URLValidator reject invalid characters in username/password",
+  "turns": [
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"path\": \"django/__init__.py\"}",
+            "name": "view_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 0
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"content\": \"import re\\n\\nclass ValidationError(Exception): pass\\n\\nclass URLValidator:\\n    # Reject invalid characters like semicolon or colon in user/pass\\n    regex = re.compile(\\n        r'^(?:[a-z0-9.+-]*)://'\\n        r'(?:([a-zA-Z0-9_.-]+)(?::([a-zA-Z0-9_.-]+))?@)?'\\n        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\\\\.)+[A-Z]{2,6}\\\\.?|'\\n        r'localhost|'\\n        r'\\\\d{1,3}\\\\.\\\\d{1,3}\\\\.\\\\d{1,3}\\\\.\\\\d{1,3})'\\n        r'(?::\\\\d+)?'\\n        r'(?:/?|[/?]\\\\S+)$', re.IGNORECASE)\\n\\n    def __call__(self, value):\\n        if not isinstance(value, str) or not self.regex.match(value):\\n            raise ValidationError('Invalid URL')\\n\", \"path\": \"django/core/validators.py\"}",
+            "name": "edit_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 1
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"command\": \"python3 -m unittest -q\"}",
+            "name": "run_command"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 2
+    },
+    {
+      "content": "Task completed and verified for Django: Make URLValidator reject invalid characters in username/password (t2-django-10097).",
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "tool_messages_seen": 3
+    }
+  ],
+  "workspace": {
+    "django/__init__.py": "",
+    "django/core/__init__.py": "",
+    "django/core/validators.py": "import re\n\nclass ValidationError(Exception): pass\n\nclass URLValidator:\n    regex = re.compile(\n        r'^(?:[a-z0-9.+-]*)://'  # scheme\n        r'(?:([^:@/\\s]+)(?::([^:@/\\s]+))?@)?'  # user:pass\n        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\\.)+[A-Z]{2,6}\\.?|'  # domain...\n        r'localhost|'  # localhost...\n        r'\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})'  # ...or ip\n        r'(?::\\d+)?'  # optional port\n        r'(?:/?|[/?]\\S+)$', re.IGNORECASE)\n\n    def __call__(self, value):\n        if not isinstance(value, str) or not self.regex.match(value):\n            raise ValidationError('Invalid URL')\n",
+    "test_validators.py": "import unittest\nfrom django.core.validators import URLValidator, ValidationError\n\nclass TestURLValidator(unittest.TestCase):\n    def test_url_auth_rejection(self):\n        v = URLValidator()\n        v(\"http://user:pass@example.com/\")\n        with self.assertRaises(ValidationError):\n            v(\"http://user:pass;word@example.com/\")\n\nif __name__ == '__main__': unittest.main()\n"
+  }
+}

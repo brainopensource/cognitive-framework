@@ -1,0 +1,56 @@
+{
+  "id": "t2-import-cycle",
+  "tier": 2,
+  "title": "Resolve circular import between model and database helpers",
+  "workspace": {
+    "db.py": "from models import User\n\ndef get_db():\n    return {'status': 'connected'}\n",
+    "models.py": "from db import get_db\n\nclass User:\n    def save(self):\n        db = get_db()\n        return True\n",
+    "test_cycle.py": "from models import User\n\ndef test_user_save():\n    u = User()\n    assert u.save() is True\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"db.py\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 1,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"path\": \"db.py\", \"target\": \"from models import User\\n\\n\", \"replacement\": \"\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 2,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"pytest\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 3,
+      "tool_calls": [],
+      "finish_reason": "stop"
+    }
+  ]
+}

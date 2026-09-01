@@ -1,0 +1,36 @@
+{
+  "tier": "sota-hard",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "manifest": "vg-code-max-v3",
+  "max_turns": 10,
+  "total": 1,
+  "passed": 1,
+  "pass_rate": "1/1",
+  "spend_usd": 0.001828,
+  "llm_calls": 8,
+  "budget_usd": 0.015,
+  "max_calls": 10,
+  "rows": [
+    {
+      "challenge": "sota_hard_large_catalog_collision",
+      "tier": "sota-hard",
+      "title": "Large Catalog Collision and Stable Lookup",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "manifest": "vg-code-max-v3",
+      "status": "PASS",
+      "llm_calls": 8,
+      "turns": 8,
+      "terminal_state": "completed",
+      "cost_usd": 0.001828,
+      "latency_s": 33.64,
+      "files_modified": [
+        "catalog/registry.py"
+      ],
+      "oracle_output": "",
+      "error": "",
+      "terminal_detail": "Fixed catalog/registry.py to detect duplicate aliases deterministically, raising AliasCollision naming both IDs regardless of input order, while preserving exact ID lookup.",
+      "run_fields": {},
+      "cassette": "benchmarks/artifacts/ladder/sota5_hard_large_20260831__sota_hard_large_catalog_collision__deepseek_deepseek-v4-flash-0731.cassette.json"
+    }
+  ]
+}

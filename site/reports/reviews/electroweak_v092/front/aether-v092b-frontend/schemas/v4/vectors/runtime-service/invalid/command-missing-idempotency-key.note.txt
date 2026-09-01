@@ -1,0 +1,1 @@
+Without an idempotency key a retry is indistinguishable from a second command.

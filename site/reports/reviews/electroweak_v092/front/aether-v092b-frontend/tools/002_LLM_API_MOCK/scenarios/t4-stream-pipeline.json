@@ -1,0 +1,63 @@
+{
+  "atoms_used": [
+    "view_file",
+    "edit_file",
+    "run_command"
+  ],
+  "created_from": "benchmarks/swe_bench::t4-stream-pipeline",
+  "id": "t4-stream-pipeline",
+  "tier": 4,
+  "title": "SWE-Verified: Multi-stage asynchronous streaming pipeline with windowed aggregation",
+  "turns": [
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"path\": \"stream/__init__.py\"}",
+            "name": "view_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 0
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"content\": \"class StreamPipeline:\\n    def __init__(self, window_size: int = 3):\\n        self.window_size = window_size\\n        self._buf = []\\n\\n    def push(self, val: float) -> list[float] | None:\\n        self._buf.append(val)\\n        if len(self._buf) >= self.window_size:\\n            w = list(self._buf[-self.window_size:])\\n            return w\\n        return None\\n\", \"path\": \"stream/pipeline.py\"}",
+            "name": "edit_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 1
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"command\": \"python3 -m unittest -q\"}",
+            "name": "run_command"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 2
+    },
+    {
+      "content": "Task completed and verified for SWE-Verified: Multi-stage asynchronous streaming pipeline with windowed aggregation (t4-stream-pipeline).",
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "tool_messages_seen": 3
+    }
+  ],
+  "workspace": {
+    "stream/__init__.py": "from .pipeline import StreamPipeline\n__all__ = ['StreamPipeline']\n",
+    "stream/pipeline.py": "class StreamPipeline:\n    def __init__(self, window_size: int = 3):\n        self.window_size = window_size\n        self._buf = []\n\n    def push(self, val: float) -> list[float] | None:\n        self._buf.append(val)\n        if len(self._buf) >= self.window_size:\n            w = list(self._buf[-self.window_size:])\n            return w\n        return None\n",
+    "test_pipeline.py": "import unittest\nfrom stream.pipeline import StreamPipeline\n\nclass TestStreamPipeline(unittest.TestCase):\n    def test_window(self):\n        sp = StreamPipeline(window_size=2)\n        self.assertIsNone(sp.push(1.0))\n        self.assertEqual(sp.push(2.0), [1.0, 2.0])\n        self.assertEqual(sp.push(3.0), [2.0, 3.0])\n\nif __name__ == '__main__': unittest.main()\n"
+  }
+}

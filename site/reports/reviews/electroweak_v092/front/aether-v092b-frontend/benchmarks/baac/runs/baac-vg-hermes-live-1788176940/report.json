@@ -1,0 +1,82 @@
+{
+  "runId": "baac-vg-hermes-live-1788176940",
+  "timestamp": "2026-08-31T11:49:00Z",
+  "preset": "vg-hermes",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "mode": "live",
+  "summary": {
+    "totalChallenges": 2,
+    "passedCount": 1,
+    "overallPassRatePct": 50.0,
+    "totalTokens": 34600,
+    "totalCostUsd": 0.002284,
+    "totalDurationSeconds": 108.91,
+    "tierPromotion": {
+      "easyPromoted": false,
+      "easyPassRate": 50.0
+    },
+    "attribution": {
+      "PASS": 1,
+      "LLM_COGNITIVE_ERROR": 0,
+      "HARNESS_ERROR": 1,
+      "DATASET_INVALID": 0
+    }
+  },
+  "results": [
+    {
+      "challengeId": "fib_cli",
+      "tier": "easy",
+      "preset": "vg-hermes",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "mode": "live",
+      "status": "PASS",
+      "attribution": "PASS",
+      "turns": 8,
+      "promptTokens": 14010,
+      "completionTokens": 1054,
+      "totalTokens": 15064,
+      "costUsd": 0.000975,
+      "durationSeconds": 62.27,
+      "oracle": {
+        "passed": true,
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_cli_execution (__main__.TestFibOracle.test_cli_execution) ... ok\ntest_fib_exceptions (__main__.TestFibOracle.test_fib_exceptions) ... ok\ntest_fib_values (__main__.TestFibOracle.test_fib_values) ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.061s\n\nOK\n",
+        "durationSeconds": 0.111,
+        "error": null,
+        "assertionCount": 3,
+        "failingAssertions": []
+      },
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "challengeId": "json_todo_store",
+      "tier": "easy",
+      "preset": "vg-hermes",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "mode": "live",
+      "status": "FAIL",
+      "attribution": "HARNESS_ERROR",
+      "turns": 8,
+      "promptTokens": 18642,
+      "completionTokens": 894,
+      "totalTokens": 19536,
+      "costUsd": 0.001309,
+      "durationSeconds": 46.64,
+      "oracle": {
+        "passed": false,
+        "exitCode": 1,
+        "stdout": "",
+        "stderr": "test_lifecycle_and_persistence (__main__.TestTodoStoreOracle.test_lifecycle_and_persistence) ... FAIL\n\n======================================================================\nFAIL: test_lifecycle_and_persistence (__main__.TestTodoStoreOracle.test_lifecycle_and_persistence)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rocha/Coding/Aether-D-System/benchmarks/baac/challenges/easy/json_todo_store/oracle/verify.py\", line 37, in test_lifecycle_and_persistence\n    self.assertEqual(id1, 1)\nAssertionError: 0 != 1\n\n----------------------------------------------------------------------\nRan 1 test in 0.003s\n\nFAILED (failures=1)\n",
+        "durationSeconds": 0.061,
+        "error": "test_lifecycle_and_persistence (__main__.TestTodoStoreOracle.test_lifecycle_and_persistence) ... FAIL\n\n======================================================================\nFAIL: test_lifecycle_and_p",
+        "assertionCount": 1,
+        "failingAssertions": [
+          "test_lifecycle_and_persistence",
+          "(failures=1)"
+        ]
+      },
+      "diagnosis": "test_lifecycle_and_persistence (__main__.TestTodoStoreOracle.test_lifecycle_and_persistence) ... FAIL\n\n======================================================================\nFAIL: test_lifecycle_and_p"
+    }
+  ]
+}

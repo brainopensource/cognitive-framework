@@ -1,0 +1,8 @@
+{
+  "format_version": 1,
+  "default_scenario": "math_formula_v1",
+  "scenarios": [
+    "math_formula_v1",
+    "slugify_repair_v1"
+  ]
+}

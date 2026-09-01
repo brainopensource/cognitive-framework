@@ -1,0 +1,55 @@
+{
+  "id": "t4-rate-limiter",
+  "tier": 4,
+  "title": "Sliding window rate limiter algorithm",
+  "workspace": {
+    "limiter.py": "class RateLimiter:\n    def __init__(self, limit=2):\n        self.limit = limit\n        self.requests = []\n\n    def allow(self, now: float) -> bool:\n        if len(self.requests) < self.limit:\n            self.requests.append(now)\n            return True\n        return False\n",
+    "test_limiter.py": "from limiter import RateLimiter\n\ndef test_limiter():\n    rl = RateLimiter(limit=2)\n    assert rl.allow(0.0) is True\n    assert rl.allow(0.5) is True\n    assert rl.allow(0.8) is False\n    assert rl.allow(1.2) is True\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"limiter.py\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 1,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"path\": \"limiter.py\", \"target\": \"        if len(self.requests) < self.limit:\\n            self.requests.append(now)\\n            return True\\n        return False\", \"replacement\": \"        self.requests = [t for t in self.requests if now - t < 1.0]\\n        if len(self.requests) < self.limit:\\n            self.requests.append(now)\\n            return True\\n        return False\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 2,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"pytest\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 3,
+      "tool_calls": [],
+      "finish_reason": "stop"
+    }
+  ]
+}

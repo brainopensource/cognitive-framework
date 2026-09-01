@@ -1,0 +1,49 @@
+{
+  "format_version": 1,
+  "key": "math_formula_v1",
+  "keywords": [
+    "calculated_value",
+    "(A + B) * B",
+    "math_formula",
+    "formula"
+  ],
+  "turn_exhaustion": "repeat_last",
+  "tiers": {
+    "1": {
+      "turns": [
+        { "content_file": "tier-1/turn-001.md" },
+        { "content_file": "tier-1/turn-002.md" }
+      ]
+    },
+    "2": {
+      "turns": [
+        { "content_file": "tier-2/turn-001.md" },
+        { "content_file": "tier-2/turn-002.md" }
+      ]
+    },
+    "3": {
+      "turns": [
+        { "content_file": "tier-3/turn-001.md" },
+        { "content_file": "tier-3/turn-002.md" }
+      ]
+    },
+    "4": {
+      "turns": [
+        {
+          "content_file": "tier-4/turn-001.md",
+          "tool_calls": [
+            {
+              "call_id": "call-apply-patch-001",
+              "name": "apply_patch",
+              "arguments": {
+                "file": "calculator.py",
+                "diff": "@@ -1,2 +1,2 @@\n-calculated_value = (A + B) + B\n+calculated_value = (A + B) * B"
+              }
+            }
+          ]
+        },
+        { "content_file": "tier-4/turn-002.md" }
+      ]
+    }
+  }
+}

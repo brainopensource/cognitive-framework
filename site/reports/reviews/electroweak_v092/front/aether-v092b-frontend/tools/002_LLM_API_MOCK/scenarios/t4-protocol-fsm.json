@@ -1,0 +1,63 @@
+{
+  "atoms_used": [
+    "view_file",
+    "edit_file",
+    "run_command"
+  ],
+  "created_from": "benchmarks/swe_bench::t4-protocol-fsm",
+  "id": "t4-protocol-fsm",
+  "tier": 4,
+  "title": "SWE-Verified: Distributed protocol finite state machine transition coordinator",
+  "turns": [
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"path\": \"fsm/__init__.py\"}",
+            "name": "view_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 0
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"content\": \"class InvalidTransitionError(Exception): pass\\n\\nclass ProtocolFSM:\\n    def __init__(self, initial_state: str = \\\"INIT\\\"):\\n        self.state = initial_state\\n        self.history = [initial_state]\\n        self._transitions = {\\n            \\\"INIT\\\": [\\\"PREPARE\\\"],\\n            \\\"PREPARE\\\": [\\\"COMMIT\\\", \\\"ABORT\\\"],\\n            \\\"COMMIT\\\": [\\\"DONE\\\"],\\n            \\\"ABORT\\\": [\\\"DONE\\\"]\\n        }\\n\\n    def transition(self, to_state: str):\\n        if to_state not in self._transitions.get(self.state, []):\\n            raise InvalidTransitionError(f\\\"Cannot transition from {self.state} to {to_state}\\\")\\n        self.state = to_state\\n        self.history.append(to_state)\\n\", \"path\": \"fsm/coordinator.py\"}",
+            "name": "edit_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 1
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"command\": \"python3 -m unittest -q\"}",
+            "name": "run_command"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 2
+    },
+    {
+      "content": "Task completed and verified for SWE-Verified: Distributed protocol finite state machine transition coordinator (t4-protocol-fsm).",
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "tool_messages_seen": 3
+    }
+  ],
+  "workspace": {
+    "fsm/__init__.py": "from .coordinator import ProtocolFSM\n__all__ = ['ProtocolFSM']\n",
+    "fsm/coordinator.py": "class InvalidTransitionError(Exception): pass\n\nclass ProtocolFSM:\n    def __init__(self, initial_state: str = \"INIT\"):\n        self.state = initial_state\n        self.history = [initial_state]\n        self._transitions = {\n            \"INIT\": [\"PREPARE\"],\n            \"PREPARE\": [\"COMMIT\", \"ABORT\"],\n            \"COMMIT\": [\"DONE\"],\n            \"ABORT\": [\"DONE\"]\n        }\n\n    def transition(self, to_state: str):\n        if to_state not in self._transitions.get(self.state, []):\n            raise InvalidTransitionError(f\"Cannot transition from {self.state} to {to_state}\")\n        self.state = to_state\n        self.history.append(to_state)\n",
+    "test_fsm.py": "import unittest\nfrom fsm.coordinator import ProtocolFSM, InvalidTransitionError\n\nclass TestFSM(unittest.TestCase):\n    def test_transitions(self):\n        f = ProtocolFSM()\n        f.transition(\"PREPARE\")\n        f.transition(\"COMMIT\")\n        f.transition(\"DONE\")\n        self.assertEqual(f.history, [\"INIT\", \"PREPARE\", \"COMMIT\", \"DONE\"])\n        with self.assertRaises(InvalidTransitionError):\n            f.transition(\"INIT\")\n\nif __name__ == '__main__': unittest.main()\n"
+  }
+}

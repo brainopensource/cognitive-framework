@@ -1,0 +1,3 @@
+The case that exposed the drift: this vector's model was changed to a deepseek
+route while the expected cost stayed on gpt-4o-mini arithmetic, so the test
+asserted a price no entry in the registry has.

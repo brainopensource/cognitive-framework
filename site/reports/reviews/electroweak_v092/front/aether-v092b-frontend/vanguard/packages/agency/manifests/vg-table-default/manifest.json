@@ -1,0 +1,20 @@
+{
+  "harness": "vg-table-default",
+  "components": {
+    "system_prompt": ["vg-table-default/system-prompt.txt"],
+    "tools": [
+      "vg-table-default/table-read-tool.json",
+      "vg-table-default/table-patch-tool.json"
+    ],
+    "context_policy": ["vg-table-default/context-policy.json"],
+    "routing_policy": ["vg-table-default/routing-policy.json"],
+    "approval_policy": ["vg-table-default/approval-policy.json"]
+  },
+  "capabilities": [
+    {"verb": "table.read", "sink": "observation", "selector": {"kind":"generic","uriPattern":"table://read/*"}, "risk": "low"},
+    {"verb": "table.patch", "sink": "privileged", "selector": {"kind":"generic","uriPattern":"table://patch/*"}, "risk": "medium"}
+  ],
+  "evaluators": ["tableworld-evaluator@1"],
+  "budgetPolicy": "vg-table-default/budget-policy.json",
+  "undeletable": false
+}

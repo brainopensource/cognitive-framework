@@ -840,7 +840,10 @@ def main():
         recorder=recorder,
     )
 
-    challenge_dirs = sorted([d for d in SUITE_ROOT.iterdir() if d.is_dir()])
+    challenge_dirs = sorted([
+        d for d in SUITE_ROOT.iterdir()
+        if d.is_dir() and not d.name.startswith("__")
+    ])
     if args.single:
         challenge_dirs = [d for d in challenge_dirs if d.name == args.single]
         if not challenge_dirs:

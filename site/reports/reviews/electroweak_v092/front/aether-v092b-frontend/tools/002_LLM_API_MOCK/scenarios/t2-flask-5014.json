@@ -1,0 +1,63 @@
+{
+  "atoms_used": [
+    "view_file",
+    "edit_file",
+    "run_command"
+  ],
+  "created_from": "benchmarks/swe_bench::t2-flask-5014",
+  "id": "t2-flask-5014",
+  "tier": 2,
+  "title": "Flask: Blueprint registration name collision validation",
+  "turns": [
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"path\": \"flask/__init__.py\"}",
+            "name": "view_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 0
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"content\": \"class Blueprint:\\n    def __init__(self, name: str, import_name: str):\\n        self.name = name\\n        self.import_name = import_name\\n\\nclass Flask:\\n    def __init__(self, name: str):\\n        self.name = name\\n        self.blueprints = {}\\n\\n    def register_blueprint(self, bp: Blueprint):\\n        if bp.name in self.blueprints and self.blueprints[bp.name] is not bp:\\n            raise ValueError(f\\\"Blueprint name '{bp.name}' is already registered with a different instance.\\\")\\n        self.blueprints[bp.name] = bp\\n\", \"path\": \"flask/blueprints.py\"}",
+            "name": "edit_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 1
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"command\": \"python3 -m unittest -q\"}",
+            "name": "run_command"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 2
+    },
+    {
+      "content": "Task completed and verified for Flask: Blueprint registration name collision validation (t2-flask-5014).",
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "tool_messages_seen": 3
+    }
+  ],
+  "workspace": {
+    "flask/__init__.py": "from .blueprints import Blueprint, Flask\n__all__ = ['Blueprint', 'Flask']\n",
+    "flask/blueprints.py": "class Blueprint:\n    def __init__(self, name: str, import_name: str):\n        self.name = name\n        self.import_name = import_name\n\nclass Flask:\n    def __init__(self, name: str):\n        self.name = name\n        self.blueprints = {}\n\n    def register_blueprint(self, bp: Blueprint):\n        if bp.name in self.blueprints and self.blueprints[bp.name] is not bp:\n            raise ValueError(f\"Blueprint name '{bp.name}' is already registered with a different instance.\")\n        self.blueprints[bp.name] = bp\n",
+    "test_blueprints.py": "import unittest\nfrom flask import Flask, Blueprint\n\nclass TestBlueprints(unittest.TestCase):\n    def test_blueprint_collision(self):\n        app = Flask('app')\n        bp1 = Blueprint('admin', __name__)\n        bp2 = Blueprint('admin', __name__)\n        app.register_blueprint(bp1)\n        # Duplicate registration of same object is fine\n        app.register_blueprint(bp1)\n        # Different object with duplicate name must raise\n        with self.assertRaises(ValueError):\n            app.register_blueprint(bp2)\n\nif __name__ == '__main__': unittest.main()\n"
+  }
+}

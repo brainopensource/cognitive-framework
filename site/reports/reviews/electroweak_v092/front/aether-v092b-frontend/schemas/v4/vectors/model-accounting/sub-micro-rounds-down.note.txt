@@ -1,0 +1,2 @@
+Integer-micro accounting floors. A single token pair costs less than one
+micro-dollar and is recorded as zero, never as a rounded-up charge.

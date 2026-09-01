@@ -1,0 +1,18 @@
+api: mhf.plugin/1
+id: mhf.toolkit.ast-patch
+version: 2.1.0
+provides:
+  - spi: IToolkit
+    spi_version: ">=1.0,<2"
+requires:
+  - id: mhf.toolkit.index
+    version: ">=1"
+isolation: subprocess
+capabilities:
+  - verb: patch.apply
+    selector:
+      kind: fs
+      root: /workspace
+      paths:
+        - /workspace
+entry: toolkits/ast_patch.py:AstPatchToolkit

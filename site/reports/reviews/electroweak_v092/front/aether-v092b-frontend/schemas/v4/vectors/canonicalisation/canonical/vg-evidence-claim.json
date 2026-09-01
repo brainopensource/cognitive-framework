@@ -1,0 +1,1 @@
+{ "claimId": "c-1", "scope": "repo:vanguard", "invalidationConditions": [ { "check": "test:TEST-SCHEMA-001", "automatic": true } ], "epistemic": "corroborated" }

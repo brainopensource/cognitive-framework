@@ -1,8 +1,8 @@
 # Vanguard SOTA Backend Completion Program
 
 **Document class:** non-authorizing implementation brief (`.draft/`)
-**Inspected subject:** `ca47eef7da1b4075f8a69d238fe1626fa1ab4c8e`
-**Date:** 2026-08-31
+**Inspected subject:** `43d9973b880be7a705199b75c03e0a6531aba265`
+**Date:** 2026-09-01
 
 Status and authorization resolve through [`milestones.md`](../docs/execution/milestones.md),
 [`active.md`](../docs/execution/active.md), and [`backlog.md`](../docs/execution/backlog.md).
@@ -39,9 +39,14 @@ coordinator, evaluator, router, or recovery ledger is introduced.
 1. **SOTA-01** adds real `HarnessSession` falsifiers for BEP-01..03, fixes task-digest fallback asymmetry, removes duplicate outbound alias schemas while retaining inbound aliases, and proves non-placeholder observation digests.
 2. **SOTA-02** makes admissible completion converge: first redundant green verification emits typed finish feedback; the second offers only `agency.finish`, `fs.read`, and `fs.search`; no auto-finish is permitted and refusal remains `ABANDONED`.
 3. **SOTA-03** adds normalized task/submission/`aether.benchmark.receipt/1` contracts, isolated adapters, exact-subject receipts, and hermetic fixtures for SWE-bench Verified, SWE-Bench Pro, and DeepSWE v1.1.
-4. **SOTA-04** runs CMX-06, the renamed internal CMX-07 proxy, and FIN-A1 only after preflight. Provider calls require separate spend authority; otherwise the result is `NOT_RUN`.
+4. **SOTA-04** has authorized spend; its canary preflight passes, while live CMX-06/CMX-07 and FIN-A1 remain `NOT_RUN` pending exact runtime/evaluator execution and independent acceptance.
 
 ## Claim ladder and integrity
+
+The preregistered B1 run stopped as `INVALID_PREREGISTRATION_STOP`: the runner
+included `__pycache__` as a 21st directory. It observed 2 passes, 19 failures,
+0 missing, 26,347 tokens, 21 DeepSeek calls, and `$0.002037315`. B2 was not
+run. No proportion or lift claim is valid from that invalid run.
 
 - B0 is hermetic instrumentation only. B1 targets 20/20 frozen internal easy tasks.
 - B2 targets at least 27/30 frozen internal average tasks. B3 is a 60% internal-hard research target, not a release promise.

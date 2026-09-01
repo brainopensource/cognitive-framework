@@ -1,0 +1,130 @@
+{
+  "harness": "vg-code-balanced",
+  "components": {
+    "system_prompt": [
+      "vg-code-max/system-prompt.txt"
+    ],
+    "tools": [
+      "vg-code-default/read-tool.json",
+      "vg-code-default/search-tool.json",
+      "vg-code-lex/surgical-patch-tool.json",
+      "vg-code-default/patch-tool.json",
+      "vg-code-default/test-tool.json",
+      "vg-code-max/symbol-tool.json",
+      "vg-code-max/deps-tool.json",
+      "vg-code-max/tests-tool.json"
+    ],
+    "context_policy": [
+      "vg-code-balanced/context-policy.json"
+    ],
+    "routing_policy": [
+      "vg-code-balanced/routing-policy.json"
+    ],
+    "approval_policy": [
+      "vg-code-default/approval-policy.json"
+    ],
+    "retrieval_policy": [
+      "vg-code-balanced/retrieval-policy.json"
+    ]
+  },
+  "capabilities": [
+    {
+      "verb": "fs.read",
+      "sink": "observation",
+      "selector": {
+        "kind": "fs",
+        "root": "/workspace",
+        "paths": [
+          "/workspace"
+        ]
+      },
+      "risk": "low"
+    },
+    {
+      "verb": "fs.search",
+      "sink": "observation",
+      "selector": {
+        "kind": "fs",
+        "root": "/workspace",
+        "paths": [
+          "/workspace"
+        ]
+      },
+      "risk": "low"
+    },
+    {
+      "verb": "patch.apply",
+      "sink": "privileged",
+      "selector": {
+        "kind": "fs",
+        "root": "/workspace",
+        "paths": [
+          "/workspace"
+        ]
+      },
+      "risk": "medium"
+    },
+    {
+      "verb": "fs.patch",
+      "sink": "privileged",
+      "selector": {
+        "kind": "fs",
+        "root": "/workspace",
+        "paths": [
+          "/workspace"
+        ]
+      },
+      "risk": "medium"
+    },
+    {
+      "verb": "proc.exec",
+      "sink": "privileged",
+      "selector": {
+        "kind": "generic",
+        "uriPattern": "proc://exec/allow/git,pytest,ruff,mypy,python3,node,npm"
+      },
+      "risk": "high"
+    },
+    {
+      "verb": "repo.symbol",
+      "sink": "observation",
+      "selector": {
+        "kind": "fs",
+        "root": "/workspace",
+        "paths": [
+          "/workspace"
+        ]
+      },
+      "risk": "low"
+    },
+    {
+      "verb": "repo.dependencies",
+      "sink": "observation",
+      "selector": {
+        "kind": "fs",
+        "root": "/workspace",
+        "paths": [
+          "/workspace"
+        ]
+      },
+      "risk": "low"
+    },
+    {
+      "verb": "repo.tests_for",
+      "sink": "observation",
+      "selector": {
+        "kind": "fs",
+        "root": "/workspace",
+        "paths": [
+          "/workspace"
+        ]
+      },
+      "risk": "low"
+    }
+  ],
+  "evaluators": [
+    "coding-oracle@3"
+  ],
+  "budgetPolicy": "vg-code-balanced/budget-policy.json",
+  "undeletable": false
+}

@@ -1,0 +1,13 @@
+{
+  "api": "mhf.context-policy/1",
+  "rules": [
+    {
+      "pattern": ".*\\.graph\\.json$",
+      "action": "always_include"
+    },
+    {
+      "pattern": ".*",
+      "action": "exclude"
+    }
+  ]
+}

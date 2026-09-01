@@ -1,0 +1,18 @@
+{
+  "id": "t7-graphql-federation",
+  "tier": 7,
+  "title": "SWE-bench Pro: GraphQL Subgraph Schema Federation & Query Planner",
+  "workspace": {
+    "federation/__init__.py": "from typing import Dict, List, Any\n\nclass SchemaStitcher:\n    def __init__(self):\n        self.subgraphs: Dict[str, Dict[str, List[str]]] = {}\n\n    def register_subgraph(self, name: str, type_fields: Dict[str, List[str]]) -> None:\n        self.subgraphs[name] = type_fields\n\n    def resolve_query(self, type_name: str, requested_fields: List[str]) -> Dict[str, List[str]]:\n        # Maps subgraph -> fields to fetch\n        plan: Dict[str, List[str]] = {}\n        for field in requested_fields:\n            resolved = False\n            for sg_name, types in self.subgraphs.items():\n                if type_name in types and field in types[type_name]:\n                    plan.setdefault(sg_name, []).append(field)\n                    resolved = True\n                    break\n            if not resolved:\n                raise ValueError(f\"Unresolvable field {field} on type {type_name}\")\n        return plan\n",
+    "problem.md": "# GraphQL Subgraph Schema Federation\nImplement subgraph schema stitching and subquery resolution plans.\n",
+    "tests/test_federation.py": "import unittest\nfrom federation import SchemaStitcher\n\nclass TestGraphQLFederation(unittest.TestCase):\n    def test_federated_query_plan_resolution(self):\n        stitcher = SchemaStitcher()\n        stitcher.register_subgraph(\"users_subgraph\", {\"User\": [\"id\", \"username\", \"email\"]})\n        stitcher.register_subgraph(\"orders_subgraph\", {\"User\": [\"order_count\", \"total_spend\"]})\n\n        plan = stitcher.resolve_query(\"User\", [\"username\", \"order_count\", \"email\"])\n        self.assertEqual(plan.get(\"users_subgraph\"), [\"username\", \"email\"])\n        self.assertEqual(plan.get(\"orders_subgraph\"), [\"order_count\"])\n\nif __name__ == \"__main__\":\n    unittest.main()\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "content": "Verified SWE-bench Pro implementation for t7_graphql_federation."
+    }
+  ]
+}

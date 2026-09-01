@@ -1,0 +1,205 @@
+{
+  "id": "t2-isolated-cache",
+  "tier": 2,
+  "title": "SWE-Verified: LRU/TTL cache invalidation window and recency refresh order",
+  "workspace": {
+    "lru_ttl_cache.py": "\"\"\"LRU cache with per-entry TTL expiration.\"\"\"\nimport time\n\n\nclass LRUTTLCache:\n    def __init__(self, capacity, clock=time.monotonic):\n        if capacity <= 0:\n            raise ValueError(\"capacity must be positive\")\n        self.capacity = int(capacity)\n        self._clock = clock\n        self._data = {}  # key -> [value, expires_at or None]\n\n    def set(self, key, value, ttl=None):\n        expires = None if ttl is None else self._clock() + ttl\n        self._data[key] = [value, expires]\n        if len(self._data) > self.capacity:\n            oldest = next(iter(self._data))\n            del self._data[oldest]\n\n    def get(self, key, default=None):\n        entry = self._data.get(key)\n        if entry is None:\n            return default\n\n        # Expiration is checked when the entry is accessed so an expired\n        # value can never be returned and does not remain resident.\n        expires = entry[1]\n        if expires is not None and self._clock() >= expires:\n            del self._data[key]\n            return default\n\n        # Dictionaries preserve insertion order. Remove and reinsert a\n        # successfully accessed entry to move it to the MRU end.\n        del self._data[key]\n        self._data[key] = entry\n        return entry[0]\n\n    def delete(self, key):\n        self._data.pop(key, None)\n\n    def __contains__(self, key):\n        return key in self._data\n\n    def __len__(self):\n        return len(self._data)\n",
+    "problem.md": "# Challenge: LRU/TTL Cache Invalidation Window\n\n`lru_ttl_cache.py` fails two invariants:\n1. Expired keys are served by `get()` instead of being invalidated eagerly on\n   access.\n2. `get()` does not refresh recency, so eviction follows insertion order\n   instead of least-recently-used order.\n\nFix `get()` to enforce both invariants. Do not modify the test suite.\n",
+    "tests/test_lru_ttl_cache.py": "import os\nimport sys\n\nimport pytest\n\nsys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))\n\nfrom lru_ttl_cache import LRUTTLCache\n\n\ndef test_expired_key_eviction_on_get():\n    t = [100.0]\n    cache = LRUTTLCache(4, clock=lambda: t[0])\n    cache.set(\"session\", \"abc\", ttl=5.0)\n    assert cache.get(\"session\") == \"abc\"\n    t[0] += 6.0  # TTL fully elapsed\n    assert cache.get(\"session\", default=\"missing\") == \"missing\"\n    assert len(cache) == 0  # expired entry must be evicted, not just hidden\n\n\ndef test_lru_order_after_access():\n    t = [0.0]\n    cache = LRUTTLCache(2, clock=lambda: t[0])\n    cache.set(\"a\", 1)\n    cache.set(\"b\", 2)\n    assert cache.get(\"a\") == 1  # touching \"a\" must make \"b\" the LRU victim\n    t[0] += 0.1\n    cache.set(\"c\", 3)  # over capacity: evict least-recently-used (\"b\")\n    assert cache.get(\"b\", default=\"gone\") == \"gone\"\n    assert cache.get(\"a\") == 1\n    assert cache.get(\"c\") == 3\n\n\ndef test_basic_set_get():\n    cache = LRUTTLCache(8)\n    cache.set(\"k\", [1, 2, 3])\n    assert cache.get(\"k\") == [1, 2, 3]\n    assert cache.get(\"absent\", default=0) == 0\n\n\ndef test_capacity_overflow():\n    cache = LRUTTLCache(2)\n    cache.set(\"a\", 1)\n    cache.set(\"b\", 2)\n    cache.set(\"c\", 3)  # oldest inserted key (\"a\") must be evicted\n    assert len(cache) == 2\n    assert cache.get(\"a\", default=None) is None\n    assert cache.get(\"b\") == 2\n    assert cache.get(\"c\") == 3\n",
+    "todo.md": "# Workspace Task Plan (todo.md)\n\n- [x] [T-001] Investigate codebase and plan implementation for: # Challenge: LRU/TTL Cache Invalidation Window <!-- Inspected cache implementation and existing tests. Root cause is get() returns entries without checking expiry or moving accessed keys to the MRU end; existing tests directly reproduce both failures. -->\n- [x] [T-002] Implement core solution and verify with tests <!-- Implemented eager expiration invalidation in get() and moved successful accesses to the dictionary's MRU end while preserving existing set/delete behavior. -->\n- [x] [T-003] Run full hermetic verification and AST audit <!-- Targeted and full pytest suites pass (4/4). Production-only change audited: get() now removes expired entries and promotes valid hits to MRU; no test files modified. -->\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "list_dir",
+            "arguments": "{\"path\": \".\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 1,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"lru_ttl_cache.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"tests/test_lru_ttl_cache.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"problem.md\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 2,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"content\": \"\\\"\\\"\\\"LRU cache with per-entry TTL expiration.\\\"\\\"\\\"\\nimport time\\n\\n\\nclass LRUTTLCache:\\n    def __init__(self\", \"path\": \"lru_ttl_cache.py\"}"
+          }
+        }
+      ],
+      "content": "Now I understand the two bugs. Let me fix the `get()` method:\n\n1. **Expired key check**: If the entry has a TTL and the current time exceeds it, delete the entry and return `default`.\n2. **LRU refresh**: Move the accessed key to the end of the dictionary so that `next(iter(self._data))` (used in `set()`) picks the least-recently-used entry"
+    },
+    {
+      "tool_messages_seen": 3,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"content\": \"\\\"\\\"\\\"LRU cache with per-entry TTL expiration.\\\"\\\"\\\"\\nimport time\\n\\n\\nclass LRUTTLCache:\\n    def __init__(self, capacity, clock=time.monotonic):\\n        if capacity <= 0:\\n            raise ValueError(\\\"capacity must be positive\\\")\\n        self.capacity = int(capacity)\\n        self._clock = clock\\n        self._data = {}  # key -> [value, expires_at or None]\\n\\n    def set(self, key, value, ttl=None):\\n        expires = None if ttl is None else self._clock() + ttl\\n        self._data[key] = [value, expires]\\n        if len(self._data) > self.capacity:\\n            oldest = next(iter(self._data))\\n            del self._data[oldest]\\n\\n    def get(self, key, default=None):\\n        entry = self._data.get(key)\\n        if entry is None:\\n            return default\\n        # Check for expiration\\n        expires_at = entry[1]\\n        if expires_at is not None and self._clock() > expires_at:\\n            del self._data[key]\\n            return default\\n        # Refresh recency: move accessed key to end (most recently used)\\n        self._data.move_to_end(key)\\n        return entry[0]\\n\\n    def delete(self, key):\\n        self._data.pop(key, None)\\n\\n    def __contains__(self, key):\\n        return key in self._data\\n\\n    def __len__(self):\\n        return len(self._data)\", \"path\": \"lru_ttl_cache.py\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 4,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"cd /workspace && python -m pytest tests/test_lru_ttl_cache.py -v\"}"
+          }
+        }
+      ],
+      "content": "Now let's run the tests:\n\n"
+    },
+    {
+      "tool_messages_seen": 5,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"cd /workspace && python -m pytest tests/test_lru_ttl_cache.py -v 2>&1\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 6,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python -m pytest tests/test_lru_ttl_cache.py -v\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 7,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"which python3\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 8,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python3 -m pytest tests/test_lru_ttl_cache.py -v\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 9,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"content\": \"\\\"\\\"\\\"LRU cache with per-entry TTL expiration.\\\"\\\"\\\"\\nimport time\\n\\n\\nclass LRUTTLCache:\\n    def __init__(self, capacity, clock=time.monotonic):\\n        if capacity <= 0:\\n            raise ValueError(\\\"capacity must be positive\\\")\\n        self.capacity = int(capacity)\\n        self._clock = clock\\n        self._data = {}  # key -> [value, expires_at or None]\\n\\n    def set(self, key, value, ttl=None):\\n        expires = None if ttl is None else self._clock() + ttl\\n        self._data[key] = [value, expires]\\n        if len(self._data) > self.capacity:\\n            oldest = next(iter(self._data))\\n            del self._data[oldest]\\n\\n    def get(self, key, default=None):\", \"path\": \"lru_ttl_cache.py\"}"
+          }
+        }
+      ],
+      "content": "The `move_to_end` method is only available on `OrderedDict`, not regular `dict`. I need to use a different approach to refresh recency. Let me fix this by deleting and re-inserting the key to move it to the end.\n\n"
+    },
+    {
+      "tool_messages_seen": 10,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"lru_ttl_cache.py\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 11,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"content\": \"\\\"\\\"\\\"LRU cache with per-entry TTL expiration.\\\"\\\"\\\"\\nimport time\\n\\n\\nclass LRUTTLCache:\\n    def __init__(self, capacity, clock=time.monotonic):\\n        if capacity <= 0:\\n            raise ValueError(\\\"capacity must be positive\\\")\\n        self.capacity = int(capacity)\\n        self._clock = clock\\n        self._data = {}  # key -> [value, expires_at or None]\\n\\n    def set(self, key, value, ttl=None):\\n        expires = None if ttl is None else self._clock() + ttl\\n        self._data[key] = [value, expires]\\n        if len(self._data) > self.capacity:\\n            oldest = next(iter(self._data))\\n            del self._data[oldest]\\n\\n    def get(self, key, default=None):\\n        entry = self._data.get(key)\\n        if entry is None:\\n            return default\\n        # Check for expiration\\n        expires_at = entry[1]\\n        if expires_at is not None and self._clock() > expires_at:\\n            del self._data[key]\\n            return default\\n        # Refresh recency: delete and re-insert to move key to end (most recently used)\\n        value = entry[0]\\n        del self._data[key]\\n        self._data[key] = [value, expires_at]\\n        return value\\n\\n    def delete(self, key):\\n        self._data.pop(key, None)\\n\\n    def __contains__(self, key):\\n        return key in self._data\\n\\n    def __len__(self):\\n        return len(self._data)\", \"path\": \"lru_ttl_cache.py\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 12,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python3 -m pytest tests/test_lru_ttl_cache.py -v\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 13,
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "content": "All 4 tests pass. Here's a summary of the two fixes in `get()`:\n\n1. **Expired key invalidation**: Before returning an entry, check if `expires_at` is not `None` and the current clock time exceeds it. If expired, delete the entry from `_data` and return `default`.\n\n2. **LRU recency refresh**: After confirming the entry is valid, delete and re-insert the key-value pair in the dictionary. Since Python dicts preserve insertion order, this moves the accessed key to the end (most recently used position), ensuring that `next(iter(self._data))` in `set()` correctly identifies the least-recently-used entry for eviction."
+    }
+  ]
+}

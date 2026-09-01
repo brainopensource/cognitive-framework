@@ -1,0 +1,16 @@
+[
+  {
+    "challenge_id": "g1_sharded_hash_ring",
+    "title": "Distributed Sharded Consistent Hash Ring with Dynamic Rebalancing",
+    "model": "deepseek/deepseek-v4-flash-0731",
+    "passed": false,
+    "wall_s": 38.744,
+    "prompt_tokens": 851,
+    "completion_tokens": 1000,
+    "total_tokens": 1851,
+    "cost_usd": 0.00018553,
+    "status": "success",
+    "error": null,
+    "oracle_output": "EFF\n======================================================================\nERROR: test_partition_rebalance (test_oracle.TestHashRingOracle.test_partition_rebalance)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/tmp75b34i66/test_oracle.py\", line 28, in test_partition_rebalance\n    old_map[k] = pm.put(k, f'v-{i}')\n                 ^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/tmp75b34i66/cluster/partition.py\", line 12, in put\n    raise RuntimeError('No node available')\nRuntimeError: No node available\n\n======================================================================\nFAIL: test_ring_wraparound_and_distribution (test_oracle.TestHashRingOracle.test_ring_wraparound_and_distribution)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/tmp75b34i66/test_oracle.py\", line 19, in test_ring_wraparound_and_distribution\n    self.assertIn(node, ('node-1', 'node-2'))\nAssertionError: None not found in ('node-1', 'node-2')\n\n======================================================================\nFAIL: test_vnode_distinct_tokens (test_oracle.TestHashRingOracle.test_vnode_distinct_tokens)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/tmp75b34i66/test_oracle.py\", line 10, in test_vnode_distinct_tokens\n    self.assertEqual(len(set(tokens)), 5)\nAssertionError: 1 != 5\n\n----------------------------------------------------------------------\nRan 3 tests in 0.001s\n\nFAILED (failures=2, errors=1)"
+  }
+]

@@ -13,9 +13,9 @@ purpose: Present stable TARGET milestone outcomes, dependencies, and acceptance 
 audience:
   - contributor
   - release-owner
-analysis_subject_sha: ca47eef7da1b4075f8a69d238fe1626fa1ab4c8e
+analysis_subject_sha: 43d9973b880be7a705199b75c03e0a6531aba265
 version: 0.9.2a3
-last_verified: 2026-08-31
+last_verified: 2026-09-01
 normative_authority:
   - docs/03_execution/milestones.md
   - docs/SPEC.md#milestone-compatibility
@@ -90,7 +90,7 @@ further execution.
 ## Three-wave SOTA backend overlay
 
 This overlay is subordinate to the gates above and to [execution.active](active.md).
-It describes evidence work on subject `ca47eef7da1b4075f8a69d238fe1626fa1ab4c8e`;
+It describes evidence work on subject `43d9973b880be7a705199b75c03e0a6531aba265`;
 it does not authorize M-8, M-9, or M-10.
 
 | Wave | Packages | Outcome |

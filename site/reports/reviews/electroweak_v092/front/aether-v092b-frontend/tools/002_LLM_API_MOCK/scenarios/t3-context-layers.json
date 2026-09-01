@@ -1,0 +1,45 @@
+{
+  "id": "t3-context-layers",
+  "tier": 3,
+  "title": "Prefix-stable context: dynamic task text leaked into L3 repo map",
+  "workspace": {
+    "vanguard/packages/agency/context/layers.py": "PREFIX_LAYERS = (\"L1\", \"L2\", \"L3\")\n\ndef render_repo_map(files, task_brief):\n    # BUG: task brief must not enter L3 or the KV prefix moves every turn\n    return \"\\n\".join(files) + \"\\nTASK:\" + task_brief\n",
+    "vanguard/packages/agency/context/compiler.py": "from .layers import render_repo_map, PREFIX_LAYERS\n\nclass ContextCompiler:\n    def __init__(self, files, brief):\n        self.l3 = render_repo_map(files, brief)\n",
+    "docs/context.md": "# L3 is the repo map. Dynamic task text belongs in L4/L5 only.\\n",
+    "test/test_prefix.py": "def test_prefix_stable():\n    from vanguard.packages.agency.context.layers import render_repo_map\n    a = render_repo_map([\"a.py\"], \"fix bug one\")\n    b = render_repo_map([\"a.py\"], \"fix bug two\")\n    assert a == b\n"
+  },
+  "turns": [
+    {
+      "tool_messages": 0,
+      "finish_reason": "tool_calls",
+      "content": "I will read the architecture note and the L3 renderer.",
+      "tool_calls": [
+        {"id": "t3a", "type": "function", "function": {"name": "view_file", "arguments": "{\"path\": \"docs/context.md\"}"}},
+        {"id": "t3b", "type": "function", "function": {"name": "view_file", "arguments": "{\"path\": \"vanguard/packages/agency/context/layers.py\"}"}},
+        {"id": "t3c", "type": "function", "function": {"name": "view_file", "arguments": "{\"path\": \"test/test_prefix.py\"}"}}
+      ]
+    },
+    {
+      "tool_messages": 3,
+      "finish_reason": "tool_calls",
+      "content": "L3 concatenates the task brief. That destroys prefix stability. I will drop the brief from the repo map.",
+      "tool_calls": [
+        {"id": "t3d", "type": "function", "function": {"name": "edit_file", "arguments": "{\"path\": \"vanguard/packages/agency/context/layers.py\", \"target\": \"def render_repo_map(files, task_brief):\\n    # BUG: task brief must not enter L3 or the KV prefix moves every turn\\n    return \\\"\\\\n\\\".join(files) + \\\"\\\\nTASK:\\\" + task_brief\\n\", \"replacement\": \"def render_repo_map(files, task_brief=None):\\n    return \\\"\\\\n\\\".join(files)\\n\"}"}}
+      ]
+    },
+    {
+      "tool_messages": 4,
+      "finish_reason": "tool_calls",
+      "content": "Running the prefix-stability test.",
+      "tool_calls": [
+        {"id": "t3e", "type": "function", "function": {"name": "run_command", "arguments": "{\"command\": \"python3 -m pytest test/test_prefix.py -q\"}"}}
+      ]
+    },
+    {
+      "tool_messages": 5,
+      "finish_reason": "stop",
+      "content": "L3 no longer includes the task brief. Prefix is stable across two different briefs. Tests pass.",
+      "tool_calls": []
+    }
+  ]
+}

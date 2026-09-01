@@ -209,5 +209,19 @@
   "total_calls": 21,
   "total_tokens": 26347,
   "total_usd": 0.002037315,
-  "status": "RUNNING"
+  "campaign": {
+    "name": "SOTA-08 B1",
+    "model": "deepseek/deepseek-v4-flash-0731",
+    "harness": "vg-code-max",
+    "observed_tasks": 21,
+    "preregistered_tasks": 20,
+    "passed": 2,
+    "failed": 19,
+    "missing": 0,
+    "disposition": "INVALID_PREREGISTRATION_STOP",
+    "reason": "runner included unintended benchmark_20_suite/__pycache__ directory; B1 membership was not exact",
+    "wilson_interval_valid": false,
+    "b2_authorized": false
+  },
+  "status": "B1_INVALID_STOP"
 }

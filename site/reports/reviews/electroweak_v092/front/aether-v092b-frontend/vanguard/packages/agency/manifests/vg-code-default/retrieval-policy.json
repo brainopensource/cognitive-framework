@@ -1,0 +1,5 @@
+{
+  "provider": "IndexPort",
+  "strategy": "repo_map",
+  "read_the_map_first": true
+}

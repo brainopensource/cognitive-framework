@@ -9,7 +9,7 @@ canonical_for:
   - repository-backlog
   - feature-lifecycle-tracking
 version: 0.9.2a3
-last_verified: 2026-08-31
+last_verified: 2026-09-01
 purpose: Track proposed, approved, in-progress, blocked, and deferred capability packages and engineering work outside the active sprint WIP=1 constraint.
 audience:
   - contributor
@@ -198,11 +198,11 @@ The canonical next-up queue is dependency ordered and limited to SOTA-W1:
 | SOTA-01 | Truth reconciliation and activation falsifiers | BEP-01..03 | Real-session evidence and boundary truth |
 | SOTA-02 | Completion-aware convergence | SOTA-01 | Redundant green verification converges to requested finish |
 | SOTA-03 | Official benchmark protocol bridge | SOTA-01 | Normalized tasks, submissions, receipts, hermetic adapters |
-| SOTA-04 | Frozen W1 qualification | SOTA-02, SOTA-03 | CMX-06/07 and FIN-A1 preflight; live missingness remains NOT_RUN |
+| SOTA-04 | Frozen W1 qualification | SOTA-02, SOTA-03 | Canary preflight passes; live CMX-06/07 remains NOT_RUN and FIN-A1 awaits exact bundle/acceptance |
 | SOTA-05 | Long-context identity and retrieval | SOTA-04 | Selection identity, drift checks, bounded sections |
 | SOTA-06 | Multi-file patch/resume hardening | SOTA-05 | Stale/partial/ambiguous/escaping patch falsifiers |
 | SOTA-07 | Multi-model economy and escalation | SOTA-06 | Existing RouteDecision path with fail-closed pricing/usage |
-| SOTA-08 | Frozen internal and Pro pilot campaigns | SOTA-07 | Preregistered attribution and kill criterion |
+| SOTA-08 | Frozen internal and Pro pilot campaigns | SOTA-07 | B1 invalidated by exact-membership drift (21 observed directories vs 20 frozen); B2 stopped; Pro remains unauthorized |
 | SOTA-09 | Qualified coordination scheduler | SOTA-08 | Durable fairness, leases, backpressure, cancellation, joins |
 | SOTA-10 | Agent-builder integration | SOTA-09 | Immutable compositions and separated skill promotion authority |
 | SOTA-11 | Hermes, Research, and Tutor compositions | SOTA-10 | Same Runtime.compose path and bounded public capabilities |
@@ -216,8 +216,8 @@ SOTA-01 adds real-session falsifiers, truthful observation digests, canonical
 boundary cleanup, and one outbound schema per canonical verb. SOTA-02 makes
 admissible completion converge after redundant green verification without
 auto-finishing. SOTA-03 supplies normalized official-protocol task, submission,
-and receipt contracts over existing runtime/port seams. SOTA-04 is preflight-only
-until separate spend authority exists; missing live authority remains `NOT_RUN`.
+and receipt contracts over existing runtime/port seams. SOTA-04 can use the
+authorized budget, but live execution remains `NOT_RUN` in this session.
 
 The existing context packet, role-aware routing, meta-controller, bounded
 scheduler, and signed skill lifecycle are mechanisms to integrate and qualify,

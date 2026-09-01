@@ -4478,6 +4478,10 @@
 <h2 id="4-topology-extension-mhftopology1">4. Topology Extension (<code>mhf.topology/1</code>)</h2>
 <p>Topology definitions specify delegation roles and child agent routing:
 - <code>mhf.topology/1</code> declarations are compiled by <code>vanguard.packages.runtime.compose</code> and lowered to sequential child turn executions (<code>arch.orchestration.delegation</code>).</p>
+<p>The production code pack registers three data-selected identities:
+<code>vg-code-fast</code>, <code>vg-code-balanced</code>, and <code>vg-code-max</code>. They share the default
+tool and policy artifacts while varying only bounded execution ceilings and
+are compiled by the same runtime composition root.</p>
 <hr />
 <h2 id="implementation-evidence">Implementation Evidence</h2>
 <ul>

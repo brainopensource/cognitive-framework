@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/mhf/progress_assessed.schema.json",
+  "title": "ProgressAssessedPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["assessment", "signals", "basis"],
+  "properties": {
+    "assessment": {"type": "string", "enum": ["advancing", "stalled", "regressing"]},
+    "signals": {"type": "object", "additionalProperties": true},
+    "basis": {"type": "array", "items": {"type": "string"}},
+    "confidence": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+    "evidenceDigest": {"type": ["string", "null"], "pattern": "^(sha256:[0-9a-f]{64})?$"}
+  }
+}

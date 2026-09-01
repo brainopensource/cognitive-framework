@@ -67,8 +67,8 @@ def cited_ids(paths: Iterable[Path]) -> dict[int, set[str]]:
 def citation_files() -> tuple[Path, ...]:
     return (
         _ROOT / "docs/SPEC.md",
-        _ROOT / "docs/03_execution/sprint_active.md",
-        *sorted((_ROOT / "docs/02_decisions").glob("[0-9][0-9][0-9][0-9]-*.md")),
+        _ROOT / "docs/execution/active.md",
+        *sorted((_ROOT / "docs/decisions.md").glob("[0-9][0-9][0-9][0-9]-*.md")),
     )
 
 

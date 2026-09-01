@@ -166,6 +166,7 @@ def index_repository(
         symbols=int(stats.get("symbols", 0)),
         relations=int(stats.get("relations", 0)),
         incremental=bool(incremental),
+        head_sha=ctx.head_sha,
     )
     return {
         "status": "SUCCESS",

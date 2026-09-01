@@ -1,8 +1,8 @@
 """BaaC Zero-State Materialization and Cryptographic Manifest Engine.
 
 Guarantees:
-1. Zero-state verification against committed sha256 digests.
-2. Ephemeral scratch workspace materialization without leaking oracle scripts.
+1. Cryptographic zero-state verification against committed sha256 digests.
+2. Ephemeral scratch workspace materialization with strict zero-leakage of oracle tests.
 3. Clean reset with zero drift from pristine challenge sources.
 """
 
@@ -22,6 +22,7 @@ EXCLUDED_FROM_WORKSPACE = {
     "__pycache__",
     ".git",
     ".DS_Store",
+    ".pytest_cache",
 }
 
 
@@ -41,7 +42,7 @@ def compute_directory_manifest(dir_path: Path) -> Dict[str, str]:
         return manifest
 
     for root, dirs, files in os.walk(dir_path):
-        dirs[:] = [d for d in dirs if d not in ("__pycache__", ".git", ".venv")]
+        dirs[:] = [d for d in dirs if d not in ("__pycache__", ".git", ".venv", ".pytest_cache")]
         for f in sorted(files):
             if f.endswith(".pyc") or f == "manifest.sha256":
                 continue
@@ -123,7 +124,7 @@ def materialize_scratch_workspace(challenge_dir: Path, target_scratch_dir: Path)
 
         dest = target_scratch_dir / item.name
         if item.is_dir():
-            shutil.copytree(item, dest, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+            shutil.copytree(item, dest, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache"))
         else:
             shutil.copy2(item, dest)
 

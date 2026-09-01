@@ -70,13 +70,20 @@ existing M-4–M-10 gates without silently closing them.
 |---|---|---|---|
 | W-092-0 | Canonical contracts and navigable implementation map | Cross-linked canonical owners; target/as-built labels; fresh navigation/index checks | `DONE` (Merged in Ancestry) |
 | W-092-1 | Valid benchmark subjects and lossless trajectory/projection evidence | Untouched-fixture preflight, immutable trajectory links, reducer compatibility vectors | `DONE` (Merged in Ancestry) |
-| W-092-2 | Coding completion admitted only by fresh applicable verification | Deterministic failure scenarios, local challenge receipts, exterior evaluator kept independent | `DONE` (AdmissionGate Green) |
+| W-092-2 | Coding completion admitted only by fresh applicable verification | Deterministic failure scenarios; task, composition, workspace postimage, command/test subject and receipt binding; exterior evaluator kept independent | `HARDENING DELTA OPEN` (BEP-01) |
 | W-092-3 | Bounded provider-neutral repository context and durable coding state | Control/treatment trajectories with task, index, context and prompt identities | `DONE` (L1-L5 Radix Integrated) |
-| W-092-4 | Tool, patch, recovery, resume, and provider reliability | Patch corpus, injected-failure study, cold-restart parity and provider contract tests | `DONE` (ProtocolRecoveryPolicy Green) |
+| W-092-4 | Tool, patch, recovery, resume, and provider reliability | Patch corpus, versioned model/dialect vectors, typed failure ablations, semantic anti-thrashing, cold-restart parity and provider contract tests | `HARDENING DELTA OPEN` (BEP-02/03) |
 | W-092-5 | Evidence-qualified release disposition | Exact-subject checks, controlled real-model evidence and explicit SWE claim boundary | `ACTIVE` (Blocked on Empirical Canary) |
 
 No capability wave may close a milestone merely by passing its own component tests. Evidence MUST
 be evaluated under the milestone acceptance boundary to which it is offered.
+
+The v0.9.2 backend hardening deltas do not reopen the accepted historical
+evidence produced by earlier subjects. They prevent the stronger current
+claims from being made until the newly named bindings and provider/recovery
+vectors pass. Their benchmark campaign has one aggregate ceiling: `$0.10`,
+`1,000,000` tokens, or `500` calls, whichever occurs first; missing usage blocks
+further execution.
 
 ## Post-M-10 1.0 qualification horizon
 

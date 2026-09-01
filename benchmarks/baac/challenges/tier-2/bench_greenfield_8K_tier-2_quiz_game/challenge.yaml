@@ -1,0 +1,14 @@
+id: bench_greenfield_8K_tier-2_quiz_game
+name: Greenfield Quiz Game Engine
+scope: greenfield
+context_bracket: 8K
+tier: tier-2
+difficulty: 2
+timeout_seconds: 35
+entrypoint: src/main.py
+eval_type: oracle
+tags:
+- greenfield
+- state_machine
+- oop
+metadata: {}

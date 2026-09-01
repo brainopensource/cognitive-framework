@@ -60,7 +60,7 @@ from verify_evidence import verify_signature_reason  # noqa: E402
 
 #: Where relocated artifacts live. Inside the repository, so a reviewer who has
 #: the tree has the bytes.
-ARTIFACT_ROOT = _REPO_ROOT / "docs" / "03_execution" / "evidence" / "artifacts"
+ARTIFACT_ROOT = _REPO_ROOT / "evidence" / "artifacts"
 
 
 def _digest_file(path: Path) -> str:

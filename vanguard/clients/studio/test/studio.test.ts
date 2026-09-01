@@ -10,7 +10,45 @@ import {
   runAllAnomalyDetectors,
   computeWaterfallLayout,
   type EventEnvelope,
+  compileManifest,
+  compositionDigest,
+  generateAaaCSource,
+  validateAgentDefinition,
+  applyCompositionDelta,
+  type AgentDefinition,
 } from "../src/index.js";
+
+const canonicalAgent: AgentDefinition = {
+  schemaVersion: "aether.agent-definition/1", name: "coding-agent", description: "test",
+  model: { router: "configured", temperature: 0.2, maxTokens: 32000, reasoningEffort: "high" },
+  systemPrompt: "Work through RuntimeService.", skills: ["patch", "read"],
+  context: { strategy: "l1-l5", retrieval: ["ledger"] }, memory: { policy: "event-sourced", scopes: ["run"] },
+  tools: ["fs.read", "fs.patch"], plugins: [],
+  budget: { usdMicros: 1000000, tokens: 50000, timeoutMs: 120000, maxDepth: 2, maxTurns: 15 },
+  approvalPolicy: { mode: "governed-effects", editable: true }, planner: { policy: "evidence-first" },
+  recoveryPolicy: { policy: "checkpoint-resume", maxRetries: 2 }, verifier: { policy: "exterior", exteriorRequired: true },
+  completionGate: { policy: "verified", requireVerification: true }, subagents: [], topology: { kind: "single_agent", channels: [] },
+};
+
+test("Agent Studio compiles deterministic immutable manifests and safe AaaC source", async () => {
+  assert.deepEqual(validateAgentDefinition(canonicalAgent), []);
+  const first = compileManifest(canonicalAgent);
+  const second = compileManifest({ ...canonicalAgent, skills: ["read", "patch"] });
+  assert.equal(await compositionDigest(first), await compositionDigest(second));
+  assert.equal(Object.isFrozen(first), true);
+  assert.equal(Object.isFrozen(first.model), true);
+  const source = generateAaaCSource(canonicalAgent);
+  assert.match(source, /build_composition_request/);
+  assert.doesNotMatch(source, /subprocess|requests\.|urllib|os\.system/);
+});
+
+test("Agent Studio rejects unsafe policy and binds child deltas to an exact base digest", () => {
+  assert.equal(validateAgentDefinition({ ...canonicalAgent, approvalPolicy: { mode: "never", editable: false } }).some((issue) => issue.code === "unsafe_policy"), true);
+  assert.throws(() => applyCompositionDelta(canonicalAgent, { baseDigest: "latest", childRole: "reviewer", changes: {}, disposition: "discard" }), /exact composition/);
+  const child = applyCompositionDelta(canonicalAgent, { baseDigest: `sha256:${"a".repeat(64)}`, childRole: "reviewer", changes: { tools: ["fs.read"] }, disposition: "discard" });
+  assert.equal(child.name, "coding-agent.reviewer");
+  assert.deepEqual(child.tools, ["fs.read"]);
+});
 
 test("DEFAULT_DISCOVERED_CAPABILITIES enforces feature gates and disables speculative features", () => {
   assert.equal(isFeaturePermitted(DEFAULT_DISCOVERED_CAPABILITIES, "liveSingleRun", "command"), true);

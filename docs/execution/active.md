@@ -5,7 +5,7 @@ class: execution
 authority: execution
 truth_plane: TARGET
 status: living
-implementation_status: WAVE_1_CLOSED_WAVE_2_TECHNICAL_COMPLETE
+implementation_status: WAVE_1_CLOSED_WAVE_2_TECHNICAL_COMPLETE_BACKEND_HARDENING_READY
 owner: repository-governance
 canonical_for:
   - current work/state/ownership
@@ -47,7 +47,7 @@ do not override this board, source, tests, or receipts.
 
 | Lane | Package | Board state | Declared next action |
 |---|---|---|---|
-| A | `1-FORGE/ADM-001..005` | `COMPLETE` | Core Reflexive Micro-Forge (`vanguard/packages/agency/forge/`), atomic patcher, admission gate, and contract/agency suites pass 100% GREEN. |
+| A | `BEP-01` | `READY` | Close task/composition verification-receipt binding through the existing `RunPlan` -> runtime -> `AdmissionGate` seam; do not copy the report-tree implementation wholesale. |
 | B | `CMX-06` / `CMX-07` | `GATED` | Produce the accepted specialist ablation and execute the frozen repository-scale qualification set |
 
 ## Wave closure disposition and next stage
@@ -68,65 +68,76 @@ subject to its existing empirical gate, and no 1.0, SWE-bench, or SOTA claim
 is made. The first 1-forge change must preserve the existing `AdmissionGate`
 and express the missing goal contract through the current runtime seam.
 
-## Reconciled state on the exact subject
+## Reconciled state and convergence rule
 
-The production implementation subject reviewed for this plan is
-`0a5795df721f762fc94cdfb3f9b6f8601810451c`. Generated navigation artifacts
-were refreshed from this subject after implementation; they remain routing
-projections and do not override current source, tests, or receipts.
+The subject above contains the generic completion, recovery, context, durable
+state, delegation, topology, memory, Coding Max, and resume mechanisms. Stable
+gates live in [milestones.md](milestones.md); package detail lives in
+[backlog.md](backlog.md). M-8 remains blocked, M-9/M-10 remain unauthorized,
+and the frozen canary remains `NOT_RUN`. Prior reviews remain non-canonical.
+The locked architecture is thin app, thick declarative composition: one
+runtime, ledger, tool path, store, and evaluator; policy outside the kernel;
+infrastructure behind ports; optional mechanisms admitted by measured lift.
 
-The current source contains the generic completion-admission, protocol-recovery,
-L1-L5 context, reconstructible coding-state, meta-controller, index-port,
-delegation, topology, artifact, memory, learning, Coding Max policy, facade,
-and cold-resume mechanisms. The required suites, falsifiers, boundary, TCB,
-isolation, secret, duplication, documentation, and knowledge checks pass.
+## Electroweak v0.9.2 backend-review disposition
 
-The M-8 held-out runner is now structurally truthful: dry-run is preflight-only,
-live execution is injected through the runtime and exterior-evaluator seams,
-prose is not a patch or a pass, and missing usage is explicit. The frozen
-canary is valid and content-addressed, but it has not been executed against a
-provider. The signed M-8 bundle currently present verifies the durable-memory
-falsifier evidence; it does not substitute for the separate empirical held-out
-lift gate.
+The backend review and dormant prototypes under
+`docs/reports/reviews/electroweak_v092/back/` are useful non-canonical design
+inputs, not production owners. The review is directionally correct that the
+shortest path to stronger general agents is consolidation, provider-neutral
+behavior, durable recovery, bounded coordination, and exact evidence. Its
+claims that new coordination and recovery planes are absent are stale against
+the current source: topology lowering, workflow scheduling, child runtime,
+artifact flow, protocol recovery, durable task state, and anti-progress-loop
+mechanisms already exist.
 
-Consequently M-8 remains blocked, M-9/M-10 remain unauthorized, and no
-SWE-bench or release claim is made.
+The accepted production deltas are therefore:
 
-## Stable package contracts
+1. `BEP-01` — make verification receipts unconditionally subject-bound for
+   production write runs by task, composition, workspace postimage, executed
+   command, and receipt identity. This extends the existing admission path.
+2. `BEP-02` — add versioned model-behavior capabilities and dialect compilation
+   at the existing model adapter boundary. Stable capability facts may be
+   canonical values; volatile prices, availability, and observed reliability
+   remain adapter/registry data. Unknown models use a conservative declared
+   fallback and explicit missingness, never invented capability or price.
+3. `BEP-03` — extend the existing protocol-recovery and durable task-state
+   contracts with typed failure classes and semantic attempt fingerprints.
+   Resume must retain spent recovery decisions; permission denial has no
+   automatic retry; repeated unchanged actions must replan or terminate.
+4. `BEP-04` — qualify existing topology/runtime mechanisms rather than adding
+   `CoordinationPlan` or an in-memory mailbox. Start sequential, then admit at
+   most three bounded topologies only after persisted artifact flow,
+   cancellation, lease/backpressure, fairness, cold-resume, and cost-adjusted
+   lift are demonstrated.
+5. `BEP-05` — ship Research and Tutor as thin first-party compositions over the
+   same public harness contract after Coding Max qualification. Their
+   completion policies and tool/egress grants are domain-specific; their
+   runtime, ledger, memory, and evaluator remain shared.
 
-The active board supplies current authorization; the [milestones.md](milestones.md)
-supplies the stable M-4–M-8 package contracts, lane ownership, dependencies, acceptance predicates,
-and evidence obligations. This candidate view links that detail rather than copying its mutable
-tables, so package status cannot be mistaken for a second active board.
+The report-tree `profile.py`, `dialect.py`, `recovery_policy.py`, `plan.py`, and
+`mailbox.py` MUST NOT be copied wholesale. In particular, a mutable global
+profile registry, hard-coded volatile pricing in domain values, a second
+recovery ledger, an in-memory coordination mailbox, and fixed unmeasured
+per-mille role shares are rejected. The admission-gate patch is a valid bug
+hypothesis, but its optional checks are insufficient for the production path:
+the caller must supply the bindings and missing bindings must fail closed.
 
-## Three-solution convergence decision
+Activation is evidence-led. Each behavioral treatment is introduced behind a
+composition or adapter feature flag and compared with the frozen control on the
+same task/model/attempt policy. Primary metrics are externally verified task
+success and cost per solved task; secondary metrics are no-patch rate, protocol
+failure rate, repeated-action rate, turns, tokens, latency, resume parity, and
+instrument-error rate. LAM is smoke/replay evidence only. A live easy-task
+check is diagnostic only. Neither may support a SWE-bench or SOTA claim.
 
-The review corpus under `docs/reports/reviews/electroweak_v091/3_body/` is
-non-canonical design input. None of the three solutions is authorized for
-wholesale application.
-
-| Proposal | Adopt | Reject or defer | Disposition |
-|---|---|---|---|
-| Solution A | Pack-local presets, deterministic fast path, explicit plan/TODO artifacts, conditional review, feature-gated rollout | Parallel tool runtime, duplicate durable store, branch search, mutation, capsules, and distillation before measured lift | Behavioral source for pack policy; not a file-level patch plan |
-| Solution B | Provider-neutral repository intelligence, epoch-safe progressive context, evidence-gated TODO transitions, non-identical recovery, fast-to-deep escalation that preserves discoveries | Adapter-to-app imports, host subprocess verification, large application-side coordinator, and direct copy of its report-tree prototype | Primary control-model reference after boundary repair |
-| Solution C | Thin product application concept, deterministic complexity classes, layered verification, SBFL and mutation as testable hypotheses, single-attempt qualification discipline | Unsupported performance/benchmark statistics, invented APIs, premature product-family expansion, auto-rollback, and mandatory swarm/SBFL/mutation | Product direction and experiment backlog only |
-
-The selected architecture is **thin app, thick declarative composition**:
-
-```text
-vg / API
-  -> apps/coding_max            thin request/result facade and preset selection
-  -> runtime                    the only composition, lifecycle and ledger authority
-  -> code-default composition   planner, context policy, coding recovery and admission policy
-  -> ports                      generic model/index/sandbox/store contracts
-  -> adapters                   infrastructure implementations; never import apps or coding policy
-```
-
-No second runtime, event system, tool broker, persistence store, evaluator, or
-authority path may be introduced. Repository-intelligence tools must be backed
-by `IndexPort` or another generic port. Commands and tests must execute through
-the mediated environment/sandbox path. Large state remains content-addressed
-artifacts referenced by ledger events; `CodingTaskState` remains a projection.
+For this review and its validation runs, the aggregate benchmark stop condition
+is `$0.10` total provider spend, `1,000,000` total tokens, or `500` total model
+calls, whichever is reached first. These are cumulative campaign ceilings, not
+per-task allowances; retries, controls, treatments, mocks, and failed provider
+requests count toward their applicable totals. Every run must persist the
+pre-run remaining budget and observed post-run usage. Unknown usage stops the
+campaign until reconciled rather than being treated as zero.
 
 ## Authorized closure sequence
 

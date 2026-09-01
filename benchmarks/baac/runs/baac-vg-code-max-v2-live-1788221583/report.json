@@ -1,0 +1,91 @@
+{
+  "runId": "baac-vg-code-max-v2-live-1788221583",
+  "timestamp": "2026-09-01T00:13:03Z",
+  "preset": "vg-code-max-v2",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "mode": "live",
+  "metadata": {},
+  "summary": {
+    "totalChallenges": 1,
+    "passedCount": 0,
+    "overallPassRatePct": 0.0,
+    "totalTokens": 19475,
+    "totalCostUsd": 0.001038,
+    "totalDurationSeconds": 25.52,
+    "attribution": {
+      "PASS": 0,
+      "LLM_COGNITIVE_ERROR": 1,
+      "HARNESS_ERROR": 0,
+      "BUDGET_EXHAUSTED": 0,
+      "DATASET_INVALID": 0
+    }
+  },
+  "results": [
+    {
+      "challengeId": "bench_multi_8K_tier-2_json_todo_store",
+      "tier": "tier-2",
+      "scope": "multi",
+      "contextBracket": "8K",
+      "preset": "vg-code-max-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "mode": "live",
+      "status": "FAIL",
+      "attribution": "LLM_COGNITIVE_ERROR",
+      "turns": 10,
+      "promptTokens": 16436,
+      "completionTokens": 3039,
+      "totalTokens": 19475,
+      "costUsd": 0.001038,
+      "durationSeconds": 25.52,
+      "changedFiles": [
+        "src/todo.py",
+        "verify_todo.py"
+      ],
+      "diffPatch": "--- a/todo.py\n+++ b/todo.py\n@@ -1,2 +1,72 @@\n+\"\"\"TodoStore: a simple todo list with JSON file persistence.\"\"\"\n+\n+import json\n+from pathlib import Path\n+\n+\n class TodoStore:\n-    pass\n+    \"\"\"A todo store that persists todos to a JSON file.\n+\n+    Todos are stored as dicts with keys: id, title, tags, completed.\n+    IDs are 1-based and monotonically increasing.\n+    \"\"\"\n+\n+    def __init__(self, path=\"todos.json\"):\n+        self.path = Path(path)\n+        self._todos = {}\n+        self._next_id = 1\n+        self._load()\n+\n+    def _load(self):\n+        if self.path.exists():\n+            with open(self.path, \"r\", encoding=\"utf-8\") as f:\n+                data = json.load(f)\n+            self._todos = {int(k): v for k, v in data.get(\"todos\", {}).items()}\n+            self._next_id = int(data.get(\"next_id\", 1))\n+        else:\n+            self._todos = {}\n+            self._next_id = 1\n+\n+    def _save(self):\n+        data = {\n+            \"todos\": {str(k): v for k, v in self._todos.items()},\n+            \"next_id\": self._next_id,\n+        }\n+        with open(self.path, \"w\", encoding=\"utf-8\") as f:\n+            json.dump(data, f, indent=2)\n+\n+    def add(self, title, tags=None):\n+        \"\"\"Add a new todo and return its id.\"\"\"\n+        todo_id = self._next_id\n+        self._next_id += 1\n+        todo = {\n+            \"id\": todo_id,\n+            \"title\": title,\n+            \"tags\": list(tags or []),\n+            \"completed\": False,\n+        }\n+        self._todos[todo_id] = todo\n+        self._save()\n+        return todo_id\n+\n+    def complete(self, todo_id):\n+        \"\"\"Mark a todo as completed. Raises KeyError if not found.\"\"\"\n+        if todo_id not in self._todos:\n+            raise KeyError(todo_id)\n+        self._todos[todo_id][\"completed\"] = True\n+        self._save()\n+        return dict(self._todos[todo_id])\n+\n+    def get(self, todo_id):\n+        \"\"\"Return a copy of the todo with the given id. Raises KeyError if not found.\"\"\"\n+        if todo_id not in self._todos:\n+            raise KeyError(todo_id)\n+        return dict(self._todos[todo_id])\n+\n+    def list_pending(self):\n+        \"\"\"Return all todos that are not yet completed.\"\"\"\n+        return [dict(t) for t in self._todos.values() if not t[\"completed\"]]\n+\n+    def list_by_tag(self, tag):\n+        \"\"\"Return all todos that have the given tag.\"\"\"\n+        return [dict(t) for t in self._todos.values() if tag in t[\"tags\"]]",
+      "oracle": {
+        "passed": false,
+        "exitCode": 1,
+        "stdout": "",
+        "stderr": "test_todo (__main__.TestTodo.test_todo) ... ERROR\n\n======================================================================\nERROR: test_todo (__main__.TestTodo.test_todo)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rocha/Coding/Aether-D-System/benchmarks/baac/challenges/tier-2/bench_multi_8K_tier-2_json_todo_store/oracle/verify.py\", line 9, in test_todo\n    store = TodoStore(tmp.name)\n            ^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/baac-scratch-bench_multi_8K_tier-2_json_todo_store-17hvs7ot/src/todo.py\", line 18, in __init__\n    self._load()\n  File \"/tmp/baac-scratch-bench_multi_8K_tier-2_json_todo_store-17hvs7ot/src/todo.py\", line 23, in _load\n    data = json.load(f)\n           ^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/__init__.py\", line 293, in load\n    return loads(fp.read(),\n           ^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/__init__.py\", line 346, in loads\n    return _default_decoder.decode(s)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/decoder.py\", line 337, in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/lib/python3.12/json/decoder.py\", line 355, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\n\n----------------------------------------------------------------------\nRan 1 test in 0.004s\n\nFAILED (errors=1)\n",
+        "durationSeconds": 0.045,
+        "error": "test_todo (__main__.TestTodo.test_todo) ... ERROR\n\n======================================================================\nERROR: test_todo (__main__.TestTodo.test_todo)\n-------------------------------",
+        "assertionCount": 1,
+        "failingAssertions": [
+          "test_todo",
+          "(errors=1)"
+        ]
+      },
+      "aiJudgeScore": null,
+      "diagnosis": "test_todo (__main__.TestTodo.test_todo) ... ERROR\n\n======================================================================\nERROR: test_todo (__main__.TestTodo.test_todo)\n-------------------------------",
+      "metadata": {
+        "id": "bench_multi_8K_tier-2_json_todo_store",
+        "name": "JSON-Backed Todo Store",
+        "scope": "multi",
+        "context_bracket": "8K",
+        "tier": "tier-2",
+        "difficulty": 2,
+        "timeout_seconds": 35,
+        "entrypoint": "src/main.py",
+        "eval_type": "oracle",
+        "tags": [
+          "storage",
+          "json",
+          "multi_file"
+        ],
+        "metadata": {},
+        "cli_args": {
+          "command": "run",
+          "preset": "vg-code-max-v2",
+          "mode": "live",
+          "model": "deepseek/deepseek-v4-flash-0731",
+          "tier": "all",
+          "single": "bench_multi_8K_tier-2_json_todo_store",
+          "max_turns": 10,
+          "max_requests": 300,
+          "budget": 0.05,
+          "keep_scratch": false
+        }
+      }
+    }
+  ]
+}

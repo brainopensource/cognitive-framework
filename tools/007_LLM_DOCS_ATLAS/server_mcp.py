@@ -246,6 +246,26 @@ class LDAMCPServer:
                             "inputSchema": {"type": "object", "properties": {}},
                         },
                         {
+                            "name": "lda_identity",
+                            "description": "Repository identity snapshot: branch, HEAD, dirty state, submodules, build systems, and index-vs-HEAD freshness (FRESH/STALE/UNKNOWN).",
+                            "inputSchema": {"type": "object", "properties": {}},
+                        },
+                        {
+                            "name": "lda_diff",
+                            "description": "Fact-level diff: workspace vs index (added/modified/deleted files), or git range with since=<sha>.",
+                            "inputSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "since": {"type": "string", "description": "Optional commit SHA to diff against (git name-status)."}
+                                },
+                            },
+                        },
+                        {
+                            "name": "lda_metrics",
+                            "description": "Structural metrics: fan-in/fan-out hubs, module import cycles, hub files by symbol count, documentation ratio.",
+                            "inputSchema": {"type": "object", "properties": {}},
+                        },
+                        {
                             "name": "lda_repomap",
                             "description": "Generate dense PageRank-ranked repository structural map with multi-file skeletons within a token budget.",
                             "inputSchema": {
@@ -449,6 +469,23 @@ class LDAMCPServer:
             from .core.drift import detect_drift
 
             return detect_drift(self._storage, self._root)
+
+        elif name == "lda_identity":
+            from .core.identity import repo_identity
+
+            return repo_identity(self._root, self._storage, self._ctx.profile)
+
+        elif name == "lda_diff":
+            from .core.repodiff import compute_diff
+
+            return compute_diff(
+                self._root, self._storage, since=args.get("since") or None
+            )
+
+        elif name == "lda_metrics":
+            from .core.metrics import compute_metrics
+
+            return compute_metrics(self._storage)
 
         elif name == "lda_repomap":
             from .atlas import generate_repository_map

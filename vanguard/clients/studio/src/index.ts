@@ -4,6 +4,7 @@ export * from "./store/fold.js";
 export * from "./store/detectors.js";
 export * from "./store/session.js";
 export * from "./render/waterfall-layout.js";
+export * from "./agent-definition.js";
 export * from "./ui/tokens.js";
 export * from "./ui/EffectInspector.js";
 export * from "./ui/ApprovalInterceptor.js";

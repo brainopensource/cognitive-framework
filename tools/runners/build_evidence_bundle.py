@@ -144,7 +144,7 @@ def _copy_material(
             ref = path.resolve().relative_to(subject_root.resolve()).as_posix()
         except ValueError:
             # A copied `.md` file with living-doc frontmatter (e.g. an RF-95
-            # preregistration) lands inside `docs/03_execution/**`, which
+            # preregistration) lands inside `evidence/**`, which
             # `check_doc_metadata.py` scans for unique `id`/`canonical_for`
             # values. Left as `.md`, the copy collides with its own source
             # document. Retarget the extension so the bytes are preserved
@@ -221,7 +221,7 @@ def build_m4(
         )
 
     if evidence_root is None:
-        evidence_root = _REPO_ROOT / "docs" / "03_execution" / "evidence"
+        evidence_root = _REPO_ROOT / "evidence"
     evidence_root = evidence_root.resolve()
     artifact_dir = evidence_root / "artifacts" / artifact_name
     artifact_dir.mkdir(parents=True, exist_ok=True)
@@ -327,7 +327,7 @@ def build_m6(
         and bool(falsifier_report.get("kill_tree"))
     )
     if evidence_root is None:
-        evidence_root = _REPO_ROOT / "docs" / "03_execution" / "evidence"
+        evidence_root = _REPO_ROOT / "evidence"
     evidence_root = evidence_root.resolve()
     bundle_name = f"M-6-canonical-recursion-{label}"
     artifact_dir = evidence_root / "artifacts" / bundle_name
@@ -420,7 +420,7 @@ def _suite_bundle(
     surface = {name: _sha256_file(subject_root / path)
                for name, path in surface_paths.items()}
     if evidence_root is None:
-        evidence_root = _REPO_ROOT / "docs" / "03_execution" / "evidence"
+        evidence_root = _REPO_ROOT / "evidence"
     evidence_root = evidence_root.resolve()
     artifact_dir = evidence_root / "artifacts" / bundle_name
     artifact_dir.mkdir(parents=True, exist_ok=True)

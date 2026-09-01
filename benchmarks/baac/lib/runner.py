@@ -1,19 +1,20 @@
-"""BaaC Challenge Execution and Telemetry Runner.
+"""BaaC Challenge Execution and Telemetry Orchestrator.
 
 Implements:
-1. Complete BaaC execution pipeline:
-   verify_zero -> materialize_scratch -> execute_harness -> run_external_oracle -> cleanup -> attribute.
-2. Dual execution modes:
+1. Complete Scientific BaaC pipeline:
+   verify_zero -> clean_cache -> materialize_scratch -> execute_harness -> run_external_oracle -> cleanup -> attribute.
+2. Multi-Provider Execution:
    - `lam`: hermetic $0.00 sub-millisecond offline replay via LLM API Mock.
-   - `live`: OpenRouter execution with pre-call budget checks.
-3. Support for presets: `vg-1-forge`, `vg-code-max`, `vg-code-max-v2`.
-4. Artifact recording (events, trajectory, telemetry).
+   - `live`: OpenRouter execution (Free, Cheap, Frontier SOTA) with strict pre-call budget checks.
+   - `ollama`: Local open-weight models with $0.00 local execution.
+3. Artifact recording (events, trajectory, telemetry, patch, metadata).
 """
 
 from __future__ import annotations
 
 import base64
 from dataclasses import dataclass, field
+import difflib
 import hashlib
 import json
 import os
@@ -26,8 +27,7 @@ import sys
 import tempfile
 import time
 from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
-import urllib.error
-import urllib.request
+import yaml
 
 from vanguard.packages.runtime.root import (
     FORGE_PRESET_NAME,
@@ -39,7 +39,11 @@ from vanguard.packages.runtime.root import (
     resolve_model,
 )
 
+from ..schema import ChallengeMetadata
 from .budget import BudgetCapConfig, BudgetTracker, BudgetExceededError
+from .cache import clean_scratch_directories, purge_bytecode_caches
+from .eval_judge import evaluate_challenge
+from .models import LAMModelPort, OllamaModelPort, OpenRouterModelPort, load_openrouter_api_key
 from .oracle import OracleResult, run_external_oracle
 from .report import ChallengeExecutionResult, classify_attribution
 from .state import (
@@ -53,385 +57,35 @@ ROOT = Path(__file__).resolve().parents[3]
 BAAC_RUNS_DIR = ROOT / "benchmarks" / "baac" / "runs"
 
 
-def load_openrouter_key() -> str:
-    """Load OpenRouter API key securely without exposing it."""
-    key = os.environ.get("OPENROUTER_API_KEY")
-    if key and not key.startswith("your_"):
-        return key.strip()
-    env_file = ROOT / ".env"
-    if env_file.exists():
-        for line in env_file.read_text(encoding="utf-8").splitlines():
-            line = line.strip()
-            if line.startswith("OPENROUTER_API_KEY="):
-                val = line.split("=", 1)[1].strip().strip('"').strip("'")
-                if val and not val.startswith("your_"):
-                    return val
-    return ""
+def compute_directory_diff(pristine_dir: Path, modified_dir: Path) -> str:
+    """Compute unified diff between pristine challenge source and modified workspace."""
+    diff_lines: List[str] = []
+    pristine_files = {p.relative_to(pristine_dir): p for p in pristine_dir.rglob("*") if p.is_file() and not p.name.startswith(".")}
+    modified_files = {p.relative_to(modified_dir): p for p in modified_dir.rglob("*") if p.is_file() and not p.name.startswith(".")}
 
+    all_rel_paths = sorted(set(pristine_files.keys()) | set(modified_files.keys()))
 
-class OpenRouterLiveModelPort:
-    """Live ModelPort communicating with OpenRouter with strict pre-call budget assertions."""
+    for rel in all_rel_paths:
+        p_file = pristine_files.get(rel)
+        m_file = modified_files.get(rel)
 
-    def __init__(
-        self,
-        model_name: str,
-        budget_tracker: BudgetTracker,
-        api_key: str,
-        cassettes: List[Dict[str, Any]],
-    ) -> None:
-        self.model_name = resolve_model(model_name)
-        self.budget_tracker = budget_tracker
-        self.api_key = api_key
-        self.cassettes = cassettes
-        self.turn_counter = 0
+        p_text = p_file.read_text(encoding="utf-8", errors="replace").splitlines(keepends=True) if p_file else []
+        m_text = m_file.read_text(encoding="utf-8", errors="replace").splitlines(keepends=True) if m_file else []
 
-    def propose(self, context: Any, tools: Any, sampling: Any) -> Any:
-        self.turn_counter += 1
-        # Pre-call assertion
-        self.budget_tracker.check_pre_call(self.model_name)
+        if p_text != m_text:
+            diff = difflib.unified_diff(
+                p_text,
+                m_text,
+                fromfile=f"a/{rel}",
+                tofile=f"b/{rel}",
+            )
+            diff_lines.extend(diff)
 
-        messages = list(context.get("messages", []))
-        payload = {
-            "model": self.model_name,
-            "messages": messages,
-            "tools": tools,
-            "tool_choice": "auto",
-            "temperature": 0.0,
-            "max_tokens": 2048,
-        }
-        req_bytes = json.dumps(payload).encode("utf-8")
-        req_sha = hashlib.sha256(req_bytes).hexdigest()
-
-        req = urllib.request.Request(
-            "https://openrouter.ai/api/v1/chat/completions",
-            data=req_bytes,
-            headers={
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-                "HTTP-Referer": "https://vanguard.ai",
-                "X-Title": "Vanguard-BaaC",
-            },
-        )
-
-        t0 = time.perf_counter()
-        with urllib.request.urlopen(req, timeout=35) as resp:
-            resp_bytes = resp.read()
-            duration_ms = int((time.perf_counter() - t0) * 1000)
-            resp_json = json.loads(resp_bytes.decode("utf-8"))
-
-        reply_sha = hashlib.sha256(resp_bytes).hexdigest()
-        choice = resp_json.get("choices", [{}])[0]
-        msg = choice.get("message", {})
-        usage = resp_json.get("usage", {})
-        p_tok = usage.get("prompt_tokens", 0)
-        c_tok = usage.get("completion_tokens", 0)
-        reported_cost = usage.get("cost", 0.0) or 0.0
-
-        cost = self.budget_tracker.record_request(
-            model=self.model_name,
-            prompt_tokens=p_tok,
-            completion_tokens=c_tok,
-            reported_cost=reported_cost,
-        )
-
-        self.cassettes.append({
-            "turn": self.turn_counter,
-            "request_sha256": req_sha,
-            "response_sha256": reply_sha,
-            "prompt_tokens": p_tok,
-            "completion_tokens": c_tok,
-            "cost_usd": cost,
-            "duration_ms": duration_ms,
-        })
-
-        usage["cost"] = cost
-        return {"message": msg, "usage": usage}
-
-
-class LamMockModelPort:
-    """Hermetic $0.00 ModelPort using LLM API Mock engine or scripted cassettes."""
-
-    FIB_SOLUTION = '''"""Fibonacci Module."""
-
-from __future__ import annotations
-import sys
-import argparse
-
-
-def fib(n: int) -> int:
-    """Compute n-th Fibonacci number."""
-    if not isinstance(n, int) or isinstance(n, bool):
-        raise TypeError("n must be an integer")
-    if n < 0:
-        raise ValueError("n must be non-negative")
-    if n == 0:
-        return 0
-    if n == 1:
-        return 1
-    a, b = 0, 1
-    for _ in range(2, n + 1):
-        a, b = b, a + b
-    return b
-
-
-def main() -> int:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--n", type=int, required=True)
-    args = parser.parse_args()
-    if args.n < 0:
-        sys.stderr.write("Error: negative n\\n")
-        return 1
-    print(fib(args.n))
-    return 0
-
-
-if __name__ == "__main__":
-    try:
-        sys.exit(main())
-    except Exception:
-        sys.exit(1)
-'''
-
-    TODO_SOLUTION = '''"""JSON-Backed Todo Store."""
-
-from __future__ import annotations
-
-import json
-from pathlib import Path
-from typing import Any, List, Optional
-
-
-class TodoStore:
-    def __init__(self, filepath: str | Path) -> None:
-        self.filepath = Path(filepath)
-        self.items: list[dict[str, Any]] = []
-        if self.filepath.is_file():
-            try:
-                self.items = json.loads(self.filepath.read_text(encoding="utf-8"))
-            except Exception:
-                self.items = []
-        else:
-            self._save()
-
-    def _save(self) -> None:
-        self.filepath.parent.mkdir(parents=True, exist_ok=True)
-        self.filepath.write_text(json.dumps(self.items, indent=2), encoding="utf-8")
-
-    def add(self, title: str, tags: list[str] | None = None) -> int:
-        if not title or not title.strip():
-            raise ValueError("title cannot be empty")
-        next_id = max([item["id"] for item in self.items], default=0) + 1
-        item = {
-            "id": next_id,
-            "title": title.strip(),
-            "completed": False,
-            "tags": list(tags or []),
-        }
-        self.items.append(item)
-        self._save()
-        return next_id
-
-    def complete(self, item_id: int) -> bool:
-        for item in self.items:
-            if item["id"] == item_id:
-                item["completed"] = True
-                self._save()
-                return True
-        return False
-
-    def get(self, item_id: int) -> dict | None:
-        for item in self.items:
-            if item["id"] == item_id:
-                return dict(item)
-        return None
-
-    def list_pending(self) -> list[dict]:
-        pending = [dict(item) for item in self.items if not item["completed"]]
-        return sorted(pending, key=lambda x: x["id"])
-
-    def list_by_tag(self, tag: str) -> list[dict]:
-        matching = [dict(item) for item in self.items if tag in item.get("tags", [])]
-        return sorted(matching, key=lambda x: x["id"])
-'''
-
-    QUIZ_SOLUTION = '''"""Quiz Game Engine."""
-
-from __future__ import annotations
-
-from dataclasses import dataclass
-import json
-from pathlib import Path
-from typing import Any, List, Optional
-
-
-@dataclass
-class Question:
-    id: str
-    prompt: str
-    options: list[str]
-    correct_choice: str
-    points: int = 10
-
-
-class QuizEngine:
-    def __init__(self, questions: list[Question | dict]) -> None:
-        if not questions:
-            raise ValueError("questions list cannot be empty")
-        self.questions: list[Question] = []
-        for q in questions:
-            if isinstance(q, Question):
-                self.questions.append(q)
-            elif isinstance(q, dict):
-                self.questions.append(
-                    Question(
-                        id=str(q["id"]),
-                        prompt=str(q["prompt"]),
-                        options=list(q["options"]),
-                        correct_choice=str(q["correct_choice"]),
-                        points=int(q.get("points", 10)),
-                    )
-                )
-        self.index = 0
-        self.earned_points = 0
-        self.answered_count = 0
-
-    def current_question(self) -> Question | None:
-        if self.index < len(self.questions):
-            return self.questions[self.index]
-        return None
-
-    def submit_answer(self, choice: str) -> dict[str, Any]:
-        if self.is_finished():
-            raise RuntimeError("Quiz is already finished")
-        q = self.questions[self.index]
-        clean_choice = str(choice).strip().lower()
-        is_correct = clean_choice == str(q.correct_choice).strip().lower()
-        points = q.points if is_correct else 0
-        self.earned_points += points
-        self.answered_count += 1
-        self.index += 1
-        return {
-            "correct": is_correct,
-            "earned_points": points,
-            "correct_choice": q.correct_choice,
-            "question_id": q.id,
-        }
-
-    def get_score(self) -> dict[str, Any]:
-        total_pts = sum(q.points for q in self.questions)
-        pct = (self.earned_points / total_pts * 100.0) if total_pts > 0 else 0.0
-        return {
-            "total_points": total_pts,
-            "earned_points": self.earned_points,
-            "score_pct": pct,
-            "answered": self.answered_count,
-            "total_questions": len(self.questions),
-        }
-
-    def is_finished(self) -> bool:
-        return self.index >= len(self.questions)
-
-    def reset(self) -> None:
-        self.index = 0
-        self.earned_points = 0
-        self.answered_count = 0
-
-    @classmethod
-    def load_from_json(cls, json_path: str | Path) -> QuizEngine:
-        p = Path(json_path)
-        data = json.loads(p.read_text(encoding="utf-8"))
-        return cls(data)
-'''
-
-    def __init__(self, challenge_id: str, budget_tracker: BudgetTracker) -> None:
-        self.challenge_id = challenge_id
-        self.budget_tracker = budget_tracker
-        self.turn_counter = 0
-
-    def propose(self, context: Any, tools: Any, sampling: Any) -> Any:
-        self.turn_counter += 1
-        self.budget_tracker.check_pre_call("lam-mock")
-
-        cid = self.challenge_id
-        if cid == "fib_cli":
-            target_path = "src/fib.py"
-            code = self.FIB_SOLUTION
-        elif cid == "json_todo_store":
-            target_path = "src/todo.py"
-            code = self.TODO_SOLUTION
-        elif cid == "quiz_game":
-            target_path = "src/quiz_engine.py"
-            code = self.QUIZ_SOLUTION
-        else:
-            target_path = "src/main.py"
-            code = "# Generated by LAM\\n"
-
-        if self.turn_counter == 1:
-            tool_calls = [
-                {
-                    "id": "call_1",
-                    "function": {
-                        "name": "view_file",
-                        "arguments": {"path": "TASK.md"},
-                    },
-                }
-            ]
-            content = "Inspecting task requirements."
-        elif self.turn_counter == 2:
-            tool_calls = [
-                {
-                    "id": "call_2",
-                    "function": {
-                        "name": "edit_file",
-                        "arguments": {
-                            "path": target_path,
-                            "content": code,
-                        },
-                    },
-                }
-            ]
-            content = "Applying implementation."
-        elif self.turn_counter == 3:
-            tool_calls = [
-                {
-                    "id": "call_3",
-                    "function": {
-                        "name": "run_command",
-                        "arguments": {"command": "python3 oracle/verify.py"},
-                    },
-                }
-            ]
-            content = "Running test oracle to verify implementation."
-        else:
-            tool_calls = [
-                {
-                    "id": "call_fin",
-                    "function": {
-                        "name": "finish_task",
-                        "arguments": {"summary": f"Challenge {cid} completed and verified green."},
-                    },
-                }
-            ]
-            content = "Finished task."
-
-        self.budget_tracker.record_request(
-            model="lam-mock",
-            prompt_tokens=150,
-            completion_tokens=30,
-            reported_cost=0.0,
-        )
-
-        return {
-            "message": {
-                "content": content,
-                "tool_calls": tool_calls,
-            },
-            "usage": {"prompt_tokens": 150, "completion_tokens": 30, "cost": 0.0},
-        }
+    return "".join(diff_lines)
 
 
 class BaaCRunner:
-    """Coordinates the BaaC cycle for one or more challenges."""
+    """Coordinates the BaaC execution cycle for one or more challenges."""
 
     def __init__(
         self,
@@ -440,28 +94,55 @@ class BaaCRunner:
         mode: str = "lam",
         budget_config: Optional[BudgetCapConfig] = None,
         run_id: Optional[str] = None,
+        extra_metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
         self.preset = preset
-        self.model_name = model_name or ("lam-mock" if mode == "lam" else get_default_paid_model())
         self.mode = mode
+        self.model_name = model_name or ("lam-mock" if mode == "lam" else "deepseek/deepseek-v4-flash-0731")
         self.budget_config = budget_config or BudgetCapConfig()
         self.run_id = run_id or f"baac-run-{int(time.time())}"
-        self.api_key = load_openrouter_key() if mode == "live" else ""
+        self.extra_metadata = extra_metadata or {}
+        self.api_key = load_openrouter_api_key() if mode == "live" else ""
         self.run_dir = BAAC_RUNS_DIR / self.run_id
         self.run_dir.mkdir(parents=True, exist_ok=True)
+
+    def load_challenge_metadata(self, challenge_dir: Path) -> ChallengeMetadata:
+        """Parse challenge.yaml or construct default metadata."""
+        yaml_file = challenge_dir / "challenge.yaml"
+        if yaml_file.is_file():
+            try:
+                raw = yaml.safe_load(yaml_file.read_text(encoding="utf-8")) or {}
+                return ChallengeMetadata.from_dict(raw)
+            except Exception:
+                pass
+
+        # Fallback default inferred from path
+        cid = challenge_dir.name
+        tier_name = challenge_dir.parent.name if "tier-" in challenge_dir.parent.name else "tier-1"
+        return ChallengeMetadata(
+            id=cid,
+            name=cid.replace("_", " ").title(),
+            scope="single" if "single" in cid else "multi",
+            context_bracket="2K" if "2K" in cid else "8K",
+            tier=tier_name,
+            difficulty=int(tier_name.split("-")[-1]) if "-" in tier_name and tier_name.split("-")[-1].isdigit() else 1,
+            timeout_seconds=30,
+        )
 
     def run_challenge(self, challenge_dir: Path, keep_scratch: bool = False) -> ChallengeExecutionResult:
         """Run the full BaaC cycle for a single challenge."""
         t_start = time.perf_counter()
-        cid = challenge_dir.name
-        tier = challenge_dir.parent.name if challenge_dir.parent.name in ("easy", "medium", "hard", "greenfield") else "standard"
+        meta = self.load_challenge_metadata(challenge_dir)
+        cid = meta.id
 
-        # 1. Step 1: Verify Zero-State of challenge directory
+        # 1. Step 1: Verify Zero-State of challenge directory against manifest
         is_zero_ok, drifts = verify_challenge_zero_state(challenge_dir)
         if not is_zero_ok:
             return ChallengeExecutionResult(
                 challenge_id=cid,
-                tier=tier,
+                tier=meta.tier,
+                scope=meta.scope,
+                context_bracket=meta.context_bracket,
                 preset=self.preset,
                 model=self.model_name,
                 mode=self.mode,
@@ -474,9 +155,10 @@ class BaaCRunner:
                 cost_usd=0.0,
                 duration_seconds=0.0,
                 diagnosis=f"Zero-state verification failed: {'; '.join(drifts)}",
+                metadata=meta.to_dict(),
             )
 
-        # 2. Step 2: Read Task Brief and Metadata
+        # 2. Step 2: Read Task Brief
         task_md_file = challenge_dir / "TASK.md"
         task_brief = task_md_file.read_text(encoding="utf-8") if task_md_file.is_file() else f"Challenge {cid}"
 
@@ -488,18 +170,27 @@ class BaaCRunner:
             budget_tracker = BudgetTracker(self.budget_config)
             cassettes: List[Dict[str, Any]] = []
 
-            # 4. Step 4: Setup ModelPort
+            # 4. Step 4: Setup ModelPort based on mode
             if self.mode == "live":
                 if not self.api_key:
                     raise RuntimeError("OPENROUTER_API_KEY is required for --mode live")
-                model_port = OpenRouterLiveModelPort(
+                model_port: Any = OpenRouterModelPort(
                     model_name=self.model_name,
                     budget_tracker=budget_tracker,
                     api_key=self.api_key,
                     cassettes=cassettes,
                 )
+            elif self.mode == "ollama":
+                model_port = OllamaModelPort(
+                    model_name=self.model_name,
+                    budget_tracker=budget_tracker,
+                )
             else:
-                model_port = LamMockModelPort(challenge_id=cid, budget_tracker=budget_tracker)
+                model_port = LAMModelPort(
+                    challenge_id=cid,
+                    budget_tracker=budget_tracker,
+                    model_name=self.model_name,
+                )
 
             # 5. Step 5: Execute Agent Harness
             def local_command_runner(cmd: str, cwd: Path) -> Tuple[int, str]:
@@ -515,7 +206,7 @@ class BaaCRunner:
                     env=env,
                     capture_output=True,
                     text=True,
-                    timeout=30,
+                    timeout=meta.timeout_seconds,
                 )
                 return proc.returncode, (proc.stdout + "\n" + proc.stderr).strip()
 
@@ -549,19 +240,27 @@ class BaaCRunner:
                 turns = outcome.turns
                 changed_files = outcome.changed_files
                 trajectory = outcome.trajectory
-            except BudgetExceededError as b_err:
+            except BudgetExceededError:
                 harness_status = "BUDGET_EXHAUSTED"
                 budget_exceeded = True
             except Exception as h_exc:
                 harness_status = "INSTRUMENT_ERROR"
 
-            # 6. Step 6: Execute Ground-Truth External Oracle
-            oracle_script = challenge_dir / "oracle" / "verify.py"
-            oracle_result = run_external_oracle(oracle_script, scratch_dir)
+            # Compute unified diff patch
+            diff_patch = compute_directory_diff(challenge_dir / "src", scratch_dir / "src" if (scratch_dir / "src").exists() else scratch_dir)
 
-            status = "PASS" if oracle_result.passed else "FAIL"
+            # 6. Step 6: Execute Ground-Truth Evaluation (Oracle / Judge)
+            eval_outcome = evaluate_challenge(
+                eval_type=meta.eval_type,
+                challenge_dir=challenge_dir,
+                scratch_dir=scratch_dir,
+                diff_patch=diff_patch,
+                timeout_seconds=meta.timeout_seconds,
+            )
+
+            status = eval_outcome.status
             attribution = classify_attribution(
-                oracle=oracle_result,
+                oracle=eval_outcome.oracle_result,
                 harness_status=harness_status,
                 turns=turns,
                 max_turns=self.budget_config.max_turns,
@@ -570,11 +269,16 @@ class BaaCRunner:
             )
 
             total_duration = round(time.perf_counter() - t_start, 2)
-            diagnosis = "All falsifiers green" if status == "PASS" else (oracle_result.error or harness_status)
+            diagnosis = "All falsifiers green" if status == "PASS" else eval_outcome.feedback
+
+            merged_meta = dict(meta.to_dict())
+            merged_meta.update(self.extra_metadata)
 
             result = ChallengeExecutionResult(
                 challenge_id=cid,
-                tier=tier,
+                tier=meta.tier,
+                scope=meta.scope,
+                context_bracket=meta.context_bracket,
                 preset=self.preset,
                 model=self.model_name,
                 mode=self.mode,
@@ -586,8 +290,12 @@ class BaaCRunner:
                 total_tokens=budget_tracker.total_tokens,
                 cost_usd=budget_tracker.total_cost_usd,
                 duration_seconds=total_duration,
-                oracle_result=oracle_result,
+                changed_files=changed_files,
+                diff_patch=diff_patch,
+                oracle_result=eval_outcome.oracle_result,
+                ai_judge_score=eval_outcome.score if meta.eval_type == "ai_judge" else None,
                 diagnosis=diagnosis,
+                metadata=merged_meta,
                 trajectory=tuple(trajectory),
             )
 
@@ -602,6 +310,6 @@ class BaaCRunner:
             return result
 
         finally:
-            # 8. Step 8: Reset / Clean Scratch Workspace
+            # 8. Step 8: Reset / Clean Ephemeral Workspace
             if not keep_scratch:
                 clean_scratch_workspace(scratch_dir)

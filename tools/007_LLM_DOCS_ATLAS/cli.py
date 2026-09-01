@@ -160,6 +160,15 @@ def main(argv=None):
     bench_p.add_argument("--k", type=int, default=5)
     bench_p.add_argument("--json", action="store_true")
 
+    # 13. Identity / diff / metrics (Wave F)
+    id_p = sub.add_parser("identity", help="Repository identity snapshot: branch, HEAD, dirty state, build system, index-vs-HEAD freshness")
+    id_p.add_argument("--json", action="store_true")
+    diff_p = sub.add_parser("diff", help="Fact-level diff: workspace vs index, or git range with --since <sha>")
+    diff_p.add_argument("--since", type=str, default=None, help="Classify git changes since this commit (name-status)")
+    diff_p.add_argument("--json", action="store_true")
+    met_p = sub.add_parser("metrics", help="Structural metrics: fan-in/fan-out hubs, import cycles, hub files, doc coverage")
+    met_p.add_argument("--json", action="store_true")
+
     args = parser.parse_args(argv)
     repo_root = args.root.resolve() if args.root else Path.cwd().resolve()
     ctx = AtlasContext.discover(repo_root, getattr(args, "include_research", False))
@@ -236,6 +245,18 @@ def main(argv=None):
         from .core.bench import run_bench
 
         result = run_bench(budget=getattr(args, "budget", 2000), k=getattr(args, "k", 5))
+    elif args.command == "identity":
+        from .core.identity import repo_identity
+
+        result = repo_identity(repo_root, get_storage(repo_root), ctx.profile)
+    elif args.command == "diff":
+        from .core.repodiff import compute_diff
+
+        result = compute_diff(repo_root, get_storage(repo_root), since=args.since)
+    elif args.command == "metrics":
+        from .core.metrics import compute_metrics
+
+        result = compute_metrics(get_storage(repo_root))
     elif args.command == "doctor":
         storage = get_storage(repo_root)
         index_stats = storage.get_stats()

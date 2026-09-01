@@ -1,9 +1,9 @@
 """BaaC Fail-Closed Budget and Request Guard.
 
 Enforces:
-1. Strict Request Caps (default: max 300 requests per run).
-2. Strict Cost Caps (default: max $0.10 USD per challenge).
-3. Strict Model Allowlist (rejects unapproved or disallowed model literals).
+1. Strict Request Caps (configurable, default: max 300 requests per run).
+2. Strict Cost Caps (configurable, default: max $0.50 USD per challenge for frontier / $0.10 for cheap).
+3. Open/Configurable Model Allowlist (supports frontier, mid, cheap, free, local, and mock models).
 4. Pre-call assertion: Aborts fail-closed BEFORE issuing any provider request if caps are met.
 """
 
@@ -12,7 +12,42 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
-from vanguard.packages.runtime.root import resolve_model, get_pricing_usd_table
+
+# USD Pricing Table per 1M tokens: (prompt_rate, completion_rate, display_name)
+MODEL_PRICING_TABLE: Dict[str, Tuple[float, float, str]] = {
+    # Frontier Models (SOTA)
+    "anthropic/claude-3.7-sonnet": (3.00, 15.00, "Claude 3.7 Sonnet"),
+    "anthropic/claude-3-opus": (15.00, 75.00, "Claude 3 Opus"),
+    "openai/gpt-4.5-preview": (75.00, 150.00, "GPT-4.5 Preview"),
+    "openai/o3-mini": (1.10, 4.40, "o3-mini"),
+    "openai/gpt-4o": (2.50, 10.00, "GPT-4o"),
+    "google/gemini-2.5-pro": (1.25, 5.00, "Gemini 2.5 Pro"),
+    "google/gemini-2.0-flash": (0.10, 0.40, "Gemini 2.0 Flash"),
+    
+    # Cheap / Fast Cloud Models
+    "deepseek/deepseek-v4-flash-0731": (0.14, 0.28, "DeepSeek V4 Flash"),
+    "deepseek/deepseek-chat": (0.14, 0.28, "DeepSeek V3"),
+    "deepseek/deepseek-r1": (0.55, 2.19, "DeepSeek R1"),
+    "z-ai/glm-5.3-flash": (0.10, 0.20, "GLM 5.3 Flash"),
+    "meta-llama/llama-3.3-70b-instruct": (0.12, 0.30, "Llama 3.3 70B"),
+    
+    # Free Cloud Models ($0.00)
+    "openrouter/free": (0.00, 0.00, "OpenRouter Free"),
+    "cohere/north-mini-code:free": (0.00, 0.00, "North Mini Code Free"),
+    "deepseek/deepseek-r1:free": (0.00, 0.00, "DeepSeek R1 Free"),
+    "meta-llama/llama-3.3-70b-instruct:free": (0.00, 0.00, "Llama 3.3 Free"),
+    "qwen/qwen-2.5-coder-32b-instruct:free": (0.00, 0.00, "Qwen 2.5 Coder Free"),
+    
+    # Local Ollama Models ($0.00)
+    "ollama/qwen2.5:1.5b": (0.00, 0.00, "Qwen 2.5 1.5B Local"),
+    "ollama/qwen2.5:7b": (0.00, 0.00, "Qwen 2.5 7B Local"),
+    "ollama/llama3.2:3b": (0.00, 0.00, "Llama 3.2 3B Local"),
+    "ollama/deepseek-r1:14b": (0.00, 0.00, "DeepSeek R1 14B Local"),
+    
+    # LAM Mock Engine ($0.00)
+    "lam-mock": (0.00, 0.00, "LAM Replay Engine"),
+    "lam/t1-calculator": (0.00, 0.00, "LAM Scenario Replay"),
+}
 
 
 class BudgetExceededError(RuntimeError):
@@ -28,14 +63,9 @@ class BudgetCapConfig:
     """Configurable budget and request limits."""
 
     max_requests: int = 300
-    max_cost_usd: float = 0.10
-    max_turns: int = 8
-    allowed_models: tuple[str, ...] = (
-        "deepseek/deepseek-v4-flash-0731",
-        "z-ai/glm-5.3-flash",
-        "openrouter/free",
-        "lam-mock",
-    )
+    max_cost_usd: float = 0.50
+    max_turns: int = 12
+    allowed_models: Optional[tuple[str, ...]] = None  # None means all models permitted
 
 
 class BudgetTracker:
@@ -48,7 +78,6 @@ class BudgetTracker:
         self.total_completion_tokens = 0
         self.total_cost_usd = 0.0
         self.records: List[Dict[str, Any]] = []
-        self._pricing = get_pricing_usd_table()
 
     @property
     def total_tokens(self) -> int:
@@ -56,13 +85,14 @@ class BudgetTracker:
 
     def check_pre_call(self, model: str) -> None:
         """Pre-flight check before making an LLM API call."""
-        # 1. Model Allowlist Check (LAM mock models are always allowed)
-        if model != "lam-mock":
-            resolved = resolve_model(model)
-            if self.config.allowed_models and resolved not in self.config.allowed_models:
-                raise DisallowedModelError(
-                    f"Model {resolved!r} is not in the BaaC allowlist: {self.config.allowed_models}"
-                )
+        # 1. Model Allowlist Check (if configured)
+        if self.config.allowed_models and len(self.config.allowed_models) > 0:
+            if "all" not in self.config.allowed_models:
+                clean_model = model.strip()
+                if not any(clean_model == m or clean_model.startswith(m.rstrip("*")) for m in self.config.allowed_models):
+                    raise DisallowedModelError(
+                        f"Model {model!r} is not in the BaaC allowlist: {self.config.allowed_models}"
+                    )
 
         # 2. Request count cap
         if self.request_count >= self.config.max_requests:
@@ -91,11 +121,14 @@ class BudgetTracker:
         # Compute cost via centralized pricing table if reported cost not given
         if reported_cost is not None and reported_cost > 0.0:
             call_cost = reported_cost
-        elif model in self._pricing:
-            p_rate, c_rate, _ = self._pricing[model]
+        elif model in MODEL_PRICING_TABLE:
+            p_rate, c_rate, _ = MODEL_PRICING_TABLE[model]
             call_cost = ((prompt_tokens * p_rate) + (completion_tokens * c_rate)) / 1_000_000.0
-        else:
+        elif model.startswith("lam") or "free" in model or "ollama" in model:
             call_cost = 0.0
+        else:
+            # Default fallback rate ($0.50 / $1.50 per M)
+            call_cost = ((prompt_tokens * 0.50) + (completion_tokens * 1.50)) / 1_000_000.0
 
         self.total_cost_usd += call_cost
 
@@ -105,8 +138,8 @@ class BudgetTracker:
             "prompt_tokens": prompt_tokens,
             "completion_tokens": completion_tokens,
             "total_tokens": prompt_tokens + completion_tokens,
-            "call_cost_usd": call_cost,
-            "cumulative_cost_usd": self.total_cost_usd,
+            "call_cost_usd": round(call_cost, 6),
+            "cumulative_cost_usd": round(self.total_cost_usd, 6),
         })
 
         return call_cost
@@ -118,6 +151,6 @@ class BudgetTracker:
             "totalPromptTokens": self.total_prompt_tokens,
             "totalCompletionTokens": self.total_completion_tokens,
             "totalTokens": self.total_tokens,
-            "totalCostUsd": self.total_cost_usd,
+            "totalCostUsd": round(self.total_cost_usd, 6),
             "maxCostUsd": self.config.max_cost_usd,
         }

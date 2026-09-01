@@ -14,14 +14,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 LIMITS = {
     "docs/SPEC.md": 250,
-    "docs/01_law": 250,
-    "docs/03_execution": 200,
-    "docs/04_architecture": 200,
-    "docs/05_contracts": 200,
-    "docs/06_protocols": 200,
-    "docs/07_engineering": 200,
-    "docs/08_theory": 200,
-    "docs/09_diagrams": 200,
+    "docs/execution": 200,
+    "docs/architecture": 200,
+    "docs/backend": 200,
+    "docs/frontend": 200,
+    "docs/product": 200,
+    "docs/theory": 200,
 }
 EXEMPT = {
     Path("docs/01_law/RUNTIME.md"),

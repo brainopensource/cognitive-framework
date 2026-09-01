@@ -82,8 +82,8 @@ graph LR
 | ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Description & Acceptance Gate |
 |---|---|---|---|---|---|---|
 | **DEL-01** | Monotonic Capability Attenuation | `kernel` / `agency` | Lane A | `DONE` | M-6 | Recursive budget attenuation $\mathcal{A}(B_{\text{parent}}, B_{\text{child}})$ and child spawning. |
-| **DEL-02** | Multi-Role Topology Declarations | `runtime` | Lane A | `APPROVED` | M-7 | Declarative multi-agent topologies (debate, critic, swarm) through single runtime. |
-| **DEL-03** | Hardware-Aware Swarm Scheduler | `runtime` | Lane A | `PROPOSED` | M-7+ | VRAM drain scheduling between Architect (DeepSeek) and Worker (Qwen) models. |
+| **DEL-02** | Multi-Role Topology Qualification | `runtime` | Lane A | `REVIEWING` | M-7 | Qualify existing topology/child-runtime/artifact-flow mechanisms with three bounded real-effect topologies, durable resume, cancellation, leases/backpressure, fairness, and explicit sequential-versus-parallel disposition. |
+| **DEL-03** | Hardware-Aware Swarm Scheduler | `runtime` | Lane A | `DEFERRED` | M-7+ | No implementation until bounded topology qualification proves cost-adjusted lift and a hardware scheduler has a separate preregistered treatment. |
 
 ### 2.4 Code Intelligence, Verification & SOTA Tools (VISION.md §5, §8)
 
@@ -91,9 +91,9 @@ graph LR
 |---|---|---|---|---|---|---|
 | **TLS-01** | AdmissionGate Closed-Loop Validation | `agency` | Lane A | `DONE` | W-092-2 | Fail-closed patch requirement and fresh workspace verification enforcement. |
 | **TLS-02** | DeepSeek DSML / JSON Normalization | `agency` | Lane A | `DONE` | W-092-4 | Protocol recovery for malformed markdown tool calls and stream truncations. |
-| **TLS-03** | Tree-Sitter & SBFL Fault Localization | `ports` / `adapters`| Lane B | `IN_PROGRESS` | Ochiai suspiciousness ranking scoring failing test statements via `IndexPort`. |
-| **TLS-04** | AST Syntax Pre-Flight Gate (<0.2ms) | `adapters` | Lane A | `IN_PROGRESS` | In-process parse gate returning line-level syntax errors with zero turn penalty. |
-| **TLS-05** | Speculative Git Checkpoint Engine | `adapters` | Lane A | `APPROVED` | W-092-4 | In-memory CoW git checkpoints with automatic rollback on test regression. |
+| **TLS-03** | Tree-Sitter / SBFL Fault-Localization Experiment | `ports` / `adapters`| Lane B | `PROPOSED` | M-8+ | Optional `IndexPort` treatment only; admit after localization accuracy and end-to-end solved-task lift beat deterministic search on held-out brownfield tasks. |
+| **TLS-04** | AST Syntax Pre-Flight Gate | `adapters` | Lane A | `PROPOSED` | W-092-4 | In-process observation returning precise syntax diagnostics; latency and defect-catch claims require measured receipts and it never substitutes for tests. |
+| **TLS-05** | Reconciled Workspace Checkpoints | `adapters` | Lane A | `DEFERRED` | W-092-4 | Prefer explicit preimage/postimage checkpoints and reconciliation; no automatic rollback until external effects, concurrent edits, and resume semantics are falsified. |
 | **TLS-06** | AST Mutation Verification (Anti-Collusion)| `adapters` | Lane B | `PROPOSED` | M-8+ | Injects AST mutants to falsify ungrounded or no-op candidate test suites. |
 | **TLS-07** | Composable Web Research Port (SSRF-Safe)| `ports` / `adapters`| Lane A | `PROPOSED` | M-9 | Egress-controlled web search and fetch tools with domain allowlists. |
 
@@ -112,8 +112,8 @@ graph LR
 
 | ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Description & Acceptance Gate |
 |---|---|---|---|---|---|---|
-| **REL-01** | Wave H0: Tooling Integrity & Exact Subject | `benchmarks` | Lane B | `IN_PROGRESS` | M-8 | Remove synthetic metrics from runner; ensure official adapter path. |
-| **REL-02** | Wave H1: 10-Task Canary Validation | `benchmarks` | Both | `BLOCKED` (on H0) | 10 valid tasks, $\ge 8/10$ patches, $\ge 6/10$ external evaluator passes. |
+| **REL-01** | Wave H0: Tooling Integrity & Exact Subject | `benchmarks` | Lane B | `DONE (hermetic)` | M-8 | Runtime/evaluator wiring and explicit empirical missingness pass; this makes no live capability claim. |
+| **REL-02** | Wave H1: 10-Task Canary Validation | `benchmarks` | Both | `FROZEN (NOT_RUN)` | M-8 | Content-addressed single-attempt canary is frozen; live thresholds remain unsatisfied until an exact provider/evaluator run is independently accepted. |
 | **REL-03** | Wave H2: Official SWE-Bench Container Bridge| `benchmarks` | Lane B | `APPROVED` | M-9 | Isolated official evaluation container passing pure unified diffs. |
 | **REL-04** | Wave H3: Preregistered Hypothesis Ablations | `runtime` / `bench` | Both | `PROPOSED` | M-9 | Controlled A/B trials with $\ge 0.05$ lift threshold per treatment. |
 | **REL-05** | Wave H4: Release Qualification & Signed Envelope| `ci` / `release` | Both | `BLOCKED` (on M-9) | Full 2348+ test suite, clean out-of-tree install, signed Ed25519 envelope. |
@@ -123,11 +123,11 @@ graph LR
 | ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Description & Acceptance Gate |
 |---|---|---|---|---|---|---|
 | **CLI-01** | `vg-code` (Autonomous SWE Problem Solver) | `packs/code-default` | Lane A | `DONE` | M-4 | Autonomous bug fixing: Ingestion $\to$ Reproducer $\to$ Surgical Patch $\to$ Verification. |
-| **CLI-02** | `vg-swarm` (Tiered Multi-Model Coding Swarm) | `agency/spawn` | Lane A | `PROPOSED` | M-7+ | Tiered swarm: DeepSeek/Claude Architect plans $\to$ Qwen/Haiku workers execute diffs. |
+| **CLI-02** | `vg-swarm` (Tiered Multi-Model Coding Swarm) | `agency/spawn` | Lane A | `DEFERRED` | M-7+ | Productization is rejected until bounded topology experiments beat the sequential control on cost-adjusted success without reliability regression. |
 | **CLI-03** | `vg-fuzz` / `vg-verifier` (Formal CEGIS & SMT Falsifier) | `ports/evaluator` | Lane B | `PROPOSED` | M-5b+ | Formal verification: SMT spec $\to$ CEGIS inductive synthesis $\to$ Concolic fuzzing. |
 | **CLI-04** | `vg-refactor` (Causal Slicing & Modernizer) | `ports/index` | Lane A | `PROPOSED` | M-9+ | AST call-graph causal slicing for atomic, regression-free codebase refactoring. |
 | **CLI-05** | `vg-review` / `vg-arena` (Adversarial Multi-Model Reviewer)| `agency/spawn` | Lane A | `PROPOSED` | M-7+ | Zero-trust PR review: Competing reviewer personas (Security, Performance, Style) debate. |
-| **CLI-06** | `vg-tutor` (Evidence-Graph Codebase Guide) | `packs/tutor` | Lane A | `DONE` | M-5a | Dynamic AST traversal $\to$ Socratic interactive codebase explanations with clickable proofs. |
+| **CLI-06** | `vg-tutor` (Evidence-Graph Codebase Guide) | `packs/tutor` | Lane A | `TECHNICAL SLICE` | 1.0 horizon | Read-only reference composition exists; supported-product status requires install/run/resume and pedagogical completion-policy qualification through the public harness contract. |
 | **CLI-07** | `vg-research` (Bounded Technical RFC & Web Corroborator)| `packs/research` | Lane A | `PROPOSED` | M-9 | Egress-controlled technical search $\to$ SSRF-safe fetch $\to$ Triangulated RFC generation. |
 | **CLI-08** | `vg-rlvr` (Verifiable Trajectory & Dataset Generator) | `domain/evidence` | Lane B | `PROPOSED` | M-8+ | Mining verified traces (State, Action, Reward, Trace) for RL fine-tuning. |
 
@@ -137,7 +137,7 @@ graph LR
 |---|---|---|---|---|---|---|
 | **ALG-01** | SMT-Guided CEGIS Synthesis Loop | `ports/evaluator` | Lane B | `PROPOSED` | M-5b+ | Iterative counterexample synthesis loop: $\Phi(x, y) \to P \in \mathcal{L} \to \text{Z3 SMT Check}$. |
 | **ALG-02** | SBFL Multi-Metric Fault Localization Suite | `ports/index` | Lane B | `PROPOSED` | M-8+ | Multi-metric suspiciousness scoring: DStar ($* = 2$), Tarantula, and Ochiai. |
-| **ALG-03** | Formal State-Hash Anti-Thrashing FSM | `agency/episode` | Lane A | `PROPOSED` | W-092-4 | Signature hashing $H(\text{tool}, \text{args}, \text{state})$; triggers `ERR_THRASHING_LOOP` recovery. |
+| **ALG-03** | Formal State-Hash Anti-Thrashing FSM | `agency/episode` | Lane A | `ABSORBED` | BEP-03 | Extend the existing protocol-recovery/task-state/no-progress path with semantic attempt fingerprints; do not add a parallel recovery ledger. |
 
 ### 2.9 Coding Max Convergence Epic
 
@@ -161,6 +161,27 @@ composition/lifecycle authority; infrastructure stays behind generic ports.
 | **CMX-06** | Conditional review and mediated specialist roles | manifests/topology/child runtime | `IMPLEMENTED (ABLATION PENDING)` | CMX-05 and accepted M-7 evidence | Reviewer/localizer/test-investigator roles exchange artifacts by digest, receive attenuated budgets, run sequentially by default, and cannot override the verifier |
 | **CMX-07** | Repository-scale qualification | benchmark program | `FROZEN (EXECUTION PENDING)` | CMX-04, CMX-05 | Frozen internal bugfix, multi-file, migration, and greenfield set reports success, missingness, tokens, cost, latency, retries, resume parity, and external verdicts |
 | **CMX-08** | First-party reference-agent portfolio | apps + independent packs/manifests | `TECHNICAL SLICE DONE` | M-10 and stable public composition contract | Coding Max plus two non-coding supported agents install, run, resume, and emit attributable evidence through the same public framework contract |
+
+### 2.10 Backend evidence-hardening program
+
+This program absorbs only the production-worthy conclusions of the v0.9.2
+backend review. Report-tree prototypes remain dormant design evidence and are
+not source owners.
+
+| ID | Capability package | Primary owner | Status | Dependency | Acceptance gate |
+|---|---|---|---|---|---|
+| **BEP-01** | Subject-bound completion evidence | `agency/episode/admission_gate.py`, `runtime/run_plan.py`, runtime receipt producer | `APPROVED` | Existing W-092-2 admission path | Production write completion always supplies and verifies task, composition, workspace postimage, command/test subject, and receipt identities; missing/foreign/stale bindings fail closed; compatibility readers are explicit |
+| **BEP-02** | Versioned model capabilities and dialect projection | model port + `adapters/models` registry/invocation | `APPROVED` | BEP-01 and frozen control | One canonical intent is projected per provider without changing agency authority; capability provenance/version is recorded; unknown models are conservative; parse/no-patch rate improves without solved-task or reliability regression |
+| **BEP-03** | Unified typed recovery and anti-thrashing | existing protocol recovery + durable coding/task projection | `APPROVED` | BEP-02 observations | Provider/transport/protocol/tool/patch/verification/permission failures are typed; unchanged semantic attempts do not repeat; permission retry is zero; spent recovery survives cold resume; no second ledger or policy authority |
+| **BEP-04** | Bounded topology qualification | existing topology, child runtime, workflow scheduler, artifacts/events | `GATED` | BEP-03 and accepted M-7 mechanism evidence | Sequential planner/implementer/verifier is the control; reviewer and parallel investigation treatments require durable fairness, leases/backpressure, cancellation/resume and positive cost-adjusted held-out lift |
+| **BEP-05** | General-agent reference compositions | packs + thin first-party apps | `GATED` | BEP-01..04 as applicable, stable public harness contract | Coding Max, Research, and Tutor use one runtime and public contract; each has domain-specific completion and evaluator vectors; Research egress is explicit and Tutor is read-only by default |
+
+The aggregate validation campaign for this program stops at the first of
+`$0.10` provider spend, `1,000,000` tokens, or `500` model calls. Limits are
+cumulative across controls, treatments, retries, mock smoke tests, and live
+diagnostics. Unknown usage is not zero and blocks further calls until
+reconciled. LAM and easy live tasks validate instrumentation only; capability
+claims require the frozen repository-scale and official benchmark programs.
 
 ### Next staged development: 1-forge
 

@@ -1,0 +1,14 @@
+id: bench_multi_32K_tier-4_circuit_breaker
+name: Stateful Service Circuit Breaker
+scope: multi
+context_bracket: 32K
+tier: tier-4
+difficulty: 4
+timeout_seconds: 35
+entrypoint: src/main.py
+eval_type: oracle
+tags:
+- fault_tolerance
+- resilience
+- patterns
+metadata: {}

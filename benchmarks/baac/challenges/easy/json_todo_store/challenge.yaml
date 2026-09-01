@@ -1,9 +1,0 @@
-id: json_todo_store
-tier: easy
-name: JSON Backed Todo Storage Engine
-timeout_seconds: 25
-entrypoint: src/todo.py
-tags:
-  - storage
-  - json
-  - crud

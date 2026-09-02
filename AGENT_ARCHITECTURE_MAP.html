@@ -1,0 +1,522 @@
+<title>Agent Harness Schematic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --paper:#EEF1F5; --surface:#FFFFFF; --sunk:#E3E8EF;
+    --ink:#10161F; --muted:#5B6878; --faint:#8494A8;
+    --rule:#C9D2DD; --rule-strong:#A8B4C4;
+    --accent:#2B54E8; --accent-soft:#DCE4FF;
+    --ok:#137A54; --ok-soft:#D4EDE2;
+    --warn:#A8690B; --warn-soft:#F7E8CC;
+    --bad:#BE342C; --bad-soft:#F8DDDA;
+    --display:"IBM Plex Sans Condensed","Helvetica Neue",Arial,sans-serif;
+    --body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+    --mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --paper:#0C1017; --surface:#141A24; --sunk:#0F141C;
+      --ink:#D9E1EC; --muted:#8494A8; --faint:#63748A;
+      --rule:#26303D; --rule-strong:#3A4757;
+      --accent:#7295FF; --accent-soft:#1B2740;
+      --ok:#3BB98A; --ok-soft:#13291F;
+      --warn:#D9982E; --warn-soft:#2C2313;
+      --bad:#E86A62; --bad-soft:#2E1A18;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#0C1017; --surface:#141A24; --sunk:#0F141C;
+    --ink:#D9E1EC; --muted:#8494A8; --faint:#63748A;
+    --rule:#26303D; --rule-strong:#3A4757;
+    --accent:#7295FF; --accent-soft:#1B2740;
+    --ok:#3BB98A; --ok-soft:#13291F;
+    --warn:#D9982E; --warn-soft:#2C2313;
+    --bad:#E86A62; --bad-soft:#2E1A18;
+  }
+
+  *{box-sizing:border-box}
+  body{background:var(--paper);color:var(--ink);font-family:var(--body);
+       font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .sheet{max-width:1340px;margin:0 auto;padding:36px 28px 96px;
+         display:flex;flex-direction:column;gap:44px}
+
+  /* ---- title block: an engineering drawing header, not a hero ---- */
+  .titleblock{border:1.5px solid var(--rule-strong);background:var(--surface);
+              display:grid;grid-template-columns:1fr auto}
+  .tb-main{padding:22px 26px;display:flex;flex-direction:column;gap:8px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+           text-transform:uppercase;color:var(--muted)}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,4vw,44px);
+     line-height:1.05;margin:0;text-wrap:balance;letter-spacing:-.01em}
+  .sub{color:var(--muted);max-width:64ch;margin:0}
+  .tb-meta{border-left:1.5px solid var(--rule-strong);padding:22px 26px;
+           display:grid;grid-template-columns:auto auto;gap:6px 20px;align-content:start;
+           font-family:var(--mono);font-size:12px}
+  .tb-meta dt{color:var(--faint)}
+  .tb-meta dd{margin:0;color:var(--ink);font-variant-numeric:tabular-nums}
+
+  h2{font-family:var(--display);font-weight:700;font-size:26px;margin:0;
+     letter-spacing:-.005em;text-wrap:balance}
+  .panel-head{display:flex;flex-direction:column;gap:6px;margin-bottom:18px}
+  .panel-head p{margin:0;color:var(--muted);max-width:78ch}
+  section{display:block}
+
+  .schematic{border:1.5px solid var(--rule-strong);background:var(--surface);
+             overflow-x:auto;padding:10px}
+  .schematic svg{display:block;min-width:1020px;width:100%;height:auto}
+
+  /* diagram primitives */
+  .bx{fill:var(--sunk);stroke:var(--rule-strong);stroke-width:1.5}
+  .bx-accent{fill:var(--accent-soft);stroke:var(--accent);stroke-width:2}
+  .bx-chip{fill:var(--surface);stroke:var(--rule);stroke-width:1.25}
+  .lbl{font-family:var(--display);font-weight:700;font-size:15px;fill:var(--ink)}
+  .lbl-sm{font-family:var(--mono);font-size:11px;fill:var(--muted)}
+  .lbl-chip{font-family:var(--mono);font-size:11px;fill:var(--muted)}
+  .flow{stroke:var(--rule-strong);stroke-width:1.75;fill:none}
+  .flow-accent{stroke:var(--accent);stroke-width:2;fill:none}
+  .flow-back{stroke:var(--faint);stroke-width:1.5;fill:none;stroke-dasharray:6 4}
+  .tag-bad{fill:var(--bad);font-family:var(--mono);font-size:11px;font-weight:500}
+  .tag-warn{fill:var(--warn);font-family:var(--mono);font-size:11px;font-weight:500}
+  .tag-ok{fill:var(--ok);font-family:var(--mono);font-size:11px;font-weight:500}
+  .stripe-bad{fill:var(--bad)} .stripe-warn{fill:var(--warn)} .stripe-ok{fill:var(--ok)}
+  .axis-note{font-family:var(--mono);font-size:11px;fill:var(--faint)}
+
+  /* ---- legend ---- */
+  .legend{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:14px;
+          font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .sw{width:12px;height:12px;border-radius:2px;display:inline-block}
+
+  /* ---- matrix ---- */
+  .tablewrap{overflow-x:auto;border:1.5px solid var(--rule-strong);background:var(--surface)}
+  table{border-collapse:collapse;width:100%;min-width:980px;font-size:13.5px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--rule);
+        vertical-align:top}
+  thead th{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+           text-transform:uppercase;color:var(--muted);background:var(--sunk);
+           border-bottom:1.5px solid var(--rule-strong);white-space:nowrap}
+  tbody tr:last-child td{border-bottom:none}
+  td.name{font-family:var(--mono);font-size:12.5px;font-weight:500;white-space:nowrap}
+  td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+  tr.flagged{background:var(--bad-soft)}
+  tr.flagged td.name{color:var(--bad)}
+  .pill{display:inline-block;padding:2px 9px;border-radius:999px;
+        font-family:var(--mono);font-size:11px;font-weight:500;white-space:nowrap}
+  .p-ok{background:var(--ok-soft);color:var(--ok)}
+  .p-warn{background:var(--warn-soft);color:var(--warn)}
+  .p-bad{background:var(--bad-soft);color:var(--bad)}
+  .p-neutral{background:var(--sunk);color:var(--muted)}
+
+  /* ---- diff callout ---- */
+  .diffgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:18px}
+  .codecard{border:1.5px solid var(--rule-strong);background:var(--surface);
+            display:flex;flex-direction:column}
+  .codecard.bad{border-color:var(--bad)}
+  .codecard.ok{border-color:var(--ok)}
+  .cc-head{padding:10px 16px;border-bottom:1.5px solid var(--rule);
+           display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+           font-family:var(--mono);font-size:12px}
+  .codecard.bad .cc-head{background:var(--bad-soft);border-bottom-color:var(--bad);color:var(--bad)}
+  .codecard.ok .cc-head{background:var(--ok-soft);border-bottom-color:var(--ok);color:var(--ok)}
+  pre{margin:0;padding:16px;font-family:var(--mono);font-size:12.5px;line-height:1.65;
+      overflow-x:auto;color:var(--ink)}
+  .cc-foot{padding:11px 16px;border-top:1px solid var(--rule);color:var(--muted);font-size:13px}
+
+  ul.findings{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:0;
+              border:1.5px solid var(--rule-strong);background:var(--surface)}
+  ul.findings li{display:grid;grid-template-columns:auto 1fr;gap:16px;padding:14px 18px;
+                 border-bottom:1px solid var(--rule);align-items:start}
+  ul.findings li:last-child{border-bottom:none}
+  .fnum{font-family:var(--mono);font-size:11px;color:var(--faint);padding-top:3px}
+  code{font-family:var(--mono);font-size:.92em;background:var(--sunk);
+       padding:1px 5px;border-radius:3px}
+  strong{font-weight:600}
+  footer{color:var(--faint);font-size:12.5px;font-family:var(--mono);
+         border-top:1px solid var(--rule);padding-top:16px}
+  @media (prefers-reduced-motion:no-preference){
+    .schematic svg{transition:none}
+  }
+</style>
+
+<div class="sheet">
+
+  <header class="titleblock">
+    <div class="tb-main">
+      <div class="eyebrow">AETHER · vanguard/packages/agency/manifests</div>
+      <h1>Agent Harness Schematic</h1>
+      <p class="sub">Every block, tool and policy in the run; where data crosses between the
+        harness and the model; and which box each observed failure actually came from —
+        measured across 46 recorded ladder runs.</p>
+    </div>
+    <dl class="tb-meta">
+      <dt>BASELINE</dt><dd>origin/feat/beta-release-MVP-v092</dd>
+      <dt>RUNS</dt><dd>46</dd>
+      <dt>ORACLE PASS</dt><dd>26 / 46</dd>
+      <dt>AGENTS PLOTTED</dt><dd>6</dd>
+      <dt>SOURCE</dt><dd>benchmarks/artifacts/ladder/</dd>
+    </dl>
+  </header>
+
+  <!-- ============ OUTER LOOP ============ -->
+  <section>
+    <div class="panel-head">
+      <h2>Outer loop — one run</h2>
+      <p>The manifest is frozen into a harness before a single token is spent. Everything above
+        the spine is declared data; everything on the spine is the runtime. The oracle is
+        re-run in a subprocess <em>after</em> the agent stops, so the verdict never comes from
+        the agent's own claim of success.</p>
+    </div>
+    <div class="schematic">
+      <svg viewBox="0 0 1280 430" role="img" aria-label="Outer run loop from manifest compose through ledger to oracle verdict">
+        <defs>
+          <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--rule-strong)"/>
+          </marker>
+          <marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--faint)"/>
+          </marker>
+        </defs>
+
+        <text x="20" y="22" class="axis-note">DECLARED · manifest components</text>
+        <!-- manifest chips -->
+        <g>
+          <rect class="bx-chip" x="20"  y="34" width="152" height="30" rx="2"/>
+          <text x="96"  y="53" class="lbl-chip" text-anchor="middle">system-prompt.txt</text>
+          <rect class="bx-chip" x="184" y="34" width="104" height="30" rx="2"/>
+          <text x="236" y="53" class="lbl-chip" text-anchor="middle">tools[ ]</text>
+          <rect class="bx-chip" x="300" y="34" width="238" height="30" rx="2"/>
+          <text x="419" y="53" class="lbl-chip" text-anchor="middle">context · routing · retrieval</text>
+          <rect class="bx-chip" x="550" y="34" width="96"  height="30" rx="2"/>
+          <text x="598" y="53" class="lbl-chip" text-anchor="middle">skill[ ]</text>
+          <rect class="bx-chip" x="658" y="34" width="126" height="30" rx="2"/>
+          <text x="721" y="53" class="lbl-chip" text-anchor="middle">repo_index</text>
+          <rect class="bx-chip" x="796" y="34" width="150" height="30" rx="2"/>
+          <text x="871" y="53" class="lbl-chip" text-anchor="middle">approval-policy</text>
+          <rect class="bx-chip" x="958" y="34" width="140" height="30" rx="2"/>
+          <text x="1028" y="53" class="lbl-chip" text-anchor="middle">budget-policy</text>
+        </g>
+        <path class="flow" d="M100,64 L100,140" marker-end="url(#ah)"/>
+        <path class="flow" d="M419,64 L419,96 L100,96" />
+        <path class="flow" d="M721,64 L721,96 L419,96" />
+        <path class="flow" d="M1028,64 L1028,96 L721,96" />
+
+        <!-- spine -->
+        <g>
+          <rect class="bx" x="20"   y="150" width="160" height="72" rx="2"/>
+          <text x="100"  y="181" class="lbl" text-anchor="middle">Compose</text>
+          <text x="100"  y="200" class="lbl-sm" text-anchor="middle">FrozenHarness</text>
+
+          <rect class="bx" x="205"  y="150" width="160" height="72" rx="2"/>
+          <text x="285"  y="181" class="lbl" text-anchor="middle">Context Packet</text>
+          <text x="285"  y="200" class="lbl-sm" text-anchor="middle">recency-window 64</text>
+
+          <rect class="bx-accent" x="390" y="150" width="170" height="72" rx="2"/>
+          <text x="475"  y="181" class="lbl" text-anchor="middle">TURN LOOP</text>
+          <text x="475"  y="200" class="lbl-sm" text-anchor="middle">inner · see below</text>
+
+          <rect class="bx" x="585"  y="150" width="160" height="72" rx="2"/>
+          <text x="665"  y="181" class="lbl" text-anchor="middle">Capability Gate</text>
+          <text x="665"  y="200" class="lbl-sm" text-anchor="middle">verb + selector</text>
+
+          <rect class="bx" x="770"  y="150" width="150" height="72" rx="2"/>
+          <text x="845"  y="181" class="lbl" text-anchor="middle">Effect</text>
+          <text x="845"  y="200" class="lbl-sm" text-anchor="middle">S0–S12 dispatch</text>
+
+          <rect class="bx" x="945"  y="150" width="150" height="72" rx="2"/>
+          <text x="1020" y="181" class="lbl" text-anchor="middle">Receipt</text>
+          <text x="1020" y="200" class="lbl-sm" text-anchor="middle">+ artifacts</text>
+
+          <rect class="bx" x="1120" y="150" width="140" height="72" rx="2"/>
+          <text x="1190" y="181" class="lbl" text-anchor="middle">Ledger</text>
+          <text x="1190" y="200" class="lbl-sm" text-anchor="middle">vg.4 · seq n</text>
+        </g>
+        <path class="flow" d="M180,186 L203,186" marker-end="url(#ah)"/>
+        <path class="flow-accent" d="M365,186 L388,186" marker-end="url(#ah)"/>
+        <path class="flow-accent" d="M560,186 L583,186" marker-end="url(#ah)"/>
+        <path class="flow" d="M745,186 L768,186" marker-end="url(#ah)"/>
+        <path class="flow" d="M920,186 L943,186" marker-end="url(#ah)"/>
+        <path class="flow" d="M1095,186 L1118,186" marker-end="url(#ah)"/>
+
+        <!-- receipt feedback into context -->
+        <path class="flow-back" d="M1020,222 L1020,268 L285,268 L285,224" marker-end="url(#ahb)"/>
+        <text x="640" y="262" class="axis-note" text-anchor="middle">receipt folded back into the next context packet — this is the only memory</text>
+
+        <!-- oracle -->
+        <rect class="bx" x="1010" y="320" width="250" height="72" rx="2"/>
+        <text x="1135" y="351" class="lbl" text-anchor="middle">Oracle re-run</text>
+        <text x="1135" y="370" class="lbl-sm" text-anchor="middle">subprocess · PASS / FAIL</text>
+        <path class="flow" d="M1190,222 L1190,318" marker-end="url(#ah)"/>
+        <text x="990" y="356" class="axis-note" text-anchor="end">independent of</text>
+        <text x="990" y="372" class="axis-note" text-anchor="end">agent's own verdict</text>
+
+        <text x="20" y="356" class="axis-note">TERMINAL STATES OBSERVED</text>
+        <rect class="stripe-ok"   x="20" y="368" width="10" height="10"/>
+        <text x="38" y="378" class="tag-ok">completed · 10</text>
+        <rect class="stripe-warn" x="180" y="368" width="10" height="10"/>
+        <text x="198" y="378" class="tag-warn">abandoned · 18</text>
+        <rect class="stripe-bad"  x="350" y="368" width="10" height="10"/>
+        <text x="368" y="378" class="tag-bad">instrument_error · 17</text>
+      </svg>
+    </div>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--accent)"></i> inner-loop boundary</span>
+      <span><i class="sw" style="background:var(--rule-strong)"></i> harness dispatch</span>
+      <span><i class="sw" style="background:var(--faint)"></i> feedback / memory</span>
+    </div>
+  </section>
+
+  <!-- ============ INNER LOOP ============ -->
+  <section>
+    <div class="panel-head">
+      <h2>Inner loop — one turn, with failures attributed</h2>
+      <p>The counts on each box are real terminal causes from the 20 failing runs. They are not
+        spread evenly: <strong>the ProposalTranslator is the hotspot</strong>, and every one of its
+        failures is a tool-name resolution problem, not a reasoning problem.</p>
+    </div>
+    <div class="schematic">
+      <svg viewBox="0 0 1280 500" role="img" aria-label="Inner turn loop with observed failure counts on each stage">
+        <defs>
+          <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--rule-strong)"/>
+          </marker>
+        </defs>
+
+        <text x="60" y="26" class="axis-note">HARNESS → MODEL</text>
+        <text x="1220" y="26" class="axis-note" text-anchor="end">MODEL → HARNESS</text>
+
+        <!-- top row -->
+        <g>
+          <rect class="bx" x="60"  y="42" width="180" height="66" rx="2"/>
+          <rect class="stripe-ok" x="60" y="42" width="180" height="4"/>
+          <text x="150" y="76" class="lbl" text-anchor="middle">Context Packet</text>
+          <text x="150" y="95" class="lbl-sm" text-anchor="middle">brief + receipts</text>
+
+          <rect class="bx" x="290" y="42" width="180" height="66" rx="2"/>
+          <rect class="stripe-ok" x="290" y="42" width="180" height="4"/>
+          <text x="380" y="76" class="lbl" text-anchor="middle">Dialect Encode</text>
+          <text x="380" y="95" class="lbl-sm" text-anchor="middle">NATIVE→…→TEXT</text>
+
+          <rect class="bx" x="520" y="42" width="180" height="66" rx="2"/>
+          <rect class="stripe-bad" x="520" y="42" width="180" height="4"/>
+          <text x="610" y="76" class="lbl" text-anchor="middle">Provider Call</text>
+          <text x="610" y="95" class="lbl-sm" text-anchor="middle">OpenRouter / z-ai</text>
+
+          <rect class="bx" x="750" y="42" width="180" height="66" rx="2"/>
+          <rect class="stripe-ok" x="750" y="42" width="180" height="4"/>
+          <text x="840" y="76" class="lbl" text-anchor="middle">Dialect Decode</text>
+          <text x="840" y="95" class="lbl-sm" text-anchor="middle">NormalizedResponse</text>
+        </g>
+        <text x="610" y="128" class="tag-bad" text-anchor="middle">HTTP 400 · 3 runs</text>
+        <path class="flow" d="M240,75 L288,75" marker-end="url(#ah2)"/>
+        <path class="flow" d="M470,75 L518,75" marker-end="url(#ah2)"/>
+        <path class="flow" d="M700,75 L748,75" marker-end="url(#ah2)"/>
+
+        <!-- right descent -->
+        <path class="flow" d="M990,75 L1080,75 L1080,370 L935,370" marker-end="url(#ah2)"/>
+        <path class="flow" d="M930,75 L988,75"/>
+
+        <!-- bottom row, right to left -->
+        <g>
+          <rect class="bx-accent" x="750" y="337" width="180" height="66" rx="2"/>
+          <rect class="stripe-bad" x="750" y="337" width="180" height="4"/>
+          <text x="840" y="371" class="lbl" text-anchor="middle">ProposalTranslator</text>
+          <text x="840" y="390" class="lbl-sm" text-anchor="middle">name → declared verb</text>
+
+          <rect class="bx" x="520" y="337" width="180" height="66" rx="2"/>
+          <rect class="stripe-warn" x="520" y="337" width="180" height="4"/>
+          <text x="610" y="371" class="lbl" text-anchor="middle">Capability Gate</text>
+          <text x="610" y="390" class="lbl-sm" text-anchor="middle">selector + budget</text>
+
+          <rect class="bx" x="290" y="337" width="180" height="66" rx="2"/>
+          <rect class="stripe-ok" x="290" y="337" width="180" height="4"/>
+          <text x="380" y="371" class="lbl" text-anchor="middle">Effect Dispatch</text>
+          <text x="380" y="390" class="lbl-sm" text-anchor="middle">fs · patch · proc</text>
+
+          <rect class="bx" x="60"  y="337" width="180" height="66" rx="2"/>
+          <rect class="stripe-ok" x="60" y="337" width="180" height="4"/>
+          <text x="150" y="371" class="lbl" text-anchor="middle">Receipt</text>
+          <text x="150" y="390" class="lbl-sm" text-anchor="middle">appended to ledger</text>
+        </g>
+        <text x="840" y="423" class="tag-bad" text-anchor="middle">instrument_error · 9 runs</text>
+        <text x="840" y="440" class="tag-bad" text-anchor="middle">"tool is not declared by manifest"</text>
+        <text x="610" y="423" class="tag-warn" text-anchor="middle">call cap 20/20 · 1 run</text>
+        <path class="flow" d="M748,370 L702,370" marker-end="url(#ah2)"/>
+        <path class="flow" d="M518,370 L472,370" marker-end="url(#ah2)"/>
+        <path class="flow" d="M288,370 L242,370" marker-end="url(#ah2)"/>
+        <path class="flow" d="M150,335 L150,120" marker-end="url(#ah2)"/>
+        <text x="128" y="230" class="axis-note" text-anchor="end" transform="rotate(-90 128 230)">next turn</text>
+
+        <!-- centre: the escalation ladder -->
+        <rect x="300" y="168" width="600" height="128" rx="2"
+              fill="var(--warn-soft)" stroke="var(--warn)" stroke-width="2" stroke-dasharray="7 4"/>
+        <text x="600" y="198" class="lbl" text-anchor="middle">Loop controller — failure_escalation ladder</text>
+        <text x="600" y="224" class="lbl-sm" text-anchor="middle">routing-policy.json · ["no_progress", "instrument_error"]</text>
+        <text x="600" y="252" class="tag-warn" text-anchor="middle">present in vg-code-default (365 B) — ABSENT in v3luna (29 B stub)</text>
+        <text x="600" y="276" class="tag-warn" text-anchor="middle">no_progress · 5 runs      repeated action · 10 runs</text>
+      </svg>
+    </div>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--ok)"></i> no observed failures</span>
+      <span><i class="sw" style="background:var(--warn)"></i> degraded / loops</span>
+      <span><i class="sw" style="background:var(--bad)"></i> terminal failures originate here</span>
+    </div>
+  </section>
+
+  <!-- ============ THE DIFF ============ -->
+  <section>
+    <div class="panel-head">
+      <h2>The single differentiating file</h2>
+      <p>Context and retrieval policies are byte-identical between the healthy and broken agents.
+        Only the routing policy differs — and with it, the loop's ability to recover from its own
+        instrument errors.</p>
+    </div>
+    <div class="diffgrid">
+      <div class="codecard ok">
+        <div class="cc-head"><span>vg-code-default/routing-policy.json</span><span>365 B</span></div>
+<pre>{
+  "kind": "single-model",
+  "role_bands": {
+    "architect":  ["medium"],
+    "executor":   ["free"],
+    "diagnostic": ["medium"],
+    "reviewer":   ["free", "medium"]
+  },
+  "failure_escalation": [
+    "no_progress",
+    "instrument_error"
+  ],
+  "maximum_band": "medium",
+  "known_pricing_required": true,
+  "resolved_model_required": true,
+  ...
+}</pre>
+        <div class="cc-foot">Inherited by <code>v3</code>, <code>chimera-v1</code>,
+          <code>1-forge-v2</code>, <code>herbs</code>. Combined record: <strong>24 / 24 pass</strong>.</div>
+      </div>
+      <div class="codecard bad">
+        <div class="cc-head"><span>vg-code-max-v3luna/routing-policy.json</span><span>29 B</span></div>
+<pre>{
+  "kind": "single-model"
+}</pre>
+        <div class="cc-foot">A fork that kept the key and dropped the body. No escalation ladder, no
+          role bands, no <code>resolved_model_required</code>. Record:
+          <strong>2 / 21 pass</strong> — every failure in the entire artifact set.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MATRIX ============ -->
+  <section>
+    <div class="panel-head">
+      <h2>Agent matrix</h2>
+      <p>Six agents, one substrate. The structural columns are near-identical; the
+        <em>policy provenance</em> column is where they actually diverge.</p>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Agent</th><th>Policy provenance</th><th>repo_index</th><th>Verbs</th>
+            <th>Tools</th><th>Prompt</th><th>Skills</th><th>Runs</th><th>Oracle pass</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="name">vg-code-max-v3</td>
+            <td><span class="pill p-ok">inherits default</span></td>
+            <td><span class="pill p-ok">wired</span></td>
+            <td class="num">4</td><td class="num">5</td><td class="num">1 944 B</td>
+            <td class="num">1</td><td class="num">18</td>
+            <td class="num"><span class="pill p-ok">18 / 18 · 100%</span></td>
+          </tr>
+          <tr>
+            <td class="name">vg-chimera-v1</td>
+            <td><span class="pill p-ok">inherits default</span></td>
+            <td><span class="pill p-ok">wired</span></td>
+            <td class="num">4</td><td class="num">5</td><td class="num">2 620 B</td>
+            <td class="num">1</td><td class="num">6</td>
+            <td class="num"><span class="pill p-ok">6 / 6 · 100%</span></td>
+          </tr>
+          <tr class="flagged">
+            <td class="name">vg-code-max-v3luna</td>
+            <td><span class="pill p-bad">forked · routing stubbed</span></td>
+            <td><span class="pill p-bad">orphaned file</span></td>
+            <td class="num">5</td><td class="num">5</td><td class="num">3 248 B</td>
+            <td class="num">1</td><td class="num">21</td>
+            <td class="num"><span class="pill p-bad">2 / 21 · 10%</span></td>
+          </tr>
+          <tr>
+            <td class="name">vg-code-default</td>
+            <td><span class="pill p-neutral">source of truth</span></td>
+            <td><span class="pill p-warn">none</span></td>
+            <td class="num">4</td><td class="num">4</td><td class="num">1 870 B</td>
+            <td class="num">3</td><td class="num">—</td>
+            <td class="num"><span class="pill p-neutral">baseline</span></td>
+          </tr>
+          <tr>
+            <td class="name">vg-1-forge-v2</td>
+            <td><span class="pill p-ok">inherits default</span></td>
+            <td><span class="pill p-ok">wired</span></td>
+            <td class="num">3</td><td class="num">3</td><td class="num">940 B</td>
+            <td class="num">1</td><td class="num">—</td>
+            <td class="num"><span class="pill p-neutral">not in ladder</span></td>
+          </tr>
+          <tr>
+            <td class="name">vg-herbs</td>
+            <td><span class="pill p-ok">inherits default</span></td>
+            <td><span class="pill p-warn">none</span></td>
+            <td class="num">5</td><td class="num">5</td><td class="num">1 188 B</td>
+            <td class="num">1</td><td class="num">—</td>
+            <td class="num"><span class="pill p-neutral">not in ladder</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="legend">
+      <span>Verbs: <code>fs.read</code> <code>fs.search</code> <code>patch.apply</code>
+        <code>proc.exec</code> — v3luna adds <code>agency.finish</code>, herbs adds
+        <code>web.distill</code>, 1-forge-v2 drops <code>fs.search</code>.</span>
+    </div>
+  </section>
+
+  <!-- ============ FINDINGS ============ -->
+  <section>
+    <div class="panel-head">
+      <h2>What the map shows</h2>
+    </div>
+    <ul class="findings">
+      <li><span class="fnum">01</span><span><strong>The agents are near-identical by construction.</strong>
+        Same four canonical verbs, same tool schemas, same recency-window-64 context policy,
+        same single <code>pytest-green</code> skill, same oracle. Prompt length varies 940 B → 3 248 B.
+        Structurally these are one agent with six prompt-and-policy trims.</span></li>
+      <li><span class="fnum">02</span><span><strong>All 20 failures belong to one agent.</strong>
+        <code>v3luna</code> is the only manifest that forked the policy layer instead of
+        inheriting it, and it is the only one with a non-zero failure count — across both
+        sota-easy and sota-hard.</span></li>
+      <li><span class="fnum">03</span><span><strong>The dominant failure is harness-side, not cognitive.</strong>
+        Nine runs die at the ProposalTranslator with
+        <code>tool is not declared by manifest: patch</code> / <code>patch.apply</code> /
+        <code>test</code> / <code>search</code>, and two more with
+        <code>'read' is an alias; no manifest was supplied to resolve it</code> — proving the
+        declared-verb map arrived empty. The model asked for the right tool by the right name.</span></li>
+      <li><span class="fnum">04</span><span><strong><code>aliases.json</code> is dead in every manifest.</strong>
+        Six agents ship it; zero reference it from <code>components</code>. The alias map that would
+        resolve <code>patch → patch.apply</code> is sitting on disk unread.</span></li>
+      <li><span class="fnum">05</span><span><strong>Passing is not the same as finishing.</strong>
+        Of 26 oracle passes only 10 terminated <code>completed</code>; 18 ended
+        <code>abandoned</code> — most commonly <code>repeated action proc.exec over 3 turns</code>.
+        The files ended up correct; the agent did not know it had won.</span></li>
+      <li><span class="fnum">06</span><span><strong>Easy tier is already solved.</strong>
+        20 / 20 on <code>easy</code> across v3 and chimera-v1 — the 80 % target is met at 100 %.
+        The frontier is sota-hard, where the only clean data point is v3's 1 / 1.</span></li>
+    </ul>
+  </section>
+
+  <footer>
+    Generated from benchmarks/artifacts/ladder/*.run.json at origin/feat/beta-release-MVP-v092 ·
+    46 runs · deepseek-v4-flash-0731, glm-5.3-flash, openrouter/free · read-only analysis, no code modified
+  </footer>
+
+</div>

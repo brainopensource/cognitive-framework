@@ -1,0 +1,97 @@
+{
+  "challenge": "tier2_fsm_workflow_engine",
+  "tier": "easy",
+  "title": "Hierarchical State Machine with Rollback",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "manifest": "vg-code-max-v2",
+  "status": "FAIL",
+  "llm_calls": 3,
+  "turns": 3,
+  "terminal_state": "instrument_error",
+  "cost_usd": 0.000954,
+  "latency_s": 25.43,
+  "files_modified": [],
+  "oracle_output": "\nF\n======================================================================\nFAIL: test_fsm (_oracle_test.TestFSM.test_fsm)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/ladder_tier2_fsm_workflow_engine_bgwl1pz2/_oracle_test.py\", line 9, in test_fsm\n    with self.assertRaises(StateError):\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: StateError not raised\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\n",
+  "error": "",
+  "terminal_detail": "tool is not declared by manifest: test",
+  "run_fields": {},
+  "cassette": "benchmarks/artifacts/ladder/desk_easy_1__tier2_fsm_workflow_engine__deepseek_deepseek-v4-flash-0731.cassette.json",
+  "trajectory": [
+    {
+      "turn": 0,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "fsm/machine.py"
+      },
+      "note": "",
+      "text": "\n\n\n\n",
+      "usage": {
+        "prompt_tokens": 2655,
+        "completion_tokens": 82,
+        "cached_tokens": 0,
+        "total_tokens": 2737,
+        "cost_usd": 0.000394,
+        "usd_micros": 394,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000394,
+      "prior_tool_result": null,
+      "recovery_feedback": null
+    },
+    {
+      "turn": 1,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "fsm/__init__.py"
+      },
+      "note": "",
+      "text": "\n\n\n",
+      "usage": {
+        "prompt_tokens": 3210,
+        "completion_tokens": 49,
+        "cached_tokens": 0,
+        "total_tokens": 3259,
+        "cost_usd": 0.000463,
+        "usd_micros": 463,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000463,
+      "prior_tool_result": "tool result turn=0 digest=sha256:05c9f8124ecd5308be251c2b306aaeb6a890502fb1f263b1e71ddeacf6f79436\nclass StateError(Exception):\n    pass\n\nclass StateMachine:\n    def __init__(self, initial_state: str):\n        self.current_state = initial_state\n        self.transitions = {}\n\n    def add_transition(self, event: str, source: str, target: str, guard=None) -> None:\n        self.transitions[(event, source)] = (target, guard)\n\n    def trigger(self, event: str) -> str:\n        key = (event, self.current_state)\n        if key not in self.transitions:\n            return self.current_state  # BUG: ignores invalid transition without raising StateError\n        target, guard = self.transitions[key]\n        if guard and not guard():\n            raise StateError('Guard rejected')\n        self.current_state = target\n        return self.current_state\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 2,
+      "kind": "effect",
+      "action": "fs.search",
+      "args": {
+        "path": ".",
+        "pattern": "*.py"
+      },
+      "note": "",
+      "text": "\n\n\n",
+      "usage": {
+        "prompt_tokens": 3340,
+        "completion_tokens": 59,
+        "cached_tokens": 3072,
+        "total_tokens": 3399,
+        "cost_usd": 9.7e-05,
+        "usd_micros": 97,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 9.7e-05,
+      "prior_tool_result": "tool result turn=1 digest=sha256:63ed9ae6d2421ffb945aee8454932dff7adc36d4cacde8da0faba6ad42745271\nfrom .machine import StateMachine, StateError\n__all__ = ['StateMachine', 'StateError']\n",
+      "recovery_feedback": null
+    }
+  ]
+}

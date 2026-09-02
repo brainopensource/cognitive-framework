@@ -1,0 +1,97 @@
+{
+  "challenge": "tier2_event_bus",
+  "tier": "easy",
+  "title": "Hierarchical Wildcard Event Emitter",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "manifest": "vg-code-max-v2",
+  "status": "FAIL",
+  "llm_calls": 3,
+  "turns": 3,
+  "terminal_state": "instrument_error",
+  "cost_usd": 0.001509,
+  "latency_s": 26.53,
+  "files_modified": [],
+  "oracle_output": "\nF\n======================================================================\nFAIL: test_pub_sub (_oracle_test.TestEventBus.test_pub_sub)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/ladder_tier2_event_bus_9f2nze2g/_oracle_test.py\", line 11, in test_pub_sub\n    self.assertEqual(res, [10, 20])\nAssertionError: Lists differ: [20] != [10, 20]\n\nFirst differing element 0:\n20\n10\n\nSecond list contains 1 additional elements.\nFirst extra element 1:\n20\n\n- [20]\n+ [10, 20]\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\n",
+  "error": "",
+  "terminal_detail": "tool is not declared by manifest: test",
+  "run_fields": {},
+  "cassette": "benchmarks/artifacts/ladder/desk_easy_1__tier2_event_bus__deepseek_deepseek-v4-flash-0731.cassette.json",
+  "trajectory": [
+    {
+      "turn": 0,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "events/bus.py"
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 2965,
+        "completion_tokens": 79,
+        "cached_tokens": 0,
+        "total_tokens": 3044,
+        "cost_usd": 0.000437,
+        "usd_micros": 437,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000437,
+      "prior_tool_result": null,
+      "recovery_feedback": null
+    },
+    {
+      "turn": 1,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "events/matcher.py"
+      },
+      "note": "",
+      "text": "\n\n\n",
+      "usage": {
+        "prompt_tokens": 3603,
+        "completion_tokens": 47,
+        "cached_tokens": 0,
+        "total_tokens": 3650,
+        "cost_usd": 0.000517,
+        "usd_micros": 517,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000517,
+      "prior_tool_result": "tool result turn=0 digest=sha256:caf36fe0648da29b4b1e9a513b670d5f9521ecee83da6861e505cdd779afcc9f\nfrom typing import Callable, Any\nfrom .matcher import topic_matches\n\nclass Subscription:\n    def __init__(self, bus: 'EventBus', pattern: str, callback: Callable[[str, Any], None]):\n        self.bus = bus\n        self.pattern = pattern\n        self.callback = callback\n        self.active = True\n\n    def unsubscribe(self) -> None:\n        self.active = False\n        self.bus._subs = [s for s in self.bus._subs if s is not self]\n\nclass EventBus:\n    def __init__(self):\n        self._subs: list[Subscription] = []\n\n    def subscribe(self, pattern: str, cb: Callable[[str, Any], None]) -> Subscription:\n        s = Subscription(self, pattern, cb)\n        self._subs.append(s)\n        return s\n\n    def publish(self, topic: str, payload: Any = None) -> int:\n        count = 0\n        for s in list(self._subs):\n            if s.active and topic_matches(s.pattern, topic):\n                s.callback(topic, payload)\n                count += 1\n        return count\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 2,
+      "kind": "effect",
+      "action": "fs.search",
+      "args": {
+        "path": ".",
+        "pattern": "*.py"
+      },
+      "note": "",
+      "text": "Let me look at the tests to understand what's expected.",
+      "usage": {
+        "prompt_tokens": 3827,
+        "completion_tokens": 70,
+        "cached_tokens": 0,
+        "total_tokens": 3897,
+        "cost_usd": 0.000555,
+        "usd_micros": 555,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000555,
+      "prior_tool_result": "tool result turn=1 digest=sha256:ecb9b7dd5724342df0e4f0ff3ecbe2d01d2737b7f14a5d6f064c62aa015887b1\nimport re\n\ndef topic_matches(pattern: str, topic: str) -> bool:\n    if pattern == topic or pattern == '**': return True\n    parts = pattern.split('.')\n    rx = []\n    for p in parts:\n        if p == '*': rx.append(r'[^.]+')\n        elif p == '**': rx.append(r'.*')\n        else: rx.append(re.escape(p))\n    return bool(re.match('^' + r'\\.'.join(rx) + '$', topic))\n",
+      "recovery_feedback": null
+    }
+  ]
+}

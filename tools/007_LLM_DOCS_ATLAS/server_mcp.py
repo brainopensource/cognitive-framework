@@ -425,6 +425,14 @@ class LDAMCPServer:
                     ],
                     "degraded_mode": "catalog_routing",
                 }
+                # Preserve the bounded_context view used by older MCP
+                # clients while making degraded mode explicit. The fallback
+                # contains catalog documents only; it must never pretend to
+                # have index-backed symbols or repository facts.
+                payload["bounded_context"] = {
+                    "documents": list(payload["documents"]),
+                    "symbols": [],
+                }
             payload["index_healthy"] = healthy
             payload["source_head_sha"] = head
             payload["profile"] = self._ctx.profile.name

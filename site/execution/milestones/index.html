@@ -2688,6 +2688,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#backend-finish-gates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend finish gates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#post-m-10-10-qualification-horizon" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4186,6 +4197,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#backend-finish-gates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Backend finish gates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#post-m-10-10-qualification-horizon" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -4283,7 +4305,7 @@
 <td>M-8</td>
 <td>Durable memory and governed learning MVP</td>
 <td>Authorization, recovery, retention, held-out lift, separated promotion authority, and executed rollback receipts</td>
-<td><code>BLOCKED</code> (Awaiting empirical held-out lift &gt;=0.05)</td>
+<td><code>BLOCKED</code> (Empirical runner repair and held-out lift &gt;=0.05 remain open)</td>
 </tr>
 <tr>
 <td>M-9</td>
@@ -4329,42 +4351,96 @@ existing M-4–M-10 gates without silently closing them.</p>
 <td>W-092-0</td>
 <td>Canonical contracts and navigable implementation map</td>
 <td>Cross-linked canonical owners; target/as-built labels; fresh navigation/index checks</td>
-<td><code>DONE</code> (Merged in Ancestry)</td>
+<td><code>REOPENED</code> (Current LDA/Tier-1 artifacts are not HEAD-bound)</td>
 </tr>
 <tr>
 <td>W-092-1</td>
 <td>Valid benchmark subjects and lossless trajectory/projection evidence</td>
 <td>Untouched-fixture preflight, immutable trajectory links, reducer compatibility vectors</td>
-<td><code>DONE</code> (Merged in Ancestry)</td>
+<td><code>REOPENED</code> (M-8 executor/canary subject repair required)</td>
 </tr>
 <tr>
 <td>W-092-2</td>
 <td>Coding completion admitted only by fresh applicable verification</td>
 <td>Deterministic failure scenarios, local challenge receipts, exterior evaluator kept independent</td>
-<td><code>DONE</code> (AdmissionGate Green)</td>
+<td><code>PARTIAL</code> (Name-set binding and synthetic test count remain)</td>
 </tr>
 <tr>
 <td>W-092-3</td>
 <td>Bounded provider-neutral repository context and durable coding state</td>
 <td>Control/treatment trajectories with task, index, context and prompt identities</td>
-<td><code>DONE</code> (L1-L5 Radix Integrated)</td>
+<td><code>PARTIAL</code> (<code>ContextPacket</code> and rich task-state production are not on the product path)</td>
 </tr>
 <tr>
 <td>W-092-4</td>
 <td>Tool, patch, recovery, resume, and provider reliability</td>
 <td>Patch corpus, injected-failure study, cold-restart parity and provider contract tests</td>
-<td><code>DONE</code> (ProtocolRecoveryPolicy Green)</td>
+<td><code>PARTIAL</code> (Approval re-entry repaired; long-session application resume remains open)</td>
 </tr>
 <tr>
 <td>W-092-5</td>
 <td>Evidence-qualified release disposition</td>
 <td>Exact-subject checks, controlled real-model evidence and explicit SWE claim boundary</td>
-<td><code>ACTIVE</code> (Blocked on Empirical Canary)</td>
+<td><code>BLOCKED</code> (Requires W-092-F0 through F5 and empirical execution)</td>
 </tr>
 </tbody>
 </table>
 <p>No capability wave may close a milestone merely by passing its own component tests. Evidence MUST
 be evaluated under the milestone acceptance boundary to which it is offered.</p>
+<h2 id="backend-finish-gates">Backend finish gates</h2>
+<p>The following gates refine W-092 without creating a shortcut around M-8, M-9,
+or M-10. Current ownership and detailed sprint instructions live in
+<a href="../active/">active.md</a>.</p>
+<table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Stable outcome</th>
+<th>Acceptance predicate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>W-092-F0</td>
+<td>Exact-subject navigation and benchmark truth</td>
+<td>LDA/index health is HEAD-bound; runtime-to-patch-to-exterior-verdict evidence resolves; canary subjects are unique, uncontaminated and content-addressed</td>
+</tr>
+<tr>
+<td>W-092-F1</td>
+<td>One canonical Coding Max product path</td>
+<td>Fast/balanced/max invoke <code>ApplicationService -&gt; Runtime -&gt; HarnessSession -&gt; EpisodeEngine</code>; no parallel production engine or name-based admission bypass remains</td>
+</tr>
+<tr>
+<td>W-092-F2</td>
+<td>Truthful task-aware completion</td>
+<td>Test counts are observed, zero-test/stale/partial/incomplete evidence fails closed, and bugfix/feature/migration/greenfield/read-only policies are explicit</td>
+</tr>
+<tr>
+<td>W-092-F3</td>
+<td>Durable long-session continuation</td>
+<td>A fresh process restores task/composition/policy/budget/phase/next-action identity and never duplicates a settled effect across 40+ turn tests</td>
+</tr>
+<tr>
+<td>W-092-F4</td>
+<td>Repository-scale progressive context</td>
+<td><code>ContextPacket</code> and <code>IndexPort</code> supply bounded, snapshot-bound, omission-bearing staged context with deterministic source fallback and affected-test/change-surface closure</td>
+</tr>
+<tr>
+<td>W-092-F5</td>
+<td>Product qualification</td>
+<td>Frozen multi-class tasks produce exact patches, fresh verification, exterior verdicts, event/trajectory evidence, costs and resume parity under preregistered thresholds</td>
+</tr>
+<tr>
+<td>W-092-F6</td>
+<td>Optional specialist disposition</td>
+<td>One-role-at-a-time held-out ablations accept or reject reviewer/localizer/test-investigator/planner treatments without weakening verifier authority</td>
+</tr>
+</tbody>
+</table>
+<p>F0-F5 are prerequisites for claiming the autonomous coding backend finished.
+F6 is optional: a negative specialist result leaves the accepted single-worker
+product intact. The separate governed-memory experiment is still required to
+accept M-8.</p>
 <h2 id="post-m-10-10-qualification-horizon">Post-M-10 1.0 qualification horizon</h2>
 <p>M-9 and M-10 keep their existing beta and <code>0.9.0</code> meanings. The following
 outcomes define a non-authorizing 1.0 horizon; they do not create new active

@@ -159,37 +159,80 @@ class RuntimeTaskExecutor:
         self._manifest_path = manifest_path
 
     def execute(self, task: Mapping[str, Any], workspace: Path, arm: str) -> TaskAttempt:
-        from vanguard.packages.runtime.root import Runtime, TaskContext
+        from vanguard.packages.runtime.root import Runtime, TaskContext, FileBlobStore
 
         model = self._model
         # Model selection remains the runtime's composition responsibility.
         # This seam accepts an already selected ModelPort; it never handles
         # provider credentials or model-policy literals itself.
-        manifest = self._manifest_path or (_REPO_ROOT / "vanguard/packages/agency/manifests/vg-code-default/manifest.json")
+        manifest = self._manifest_path or (_REPO_ROOT / "vanguard/packages/agency/manifests/vg-code-max/manifest.json")
         task_id = str(task["id"])
+        started = time.monotonic()
+        state_dir = workspace / ".m8-state"
         context = TaskContext(
             brief=str(task.get("prompt") or task.get("title") or task_id),
-            repo_path=workspace, run_id=f"m8:{task_id}:{arm}",
-            episode_id=f"m8:{task_id}:{arm}", max_turns=1,
+            repo_path=workspace,
+            run_id=f"m8:{task_id}:{arm}",
+            episode_id=f"m8:{task_id}:{arm}",
+            max_turns=min(8, int(task.get("max_turns", 8) or 8)),
             project_id="m8-heldout",
             preregistration={"task_digest": _task_digest(task)},
         )
-        started = time.monotonic()
         result = Runtime.execute_profiled(
-            manifest, context, profile_id=self._profile_id, interactive=False, model=model)
-        telemetry = result.telemetry
+            manifest, context, profile_id=self._profile_id,
+            interactive=True, model=model,
+            store_path=str(state_dir / "events.sqlite3"),
+            blobs=FileBlobStore(state_dir / "blobs"),
+        )
         route = {
             "provider": getattr(model, "provider", None),
             "model": getattr(model, "model", None),
             "compositionDigest": result.composition_digest,
         }
-        trajectory_digest = digest_of(result.trajectory) if result.trajectory is not None else None
+        telemetry_obj = getattr(result, "telemetry", None)
+        telemetry = {
+            "promptTokens": getattr(telemetry_obj, "prompt_tokens", None),
+            "completionTokens": getattr(telemetry_obj, "completion_tokens", None),
+            "usdMicros": getattr(telemetry_obj, "usd_micros", None),
+            "turns": getattr(telemetry_obj, "turns", 0),
+        }
+        patch_parts: list[str] = []
+        blobs = FileBlobStore(state_dir / "blobs")
+        trajectory = getattr(result, "trajectory", None)
+        trajectory_artifacts = trajectory.get("artifacts", ()) if isinstance(trajectory, Mapping) else ()
+        artifact_refs = tuple(
+            str(item.get("digest")) for item in trajectory_artifacts
+            if isinstance(item, Mapping) and item.get("digest")
+        )
+        if not artifact_refs:
+            artifact_refs = tuple(getattr(result, "artifact_refs", ()) or ())
+        for reference in artifact_refs:
+            stored = blobs.get(str(reference))
+            if not stored.ok or stored.value is None:
+                continue
+            try:
+                value = json.loads(stored.value.decode("utf-8"))
+            except (UnicodeDecodeError, ValueError):
+                continue
+            if isinstance(value, Mapping) and value.get("action") in {"patch.apply", "fs.patch", "patch"}:
+                args = value.get("args")
+                if isinstance(args, Mapping) and isinstance(args.get("diff") or args.get("patch"), str):
+                    patch_parts.append(str(args.get("diff") or args.get("patch")))
+        trajectory_digest = digest_of({
+            "runId": context.run_id,
+            "episodeId": context.episode_id,
+            "compositionDigest": result.composition_digest,
+            "artifactRefs": list(artifact_refs),
+            "tokenUsage": telemetry,
+        })
         return TaskAttempt(
-            output=result.detail, trajectory_digest=trajectory_digest,
-            usage={"prompt_tokens": telemetry.prompt_tokens,
-                   "completion_tokens": telemetry.completion_tokens,
-                   "usd_micros": telemetry.usd_micros,
-                   "turns": telemetry.turns},
+            output=result.detail,
+            patch="\n".join(patch_parts) or None,
+            trajectory_digest=trajectory_digest,
+            usage={"prompt_tokens": telemetry.get("promptTokens"),
+                   "completion_tokens": telemetry.get("completionTokens"),
+                   "usd_micros": telemetry.get("usdMicros"),
+                   "turns": telemetry.get("turns", 0)},
             route_identity=route, elapsed_seconds=time.monotonic() - started)
 
 

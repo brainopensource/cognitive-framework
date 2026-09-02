@@ -19,6 +19,7 @@ from ..adapters.environment.git import GitEnvironmentAdapter
 from ..adapters.sandbox.rootless import RootlessSandboxRunner
 from ..adapters.sandbox.worker import WorkerProtocol
 from ..adapters.stores.event_store import SqliteEventStore
+from ..adapters.stores.blob_store import FileBlobStore
 from ..adapters.models.cassette import Cassette, CassetteRecorder
 from ..adapters.models.openrouter import OpenRouterModel
 from ..domain.canonicalisation.digest import digest_of

@@ -33,10 +33,24 @@ import type {
 import type { RuntimeClient } from "@aether/client";
 import { TauriNativeBridge, type NativePlatformBridge } from "../bridge/tauri-bridge.js";
 import { groupSessionsByDate, filterSessions, type SessionSummary, type SessionGroup } from "./session-history.js";
+import {
+  fetchCredentialStatus,
+  probeProvider,
+  type CredentialStatus,
+  type ProviderProbeResult,
+} from "../gateway/credentials.js";
 
 export type Signal<T> = {
   get(): T;
   set(value: T | ((prev: T) => T)): void;
+  /**
+   * Update the value without notifying subscribers.
+   *
+   * For state the DOM already reflects. A controlled textarea that notifies on
+   * every keystroke forces a full re-render to tell the browser something it
+   * just did itself, which in this application destroys the focused node.
+   */
+  setSilent(value: T | ((prev: T) => T)): void;
   subscribe(fn: (value: T) => void): () => void;
 };
 
@@ -57,6 +71,9 @@ export function createSignal<T>(initialValue: T): Signal<T> {
         }
       }
     },
+    setSilent(val) {
+      current = typeof val === "function" ? (val as (prev: T) => T)(current) : val;
+    },
     subscribe(fn) {
       listeners.add(fn);
       return () => listeners.delete(fn);
@@ -64,7 +81,11 @@ export function createSignal<T>(initialValue: T): Signal<T> {
   };
 }
 
-export type ForensicTab = "diffs" | "evidence" | "artifacts" | "trace" | "runs" | "settings" | "providers";
+//: How long the composer waits before persisting a draft. Long enough that
+//: ordinary typing never triggers it, short enough that a pause records.
+const DRAFT_FLUSH_MS = 400;
+
+export type ForensicTab = "diffs" | "evidence" | "artifacts" | "trace" | "runs" | "logs" | "settings" | "providers";
 export type LayoutMode = "COMPACT" | "STANDARD" | "WIDE";
 
 export type DesktopStoreState = {
@@ -123,6 +144,18 @@ export type DesktopStoreState = {
   activeSettingsTab: "general" | "runtime" | "providers" | "appearance" | "workspace" | "terminal" | "accessibility";
   selectedRunDetailId?: string;
   settings: FrontendSettings;
+  /** What the runtime says about the provider key. Null until first asked. */
+  credential: CredentialStatus | null;
+  /** Result of the last "Test Connection", and whether one is in flight. */
+  credentialProbe: ProviderProbeResult | null;
+  credentialProbeRunning: boolean;
+};
+
+/** Where this host reaches the runtime, and over which transport. */
+export type RuntimeTarget = {
+  socketPath?: string;
+  httpUrl?: string;
+  transport?: "socket" | "http";
 };
 
 export type DesktopStoreOptions =
@@ -130,6 +163,7 @@ export type DesktopStoreOptions =
       controller?: FrontendAppController;
       client?: RuntimeClient;
       bridge?: NativePlatformBridge;
+      runtimeTarget?: RuntimeTarget;
       initial?: Partial<DesktopStoreState>;
     }
   | Partial<DesktopStoreState>;
@@ -137,7 +171,9 @@ export type DesktopStoreOptions =
 export class DesktopStore {
   public readonly controller: FrontendAppController;
   public readonly bridge: NativePlatformBridge;
-  public readonly managedRuntime: ManagedRuntimeHost;
+  private managedRuntimeHost?: ManagedRuntimeHost;
+  private readonly runtimeTarget?: RuntimeTarget;
+  private draftFlushTimer?: ReturnType<typeof setTimeout>;
   public readonly state: Signal<DesktopStoreState>;
   private unsubscribeController?: () => void;
   private lastNotifiedApprovalId?: string;
@@ -148,23 +184,7 @@ export class DesktopStore {
     const controllerParam = isDirectState ? undefined : (options as any).controller;
     const clientParam = isDirectState ? undefined : (options as any).client;
     this.bridge = (options as any)?.bridge ?? new TauriNativeBridge();
-    this.managedRuntime = new ManagedRuntimeHost({
-      onEvent: (event) => {
-        if (event.type === "status_changed") {
-          this.update((s) => ({
-            ...s,
-            connectionState:
-              event.status === "RUNNING"
-                ? "connected"
-                : event.status === "INCOMPATIBLE"
-                ? "incompatible"
-                : "connecting",
-            statusMessage: event.detail ?? s.statusMessage,
-          }));
-        }
-      },
-    });
-
+    this.runtimeTarget = isDirectState ? undefined : (options as any).runtimeTarget;
     this.controller =
       controllerParam ??
       new FrontendAppController({
@@ -231,6 +251,9 @@ export class DesktopStore {
       hasUnreadContent: false,
       activeSettingsTab: "general",
       settings: ctrlState.settings,
+      credential: null,
+      credentialProbe: null,
+      credentialProbeRunning: false,
     });
 
     this.unsubscribeController = this.controller.subscribe((cState) => {
@@ -461,6 +484,118 @@ export class DesktopStore {
     }
   }
 
+  /**
+   * `ManagedRuntimeHost` spawns and supervises a Python sidecar, so its
+   * constructor resolves the product layout through `node:os` and `node:fs`.
+   * Building it eagerly made the store unconstructable in a browser -- the one
+   * host this UI actually renders in. It is created on first use instead, so
+   * the browser build only reaches Node built-ins if the operator asks for a
+   * managed sidecar, and then fails with a message that says so.
+   */
+  public get managedRuntime(): ManagedRuntimeHost {
+    if (!this.managedRuntimeHost) {
+      this.managedRuntimeHost = new ManagedRuntimeHost({
+        onEvent: (event) => {
+          if (event.type === "status_changed") {
+            this.update((s) => ({
+              ...s,
+              connectionState:
+                event.status === "RUNNING"
+                  ? "connected"
+                  : event.status === "INCOMPATIBLE"
+                  ? "incompatible"
+                  : "connecting",
+              statusMessage: event.detail ?? s.statusMessage,
+            }));
+          }
+        },
+      });
+    }
+    return this.managedRuntimeHost;
+  }
+
+  /**
+   * Record composer text without provoking a re-render.
+   *
+   * Two notifiers had to be silenced, not one. `state.setSilent` keeps the
+   * store from re-rendering, and the debounce keeps
+   * `controller.setConversationDraft` -- which notifies its own subscribers,
+   * and so reaches the same renderer by a longer road -- from firing on every
+   * keystroke. The draft is still durably recorded; it is recorded once the
+   * operator pauses instead of once per character.
+   */
+  public setComposerDraft(text: string, { flush = false }: { flush?: boolean } = {}): void {
+    this.state.setSilent((s) => ({ ...s, composerText: text }));
+
+    if (this.draftFlushTimer !== undefined) {
+      clearTimeout(this.draftFlushTimer);
+      this.draftFlushTimer = undefined;
+    }
+    if (flush) {
+      this.controller.setConversationDraft(text);
+      return;
+    }
+    this.draftFlushTimer = setTimeout(() => {
+      this.draftFlushTimer = undefined;
+      this.controller.setConversationDraft(this.get().composerText);
+    }, DRAFT_FLUSH_MS);
+  }
+
+  /** Persist any pending draft immediately. */
+  public flushComposerDraft(): void {
+    if (this.draftFlushTimer === undefined) return;
+    clearTimeout(this.draftFlushTimer);
+    this.draftFlushTimer = undefined;
+    this.controller.setConversationDraft(this.get().composerText);
+  }
+
+  /** Ask the runtime whether it can load the provider key. */
+  public async refreshCredentialStatus(): Promise<void> {
+    const baseUrl = this.runtimeTarget?.httpUrl;
+    if (!baseUrl) return;
+    const credential = await fetchCredentialStatus(baseUrl);
+    this.update((s) => ({ ...s, credential }));
+  }
+
+  /**
+   * Send a one-token request to the provider and record what came back.
+   *
+   * The running flag is state rather than a local variable so the button can
+   * say "Testing…"; a button that looks identical while working is the reason
+   * this surface read as broken.
+   */
+  public async testProviderConnection(model?: string): Promise<void> {
+    const baseUrl = this.runtimeTarget?.httpUrl;
+    if (!baseUrl) return;
+    this.update((s) => ({ ...s, credentialProbeRunning: true, credentialProbe: null }));
+    const result = await probeProvider(baseUrl, model);
+    this.update((s) => ({
+      ...s,
+      credentialProbeRunning: false,
+      credentialProbe: result,
+      credential: {
+        keyRef: result.keyRef,
+        state: result.state,
+        source: result.source || s.credential?.source || "",
+        detail: result.detail,
+        remedy: result.remedy,
+      },
+    }));
+  }
+
+  /**
+   * Reconnect over whichever transport this host was configured for. Going
+   * through the controller directly would fall back to the UDS transport,
+   * which the browser build cannot open.
+   */
+  public async connectRuntime(): Promise<boolean> {
+    const connected = await this.controller.connectRuntime(this.runtimeTarget);
+    // Credential status is part of "can this thing do any work", so it is
+    // resolved alongside the connection rather than only when Settings opens.
+    void this.refreshCredentialStatus();
+    return connected;
+  }
+
   public async startManagedRuntime(): Promise<void> {
     try {
       const { client } = await this.managedRuntime.ensureRunning();
@@ -475,9 +610,12 @@ export class DesktopStore {
   }
 
   public async destroy(): Promise<void> {
+    this.flushComposerDraft();
     if (this.unsubscribeController) {
       this.unsubscribeController();
     }
-    await this.managedRuntime.shutdown();
+    if (this.managedRuntimeHost) {
+      await this.managedRuntimeHost.shutdown();
+    }
   }
 }

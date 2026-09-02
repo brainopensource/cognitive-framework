@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { DesktopStore } from "../src/state/desktop-store.js";
+import { installMockDom } from "./support/mock-dom.js";
 import { DesktopApp } from "../src/components/App.js";
 import { InMemoryPersistenceAdapter, FrontendAppController } from "@aether/client";
 import type { EventEnvelope } from "@aether/contracts";
@@ -85,31 +86,7 @@ test("Desktop daily-use: startup readiness, provider selection, and draft contin
 });
 
 test("Desktop mount & unmount with readiness modal rendering", () => {
-  // Provide DOM mock if needed
-  if (typeof document === "undefined") {
-    (globalThis as any).document = {
-      createElement: (tag: string) => {
-        const el: any = {
-          tagName: tag.toUpperCase(),
-          className: "",
-          style: { cssText: "" },
-          innerHTML: "",
-          textContent: "",
-          children: [] as any[],
-          appendChild: (child: any) => {
-            el.children.push(child);
-            return child;
-          },
-          querySelectorAll: () => [],
-          querySelector: () => null,
-        };
-        return el;
-      },
-      head: {
-        appendChild: () => {},
-      },
-    };
-  }
+  installMockDom();
 
   const store = new DesktopStore();
   const app = new DesktopApp({ store });

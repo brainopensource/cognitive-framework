@@ -189,7 +189,6 @@
 {"source_id": "decision.index", "source_path": "docs/decisions.md", "target_id": "arch.assurance.evaluation", "target_path": "docs/backend/architecture/assurance-evaluation.md", "relationship_type": "markdown_link"}
 {"source_id": "decision.index", "source_path": "docs/decisions.md", "target_id": "arch.memory.learning", "target_path": "docs/backend/architecture/memory-learning.md", "relationship_type": "markdown_link"}
 {"source_id": "decision.index", "source_path": "docs/decisions.md", "target_id": "ref.artifacts", "target_path": "docs/backend/reference/artifacts-memory.md", "relationship_type": "markdown_link"}
-{"source_id": "execution.active", "source_path": "docs/execution/active.md", "target_id": "execution.milestones", "target_path": "docs/execution/milestones.md", "relationship_type": "markdown_link"}
 {"source_id": "execution.backlog", "source_path": "docs/execution/backlog.md", "target_id": "execution.active", "target_path": "docs/execution/active.md", "relationship_type": "markdown_link"}
 {"source_id": "execution.backlog", "source_path": "docs/execution/backlog.md", "target_id": "repo-root-vision", "target_path": "VISION.md", "relationship_type": "markdown_link"}
 {"source_id": "execution.backlog", "source_path": "docs/execution/backlog.md", "target_id": "execution.milestones", "target_path": "docs/execution/milestones.md", "relationship_type": "markdown_link"}

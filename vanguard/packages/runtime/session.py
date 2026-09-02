@@ -22,6 +22,7 @@ from ..agency.context import (
     CompiledContext,
     ContextCompiler,
     Fragment,
+    build_context_packet,
 )
 from ..agency.manifests.discovery import WorkspaceDiscovery
 from ..agency.provenance import NullProvenanceSink, ProvenanceSink
@@ -348,6 +349,21 @@ def _route_of(model: Any) -> Mapping[str, Any]:
     }
 
 
+def _observed_test_count(detail: str) -> int:
+    """Extract a conservative test count from mediated verifier output.
+
+    Exit status alone is not evidence that a test was collected or executed.
+    Unknown/unparseable output intentionally returns zero so completion remains
+    fail-closed.  The parser accepts the stable summaries emitted by unittest
+    and pytest without coupling the runtime to either framework.
+    """
+    for pattern in (r"Ran\s+(\d+)\s+tests?\b", r"collected\s+(\d+)\s+items?\b"):
+        match = re.search(pattern, detail, flags=re.IGNORECASE)
+        if match:
+            return max(0, int(match.group(1)))
+    return 0
+
+
 @dataclass(frozen=True, slots=True)
 class SessionPorts:
     """Everything a session needs from outside itself.
@@ -574,23 +590,65 @@ class HarnessSession:
                 "=== Durable Coding Task State ===\n"
                 + json.dumps(dict(task.resume_state), sort_keys=True, default=str))
         if self.index is not None:
-            files_res = self.index.files()
-            if files_res.ok and files_res.value is not None:
-                symbols_res = self.index.symbols()
-                slist = list(symbols_res.value) if symbols_res.ok and symbols_res.value is not None else []
-                sym_by_file: dict[str, list[str]] = {}
-                for s in slist:
-                    sym_by_file.setdefault(s.path, []).append(f"{s.kind} {s.name}:{s.line}")
-                lines = ["=== Workspace Repository Map ==="]
-                if not files_res.value:
-                    lines.append("- state: empty greenfield workspace")
-                for f in files_res.value:
-                    syms = sym_by_file.get(f, [])
-                    if syms:
-                        lines.append(f"- {f} ({', '.join(syms)})")
-                    else:
-                        lines.append(f"- {f}")
-                env_parts.append("\n".join(lines))
+            # Repository intelligence is dynamic, bounded context. Never put a
+            # complete flat index into the immutable environment prefix: large
+            # workspaces would consume the compaction budget before the first
+            # edit. The packet retains explicit omissions and provenance while
+            # the compiler receives only a compact orientation summary.
+            mapped = self.index.repo_map(token_budget=4000)
+            if mapped.ok and mapped.value is not None:
+                repo_map = mapped.value
+                selected: list[Mapping[str, Any]] = [
+                    {"kind": "file", "path": path, "estimated_tokens": 4}
+                    for path in repo_map.files
+                ]
+                selected.extend(
+                    {"kind": "symbol", "identity": f"{item.path}:{item.line}:{item.name}",
+                     "path": item.path, "name": item.name, "line": item.line,
+                     "symbolKind": item.kind,
+                     "estimated_tokens": 8}
+                    for item in repo_map.symbols
+                )
+                selected.extend(
+                    {"kind": "dependency", "identity": f"{item.source}->{item.target}",
+                     "source": item.source, "target": item.target,
+                     "estimated_tokens": 6}
+                    for item in repo_map.dependencies
+                )
+                selected.extend(
+                    {"kind": "test", "path": item.test_path,
+                     "source": item.source_path, "estimated_tokens": 5}
+                    for item in repo_map.tests
+                )
+                packet = build_context_packet(
+                    task_digest=digest_of({"runId": task.run_id, "brief": task.brief}),
+                    repository_snapshot=repo_map.source_revision,
+                    provider=repo_map.adapter_id,
+                    provider_version="1",
+                    query_digest=digest_of({"brief": task.brief}),
+                    budget_tokens=4000,
+                    selected=selected,
+                    index_snapshot_digest=repo_map.source_revision,
+                    reserve_tokens=1000,
+                )
+                orientation = {
+                    "packetDigest": packet.digest(),
+                    "repositorySnapshot": packet.repository_snapshot,
+                    "files": list(packet.files)[:80],
+                    "symbols": [dict(item) for item in packet.symbols[:80]],
+                    "symbolSummary": [
+                        f"{item.get('symbolKind', item.get('kind', 'symbol'))} {item.get('name', '')}:{item.get('line', '')}"
+                        for item in packet.symbols[:80]
+                    ],
+                    "dependencies": [dict(item) for item in packet.dependencies[:80]],
+                    "tests": list(packet.tests)[:80],
+                    "omissions": list(packet.omissions),
+                    "truncated": bool(repo_map.truncated or packet.omissions),
+                }
+                env_parts.append(
+                    "=== Workspace Repository Map ===\n"
+                    "=== Bounded Repository Context Packet ===\n"
+                    + json.dumps(orientation, sort_keys=True, default=str))
         env_text = "\n\n".join(part for part in env_parts if part)
         compiler = ContextCompiler(
             system_core=harness.system_core,
@@ -912,6 +970,8 @@ class HarnessSession:
                 "taskDigest": getattr(self.run_plan, "task_digest", ""),
                 "preregistrationDigest": getattr(
                     self.run_plan, "preregistration_digest", ""),
+                "maxTurns": int(self.task.max_turns),
+                "interactive": bool(self.ports.interactive),
             },
         ))
         self._episode_begun_here = True
@@ -1006,7 +1066,7 @@ class HarnessSession:
                 patch_detector=patch_detector,
                 truncation_detector=truncation_detector,
                 completion_admitter=(self._admit_completion
-                                     if harness.harness in ADMISSION_GATED_HARNESSES
+                                     if admission_required(harness)
                                      else None))
             outcome = engine.run(
                 episode_id=task.episode_id, run_id=task.run_id,
@@ -1231,6 +1291,14 @@ class HarnessSession:
             path = request.args.get("path")
             if isinstance(path, str) and path and not path.startswith(("/", "\\")):
                 self._completion_changed_files.add(path.replace("\\", "/"))
+            if (self.artifacts is not None
+                    and "reused durable settled effect" not in str(outcome.detail or "")):
+                self.artifacts.capture(
+                    "patch",
+                    {"action": request.action, "args": dict(request.args),
+                     "resultDigest": outcome.result_digest},
+                    turn=self.turns_consumed(),
+                )
         if request.action not in {"test", "exec", "proc.exec"}:
             return
         argv = request.args.get("argv", request.args.get("command", ()))
@@ -1246,11 +1314,22 @@ class HarnessSession:
         exit_code = int(match.group(1)) if match else (0 if outcome.status == "ok" else 1)
         self._completion_verification = VerificationReceipt(
             exit_code=exit_code,
-            executed_test_count=1,
+            executed_test_count=_observed_test_count(detail),
             workspace_digest=self._workspace_digest(),
             task_digest=digest_of({"runId": self.task.run_id, "brief": self.task.brief}),
             receipt_digest=outcome.result_digest or "",
         )
+        if (self.artifacts is not None
+                and "reused durable settled effect" not in str(outcome.detail or "")):
+            self.artifacts.capture(
+                "verification_report",
+                {"command": list(argv) if isinstance(argv, Sequence) else [],
+                 "exitCode": exit_code,
+                 "executedTestCount": self._completion_verification.executed_test_count,
+                 "workspaceDigest": self._completion_verification.workspace_digest,
+                 "receiptDigest": self._completion_verification.receipt_digest},
+                turn=self.turns_consumed(),
+            )
 
     def _admit_completion(self, _episode: Any, _proposal: Any) -> AdmissionVerdict:
         """Apply the coding completion contract before reducing ``finish``."""

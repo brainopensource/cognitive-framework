@@ -10,6 +10,8 @@ import {
   renderResearchCitationCard,
 } from "@aether/ui-web";
 import { formatDeepLink } from "@aether/projections";
+import { renderCredentialPanel } from "./CredentialPanel.js";
+import { renderLogsPane } from "./LogsPane.js";
 
 export function renderForensicDrawer(store: DesktopStore): HTMLElement | null {
   const state = store.get();
@@ -62,6 +64,7 @@ export function renderForensicDrawer(store: DesktopStore): HTMLElement | null {
     { id: "artifacts", label: "Artifacts" },
     { id: "trace", label: "Trace" },
     { id: "runs", label: "Runs" },
+    { id: "logs", label: "Logs" },
     { id: "settings", label: "Settings" },
   ];
 
@@ -291,8 +294,13 @@ export function renderForensicDrawer(store: DesktopStore): HTMLElement | null {
         content.appendChild(item);
       }
     }
+  } else if (state.activeForensicTab === "logs") {
+    content.appendChild(renderLogsPane(store));
   } else if (state.activeForensicTab === "settings") {
-    // Render Provider Manager
+    // Real credential status first: it is the answer to "why did nothing
+    // happen", and it comes from the runtime rather than from browser defaults.
+    content.appendChild(renderCredentialPanel(store));
+
     const providerSec = renderProviderManager({
       providers: state.providers,
       selectedProviderId: state.selectedProviderId,
@@ -302,6 +310,7 @@ export function renderForensicDrawer(store: DesktopStore): HTMLElement | null {
       onRemoveProvider: (id) => store.controller.removeProvider(id),
       onUpdateCredential: (pId, secret) => store.controller.setProviderCredential(pId, secret),
       onValidateProvider: (pId) => store.controller.validateProvider(pId),
+      credentialsManagedByRuntime: true,
     });
     content.appendChild(providerSec);
 

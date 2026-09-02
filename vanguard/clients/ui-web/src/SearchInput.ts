@@ -1,4 +1,6 @@
 export type SearchInputProps = {
+  /** Stable identity for focus restoration across re-renders. */
+  focusKey?: string;
   placeholder?: string;
   initialValue?: string;
   onSearch: (query: string) => void;
@@ -23,6 +25,10 @@ export function renderSearchInput(props: SearchInputProps): HTMLElement {
   container.appendChild(icon);
 
   const input = document.createElement("input");
+  // Hosts that rebuild their tree on every state change use this to restore
+  // focus and caret after the swap; without it, typing here loses the caret
+  // exactly as the composer did.
+  if (props.focusKey) input.setAttribute("data-focus-key", props.focusKey);
   input.type = "text";
   input.placeholder = props.placeholder ?? "Search…";
   input.value = props.initialValue ?? "";

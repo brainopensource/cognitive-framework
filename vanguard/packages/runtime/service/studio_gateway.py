@@ -29,6 +29,18 @@ from .service import RuntimeService, _utc_now
 #: Two limits for one protocol means the looser transport is the real one.
 MAX_BODY_BYTES = MAX_FRAME_BYTES
 
+#: Where the composable harness manifests live, relative to a repository root.
+_AGENCY_MANIFESTS = Path("vanguard") / "packages" / "agency" / "manifests"
+
+#: Execution profiles the runtime actually presets. Anything else is an
+#: agent name that reached the wrong field.
+_EXECUTION_PROFILES = frozenset({"product", "local", "sandboxed", "hermetic",
+                                 "standard", "ci", "fast"})
+
+#: Manifests ship with the runtime, so a workspace that is not this repository
+#: still resolves `vg-code-default` instead of failing to find a harness.
+_REPO_ROOT = Path(__file__).resolve().parents[4]
+
 #: Workspace reads are mediated: only these suffixes may be dereferenced, and
 #: only inside the resolved workspace root. Everything else goes through
 #: `ExplainArtifact`, which is the audited path.
@@ -164,6 +176,8 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
             self._handle_health()
         elif path in ("/api/capabilities", "/api/v1/capabilities"):
             self._handle_capabilities()
+        elif path in ("/api/credentials", "/api/v1/credentials"):
+            self._handle_credential_status()
         elif path in ("/api/runs", "/api/v1/runs"):
             self._handle_list_runs(query)
         elif path.startswith("/api/artifacts/") or path.startswith("/api/v1/artifacts/"):
@@ -212,6 +226,8 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
 
         if path in ("/api/runs", "/api/v1/runs", "/api/runs/launch"):
             self._handle_launch_run(payload)
+        elif path in ("/api/credentials:test", "/api/v1/credentials:test"):
+            self._handle_credential_probe(payload)
         elif path in ("/api/approvals/resolve", "/api/v1/approvals/resolve") or (
             path.startswith("/api/v1/approvals/") and path.endswith(":resolve")
         ):
@@ -257,6 +273,33 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
             "timestamp": _utc_now(),
         }
         self.wfile.write(json.dumps(response).encode("utf-8"))
+
+    def _handle_credential_status(self) -> None:
+        """Report whether the runtime can load the provider key, and why not.
+
+        The desktop pane used to render a hardcoded "CONFIGURED", which is how
+        an operator ends up believing a key is saved when no key exists. This
+        answers from the only authority there is -- the loader that the run
+        path itself uses -- and carries a reason and a remedy, never a secret.
+        """
+        from ...adapters.models.credential_probe import credential_status
+
+        self._send_plain_json(credential_status(self.server.workspace_root))
+
+    def _handle_credential_probe(self, payload: Mapping[str, Any]) -> None:
+        """Spend one token against the provider and report what came back."""
+        from ...adapters.models.credential_probe import PROBE_MODEL, probe_provider
+
+        model = str(payload.get("model") or PROBE_MODEL)
+        self._send_plain_json(probe_provider(self.server.workspace_root, model=model))
+
+    def _send_plain_json(self, data: Mapping[str, Any], status: int = HTTPStatus.OK) -> None:
+        """Send a non-frame JSON body. Status endpoints are not run receipts."""
+        self.send_response(status)
+        self._set_cors_headers()
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+        self.wfile.write(json.dumps(data).encode("utf-8"))
 
     def _handle_capabilities(self) -> None:
         cmd_frame = {
@@ -308,9 +351,35 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
 
     def _handle_launch_run(self, payload: Mapping[str, Any]) -> None:
         brief = str(payload.get("brief") or "Interactive Studio Task")
-        manifest_path = str(payload.get("manifestPath") or "harness.yaml")
         repo_path = str(payload.get("repoPath") or str(self.server.workspace_root))
         run_id = str(payload.get("runId") or f"run-studio-{uuidv7()[:8]}")
+
+        # `_cmd_StartRun` only spawns a worker when the manifest resolves to a
+        # real file, and `_run_worker_thread` reads `profileId`/`model` out of
+        # this same payload. Defaulting to a bare "harness.yaml" that exists in
+        # no workspace meant every launch was accepted, published one heartbeat
+        # and then executed nothing -- a run that streams forever because there
+        # is nothing on the other end producing events.
+        manifest_path = self._resolve_manifest(payload)
+
+        run_payload: dict[str, Any] = {
+            "manifestPath": manifest_path,
+            "repoPath": repo_path,
+            "brief": brief,
+        }
+        # Carried through rather than dropped: the client sends the operator's
+        # model and profile selection, and the worker thread is the consumer.
+        for key in ("model", "episodeId", "actor"):
+            value = payload.get(key)
+            if value:
+                run_payload[key] = str(value)
+
+        # `_run_worker_thread` defaults this to "code-default", which is an
+        # agent name and not a member of PRESETS, so every run died on
+        # "unknown execution profile". `local` is the preset that runs on the
+        # operator's own host, which is what a desktop session is.
+        profile_id = str(payload.get("profileId") or "").strip()
+        run_payload["profileId"] = profile_id if profile_id in _EXECUTION_PROFILES else "local"
 
         cmd_frame = {
             "version": "vg.4",
@@ -321,15 +390,48 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
                 "commandId": str(payload.get("commandId") or uuidv7()),
                 "idempotencyKey": str(payload.get("idempotencyKey") or uuidv7()),
                 "runId": run_id,
-                "payload": {
-                    "manifestPath": manifest_path,
-                    "repoPath": repo_path,
-                    "brief": brief,
-                },
+                "payload": run_payload,
             },
         }
         res = self.server.service.execute_command(cmd_frame)
         self._send_json_response(res)
+
+    def _resolve_manifest(self, payload: Mapping[str, Any]) -> str:
+        """Resolve the harness manifest to a file that actually composes.
+
+        Order: an explicit `manifestPath` (absolute, or relative to the
+        workspace), then the agency manifest named by `agentId`, then
+        `vg-code-default`.
+
+        The agency manifests are the live composition surface. `packs/*.yaml`
+        is a third dialect that no current ingress accepts -- `compose` routes
+        `mhf.harness/1` to `canonical_from_legacy`, which reads
+        `{harness, components, ...}`, while the packs carry
+        `{id, plugins, system_prompt, ...}`. Pointing a run at one produced
+        `manifest has unread fields` before any model was called.
+        """
+        root = self.server.workspace_root
+        explicit = str(payload.get("manifestPath") or "").strip()
+        candidates: list[Path] = []
+        if explicit and explicit not in (".", "harness.yaml"):
+            candidates.append(Path(explicit) if Path(explicit).is_absolute() else root / explicit)
+
+        # `profileId` is the *execution* profile (local/sandboxed/hermetic), a
+        # different axis from which agent runs. The agent comes from `agentId`.
+        agent_id = str(payload.get("agentId") or "").strip()
+        for name in (agent_id, f"vg-{agent_id}" if agent_id else "", "vg-code-default"):
+            if not name:
+                continue
+            for base in (root, _REPO_ROOT):
+                candidates.append(base / _AGENCY_MANIFESTS / name / "manifest.json")
+
+        for candidate in candidates:
+            if candidate.is_file():
+                return str(candidate)
+        # Nothing resolved. Returning the explicit value keeps the failure
+        # attributable: `StartRun` reports the path that did not exist rather
+        # than silently substituting one that does.
+        return explicit or str(_REPO_ROOT / _AGENCY_MANIFESTS / "vg-code-default" / "manifest.json")
 
     def _handle_cancel(self, run_id: str, payload: Mapping[str, Any]) -> None:
         p_clean = {k: v for k, v in payload.items() if k in ("reason", "expectedSeq")}

@@ -5,295 +5,431 @@ class: execution
 authority: execution
 truth_plane: TARGET
 status: living
-implementation_status: WAVE_1_CLOSED_WAVE_2_TECHNICAL_COMPLETE
+implementation_status: BACKEND_FINISH_ACTIVE
 owner: repository-governance
 canonical_for:
   - current work/state/ownership
-purpose: Represent current execution intent exactly as the active board states it, including unresolved internal status conflicts.
+purpose: Represent the current authorized backend finish sequence and its exact evidence gaps.
 audience:
   - contributor
   - release-owner
-analysis_subject_sha: 0a5795df721f762fc94cdfb3f9b6f8601810451c
-version: 0.9.2a2
-last_verified: 2026-08-31
+analysis_subject_sha: ea152f92fe9c9711035dfc7ff77b0c213380fe1f
+version: 0.9.2a3
+last_verified: 2026-09-02
 normative_authority:
-  - docs/03_execution/sprint_active.md
-  - docs/03_execution/backlog.md
+  - docs/SPEC.md
+  - docs/decisions.md
 relationships:
   - execution.milestones
   - execution.backlog
   - decision.index
-reviewer: principal-architecture-convergence-review
+reviewer: repository-governance
 confidence: high
 ---
 
 # Current Execution Intent
 
-## Authoritative source
+## Authoritative disposition
 
-This file is the current execution board for the repository subject named by
-`analysis_subject_sha`. Generated indexes and historical reports route work but
-do not override this board, source, tests, or receipts.
+This file is the sole current execution board. It supersedes older status prose in
+the README, drafts, review reports, generated indexes, benchmark filenames, and
+historical evidence bundles. Those artifacts may supply evidence, but they do not
+authorize work or close a gate.
 
-## Uncontested current controls
+The backend is in a **finish and convergence phase**, not a greenfield architecture
+phase. The general substrate already provides one mediated runtime, event-sourced
+state, bounded turns and budgets, model adapters, repository-index and context
+seams, completion admission, recursive delegation, application services, and
+exterior evaluation. The remaining work is to connect those mechanisms on one
+production Coding Max path, prove long-session continuation and task-appropriate
+completion, repair the empirical runner, and qualify the exact subject.
 
-- Lane A owns runtime, execution, persistence, clients, packaging, deployment, operations, and release surfaces.
-- Lane B owns domain/ports contracts, schemas, projections, evaluation semantics, falsifiers, experiments, and promotion criteria.
-- Each lane has WIP=1 and one current package.
-- Package progression is predicate-driven; product-time approval for privileged effects remains separate from development workflow.
-- Exact-subject verifier receipts, not prose or green test counts, close evidence gates.
+M-8 remains blocked. M-9 and M-10 remain unauthorized. No local challenge,
+cassette, green suite, or self-authored oracle is an official SWE-bench or SOTA
+result.
 
-## Board-declared current packages
+## Navigation and evidence health
 
-| Lane | Package | Board state | Declared next action |
+The source subject audited for this board is
+`ea152f92fe9c9711035dfc7ff77b0c213380fe1f`.
+
+- `.generated/knowledge/report.json` is `VALIDATED` with non-zero document,
+  symbol, link, and code-mapping counts. The supported generator was rerun after
+  this board changed; generated projections still do not authorize status.
+- `dev_context_logs/context_summary.md` records subject `7d46c7f...` and is stale
+  for current-status claims.
+- After the locked development dependencies were installed, `lda doctor --json`
+  and `lda check --json` reported `index_healthy: true`, non-zero entities, and
+  current `HEAD` `ea152f92fe9c...`. A prescribed full rebuild reduced sampled
+  stale symbol paths from 300 to zero. The tool still reports 5,207 orphan FTS
+  rows, 29 sampled low-signal paths, documentation-drift warnings, and duplicate
+  document candidates after that rebuild; these are navigation-tool hygiene debt
+  and cannot override resolved canonical files or source.
+- The investigation used both healthy LDA bounded context and the deterministic
+  verification path: `docs_rag_v0.py`, reverse file routing, generated symbols
+  only after path resolution, targeted `rg`, canonical owners, current source,
+  tests, Git history, and durable benchmark artifacts.
+
+`W-092-F0` has restored the minimum HEAD-bound navigation prerequisite, but must
+also close the residual hygiene findings and the runtime/canary evidence defects
+below before any later exact-subject qualification is accepted.
+
+## Current board and WIP
+
+Each lane has WIP=1. A package may advance only when its exit predicate is
+demonstrated on the current subject.
+
+| Lane | Active package | State | Current objective |
 |---|---|---|---|
-| A | `1-FORGE/ADM-001..005` | `COMPLETE` | Core Reflexive Micro-Forge (`vanguard/packages/agency/forge/`), atomic patcher, admission gate, and contract/agency suites pass 100% GREEN. |
-| B | `CMX-06` / `CMX-07` | `GATED` | Produce the accepted specialist ablation and execute the frozen repository-scale qualification set |
+| A — runtime/product | `CMX-09` / `W-092-F1` | `IN_PROGRESS` | Converge all useful Coding Max/Forge/Chimera behavior onto one `ApplicationService -> Runtime -> HarnessSession -> EpisodeEngine` product path |
+| B — evidence/evaluation | `REL-01R` / `W-092-F0` | `IN_PROGRESS` | Repair navigation and benchmark subject integrity before another live qualification run |
 
-## Wave closure disposition and next stage
+Everything else is queued, blocked, or experimental. In particular, `TLS-03`,
+`TLS-04`, speculative checkpoints, mutation, SBFL, branch search, swarm execution,
+and skill promotion are not active WIP.
 
-As of the exact implementation subject recorded in the accepted evidence
-bundle (`0a5795df721f762fc94cdfb3f9b6f8601810451c`):
+## Current-source audit findings
 
-| Stage | Disposition | Evidence-backed boundary |
-|---|---|---|
-| Wave 1 (`REL-01`, `REL-02`, `CMX-01..03`) | `CLOSED` | Official runtime/evaluator seams, frozen single-attempt canary, three presets, port-backed intelligence, and durable cold-resume falsifiers pass; no live canary or performance claim is made. |
-| Wave 2 implementation (`CMX-04`, `CMX-05`, technical `CMX-08`) | `TECHNICAL COMPLETE` | Multi-file/greenfield admission, thin facade/result parity, durable resume, and shared reference-agent path pass the hermetic suites. |
-| Wave 2 qualification (`CMX-06`, `CMX-07`) | `GATED` | Specialist enablement still requires an accepted ablation; repository-scale qualification still requires an executed exact-evidence run. |
-| 1-forge (`ADM-001..005`) | `COMPLETE` | `ForgeEngine`, `ForgeContextCompiler` (distillation + RFC-8785 JCS), `ForgeAtomicPatcher` (unified diffs, AST/block replace, rollback), `ForgeAdmissionGate` (strict freshness binding), and `vg-1-forge` preset implemented and verified with 100% test pass rate. |
+### What is real and reusable
 
-The live canary remains `NOT_RUN` because no provider-backed execution was
-authorized or available in this hermetic validation. M-8 therefore remains
-subject to its existing empirical gate, and no 1.0, SWE-bench, or SOTA claim
-is made. The first 1-forge change must preserve the existing `AdmissionGate`
-and express the missing goal contract through the current runtime seam.
+- `HarnessSession` owns the canonical mediated run path, one kernel, one ledger,
+  approval re-entry, trajectory capture, and exterior evaluation.
+- `EpisodeEngine` preserves prior turns and seen verbs across approval re-entry;
+  repeated-action detection no longer includes the ever-growing episode digest.
+- `PromptAssembler` and `ContextCompiler` provide deterministic L1-L5 assembly,
+  stable prefixes, bounded compaction, prompt/model-output capture, and provenance.
+- `AdmissionGate`, pack completion middleware, `CodingTaskState`, `ContextPacket`,
+  `IndexPort`, `FileRepoIndex`, and the thin `CodingMaxFacade` exist with focused
+  tests.
+- OpenRouter message conversion accepts assembled conversations, retains tool
+  descriptions, and maps the explicit `agency.finish` tool.
+- Local challenge artifacts demonstrate that the canonical application service
+  can produce externally oracle-passing multi-file patches on small controlled
+  workspaces. They are useful development evidence, not release qualification.
 
-## Reconciled state on the exact subject
+### P0 integration defects
 
-The production implementation subject reviewed for this plan is
-`0a5795df721f762fc94cdfb3f9b6f8601810451c`. Generated navigation artifacts
-were refreshed from this subject after implementation; they remain routing
-projections and do not override current source, tests, or receipts.
+1. **Production preset divergence.** The public Coding Max facade selects
+   `vg-code-fast`, `vg-code-balanced`, and `vg-code-max`, while later successful
+   development artifacts use `vg-code-max-v3luna`, `vg-code-chimera`, and
+   `vg-1-forge-v2`. The public presets currently share effectively the same base
+   manifest. Later behavior has not been reconciled into the public catalog.
+2. **Parallel engines are not production proof.** `ForgeEngine` and
+   `ChimeraEngine` implement their own turn/context/tool loops. The hard-challenge
+   reports named for Forge/Chimera actually invoke their manifests through
+   `ApplicationService`; they do not prove the separate engines are integrated.
+   A second production runtime would violate the locked thin-app/thick-composition
+   boundary.
+3. **Completion binding was inconsistent.** The runtime now uses
+   `admission_required()` at the engine seam and the application policy is bound
+   from declared `patch.apply` capability rather than preset names. Remaining
+   work is to remove compatibility-only name-set assertions and prove arbitrary
+   new manifests through a contract test.
+4. **Verification count was fabricated at the runtime boundary.** The runtime
+   now parses stable unittest/pytest summaries and returns zero when output is
+   unknown, so a zero-test or unparsable result fails closed. Remaining work is
+   typed framework/result evidence and broader task-kind policies.
+5. **Long-session resume was only a one-turn continuation.** Resume now records
+   and restores the original `maxTurns` and interactive approval mode rather than
+   deriving a new ceiling from proposal count. Remaining work is exact model,
+   profile, policy, phase, budget and 40+ turn cold-restart parity.
+6. **Semantic task state is under-produced.** `CodingTaskState` can fold rich
+   plan, discovery, dead-end, TODO, change-surface, verification, next-action,
+   and budget fields, but current production code has no general event producer
+   for most of those fields. The type and unit tests do not by themselves prove
+   meaningful cold continuation.
+7. **Repository context was not progressive.** The public Coding Max manifests
+   now declare the file index and `HarnessSession` constructs a bounded,
+   omission-bearing `ContextPacket` instead of an unbounded flat prefix. Remaining
+   work is staged retrieval by task/change epoch, dependency/test ranking and
+   post-edit refresh.
+8. **The product presets did not request the index.** Fast/balanced/max now bind
+   the shared repository-index component. Successful historical hard runs remain
+   non-integrated evidence because they predate this change and must be rerun.
+9. **The LDA A/B evidence is not an LDA adapter ablation.** Its treatment adds an
+   LDA hint and a hand-authored `lda_index.py` helper to the task workspace. The
+   hard runner named `run_3_hard_lda.py` does not call LDA. These artifacts must
+   not support a repository-intelligence lift claim.
+10. **M-8 live execution is structurally improved but cannot yet prove lift.**
+    `RuntimeTaskExecutor` now uses the canonical `vg-code-max` application path,
+    a bounded multi-turn attempt, interactive execution mode, durable state, and
+    patch-artifact extraction. The frozen canary still maps several workload
+    titles to unrelated or repeated workspaces, and the live path still requires
+    successor-subject repair and exterior-verdict qualification.
 
-The current source contains the generic completion-admission, protocol-recovery,
-L1-L5 context, reconstructible coding-state, meta-controller, index-port,
-delegation, topology, artifact, memory, learning, Coding Max policy, facade,
-and cold-resume mechanisms. The required suites, falsifiers, boundary, TCB,
-isolation, secret, duplication, documentation, and knowledge checks pass.
+### Evidence interpretation
 
-The M-8 held-out runner is now structurally truthful: dry-run is preflight-only,
-live execution is injected through the runtime and exterior-evaluator seams,
-prose is not a patch or a pass, and missing usage is explicit. The frozen
-canary is valid and content-addressed, but it has not been executed against a
-provider. The signed M-8 bundle currently present verifies the durable-memory
-falsifier evidence; it does not substitute for the separate empirical held-out
-lift gate.
+The retained three-hard-task reports show `3/3` exterior-oracle passes for both
+`vg-code-max-v3luna` and the `vg-1-forge-v2` manifest on self-authored fixtures.
+They demonstrate promising model-plus-harness behavior. They do **not** close
+`CMX-07`, M-8, M-9, or any SOTA claim because their rows lack an exact repository
+subject and full immutable event/trajectory bundle; the Forge-labelled run does
+not execute `ForgeEngine`; and the runtime admission/policy gaps above remain.
 
-Consequently M-8 remains blocked, M-9/M-10 remain unauthorized, and no
-SWE-bench or release claim is made.
+The independent v0.9.1 report is retained as historical evidence for its exact
+subject. Its recorded LDA head and current code subject differ, so it is not a
+current acceptance receipt.
 
-## Stable package contracts
+## Delivered implementation slice
 
-The active board supplies current authorization; the [milestones.md](milestones.md)
-supplies the stable M-4–M-8 package contracts, lane ownership, dependencies, acceptance predicates,
-and evidence obligations. This candidate view links that detail rather than copying its mutable
-tables, so package status cannot be mistaken for a second active board.
+The current worktree contains the first convergence slice: capability-derived
+runtime admission, capability-derived code-pack policy binding, durable
+`maxTurns`/interactive resume metadata, conservative verification-count parsing,
+bounded production `ContextPacket` construction, repository-index declarations
+for all public Coding Max presets, cold-index MCP compatibility output, durable
+patch/verification artifact capture, and a canonical multi-turn M-8 executor.
+Unattended privileged benchmark effects still require an injected approval
+authority from the benchmark caller.
+These changes are covered by focused runtime, application, context, falsifier and
+M-8 tests. They do not by themselves close the remaining exact-subject,
+task-state, progressive-refresh, 40+ turn, or empirical-lift predicates.
 
-## Three-solution convergence decision
+## Authorized backend finish sequence
 
-The review corpus under `docs/reports/reviews/electroweak_v091/3_body/` is
-non-canonical design input. None of the three solutions is authorized for
-wholesale application.
+The sequence is dependency-ordered. Later packages may prepare fixtures or test
+doubles, but may not claim completion before their prerequisites close.
 
-| Proposal | Adopt | Reject or defer | Disposition |
-|---|---|---|---|
-| Solution A | Pack-local presets, deterministic fast path, explicit plan/TODO artifacts, conditional review, feature-gated rollout | Parallel tool runtime, duplicate durable store, branch search, mutation, capsules, and distillation before measured lift | Behavioral source for pack policy; not a file-level patch plan |
-| Solution B | Provider-neutral repository intelligence, epoch-safe progressive context, evidence-gated TODO transitions, non-identical recovery, fast-to-deep escalation that preserves discoveries | Adapter-to-app imports, host subprocess verification, large application-side coordinator, and direct copy of its report-tree prototype | Primary control-model reference after boundary repair |
-| Solution C | Thin product application concept, deterministic complexity classes, layered verification, SBFL and mutation as testable hypotheses, single-attempt qualification discipline | Unsupported performance/benchmark statistics, invented APIs, premature product-family expansion, auto-rollback, and mandatory swarm/SBFL/mutation | Product direction and experiment backlog only |
+### Sprint F0 — exact-subject truth (`REL-01R`, Lane B, active)
 
-The selected architecture is **thin app, thick declarative composition**:
+Deliverables:
 
-```text
-vg / API
-  -> apps/coding_max            thin request/result facade and preset selection
-  -> runtime                    the only composition, lifecycle and ledger authority
-  -> code-default composition   planner, context policy, coding recovery and admission policy
-  -> ports                      generic model/index/sandbox/store contracts
-  -> adapters                   infrastructure implementations; never import apps or coding policy
-```
+1. Make `lda doctor --json` work in the supported development environment and
+   bind the index to current `HEAD`; refresh Tier-1 context and generated
+   knowledge through supported generators, never manual edits.
+2. Repair `RuntimeTaskExecutor` so an empirical attempt uses the selected
+   write-capable, admission-gated composition; distinguishes one agent attempt
+   from its bounded multi-turn episode; obtains a patch from a durable runtime
+   artifact; retains trajectory/event identity; and uses an exterior evaluator.
+3. Replace the current canary with a successor manifest whose task title,
+   payload, workspace preimage, oracle, split, base revision, and content digest
+   identify the same subject. Preserve the old frozen artifact; never rewrite a
+   previously executed subject.
+4. Add negative falsifiers for no patch, no trajectory, subject mismatch,
+   duplicate/contaminated tasks, zero tests, unavailable evaluator, budget
+   exhaustion, timeout, and a second agent attempt.
 
-No second runtime, event system, tool broker, persistence store, evaluator, or
-authority path may be introduced. Repository-intelligence tools must be backed
-by `IndexPort` or another generic port. Commands and tests must execute through
-the mediated environment/sandbox path. Large state remains content-addressed
-artifacts referenced by ledger events; `CodingTaskState` remains a projection.
+Exit predicate: hermetic preflight plus fake/cassette integration proves the
+complete runtime-to-patch-to-exterior-verdict chain, and every material identity
+in the bundle resolves on the audited subject. Live provider execution remains
+`NOT_RUN` at this sprint exit.
 
-## Authorized closure sequence
+### Sprint F1 — one canonical Coding Max (`CMX-09`, Lane A, active)
 
-### Sprint EWK-Q — evidence integrity and current sprint closure
+Deliverables:
 
-The implementation portion of this sprint is closed. Its remaining M-8
-empirical disposition is a qualification gate, not a reason to reopen the
-completed Wave1/Wave2 technical packages.
+1. Select one production preset lineage and fold accepted v3luna/Forge/Chimera
+   prompt, tool, patch, recovery, and context improvements into data-selected
+   `fast`, `balanced`, and `max` compositions.
+2. Keep `CodingMaxFacade` thin and route all run/status/resume/evidence/cost
+   operations through `ApplicationService` and the canonical runtime.
+3. Use `admission_required(harness)` as the single generic decision for every
+   write-capable composition. Bind `ICompletionPolicy` by declared component or
+   capability, not a second preset-name allowlist.
+4. Remove the separate Forge/Chimera engines from the supported product path.
+   Retain them only as experimental/reference code until useful mechanisms are
+   ported and parity tests prove the canonical runtime owns all effects,
+   persistence, approval, budgets, and evidence.
+5. Make every manifest tool name/verb/selector and environment allowlist resolve
+   from one compiled contract. Decorative capability strings are stop-ship.
 
-| Order | Package | Owner | Deliverable | Exit predicate |
-|---:|---|---|---|---|
-| 1 | `REL-01/H0` | Lane B | Runtime-adapter benchmark driver; executable materialized tasks; exterior oracle; structural-only dry run | Dry-run emits no lift/cost/success; live fixture proves exact task, patch, trajectory and evaluator linkage |
-| 2 | `REL-02/H1` | Lane B | Frozen content-addressed canary with `max_attempts=1` and explicit missingness | Manifest digest is fixed before live execution; invalid/unavailable tasks cannot count as failures or passes |
-| 3 | `FIN-A1` | Lane A | Producer-signed M-8 bundle and independent disposition | Protocol, promotion separation, and rollback evidence are valid on one subject; the independent verdict is accepted as positive, negative, or undeterminable without reinterpretation |
-| 4 | `W-092-5` | Both | Exact-subject qualification record | Required checks execute; claims match receipts; no local canary is called official SWE-bench |
+Exit predicate: CLI/API/preset contract tests show all three presets invoke one
+runtime and one completion path; a new write-capable manifest cannot complete
+without fresh applicable evidence; no app or experimental engine performs a
+direct effect or provider call.
 
-The integrity predicates pass for the implementation subject. The empirical
-treatment remains `NOT_RUN`; if it is later negative or undeterminable under
-the preregistration, record that result and keep M-8 blocked. Do not tune the
-threshold or manufacture replacement data. M-9 promotion remains blocked
-until M-8 is actually accepted.
+### Sprint F2 — truthful completion (`CMX-10A`, Lane A, queued)
 
-### Closed Wave1 handoff: `REL-01/H0`, `REL-02/H1`, and `CMX-01..03`
+Deliverables:
 
-This packet is closed on the current implementation subject. The material
-below is retained as the audit trail for the completed contract and falsifier
-matrix; it is no longer the next implementation task.
+- Produce typed verification receipts from the mediated command result: command,
+  exit code, framework, collected/executed/failed/skipped counts when observable,
+  output/result digest, task digest, and current postimage digest.
+- Fail closed on zero collection, unparsable required evidence, stale receipts,
+  partial patches, modified-but-uninspected files, incomplete multi-file change
+  surfaces, and post-verification edits.
+- Define explicit completion policy for bugfix, feature/refactor/migration,
+  greenfield, repository-without-tests, and read-only/explain tasks.
+- Make completion rejection model-visible and bounded; repeated finish rejection
+  with unchanged evidence becomes typed no-progress, not an infinite loop.
 
-**Required reading and source order**
+Exit predicate: end-to-end falsifiers reach the actual runtime boundary for each
+failure above; no synthetic test count or boolean-only verification can admit a
+write-capable completion.
 
-1. `docs/execution/active.md` (this package and current authorization).
-2. `benchmarks/m8_heldout/artifacts/preregistration.json` and
-   `benchmarks/m8_heldout/fixtures/workload.json` (frozen protocol inputs).
-3. `benchmarks/m8_heldout/runner.py` and
-   `test/benchmarks/test_m8_heldout_runner.py` (defective implementation and
-   executable falsifiers).
-4. `vanguard/packages/adapters/models/openrouter.py`,
-   `vanguard/packages/runtime/model_selection.py`, and the canonical runtime
-   entrypoint (official model/harness path).
-5. `vanguard/packages/runtime/evaluator_gateway.py` and evaluator port/adapter
-   contracts (exterior verdict path).
-6. Reverse-route every production file before editing and update its mapped
-   canonical owner; report degraded navigation if the index subject is stale.
+### Sprint F3 — durable long sessions (`CMX-10B`, Lane A, queued)
 
-**Implemented requirements**
+Deliverables:
 
-- The runner has no direct `urllib` provider client; the official model adapter
-  and runtime path are injected without exposing credentials.
-- The runner binds workspace, patch, trajectory, and evaluator observations to
-  the exact task/base-commit identities when a live executor is supplied.
-- Make dry-run a structural preflight only. It reports `NOT_RUN`/missing values
-  for success, lift, tokens, cost, latency, promotion, and rollback; zero is not
-  a substitute for missing empirical data.
-- `max_attempts=1` is enforced at the driver boundary. Transport retries may recover
-  the same provider request, but may not open a second episode or task attempt.
-- Unavailable, invalid, timed-out, provider-failed, no-patch, patch-
-  rejected, and evaluator-failed tasks as distinct typed dispositions. Only an
-  applicable exterior pass counts as passed.
-- The live-mode task title fallback is defined and malformed task
-  records during preflight rather than during paid execution.
-- Aggregate and per-task USD/token/time ceilings are checked before each call and
-  persist observed provider usage; never recompute observed cost from a local
-  price constant when provider billing is available.
-- Producer-verifiable bundles are emitted only after every referenced artifact exists
-  and its digest resolves. Promotion and rollback receipts remain separate from
-  benchmark production and independent evaluation.
+- Persist identity-bearing events/artifacts for plan and TODO state,
+  discoveries, hypotheses, dead ends, implicated/change-surface files,
+  verification plan/result, route decisions, settled effects, next action, and
+  remaining additive/structural budgets.
+- Restore the original task, composition, profile, model-route policy,
+  completion policy, approval semantics, total turn ceiling, spent/remaining
+  budget, phase, and task-state digest after a fresh-process restart.
+- Reconcile in-flight effects before model re-entry and never replay a settled
+  patch, command, child, or evaluator call.
+- Add checkpoint/compaction triggers based on context pressure and durable work
+  boundaries. Checkpoints accelerate replay but never replace the ledger.
+- Prove at least three cold restarts during one 40+ turn scripted task, including
+  interruption after patch approval and after verification.
 
-**Minimum falsifier matrix**
+Exit predicate: the resumed run performs the same next admissible action and
+produces the same final postimage/evidence as an uninterrupted control, within
+declared nondeterminism and without duplicated settled effects.
 
-| Falsifier | Expected result |
+### Sprint F4 — repository-scale context and change closure (`CMX-11`, Lane A, queued)
+
+Deliverables:
+
+1. Call `IndexPort.repo_map()` and build a real `ContextPacket` with task,
+   repository/index snapshot, provider/version, query, selected files/symbols,
+   dependencies, related tests, token estimate, omissions, and packet digest.
+2. Keep the initial prefix small. Use progressive, epoch-safe retrieval:
+   orientation -> implicated symbols/files -> callers/dependencies/tests ->
+   changed-surface refresh -> verification context.
+3. Reserve context for at least one edit/verification/recovery cycle. Compaction
+   must retain goal, constraints, plan, modified files, latest failure and
+   verification, next action, settled effects, and remaining budgets.
+4. Fall back deterministically to source search when an index is absent, stale,
+   empty, unhealthy, or points at unresolved paths. LDA remains an optional
+   provider behind the generic port; Vanguard never requires it.
+5. Drive affected-test and interface-closure checks from observed dependency and
+   test associations, with explicit incompleteness when language coverage is
+   insufficient.
+
+Exit predicate: controlled large-repository tests prove bounded prompts, no
+lost-in-the-middle regression, deterministic fallback, snapshot refresh after
+edits, and multi-file/interface closure. A treatment must improve success or
+cost-adjusted success on held-out tasks before becoming the default.
+
+### Sprint F5 — product qualification (`CMX-07`, Lane B, blocked on F0–F4)
+
+Run an immutable, preregistered set covering:
+
+- single-file bugfix with a failing baseline reproducer;
+- multi-file behavioral bugfix;
+- cross-package public-interface feature;
+- API/schema migration with backward-compatibility assertions;
+- Python and non-Python greenfield projects with multiple files;
+- repository-scale task with distractors and bounded context;
+- interrupted/resumed long task;
+- read-only explanation/review task with source-grounded evidence;
+- adversarial noisy output, malformed tools, zero tests, stale verification,
+  path escape, budget exhaustion, and provider interruption.
+
+Each row binds exact source, task, preimage/postimage, composition, model/provider,
+context policy and packet, event/trajectory, patch, verification, exterior
+verdict, terminal, missingness, turns, tool calls, retries, tokens, cost, latency,
+and resume parity. Report per-class results and confidence intervals; do not hide
+invalid or unavailable rows.
+
+Exit predicate: all stop-ship integrity predicates pass and the preregistered
+product thresholds are met. A negative result is recorded honestly and returns
+the failing mechanism to the appropriate sprint; thresholds are not retuned
+after observation.
+
+### Sprint F6 — optional specialists (`CMX-06`, Lane B, blocked on F5)
+
+Compare the accepted single-worker control with one treatment at a time:
+localizer, test investigator, reviewer, or bounded planner. Children must use
+mediated `agent.spawn`, attenuated budgets/capabilities, artifact-digest handoff,
+and the same verifier. Enable a role only when preregistered held-out evidence
+improves success or cost-adjusted success without exceeding the reliability
+regression budget.
+
+### Sprint F7 — M-8 and release disposition (`FIN-A1` / `W-092-5`)
+
+After F0–F5, execute the separate governed-memory control/treatment required by
+M-8. Coding Max qualification does not substitute for memory lift. A valid
+positive, negative, or undeterminable independent disposition closes the
+experiment; only an accepted positive result satisfying the M-8 predicate can
+authorize M-9.
+
+## Product acceptance matrix
+
+| Task class | Required operational completion evidence |
 |---|---|
-| Dry-run with all fixtures present | Structural PASS; all empirical fields missing; no lift or promotion verdict |
-| Non-empty model prose with no patch | `NO_PATCH`, never passed/grounded/verified |
-| Patch applies but exterior tests fail | evaluator failure; task not passed |
-| Zero tests collected | verification failure |
-| Second episode requested | driver rejects the attempt |
-| Provider unavailable or budget exhausted | typed missingness; denominator policy follows preregistration |
-| Task/base commit or artifact digest tampered | bundle verification fails closed |
-| Credential appears in prompt, event, patch, log, or artifact | stop-ship |
-| Fake official runtime adapter and evaluator | hermetic integration test proves wiring without network |
+| Bugfix | Baseline reproducer fails when feasible; implicated source is inspected; patch applies; reproducer and affected regression checks pass on current postimage |
+| Multi-file feature/refactor | Public interfaces, callers, serialization/configuration and tests are in the declared change surface; targeted and affected checks pass |
+| Migration | Forward behavior, backward compatibility or explicit break contract, data/schema transition, rollback/recovery, and consumer checks pass |
+| Greenfield | Empty/scaffold baseline is recorded; requested files are created; build/type/syntax checks and at least one behavioral smoke/contract test pass |
+| Repository without tests | Pack declares or creates the smallest executable acceptance harness; syntax-only success is insufficient for behavioral work |
+| Explain/review/read-only | No fabricated patch is required; every material conclusion cites resolved source/symbol/test evidence and satisfies an explicit requirements checklist |
+| Long session | State survives compaction and fresh-process restart; no settled effect is duplicated; final evidence is bound to the resumed postimage |
 
-The package handoff includes the commands actually run, exact counts, zero
-test failures, and the resulting subject digest. Live provider execution is
-not required for the Wave1 implementation gate and remains explicitly
-`NOT_RUN`.
+## Stop-ship conditions
 
-### Completed Wave2 technical slice — Coding Max vertical slice
+- Any second production turn engine, runtime, ledger, tool broker, evaluator, or
+  authority path.
+- Direct provider HTTP or host subprocess execution in app/pack/product logic.
+- Completion admitted from model prose, a preset-name omission, a fabricated test
+  count, zero tests, stale verification, or a mismatched postimage.
+- Resume that changes the task/composition identity, silently resets budgets or
+  approval semantics, grants fresh turns, or duplicates settled effects.
+- A repository map that consumes the entire usable prompt, lacks snapshot
+  identity/omissions, or overrides current source and tests.
+- Benchmark rows without baseline validity, immutable trajectory/event linkage,
+  patch identity, exterior verdict, exact cost/token/latency/turn values or typed
+  missingness.
+- Calling a local, synthetic, self-authored, or unofficial run SWE-bench, SOTA,
+  or release evidence.
+- Enabling specialists, swarms, SBFL, mutation, speculative rollback, skill
+  promotion, or self-modification without a preregistered held-out benefit.
 
-This implementation sequence produced one useful first-party agent while
-strengthening the general framework through existing seams. CMX-06 and CMX-07
-remain qualification-gated as recorded above.
+## Required validation before package closure
 
-**Board convergence, recorded honestly (2026-08-31):** Wave1 and the Wave2
-technical implementation slice are now closed on hermetic evidence. The
-frozen content-addressed canary under
-`benchmarks/m8_heldout/artifacts/canary_manifest.json` pins ten single-attempt
-rows and explicit missingness. CMX-04/05 and technical CMX-08 pass their
-falsifiers. CMX-06 remains disabled pending an accepted ablation and CMX-07
-remains pending an executed exact-evidence qualification. No milestone is
-marked accepted by this note; no 1.0 or benchmark claim is made.
+During implementation run focused falsifiers and `just check`. Before any sprint,
+task, PR, milestone, or release-completion claim run `just verify` on the exact
+subject. A package handoff records commands actually executed, pass/fail/skip
+counts, known environment limitations, subject digest, generated evidence
+digests, and unresolved missingness.
 
-| Order | Package | Primary location | Required outcome |
-|---:|---|---|---|
-| 1 | `CMX-01` composition delta | `packs/code-default/`, existing manifests | Reconcile current mechanisms with one `fast`, one `balanced`, and one `max` policy; no duplicate coordinator or store |
-| 2 | `CMX-02` repository intelligence | `ports/index.py`, adapters, code-pack tool bindings | Search, symbol, dependency, test mapping and repository map with deterministic fallback, provenance and path containment |
-| 3 | `CMX-03` durable work loop | code-pack planner/context/recovery policy + existing runtime projection | Understand/explore/localize/plan/edit/verify/recover/complete; resume restores the next action and failed-attempt memory |
-| 4 | `CMX-04` multi-file and greenfield | code-pack policy and fixtures | Change-surface closure, affected-test selection, scaffold/baseline policy, explicit non-test evidence rules, and no silent verification bypass |
-| 5 | `CMX-05` product facade | `vanguard/packages/apps/coding_max/` + shared application service | `vg code` and API invoke the same composition and expose status, resume, evidence and cost without owning execution |
-| 6 | `CMX-06` qualification | hermetic fixtures + controlled live canary | Internal repository-scale bug, multi-file feature, and greenfield tasks pass; cost/turn/token regressions are reported |
+The 2026-09-02 audit installed the locked development environment and reran the
+relevant suites. Agency tests passed `179/179`. Contract tests ran 440 tests and
+ended with one failure, two errors, and five skips: the cold-index MCP fallback
+returned catalog routing without the required `bounded_context`, and two UDS
+subprocess lifecycle cases timed out before binding. The earlier focused
+episode/context/state/Forge/M-8 selection passed 83 tests once dependencies were
+available. The M-8 dry-run completed and truthfully emitted only `NOT_RUN`
+empirical records.
 
-The sprint stop-ship conditions are path escape, capability or budget expansion,
-direct model/provider HTTP in product logic, host subprocess execution outside
-the environment port, zero-test/stale-receipt admission, duplicated effects on
-resume, synthetic benchmark metrics, missing trajectory links, or an adapter
-importing `apps`.
+`just check` and `just verify` were both executed. Lock validation, frozen
+dependency sync, boundaries (`754` files), TCB (`1386/1438` logical lines),
+domain-blindness, and isolation passed. Both recipes stopped at
+`check_path_hygiene.py`, which found machine-local paths and usernames in retained
+BAAC, ladder, and hard-run artifacts that predate this documentation change.
+Documentation metadata, links, stale-path checks, Markdown lint, knowledge-base
+generation, event coverage, execution-truth checks, RF-ID validation, secret
+scanning, and the 97-test kernel suite passed when run directly. TypeScript
+typecheck passed; the JavaScript workspace test command reached client-core with
+six passing and one failing Wave-5 test in the pre-existing frontend worktree.
+The strict MkDocs build also remains red on two pre-existing unresolved `R13`
+cross-references in non-canonical Chimera review documents. Therefore no
+full-repository green or milestone-completion claim is made.
 
-## First-party agent portfolio toward 1.0
+Post-change focused validation passed: resume, bounded repository context,
+Coding Max facade, M-8 runner, M-8 turn-loop, wave falsifiers and cold-index MCP
+fallback. Boundary validation passed for 762 source files and TCB remained at
+1386/1438 logical lines. LAM synthetic smoke passed 5/5 with zero network cost.
+Two isolated DeepSeek V4 Flash smokes were within the requested budget (2 turns /
+6,298 tokens / approximately $0.000556, then 1 turn / 3,029 tokens /
+approximately $0.000435); both correctly stopped at their explicit turn ceilings
+and are not quality or benchmark claims.
 
-The framework is not complete merely because custom agents are theoretically
-composable. The supported portfolio must dogfood the same public composition
-contract:
+## Locked decisions
 
-1. **Coding Max** — write-capable autonomous engineering agent; first release
-   priority and the only agent allowed to block the Coding Max sprint.
-2. **Code Reviewer** — read-only or patch-suggesting critic using sequential
-   mediated child lineages; it cannot override failed verification.
-3. **Research** — bounded evidence-producing agent with explicit egress policy
-   and citation artifacts; no web capability is implied until the port exists.
-4. **Tutor** — read-only repository explainer proving a different completion
-   policy and context organization on the same framework.
+- Thin apps, thick declarative composition; one canonical runtime and ledger.
+- Coding policy remains outside the domain-blind kernel.
+- Effects, tests, child agents, and evaluation remain mediated by ports and
+  capability/budget policy.
+- Context/index providers are optional observations, never authority.
+- Local completion admission and exterior evaluation remain separate.
+- Sequential single-worker execution is the default until an ablation accepts a
+  specialist treatment.
+- M-8, M-9, M-10, 1.0, and official benchmark claims remain exact-evidence gated.
 
-Research, Reviewer, and Tutor are reference-product gates for 1.0, not reasons
-to delay the first useful Coding Max vertical slice. Swarm, branch search,
-SBFL, mutation testing, ToolScript, skill distillation, and self-modification
-remain opt-in experiments until preregistered ablations show lift exceeding
-their cost and reliability burden.
-
-## 1.0 release horizon
-
-M-9 and M-10 retain their existing `0.9.0b1` and `0.9.0` meanings. A future
-1.0 release is non-authorizing until M-10 closes. Its minimum gate is:
-
-- a stable, documented public composition/port contract with compatibility tests;
-- installable Coding Max plus at least two supported non-coding reference agents;
-- repository-scale bugfix, multi-file, and greenfield qualification with exact
-  model, cost, token, latency and evaluator disclosure;
-- restart/resume, migration, backup/restore, security, performance and soak
-  evidence on the exact release subject;
-- no SOTA claim without an official or independently reproducible benchmark and
-  ablations that isolate harness lift from model lift.
-
-## Locked decisions and deliberately open variables
-
-The next session MUST NOT reopen these decisions without contradictory current
-source evidence or a formal architecture change:
-
-- hybrid disposition: B control model + A rollout discipline + measured C ideas;
-- thin app, thick composition; one runtime, ledger, tool path, store and evaluator;
-- coding policy outside kernel; infrastructure adapters do not import apps;
-- sequential execution by default; delegation is mediated and budget-attenuated;
-- completion requires task-appropriate fresh evidence; model prose is never verification;
-- durable state is event/artifact-derived; resume cannot duplicate settled effects;
-- optional intelligence providers enrich observations but never control authority;
-- M-8/M-9/M-10 and official benchmark claims remain evidence-gated.
-
-These variables remain intentionally open because evidence, not architecture,
-must select them: exact preset token/turn/USD ceilings, context-ranking weights,
-model routes, SBFL metric, reviewer trigger rate, concurrency, branch width, and
-mutation intensity. Each receives a conservative default in its implementation
-package and may change only through a preregistered measurement with rollback.
+Numeric prompt/turn/token/USD ceilings, ranking weights, model routes, specialist
+triggers, and concurrency remain measured variables. Conservative defaults may
+be implemented, but they become release defaults only through preregistered
+evidence with a rollback path.

@@ -10,6 +10,16 @@ export type ProviderManagerProps = {
   onRemoveProvider: (id: string) => void;
   onUpdateCredential: (providerId: string, secret: string) => void;
   onValidateProvider: (providerId: string) => void;
+  /**
+   * When the runtime owns the secret, this pane must not offer to store one.
+   *
+   * The desktop loads `OPENROUTER_API_KEY` server-side from a mode-0600 `.env`
+   * (`SEC-01`), so a key typed here would reach browser memory and nothing
+   * else -- saved to all appearances, gone on reload, and never seen by the
+   * process that makes provider calls. Hosts in that arrangement pass true and
+   * get a pointer to the real control instead of a dead text box.
+   */
+  credentialsManagedByRuntime?: boolean;
 };
 
 export function renderProviderManager(props: ProviderManagerProps): HTMLElement {
@@ -52,11 +62,24 @@ export function renderProviderManager(props: ProviderManagerProps): HTMLElement 
     nameSpan.innerHTML = `<span>${p.name}</span><span style="font-size: 10px; color: var(--aether-text-muted, #6c7086); font-weight: normal;">(${p.type})</span>`;
     topRow.appendChild(nameSpan);
 
-    const credBadge = renderStatusBadge({
-      status: p.credentialState === "CONFIGURED" ? "valid" : p.credentialState === "INVALID" ? "invalid" : "unverified",
-      size: "sm",
-    });
-    topRow.appendChild(credBadge);
+    // `credentialState` is browser-side and defaults to CONFIGURED, so this
+    // badge read "VALID" next to providers whose key the runtime could not
+    // load at all. Where the runtime owns the secret it is also the only
+    // authority on validity, and it reports that once, above -- so the claim
+    // is not repeated here on weaker evidence.
+    if (!props.credentialsManagedByRuntime) {
+      topRow.appendChild(
+        renderStatusBadge({
+          status:
+            p.credentialState === "CONFIGURED"
+              ? "valid"
+              : p.credentialState === "INVALID"
+                ? "invalid"
+                : "unverified",
+          size: "sm",
+        }),
+      );
+    }
     card.appendChild(topRow);
 
     // Model Selector
@@ -78,7 +101,14 @@ export function renderProviderManager(props: ProviderManagerProps): HTMLElement 
     card.appendChild(modelRow);
 
     // Credential Row
-    if (p.type !== "ollama") {
+    if (props.credentialsManagedByRuntime) {
+      const managed = document.createElement("div");
+      managed.className = "aether-provider-managed-credential";
+      managed.style.cssText =
+        "font-size: 11px; color: var(--aether-text-muted, #6c7086); font-style: italic;";
+      managed.textContent = "Key is loaded by the runtime from .env — see Provider Credential above.";
+      card.appendChild(managed);
+    } else if (p.type !== "ollama") {
       const credRow = document.createElement("div");
       credRow.style.cssText = "display: flex; align-items: center; gap: 8px;";
 
@@ -114,11 +144,16 @@ export function renderProviderManager(props: ProviderManagerProps): HTMLElement 
       actionRow.appendChild(defBtn);
     }
 
-    const testBtn = document.createElement("button");
-    testBtn.style.cssText = "padding: 3px 8px; background: transparent; border: 1px solid var(--aether-border, #313244); color: var(--aether-info, #89dceb); border-radius: 4px; font-size: 11px; cursor: pointer;";
-    testBtn.textContent = "Test Connection";
-    testBtn.onclick = () => props.onValidateProvider(p.id);
-    actionRow.appendChild(testBtn);
+    // Only offered where this pane owns validation. When the runtime owns the
+    // key, the working probe lives beside the credential it actually tests;
+    // a second button here would re-read local state and appear to do nothing.
+    if (!props.credentialsManagedByRuntime) {
+      const testBtn = document.createElement("button");
+      testBtn.style.cssText = "padding: 3px 8px; background: transparent; border: 1px solid var(--aether-border, #313244); color: var(--aether-info, #89dceb); border-radius: 4px; font-size: 11px; cursor: pointer;";
+      testBtn.textContent = "Test Connection";
+      testBtn.onclick = () => props.onValidateProvider(p.id);
+      actionRow.appendChild(testBtn);
+    }
 
     card.appendChild(actionRow);
     list.appendChild(card);

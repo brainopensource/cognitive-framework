@@ -8,8 +8,8 @@ owner: repository-governance
 canonical_for:
   - repository-backlog
   - feature-lifecycle-tracking
-version: 0.9.2a2
-last_verified: 2026-08-31
+version: 0.9.2a3
+last_verified: 2026-09-02
 purpose: Track proposed, approved, in-progress, blocked, and deferred capability packages and engineering work outside the active sprint WIP=1 constraint.
 audience:
   - contributor
@@ -54,6 +54,9 @@ graph LR
 * **`BLOCKED`**: Execution halted due to prerequisite milestone gates (e.g., M-9 blocked on M-8).
 * **`DONE`**: Implementation verified by passing tests, boundary checks, and frozen evidence receipts.
 * **`DEFERRED`**: Candidate rejected or postponed due to lack of measured lift or architectural misalignment.
+* **`REOPENED`**: A previously closed package has a current-source or
+  exact-subject falsifier that invalidates carrying its old closure forward.
+  The earlier receipt remains historical evidence for its own subject.
 
 ---
 
@@ -73,7 +76,7 @@ graph LR
 | ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Description & Acceptance Gate |
 |---|---|---|---|---|---|---|
 | **MEM-01** | Governed Memory & Rollback Mechanisms | `runtime` | Lane A | `REVIEWING` | M-8 | Authorization, recovery, and rollback receipts in `governance/learning.py`. |
-| **MEM-02** | M-8 Empirical Held-Out Canary Proof | `benchmarks` | Lane B | `BLOCKED` | M-8 | Held-out real-model canary demonstrating $\ge 0.05$ lift without synthetic metrics. |
+| **MEM-02** | M-8 Empirical Held-Out Canary Proof | `benchmarks` | Lane B | `BLOCKED` (on REL-01R/REL-02R) | M-8 | Held-out real-model canary demonstrating $\ge 0.05$ lift without synthetic metrics after the runtime executor and successor canary are qualification-ready. |
 | **MEM-03** | Adaptive Strategy & Meta-Controller | `agency` / `runtime` | Lane A | `APPROVED` | M-6.5 | Higher-order policy adjusting strategy upon failure without modifying history. |
 | **MEM-04** | Trajectory-to-Skill Promotion Pipeline | `runtime` | Lane A | `PROPOSED` | M-8+ | Mining verified traces to propose reusable skills with explicit promotion receipts. |
 
@@ -91,8 +94,8 @@ graph LR
 |---|---|---|---|---|---|---|
 | **TLS-01** | AdmissionGate Closed-Loop Validation | `agency` | Lane A | `DONE` | W-092-2 | Fail-closed patch requirement and fresh workspace verification enforcement. |
 | **TLS-02** | DeepSeek DSML / JSON Normalization | `agency` | Lane A | `DONE` | W-092-4 | Protocol recovery for malformed markdown tool calls and stream truncations. |
-| **TLS-03** | Tree-Sitter & SBFL Fault Localization | `ports` / `adapters`| Lane B | `IN_PROGRESS` | Ochiai suspiciousness ranking scoring failing test statements via `IndexPort`. |
-| **TLS-04** | AST Syntax Pre-Flight Gate (<0.2ms) | `adapters` | Lane A | `IN_PROGRESS` | In-process parse gate returning line-level syntax errors with zero turn penalty. |
+| **TLS-03** | Tree-Sitter & SBFL Fault Localization | `ports` / `adapters`| Lane B | `DEFERRED` | Post-CMX-07 | Optional treatment; may enter WIP only after the canonical single-worker baseline is qualified and a preregistered ablation exists. |
+| **TLS-04** | AST Syntax Pre-Flight Gate (<0.2ms) | `adapters` | Lane A | `DEFERRED` | Post-CMX-07 | Optional treatment; current finish work must first make verification counts and subject binding truthful. |
 | **TLS-05** | Speculative Git Checkpoint Engine | `adapters` | Lane A | `APPROVED` | W-092-4 | In-memory CoW git checkpoints with automatic rollback on test regression. |
 | **TLS-06** | AST Mutation Verification (Anti-Collusion)| `adapters` | Lane B | `PROPOSED` | M-8+ | Injects AST mutants to falsify ungrounded or no-op candidate test suites. |
 | **TLS-07** | Composable Web Research Port (SSRF-Safe)| `ports` / `adapters`| Lane A | `PROPOSED` | M-9 | Egress-controlled web search and fetch tools with domain allowlists. |
@@ -112,8 +115,10 @@ graph LR
 
 | ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Description & Acceptance Gate |
 |---|---|---|---|---|---|---|
-| **REL-01** | Wave H0: Tooling Integrity & Exact Subject | `benchmarks` | Lane B | `IN_PROGRESS` | M-8 | Remove synthetic metrics from runner; ensure official adapter path. |
-| **REL-02** | Wave H1: 10-Task Canary Validation | `benchmarks` | Both | `BLOCKED` (on H0) | 10 valid tasks, $\ge 8/10$ patches, $\ge 6/10$ external evaluator passes. |
+| **REL-01** | Wave H0: Tooling Integrity & Exact Subject | `benchmarks` | Lane B | `DONE` (historical subject only) | M-8 | Structural dry-run and injected seams were delivered, but current-source audit found the live executor cannot return a patch or execute a bounded multi-turn write-capable attempt. |
+| **REL-01R** | Current-Subject Empirical Runner Repair | `benchmarks` / `runtime` | Lane B | `IN_PROGRESS` | W-092-F0 | Bind one write-capable multi-turn runtime attempt to patch, event/trajectory, usage and exterior-verdict identities; restore HEAD-bound LDA/navigation health. |
+| **REL-02** | Wave H1: Frozen 10-Task Canary | `benchmarks` | Both | `DONE` (historical artifact only) | M-8 | The old artifact remains immutable, but title/payload/workspace duplication and current-subject drift prevent its reuse as qualification evidence. |
+| **REL-02R** | Successor Uncontaminated Canary | `benchmarks` | Lane B | `BLOCKED` (on REL-01R) | W-092-F0 / M-8 | Freeze a successor only after every task, workspace, oracle, split, base revision and digest resolves to one unique subject. |
 | **REL-03** | Wave H2: Official SWE-Bench Container Bridge| `benchmarks` | Lane B | `APPROVED` | M-9 | Isolated official evaluation container passing pure unified diffs. |
 | **REL-04** | Wave H3: Preregistered Hypothesis Ablations | `runtime` / `bench` | Both | `PROPOSED` | M-9 | Controlled A/B trials with $\ge 0.05$ lift threshold per treatment. |
 | **REL-05** | Wave H4: Release Qualification & Signed Envelope| `ci` / `release` | Both | `BLOCKED` (on M-9) | Full 2348+ test suite, clean out-of-tree install, signed Ed25519 envelope. |
@@ -153,23 +158,28 @@ composition/lifecycle authority; infrastructure stays behind generic ports.
 
 | ID | Capability package | Primary owner | Status | Dependency | Acceptance gate |
 |---|---|---|---|---|---|
-| **CMX-01** | Current-mechanism delta and three presets | `packs/code-default`, manifests | `DONE (hermetic)` | EWK-Q disposition | `fast`, `balanced`, and `max` are data-selected compositions over one runtime; no duplicate store, coordinator, tool broker, or evaluator |
-| **CMX-02** | Port-backed repository intelligence | `ports/index.py`, `adapters`, code-pack bindings | `DONE (hermetic)` | CMX-01 | Search, symbols, dependencies, test mapping, and repository map have provenance, path containment, deterministic fallback, and bounded output; adapters never import `apps` |
-| **CMX-03** | Durable plan/context/recovery loop | code-pack policies + existing projections | `DONE (hermetic)` | CMX-01, CMX-02 | A cold-resumed task restores objective, constraints, discoveries, dead ends, modified files, latest verification, remaining budget, and next action without replaying settled effects |
-| **CMX-04** | Multi-file and greenfield correctness | code-pack policies and fixtures | `DONE (hermetic)` | CMX-03 | Change-surface closure and affected-test selection pass multi-file fixtures; greenfield work uses an explicit scaffold/baseline/evidence policy and never silently bypasses admission |
+| **CMX-01** | Current-mechanism delta and three presets | `packs/code-default`, manifests | `REOPENED` (product divergence) | EWK-Q disposition | Public fast/balanced/max still need accepted later harness behavior folded into one data-selected catalog; experimental manifest names are not product presets. |
+| **CMX-02** | Port-backed repository intelligence | `ports/index.py`, adapters, code-pack bindings | `PARTIAL` | CMX-09 | Public Coding Max presets now declare the shared index and the runtime constructs bounded `ContextPacket` context; staged task-ranked retrieval, epoch refresh and fallback evidence remain. |
+| **CMX-03** | Durable plan/context/recovery loop | code-pack policies + existing projections | `PARTIAL` | CMX-09 | Resume restores the original turn ceiling and approval mode, but rich task-state production, exact policy/profile/budget identity and 40+ turn cold parity remain. |
+| **CMX-04** | Multi-file and greenfield correctness | code-pack policies and fixtures | `REVIEWING` | CMX-10A, CMX-11 | Hermetic policies/fixtures and conservative verification observation exist; task-specific completion and repository-scale change-surface qualification remain. |
 | **CMX-05** | Coding Max application facade | `apps/coding_max`, shared application service, `vg` | `DONE (hermetic)` | CMX-03 | CLI and API invoke the same composition; run/status/resume/evidence/cost results agree; app owns no execution loop or provider HTTP |
-| **CMX-06** | Conditional review and mediated specialist roles | manifests/topology/child runtime | `IMPLEMENTED (ABLATION PENDING)` | CMX-05 and accepted M-7 evidence | Reviewer/localizer/test-investigator roles exchange artifacts by digest, receive attenuated budgets, run sequentially by default, and cannot override the verifier |
-| **CMX-07** | Repository-scale qualification | benchmark program | `FROZEN (EXECUTION PENDING)` | CMX-04, CMX-05 | Frozen internal bugfix, multi-file, migration, and greenfield set reports success, missingness, tokens, cost, latency, retries, resume parity, and external verdicts |
+| **CMX-06** | Conditional review and mediated specialist roles | manifests/topology/child runtime | `BLOCKED` (on CMX-07) | CMX-05 and accepted baseline | Reviewer/localizer/test-investigator roles remain disabled until one-role-at-a-time held-out ablations beat the qualified single-worker control. |
+| **CMX-07** | Repository-scale qualification | benchmark program | `BLOCKED` (on REL-01R, CMX-09..11) | CMX-04, CMX-05 | Re-freeze the exact multi-class subject only after canonical completion, long-session resume and progressive-context gates pass. |
 | **CMX-08** | First-party reference-agent portfolio | apps + independent packs/manifests | `TECHNICAL SLICE DONE` | M-10 and stable public composition contract | Coding Max plus two non-coding supported agents install, run, resume, and emit attributable evidence through the same public framework contract |
+| **CMX-09** | Canonical Harness Convergence | runtime, code pack, manifests, thin app | `IN_PROGRESS` | W-092-F1 | Fold accepted later prompt/tool/recovery mechanisms into public presets; use one capability-derived admission/policy binding; keep Forge/Chimera engines off the supported product path. |
+| **CMX-10A** | Truthful Task-Aware Completion | runtime + code-pack completion policy | `APPROVED` | CMX-09 | Parse real verification counts and fail closed on zero, stale, partial, incomplete or task-inapplicable evidence across bugfix, feature, migration, greenfield and read-only tasks. |
+| **CMX-10B** | Durable Long-Session Continuation | runtime/session/task projection | `APPROVED` | CMX-10A | Persist and restore exact task/composition/policy/budget/phase/next-action identity; prove 40+ turns and repeated fresh-process restarts without duplicate effects. |
+| **CMX-11** | Progressive Repository Context & Change Closure | agency context, `IndexPort`, adapters, code pack | `APPROVED` | CMX-09, CMX-10B | Put `ContextPacket` on the product path, reserve recovery/verification context, refresh by repository epoch, expose omissions, and prove multi-file/affected-test closure with deterministic fallback. |
 
-### Next staged development: 1-forge
+### 1-Forge and Chimera disposition
 
-The next implementation packet is `FORGE-ADM-001..005` in the non-canonical
-review material under `docs/reports/reviews/electroweak_v091/1_forge/`:
-define the goal contract, compose it with the existing admission gate, and
-make rejection model-visible. ToolScript, forks, mutation, and other later
-forge mechanisms remain deferred until their own falsifiers and evidence gates
-are authorized.
+`ForgeEngine`, `ChimeraEngine`, their compilers and patchers are implemented
+experimental mechanisms. They are not a second supported runtime and are not a
+new active product family. The hard reports carrying Forge/Chimera manifest
+names execute those manifests through `ApplicationService`; they do not execute
+the separate engines. CMX-09 may port useful behavior into the canonical
+runtime, after which unused parallel loops should be retired or kept explicitly
+experimental. ToolScript, forks, mutation and self-modification remain deferred.
 
 #### Preset contract
 
@@ -227,25 +237,22 @@ capability or performance claim is supported by an exact-subject receipt.
 
 The dependency-ordered queue is:
 
-1. **`REL-01` (H0 evidence integrity)** — remove direct provider HTTP and
-   synthetic result metrics from the admissible path; use runtime adapters and
-   an exterior oracle.
-2. **`REL-02` (H1 frozen canary)** — freeze executable, content-addressed,
-   single-attempt tasks and explicit missingness before any live run.
-3. **`FIN-A1` / `W-092-5` disposition** — independently accept a valid M-8
-   bundle or record a negative/undeterminable result without threshold changes.
-4. **`CMX-01` through `CMX-05`** — deliver the Coding Max vertical slice in
-   dependency order.
-5. **`CMX-07`** — qualify the vertical slice before enabling optional
-   orchestration.
-6. **`CMX-06` and experimental features** — admit one treatment at a time only
-   after a preregistered ablation.
-7. **`CMX-08`** — qualify the supported first-party agent portfolio on the road
-   to 1.0 after M-10.
+1. In parallel under lane WIP=1: **`REL-01R`** exact-subject runner/navigation
+   repair and **`CMX-09`** canonical product convergence.
+2. **`REL-02R`** successor canary after REL-01R proves the evidence path.
+3. **`CMX-10A`** truthful task-aware completion.
+4. **`CMX-10B`** durable 40+ turn continuation and fresh-process parity.
+5. **`CMX-11`** progressive repository context, affected-test mapping and
+   multi-file change closure.
+6. **`CMX-07`** frozen multi-class product qualification.
+7. **`CMX-06`** optional one-treatment-at-a-time specialist ablations.
+8. **`FIN-A1` / `W-092-5`** governed-memory experiment and independent M-8
+   disposition; only an accepted positive M-8 result can authorize M-9.
+9. **`CMX-08`** portfolio qualification after M-10 and a stable public contract.
 
-`TLS-04` may be absorbed into CMX-04 if its measured latency and defect-catch
-rate justify the seam. `DOC-04` remains approved but is not on the critical
-product path.
+`TLS-03`, `TLS-04`, `TLS-05`, mutation, branch search and swarm work remain
+deferred until CMX-07 identifies a measured bottleneck. `DOC-04` remains
+approved but is not on the critical backend path.
 
 ---
 

@@ -42,20 +42,20 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 ### Context: Instrument truth
 
 **T-01 Enumerator membership digest** (B)  
-- [ ] Schema-valid task manifest required; directory names insufficient  
-- [ ] Reject `__pycache__`, hidden, tmp, missing oracle, duplicate IDs, digest mismatch  
-- [ ] Order-independent task-set digest  
+- [x] Schema-valid task manifest required; directory names insufficient  
+- [x] Reject `__pycache__`, hidden, tmp, missing oracle, duplicate IDs, digest mismatch  
+- [x] Order-independent task-set digest  
 - Files: `benchmarks/benchmark_20_suite/runner.py`; create `test/benchmarks/test_b20_membership.py`  
 - Falsifier: `__pycache__` is not a task  
 
 **T-02 Subject SHA on every empirical JSON** (B)  
-- [ ] Bind `subject_sha` = frozen candidate `git rev-parse HEAD`  
-- [ ] Missing SHA ⇒ receipt refused  
+- [x] Bind `subject_sha` = frozen candidate `git rev-parse HEAD`  
+- [x] Missing SHA ⇒ receipt refused  
 - Files: `benchmarks/protocols.py`, B20 writer  
 - Requires: T-01  
 
 **T-03 Dry-run empirical field ban** (B)  
-- [ ] `dry_run ⇒` pass/cost/oracle_passed null  
+- [x] `dry_run ⇒` pass/cost/oracle_passed null  
 - Files: runners; cousin `test/benchmarks/test_m8_bundle.py`  
 
 **T-24 Patch identity on results** (B)  

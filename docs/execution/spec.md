@@ -51,6 +51,8 @@ Historical CMX-09-only delta is preserved as [Appendix H](#appendix-h-historical
 
 **Authorize-before-retrieve.** Memory recall requires grant (`runtime/prompt_assembler.py`).
 
+**Instrument truth (T-01–T-03).** B20 task discovery SHALL require a schema-valid `membership.json` (`aether.b20.membership/1`); directory names are insufficient. `__pycache__`, hidden, and tmp names are not tasks. Missing oracle, duplicate ids, or task-set digest mismatch SHALL fail closed. The task-set digest is order-independent over admitted ids. Every empirical B20 JSON and `BenchmarkReceipt` SHALL bind `subject_sha` to the frozen candidate `git rev-parse HEAD`; a missing SHA SHALL refuse the receipt. `dry_run` SHALL emit `pass`, `cost`, `oracle`, and `oracle_passed` as null.
+
 ---
 
 ## From A — product thesis, SOTA definition, non-goals

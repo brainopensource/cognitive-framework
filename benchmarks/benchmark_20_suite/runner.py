@@ -40,6 +40,12 @@ if str(ROOT) not in sys.path:
 if str(ROOT / "tools" / "002_LLM_API_MOCK") not in sys.path:
     sys.path.insert(0, str(ROOT / "tools" / "002_LLM_API_MOCK"))
 
+from benchmarks.protocols import (
+    B20MembershipError,
+    enumerate_b20_membership,
+    write_b20_report,
+)
+
 # Centralized Model Registry Configuration
 from vanguard.packages.runtime.root import (
     get_default_model,
@@ -822,6 +828,21 @@ def print_results_matrix(results: List[ChallengeResult], total_cost: float, tota
     print("=" * 120 + "\n")
 
 
+def resolve_frozen_subject_sha(repo_root: Path = ROOT) -> str:
+    """Bind empirical receipts to the frozen candidate HEAD SHA."""
+    proc = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    sha = (proc.stdout or "").strip()
+    if proc.returncode != 0 or not sha:
+        raise ValueError("B20 receipt refused: missing subject_sha")
+    return sha
+
+
 def main():
     parser = argparse.ArgumentParser(description="Run Benchmark 20 Suite")
     parser.add_argument("--model", default=None, help="Model identifier or alias (defaults to centralized config: get_default_paid_model())")
@@ -829,7 +850,38 @@ def main():
     parser.add_argument("--max-turns", type=int, default=8, help="Max turns per challenge")
     parser.add_argument("--budget", type=float, default=0.20, help="Max USD budget")
     parser.add_argument("--single", default=None, help="Run single challenge name for debugging")
+    parser.add_argument("--dry-run", action="store_true", help="Structural preflight; pass/cost/oracle stay null")
     args = parser.parse_args()
+
+    try:
+        membership = enumerate_b20_membership(SUITE_ROOT)
+    except B20MembershipError as exc:
+        print(f"INVALID membership: {exc}")
+        sys.exit(2)
+
+    records = list(membership.tasks)
+    if args.single:
+        records = [task for task in records if task.task_id == args.single]
+        if not records:
+            print(f"Challenge {args.single} not found in membership manifest")
+            sys.exit(1)
+
+    try:
+        subject_sha = resolve_frozen_subject_sha(ROOT)
+    except ValueError as exc:
+        print(exc)
+        sys.exit(2)
+
+    if args.dry_run:
+        report = write_b20_report(
+            None,
+            subject_sha=subject_sha,
+            dry_run=True,
+            task_ids=[task.task_id for task in records],
+            harness=f"vanguard-{args.preset}",
+        )
+        print(json.dumps(report, indent=2))
+        return
 
     recorder = MockRecorder(LAM_SQLITE_PATH) if MockRecorder else None
     runner = BenchmarkRunner(
@@ -840,15 +892,7 @@ def main():
         recorder=recorder,
     )
 
-    challenge_dirs = sorted([
-        d for d in SUITE_ROOT.iterdir()
-        if d.is_dir() and not d.name.startswith("__")
-    ])
-    if args.single:
-        challenge_dirs = [d for d in challenge_dirs if d.name == args.single]
-        if not challenge_dirs:
-            print(f"Challenge {args.single} not found in {SUITE_ROOT}")
-            sys.exit(1)
+    challenge_dirs = [SUITE_ROOT / task.task_id for task in records]
 
     t_suite_start = time.perf_counter()
     results = []
@@ -860,31 +904,33 @@ def main():
     total_duration = time.perf_counter() - t_suite_start
     print_results_matrix(results, runner.total_cost_usd, total_duration)
 
-    report_data = {
-        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    result_rows = [
+        {
+            "id": r.challenge_id,
+            "kind": r.kind,
+            "status": r.status,
+            "turns": r.turns,
+            "tokens": r.total_tokens,
+            "cost_usd": round(r.cost_usd, 6),
+            "latency_s": r.latency_seconds,
+            "diagnosis": r.diagnosis,
+        }
+        for r in results
+    ]
+    write_kwargs = {
+        "subject_sha": subject_sha,
+        "dry_run": False,
+        "task_ids": [r.challenge_id for r in results],
+        "results": result_rows,
         "model": runner.model_name,
         "harness": f"vanguard-{runner.preset}",
-        "pass_rate_pct": round((sum(1 for r in results if r.status == 'PASS') / len(results)) * 100, 1),
         "total_cost_usd": round(runner.total_cost_usd, 6),
         "total_duration_seconds": round(total_duration, 2),
-        "results": [
-            {
-                "id": r.challenge_id,
-                "kind": r.kind,
-                "status": r.status,
-                "turns": r.turns,
-                "tokens": r.total_tokens,
-                "cost_usd": round(r.cost_usd, 6),
-                "latency_s": r.latency_seconds,
-                "diagnosis": r.diagnosis,
-            }
-            for r in results
-        ]
     }
     out_file = SUITE_ROOT / f"benchmark_20_results_{runner.preset.replace('-', '_')}.json"
-    out_file.write_text(json.dumps(report_data, indent=2), encoding="utf-8")
+    write_b20_report(out_file, **write_kwargs)
     if runner.preset == "vg-code-max":
-        (SUITE_ROOT / "benchmark_20_results.json").write_text(json.dumps(report_data, indent=2), encoding="utf-8")
+        write_b20_report(SUITE_ROOT / "benchmark_20_results.json", **write_kwargs)
 
 
 if __name__ == "__main__":

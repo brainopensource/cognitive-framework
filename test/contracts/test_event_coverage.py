@@ -26,9 +26,18 @@ for _p in (_LINTERS, _TOOLS):
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
-from check_event_coverage import production_emittable_kinds  # noqa: E402
+from check_event_coverage import (  # noqa: E402
+    UNPRODUCED_ALLOWLIST,
+    check as run_event_coverage_check,
+    emitting_call_sites,
+    production_emittable_kinds,
+)
 
-from vanguard.packages.domain.ledger.events import EVENT_KINDS, EventEnvelope  # noqa: E402
+from vanguard.packages.domain.ledger.events import (  # noqa: E402
+    EVENT_KINDS,
+    WRITABLE_KINDS,
+    EventEnvelope,
+)
 from vanguard.packages.domain.ledger.reducer import initial_state, reduce_event  # noqa: E402
 from vanguard.packages.runtime.ledger_emitter import PRIVILEGED_KIND_OWNERS  # noqa: E402
 
@@ -56,6 +65,65 @@ UNFOLDED_ALLOWLIST = frozenset({
     "RunCompleted",            # Outer run completed marker (EpisodeCompleted is folded)
     "RunStarted",              # Outer run started marker (EpisodeStarted is folded)
 })
+
+
+class WritableKindsHaveProducersOrAreAllowlisted(unittest.TestCase):
+    """E-COV, the other direction: catalogued kinds must be *written*.
+
+    The original check only asserted `emittable <= EVENT_KINDS`, so a kind
+    could be catalogued, reduced, projected and rendered by a client while
+    nothing ever emitted it. The reader looks correct and the feature is
+    simply invisible -- which is exactly what happened to `GoalDeclared`,
+    `TurnStarted` and `ContextCompacted` (the last with five readers).
+    """
+
+    def test_every_writable_kind_has_a_producer_or_is_allowlisted(self) -> None:
+        unproduced = sorted(WRITABLE_KINDS - emitting_call_sites() - UNPRODUCED_ALLOWLIST)
+        self.assertEqual(
+            unproduced, [],
+            f"writable kinds nothing emits and nothing excuses: {unproduced}")
+
+    def test_allowlist_contains_no_produced_kind(self) -> None:
+        # Anti-rot. Once a kind gains a producer its entry must be deleted,
+        # or the allowlist silently becomes a graveyard the way the deleted
+        # `EMITTER_SITES` registry did.
+        stale = sorted(UNPRODUCED_ALLOWLIST & emitting_call_sites())
+        self.assertEqual(stale, [], f"allowlisted kinds that now have producers: {stale}")
+
+    def test_allowlist_is_a_subset_of_writable_kinds(self) -> None:
+        # A typo'd entry would otherwise excuse nothing while looking
+        # deliberate, and the missing producer stays invisible.
+        unknown = sorted(UNPRODUCED_ALLOWLIST - WRITABLE_KINDS)
+        self.assertEqual(unknown, [], f"allowlist entries that are not writable kinds: {unknown}")
+
+    def test_the_two_allowlists_answer_different_questions(self) -> None:
+        # `UNFOLDED_ALLOWLIST` is about the reducer, this one is about the
+        # producer. They legitimately overlap, so neither may be derived from
+        # the other -- assert only that both are real catalog subsets.
+        self.assertTrue(UNFOLDED_ALLOWLIST <= EVENT_KINDS)
+        self.assertTrue(UNPRODUCED_ALLOWLIST <= EVENT_KINDS)
+
+    def test_producer_axis_excludes_the_writer_authority_table(self) -> None:
+        # `production_emittable_kinds()` unions `PRIVILEGED_KIND_OWNERS`. If
+        # the producer check were built on it, granting a kind an owner would
+        # satisfy "has a producer" with no emitter anywhere.
+        self.assertTrue(emitting_call_sites() <= production_emittable_kinds())
+        masked = set(PRIVILEGED_KIND_OWNERS) - emitting_call_sites()
+        self.assertTrue(
+            masked, "expected the authority table to name kinds no call site emits")
+
+    def test_check_reports_an_unproduced_kind(self) -> None:
+        # The falsifier's falsifier: drop a real gap's excuse and the linter
+        # must fail. Without this, a check that can never fail looks green.
+        import check_event_coverage as module
+
+        original = module.UNPRODUCED_ALLOWLIST
+        try:
+            module.UNPRODUCED_ALLOWLIST = original - {"GoalDeclared"}
+            errors = run_event_coverage_check()
+        finally:
+            module.UNPRODUCED_ALLOWLIST = original
+        self.assertTrue(any("GoalDeclared" in err for err in errors), errors)
 
 
 class ProductionEmittableKindsAreCatalogued(unittest.TestCase):

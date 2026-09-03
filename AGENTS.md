@@ -247,7 +247,7 @@ When updating documentation, route information to its semantic owner:
 - **`docs/execution/`**: Exactly five authoritative operational runway documents:
   - `milestones.md`: Stable TARGET outcomes and release predicates (M-0 to M-10 plus MS-* overlay). No sprint calendar.
   - `backlog.md`: Stable capability package inventory (SUB-*, MEM-*, CMX-*, OCT-*, T-* aliases). No sprint queue.
-  - `spec.md`: Feature delta contract (typed schemas, invariants, error matrix). Historical name `FEATURE_SPEC.md` is a pointer.
+  - `spec.md`: Feature delta contract (typed schemas, invariants, error matrix).
   - `technical.md`: Self-explaining engineering handbook for remaining work (FACT vs `[PROPOSAL]`).
   - `tasks.md`: Flat tasks and subtasks by context. `requires:` edges only; no waves or WIP calendar.
 - **`docs/decisions.md`**: Immutable Architecture Decision Records (ADRs).

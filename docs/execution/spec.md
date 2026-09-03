@@ -1,14 +1,15 @@
 ---
 id: execution.feature_spec
 canonical_id: execution.feature_spec
-class: specification
+class: execution
 authority: execution
-status: active
+status: living
 owner: repository-governance
 canonical_for:
   - active-feature-delta-specification
 version: "2.0.0"
 date: "2026-09-03"
+last_verified: 2026-09-03
 lock_head: "66aa7a3c0c31"
 derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN.md

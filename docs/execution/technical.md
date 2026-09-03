@@ -8,6 +8,7 @@ status: living
 owner: repository-governance
 canonical_for:
   - execution-technical-handbook
+version: "0.9.3"
 purpose: Self-explaining engineering handbook for future work. Present-tense architecture stays in docs/architecture and docs/backend.
 derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN.md
@@ -139,7 +140,7 @@ Vanguard is simultaneously two tightly integrated systems:
 
 - **Plan A remains program law**: reliability identity, wave order, competency profiles, formal model, per-class evidence, non-goals, D-01–D-10.
 - **Plan B remains substrate ground truth and the critical-path DAG**: empirical contradiction audit, live inventory, lattice placement, and Tickets 01–35 (operator one-pager 01–13 first).
-- **`DEVELOPMENT_FINAL_PLAN_v2.md` defines the System Architecture & Primitive Mechanics**: It synthesizes the extensive research in `docs/research/coding_harness/`, the outer-loop director in `docs/reports/reviews/electroweak_v092/octopus/`, and dynamic multi-agent topologies (`HYDRA`). It translates conceptual theory into typed protocols, concrete data models, and execution packages ready to be decomposed (in a *later* sprint) into [`milestones.md`](milestones.md), [`backlog.md`](backlog.md), [`docs/execution/spec.md`](spec.md) (current delta file; historical name `FEATURE_SPEC.md` is kept as a pointer), and [`tasks.md`](tasks.md).
+- **`DEVELOPMENT_FINAL_PLAN_v2.md` defines the System Architecture & Primitive Mechanics**: It synthesizes the extensive research in `docs/research/coding_harness/`, the outer-loop director in `docs/reports/reviews/electroweak_v092/octopus/`, and dynamic multi-agent topologies (`HYDRA`). It translates conceptual theory into typed protocols, concrete data models, and execution packages ready to be decomposed (in a *later* sprint) into [`milestones.md`](milestones.md), [`backlog.md`](backlog.md), [`docs/execution/spec.md`](spec.md) (current delta file), and [`tasks.md`](tasks.md).
 
 Historical claim (draft v2.0.0 §1.2, 2026-09-03): this document does not compete with nor replace `DEVELOPMENT_FINAL_PLAN_MERGED.md`; MERGED "remains the Substrate Ground Truth & Forensic Baseline" owning the empirical contradiction audit, the 3 headline metrics ($R_{\text{solve}}$, $C_{\text{turn}}$, $R_{\text{tamper}}$), and Tickets 01–35. **Keep that idea.** `[PROPOSAL]` if MERGED is restored as an optional historical sibling. It is **not** authority while absent. Critical-path numbering remains B tickets 01–35. v2 `SUB-*` / `M-HYD` inventory in §8 is `[PROPOSAL]` mapping, not a replacement DAG.
 
@@ -2200,7 +2201,7 @@ See §2.6. Additionally, OpenAI’s evaluation note: coding evals mix signal and
 - [`docs/execution/active.md`](tasks.md)
 - [`docs/execution/milestones.md`](../execution/milestones.md)
 - [`docs/execution/backlog.md`](../execution/backlog.md)
-- [`docs/execution/FEATURE_SPEC.md`](../execution/FEATURE_SPEC.md)
+- [`docs/execution/spec.md`](../execution/spec.md)
 - [`docs/execution/tasks.md`](../execution/tasks.md)
 - [`docs/backend/architecture/agency.md`](../backend/architecture/agency.md)
 - [`docs/architecture/workflows/end-to-end-execution.md`](../architecture/workflows/end-to-end-execution.md)
@@ -2290,7 +2291,7 @@ See §2.6. Additionally, OpenAI’s evaluation note: coding evals mix signal and
 
 This task’s intended unique created file:
 
-`/home/rock-dev/Coding/cognitive-framework/.draft/DEVELOPMENT_FINAL_PLAN_B.md`
+`.draft/DEVELOPMENT_FINAL_PLAN_B.md`
 
 No production code, tests, canonical docs, generated indexes, package metadata, benchmark artifacts, or existing drafts were to be modified.
 
@@ -5020,8 +5021,8 @@ The following sources informed this plan but do not all carry equal authority.
   - **FACT (lock `66aa7a3c`):** this path is **missing**. Current execution files are `tasks.md`, `spec.md`, `milestones.md`, and `backlog.md`. Keep the link as the historical execution-board name from the `7e08462c` planning subject.
 - [`docs/execution/milestones.md`](../execution/milestones.md)
 - [`docs/execution/backlog.md`](../execution/backlog.md)
-- [`docs/execution/FEATURE_SPEC.md`](../execution/FEATURE_SPEC.md)
-  - **FACT (lock `66aa7a3c`):** the current delta-contract file is [`docs/execution/spec.md`](../execution/spec.md). Keep the `FEATURE_SPEC.md` link; it is the historical name used throughout this draft and in B/v2. Do not treat the missing filename as authorization to invent a parallel spec.
+- [`docs/execution/spec.md`](../execution/spec.md)
+  - **FACT (lock `66aa7a3c`):** the current delta-contract file is [`docs/execution/spec.md`](../execution/spec.md). Do not invent a parallel spec.
 - [`docs/execution/tasks.md`](../execution/tasks.md)
 - [`docs/backend/architecture/agency.md`](../backend/architecture/agency.md)
 - [`docs/backend/architecture/runtime-execution.md`](../backend/architecture/runtime-execution.md)
@@ -5451,7 +5452,7 @@ Signed exact-subject evidence supports acceptance.
 
 | Field | Value |
 |---|---|
-| Repository | `/home/rock-dev/Coding/cognitive-framework` |
+| Repository | `cognitive-framework` |
 | Branch | `main` |
 | Lock HEAD | `66aa7a3c0c31cb68a2c0387a1ddf237c80084253` |
 | LDA index HEAD | `66aa7a3c0c31` |
@@ -5465,7 +5466,7 @@ Signed exact-subject evidence supports acceptance.
 
 | Field | Value |
 |---|---|
-| Repository | `/home/rock-dev/Coding/cognitive-framework` |
+| Repository | `cognitive-framework` |
 | Branch | `main` |
 | HEAD | `ebad36e675f0eab6c4635851a91423f5a6541290` |
 | Worktree | dirty (pre-existing user work; this task created only this file) |

@@ -40,6 +40,7 @@
 {"symbol": "ArtifactWriter", "kind": "class", "defined_in": "vanguard/packages/runtime/artifacts.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "AssurancePolicy", "kind": "class", "defined_in": "vanguard/packages/runtime/assurance.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "AsyncGraphScheduler", "kind": "class", "defined_in": "vanguard/packages/runtime/scheduler.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "AtomicMultiFileTransactionManager", "kind": "class", "defined_in": "vanguard/packages/adapters/environment/transaction.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "AttenuationDenied", "kind": "class", "defined_in": "vanguard/packages/kernel/attenuation.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "AttenuationResult", "kind": "class", "defined_in": "vanguard/packages/kernel/attenuation.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "AuditProjection", "kind": "class", "defined_in": "vanguard/packages/runtime/ledger/projections.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -244,6 +245,7 @@
 {"symbol": "FakeSandboxRunner", "kind": "class", "defined_in": "vanguard/packages/adapters/sandbox/fake.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "FallbackModelRouter", "kind": "class", "defined_in": "vanguard/packages/adapters/models/routing.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "FileBlobStore", "kind": "class", "defined_in": "vanguard/packages/adapters/stores/blob_store.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "FileMutation", "kind": "class", "defined_in": "vanguard/packages/adapters/environment/transaction.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "FilePatch", "kind": "class", "defined_in": "vanguard/packages/agency/forge/patcher.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "FileRepoIndex", "kind": "class", "defined_in": "vanguard/packages/adapters/stores/repo_index.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "FixedClock", "kind": "class", "defined_in": "vanguard/packages/runtime/determinism.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -626,6 +628,7 @@
 {"symbol": "TrajectoryTurn", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "TrajectoryTurnV2", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "TrajectoryV2", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "TransactionReceipt", "kind": "class", "defined_in": "vanguard/packages/adapters/environment/transaction.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "TransformDiagnostic", "kind": "class", "defined_in": "vanguard/packages/domain/transforms/contracts.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "TransformInput", "kind": "class", "defined_in": "vanguard/packages/domain/transforms/contracts.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "TransformOutput", "kind": "class", "defined_in": "vanguard/packages/domain/transforms/contracts.py", "canonical_owner": "docs/backend/reference/schemas.md"}
@@ -675,5 +678,6 @@
 {"symbol": "WorkloadSuite", "kind": "class", "defined_in": "vanguard/packages/runtime/governance/learning.py", "canonical_owner": "docs/backend/architecture/memory-learning.md"}
 {"symbol": "Workspace", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/graph.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "WorkspaceDiscovery", "kind": "class", "defined_in": "vanguard/packages/agency/manifests/discovery.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "WorkspaceEpoch", "kind": "class", "defined_in": "vanguard/packages/domain/workspace_epoch.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "WrangleResult", "kind": "class", "defined_in": "vanguard/packages/domain/transforms/protocol/response_wrangler.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "WriterAuthorityError", "kind": "class", "defined_in": "vanguard/packages/runtime/ledger_emitter.py", "canonical_owner": "docs/backend/architecture/causal-state.md"}

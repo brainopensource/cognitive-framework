@@ -341,7 +341,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - [ ] `just docs-knowledge` — never hand-edit `.generated/`  
 
 **T-68 Link repair** (PHASE-0 §8) — can start immediately; does not wait for T-01
-- [x] Living `docs/execution/` / README / AGENTS: `active.md` → `tasks.md`; `FEATURE_SPEC.md` is a pointer (Dev C pass)
+- [x] Living `docs/execution/` / README / AGENTS: `active.md` → `tasks.md`; `FEATURE_SPEC.md` eliminated, `spec.md` is canonical delta contract
 - [x] Restore `docs/SPEC.md` (deleted in `614b7800`; compact TARGET contract)
 - [ ] Remaining historical mentions in handbook appendices / research reports — do not rewrite research  
 
@@ -601,13 +601,13 @@ graph TD
   - All 1,471 Python tests + 10 TypeScript workspaces passing green.
 
 - [x] **T1: Documentation Runway Refactor & Forensic Quarantine**
-  - Refactored `docs/execution/` into exactly 4 files (`milestones.md`, `backlog.md`, `FEATURE_SPEC.md`, `tasks.md`).
-  - Authored SOTA delta contract in [`FEATURE_SPEC.md`](FEATURE_SPEC.md).
+  - Refactored `docs/execution/` into the operational runway (`milestones.md`, `backlog.md`, `spec.md`, `tasks.md`).
+  - Authored SOTA delta contract in [`spec.md`](spec.md).
   - Quarantined autopsy logs, git commit digests, and historical forensics.
 
 - [ ] **T2: Domain Semantic Task State Vector (`CMX-09.1`)**
   - **File**: `vanguard/packages/domain/task_state.py`
-  - **Objective**: Implement `SemanticTaskState`, `TaskStep`, and `StepState` per [`FEATURE_SPEC.md`](FEATURE_SPEC.md) §3.
+  - **Objective**: Implement `SemanticTaskState`, `TaskStep`, and `StepState` per [`spec.md`](spec.md) §3.
   - **Falsifier**: `test/contracts/test_semantic_task_state.py` validating monotonic revision increments, immutability, and JCS serialization.
 
 - [ ] **T3: Two-Phase Commit Multi-File Transaction Manager (`CMX-09.2`)**
@@ -632,6 +632,6 @@ graph TD
 
 - [ ] **T7: Terminal Sprint Verification & Gate Promotion (`W-092-F1`)**
   - Run all boundary, TCB budget, and contract falsifiers.
-  - Promote verified interfaces from `FEATURE_SPEC.md` into canonical `docs/architecture/`.
+  - Promote verified interfaces from `spec.md` into canonical `docs/architecture/`.
 
 

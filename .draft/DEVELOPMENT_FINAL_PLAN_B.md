@@ -3,7 +3,7 @@ id: draft.development-final-plan-b
 class: planning
 authority: non-canonical
 truth_plane: PROPOSED
-status: draft
+status: unused-lock
 owner: repository-governance
 version: "1.0.0"
 triad_role: ground-truth
@@ -17,8 +17,9 @@ lock_head: "66aa7a3c0c31"
 lock_date: 2026-09-03
 created: 2026-09-03
 last_verified: 2026-09-03
+implementation_head: "63b77116bf68152343a544b7ec5b766bdeac2118"
 supersedes: []
-superseded_by: null
+superseded_by: docs/execution/
 historical_does_not_modify: ".draft/DEVELOPMENT_FINAL_PLAN.md"
 historical_observed_head: "ebad36e675f0eab6c4635851a91423f5a6541290"
 historical_lda_index_head: "7e08462c2cbb"
@@ -1820,3 +1821,22 @@ Identical appendix in A, B, and v2. Duplication is required so no file is a stub
 ---
 
 *End of Plan B. Non-authoritative. Source and tests win. Locked triad 2026-09-03 / HEAD `66aa7a3c0c31` / LDA `FRESH`.*
+
+---
+
+## Post-lock addendum (Dev C, 2026-09-03) — not a restamp of the lock body
+
+Tickets 01–35 remain the ID scheme. Checkboxes live only in `docs/execution/tasks.md`.
+
+Drift vs this lock’s “MISSING” / Wave-0 language:
+
+| Lock claim (this file) | Living / HEAD |
+|---|---|
+| B20 membership / `subject_sha` / dry-run null | **MECHANISM** T-01–T-03 (`65768a6b`) + T-24/T-25/T-40/T-41 (`63b77116`) |
+| `domain/task_state.py` MISSING | Lock SHA: still true. Branch: **landed** `8637db55` (`SemanticTaskState`; fold in `runtime/task_state.py`). MS-RESUME stays `OPEN` (gate). Do not treat lock MISSING as living FACT. |
+| Forge `test_count = 1` / Chimera bare exit-0 | **MECHANISM** T-06 + Chimera tail in `63b77116` |
+| `admission_required` exempts `vg-code-default` | Still FACT. T-04 not authorized. |
+| FEATURE_SPEC vs source table (§4.12) | Living table is `spec.md` §14, re-checked against this branch — not the ebad36e snapshot |
+| Wave 0–10 / sprint S0 | Not a calendar. MS-* + `requires:` only |
+
+B §6.12 lattice still wins for placement. Operator one-pager (01–13 first) is the `tasks.md` reading-order note, not a sprint.

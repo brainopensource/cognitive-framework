@@ -3,11 +3,12 @@ id: draft.development-final-plan-v2
 class: planning
 authority: non-canonical
 truth_plane: PROPOSED
-status: draft
+status: unused-lock
 owner: repository-governance
 version: "2.0.0"
 created: 2026-09-03
 last_verified: 2026-09-03
+implementation_head: "63b77116bf68152343a544b7ec5b766bdeac2118"
 triad_role: architecture
 lock_head: "66aa7a3c0c31"
 lock_date: 2026-09-03
@@ -24,6 +25,7 @@ historical_complements_snapshot_2026-09-03:
   - docs/reports/reviews/electroweak_v092/octopus/
   - docs/research/coding_harness/
 supersedes: []
+superseded_by: docs/execution/
 authorizes_nothing: true
 navigation_mode: degraded-locator-plus-source
 ---
@@ -1121,3 +1123,16 @@ Duplicated in A, B, and v2 so no file is a stub.
 | Director / HYDRA | v2 §7, A waves 7–8, B waves 7–8 | default swarm |
 | Mutation 0.80 | v2 §5.4 | as admission law |
 | CLI | A appended operator surface | TUI visual design (A non-goal) |
+
+---
+
+## Post-lock addendum (Dev C, 2026-09-03) — not a restamp of the lock body
+
+Architecture catalog only. `SUB-*` / `TXN-*` / `HYD-*` are aliases in `backlog.md`, not a second DAG.
+
+- I-7 stands: no `ast.parse` in `kernel/`. Adapter-only preflight.
+- I-1 universal signed finish remains `[PROPOSAL]` too strong; A §9.4 + T-38 (bugfix) win.
+- Mutation ≥ 0.80 remains T-39 `[PROPOSAL]`, not admission.
+- `PRG-01` is L4/L5 policy on the existing `ContextCompiler`, not a second compiler.
+- HYDRA / Meta-Conductor / Campaign Service remain `[PROPOSAL]`. Product path is still `ApplicationService → … → EpisodeEngine`.
+- Coding Max report arms ⊆ `{vg-code-fast, vg-code-balanced, vg-code-max}` (T-23, `63b77116`).

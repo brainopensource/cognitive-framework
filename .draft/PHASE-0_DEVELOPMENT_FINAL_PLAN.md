@@ -3,11 +3,14 @@ id: draft.phase-0-development-final-plan
 class: planning
 authority: non-canonical
 truth_plane: PROPOSED
-status: draft
+status: unused-lock
 owner: repository-governance
 version: "1.0.0"
 created: 2026-09-03
+last_verified: 2026-09-03
+implementation_head: "63b77116bf68152343a544b7ec5b766bdeac2118"
 lock_head: "66aa7a3c0c31"
+superseded_by: docs/execution/
 purpose: >-
   Organization plan to move the locked triad (A, B, v2) into docs/execution/
   as the only development authority, without information loss, without deleting
@@ -733,3 +736,34 @@ Before declaring the apply done:
 **Applied 2026-09-03.** Content copied into `docs/execution/{milestones,spec,technical,backlog,tasks}.md`. Drafts remain unused reference. This PHASE-0 file is not day-to-day authority.
 
 *End of PHASE-0. Apply by copying triad content into the five execution files using §3–§6. Authority after apply: `docs/execution/`. Drafts remain unused reference.*
+
+---
+
+## PHASE-1 (Dev C) — consolidate the copy-in; do not re-apply PHASE-0
+
+`.draft/_phase0_apply.py` is **one-shot**. A second run nests appendices. Do not run it.
+
+PHASE-0 copy-in is done. PHASE-1 is quality, not another paste:
+
+1. Living `docs/execution/` has one outline per file. Historical dumps are named appendices.
+2. `tasks.md` must have **one** YAML frontmatter. Delete the second `---` / “Active Sprint W-092-F1” block; keep the CMX-09 DAG as markdown only.
+3. `milestones.md`: drop the living W-092 overlay body that marks F0 `DONE`. Keep the alias table.
+4. Information-loss checklist below: routing destinations exist. Unchecked boxes were never a reason to re-copy.
+5. T-68 (living links): `active.md` → `tasks.md`; `FEATURE_SPEC.md` is a pointer to `spec.md`. Do not rewrite research reports.
+
+A and B implementers own T-ids. Dev C does not steal `session.py`, `domain/`, or `benchmarks/`.
+
+### §9 routing check (this addendum only — not a restamp of the lock checklist)
+
+Routing destinations exist in `docs/execution/`. Checked here because PHASE-0 copy-in already happened:
+
+- [x] A §0–§39 and appendices each have a destination in PHASE-0 §3.1
+- [x] B §1–§23 and appendices A–E each have a destination in PHASE-0 §3.2
+- [x] v2 §1–§24 and appendix each have a destination in PHASE-0 §3.3
+- [x] T-01–T-35 exist in `tasks.md` with original falsifiers
+- [x] A §31 all 30 lines mapped
+- [x] D-01–D-10 and Q-01–Q-15 in `backlog.md`
+- [x] Risks copied
+- [x] Drafts A / B / v2 still on disk
+
+Not claimed: T-09 “done” as an MS-RESUME close. B landed the domain type on `8637db55`; the gate stays `OPEN`. Lock-body row “always MISSING until T-09 lands” is historical lock language, not living FACT.

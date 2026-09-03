@@ -3,13 +3,14 @@ id: draft.development-final-plan
 class: planning
 authority: non-canonical
 truth_plane: PROPOSED
-status: draft
+status: unused-lock
 owner: repository-governance
 version: "0.1.0"
 observed_head: "7e08462c2cbbf10e37c75f2d3f34d0beaa4ceef5"
 observed_worktree: dirty
 created: 2026-09-03
 last_verified: 2026-09-03
+implementation_head: "63b77116bf68152343a544b7ec5b766bdeac2118"
 triad_role: law
 complements:
   - .draft/DEVELOPMENT_FINAL_PLAN_B.md
@@ -18,7 +19,7 @@ lock_head: "66aa7a3c0c31"
 lock_date: "2026-09-03"
 lda_freshness: FRESH
 supersedes: []
-superseded_by: null
+superseded_by: docs/execution/
 ---
 
 > **Unused reference.** Day-to-day development authority is [`docs/execution/`](../docs/execution/): [`milestones.md`](../docs/execution/milestones.md), [`spec.md`](../docs/execution/spec.md), [`technical.md`](../docs/execution/technical.md), [`backlog.md`](../docs/execution/backlog.md), [`tasks.md`](../docs/execution/tasks.md). This draft remains forensic lock at HEAD `66aa7a3c`. Do not treat it as the work board.
@@ -3636,3 +3637,21 @@ This appendix is duplicated in Plan A, Plan B, and Plan v2 so no file is a stub.
 | Mutation 0.80 | v2 §5.4 | as admission law |
 | CLI | A appended operator surface | TUI visual design (A non-goal) |
 
+
+---
+
+## Post-lock addendum (Dev C, 2026-09-03) — not a restamp of the lock body
+
+This file remains program law at lock `66aa7a3c`. It is not the work board.
+
+Living board: `docs/execution/{milestones,spec,technical,backlog,tasks}.md`.
+
+Observed on `feat/strongforce_beta_release_v093` (not this lock SHA):
+
+- MS-INSTRUMENT `CLOSED` at `63b77116` (T-01–T-03, T-24, T-25, T-40, T-41).
+- MS-TRUTH `OPEN`. A’s no-session slice landed (T-23, T-38, T-42, Chimera T-08 tail). T-04 / T-05 / T-07 remain `[PROPOSAL]` / blocked. Do not shrink `ADMISSION_GATE_EXEMPT`.
+- MS-RESUME `OPEN`. B landed `domain/task_state.py` on commit `8637db55` (`SemanticTaskState`; `CodingTaskState` alias; fold in `runtime/task_state.py`). A §6.2 extra types stay `[PROPOSAL]` — not implemented. Gate stays `OPEN` until a receipt; checkboxes in `tasks.md` are B’s `[x]`, not Dev C restamp.
+- Per-class evidence (this file §9.4) still wins over v2 I-1. Fail-to-pass is bugfix-only (T-38).
+- Reliability order is unchanged. Recast as MS-* in `milestones.md`, not as waves.
+
+If this body and `docs/execution/` disagree, **execution + HEAD source win**. Do not “fix” the lock paragraphs above.

@@ -38,11 +38,11 @@ Companion handbook: [`technical.md`](technical.md). Task IDs: [`tasks.md`](tasks
 - **I-TCB.** Kernel LOC ≤ 1438 (live 1386 at last A linter pass).
 - **INV-DELTA-1.** Domain state schemas: stdlib + JCS only.
 - **INV-DELTA-2.** This program SHALL NOT grow kernel past the TCB ceiling.
-- **INV-DELTA-3.** Multi-file writes are all-or-nothing. Preflight in the adapter. `[PROPOSAL]` until T-17.
+- **INV-DELTA-3.** Multi-file writes are all-or-nothing. Preflight in the adapter. MECHANISM this-branch (T-17). Product MS-CHANGE remains `OPEN` (T-18–T-20).
 - **INV-DELTA-4.** Agents SHALL NOT mutate tests during implementation. Tamper shield `[PROPOSAL]` T-18; enumerate via IndexPort, not `Path.glob("test/**")`.
 - **INV-DELTA-5.** L1–L3 prefix-stable. Compaction SHALL NOT drop settled invariants or falsified hypotheses.
 - **I-STATE.** σ is a ledger fold (`fold_task_state`). One schema: `SemanticTaskState` with alias `CodingTaskState`. Lock: `domain/task_state.py` MISSING. Branch: LIVE `8637db55`. MS-RESUME `CLOSED`.
-- **I-TXN.** 2PC lives in `adapters/environment/transaction.py` (MISSING). Not kernel.
+- **I-TXN.** 2PC lives in `adapters/environment/transaction.py`. This branch LIVE (T-17 MECHANISM). Lock `66aa7a3c` MISSING. Not kernel.
 - **Single-writer.** One writer per workspace.
 - **Authorize-before-retrieve.** Memory recall requires grant.
 
@@ -913,7 +913,7 @@ Wire recovery: `adapters/models/dialect.py`. Malformed → Proposal: `agency/epi
 
 ## 2PC / tamper placement
 
-- 2PC: create `adapters/environment/transaction.py` (**MISSING**). `GitEnvironment.apply` is sequential today; `ast.parse` is post-write observation.
+- 2PC: `adapters/environment/transaction.py` this-branch LIVE (T-17 MECHANISM). Lock `66aa7a3c` MISSING. Multi-file `GitEnvironment.apply` preflights `ast.parse` then all-or-nothing flush. Single-file sequential observation (S8-B-09) unchanged. Product change-closure still needs T-18–T-20.
 - Tamper: create `runtime/governance/tamper_shield.py` (**MISSING**). Enumerate tests via IndexPort (T-18); `Path.glob("test/**")` is insufficient.
 
 ---
@@ -930,7 +930,7 @@ Keep `ContextPacket`. FEATURE_SPEC 4-tier budget is L4/L5 **policy** on existing
 
 ## 7. 2PC and tamper
 
-Living rule: create `adapters/environment/transaction.py` and `runtime/governance/tamper_shield.py` when T-17/T-18 start. Today `GitEnvironment.apply` is sequential; `ast.parse` is post-write observation. Historical CMX-09 schemas remain in Appendix H.
+Living rule: T-17 MECHANISM — `adapters/environment/transaction.py` this-branch LIVE; lock `66aa7a3c` MISSING. Multi-file apply is adapter 2PC with AST preflight. Product MS-CHANGE remains `OPEN` (T-18–T-20; epoch is T-14). `tamper_shield.py` still MISSING. Historical CMX-09 schemas remain in Appendix H.
 
 ## 8. Dialect
 
@@ -946,7 +946,7 @@ SHALL text for stop/simplify/rollback and research/explanation lives in §§11�
 |---|---|---|
 | `domain/task_state.py` | MISSING | LIVE (`8637db55`) |
 | `runtime/task_state.py` `fold_task_state` | LIVE (old schema) | Fold of domain type (`8637db55`) |
-| `adapters/environment/transaction.py` | MISSING | MISSING |
+| `adapters/environment/transaction.py` | MISSING | LIVE (T-17 MECHANISM). Lock `66aa7a3c` still MISSING |
 | `runtime/governance/tamper_shield.py` | MISSING | MISSING |
 | `agency/context/progressive.py` | MISSING | Do not add — policy on `ContextCompiler` |
 | `runtime/event_store.py` | MISSING | Owner remains `adapters/stores/event_store.py` |

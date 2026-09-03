@@ -189,9 +189,9 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 ### Context: Multi-file edit, 2PC, tamper, completeness
 
 **T-17 Atomic multi-file transaction** (B, v2 §4.2)  
-- [ ] Shadow tree; `ast.parse` in **adapter**; all-or-nothing  
-- [ ] File 4 of 5 syntax fail rolls back all  
-- [ ] Kernel MUST NOT gain AST  
+- [x] Shadow tree; `ast.parse` in **adapter**; all-or-nothing  
+- [x] File 4 of 5 syntax fail rolls back all  
+- [x] Kernel MUST NOT gain AST  
 - Files: create `adapters/environment/transaction.py`; `git.py`  
 - Requires: T-08 (honest verify)  
 

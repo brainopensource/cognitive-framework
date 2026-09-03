@@ -35,6 +35,7 @@ from ...ports.environment import (
     Reconciliation,
 )
 from ...ports.event_store import Result
+from .transaction import AtomicMultiFileTransactionManager, FileMutation
 
 __all__ = ["GitEnvironment", "GitEnvironmentAdapter", "GitUnavailableError"]
 
@@ -850,6 +851,23 @@ class GitEnvironment:
 
         return Result.fail("invalid_request", f"unsupported effect preview action: {action!r}")
 
+    def _apply_multi_file_transaction(
+        self, planned_files: dict[str, str | None]
+    ) -> Result[object]:
+        mutations: list[FileMutation] = []
+        for rel_name, content in planned_files.items():
+            dest = self._working_dir / rel_name
+            if content is None:
+                mutation = FileMutation(path=rel_name, content=None, action="delete")
+            elif dest.is_file():
+                mutation = FileMutation(path=rel_name, content=content, action="modify")
+            else:
+                mutation = FileMutation(path=rel_name, content=content, action="create")
+            mutations.append(mutation)
+        return AtomicMultiFileTransactionManager(self._working_dir).execute_transaction(
+            mutations
+        )
+
     def apply(self, req: EffectRequest, grant: Optional[Any] = None) -> Result[EffectReceipt]:
         del grant
         disposed_err = self._check_disposed()
@@ -878,6 +896,25 @@ class GitEnvironment:
                     message=val_res.error.message if val_res.error else "patch apply failed",
                 )
             planned_files, affected, _, _, _, diff_txt = val_res.value
+            if len(planned_files) > 1:
+                txn_res = self._apply_multi_file_transaction(planned_files)
+                if not txn_res.ok:
+                    return Result.fail(
+                        kind=txn_res.error.kind if txn_res.error else "invalid_request",
+                        message=txn_res.error.message if txn_res.error else "transaction failed",
+                    )
+                result_digest = digest_of({"affected": [a.resource for a in affected], "diff": diff_txt})
+                return Result.success(
+                    EffectReceipt(
+                        descriptor_digest=descriptor_digest,
+                        outcome="ok",
+                        observed_at=observed_at,
+                        result_digest=result_digest,
+                        affected_resources=tuple(affected),
+                        diff=diff_txt,
+                    )
+                )
+
             for rel_name, content in planned_files.items():
                 file_path = (self._working_dir / rel_name).resolve()
                 if content is None:

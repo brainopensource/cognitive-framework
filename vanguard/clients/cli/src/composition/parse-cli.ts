@@ -1,5 +1,6 @@
 import type { CliOptions } from "@aether/client";
 import { parseBudgetUsdToMicros } from "@aether/client";
+import { existsSync } from "node:fs";
 
 export type ParsedCli = CliOptions & {
   promptExplicit: boolean;
@@ -8,6 +9,7 @@ export type ParsedCli = CliOptions & {
 
 export const USAGE =
   "Usage:\n" +
+  "  aether | vg                  interactive TUI in the current directory\n" +
   "  vg daemon start|status|stop\n" +
   "  vg run [repo] [--headless] [--prompt <text>] [--brief <text>] [--model <id>] [--manifest <path>]\n" +
   "          [--run-id <id>] [--resume <id>] [--checkpoint-every <n>] [--socket-path <path>]\n" +
@@ -171,4 +173,41 @@ export function parseCliOptions(args: string[]): ParsedCli {
     question: value("--question"),
     budgetError,
   };
+}
+
+const CLI_COMMANDS = new Set([
+  "run",
+  "agent",
+  "workflow",
+  "artifact",
+  "event",
+  "approve",
+  "doctor",
+  "daemon",
+  "config",
+  "provider",
+  "model",
+  "workspace",
+  "history",
+  "attach",
+  "code",
+  "explain",
+  "resume",
+  "trace",
+  "why",
+  "init",
+  "composition",
+  "schema",
+  "lineage",
+]);
+
+/** Map a bare `aether` / `vg` invocation onto `run .` without stealing --help. */
+export function normalizeArgv(argv: string[]): string[] {
+  if (argv.length === 0) return ["run", "."];
+  const head = argv[0]!;
+  if (head === "--help" || head === "-h") return argv;
+  if (CLI_COMMANDS.has(head)) return argv;
+  if (head.startsWith("-")) return ["run", ".", ...argv];
+  if (existsSync(head)) return ["run", ...argv];
+  return argv;
 }

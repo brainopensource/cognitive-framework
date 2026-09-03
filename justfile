@@ -96,3 +96,21 @@ verify:
 release-verify SUBJECT ENVELOPE GIT_RECEIPT:
 	python3 tools/release_qualification.py --subject "{{SUBJECT}}" --envelope "{{ENVELOPE}}" --git-receipt "{{GIT_RECEIPT}}"
 	@echo "AETHER RELEASE VERIFY: PASS"
+
+# Install `aether` and `vg` onto ~/.local/bin (survives nvm version switches)
+install-cli:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	npm --workspace @vanguard/cli run build
+	REPO="$(pwd)"
+	BIN="${HOME}/.local/bin"
+	mkdir -p "$BIN"
+	for name in aether vg; do
+	  printf '%s\n' '#!/usr/bin/env bash' "export AETHER_HOME=\"$REPO\"" 'exec node "$AETHER_HOME/vanguard/clients/cli/dist/src/main.js" "$@"' > "$BIN/$name"
+	  chmod +x "$BIN/$name"
+	done
+	echo "Installed $BIN/aether and $BIN/vg"
+	echo "Launch: aether"
+	if [[ ":$PATH:" != *":$BIN:"* ]]; then
+	  echo "Warning: $BIN is not in PATH. Add: export PATH=\"\$HOME/.local/bin:\$PATH\""
+	fi

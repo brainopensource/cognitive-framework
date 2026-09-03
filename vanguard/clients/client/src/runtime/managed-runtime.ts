@@ -1,5 +1,6 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import { existsSync, readFileSync, unlinkSync, createWriteStream } from "node:fs";
+import { join } from "node:path";
 import { ProductPaths, type ProductLayout } from "../product/paths.js";
 import { SocketRuntimeClient } from "../transports/socket.js";
 import { CompatibilityNegotiator, type CompatibilityReport } from "../product/compatibility.js";
@@ -36,6 +37,9 @@ export class ManagedRuntimeHost {
   private childProcess: ChildProcess | null = null;
   private isOwned: boolean = false;
   private restartCount: number = 0;
+  private lastStderr = "";
+  private lastStdout = "";
+  private childExit: { code: number | null; signal: NodeJS.Signals | null } | null = null;
   private readonly options: ManagedRuntimeOptions;
   private readonly listeners: Set<(event: ManagedRuntimeEvent) => void> = new Set();
 
@@ -168,19 +172,31 @@ export class ManagedRuntimeHost {
     }
   }
 
+  private resolvePython(): string {
+    if (this.options.pythonExecutable) return this.options.pythonExecutable;
+    if (process.env.PYTHON_BIN) return process.env.PYTHON_BIN;
+    const venvPy =
+      process.platform === "win32"
+        ? join(this.layout.appRoot, ".venv", "Scripts", "python.exe")
+        : join(this.layout.appRoot, ".venv", "bin", "python");
+    if (existsSync(venvPy)) return venvPy;
+    return "python3";
+  }
+
   private async spawnRuntimeProcess(): Promise<void> {
-    const python = this.options.pythonExecutable ?? process.env.PYTHON_BIN ?? "python3";
+    const python = this.resolvePython();
     const entrypoint = this.layout.runtimeEntrypoint;
+    this.lastStderr = "";
+    this.lastStdout = "";
+    this.childExit = null;
 
     // Log routing
     const logFile = `${this.layout.logsDir}/runtime.log`;
     const logStream = createWriteStream(logFile, { flags: "a" });
 
     const args = [
-      "-u", // unbuffered stdio
+      "-u",
       entrypoint,
-      // vanguard/packages/runtime/standalone_daemon.py's real argparse flag
-      // is `--socket`, not `--socket-path` -- verified against its source.
       "--socket",
       this.layout.socketPath,
       "--state-dir",
@@ -194,8 +210,9 @@ export class ManagedRuntimeHost {
 
     const env = {
       ...process.env,
-      PYTHONPATH: `${this.layout.runtimeDir}${process.platform === "win32" ? ";" : ":"}${process.env.PYTHONPATH ?? ""}`,
+      PYTHONPATH: `${this.layout.appRoot}${process.platform === "win32" ? ";" : ":"}${process.env.PYTHONPATH ?? ""}`,
       VANGUARD_ROOT: this.layout.appRoot,
+      AETHER_HOME: this.layout.appRoot,
     };
 
     const child = spawn(python, args, {
@@ -209,28 +226,42 @@ export class ManagedRuntimeHost {
 
     child.stdout?.on("data", (chunk: Buffer) => {
       const text = chunk.toString();
+      this.lastStdout = (this.lastStdout + text).slice(-4000);
       logStream.write(`[OUT] ${text}`);
       this.emit({ type: "log", text, stream: "stdout" });
     });
 
     child.stderr?.on("data", (chunk: Buffer) => {
       const text = chunk.toString();
+      this.lastStderr = (this.lastStderr + text).slice(-4000);
       logStream.write(`[ERR] ${text}`);
       this.emit({ type: "log", text, stream: "stderr" });
     });
 
     child.on("error", (err) => {
       this.emit({ type: "error", error: err });
+      this.lastStderr = (this.lastStderr + "\n" + err.message).slice(-4000);
+      this.childExit = { code: 1, signal: null };
     });
 
     child.on("exit", (code, sig) => {
       logStream.write(`[EXIT] Runtime exited with code ${code}, signal ${sig}\n`);
+      this.childExit = { code, signal: sig };
       if (this.status !== "STOPPING" && this.status !== "OFFLINE") {
         this.setStatus("CRASHED", `Runtime exited unexpectedly (${code ?? sig})`);
-        this.handleUnexpectedCrash();
+        if (this.status === "RUNNING") {
+          this.handleUnexpectedCrash();
+        }
       }
       this.childProcess = null;
     });
+  }
+
+  private childDiedMessage(): string | null {
+    if (!this.childExit) return null;
+    const detail = (this.lastStderr || this.lastStdout || "").trim();
+    const code = this.childExit.code ?? this.childExit.signal;
+    return `Managed runtime exited (${code}) before becoming ready at ${this.layout.socketPath}${detail ? `:\n${detail}` : ""}`;
   }
 
   private async waitForReadiness(client: SocketRuntimeClient): Promise<DaemonStatus> {
@@ -238,6 +269,8 @@ export class ManagedRuntimeHost {
     const start = Date.now();
 
     while (Date.now() - start < timeout) {
+      const died = this.childDiedMessage();
+      if (died) throw new Error(died);
       if (existsSync(this.layout.socketPath)) {
         try {
           const res = await client.getDaemonStatus();
@@ -248,9 +281,11 @@ export class ManagedRuntimeHost {
           /* wait and retry */
         }
       }
-      await new Promise((resolve) => setTimeout(resolve, 200));
+      await new Promise((resolve) => setTimeout(resolve, 50));
     }
 
+    const died = this.childDiedMessage();
+    if (died) throw new Error(died);
     throw new Error(`Managed runtime failed to initialize within ${timeout}ms at ${this.layout.socketPath}`);
   }
 

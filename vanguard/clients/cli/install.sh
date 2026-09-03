@@ -1,19 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Channel 1: curl|sh installer for @vanguard/cli (Node >= 20).
+# Install aether and vg into ~/.local/bin, pointing at this checkout.
 ROOT="$(cd "$(dirname "$0")" && pwd)"
-CORE="$(cd "$ROOT/../client-core" && pwd)"
+REPO="$(cd "$ROOT/../../.." && pwd)"
 if ! command -v node >/dev/null; then
-  echo "vg install: Node.js >= 20 is required" >&2
+  echo "aether install: Node.js >= 20 is required" >&2
   exit 1
 fi
-cd "$CORE"
-npm install --workspaces=false
-npm run build
-cd "$ROOT"
-npm install --workspaces=false
-npm run build
-npm link
-echo "vg is linked. Try: vg --help"
-echo "Live daemon socket: --socket-path, VANGUARD_RUNTIME_SOCKET, or /tmp/vanguard-runtime.sock"
-echo "Demo (no daemon): vg run --demo --headless"
+cd "$REPO"
+npm --workspace @vanguard/cli run build
+BIN="${HOME}/.local/bin"
+mkdir -p "$BIN"
+for name in aether vg; do
+  printf '%s\n' '#!/usr/bin/env bash' "export AETHER_HOME=\"$REPO\"" 'exec node "$AETHER_HOME/vanguard/clients/cli/dist/src/main.js" "$@"' > "$BIN/$name"
+  chmod +x "$BIN/$name"
+done
+echo "Installed $BIN/aether and $BIN/vg"
+echo "Launch: aether"
+echo "Live daemon socket: --socket-path, AETHER_RUNTIME_SOCK, or /tmp/vanguard-runtime.sock"
+if [[ ":$PATH:" != *":$BIN:"* ]]; then
+  echo "Warning: $BIN is not in PATH. Add: export PATH=\"\$HOME/.local/bin:\$PATH\""
+fi

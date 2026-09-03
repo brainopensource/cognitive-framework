@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { manageDaemon, resumeRun, streamRun } from "../src/application/commands.js";
 import { LiveRuntimeClient } from "../src/adapters/live.js";
 import { ReplayRuntimeClient } from "../src/adapters/replay.js";
-import { parseCliOptions, USAGE } from "../src/composition/parse-cli.js";
+import { parseCliOptions, USAGE, normalizeArgv } from "../src/composition/parse-cli.js";
 import { demoFixturePath, packageRootFrom } from "../src/composition/catalog.js";
 import { sourceLabel } from "../src/tui/theme/tokens.js";
 import { OperatorSigner } from "../src/adapters/signer.js";
@@ -32,6 +32,17 @@ test("usage documents all flags", () => {
   for (const flag of ["--demo", "--socket-path", "--manifest", "--replay", "--headless", "--yes", "--help"]) {
     assert.equal(USAGE.includes(flag), true, flag);
   }
+  assert.match(USAGE, /aether.*interactive TUI|no args.*interactive/i);
+});
+
+test("normalizeArgv defaults a bare invocation to interactive run in .", () => {
+  assert.deepEqual(normalizeArgv([]), ["run", "."]);
+  assert.deepEqual(normalizeArgv(["--help"]), ["--help"]);
+  assert.deepEqual(normalizeArgv(["-h"]), ["-h"]);
+  assert.deepEqual(normalizeArgv(["run", "."]), ["run", "."]);
+  assert.deepEqual(normalizeArgv(["--model", "openrouter/free"]), ["run", ".", "--model", "openrouter/free"]);
+  assert.deepEqual(normalizeArgv(["doctor"]), ["doctor"]);
+  assert.deepEqual(normalizeArgv(["."]), ["run", "."]);
 });
 
 test("vg --help prints every documented flag", () => {

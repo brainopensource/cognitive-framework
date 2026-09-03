@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import type { RuntimeClient } from "@aether/client";
-import { parseCliOptions, usage, USAGE } from "./composition/parse-cli.js";
+import { parseCliOptions, usage, USAGE, normalizeArgv } from "./composition/parse-cli.js";
 import { COMMANDS } from "./commands/index.js";
 
 // EPIPE signal handling: silent clean exit code 0 when pipe closes (e.g. | head -n 5)
@@ -18,13 +18,14 @@ process.on("SIGTERM", () => {
   process.exit(130);
 });
 
-const argv = process.argv.slice(2);
-if (!argv[0] || argv[0] === "--help" || argv[0] === "-h") {
+const argv = normalizeArgv(process.argv.slice(2));
+if (argv[0] === "--help" || argv[0] === "-h") {
   console.error(USAGE);
-  process.exit(argv[0] ? 0 : 2);
+  process.exit(0);
 }
 
 const [command, ...rest] = argv;
+
 const parsed = parseCliOptions(rest);
 
 // Support --output json as alias to --json

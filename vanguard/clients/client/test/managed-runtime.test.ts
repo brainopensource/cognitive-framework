@@ -89,4 +89,31 @@ describe("@aether/client — ManagedRuntimeHost (real daemon spawn)", () => {
       rmSync(layout.dataDir, { recursive: true, force: true });
     }
   });
+
+  it("rejects quickly when the daemon entrypoint does not exist, including stderr in the error", async () => {
+    const layout = tempLayout();
+    layout.runtimeEntrypoint = join(layout.stateDir, "no-such-daemon.py");
+    const started = Date.now();
+    const host = new ManagedRuntimeHost({
+      layout,
+      pythonExecutable: "python3",
+      autoRestart: false,
+      startupTimeoutMs: 8_000,
+    });
+    try {
+      await assert.rejects(
+        () => host.ensureRunning(),
+        (err: unknown) => {
+          const message = err instanceof Error ? err.message : String(err);
+          assert.ok(/no-such-daemon|can't open file|No such file/i.test(message), message);
+          return true;
+        },
+      );
+      assert.ok(Date.now() - started < 4000, "must fail faster than the startup timeout");
+    } finally {
+      await host.shutdown();
+      rmSync(layout.stateDir, { recursive: true, force: true });
+      rmSync(layout.dataDir, { recursive: true, force: true });
+    }
+  });
 });

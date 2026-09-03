@@ -1,33 +1,42 @@
-# `vg` CLI / TUI
+# `aether` / `vg` CLI / TUI
 
-Ink client for the RuntimeService daemon. Architecture: [`docs/SPEC.md`](../../../docs/SPEC.md) · Decisions: [`docs/decisions.md`](../../../docs/decisions.md).
-
-Requires Node ≥ 20. Do not import `vanguard/packages`.
+Requires Node ≥ 20. Architecture: [`docs/SPEC.md`](../../../docs/SPEC.md).
 
 ## Install
 
+From the repository root (writes `aether` and `vg` into `~/.local/bin`):
+
 ```bash
-# channel 1
-bash install.sh
-# channel 2
-npm install -g .
+just install-cli
+# or
+bash vanguard/clients/cli/install.sh
 ```
+
+Then, from any directory:
+
+```bash
+aether
+aether run /path/to/repo
+aether --help
+```
+
+`npm link --workspace @vanguard/cli` also works, but the symlink lives in the current Node version's bin and disappears if you switch nvm versions.
 
 ## Flags
 
-`vg --help` lists: `--headless --feed --scenario --demo --replay --run-id --resume --checkpoint-every --repo --prompt --brief --model --manifest --decision --socket-path --yes|-y --help`.
+`aether --help` lists: `--headless --feed --scenario --demo --replay --run-id --resume --checkpoint-every --repo --prompt --brief --model --manifest --decision --socket-path --yes|-y --help`.
 
-Socket path: `--socket-path` → `VANGUARD_RUNTIME_SOCKET` → `/tmp/vanguard-runtime.sock`.
+Socket path: `--socket-path` → `AETHER_RUNTIME_SOCK` → `/tmp/vanguard-runtime.sock`.
 
 ## Examples
 
 ```bash
 npm install
 npm run typecheck && npm test
+aether
 vg run --demo --headless
-vg run . --headless --prompt "fix the test" --manifest ./manifest.json
+vg run . --headless --prompt "fix the test"
 vg daemon status
-vg --help
 ```
 
 `--demo` replays `fixtures/sessions/` and labels `source: mock`. It does not open the daemon socket.

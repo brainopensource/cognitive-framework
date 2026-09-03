@@ -145,6 +145,7 @@ export class TuiStore {
   public readonly state: Signal<TuiStoreState>;
   private abortController: AbortController | null = null;
   private lastClient?: RuntimeClient;
+  private readonly pinnedAgentId?: string;
 
   constructor(initial: Partial<TuiStoreState> = {}, client?: RuntimeClient) {
     this.persistence = new NodeFsPersistenceAdapter();
@@ -152,8 +153,9 @@ export class TuiStore {
       client,
       persistence: this.persistence,
       initialWorkspace: initial.workspacePath ?? ".",
-      initialAgentId: initial.agentId ?? "coding-agent",
+      initialAgentId: initial.agentId ?? "vg-code-balanced",
     });
+    this.pinnedAgentId = initial.agentId;
 
     const ctrlState = this.controller.getState();
     const wsPath = initial.workspacePath ?? ctrlState.currentWorkspace;
@@ -209,6 +211,7 @@ export class TuiStore {
 
   private async initPersistence(): Promise<void> {
     await this.controller.restoreFromPersistence();
+    if (this.pinnedAgentId) this.selectAgent(this.pinnedAgentId);
   }
 
   private syncFromController(cState: any): void {

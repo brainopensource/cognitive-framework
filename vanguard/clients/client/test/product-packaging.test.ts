@@ -1,5 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import {
   ProductPaths,
   CompatibilityNegotiator,
@@ -7,6 +9,25 @@ import {
   InMemoryPersistenceAdapter,
 } from "../src/index.js";
 import type { DaemonStatus } from "@aether/contracts";
+
+test("default layout locates standalone_daemon.py at the repo root, not clients/", () => {
+  const savedHome = process.env.AETHER_HOME;
+  delete process.env.AETHER_HOME;
+  ProductPaths.clearCache();
+  try {
+    const layout = ProductPaths.resolveLayout();
+    assert.equal(existsSync(layout.runtimeEntrypoint), true, layout.runtimeEntrypoint);
+    assert.ok(
+      layout.runtimeEntrypoint.endsWith(join("vanguard", "packages", "runtime", "standalone_daemon.py")),
+    );
+    assert.equal(layout.appRoot.includes(`${join("clients", "vanguard")}`), false);
+    assert.equal(existsSync(join(layout.appRoot, "vanguard", "packages")), true);
+  } finally {
+    if (savedHome === undefined) delete process.env.AETHER_HOME;
+    else process.env.AETHER_HOME = savedHome;
+    ProductPaths.clearCache();
+  }
+});
 
 test("ProductPaths: deterministic resolution of platform directories", () => {
   const layout = ProductPaths.resolveLayout("/opt/aether-test");

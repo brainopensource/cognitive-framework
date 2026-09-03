@@ -26,8 +26,29 @@ export type ProductLayout = {
   cacheDir: string;
 };
 
+const DAEMON_RELATIVE = join("vanguard", "packages", "runtime", "standalone_daemon.py");
+
+function hasDaemon(root: string): boolean {
+  return existsSync(join(root, DAEMON_RELATIVE));
+}
+
+function walkToAppRoot(seed: string): string | undefined {
+  let dir = resolve(seed);
+  for (let i = 0; i < 24; i++) {
+    if (hasDaemon(dir)) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return undefined;
+}
+
 export class ProductPaths {
   private static cachedLayout?: ProductLayout;
+
+  public static clearCache(): void {
+    this.cachedLayout = undefined;
+  }
 
   public static getPlatform(): ProductPlatform {
     const p = platform();
@@ -43,31 +64,28 @@ export class ProductPaths {
     const currentPlatform = this.getPlatform();
     const home = homedir();
 
-    let fallbackRoot = process.cwd();
+    let moduleDir = process.cwd();
     try {
       if (typeof import.meta !== "undefined" && import.meta.url) {
-        const currentFile = fileURLToPath(import.meta.url);
-        fallbackRoot = resolve(dirname(currentFile), "../../../..");
+        moduleDir = dirname(fileURLToPath(import.meta.url));
       }
     } catch {
-      fallbackRoot = process.cwd();
+      moduleDir = process.cwd();
     }
 
-    // 1. Immutable App Root Resolution
-    // Precedence: AETHER_HOME env -> customAppRoot -> process.resourcesPath (Tauri) -> package root
-    const appRoot =
-      process.env.AETHER_HOME ??
-      customAppRoot ??
-      (process as any).resourcesPath ??
-      fallbackRoot;
+    const envHome = process.env.AETHER_HOME;
+    const envRoot = envHome && hasDaemon(envHome) ? envHome : undefined;
+    const custom = customAppRoot && hasDaemon(customAppRoot) ? customAppRoot : customAppRoot;
+    const walked = walkToAppRoot(moduleDir) ?? walkToAppRoot(process.cwd());
+
+    const appRoot = envRoot ?? custom ?? walked ?? process.cwd();
 
     const binDir = join(appRoot, "bin");
     const runtimeDir = join(appRoot, "vanguard", "packages");
-    const runtimeEntrypoint = join(appRoot, "vanguard", "packages", "runtime", "standalone_daemon.py");
+    const runtimeEntrypoint = join(appRoot, DAEMON_RELATIVE);
     const schemasDir = join(appRoot, "schemas");
     const labDir = join(appRoot, "vanguard", "clients", "lab", "dist");
 
-    // 2. Mutable User Directories
     let configDir: string;
     let stateDir: string;
     let dataDir: string;
@@ -92,7 +110,6 @@ export class ProductPaths {
       logsDir = join(home, "Library", "Logs", "Aether");
       cacheDir = join(home, "Library", "Caches", "Aether");
     } else {
-      // Linux / XDG
       const xdgConfig = process.env.XDG_CONFIG_HOME ?? join(home, ".config");
       const xdgData = process.env.XDG_DATA_HOME ?? join(home, ".local", "share");
       const xdgState = process.env.XDG_STATE_HOME ?? join(home, ".local", "state");

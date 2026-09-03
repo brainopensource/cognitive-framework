@@ -87,10 +87,10 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - Requires: T-04  
 - Files: `session.py`; `test_completion_gate_scope.py`  
 
-**T-06 Remove Forge `test_count = 1`** (B)  
-- [ ] Delete `forge/engine.py` L309–311 fallback  
-- [ ] Chimera `executed = 1` on bare exit 0 — same treatment (subtask from A G-01)  
-- Falsifier: exit 0 + empty output ⇒ not passed  
+**T-06 Remove Forge `test_count = 1`** (B)
+- [x] Delete `forge/engine.py` L309–311 fallback
+- [x] Chimera `executed = 1` on bare exit 0 — same treatment (subtask from A G-01)
+- Falsifier: exit 0 + empty output ⇒ not passed
 
 **T-07 Typed verification command subject** (B)  
 - [ ] Bind argv digest + workspace digest + task digest  

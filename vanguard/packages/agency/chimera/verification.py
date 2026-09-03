@@ -132,12 +132,9 @@ class VerificationCortex:
                 executed = p_cnt + f_cnt
                 passed = p_cnt
 
-        # 4. Fallback: non-zero exit code or generic assert
-        if executed == 0 and exit_code == 0:
-            # If command succeeded without explicit test runner, count as 1 pass
-            executed = 1
-            passed = 1
-        elif executed == 0 and exit_code != 0:
+        # Bare exit 0 is not evidence a test ran. Unknown counts stay 0 (T-06).
+        # Non-zero exit without a parsed runner summary still records a failed command.
+        if executed == 0 and exit_code != 0:
             executed = 1
             passed = 0
             failed.append("CommandFailed")

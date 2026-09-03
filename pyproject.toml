@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vanguard-runtime"
-version = "0.9.0b1"
+version = "0.9.3"
 description = "AETHER — Higgs development line"
 readme = "README.md"
 requires-python = ">=3.10"

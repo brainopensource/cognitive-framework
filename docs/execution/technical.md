@@ -488,7 +488,7 @@ Stage 7: CLEANUP         ──► Quarantine or promote reproducer into officia
 
 **I-1 universal signed finish is `[PROPOSAL]` and too strong** versus A §9.4 per-class evidence (A wins for completion policy) and versus the local vs exterior evaluator split (B §3.4). Keep this section as the bugfix-class protocol. Do not promote it to universal law for research/explanation/greenfield classes.
 
-**FACT (live admission, not this protocol).** `VerificationReceipt.passed` = `exit_code == 0 and executed_test_count > 0` (`admission_gate.py` 22–37). Session `_observed_test_count` returns 0 if unparseable (363–375). Forge still sets `test_count = 1` on green-empty (`forge/engine.py` 309–311). `admission_required` exempts `vg-code-default` / `vg-code-lex`, else `"patch.apply" in verbs` (`runtime/session.py` 124–138). `ADMISSION_GATED_HARNESSES` is unused in runtime.
+**FACT (live admission, not this protocol).** `VerificationReceipt.passed` = `exit_code == 0 and executed_test_count > 0` (`admission_gate.py` 22–37). Session `_observed_test_count` returns 0 if unparseable (363–375). Forge `parse_test_output` and Chimera bare-exit-0 parsing leave unknown counts at 0 (T-06). `admission_required` exempts `vg-code-default` / `vg-code-lex`, else `"patch.apply" in verbs` (`runtime/session.py` 124–138). `ADMISSION_GATED_HARNESSES` is unused in runtime.
 
 ### 5.4 Type-Aware Mutation Testing (EvalPlus / LLMorpheus)
 To defeat "tautological fixes" (hardcoding return values for known test cases):
@@ -1206,7 +1206,7 @@ Lock-time verb inventory matching pack YAML is appended as **§22** (does not re
 
 | Capability | Owner | Actual implementation | Current evidence | Gap | Disposition |
 |---|---|---|---|---|---|
-| ForgeEngine | `agency/forge/engine.py` | own tools, own admission, **bypasses Kernel.dispatch**; `if exit_code == 0 and test_count == 0: test_count = 1` at L309–311 | forge unit tests | second runtime semantics; false-positive completion | reject-as-default; quarantine from Coding Max scores |
+| ForgeEngine | `agency/forge/engine.py` | own tools, own admission, **bypasses Kernel.dispatch**; unknown/unparseable counts stay 0 (T-06) | forge unit tests | second runtime semantics; quarantine from product scores is T-23 | reject-as-default; quarantine from Coding Max scores |
 | ChimeraEngine | `agency/chimera/engine.py` | parallel loop | chimera tests | same lattice tension | reject-as-default |
 | Role manifests | `agency/manifests/{localizer,reviewer,test_investigator}.py` | helpers that write artifacts; reviewer has **no admission authority** | CMX-08 falsifiers | not autonomous agents | keep as treatments after Wave 5 |
 | Topology lowering | `runtime/topology.py` | sequential default; rejects authority fields | topology tests OK this session | not a coding agent | keep |
@@ -1250,13 +1250,11 @@ Each gap answers: what exists, where, what is missing, why it blocks long-horizo
 
 ### 4.2 Invented test counts (Forge)
 
-**Exists.** `agency/forge/engine.py` L309–311 sets `test_count = 1` when `exit_code == 0` and parse failed.
+**FACT (T-06).** Forge `parse_test_output` no longer sets `test_count = 1` on `exit_code == 0` with empty or unparseable output. Chimera no longer sets `executed = 1` / `passed = 1` on bare exit 0. Unknown counts stay 0; `VerificationReceipt.passed` remains `exit_code == 0 and executed_test_count > 0`.
 
-**Contrast.** `runtime/session.py` `_observed_test_count` L363–375 returns 0 on unparseable output (correct fail-closed).
+**Contrast.** `runtime/session.py` `_observed_test_count` L363–375 already returned 0 on unparseable output.
 
-**Why it blocks.** Forge can admit “green” on empty or unparsed suites. Any benchmark that scores Forge against Coding Max is then incomparable.
-
-**Smallest change.** Remove the fallback. If a later adapter cannot parse a CTRF/JUnit document, count is 0 and admission fails.
+**Remaining.** Typed runner adapters and collected/executed/passed/failed/skipped without inventing counts are T-08. Quarantine of Forge/Chimera from Coding Max reports is T-23.
 
 **Falsifier.** `exit_code == 0` + empty output ⇒ `VerificationReceipt.passed is False`.
 
@@ -1775,7 +1773,7 @@ Shared rollback for every wave: revert the wave’s files; do not weaken falsifi
 
 - **Objective.** No `completed` without bound verification; Forge cannot invent counts; default pack gated.
 - **Dependencies.** Wave 0 instrument (so later scores are not compared to B1).
-- **Source files.** `runtime/session.py` (`admission_required`, `_observed_test_count`, `_observe_completion_dispatch`); `agency/episode/admission_gate.py`; `agency/forge/engine.py` L309–311; pack completeness/parser.
+- **Source files.** `runtime/session.py` (`admission_required`, `_observed_test_count`, `_observe_completion_dispatch`); `agency/episode/admission_gate.py`; `agency/forge/engine.py` / `agency/chimera/verification.py` (T-06 count honesty); pack completeness/parser.
 - **Contracts.** `VerificationReceipt.passed ⇔ exit_code==0 ∧ count>0 ∧ identities match`; task class from pack policy, not substring alone.
 - **Packages.** agency, runtime, packs/code-default, forge quarantine.
 - **Tests.** Existing admission tests plus: default harness cannot finish empty; Forge fallback removed; greenfield vs bugfix policies explicit.
@@ -2440,7 +2438,7 @@ INGEST → DISCOVER → PLAN → EDIT → VERIFY_TARGETED → RECOVER → VERIFY
 
 **FACT.** Stage transitions follow receipts, not conversational `finish`. Live inner loop is `ContextCompiler` freeze of L1–L3 at construction, then `EpisodeEngine`: observe → propose → `recover_proposal` → `Kernel.dispatch` → ingest (`agency/episode/engine.py`). Compile is **not** a step inside `EpisodeEngine`.
 
-**FACT.** `admission_required` exempts `vg-code-default` / `vg-code-lex`, else `"patch.apply" in verbs`. `ADMISSION_GATED_HARNESSES` is unused in runtime. `VerificationReceipt.passed` ⇔ `exit_code == 0 and executed_test_count > 0`. Session `_observed_test_count` returns 0 if unparseable. Forge still sets `test_count = 1` on green-empty.
+**FACT.** `admission_required` exempts `vg-code-default` / `vg-code-lex`, else `"patch.apply" in verbs`. `ADMISSION_GATED_HARNESSES` is unused in runtime. `VerificationReceipt.passed` ⇔ `exit_code == 0 and executed_test_count > 0`. Session `_observed_test_count` returns 0 if unparseable. Forge `parse_test_output` and Chimera bare-exit-0 parsing leave unknown counts at 0 (T-06).
 
 **Pointer.** Reliability order and competency profiles: A. Tickets 01–35 and lattice: this file. 2PC / AST / later phenotypes: v2 as `[PROPOSAL]` except sequential git apply + post-write `ast.parse` (MECHANISM).
 
@@ -2581,13 +2579,9 @@ That boundary should remain stable while cognition evolves behind declarative ma
 
 #### G-01: completion evidence can be overstated
 
-`agency/forge/engine.py::parse_test_output` sets `test_count = 1` when exit code is zero and no recognized count exists.
+**FACT (T-06).** Forge `parse_test_output` and Chimera `VerificationCortex.parse_test_output` no longer invent `test_count = 1` / `executed = 1` on bare exit 0. Unknown counts stay 0.
 
-`agency/chimera/verification.py` contains a similar successful-command fallback.
-
-A zero exit code is not proof that a test ran.
-
-This blocks trustworthy completion.
+A zero exit code is still not proof that a test ran. Remaining invented-count work is typed runner adapters (T-08), not this fallback.
 
 #### G-02: verification classification is heuristic
 

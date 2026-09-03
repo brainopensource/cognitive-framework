@@ -229,6 +229,43 @@ class TestChimeraSymbolicAndPatcher(unittest.TestCase):
             self.assertEqual((ws / "src/calc.py").read_text(encoding="utf-8"), "def add(x, y):\n    return x + y\n")
 
 
+class TestChimeraVerificationCountHonesty(unittest.TestCase):
+    """T-06: Chimera must not invent executed=1 on bare exit 0."""
+
+    def test_empty_exit_zero_is_not_passed(self) -> None:
+        record = VerificationCortex.parse_test_output("", exit_code=0)
+        self.assertEqual(record.executed_tests, 0)
+        self.assertEqual(record.passed_tests, 0)
+        receipt = VerificationReceipt(
+            exit_code=0,
+            executed_test_count=record.executed_tests,
+            workspace_digest="sha256:ws",
+        )
+        self.assertFalse(receipt.passed)
+
+    def test_unparseable_exit_zero_is_not_passed(self) -> None:
+        record = VerificationCortex.parse_test_output("command succeeded\nOK\n", exit_code=0)
+        self.assertEqual(record.executed_tests, 0)
+        self.assertEqual(record.passed_tests, 0)
+        receipt = VerificationReceipt(
+            exit_code=0,
+            executed_test_count=record.executed_tests,
+            workspace_digest="sha256:ws",
+        )
+        self.assertFalse(receipt.passed)
+
+    def test_parsed_unittest_count_still_green(self) -> None:
+        record = VerificationCortex.parse_test_output("Ran 3 tests in 0.05s\n\nOK\n", exit_code=0)
+        self.assertEqual(record.executed_tests, 3)
+        self.assertEqual(record.passed_tests, 3)
+        receipt = VerificationReceipt(
+            exit_code=0,
+            executed_test_count=record.executed_tests,
+            workspace_digest="sha256:ws",
+        )
+        self.assertTrue(receipt.passed)
+
+
 class TestChimeraHermeticEpisode(unittest.TestCase):
     def test_hermetic_bugfix_episode(self) -> None:
         with tempfile.TemporaryDirectory() as td:

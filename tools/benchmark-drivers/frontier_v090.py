@@ -14,11 +14,12 @@ import shutil
 import subprocess
 import sys
 import time
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from random import Random
 from tempfile import TemporaryDirectory
-from typing import Any, Mapping, Sequence
+from typing import Any, Iterator, Mapping, Sequence
 
 ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
@@ -245,20 +246,40 @@ def runtime_executor(preset: str, *, model_name: str | None = None, models: Sequ
 
     effective_model = model_name or (models[0] if models else MODEL)
 
-    def execute(workspace: Path, challenge: Any) -> ExecutionTelemetry:
-        res_key = load_api_key(ROOT)
-        if res_key.ok:
-            os.environ["OPENROUTER_API_KEY"] = res_key.value
+    @contextmanager
+    def _provider_key_bound() -> Iterator[None]:
+        """Bind the provider key for the duration of one lab task only.
 
-        result = run_lab_task(
-            preset, workspace, model_port="openrouter", model_name=effective_model,
-            models=models,
-            interactive=False, isolate=False, approve_writes=True,
-            allow_paid=True, max_turns=8, max_attempts=2,
-            brief=challenge.brief, sandbox_mode="host-dev",
-            state_dir=workspace / ".vanguard",
-            reasoning_effort=reasoning_effort,
-        )
+        Leaking it onto ``os.environ`` for the rest of the process makes a
+        later hermetic assertion ("no provider key is set") pass or fail
+        depending on which benchmarks ran first in the same interpreter.
+        """
+        res_key = load_api_key(ROOT)
+        if not res_key.ok:
+            yield
+            return
+        sentinel = object()
+        previous: Any = os.environ.get("OPENROUTER_API_KEY", sentinel)
+        os.environ["OPENROUTER_API_KEY"] = res_key.value
+        try:
+            yield
+        finally:
+            if previous is sentinel:
+                os.environ.pop("OPENROUTER_API_KEY", None)
+            else:
+                os.environ["OPENROUTER_API_KEY"] = previous
+
+    def execute(workspace: Path, challenge: Any) -> ExecutionTelemetry:
+        with _provider_key_bound():
+            result = run_lab_task(
+                preset, workspace, model_port="openrouter", model_name=effective_model,
+                models=models,
+                interactive=False, isolate=False, approve_writes=True,
+                allow_paid=True, max_turns=8, max_attempts=2,
+                brief=challenge.brief, sandbox_mode="host-dev",
+                state_dir=workspace / ".vanguard",
+                reasoning_effort=reasoning_effort,
+            )
         # ``run_lab_task`` exposes the selected route under its canonical
         # model-selection keys and keeps measured cost on the durable
         # trajectory.  The benchmark envelope uses the shorter public names;

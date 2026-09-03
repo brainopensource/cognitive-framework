@@ -112,12 +112,102 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
             projections.append({"kind": "write", "path": rec_detail or "patch", "text": rec_outcome})
         elif verb == "proc.exec":
             projections.append({"kind": "test", "path": rec_detail or "exec", "exitCode": 0 if rec_outcome == "ok" else 1})
+    # The ledger already carries verification, spend, approval, recovery and
+    # sub-agent lifecycle. Projecting only fs/proc receipts left `--headless`
+    # unable to report why a run failed or what it cost, so fold the event
+    # stream too. Unknown kinds are skipped, never guessed at (CT-44).
     last_note = ""
+    spent_micros = 0
     for ev in getattr(result, "events", ()) or ():
-        if getattr(ev, "kind", "") == "ProposalProduced":
-            note = getattr(ev, "payload", {}).get("note")
+        kind = getattr(ev, "kind", "")
+        payload = getattr(ev, "payload", {}) or {}
+
+        if kind == "ProposalProduced":
+            note = payload.get("note")
             if note:
                 last_note = str(note)
+        elif kind == "ReflectionProduced":
+            text = payload.get("reflection") or payload.get("text")
+            if text:
+                projections.append({"kind": "reflect", "text": str(text)})
+        elif kind == "PlanRevised":
+            steps = payload.get("steps")
+            entry: dict[str, Any] = {"kind": "plan"}
+            if isinstance(steps, (list, tuple)):
+                entry["stepTotal"] = len(steps)
+            if payload.get("plan"):
+                entry["text"] = str(payload["plan"])
+            projections.append(entry)
+        elif kind == "EffectFailed":
+            projections.append({
+                "kind": "error",
+                "detail": str(payload.get("error") or payload.get("reason") or "effect failed"),
+            })
+        elif kind == "EffectRejected":
+            projections.append({
+                "kind": "error",
+                "detail": str(payload.get("reason") or "rejected by policy"),
+            })
+        elif kind == "VerdictRecorded":
+            entry = {"kind": "verdict", "verdict": str(payload.get("verdict") or "recorded")}
+            if payload.get("detail"):
+                entry["detail"] = str(payload["detail"])
+            projections.append(entry)
+        elif kind in ("ApprovalRequested", "ApprovalResolved"):
+            projections.append({
+                "kind": "approval",
+                "status": "requested" if kind == "ApprovalRequested" else str(
+                    payload.get("decision") or "resolved"
+                ),
+                "action": str(payload.get("action") or "mutating action"),
+            })
+        elif kind == "CheckpointCreated":
+            projections.append({
+                "kind": "checkpoint",
+                "checkpointId": str(payload.get("checkpointId") or payload.get("id") or "created"),
+                "branchId": str(payload.get("branchId") or "main"),
+            })
+        elif kind == "ChildSpawned":
+            projections.append({
+                "kind": "child",
+                "childId": str(payload.get("childRunId") or payload.get("childId") or ""),
+                "role": str(payload.get("role") or "sub-agent"),
+            })
+        elif kind == "ChildReturned":
+            projections.append({
+                "kind": "child",
+                "childId": str(payload.get("childRunId") or payload.get("childId") or ""),
+                "role": str(payload.get("role") or "sub-agent"),
+                "outcome": str(payload.get("outcome") or "returned"),
+            })
+        elif kind == "ContextCompacted":
+            entry = {"kind": "context"}
+            for src, dst in (("beforeTokens", "beforeTokens"), ("afterTokens", "afterTokens")):
+                value = payload.get(src)
+                if isinstance(value, int):
+                    entry[dst] = value
+            projections.append(entry)
+        elif kind == "ConflictDetected":
+            projections.append({
+                "kind": "conflict",
+                "detail": str(payload.get("summary") or payload.get("detail") or "detected"),
+            })
+        elif kind in ("CapabilityGranted", "CapabilityRevoked", "CapabilityAttenuated"):
+            projections.append({
+                "kind": "capability",
+                "status": kind.replace("Capability", "").lower(),
+                "capability": str(payload.get("capability") or payload.get("name") or "unnamed"),
+            })
+        elif kind == "BudgetCommitted":
+            micros = payload.get("usdMicros") or payload.get("costMicros")
+            if isinstance(micros, int):
+                spent_micros += micros
+        elif kind == "BudgetExhausted":
+            projections.append({
+                "kind": "budget",
+                "detail": str(payload.get("dimension") or "limit reached"),
+            })
+
     if last_note:
         projections.append({"kind": "note", "text": last_note})
     projections.append({"kind": "complete", "outcome": outcome, "turns": int(getattr(result.telemetry, "turns", 0))})
@@ -126,7 +216,8 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
         "turns": int(getattr(result.telemetry, "turns", 0)),
         "planDigest": result.run_digest or None, "activeStepId": None,
         "verifiedStepIds": [], "modelRoutes": [], "promptTokens": None,
-        "completionTokens": None, "spentUsdMicros": None, "detail": result.detail,
+        "completionTokens": None,
+        "spentUsdMicros": spent_micros or None, "detail": result.detail,
         "projections": projections,
     }}
 

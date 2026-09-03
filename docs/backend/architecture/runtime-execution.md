@@ -151,7 +151,7 @@ Task + repository snapshot
 
 LDA, SCIP-style indexes, and future providers are substitutable adapters/projections. Vanguard must not import or require LDA. A deterministic filesystem index remains the fallback when an external index is absent, empty, stale, or invalid. Provider output selects references; it cannot propose effects, grant capabilities, or override canonical documentation, source, tests, or ledger facts.
 
-The target `ContextPacket` records at minimum the task digest, repository snapshot digest, provider identity/version, query digest, selected documents/symbols/files/tests/dependency edges, estimated tokens, omissions, and an overall packet digest. It is bounded by the manifest context budget and captured as evidence sufficient to reproduce selection.
+The target `ContextPacket` records at minimum the task digest, repository snapshot digest, provider identity/version, query digest, selected documents/symbols/files/tests/dependency edges, estimated tokens, omissions, overall packet digest, and a product `WorkspaceEpoch` (`treeHash`, `indexDigest`, `sourceRevision`, `compiledAtTurn`). Epoch is the single authority for packet freshness: a write changes the tree hash; a stale or missing epoch MUST NOT justify `completed`. It is bounded by the manifest context budget and captured as evidence sufficient to reproduce selection.
 
 The same composition path binds a generic completion-admission policy. `EpisodeEngine` asks whether completion is admissible; the code pack interprets coding verification, while runtime records the decision and its evidence reference. External evaluation remains a later, independent lifecycle stage.
 

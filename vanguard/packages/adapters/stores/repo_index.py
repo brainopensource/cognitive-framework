@@ -19,6 +19,7 @@ import re
 from pathlib import Path
 from typing import Mapping, Sequence
 
+from ...domain.canonicalisation.digest import digest_of
 from ...ports.event_store import Result
 from ...ports.index import DependencyEdge, RepositoryMap, Symbol, TestAssociation
 
@@ -49,9 +50,30 @@ def _source_revision(files: Mapping[str, str]) -> str:
     return "sha256:" + hashlib.sha256(json.dumps(dict(sorted(files.items())), separators=(",", ":")).encode()).hexdigest()
 
 
+def _hashed_tree(content_digests: Mapping[str, str]) -> str:
+    return digest_of({"tree": dict(sorted(content_digests.items()))})
+
+
+def _index_snapshot_digest(
+    files: Sequence[str],
+    symbols: Sequence[Symbol],
+    dependencies: Sequence[DependencyEdge],
+    tests: Sequence[TestAssociation],
+) -> str:
+    return digest_of({
+        "files": list(files),
+        "symbols": [{"name": item.name, "kind": item.kind, "path": item.path, "line": item.line}
+                    for item in symbols],
+        "dependencies": [{"source": item.source, "target": item.target, "kind": item.kind}
+                         for item in dependencies],
+        "tests": [{"testPath": item.test_path, "sourcePath": item.source_path} for item in tests],
+    })
+
+
 def _bounded_map(files: Sequence[str], symbols: Sequence[Symbol],
                  dependencies: Sequence[DependencyEdge], tests: Sequence[TestAssociation],
-                 adapter_id: str, revision: str, token_budget: int) -> RepositoryMap:
+                 adapter_id: str, revision: str, token_budget: int,
+                 tree_hash: str, index_digest: str) -> RepositoryMap:
     capacity = token_budget * 4
     used = 0
     kept_files: list[str] = []
@@ -69,7 +91,8 @@ def _bounded_map(files: Sequence[str], symbols: Sequence[Symbol],
     truncated = len(kept_files) < len(files) or len(kept_symbols) < len(symbols) or len(kept_edges) < len(dependencies) or len(kept_tests) < len(tests)
     return RepositoryMap(tuple(kept_files), kept_symbols, kept_edges, kept_tests,
                          adapter_id, revision, truncated=truncated,
-                         token_estimate=max(1, used // 4) if used else 0)
+                         token_estimate=max(1, used // 4) if used else 0,
+                         tree_hash=tree_hash, index_digest=index_digest)
 
 
 def _edges_and_tests(contents: Mapping[str, str]) -> tuple[list[DependencyEdge], list[TestAssociation]]:
@@ -156,9 +179,17 @@ class InMemoryRepoIndex:
     def repo_map(self, *, token_budget: int = 4000) -> Result[RepositoryMap]:
         if token_budget < 0:
             return Result.fail("invalid_request", "token_budget must be non-negative")
-        return Result.success(_bounded_map(tuple(sorted(self._contents)), self._symbols,
+        files = tuple(sorted(self._contents))
+        tree_hash = _hashed_tree({
+            path: hashlib.sha256(text.encode("utf-8")).hexdigest()
+            for path, text in self._contents.items()
+        })
+        index_digest = _index_snapshot_digest(
+            files, self._symbols, self._dependencies, self._tests)
+        return Result.success(_bounded_map(files, self._symbols,
                                            self._dependencies, self._tests,
-                                           "in-memory-repo-index/1", _source_revision(self._contents), token_budget))
+                                           "in-memory-repo-index/1", _source_revision(self._contents),
+                                           token_budget, tree_hash, index_digest))
 
 
 class FileRepoIndex:
@@ -270,9 +301,41 @@ class FileRepoIndex:
             return Result.fail("invalid_request", "index() has not been called")
         if token_budget < 0:
             return Result.fail("invalid_request", "token_budget must be non-negative")
+        live = _live_content_digests(self._root, max_files=self.max_files)
+        if live is None:
+            return Result.fail("invalid_request", "tree hash unbound")
+        tree_hash = _hashed_tree(live)
+        index_digest = _index_snapshot_digest(
+            self._files, self._symbols, self._dependencies, self._tests)
+        if not tree_hash or not index_digest:
+            return Result.fail("invalid_request", "WorkspaceEpoch digest unbound")
         return Result.success(_bounded_map(self._files, self._symbols, self._dependencies,
                                            self._tests, "file-repo-index/1", self._revision,
-                                           token_budget))
+                                           token_budget, tree_hash, index_digest))
+
+
+def _live_content_digests(root: Path, *, max_files: int) -> dict[str, str] | None:
+    """Hash the current workspace tree. None means the digest cannot be bound."""
+    try:
+        base = root.resolve()
+    except OSError:
+        return None
+    if not base.is_dir():
+        return None
+    digests: dict[str, str] = {}
+    for path in sorted(base.rglob("*")):
+        if path.is_symlink():
+            return None
+        if not path.is_file() or set(path.parts) & _IGNORED:
+            continue
+        if len(digests) >= max_files:
+            break
+        relative = path.relative_to(base).as_posix()
+        try:
+            digests[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
+        except OSError:
+            continue
+    return digests
 
 
 def _symbols_in(path: str, lines: Sequence[str]) -> list[Symbol]:

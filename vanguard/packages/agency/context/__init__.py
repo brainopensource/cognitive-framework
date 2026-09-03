@@ -21,6 +21,7 @@ from .packet import (
     ContextPacketError,
     SectionAddress,
     build_context_packet,
+    validate_completion_epoch,
     validate_resume_identity,
 )
 from .layers import (
@@ -44,7 +45,7 @@ __all__ = [
     "ContextBudgetExceeded",
     "ContextCompiler",
     "ContextPacket", "ContextPacketError", "SectionAddress",
-    "build_context_packet", "validate_resume_identity",
+    "build_context_packet", "validate_completion_epoch", "validate_resume_identity",
     "Fragment",
     "LAYER_ORDER",
     "Layer",

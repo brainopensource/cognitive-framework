@@ -22,14 +22,18 @@ from ..agency.context import (
     CompetencePriorRecorder,
     CompiledContext,
     ContextCompiler,
+    ContextPacket,
+    ContextPacketError,
     Fragment,
     build_context_packet,
+    validate_completion_epoch,
     validate_resume_identity,
 )
 from ..agency.context.compiler import CONTEXT_POLICY_VERSION
 from ..agency.manifests.discovery import WorkspaceDiscovery
 from ..agency.provenance import NullProvenanceSink, ProvenanceSink
 from ..domain.canonicalisation.digest import digest_of
+from ..domain.workspace_epoch import WorkspaceEpoch
 from ..domain.ledger.agent_view import AgentView, fold_agent_view
 from ..domain.ledger.progress import ConfidenceRecord, ProgressView, fold_progress
 from ..domain.ledger.reducer import compute_state_digest, reconstruct_state
@@ -566,6 +570,7 @@ class HarnessSession:
         repo = Path(task.repo_path)
         self.repo = repo
         self._completion_scaffold_baseline = self._empty_workspace_baseline()
+        self.context_packet: ContextPacket | None = None
         self.ledger = LedgerEmitter(
             ports.store,
             episode_id=task.episode_id,
@@ -678,79 +683,8 @@ class HarnessSession:
             # workspaces would consume the compaction budget before the first
             # edit. The packet retains explicit omissions and provenance while
             # the compiler receives only a compact orientation summary.
-            mapped = self.index.repo_map(token_budget=4000)
-            if mapped.ok and mapped.value is not None:
-                repo_map = mapped.value
-                selected: list[Mapping[str, Any]] = [
-                    {"kind": "file", "path": path, "estimated_tokens": 4}
-                    for path in repo_map.files
-                ]
-                selected.extend(
-                    {"kind": "symbol", "identity": f"{item.path}:{item.line}:{item.name}",
-                     "path": item.path, "name": item.name, "line": item.line,
-                     "symbolKind": item.kind,
-                     "estimated_tokens": 8}
-                    for item in repo_map.symbols
-                )
-                selected.extend(
-                    {"kind": "dependency", "identity": f"{item.source}->{item.target}",
-                     "source": item.source, "target": item.target,
-                     "estimated_tokens": 6}
-                    for item in repo_map.dependencies
-                )
-                selected.extend(
-                    {"kind": "test", "path": item.test_path,
-                     "source": item.source_path, "estimated_tokens": 5}
-                    for item in repo_map.tests
-                )
-                selection_policy_identity = {
-                    "policyId": "agency.context-compiler/default",
-                    "policyVersion": CONTEXT_POLICY_VERSION,
-                }
-                packet = build_context_packet(
-                    task_digest=digest_of({"runId": task.run_id, "brief": task.brief}),
-                    repository_snapshot=repo_map.source_revision,
-                    provider=repo_map.adapter_id,
-                    provider_version="1",
-                    query_digest=digest_of({"brief": task.brief}),
-                    budget_tokens=4000,
-                    selected=selected,
-                    index_snapshot_digest=repo_map.source_revision,
-                    reserve_tokens=1000,
-                    repository_identity=repo_map.source_revision,
-                    selection_policy_identity=selection_policy_identity,
-                )
-                prior = task.resume_state if isinstance(task.resume_state, Mapping) else {}
-                prior_repo = prior.get("repositoryIdentity")
-                prior_policy = prior.get("selectionPolicyIdentity")
-                prior_index = prior.get("indexSnapshotDigest")
-                if prior_repo is not None or prior_policy is not None or prior_index is not None:
-                    validate_resume_identity(
-                        packet,
-                        repository_identity=str(prior_repo or packet.repository_identity or ""),
-                        index_snapshot_digest=(
-                            str(prior_index) if prior_index is not None
-                            else packet.index_snapshot_digest
-                        ),
-                        selection_policy_identity=(
-                            dict(prior_policy) if isinstance(prior_policy, Mapping)
-                            else selection_policy_identity
-                        ),
-                    )
-                orientation = {
-                    "packetDigest": packet.digest(),
-                    "repositorySnapshot": packet.repository_snapshot,
-                    "files": list(packet.files)[:80],
-                    "symbols": [dict(item) for item in packet.symbols[:80]],
-                    "symbolSummary": [
-                        f"{item.get('symbolKind', item.get('kind', 'symbol'))} {item.get('name', '')}:{item.get('line', '')}"
-                        for item in packet.symbols[:80]
-                    ],
-                    "dependencies": [dict(item) for item in packet.dependencies[:80]],
-                    "tests": list(packet.tests)[:80],
-                    "omissions": list(packet.omissions),
-                    "truncated": bool(repo_map.truncated or packet.omissions),
-                }
+            orientation = self._bind_context_packet()
+            if orientation is not None:
                 env_parts.append(
                     "=== Workspace Repository Map ===\n"
                     "=== Bounded Repository Context Packet ===\n"
@@ -1390,6 +1324,130 @@ class HarnessSession:
             return snapshot.value.digest
         return ""
 
+    def _epoch_from_repo_map(self, repo_map: Any, *, compiled_at_turn: int) -> WorkspaceEpoch:
+        try:
+            return WorkspaceEpoch(
+                tree_hash=repo_map.tree_hash,
+                index_digest=repo_map.index_digest,
+                source_revision=repo_map.source_revision,
+                compiled_at_turn=compiled_at_turn,
+            )
+        except ValueError as exc:
+            raise ContextPacketError(str(exc)) from exc
+
+    def current_workspace_epoch(self) -> WorkspaceEpoch:
+        """Live WorkspaceEpoch. Fail closed if tree hash or index digest cannot bind."""
+        if self.index is None:
+            raise ContextPacketError("IndexPort snapshot unbound; cannot bind WorkspaceEpoch")
+        mapped = self.index.repo_map(token_budget=4000)
+        if not mapped.ok or mapped.value is None:
+            raise ContextPacketError("IndexPort snapshot unbound; cannot bind WorkspaceEpoch")
+        turn = 0
+        packet = self.context_packet
+        if packet is not None and packet.workspace_epoch is not None:
+            turn = packet.workspace_epoch.compiled_at_turn
+        return self._epoch_from_repo_map(mapped.value, compiled_at_turn=turn)
+
+    def _bind_context_packet(self) -> Mapping[str, Any] | None:
+        """Compile a product packet bound to WorkspaceEpoch. None if the map is unbound."""
+        if self.index is None:
+            self.context_packet = None
+            return None
+        mapped = self.index.repo_map(token_budget=4000)
+        if not mapped.ok or mapped.value is None:
+            self.context_packet = None
+            return None
+        repo_map = mapped.value
+        epoch = self._epoch_from_repo_map(repo_map, compiled_at_turn=self.turns_consumed())
+        selected: list[Mapping[str, Any]] = [
+            {"kind": "file", "path": path, "estimated_tokens": 4}
+            for path in repo_map.files
+        ]
+        selected.extend(
+            {"kind": "symbol", "identity": f"{item.path}:{item.line}:{item.name}",
+             "path": item.path, "name": item.name, "line": item.line,
+             "symbolKind": item.kind,
+             "estimated_tokens": 8}
+            for item in repo_map.symbols
+        )
+        selected.extend(
+            {"kind": "dependency", "identity": f"{item.source}->{item.target}",
+             "source": item.source, "target": item.target,
+             "estimated_tokens": 6}
+            for item in repo_map.dependencies
+        )
+        selected.extend(
+            {"kind": "test", "path": item.test_path,
+             "source": item.source_path, "estimated_tokens": 5}
+            for item in repo_map.tests
+        )
+        selection_policy_identity = {
+            "policyId": "agency.context-compiler/default",
+            "policyVersion": CONTEXT_POLICY_VERSION,
+        }
+        packet = build_context_packet(
+            task_digest=digest_of({"runId": self.task.run_id, "brief": self.task.brief}),
+            repository_snapshot=repo_map.source_revision,
+            provider=repo_map.adapter_id,
+            provider_version="1",
+            query_digest=digest_of({"brief": self.task.brief}),
+            budget_tokens=4000,
+            selected=selected,
+            index_snapshot_digest=repo_map.source_revision,
+            reserve_tokens=1000,
+            repository_identity=repo_map.source_revision,
+            selection_policy_identity=selection_policy_identity,
+            workspace_epoch=epoch,
+            require_epoch=True,
+        )
+        prior = self.task.resume_state if isinstance(self.task.resume_state, Mapping) else {}
+        prior_repo = prior.get("repositoryIdentity")
+        prior_policy = prior.get("selectionPolicyIdentity")
+        prior_index = prior.get("indexSnapshotDigest")
+        prior_epoch_raw = prior.get("workspaceEpoch")
+        prior_epoch = (
+            WorkspaceEpoch.from_mapping(prior_epoch_raw)
+            if isinstance(prior_epoch_raw, Mapping) else None
+        )
+        if prior_repo is not None or prior_policy is not None or prior_index is not None:
+            validate_resume_identity(
+                packet,
+                repository_identity=str(prior_repo or packet.repository_identity or ""),
+                index_snapshot_digest=(
+                    str(prior_index) if prior_index is not None
+                    else packet.index_snapshot_digest
+                ),
+                selection_policy_identity=(
+                    dict(prior_policy) if isinstance(prior_policy, Mapping)
+                    else selection_policy_identity
+                ),
+                workspace_epoch=prior_epoch,
+            )
+        self.context_packet = packet
+        return {
+            "packetDigest": packet.digest(),
+            "repositorySnapshot": packet.repository_snapshot,
+            "files": list(packet.files)[:80],
+            "symbols": [dict(item) for item in packet.symbols[:80]],
+            "symbolSummary": [
+                f"{item.get('symbolKind', item.get('kind', 'symbol'))} {item.get('name', '')}:{item.get('line', '')}"
+                for item in packet.symbols[:80]
+            ],
+            "dependencies": [dict(item) for item in packet.dependencies[:80]],
+            "tests": list(packet.tests)[:80],
+            "omissions": list(packet.omissions),
+            "truncated": bool(repo_map.truncated or packet.omissions),
+            "workspaceEpoch": packet.workspace_epoch.to_canonical_dict()
+            if packet.workspace_epoch is not None else None,
+        }
+
+    def refresh_context_packet(self) -> ContextPacket:
+        """Recompile after a write. The previous packet cannot admit completed."""
+        orientation = self._bind_context_packet()
+        if orientation is None or self.context_packet is None:
+            raise ContextPacketError("cannot refresh WorkspaceEpoch; IndexPort snapshot unbound")
+        return self.context_packet
+
     def _observe_completion_dispatch(self, request: EffectRequest, result: Any) -> None:
         """Capture patch and verification facts at the mediated boundary."""
         if result.failure is not FailurePath.OK or result.outcome is None:
@@ -1500,6 +1558,17 @@ class HarnessSession:
     def _admit_completion(self, _episode: Any, _proposal: Any) -> AdmissionVerdict:
         """Apply the coding completion contract before reducing ``finish``."""
         policy = self.ports.completion_policy or self._completion_gate
+        packet = self.context_packet
+        if packet is not None:
+            try:
+                validate_completion_epoch(packet, self.current_workspace_epoch())
+            except ContextPacketError:
+                return AdmissionVerdict(
+                    False,
+                    "PACKET_EPOCH_STALE",
+                    "ADMISSION GATE REJECTION: Context packet WorkspaceEpoch is missing or stale. "
+                    "Refresh the packet after the write before issuing completion.",
+                )
         verdict = policy.evaluate(
             preset_name=self.harness.harness,
             changed_files=tuple(sorted(self._completion_changed_files)),

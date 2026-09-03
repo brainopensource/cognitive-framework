@@ -6,9 +6,10 @@ from dataclasses import dataclass
 from typing import Any, Mapping, Sequence
 
 from ...domain.canonicalisation.digest import digest_of
+from ...domain.workspace_epoch import WorkspaceEpoch
 
 __all__ = ["ContextPacket", "ContextPacketError", "build_context_packet",
-           "validate_resume_identity", "SectionAddress"]
+           "validate_resume_identity", "validate_completion_epoch", "SectionAddress"]
 
 
 class ContextPacketError(ValueError):
@@ -34,6 +35,7 @@ class ContextPacket:
     # preventing them from being used for new capability claims.
     selection_policy_identity: Mapping[str, Any] | None = None
     repository_identity: str | None = None
+    workspace_epoch: WorkspaceEpoch | None = None
 
     def __post_init__(self) -> None:
         if self.estimated_tokens < 0:
@@ -62,6 +64,8 @@ class ContextPacket:
             value["selectionPolicyIdentity"] = dict(self.selection_policy_identity)
         if self.repository_identity is not None:
             value["repositoryIdentity"] = self.repository_identity
+        if self.workspace_epoch is not None:
+            value["workspaceEpoch"] = self.workspace_epoch.to_canonical_dict()
         return value
 
     def digest(self) -> str:
@@ -81,10 +85,14 @@ def build_context_packet(
     reserve_tokens: int = 1,
     selection_policy_identity: Mapping[str, Any] | None = None,
     repository_identity: str | None = None,
+    workspace_epoch: WorkspaceEpoch | None = None,
+    require_epoch: bool = False,
 ) -> ContextPacket:
     """Build a bounded packet, retaining explicit omissions and reserve."""
     if budget_tokens < 0 or reserve_tokens < 0 or reserve_tokens > budget_tokens:
         raise ContextPacketError("invalid context budget or recovery reserve")
+    if require_epoch and workspace_epoch is None:
+        raise ContextPacketError("product compile requires WorkspaceEpoch")
     usable = budget_tokens - reserve_tokens
     kept: list[Mapping[str, Any]] = []
     omissions: list[str] = []
@@ -116,6 +124,7 @@ def build_context_packet(
         selection_policy_identity=(dict(selection_policy_identity)
                                    if selection_policy_identity is not None else None),
         repository_identity=repository_identity,
+        workspace_epoch=workspace_epoch,
     )
 
 
@@ -146,6 +155,7 @@ def validate_resume_identity(
     repository_identity: str,
     index_snapshot_digest: str | None,
     selection_policy_identity: Mapping[str, Any] | None,
+    workspace_epoch: WorkspaceEpoch | None = None,
 ) -> None:
     """Reject resume drift; legacy packets remain replayable but unclaimable."""
     if packet.repository_identity is not None and packet.repository_identity != repository_identity:
@@ -154,3 +164,13 @@ def validate_resume_identity(
         raise ContextPacketError("index snapshot drifted during resume")
     if packet.selection_policy_identity is not None and dict(packet.selection_policy_identity) != dict(selection_policy_identity or {}):
         raise ContextPacketError("selection policy drifted during resume")
+    if packet.workspace_epoch is not None and workspace_epoch is not None and packet.workspace_epoch != workspace_epoch:
+        raise ContextPacketError("workspace epoch drifted during resume")
+
+
+def validate_completion_epoch(packet: ContextPacket, current: WorkspaceEpoch) -> None:
+    """Stale or missing epoch MUST NOT justify completed."""
+    if packet.workspace_epoch is None:
+        raise ContextPacketError("legacy packet cannot admit completed")
+    if packet.workspace_epoch != current:
+        raise ContextPacketError("stale WorkspaceEpoch; refresh required")

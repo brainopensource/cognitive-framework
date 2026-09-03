@@ -107,7 +107,7 @@ The context compiler organizes prompt tokens into five layers ordered by mutatio
 ```
 
 ### Prefix Stability & KV-Caching
-Layers L1–L3 are deterministically hashed and remain byte-identical across turns. L4 is stable within the task; L5 is the only layer mutated each turn. Cache participation is observed through digests and receipts rather than assumed from layout alone.
+Layers L1–L3 are deterministically hashed and remain byte-identical across turns. L4 is stable within the task; L5 is the only layer mutated each turn. Cache participation is observed through digests and receipts rather than assumed from layout alone. Product `ContextPacket` values bind `WorkspaceEpoch` (`tree_hash` ← treeHash, `index_digest` ← indexDigest, `source_revision` ← sourceRevision, `compiled_at_turn` ← compiledAtTurn). Epoch is a new field on the existing packet, not a second compiler; stale or missing epoch cannot admit `completed`.
 
 ### Context Compaction
 When the context approaches the token budget ceiling, `CompactionEngine` applies structured compaction to L5 while preserving higher layers:

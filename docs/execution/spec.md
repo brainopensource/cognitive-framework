@@ -897,7 +897,9 @@ Keep `ContextPacket`. FEATURE_SPEC 4-tier budget is **L4/L5 policy on existing `
 | 2 Active AST slice | L5 | current files, epoch-bound |
 | 3 Symbol stubs | L5 remainder | IndexPort stubs with omissions |
 
-## WorkspaceEpoch `[PROPOSAL]` (T-14)
+## WorkspaceEpoch (T-14)
+
+Lock `66aa7a3c` **MISSING**. This branch **LIVE** — see §6 / §14.
 
 ```text
 WorkspaceEpoch := { treeHash, indexDigest, sourceRevision, compiledAtTurn }
@@ -924,7 +926,7 @@ Branch: `vanguard/packages/domain/task_state.py` defines `SemanticTaskState` and
 
 ## 6. Context packet and WorkspaceEpoch
 
-Keep `ContextPacket`. FEATURE_SPEC 4-tier budget is L4/L5 **policy** on existing `ContextCompiler` (not `progressive.py` as a second compiler). `WorkspaceEpoch := {treeHash, indexDigest, sourceRevision, compiledAtTurn}` `[PROPOSAL]` T-14.
+Keep `ContextPacket`. FEATURE_SPEC 4-tier budget is L4/L5 **policy** on existing `ContextCompiler` (not `progressive.py` as a second compiler). `WorkspaceEpoch := {treeHash, indexDigest, sourceRevision, compiledAtTurn}` this branch **LIVE**; lock `66aa7a3c` **MISSING**. T-14. Product compile stamps epoch on the existing packet; write changes `treeHash`; stale or missing epoch MUST NOT admit `completed`. Legacy packets without epoch may still resume via identity fields.
 
 ## 7. 2PC and tamper
 
@@ -949,6 +951,7 @@ SHALL text for stop/simplify/rollback and research/explanation lives in §§11�
 | `agency/context/progressive.py` | MISSING | Do not add — policy on `ContextCompiler` |
 | `runtime/event_store.py` | MISSING | Owner remains `adapters/stores/event_store.py` |
 | `ADMISSION_GATE_EXEMPT` | FACT | Unchanged. T-04 not started |
+| `domain/workspace_epoch.py` `WorkspaceEpoch` | MISSING | LIVE (T-14). Lock `66aa7a3c` still MISSING |
 
 ## 15. Error / verification matrix
 

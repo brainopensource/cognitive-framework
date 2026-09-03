@@ -68,6 +68,8 @@ class RepositoryMap:
     generated_at_source: str = "deterministic-index"
     truncated: bool = False
     token_estimate: int = 0
+    tree_hash: str = ""
+    index_digest: str = ""
 
 
 @runtime_checkable

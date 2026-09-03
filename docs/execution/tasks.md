@@ -160,8 +160,8 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 ### Context: Context, index, epoch
 
 **T-14 WorkspaceEpoch** (B)  
-- [ ] `{treeHash, indexDigest, sourceRevision, compiledAtTurn}`  
-- [ ] Stale packet cannot justify completion  
+- [x] `{treeHash, indexDigest, sourceRevision, compiledAtTurn}`  
+- [x] Stale packet cannot justify completion  
 - Files: `ports/index.py`, `adapters/stores/repo_index.py`, session  
 
 **T-15 Progressive L4/L5 strategy** (B)  

@@ -1,0 +1,87 @@
+{
+  "runId": "baac-vg-1-forge-live-1788221555",
+  "timestamp": "2026-09-01T00:12:35Z",
+  "preset": "vg-1-forge",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "mode": "live",
+  "metadata": {},
+  "summary": {
+    "totalChallenges": 1,
+    "passedCount": 1,
+    "overallPassRatePct": 100.0,
+    "totalTokens": 12051,
+    "totalCostUsd": 0.000682,
+    "totalDurationSeconds": 23.17,
+    "attribution": {
+      "PASS": 1,
+      "LLM_COGNITIVE_ERROR": 0,
+      "HARNESS_ERROR": 0,
+      "BUDGET_EXHAUSTED": 0,
+      "DATASET_INVALID": 0
+    }
+  },
+  "results": [
+    {
+      "challengeId": "bench_single_2K_tier-1_string_dedupe",
+      "tier": "tier-1",
+      "scope": "single",
+      "contextBracket": "2K",
+      "preset": "vg-1-forge",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "mode": "live",
+      "status": "PASS",
+      "attribution": "PASS",
+      "turns": 8,
+      "promptTokens": 11076,
+      "completionTokens": 975,
+      "totalTokens": 12051,
+      "costUsd": 0.000682,
+      "durationSeconds": 23.17,
+      "changedFiles": [
+        "src/dedupe.py"
+      ],
+      "diffPatch": "--- a/dedupe.py\n+++ b/dedupe.py\n@@ -1,2 +1,8 @@\n def remove_consecutive_duplicates(s: str) -> str:\n-    pass\n+    result = []\n+    prev = None\n+    for ch in s:\n+        if ch != prev:\n+            result.append(ch)\n+            prev = ch\n+    return \"\".join(result)",
+      "oracle": {
+        "passed": true,
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_dedupe (__main__.TestDedupe.test_dedupe) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK\n",
+        "durationSeconds": 0.039,
+        "error": null,
+        "assertionCount": 1,
+        "failingAssertions": []
+      },
+      "aiJudgeScore": null,
+      "diagnosis": "All falsifiers green",
+      "metadata": {
+        "id": "bench_single_2K_tier-1_string_dedupe",
+        "name": "Consecutive String Deduplication",
+        "scope": "single",
+        "context_bracket": "2K",
+        "tier": "tier-1",
+        "difficulty": 1,
+        "timeout_seconds": 35,
+        "entrypoint": "src/main.py",
+        "eval_type": "oracle",
+        "tags": [
+          "string",
+          "algorithms",
+          "single_file"
+        ],
+        "metadata": {},
+        "cli_args": {
+          "command": "run",
+          "preset": "vg-1-forge",
+          "mode": "live",
+          "model": "deepseek/deepseek-v4-flash-0731",
+          "tier": "all",
+          "single": "bench_single_2K_tier-1_string_dedupe",
+          "max_turns": 10,
+          "max_requests": 300,
+          "budget": 0.05,
+          "keep_scratch": false
+        }
+      }
+    }
+  ]
+}

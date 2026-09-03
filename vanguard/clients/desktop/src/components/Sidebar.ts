@@ -62,6 +62,7 @@ export function renderSidebar(store: DesktopStore): HTMLElement {
   searchWrapper.style.cssText = "padding: 0 16px 8px 16px;";
   searchWrapper.appendChild(
     renderSearchInput({
+      focusKey: "sidebar-search",
       placeholder: "Search conversations…",
       initialValue: state.searchQuery,
       onSearch: (q: string) => {

@@ -1,0 +1,40 @@
+{
+  "name": "@vanguard/cli",
+  "version": "0.4.1-beta",
+  "private": true,
+  "description": "Vanguard CLI client and minimal TUI for the vg-code-default harness",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "vg": "dist/src/main.js",
+    "aether": "dist/src/main.js"
+  },
+  "files": [
+    "dist/src/**/*.js",
+    "dist/src/**/*.d.ts",
+    "fixtures/**/*.jsonl",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prebuild": "npm run build --prefix ../client-core --silent",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pretypecheck": "npm run build --prefix ../client-core --silent",
+    "test": "npm run build --silent && node --test dist/test/*.test.js",
+    "vg": "node --import tsx/esm src/main.tsx"
+  },
+  "dependencies": {
+    "@vanguard/client-core": "file:../client-core",
+    "ink": "^5.1.0",
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.3.18",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

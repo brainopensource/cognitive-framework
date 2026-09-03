@@ -13,6 +13,11 @@ import {
   reduceRunView,
 } from "../src/index.js";
 import type { EventEnvelope, RuntimeClient, StreamItem } from "../src/index.js";
+// F4 Phase 2: subscribeRun is now a re-export shim onto @aether/client, whose
+// StreamItem (from @aether/contracts) is a strict superset of this package's
+// own contract/types.js StreamItem (contractVersion: "0.1" | "vg.4" vs "0.1"
+// only). The items subscribeRun actually yields are typed by the former.
+import type { StreamItem as WireStreamItem } from "@aether/contracts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FIXTURE_PATH = path.resolve(__dirname, "../../../cli/fixtures/successful-episode.jsonl");
@@ -182,7 +187,7 @@ describe("FE-1-8 — subscribeRun", () => {
       },
     };
 
-    const items: StreamItem[] = [];
+    const items: WireStreamItem[] = [];
     let doneCalled = false;
 
     await subscribeRun(fakeClient, { runId: "run-1" }, {
@@ -258,7 +263,7 @@ describe("FE-1-8 — subscribeRun", () => {
       },
     };
 
-    const items: StreamItem[] = [];
+    const items: WireStreamItem[] = [];
     await subscribeRun(fakeClient, { runId: "run-1" }, {
       onItem: (item) => items.push(item),
     }, controller.signal);

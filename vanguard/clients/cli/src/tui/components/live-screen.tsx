@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Text } from "ink";
-import type { RunViewModel } from "@vanguard/client-core";
+import type { RunViewModel } from "@aether/client";
 
 export function LiveScreen({ view, repo }: { view: RunViewModel; repo: string }) {
   return (

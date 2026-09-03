@@ -22,7 +22,14 @@ export function renderTopBar(store: DesktopStore, bridge?: TauriNativeBridge): H
 
   // Left Section: Workspace Breadcrumb & Agent / Workflow Selectors
   const left = document.createElement("div");
-  left.style.cssText = "display: flex; align-items: center; gap: 10px; font-size: 13px; min-width: 0;";
+  // `flex: 1` plus `min-width: 0` lets the left group absorb the squeeze
+  // instead of keeping its content width and pushing the status and drawer
+  // buttons off the bar, which is what made them overlap the workflow
+  // selector. The give is taken from the workspace path, which already
+  // truncates; the selectors below hold their size, so shrinking the bar
+  // shortens the path rather than hiding a control.
+  left.style.cssText =
+    "display: flex; align-items: center; gap: 10px; font-size: 13px; min-width: 0; flex: 1 1 auto; overflow: hidden;";
 
   // Sidebar toggle
   const sidebarBtn = document.createElement("button");
@@ -41,7 +48,7 @@ export function renderTopBar(store: DesktopStore, bridge?: TauriNativeBridge): H
 
   // Workspace Selector
   const wsWrapper = document.createElement("div");
-  wsWrapper.style.cssText = "display: flex; align-items: center; gap: 4px; max-width: 240px;";
+  wsWrapper.style.cssText = "display: flex; align-items: center; gap: 4px; max-width: 240px; min-width: 48px; flex: 1 1 auto; overflow: hidden;";
 
   const wsIcon = document.createElement("span");
   wsIcon.textContent = "📁";
@@ -72,7 +79,13 @@ export function renderTopBar(store: DesktopStore, bridge?: TauriNativeBridge): H
     }
   };
   wsWrapper.appendChild(wsBtn);
-  left.appendChild(wsWrapper);
+  // The drawer takes roughly a third of the width, which leaves the bar unable
+  // to show the path and both selectors without clipping one. The path is the
+  // one of the three that is already stated elsewhere -- the composer's context
+  // bar carries it -- so it is what gives way.
+  if (!state.forensicDrawerOpen) {
+    left.appendChild(wsWrapper);
+  }
 
   const sep1 = document.createElement("span");
   sep1.style.cssText = "color: var(--aether-border, #313244);";
@@ -82,6 +95,8 @@ export function renderTopBar(store: DesktopStore, bridge?: TauriNativeBridge): H
   // Agent Selector Dropdown
   const agentSelect = document.createElement("select");
   agentSelect.style.cssText = `
+    flex: 0 1 auto;
+    min-width: 96px;
     background: var(--aether-surface-raised, #252538);
     color: var(--aether-accent, #89b4fa);
     border: 1px solid var(--aether-border, #313244);
@@ -132,7 +147,7 @@ export function renderTopBar(store: DesktopStore, bridge?: TauriNativeBridge): H
 
   // Right Section: Connection Status, Command Palette trigger, Forensic Drawer Toggle, Layout switcher
   const right = document.createElement("div");
-  right.style.cssText = "display: flex; align-items: center; gap: 10px;";
+  right.style.cssText = "display: flex; align-items: center; gap: 8px; flex: 0 0 auto; margin-left: 12px;";
 
   // Command palette shortcut hint button
   const kbdBtn = document.createElement("button");
@@ -179,6 +194,33 @@ export function renderTopBar(store: DesktopStore, bridge?: TauriNativeBridge): H
   };
   right.appendChild(layoutBtn);
 
+  // Logs: a direct route to the raw ledger. When a run stalls, the transcript
+  // is the one place that cannot say why, so reaching the events must not
+  // require knowing that they live behind a tab called "Forensic".
+  const logsBtn = document.createElement("button");
+  const logsActive = state.forensicDrawerOpen && state.activeForensicTab === "logs";
+  logsBtn.className = "aether-topbar-logs";
+  logsBtn.setAttribute("data-focus-key", "topbar-logs");
+  logsBtn.style.cssText = `
+    background: ${logsActive ? "var(--aether-accent, #89b4fa)" : "var(--aether-surface-raised, #252538)"};
+    color: ${logsActive ? "var(--aether-bg, #11111b)" : "var(--aether-text-primary, #cdd6f4)"};
+    border: 1px solid var(--aether-border, #313244);
+    border-radius: 4px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  `;
+  logsBtn.textContent = `📜 Logs${state.events.length ? ` (${state.events.length})` : ""}`;
+  logsBtn.onclick = () => {
+    if (logsActive) {
+      store.closeForensicDrawer();
+    } else {
+      store.openForensicDrawer("logs");
+    }
+  };
+  right.appendChild(logsBtn);
+
   // Forensic Drawer Toggle
   const forensicBtn = document.createElement("button");
   forensicBtn.style.cssText = `
@@ -191,6 +233,7 @@ export function renderTopBar(store: DesktopStore, bridge?: TauriNativeBridge): H
     font-weight: 600;
     cursor: pointer;
   `;
+  forensicBtn.setAttribute("data-focus-key", "topbar-forensic");
   forensicBtn.textContent = "🔍 Forensic";
   forensicBtn.onclick = () => {
     if (state.forensicDrawerOpen) {

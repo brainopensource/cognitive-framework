@@ -124,6 +124,7 @@ class EpisodeOutcome:
 
     episode: Episode
     dispatches: tuple[Any, ...] = ()
+    recovery_state: ProtocolRecoveryState = ProtocolRecoveryState()
 
     @property
     def terminal(self) -> RunTermination:
@@ -209,6 +210,7 @@ class EpisodeEngine:
         patch_detector: Any = None,
         truncation_detector: Any = None,
         completion_admitter: Any = None,
+        completion_allowed_tools: Sequence[str] | None = None,
     ) -> None:
         self._kernel = kernel
         #: True when this engine runs a spawned child under a narrowed grant.
@@ -242,6 +244,12 @@ class EpisodeEngine:
         #: proposal, while the harness pack supplies task-specific admission
         #: facts (patch and verification). No coding policy is imported here.
         self._completion_admitter = completion_admitter
+        # Runtime may narrow the advertised tools after redundant successful
+        # verification.  This is an offer-set restriction only; the kernel
+        # remains the authority if a model proposes anything else.
+        self._completion_allowed_tools = (
+            frozenset(str(item) for item in completion_allowed_tools)
+            if completion_allowed_tools is not None else None)
 
     # ------------------------------------------------------------------
 
@@ -258,6 +266,7 @@ class EpisodeEngine:
         receipt_labeller: Any = None,
         prior_turns: Sequence[Turn] = (),
         prior_seen_verbs: Sequence[str] = (),
+        prior_recovery_state: ProtocolRecoveryState | None = None,
     ) -> EpisodeOutcome:
         """Reduce turns until the episode is terminal. It always terminates.
 
@@ -283,7 +292,7 @@ class EpisodeEngine:
                           turns=tuple(prior_turns))
         dispatches: list[Any] = []
         accumulated: tuple[Span, ...] = tuple(spans)
-        recovery_state = ProtocolRecoveryState()
+        recovery_state = prior_recovery_state or ProtocolRecoveryState()
         recovery_feedback: dict[str, Any] | None = None
         sampling_override: dict[str, Any] | None = None
         #: Repeated-action escalation (`CMX-03`). Tracked across turns because
@@ -341,6 +350,7 @@ class EpisodeEngine:
                 **dict(decision.retry_feedback),
                 "reason": decision.retry_reason,
             }
+            self._emit_recovery_state(episode, recovery_state)
             if decision.continuation:
                 base_tokens = int(base_sampling.get("maxTokens", 4096) or 4096)
                 if 0 < base_tokens < 8192:
@@ -378,6 +388,14 @@ class EpisodeEngine:
                     if str(tool.get("verb") or tool.get("name") or "") in policy.allowed)
                 if filtered:
                     offered_tools = filtered
+                turn_sampling["toolChoice"] = "required"
+            if self._completion_allowed_tools is not None:
+                narrowed = tuple(
+                    tool for tool in offered_tools
+                    if str(tool.get("verb") or tool.get("name") or "")
+                    in self._completion_allowed_tools)
+                if narrowed:
+                    offered_tools = narrowed
                 turn_sampling["toolChoice"] = "required"
             view = self._view(episode, recovery_feedback=recovery_feedback)
 
@@ -748,7 +766,8 @@ class EpisodeEngine:
                     f"no progress over {self._no_progress_limit} turns")
                 break
 
-        return EpisodeOutcome(episode=episode, dispatches=tuple(dispatches))
+        return EpisodeOutcome(episode=episode, dispatches=tuple(dispatches),
+                              recovery_state=recovery_state)
 
     # ------------------------------------------------------------------
 
@@ -807,6 +826,31 @@ class EpisodeEngine:
             principal=episode.principal,
             payload=payload,
         ))
+
+    def _emit_recovery_state(self, episode: Episode,
+                             state: ProtocolRecoveryState) -> None:
+        """Persist retry spend through the existing event authority.
+
+        Recovery is execution state, not a second ledger.  Emitting the
+        serialised state alongside the ordinary episode stream lets a fresh
+        process restore retry decisions before it asks the provider again.
+        """
+        try:
+            self._events.emit(Event(
+                # Reuse the canonical episode-state event; recovery is state
+                # belonging to this episode, not a new event authority.
+                kind="EpisodeStateChanged",
+                reason="protocol_recovery",
+                at=self._clock.now(),
+                run_id=episode.run_id,
+                principal=episode.principal,
+                payload={"episodeId": episode.episode_id,
+                         "recoveryState": state.to_dict()},
+            ))
+        except Exception:
+            # Recovery telemetry must not turn a handled retry into a runtime
+            # failure; the append-only event stream remains best effort here.
+            pass
 
     def _emit_scope_escalation_denied(self, episode: Episode, proposal: Proposal) -> None:
         """`AuthorizationDenied` for the engine-side sealed-scope refuse.

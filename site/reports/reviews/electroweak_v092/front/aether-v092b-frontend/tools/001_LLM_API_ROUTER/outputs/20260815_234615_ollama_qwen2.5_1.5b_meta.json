@@ -1,0 +1,18 @@
+{
+  "timestamp": "20260815_234615",
+  "provider": "ollama",
+  "model": "qwen2.5:1.5b",
+  "requested_model": "qwen25",
+  "temperature": 0.2,
+  "prompt": "# Sample Coding Challenge for Comparative Benchmarking\n\nWrite a Python function named `fibonacci_memoized` that computes the n-th Fibonacci number using an internal memoization dictionary.\nRequirements:\n1. Return the integer result for n >= 0.\n2. Handle negative inputs by raising ValueError.\n3. Keep the implementation under 25 lines of clean code.\n4. Output only code and necessary docstring.",
+  "latency_ms": 5778,
+  "ttft_ms": 5778,
+  "tokens": {
+    "prompt": 111,
+    "completion": 299,
+    "total": 410
+  },
+  "cost_usd_micros": 0,
+  "cost_usd": 0.0,
+  "response_file": "tools/001_LLM_API_ROUTER/outputs/20260815_234615_ollama_qwen2.5_1.5b_response.md"
+}

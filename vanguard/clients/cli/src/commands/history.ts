@@ -8,7 +8,7 @@ import {
 } from "../output.js";
 
 export async function handleHistory(args: string[], options: ParsedCli): Promise<number> {
-  const runtime = clientFor(options) as any;
+  const runtime = await clientFor(options) as any;
 
   const statusIndex = args.indexOf("--status");
   const statusFilter = (statusIndex >= 0 ? args[statusIndex + 1] ?? "" : "").toLowerCase();

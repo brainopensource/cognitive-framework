@@ -1,0 +1,1 @@
+{"expectedKeyword": "required", "expectedPath": "/command/idempotencyKey", "expectedCode": "invalid_request"}

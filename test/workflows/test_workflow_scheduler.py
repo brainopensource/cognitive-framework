@@ -76,6 +76,23 @@ class TestWorkflowScheduler(unittest.TestCase):
         self.assertTrue(outcome.final_state.suspended)
         self.assertEqual(outcome.final_state.suspend_reason, "CYCLE_LIMIT_EXCEEDED")
 
+    def test_resume_does_not_reexecute_settled_prefix(self) -> None:
+        spec = WorkflowSpec(
+            topology_id="topo.resume/1", version="1.0.0",
+            nodes=(WorkflowNode("step1", "transform", "test.lower/1"),
+                   WorkflowNode("step2", "transform", "test.lower/1")),
+            edges=(WorkflowEdge("step1", "step2", "accepted"),), entry_node="step1")
+        scheduler = WorkflowScheduler(spec, self.transform_runtime, self.store)
+        input_digest = self.store.put(b"RESUME").value
+        first = scheduler.run("wf-resume", initial_artifact_digest=input_digest)
+        prefix = [event for event in first.events if event["type"] != "WorkflowCompleted"][:2]
+        resumed = scheduler.run("wf-resume", initial_artifact_digest=input_digest,
+                                prior_events=prefix)
+        self.assertTrue(resumed.completed)
+        self.assertNotIn("step1", [event["payload"].get("nodeId")
+                                    for event in resumed.events
+                                    if event["type"] == "NodeScheduled"])
+
 
 if __name__ == "__main__":
     unittest.main()

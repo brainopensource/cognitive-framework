@@ -522,18 +522,25 @@ class Runtime:
 
     @staticmethod
     def _schemas_with_aliases(schemas: list[dict[str, Any]], translator: Any) -> list[dict[str, Any]]:
-        """Expose pack aliases as extra tool names. Canonical verbs stay bound."""
-        aliases = getattr(translator, "to_canonical_map", None) or {}
-        by_verb = {str(item.get("verb")): item for item in schemas if item.get("verb")}
-        names = {str(item.get("name")) for item in schemas}
-        extra: list[dict[str, Any]] = []
-        for name, verb in aliases.items():
-            if name in names or verb not in by_verb:
+        """Return one outbound schema per canonical tool.
+
+        Aliases are an inbound compatibility concern.  Advertising every
+        alias as a second schema duplicates tools in provider requests and
+        lets provider selection change the wire surface.  The translator is
+        still attached to the loaded pack, so legacy model responses continue
+        to resolve through ``ProposalTranslator``.
+        """
+        del translator
+        unique: list[dict[str, Any]] = []
+        seen: set[str] = set()
+        for schema in schemas:
+            identity = str(schema.get("verb") or schema.get("name") or "")
+            if identity and identity in seen:
                 continue
-            clone = dict(by_verb[verb])
-            clone["name"] = name
-            extra.append(clone)
-        return schemas + extra
+            if identity:
+                seen.add(identity)
+            unique.append(schema)
+        return unique
 
     @staticmethod
     def _policy(policy: Mapping[str, Any] | str, path: str = "budget policy") -> Mapping[str, Any]:

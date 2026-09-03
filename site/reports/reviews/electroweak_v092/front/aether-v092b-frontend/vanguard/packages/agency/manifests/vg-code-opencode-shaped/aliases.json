@@ -1,0 +1,6 @@
+{
+  "view_file": "fs.read",
+  "grep_file": "fs.search",
+  "edit_file": "patch.apply",
+  "run_command": "proc.exec"
+}

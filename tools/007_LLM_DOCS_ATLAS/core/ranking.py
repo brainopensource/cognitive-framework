@@ -25,7 +25,7 @@ def load_catalog_metadata(
 
     Read-only: LDA is a downstream consumer of the knowledge base. The Single
     Emitter that owns <generated_root>/knowledge/ is the canonical repository
-    generator (in AETHER: tools/generate_knowledge_base.py).
+    generator (e.g. tools/generate_knowledge_base.py).
     """
     catalog_path = Path(repo_root) / generated_root / "knowledge" / "catalog.jsonl"
     by_path: Dict[str, Dict[str, Any]] = {}

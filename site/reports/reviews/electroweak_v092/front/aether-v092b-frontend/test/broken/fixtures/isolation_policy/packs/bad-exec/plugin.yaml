@@ -1,0 +1,14 @@
+api: mhf.plugin/1
+id: mhf.toolkit.bad-exec
+version: 1.0.0
+provides:
+  - spi: IToolkit
+    spi_version: ">=1.0,<2"
+requires: []
+isolation: in_process
+capabilities:
+  - verb: proc.exec
+    selector:
+      kind: generic
+      uriPattern: proc://exec/allow/git,pytest,ruff,python3
+entry: nowhere.py:Bad

@@ -179,7 +179,9 @@ export class ManagedRuntimeHost {
     const args = [
       "-u", // unbuffered stdio
       entrypoint,
-      "--socket-path",
+      // vanguard/packages/runtime/standalone_daemon.py's real argparse flag
+      // is `--socket`, not `--socket-path` -- verified against its source.
+      "--socket",
       this.layout.socketPath,
       "--state-dir",
       this.layout.stateDir,

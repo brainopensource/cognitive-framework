@@ -6,7 +6,7 @@ from pathlib import Path
 @dataclass(frozen=True, slots=True)
 class SandboxLimits:
     cpu_seconds: int = 2
-    address_space_bytes: int = 256 * 1024 * 1024
+    address_space_bytes: int = 512 * 1024 * 1024
     max_open_files: int = 64
     max_processes: int = 64
 def apply_rlimits(limits: SandboxLimits) -> None:

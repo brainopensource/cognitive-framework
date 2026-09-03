@@ -257,7 +257,54 @@ class BenchmarkRunner:
         self.api_key = load_openrouter_key()
         self.recorder = recorder
         self.pricing_table = get_pricing_usd_table()
+        self.ledger_path = ROOT / "benchmarks" / "sota_spend_ledger.json"
+        self.ledger = json.loads(self.ledger_path.read_text(encoding="utf-8"))
+        if self.ledger.get("status") not in {"FROZEN_NO_PAID_CALLS", "RUNNING"}:
+            raise RuntimeError("SOTA spend ledger is closed")
+        self.ledger["status"] = "RUNNING"
+        self._persist_ledger()
         CAPTURES_DIR.mkdir(parents=True, exist_ok=True)
+
+    def _persist_ledger(self) -> None:
+        self.ledger_path.write_text(json.dumps(self.ledger, indent=2) + "\n", encoding="utf-8")
+
+    def _reserve_provider_call(self) -> None:
+        auth = self.ledger["authorization"]
+        if self.model_name not in set(auth["models"]):
+            raise RuntimeError(f"model is outside frozen SOTA authorization: {self.model_name}")
+        if (self.ledger["total_calls"] >= auth["max_calls"] or
+                self.ledger["total_tokens"] >= auth["max_tokens"] or
+                self.ledger["total_usd"] >= auth["max_usd"]):
+            raise RuntimeError("frozen SOTA spend ledger exhausted")
+
+    def _record_provider_call(self, *, usage: Dict[str, Any], cost: float,
+                              model_resolved: str, latency_ms: int) -> None:
+        prompt = usage.get("prompt_tokens")
+        completion = usage.get("completion_tokens")
+        if not isinstance(prompt, int) or not isinstance(completion, int):
+            self.ledger["status"] = "BLOCKED_UNKNOWN_USAGE"
+            self._persist_ledger()
+            raise RuntimeError("provider usage missing; paid routing blocked")
+        tokens = prompt + completion
+        auth = self.ledger["authorization"]
+        if (self.ledger["total_tokens"] + tokens > auth["max_tokens"] or
+                self.ledger["total_usd"] + cost > auth["max_usd"]):
+            self.ledger["status"] = "CLOSED_BUDGET"
+            self._persist_ledger()
+            raise RuntimeError("provider response would exceed frozen SOTA budget")
+        self.ledger["calls"].append({
+            "call_index": self.ledger["total_calls"] + 1,
+            "model_resolved": model_resolved,
+            "prompt_tokens": prompt,
+            "completion_tokens": completion,
+            "tokens": tokens,
+            "usd": cost,
+            "latency_ms": latency_ms,
+        })
+        self.ledger["total_calls"] += 1
+        self.ledger["total_tokens"] += tokens
+        self.ledger["total_usd"] = round(self.ledger["total_usd"] + cost, 9)
+        self._persist_ledger()
 
     def check_workspace_tests(self, workspace: Path) -> Tuple[bool, str]:
         env = {
@@ -349,6 +396,7 @@ class BenchmarkRunner:
     ) -> Tuple[Dict[str, Any], Dict[str, Any], float]:
         if not self.api_key:
             raise RuntimeError("OPENROUTER_API_KEY not configured in .env or environment")
+        self._reserve_provider_call()
 
         payload = {
             "model": self.model_name,
@@ -399,6 +447,11 @@ class BenchmarkRunner:
                     cost = ((prompt_tokens * p_rate) + (completion_tokens * c_rate)) / 1_000_000.0
                 else:
                     cost = usage.get("cost", 0.0) or 0.0
+
+                self._record_provider_call(
+                    usage=usage, cost=cost,
+                    model_resolved=str(resp_json.get("model") or self.model_name),
+                    latency_ms=millis)
 
                 if self.recorder is not None:
                     try:
@@ -787,7 +840,10 @@ def main():
         recorder=recorder,
     )
 
-    challenge_dirs = sorted([d for d in SUITE_ROOT.iterdir() if d.is_dir()])
+    challenge_dirs = sorted([
+        d for d in SUITE_ROOT.iterdir()
+        if d.is_dir() and not d.name.startswith("__")
+    ])
     if args.single:
         challenge_dirs = [d for d in challenge_dirs if d.name == args.single]
         if not challenge_dirs:

@@ -1,0 +1,168 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/mhf/trajectory.schema.json",
+  "$comment": "mhf.trajectory/1 — Invariant I-9 (ADR-0074 §7, SPEC §7). Emitted at EVERY EpisodeCompleted with no transformation step: the record on disk IS the harvest row. A digest over {ids, n} is NOT this schema (falsifier F-12). DPO/harvest consumers are deferred (ADR-0073); this contract is not. Field bytes that are large (contexts, stdout) travel as content-addressed refs, never inline.",
+  "title": "Trajectory",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "project_id", "run_id", "episode_id", "principal_id", "harness_digest", "turns", "verdict", "cost"],
+  "properties": {
+    "schema": { "type": "string", "const": "mhf.trajectory/1" },
+    "project_id": { "type": "string", "minLength": 1 },
+    "run_id": { "type": "string", "minLength": 1 },
+    "episode_id": { "type": "string", "minLength": 1 },
+    "parent_episode_id": { "type": ["string", "null"] },
+    "principal_id": { "type": "string", "minLength": 1 },
+    "harness_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "$comment": "D_H only — the complete composition digest (ADR-0074 §4). Never D_R or D_X."
+    },
+    "execution_digest": {
+      "type": ["string", "null"],
+      "$comment": "D_R = H(D_H ∥ runtime ∥ environment ∥ model identity ∥ oracle identity) (ADR-0071). Null until the run computes it; MUST NOT be collapsed into harness_digest."
+    },
+    "state_digest": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "event_range": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "first_seq": { "type": ["integer", "null"] },
+        "last_seq": { "type": ["integer", "null"] },
+        "count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "manifest_genome": {
+      "type": "object",
+      "$comment": "JCS-diffable manifest fields for later mutation attribution (SPEC §5.2, deferred consumer)."
+    },
+    "model_routes_used": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["tier", "provider", "model"],
+        "properties": {
+          "tier": { "type": "integer", "minimum": 1 },
+          "provider": { "type": "string" },
+          "model": { "type": "string" },
+          "model_fingerprint": { "type": ["string", "null"] },
+          "fingerprint_unavailable_reason": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "turns": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/TrajectoryTurn" }
+    },
+    "verdict": {
+      "type": ["object", "null"],
+      "$comment": "The SignedVerdict object exactly as ledgered in VerdictRecorded (schemas/mhf/spi_payloads.schema.json#/$defs/SignedVerdict), or null when the episode terminated without evaluation (aborted, budget-exhausted). Never a synthesized summary."
+    },
+    "verdict_absence_reason": {
+      "type": ["string", "null"]
+    },
+    "cost": { "$ref": "#/$defs/CostVector" },
+    "attribution": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "prefix_hits": { "type": "number", "minimum": 0, "maximum": 1 },
+        "escalations": { "type": "integer", "minimum": 0 },
+        "repair_rounds": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "outcome": {
+      "type": "string",
+      "enum": ["completed", "aborted", "budget_exhausted", "instrument_error"]
+    }
+  },
+  "$defs": {
+    "TrajectoryTurn": {
+      "title": "TrajectoryTurn",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["turn", "context_digest", "proposal", "receipts", "cost"],
+      "properties": {
+        "turn": { "type": "integer", "minimum": 0 },
+        "context_digest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "$comment": "Digest of the compiled context bundle the model actually saw — the DPO pairing key (SPEC §7)."
+        },
+        "context_ref": { "type": ["string", "null"], "$comment": "Blob-store ref to the full bundle; policy-gated (SPEC §9: capture by policy, corpus opt-in)." },
+        "proposal": {
+          "type": "object",
+          "$comment": "The Proposal as translated to kernel shape: thought (may be redacted by policy), requests (verb, selector, sink), confidence."
+        },
+        "receipts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["request_digest", "outcome"],
+            "properties": {
+              "request_digest": { "type": "string" },
+              "outcome": { "type": "string", "enum": ["completed", "failed", "rejected", "undeterminable"] },
+              "grant_digest": { "type": ["string", "null"] },
+              "lease_id": { "type": ["string", "null"] },
+              "stdout_ref": { "type": ["string", "null"] },
+              "artifact_refs": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "model_route": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["provider", "model"],
+          "properties": {
+            "tier": { "type": "integer", "minimum": 1 },
+            "provider": { "type": "string" },
+            "model": { "type": "string" },
+            "model_fingerprint": { "type": ["string", "null"] },
+            "fingerprint_unavailable_reason": { "type": ["string", "null"] }
+          }
+        },
+        "invocations": {
+          "type": "array"
+        },
+        "cost": { "$ref": "#/$defs/CostVector" }
+      }
+    },
+    "CostVector": {
+      "title": "CostVector",
+      "$comment": "Additive conserved dimensions only (ADR-0074 §2): usd_micros, tokens, bytes, charged millis. Structural ceilings (depth, turns) are not costs and do not appear here.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["usd_micros", "tokens", "bytes", "millis"],
+      "properties": {
+        "usd_micros": { "type": "integer", "minimum": 0 },
+        "tokens": { "type": "integer", "minimum": 0 },
+        "bytes": { "type": "integer", "minimum": 0 },
+        "millis": { "type": "integer", "minimum": 0, "$comment": "Charged compute time, never wall-clock under concurrency (ADR-0074 §2)." },
+        "measurement_status": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "usd_micros": { "$ref": "#/$defs/MeasurementStatus" },
+            "tokens": { "$ref": "#/$defs/MeasurementStatus" },
+            "bytes": { "$ref": "#/$defs/MeasurementStatus" },
+            "millis": { "$ref": "#/$defs/MeasurementStatus" }
+          }
+        }
+      }
+    },
+    "MeasurementStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "type": "string", "enum": ["measured", "estimated", "unavailable"] },
+        "reason": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

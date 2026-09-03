@@ -1,0 +1,210 @@
+{
+  "timestamp": "2026-08-31T08:40:30Z",
+  "model": "deepseek/deepseek-chat",
+  "harness": "vanguard-vg-code-max",
+  "pass_rate_pct": 90.0,
+  "total_cost_usd": 0.063354,
+  "total_duration_seconds": 861.77,
+  "results": [
+    {
+      "id": "01_rate_limiter_lease_recovery",
+      "kind": "Brownfield",
+      "status": "PASS",
+      "turns": 4,
+      "tokens": 8494,
+      "cost_usd": 0.003562,
+      "latency_s": 40.01,
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "id": "02_ed25519_signature_replay",
+      "kind": "Brownfield",
+      "status": "PASS",
+      "turns": 3,
+      "tokens": 6194,
+      "cost_usd": 0.002488,
+      "latency_s": 25.14,
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "id": "03_trait_attenuation_escalation",
+      "kind": "Brownfield",
+      "status": "PASS",
+      "turns": 3,
+      "tokens": 4982,
+      "cost_usd": 0.002015,
+      "latency_s": 42.13,
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "id": "04_sqlite_wal_checkpoint_lock",
+      "kind": "Brownfield",
+      "status": "PASS",
+      "turns": 1,
+      "tokens": 1259,
+      "cost_usd": 0.000461,
+      "latency_s": 41.94,
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "id": "05_token_budget_clamping_drift",
+      "kind": "Brownfield",
+      "status": "PASS",
+      "turns": 2,
+      "tokens": 3565,
+      "cost_usd": 0.00209,
+      "latency_s": 27.2,
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "id": "06_fts5_stale_index_rebuild",
+      "kind": "Brownfield",
+      "status": "PASS",
+      "turns": 3,
+      "tokens": 6283,
+      "cost_usd": 0.002666,
+      "latency_s": 36.35,
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "id": "07_context_lost_in_middle_prune",
+      "kind": "Brownfield",
+      "status": "PASS",
+      "turns": 3,
+      "tokens": 5294,
+      "cost_usd": 0.002086,
+      "latency_s": 20.88,
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "id": "08_evaluator_oracle_timeout",
+      "kind": "Brownfield",
+      "status": "PASS",
+      "turns": 4,
+      "tokens": 7867,
+      "cost_usd": 0.003163,
+      "latency_s": 38.48,
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "id": "09_model_port_streaming_chunk_drop",
+      "kind": "Brownfield",
+      "status": "PASS",
+      "turns": 4,
+      "tokens": 8148,
+      "cost_usd": 0.003091,
+      "latency_s": 30.16,
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "id": "10_graph_ppr_dangling_node_sink",
+      "kind": "Brownfield",
+      "status": "PASS",
+      "turns": 4,
+      "tokens": 7798,
+      "cost_usd": 0.002757,
+      "latency_s": 29.6,
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "id": "11_kv_lru_ttl_store",
+      "kind": "Greenfield",
+      "status": "PASS",
+      "turns": 4,
+      "tokens": 10076,
+      "cost_usd": 0.004309,
+      "latency_s": 48.9,
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "id": "12_finite_state_machine_workflow",
+      "kind": "Greenfield",
+      "status": "PASS",
+      "turns": 4,
+      "tokens": 9334,
+      "cost_usd": 0.004628,
+      "latency_s": 63.4,
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "id": "13_semver_dependency_resolver",
+      "kind": "Greenfield",
+      "status": "FAIL",
+      "turns": 6,
+      "tokens": 24913,
+      "cost_usd": 0.010814,
+      "latency_s": 137.77,
+      "diagnosis": "test_suite.py FAILED: F. ====================================================================== FAIL: test_conflict_erro"
+    },
+    {
+      "id": "14_merkle_tree_ledger",
+      "kind": "Greenfield",
+      "status": "PASS",
+      "turns": 3,
+      "tokens": 7097,
+      "cost_usd": 0.004271,
+      "latency_s": 65.16,
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "id": "15_circuit_breaker_proxy",
+      "kind": "Greenfield",
+      "status": "PASS",
+      "turns": 2,
+      "tokens": 3826,
+      "cost_usd": 0.002324,
+      "latency_s": 27.01,
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "id": "16_submodular_greedy_packer",
+      "kind": "Greenfield",
+      "status": "PASS",
+      "turns": 5,
+      "tokens": 7920,
+      "cost_usd": 0.002443,
+      "latency_s": 26.96,
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "id": "17_json_canonicalizer_jcs",
+      "kind": "Greenfield",
+      "status": "PASS",
+      "turns": 3,
+      "tokens": 4585,
+      "cost_usd": 0.002154,
+      "latency_s": 27.13,
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "id": "18_token_bucket_hierarchical",
+      "kind": "Greenfield",
+      "status": "FAIL",
+      "turns": 3,
+      "tokens": 5942,
+      "cost_usd": 0.003558,
+      "latency_s": 52.69,
+      "diagnosis": "test_suite.py FAILED: F ====================================================================== FAIL: test_parent_child_a"
+    },
+    {
+      "id": "19_markdown_section_splitter",
+      "kind": "Greenfield",
+      "status": "PASS",
+      "turns": 3,
+      "tokens": 5795,
+      "cost_usd": 0.002368,
+      "latency_s": 26.2,
+      "diagnosis": "All falsifiers green"
+    },
+    {
+      "id": "20_event_bus_pubsub_channel",
+      "kind": "Greenfield",
+      "status": "PASS",
+      "turns": 3,
+      "tokens": 5547,
+      "cost_usd": 0.002105,
+      "latency_s": 54.64,
+      "diagnosis": "All falsifiers green"
+    }
+  ]
+}

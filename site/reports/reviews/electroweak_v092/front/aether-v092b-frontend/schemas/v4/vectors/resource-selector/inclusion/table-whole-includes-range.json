@@ -1,0 +1,17 @@
+{
+  "parent": {
+    "kind": "table",
+    "table": "table://t"
+  },
+  "child": {
+    "kind": "table",
+    "table": "table://t",
+    "ranges": [
+      "0..10"
+    ]
+  },
+  "expected": {
+    "included": true,
+    "reason": "included"
+  }
+}

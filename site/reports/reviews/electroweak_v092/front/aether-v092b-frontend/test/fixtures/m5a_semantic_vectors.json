@@ -1,0 +1,27 @@
+[
+  {
+    "payload": {"kind": "GoalDeclared", "goalDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"},
+    "canonical": "{\"goalDigest\":\"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"kind\":\"GoalDeclared\"}",
+    "digest": "sha256:311490f8472106e4ce3f40fc1c1f81916408e86870c207d9c2e3246e525bab85"
+  },
+  {
+    "payload": {"kind": "PlanRevised", "revision": 0, "planDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+    "canonical": "{\"kind\":\"PlanRevised\",\"planDigest\":\"sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"revision\":0}",
+    "digest": "sha256:b7b51d41e6ccdea7d0805f9238551f6cf678e32845e37f737e38f300a5fcf90b"
+  },
+  {
+    "payload": {"kind": "StrategyChanged", "from": "depth", "to": "breadth", "trigger": "stalled"},
+    "canonical": "{\"from\":\"depth\",\"kind\":\"StrategyChanged\",\"to\":\"breadth\",\"trigger\":\"stalled\"}",
+    "digest": "sha256:e33fbd4eb433492cb403384d46b2888d415625c697e7df98c1dcae9b843129c4"
+  },
+  {
+    "payload": {"kind": "ProgressAssessed", "assessment": "advancing", "signals": {"tests": "green"}, "basis": ["event-1"]},
+    "canonical": "{\"assessment\":\"advancing\",\"basis\":[\"event-1\"],\"kind\":\"ProgressAssessed\",\"signals\":{\"tests\":\"green\"}}",
+    "digest": "sha256:17cb813abd6907264fb43fbaff0c7812b8808afb4f4124967c0e8bdb053611f1"
+  },
+  {
+    "payload": {"kind": "ContextCompacted", "inputDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc", "outputDigest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"},
+    "canonical": "{\"inputDigest\":\"sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc\",\"kind\":\"ContextCompacted\",\"outputDigest\":\"sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd\"}",
+    "digest": "sha256:9bebf9ea25f2211efc40ff6ec7a2df701dfc697d8194df0e5bbd846ae29bd130"
+  }
+]

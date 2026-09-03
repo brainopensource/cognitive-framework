@@ -196,7 +196,15 @@ class WorkerProtocol:
             if not isinstance(content, str):
                 return Result.fail("invalid_request", "Missing patch/diff content")
             flag = " --dry-run" if operation.args.get("dry_run") is True else ""
-            argv = ["/bin/sh", "-c", f'printf "%s" "$1" | patch -p1{flag}', "--", content]
+            git_flag = " --check" if operation.args.get("dry_run") is True else ""
+            cmd = (
+                f'if command -v patch >/dev/null 2>&1; then '
+                f'printf "%s" "$1" | patch -p1{flag}; '
+                f'elif command -v git >/dev/null 2>&1; then '
+                f'printf "%s" "$1" | git apply --whitespace=nowarn --unsafe-paths{git_flag}; '
+                f'else echo "neither patch nor git found" >&2; exit 127; fi'
+            )
+            argv = ["/bin/sh", "-c", cmd, "--", content]
 
         elif operation.operation == "proc.exec":
             cmd_argv = operation.args.get("argv")

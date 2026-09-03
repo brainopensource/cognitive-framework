@@ -110,7 +110,7 @@ def verify_acceptance(produced_path: Path, acceptance_path: Path) -> list[str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--evidence-dir", type=Path, default=Path("docs/03_execution/evidence"))
+    parser.add_argument("--evidence-dir", type=Path, default=Path("evidence"))
     args = parser.parse_args()
     bundles = [path for path in sorted(args.evidence_dir.glob("*.json"))
                if not path.name.endswith(".acceptance.json")]

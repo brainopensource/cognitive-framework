@@ -1,0 +1,10 @@
+api: mhf.plugin/1
+id: mhf.eval.formal-graph-coloring-exterior
+version: 1.0.0
+provides:
+  - spi: IEvaluationGate
+    spi_version: ">=1.0,<2"
+requires: []
+isolation: process
+capabilities: []
+entry: vanguard.packages.adapters.evaluators.gate:ExteriorJudgeAdapter

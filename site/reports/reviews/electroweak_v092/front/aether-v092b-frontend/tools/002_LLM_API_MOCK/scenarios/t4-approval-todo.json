@@ -1,0 +1,55 @@
+{
+  "id": "t4-approval-todo",
+  "tier": 4,
+  "title": "Implement multistep approval status workflow",
+  "workspace": {
+    "workflow.py": "class ApprovalWorkflow:\n    def __init__(self):\n        self.state = 'pending'\n\n    def approve(self):\n        # Bug: state must transition to approved\n        pass\n",
+    "test_workflow.py": "from workflow import ApprovalWorkflow\n\ndef test_approve():\n    w = ApprovalWorkflow()\n    w.approve()\n    assert w.state == 'approved'\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"workflow.py\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 1,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"path\": \"workflow.py\", \"target\": \"        # Bug: state must transition to approved\\n        pass\", \"replacement\": \"        self.state = 'approved'\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 2,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"pytest\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 3,
+      "tool_calls": [],
+      "finish_reason": "stop"
+    }
+  ]
+}

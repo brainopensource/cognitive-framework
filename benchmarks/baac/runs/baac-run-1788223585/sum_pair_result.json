@@ -1,0 +1,46 @@
+{
+  "challengeId": "sum_pair",
+  "tier": "easy",
+  "scope": "single",
+  "contextBracket": "2K",
+  "preset": "vg-1-forge",
+  "model": "lam-mock",
+  "mode": "lam",
+  "status": "PASS",
+  "attribution": "PASS",
+  "turns": 3,
+  "promptTokens": 450,
+  "completionTokens": 120,
+  "totalTokens": 570,
+  "costUsd": 0.0,
+  "durationSeconds": 0.09,
+  "changedFiles": [
+    "src/main.py"
+  ],
+  "diffPatch": "--- a/main.py\n+++ b/main.py\n@@ -0,0 +1 @@\n+# Solution code\n",
+  "oracle": {
+    "passed": true,
+    "exitCode": 0,
+    "stdout": "ALL ORACLE ASSERTIONS PASSED\n",
+    "stderr": "",
+    "durationSeconds": 0.029,
+    "error": null,
+    "assertionCount": 1,
+    "failingAssertions": []
+  },
+  "aiJudgeScore": null,
+  "diagnosis": "All falsifiers green",
+  "metadata": {
+    "id": "sum_pair",
+    "name": "",
+    "scope": "single",
+    "context_bracket": "2K",
+    "tier": "easy",
+    "difficulty": 1,
+    "timeout_seconds": 30,
+    "entrypoint": "src/main.py",
+    "eval_type": "oracle",
+    "tags": [],
+    "metadata": {}
+  }
+}

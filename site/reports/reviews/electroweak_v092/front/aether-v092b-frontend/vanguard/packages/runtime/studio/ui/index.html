@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" class="dark h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VANGUARD / AETHER — Meta-Harness Studio</title>
+  <!-- Tailwind CSS & FontAwesome -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            canvas: '#06090d',
+            surface: '#0b0f15',
+            panel: '#0e141c',
+            card: '#121a24',
+            border: {
+              DEFAULT: '#1c2736',
+              strong: '#2a3b50',
+              accent: '#38bdf8',
+            },
+            accent: {
+              DEFAULT: '#38bdf8',
+              dim: '#0284c7',
+              bg: 'rgba(56, 189, 248, 0.1)',
+            },
+            status: {
+              green: '#22c55e',
+              yellow: '#eab308',
+              red: '#ef4444',
+              blue: '#3b82f6',
+              purple: '#a855f7'
+            }
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Inter"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', '"Fira Code"', 'Menlo', 'Consolas', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #06090d; }
+    ::-webkit-scrollbar-thumb { background: #1c2736; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #2a3b50; }
+    
+    .glow-accent {
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.125rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.7rem;
+      font-family: monospace;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body class="bg-canvas text-gray-200 font-sans h-full flex flex-col overflow-hidden select-none">
+
+  <!-- Top Header Navigation Bar -->
+  <header class="h-14 bg-surface border-b border-border flex items-center justify-between px-4 z-20">
+    <div class="flex items-center space-x-3">
+      <div class="w-8 h-8 rounded bg-gradient-to-tr from-cyan-600 to-sky-400 flex items-center justify-center font-mono font-bold text-black text-sm shadow-md">
+        VG
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <span class="font-bold tracking-wide text-sm text-gray-100">AETHER / VANGUARD</span>
+          <span class="badge bg-cyan-950 text-cyan-400 border border-cyan-800">META-HARNESS STUDIO</span>
+        </div>
+        <div class="text-[10px] text-gray-500 font-mono" id="system-status-pill">
+          KERNEL S0-S12 • TCB BUDGET: 1366 / 1438 LOC • WAVE 3D ACTIVE
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Navigation Tabs (Read-Only Studio) -->
+    <nav class="flex space-x-1 bg-panel p-1 rounded-md border border-border text-xs">
+      <button onclick="switchTab('harness-tab')" id="nav-harness-tab" class="tab-btn px-3 py-1.5 rounded text-gray-300 hover:text-white transition font-medium bg-card text-accent">
+        <i class="fa-solid fa-microchip mr-1.5"></i>Harness & Packs
+      </button>
+      <button onclick="switchTab('dispatch-tab')" id="nav-dispatch-tab" class="tab-btn px-3 py-1.5 rounded text-gray-400 hover:text-white transition font-medium">
+        <i class="fa-solid fa-network-wired mr-1.5"></i>S0–S12 Pipeline
+      </button>
+      <button onclick="switchTab('trajectory-tab')" id="nav-trajectory-tab" class="tab-btn px-3 py-1.5 rounded text-gray-400 hover:text-white transition font-medium">
+        <i class="fa-solid fa-fingerprint mr-1.5"></i>Evidence & Audit
+      </button>
+    </nav>
+
+    <!-- Top Right Status -->
+    <div class="flex items-center space-x-3">
+      <div class="flex items-center space-x-2 bg-panel px-2.5 py-1 rounded border border-border text-xs">
+        <span class="text-gray-400 text-[11px]">Profile Preset:</span>
+        <select id="execution-profile-selector" class="bg-transparent text-cyan-400 font-mono focus:outline-none cursor-pointer text-xs" onchange="updateSelectedProfile()">
+          <option value="local" class="bg-panel">local (host-dev)</option>
+          <option value="sandboxed" class="bg-panel">sandboxed (bwrap)</option>
+          <option value="hermetic" class="bg-panel">hermetic (RF-85 candidate)</option>
+        </select>
+      </div>
+      <span class="badge bg-slate-900 text-slate-300 border border-slate-700 text-[10px]">READ-ONLY STUDIO</span>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="flex-1 flex overflow-hidden">
+
+    <!-- ==================== TAB 1: HARNESS & PACKS EXPLORER ==================== -->
+    <div id="harness-tab" class="tab-pane flex-1 flex overflow-hidden">
+      <!-- Left: Pack & Agent Selector -->
+      <div class="w-72 bg-surface border-r border-border flex flex-col">
+        <div class="p-3 border-b border-border flex items-center justify-between">
+          <span class="text-xs font-bold text-gray-300 uppercase tracking-wider">Harness Packs</span>
+          <span class="badge bg-card text-gray-400" id="pack-count-badge">4 Registered</span>
+        </div>
+        <div class="p-2 overflow-y-auto flex-1 space-y-1.5" id="pack-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Center: Pack Visual Configuration / Graph -->
+      <div class="flex-1 bg-canvas flex flex-col overflow-hidden">
+        <!-- Top Details bar -->
+        <div class="h-12 bg-panel border-b border-border flex items-center justify-between px-4">
+          <div class="flex items-center space-x-3">
+            <span class="font-mono font-bold text-sm text-cyan-400" id="current-harness-id">vg-code-default</span>
+            <span class="badge bg-emerald-950 text-emerald-400 border border-emerald-800" id="current-harness-api">mhf.manifest/2</span>
+            <span class="badge bg-gray-800 text-gray-300 font-mono text-[10px]" id="current-harness-digest">D_H: sha256:...</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="renderJsonManifest()" class="px-2.5 py-1 bg-card hover:bg-gray-800 border border-border text-xs rounded text-gray-300">
+              <i class="fa-solid fa-code mr-1"></i> Raw Manifest
+            </button>
+          </div>
+        </div>
+
+        <!-- Visual Components & Ceiling Grid -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+          
+          <!-- System Core Prompt Card -->
+          <div class="bg-panel border border-border rounded-lg p-4">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-scroll text-cyan-400 text-sm"></i>
+                <span class="text-xs font-bold text-gray-200">System Core & Policy Directives</span>
+              </div>
+              <span class="text-[10px] text-gray-500 font-mono">IContextManager Interface</span>
+            </div>
+            <pre class="bg-canvas border border-border rounded p-3 text-xs font-mono text-gray-300 whitespace-pre-wrap max-h-36 overflow-y-auto" id="harness-system-prompt">Loading system prompt...</pre>
+          </div>
+
+          <!-- SPI Component Topology -->
+          <div>
+            <div class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-3 flex items-center space-x-2">
+              <i class="fa-solid fa-cubes text-cyan-400"></i>
+              <span>Active SPI Component Cells</span>
+            </div>
+            <div class="grid grid-cols-3 gap-4" id="spi-component-cards">
+              <!-- Component Cards Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Capability Ceilings & Tool Bindings -->
+          <div>
+            <div class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-3 flex items-center space-x-2">
+              <i class="fa-solid fa-shield-halved text-cyan-400"></i>
+              <span>Attenuated Capability Ceilings & Verbs</span>
+            </div>
+            <div class="bg-panel border border-border rounded-lg overflow-hidden">
+              <table class="w-full text-left text-xs font-mono">
+                <thead class="bg-surface text-gray-400 border-b border-border text-[11px]">
+                  <tr>
+                    <th class="py-2.5 px-4">Verb</th>
+                    <th class="py-2.5 px-4">Sink Class</th>
+                    <th class="py-2.5 px-4">Risk Level</th>
+                    <th class="py-2.5 px-4">Resource Selector Scope</th>
+                    <th class="py-2.5 px-4">Isolation Tier</th>
+                  </tr>
+                </thead>
+                <tbody id="capability-table-body" class="divide-y divide-border">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Budget Ceilings -->
+          <div>
+            <div class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-3 flex items-center space-x-2">
+              <i class="fa-solid fa-scale-balanced text-cyan-400"></i>
+              <span>Typed Budget Limits (RFC-8785 Bound)</span>
+            </div>
+            <div class="grid grid-cols-4 gap-4 font-mono text-xs" id="budget-meters">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 2: LIVE TURN INSPECTOR ==================== -->
+    <div id="live-tab" class="tab-pane flex-1 flex overflow-hidden hidden">
+      <!-- Left: Turn List / Session Timeline -->
+      <div class="w-80 bg-surface border-r border-border flex flex-col">
+        <div class="p-3 border-b border-border flex items-center justify-between">
+          <span class="text-xs font-bold text-gray-300 uppercase tracking-wider">Live Turns</span>
+          <span class="badge bg-cyan-950 text-cyan-400 border border-cyan-800" id="live-turn-badge">Turn 1 Active</span>
+        </div>
+        <div class="p-2 overflow-y-auto flex-1 space-y-1.5" id="turn-timeline-list">
+          <!-- Turns populated by JS -->
+        </div>
+      </div>
+
+      <!-- Center: Turn Stream & Dialogue Layer -->
+      <div class="flex-1 bg-canvas flex flex-col overflow-hidden">
+        <!-- Live Run Header -->
+        <div class="h-12 bg-panel border-b border-border flex items-center justify-between px-4">
+          <div class="flex items-center space-x-3 font-mono text-xs">
+            <span class="text-gray-400">Run ID:</span>
+            <span class="text-sky-400 font-bold" id="live-run-id">run-local-dev-001</span>
+            <span class="text-gray-600">•</span>
+            <span class="text-gray-400">D_R:</span>
+            <span class="text-gray-300" id="live-dr-digest">sha256:d8a2...</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <span class="badge bg-emerald-950 text-emerald-400 border border-emerald-800">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse mr-1.5"></span>
+              STREAMING WAL
+            </span>
+          </div>
+        </div>
+
+        <!-- Event Logs and Turn Actions -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-4 font-mono text-xs" id="live-event-stream">
+          <!-- Live Events -->
+        </div>
+      </div>
+
+      <!-- Right: Interactive Approval Interceptor & Receipts -->
+      <div class="w-96 bg-surface border-l border-border flex flex-col">
+        <div class="p-3 border-b border-border flex items-center justify-between">
+          <span class="text-xs font-bold text-gray-300 uppercase tracking-wider flex items-center space-x-1.5">
+            <i class="fa-solid fa-hand-holding-hand text-amber-400"></i>
+            <span>Approval Interceptor</span>
+          </span>
+          <span class="badge bg-amber-950 text-amber-400 border border-amber-800 text-[10px]">K-14 BOUND</span>
+        </div>
+
+        <div class="p-4 flex-1 flex flex-col justify-between overflow-y-auto" id="approval-box">
+          <div class="space-y-3">
+            <div class="p-3 bg-panel border border-border rounded text-xs space-y-2">
+              <div class="text-gray-400 text-[11px]">Requested Privileged Action:</div>
+              <div class="font-mono text-cyan-300 font-bold" id="approval-verb">patch.apply</div>
+              <div class="text-gray-300 text-xs font-mono bg-canvas p-2 rounded border border-border" id="approval-descriptor">
+                Target: src/calc.py<br/>
+                Diff: +12 lines, -3 lines
+              </div>
+            </div>
+            <div class="text-[11px] text-gray-400">
+              <i class="fa-solid fa-eye mr-1 text-cyan-400"></i>
+              Read-Only Observer Mode: Watching S0–S12 events emitted by kernel. Interactive authorization is managed by the CLI/runtime.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 3: S0–S12 DISPATCH PIPELINE ==================== -->
+    <div id="dispatch-tab" class="tab-pane flex-1 bg-canvas flex flex-col overflow-y-auto p-6 hidden">
+      <div class="max-w-5xl mx-auto w-full space-y-6">
+        <div>
+          <h2 class="text-base font-bold text-gray-100 mb-1">Domain-Blind Kernel Pipeline (S0–S12)</h2>
+          <p class="text-xs text-gray-400">13-stage deterministic dispatch pipeline executing within Trusted Computing Base (&le; 1438 LOC).</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="dispatch-stages-grid">
+          <!-- Stages populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 4: EVIDENCE & REPLAY AUDITOR ==================== -->
+    <div id="trajectory-tab" class="tab-pane flex-1 bg-canvas flex flex-col overflow-y-auto p-6 hidden">
+      <div class="max-w-5xl mx-auto w-full space-y-6">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-bold text-gray-100 mb-1">M-4 Single-Run Evidence Auditor</h2>
+            <p class="text-xs text-gray-400">Verifies 9 source-derived canonical rows required for certification.</p>
+          </div>
+        </div>
+
+        <!-- 9 Rows Grid -->
+        <div class="bg-panel border border-border rounded-lg overflow-hidden">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="bg-surface text-gray-400 border-b border-border text-[11px]">
+              <tr>
+                <th class="py-2.5 px-4 w-16">Row</th>
+                <th class="py-2.5 px-4 w-44">Subject Category</th>
+                <th class="py-2.5 px-4">Evidence Facts & Cryptographic Proofs</th>
+                <th class="py-2.5 px-4 w-28">Status</th>
+              </tr>
+            </thead>
+            <tbody id="evidence-rows-body" class="divide-y divide-border">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

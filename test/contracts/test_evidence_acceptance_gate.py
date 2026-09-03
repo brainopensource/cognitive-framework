@@ -25,7 +25,7 @@ if str(_ROOT / "tools" / "linters") not in sys.path:
 
 from check_evidence_acceptance import _is_ancestor, superseding_bundle  # noqa: E402
 
-EVIDENCE = _ROOT / "docs" / "03_execution" / "evidence"
+EVIDENCE = _ROOT / "evidence"
 
 
 def _bundles() -> list[Path]:

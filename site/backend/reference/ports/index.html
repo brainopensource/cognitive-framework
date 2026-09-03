@@ -1968,10 +1968,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#1-the-five-frozen-spi-protocols-portsspipy" class="md-nav__link">
+  <a href="#1-the-frozen-spi-protocols-portsspipy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. The Five Frozen SPI Protocols (ports/spi.py)
+        1. The Frozen SPI Protocols (ports/spi.py)
       
     </span>
   </a>
@@ -2012,10 +2012,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#5-v092-target-repository-intelligence-binding" class="md-nav__link">
+  <a href="#5-repository-intelligence-binding" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. v0.9.2 Target: Repository-Intelligence Binding
+        5. Repository-Intelligence Binding
       
     </span>
   </a>
@@ -4230,10 +4230,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#1-the-five-frozen-spi-protocols-portsspipy" class="md-nav__link">
+  <a href="#1-the-frozen-spi-protocols-portsspipy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. The Five Frozen SPI Protocols (ports/spi.py)
+        1. The Frozen SPI Protocols (ports/spi.py)
       
     </span>
   </a>
@@ -4274,10 +4274,10 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#5-v092-target-repository-intelligence-binding" class="md-nav__link">
+  <a href="#5-repository-intelligence-binding" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. v0.9.2 Target: Repository-Intelligence Binding
+        5. Repository-Intelligence Binding
       
     </span>
   </a>
@@ -4314,11 +4314,11 @@
 
 <h1 id="hexagonal-ports-spi-reference">Hexagonal Ports &amp; SPI Reference</h1>
 <h2 id="purpose">Purpose</h2>
-<p>This document is the canonical reference owner for all hexagonal port protocols (<code>vanguard.packages.ports</code>), the five frozen Service Provider Interfaces (SPIs), and their concrete adapter mappings and test doubles.</p>
+<p>This document is the canonical reference owner for all hexagonal port protocols (<code>vanguard.packages.ports</code>), the frozen Service Provider Interfaces (SPIs), and their concrete adapter mappings and test doubles.</p>
 <h2 id="scope">Scope</h2>
 <ul>
 <li>Port protocol signatures in <code>vanguard/packages/ports/</code>.</li>
-<li>The five SPI protocols defined in <code>vanguard/packages/ports/spi.py</code> (<code>IPlanner</code>, <code>IContextManager</code>, <code>IToolkit</code>, <code>IMemoryEngine</code>, <code>IEvaluationGate</code>).</li>
+<li>The six SPI protocols defined in <code>vanguard/packages/ports/spi.py</code> (<code>IPlanner</code>, <code>IContextManager</code>, <code>IToolkit</code>, <code>IMemoryEngine</code>, <code>IEvaluationGate</code>, <code>ICompletionPolicy</code>).</li>
 <li>Mapping of ports to concrete production adapters (<code>vanguard/packages/adapters/</code>) and test fakes.</li>
 <li>Standard port exception and failure hierarchies.</li>
 </ul>
@@ -4330,18 +4330,19 @@
 <h2 id="as_built-status">AS_BUILT Status</h2>
 <ul>
 <li><code>IMPLEMENTED</code> — Pure Python protocols enforce strict dependency inversion (<code>domain &lt;- ports &lt;- kernel &lt;- agency &lt;- runtime -&gt; adapters</code>).</li>
-<li><code>PARTIAL</code> — <code>IContextManager</code> and <code>IndexPort</code> provide the existing extension seams; the provider-neutral repository <code>ContextPacket</code> usage described in Section 5 is a <strong>v0.9.2 target</strong>, not a new implemented port signature.</li>
+<li><code>IMPLEMENTED</code> — <code>IndexPort</code> exposes bounded, value-only file, symbol, dependency, test-association, and repository-map observations. It does not select policy or dispatch effects.</li>
 </ul>
 <hr />
-<h2 id="1-the-five-frozen-spi-protocols-portsspipy">1. The Five Frozen SPI Protocols (<code>ports/spi.py</code>)</h2>
-<p>The five SPI protocols represent the client interfaces of the agent substrate:</p>
+<h2 id="1-the-frozen-spi-protocols-portsspipy">1. The Frozen SPI Protocols (<code>ports/spi.py</code>)</h2>
+<p>The SPI protocols represent the client interfaces of the agent substrate:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vanguard.packages.ports.spi</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">IPlanner</span><span class="p">,</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">IContextManager</span><span class="p">,</span>
 <a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">IToolkit</span><span class="p">,</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">IMemoryEngine</span><span class="p">,</span>
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">IEvaluationGate</span><span class="p">,</span>
-<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="p">)</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">ICompletionPolicy</span><span class="p">,</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span>
 </code></pre></div>
 <table>
 <thead>
@@ -4382,6 +4383,12 @@
 <td><code>evaluate(req)</code><br><code>rubrics()</code></td>
 <td><code>EvaluationSubject</code><br>$ o$ <code>Result[SignedVerdict]</code></td>
 <td>Exterior evaluation verdict provider.</td>
+</tr>
+<tr>
+<td><code>ICompletionPolicy</code></td>
+<td><code>evaluate(**observations)</code></td>
+<td>Runtime completion observations<br>$   o$ admission verdict</td>
+<td>Pack-composed terminal admission policy for repository closure and greenfield evidence.</td>
 </tr>
 </tbody>
 </table>
@@ -4444,8 +4451,8 @@
 </tr>
 <tr>
 <td><code>IndexPort</code> (<code>index.py</code>)</td>
-<td><code>search(query) -&gt; list[Hit]</code>, <code>index(doc) -&gt; None</code></td>
-<td>Inverted index / search interface.</td>
+<td><code>index(root)</code>, <code>files(prefix)</code>, <code>symbols(name, path)</code>, <code>dependencies(path)</code>, <code>tests(path)</code>, <code>repo_map(token_budget)</code></td>
+<td>Workspace-relative, deterministic repository observations with typed failures and provenance-bearing summaries.</td>
 </tr>
 <tr>
 <td><code>MemoryPort</code> (<code>memory.py</code>)</td>
@@ -4519,10 +4526,8 @@
 - <code>Ok(value)</code>: Successful operation wrapping output value.
 - <code>Err(error)</code>: Explicit typed error (<code>EffectFailure</code>, <code>MemoryError</code>, <code>EvaluationError</code>) avoiding untyped runtime exceptions.</p>
 <hr />
-<h2 id="5-v092-target-repository-intelligence-binding">5. v0.9.2 Target: Repository-Intelligence Binding</h2>
-<blockquote>
-<p><strong>TARGET / PLANNED — not AS_BUILT.</strong> Reuse the five frozen SPIs and existing <code>IndexPort</code>; do not add an LDA-specific substrate port.</p>
-</blockquote>
+<h2 id="5-repository-intelligence-binding">5. Repository-Intelligence Binding</h2>
+<p>The existing <code>IndexPort</code> is the narrow repository-intelligence boundary; no LDA-specific substrate port is added. <code>FileRepoIndex</code> and <code>InMemoryRepoIndex</code> return value-only observations. The file adapter bounds files, symbols, dependency edges, and test associations, rejects traversal and symlink escape, and reports a deterministic source revision.</p>
 <p>The code-pack <code>IContextManager</code> may query <code>IndexPort</code> or a provider adapter and compile the results into a bounded, value-only context packet. The planned logical fields are:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>task_digest                 repository_snapshot_digest
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>provider_id                 provider_version
@@ -4533,7 +4538,7 @@
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>packet_digest
 </code></pre></div>
 <p><code>omissions</code> makes truncation, unavailable sources, and failed provider lookups explicit. Hits are advisory references with provenance and confidence; consumers resolve and verify target files before use. An index health claim is usable only when its schema is valid, its source snapshot matches, required entity counts are non-zero, referenced paths resolve, and freshness checks pass. Otherwise composition degrades to a deterministic filesystem/source search implementation.</p>
-<p>The provider boundary is intentionally narrow: it retrieves and ranks information but cannot dispatch effects, mutate task state, grant capabilities, or become an authority source. Exact value types and versioned schemas should be added here only when their source implementation lands.</p>
+<p>The provider boundary is intentionally narrow: it retrieves observations but cannot dispatch effects, mutate task state, grant capabilities, or become an authority source. Empty observations are successful values; an unbuilt, unavailable, stale, or invalid source is a typed failure for deterministic fallback.</p>
 <hr />
 <h2 id="implementation-evidence">Implementation Evidence</h2>
 <ul>

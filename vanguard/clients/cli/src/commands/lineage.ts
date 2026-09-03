@@ -6,7 +6,7 @@ import { clientFor } from "../composition/client-for.js";
 // vg lineage inspect <lineage-id> [--json]
 export async function handleLineage(args: string[], options: ParsedCli): Promise<number> {
   const subcommand = args[0];
-  const client = clientFor(options);
+  const client = await clientFor(options);
 
   if (!subcommand) {
     console.error("Missing subcommand for lineage (tree, inspect)");

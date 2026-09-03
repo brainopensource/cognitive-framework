@@ -1,0 +1,30 @@
+{
+  "schema": "cmx06.ablation/1",
+  "name": "CMX-06 mediated reviewer hermetic ablation",
+  "mode": "lam",
+  "control": {
+    "id": "sequential",
+    "topology": ["Planner", "Implementer", "Verifier"]
+  },
+  "treatment": {
+    "id": "reviewer_in_loop",
+    "topology": ["Planner", "Implementer", "Reviewer", "Verifier"]
+  },
+  "primary_metric": "externally_verified_task_success_rate",
+  "secondary_metrics": [
+    "turns",
+    "tokens",
+    "cost_per_solved_task",
+    "no_patch_rate"
+  ],
+  "acceptance": {
+    "rule": "treatment_cost_adjusted_success_gte_control",
+    "regression_allowed": false
+  },
+  "max_attempts_per_task_per_arm": 1,
+  "evidence_policy": {
+    "lam_is_instrumentation_only": true,
+    "live_claims": false,
+    "unknown_usage_is_not_zero": true
+  }
+}

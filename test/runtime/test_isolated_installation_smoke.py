@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tarfile
 import tempfile
 import unittest
@@ -71,7 +72,7 @@ class TestIsolatedInstallationSmoke(unittest.TestCase):
         shutil.rmtree(self.tmp_ws, ignore_errors=True)
 
     def _run_cli(self, args: list[str], check: bool = True) -> subprocess.CompletedProcess[str]:
-        cmd = ["python3", "-m", "vanguard.packages.runtime.cli"] + args
+        cmd = [sys.executable, "-m", "vanguard.packages.runtime.cli"] + args
         return subprocess.run(
             cmd,
             cwd=str(self.workspace),
@@ -84,7 +85,7 @@ class TestIsolatedInstallationSmoke(unittest.TestCase):
     def test_package_archive_completeness(self) -> None:
         """Verify sdist tarball includes required packages, schemas, manifests, and metadata."""
         self.assertTrue(self.sdist_path.exists())
-        self.assertEqual(self.sdist_filename, "vanguard-runtime-0.9.0b1.tar.gz")
+        self.assertIn(self.sdist_filename, ("vanguard-runtime-0.9.0b1.tar.gz", "vanguard_runtime-0.9.0b1.tar.gz"))
 
         pkg_root = self.extracted_pkg_root
         self.assertTrue((pkg_root / "pyproject.toml").is_file())

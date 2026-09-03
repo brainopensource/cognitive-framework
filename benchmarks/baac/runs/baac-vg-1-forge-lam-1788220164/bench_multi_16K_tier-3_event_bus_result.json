@@ -1,0 +1,62 @@
+{
+  "challengeId": "bench_multi_16K_tier-3_event_bus",
+  "tier": "tier-3",
+  "scope": "multi",
+  "contextBracket": "16K",
+  "preset": "vg-1-forge",
+  "model": "lam-mock",
+  "mode": "lam",
+  "status": "PASS",
+  "attribution": "PASS",
+  "turns": 10,
+  "promptTokens": 1500,
+  "completionTokens": 400,
+  "totalTokens": 1900,
+  "costUsd": 0.0,
+  "durationSeconds": 0.14,
+  "changedFiles": [
+    "src/event_bus.py"
+  ],
+  "diffPatch": "--- a/event_bus.py\n+++ b/event_bus.py\n@@ -1,2 +1,31 @@\n+\"\"\"Asynchronous Event Bus.\"\"\"\n+from typing import Callable, Any, Dict, List\n+\n class EventBus:\n-    pass\n+    def __init__(self):\n+        self._handlers = {}\n+        self._next_id = 1\n+\n+    def subscribe(self, topic: str, handler: Callable[[Any], None]) -> int:\n+        sub_id = self._next_id\n+        self._next_id += 1\n+        if topic not in self._handlers:\n+            self._handlers[topic] = []\n+        self._handlers[topic].append((sub_id, handler))\n+        return sub_id\n+\n+    def publish(self, topic: str, payload: Any) -> int:\n+        count = 0\n+        for top, handlers in list(self._handlers.items()):\n+            if top == topic or top == \"*\":\n+                for _, h in handlers:\n+                    h(payload)\n+                    count += 1\n+        return count\n+\n+    def unsubscribe(self, sub_id: int) -> bool:\n+        for top in list(self._handlers.keys()):\n+            self._handlers[top] = [(sid, h) for sid, h in self._handlers[top] if sid != sub_id]\n+            if not self._handlers[top]:\n+                del self._handlers[top]\n+        return True\n",
+  "oracle": {
+    "passed": true,
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "test_bus (__main__.TestEventBus.test_bus) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.003s\n\nOK\n",
+    "durationSeconds": 0.043,
+    "error": null,
+    "assertionCount": 1,
+    "failingAssertions": []
+  },
+  "aiJudgeScore": null,
+  "diagnosis": "All falsifiers green",
+  "metadata": {
+    "id": "bench_multi_16K_tier-3_event_bus",
+    "name": "Asynchronous In-Memory Event Bus",
+    "scope": "multi",
+    "context_bracket": "16K",
+    "tier": "tier-3",
+    "difficulty": 3,
+    "timeout_seconds": 35,
+    "entrypoint": "src/main.py",
+    "eval_type": "oracle",
+    "tags": [
+      "events",
+      "pubsub",
+      "patterns"
+    ],
+    "metadata": {},
+    "cli_args": {
+      "command": "cycle",
+      "preset": "vg-1-forge",
+      "mode": "lam",
+      "model": null,
+      "tier": "all",
+      "single": null,
+      "max_turns": 10,
+      "max_requests": 300,
+      "budget": 0.5,
+      "keep_scratch": false
+    }
+  }
+}

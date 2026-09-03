@@ -1,0 +1,27 @@
+{
+  "id": "claim-01H8Y",
+  "subject": "artifact-playbook-bugfix-v4",
+  "predicate": "beats_unguided_baseline",
+  "value": 0.14,
+  "protocol": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "evaluator": {
+    "evaluatorId": "eval-pytest-suite",
+    "class": "mechanically_reproducible",
+    "imageDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+  },
+  "environmentProfile": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+  "substrateProfile": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+  "taskDistribution": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+  "uncertainty": {
+    "kind": "interval",
+    "lower": 0.06,
+    "upper": 0.22,
+    "n": 412
+  },
+  "validity": {
+    "domains": [
+      "python"
+    ]
+  },
+  "invalidationConditions": []
+}

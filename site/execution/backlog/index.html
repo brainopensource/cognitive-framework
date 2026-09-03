@@ -2798,7 +2798,18 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="2.9 Coding Max Convergence Epic">
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-forge-and-chimera-disposition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1-Forge and Chimera disposition
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1-Forge and Chimera disposition">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -4405,7 +4416,18 @@
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="2.9 Coding Max Convergence Epic">
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#1-forge-and-chimera-disposition" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1-Forge and Chimera disposition
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1-Forge and Chimera disposition">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -4537,6 +4559,9 @@
 <li><strong><code>BLOCKED</code></strong>: Execution halted due to prerequisite milestone gates (e.g., M-9 blocked on M-8).</li>
 <li><strong><code>DONE</code></strong>: Implementation verified by passing tests, boundary checks, and frozen evidence receipts.</li>
 <li><strong><code>DEFERRED</code></strong>: Candidate rejected or postponed due to lack of measured lift or architectural misalignment.</li>
+<li><strong><code>REOPENED</code></strong>: A previously closed package has a current-source or
+  exact-subject falsifier that invalidates carrying its old closure forward.
+  The earlier receipt remains historical evidence for its own subject.</li>
 </ul>
 <hr />
 <h2 id="2-capability-family-backlog">2. Capability Family Backlog</h2>
@@ -4620,9 +4645,9 @@
 <td>M-8 Empirical Held-Out Canary Proof</td>
 <td><code>benchmarks</code></td>
 <td>Lane B</td>
-<td><code>BLOCKED</code></td>
+<td><code>BLOCKED</code> (on REL-01R/REL-02R)</td>
 <td>M-8</td>
-<td>Held-out real-model canary demonstrating $\ge 0.05$ lift without synthetic metrics.</td>
+<td>Held-out real-model canary demonstrating $\ge 0.05$ lift without synthetic metrics after the runtime executor and successor canary are qualification-ready.</td>
 </tr>
 <tr>
 <td><strong>MEM-03</strong></td>
@@ -4724,18 +4749,18 @@
 <td>Tree-Sitter &amp; SBFL Fault Localization</td>
 <td><code>ports</code> / <code>adapters</code></td>
 <td>Lane B</td>
-<td><code>IN_PROGRESS</code></td>
-<td>Ochiai suspiciousness ranking scoring failing test statements via <code>IndexPort</code>.</td>
-<td></td>
+<td><code>DEFERRED</code></td>
+<td>Post-CMX-07</td>
+<td>Optional treatment; may enter WIP only after the canonical single-worker baseline is qualified and a preregistered ablation exists.</td>
 </tr>
 <tr>
 <td><strong>TLS-04</strong></td>
 <td>AST Syntax Pre-Flight Gate (&lt;0.2ms)</td>
 <td><code>adapters</code></td>
 <td>Lane A</td>
-<td><code>IN_PROGRESS</code></td>
-<td>In-process parse gate returning line-level syntax errors with zero turn penalty.</td>
-<td></td>
+<td><code>DEFERRED</code></td>
+<td>Post-CMX-07</td>
+<td>Optional treatment; current finish work must first make verification counts and subject binding truthful.</td>
 </tr>
 <tr>
 <td><strong>TLS-05</strong></td>
@@ -4855,18 +4880,36 @@
 <td>Wave H0: Tooling Integrity &amp; Exact Subject</td>
 <td><code>benchmarks</code></td>
 <td>Lane B</td>
-<td><code>IN_PROGRESS</code></td>
+<td><code>DONE</code> (historical subject only)</td>
 <td>M-8</td>
-<td>Remove synthetic metrics from runner; ensure official adapter path.</td>
+<td>Structural dry-run and injected seams were delivered, but current-source audit found the live executor cannot return a patch or execute a bounded multi-turn write-capable attempt.</td>
+</tr>
+<tr>
+<td><strong>REL-01R</strong></td>
+<td>Current-Subject Empirical Runner Repair</td>
+<td><code>benchmarks</code> / <code>runtime</code></td>
+<td>Lane B</td>
+<td><code>IN_PROGRESS</code></td>
+<td>W-092-F0</td>
+<td>Bind one write-capable multi-turn runtime attempt to patch, event/trajectory, usage and exterior-verdict identities; restore HEAD-bound LDA/navigation health.</td>
 </tr>
 <tr>
 <td><strong>REL-02</strong></td>
-<td>Wave H1: 10-Task Canary Validation</td>
+<td>Wave H1: Frozen 10-Task Canary</td>
 <td><code>benchmarks</code></td>
 <td>Both</td>
-<td><code>BLOCKED</code> (on H0)</td>
-<td>10 valid tasks, $\ge 8/10$ patches, $\ge 6/10$ external evaluator passes.</td>
-<td></td>
+<td><code>DONE</code> (historical artifact only)</td>
+<td>M-8</td>
+<td>The old artifact remains immutable, but title/payload/workspace duplication and current-subject drift prevent its reuse as qualification evidence.</td>
+</tr>
+<tr>
+<td><strong>REL-02R</strong></td>
+<td>Successor Uncontaminated Canary</td>
+<td><code>benchmarks</code></td>
+<td>Lane B</td>
+<td><code>BLOCKED</code> (on REL-01R)</td>
+<td>W-092-F0 / M-8</td>
+<td>Freeze a successor only after every task, workspace, oracle, split, base revision and digest resolves to one unique subject.</td>
 </tr>
 <tr>
 <td><strong>REL-03</strong></td>
@@ -5053,39 +5096,39 @@ composition/lifecycle authority; infrastructure stays behind generic ports.</p>
 <td><strong>CMX-01</strong></td>
 <td>Current-mechanism delta and three presets</td>
 <td><code>packs/code-default</code>, manifests</td>
-<td><code>APPROVED</code></td>
+<td><code>REOPENED</code> (product divergence)</td>
 <td>EWK-Q disposition</td>
-<td><code>fast</code>, <code>balanced</code>, and <code>max</code> are data-selected compositions over one runtime; no duplicate store, coordinator, tool broker, or evaluator</td>
+<td>Public fast/balanced/max still need accepted later harness behavior folded into one data-selected catalog; experimental manifest names are not product presets.</td>
 </tr>
 <tr>
 <td><strong>CMX-02</strong></td>
 <td>Port-backed repository intelligence</td>
-<td><code>ports/index.py</code>, <code>adapters</code>, code-pack bindings</td>
-<td><code>APPROVED</code></td>
-<td>CMX-01</td>
-<td>Search, symbols, dependencies, test mapping, and repository map have provenance, path containment, deterministic fallback, and bounded output; adapters never import <code>apps</code></td>
+<td><code>ports/index.py</code>, adapters, code-pack bindings</td>
+<td><code>PARTIAL</code></td>
+<td>CMX-09</td>
+<td><code>IndexPort</code> and <code>ContextPacket</code> exist, but the packet has no production caller and public presets do not declare the index component.</td>
 </tr>
 <tr>
 <td><strong>CMX-03</strong></td>
 <td>Durable plan/context/recovery loop</td>
 <td>code-pack policies + existing projections</td>
-<td><code>APPROVED</code></td>
-<td>CMX-01, CMX-02</td>
-<td>A cold-resumed task restores objective, constraints, discoveries, dead ends, modified files, latest verification, remaining budget, and next action without replaying settled effects</td>
+<td><code>PARTIAL</code></td>
+<td>CMX-09</td>
+<td>Approval re-entry preserves turns, but rich task-state facts are under-produced and application resume restores only one new turn with benchmark-mode approval semantics.</td>
 </tr>
 <tr>
 <td><strong>CMX-04</strong></td>
 <td>Multi-file and greenfield correctness</td>
 <td>code-pack policies and fixtures</td>
-<td><code>APPROVED</code></td>
-<td>CMX-03</td>
-<td>Change-surface closure and affected-test selection pass multi-file fixtures; greenfield work uses an explicit scaffold/baseline/evidence policy and never silently bypasses admission</td>
+<td><code>REVIEWING</code></td>
+<td>CMX-10A, CMX-11</td>
+<td>Hermetic policies/fixtures exist; the canonical runtime still fabricates a positive test count and repository-scale change-surface qualification is pending.</td>
 </tr>
 <tr>
 <td><strong>CMX-05</strong></td>
 <td>Coding Max application facade</td>
 <td><code>apps/coding_max</code>, shared application service, <code>vg</code></td>
-<td><code>APPROVED</code></td>
+<td><code>DONE (hermetic)</code></td>
 <td>CMX-03</td>
 <td>CLI and API invoke the same composition; run/status/resume/evidence/cost results agree; app owns no execution loop or provider HTTP</td>
 </tr>
@@ -5093,28 +5136,68 @@ composition/lifecycle authority; infrastructure stays behind generic ports.</p>
 <td><strong>CMX-06</strong></td>
 <td>Conditional review and mediated specialist roles</td>
 <td>manifests/topology/child runtime</td>
-<td><code>PROPOSED</code></td>
-<td>CMX-05 and accepted M-7 evidence</td>
-<td>Reviewer/localizer/test-investigator roles exchange artifacts by digest, receive attenuated budgets, run sequentially by default, and cannot override the verifier</td>
+<td><code>BLOCKED</code> (on CMX-07)</td>
+<td>CMX-05 and accepted baseline</td>
+<td>Reviewer/localizer/test-investigator roles remain disabled until one-role-at-a-time held-out ablations beat the qualified single-worker control.</td>
 </tr>
 <tr>
 <td><strong>CMX-07</strong></td>
 <td>Repository-scale qualification</td>
 <td>benchmark program</td>
-<td><code>PROPOSED</code></td>
+<td><code>BLOCKED</code> (on REL-01R, CMX-09..11)</td>
 <td>CMX-04, CMX-05</td>
-<td>Frozen internal bugfix, multi-file, migration, and greenfield set reports success, missingness, tokens, cost, latency, retries, resume parity, and external verdicts</td>
+<td>Re-freeze the exact multi-class subject only after canonical completion, long-session resume and progressive-context gates pass.</td>
 </tr>
 <tr>
 <td><strong>CMX-08</strong></td>
 <td>First-party reference-agent portfolio</td>
 <td>apps + independent packs/manifests</td>
-<td><code>PROPOSED</code></td>
+<td><code>TECHNICAL SLICE DONE</code></td>
 <td>M-10 and stable public composition contract</td>
 <td>Coding Max plus two non-coding supported agents install, run, resume, and emit attributable evidence through the same public framework contract</td>
 </tr>
+<tr>
+<td><strong>CMX-09</strong></td>
+<td>Canonical Harness Convergence</td>
+<td>runtime, code pack, manifests, thin app</td>
+<td><code>IN_PROGRESS</code></td>
+<td>W-092-F1</td>
+<td>Fold accepted later prompt/tool/recovery mechanisms into public presets; use one capability-derived admission/policy binding; keep Forge/Chimera engines off the supported product path.</td>
+</tr>
+<tr>
+<td><strong>CMX-10A</strong></td>
+<td>Truthful Task-Aware Completion</td>
+<td>runtime + code-pack completion policy</td>
+<td><code>APPROVED</code></td>
+<td>CMX-09</td>
+<td>Parse real verification counts and fail closed on zero, stale, partial, incomplete or task-inapplicable evidence across bugfix, feature, migration, greenfield and read-only tasks.</td>
+</tr>
+<tr>
+<td><strong>CMX-10B</strong></td>
+<td>Durable Long-Session Continuation</td>
+<td>runtime/session/task projection</td>
+<td><code>APPROVED</code></td>
+<td>CMX-10A</td>
+<td>Persist and restore exact task/composition/policy/budget/phase/next-action identity; prove 40+ turns and repeated fresh-process restarts without duplicate effects.</td>
+</tr>
+<tr>
+<td><strong>CMX-11</strong></td>
+<td>Progressive Repository Context &amp; Change Closure</td>
+<td>agency context, <code>IndexPort</code>, adapters, code pack</td>
+<td><code>APPROVED</code></td>
+<td>CMX-09, CMX-10B</td>
+<td>Put <code>ContextPacket</code> on the product path, reserve recovery/verification context, refresh by repository epoch, expose omissions, and prove multi-file/affected-test closure with deterministic fallback.</td>
+</tr>
 </tbody>
 </table>
+<h3 id="1-forge-and-chimera-disposition">1-Forge and Chimera disposition</h3>
+<p><code>ForgeEngine</code>, <code>ChimeraEngine</code>, their compilers and patchers are implemented
+experimental mechanisms. They are not a second supported runtime and are not a
+new active product family. The hard reports carrying Forge/Chimera manifest
+names execute those manifests through <code>ApplicationService</code>; they do not execute
+the separate engines. CMX-09 may port useful behavior into the canonical
+runtime, after which unused parallel loops should be retired or kept explicitly
+experimental. ToolScript, forks, mutation and self-modification remain deferred.</p>
 <h4 id="preset-contract">Preset contract</h4>
 <p>Presets change policy and ceilings, not runtime identity or authority. Numeric
 ceilings are calibrated later; their behavioral meanings are locked now.</p>
@@ -5200,25 +5283,22 @@ capability or performance claim is supported by an exact-subject receipt.</p>
 <h2 id="3-prioritized-next-up-queue-staging-for-activemd">3. Prioritized Next-Up Queue (Staging for active.md)</h2>
 <p>The dependency-ordered queue is:</p>
 <ol>
-<li><strong><code>REL-01</code> (H0 evidence integrity)</strong> — remove direct provider HTTP and
-   synthetic result metrics from the admissible path; use runtime adapters and
-   an exterior oracle.</li>
-<li><strong><code>REL-02</code> (H1 frozen canary)</strong> — freeze executable, content-addressed,
-   single-attempt tasks and explicit missingness before any live run.</li>
-<li><strong><code>FIN-A1</code> / <code>W-092-5</code> disposition</strong> — independently accept a valid M-8
-   bundle or record a negative/undeterminable result without threshold changes.</li>
-<li><strong><code>CMX-01</code> through <code>CMX-05</code></strong> — deliver the Coding Max vertical slice in
-   dependency order.</li>
-<li><strong><code>CMX-07</code></strong> — qualify the vertical slice before enabling optional
-   orchestration.</li>
-<li><strong><code>CMX-06</code> and experimental features</strong> — admit one treatment at a time only
-   after a preregistered ablation.</li>
-<li><strong><code>CMX-08</code></strong> — qualify the supported first-party agent portfolio on the road
-   to 1.0 after M-10.</li>
+<li>In parallel under lane WIP=1: <strong><code>REL-01R</code></strong> exact-subject runner/navigation
+   repair and <strong><code>CMX-09</code></strong> canonical product convergence.</li>
+<li><strong><code>REL-02R</code></strong> successor canary after REL-01R proves the evidence path.</li>
+<li><strong><code>CMX-10A</code></strong> truthful task-aware completion.</li>
+<li><strong><code>CMX-10B</code></strong> durable 40+ turn continuation and fresh-process parity.</li>
+<li><strong><code>CMX-11</code></strong> progressive repository context, affected-test mapping and
+   multi-file change closure.</li>
+<li><strong><code>CMX-07</code></strong> frozen multi-class product qualification.</li>
+<li><strong><code>CMX-06</code></strong> optional one-treatment-at-a-time specialist ablations.</li>
+<li><strong><code>FIN-A1</code> / <code>W-092-5</code></strong> governed-memory experiment and independent M-8
+   disposition; only an accepted positive M-8 result can authorize M-9.</li>
+<li><strong><code>CMX-08</code></strong> portfolio qualification after M-10 and a stable public contract.</li>
 </ol>
-<p><code>TLS-04</code> may be absorbed into CMX-04 if its measured latency and defect-catch
-rate justify the seam. <code>DOC-04</code> remains approved but is not on the critical
-product path.</p>
+<p><code>TLS-03</code>, <code>TLS-04</code>, <code>TLS-05</code>, mutation, branch search and swarm work remain
+deferred until CMX-07 identifies a measured bottleneck. <code>DOC-04</code> remains
+approved but is not on the critical backend path.</p>
 <hr />
 <h2 id="4-cross-references">4. Cross-References</h2>
 <ul>

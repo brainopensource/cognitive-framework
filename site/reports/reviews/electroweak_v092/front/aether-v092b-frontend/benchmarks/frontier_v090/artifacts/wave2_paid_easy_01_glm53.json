@@ -1,0 +1,55 @@
+{
+  "model": "z-ai/glm-5.3-flash",
+  "non_empirical": false,
+  "provider": "openrouter",
+  "rows": [
+    {
+      "after_digest": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "before_digest": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "challenge_id": "tier1_lru_ttl_cache",
+      "challenge_slot": "CODE-E",
+      "changed_files": [],
+      "class_name": "Coding",
+      "difficulty": "Easy",
+      "elapsed_s": 62.87,
+      "event_store_identity": "sha256:c63bc86a322fa4c1bb38a0d55a2f48fa1eeabeced2b925bc8f984172003ca44a",
+      "model": "openrouter:z-ai/glm-5.3-flash",
+      "non_empirical": false,
+      "oracle": {
+        "exit_code": 1,
+        "instrument_valid": true,
+        "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
+        "reason": "oracle_failed",
+        "result": false,
+        "stderr_digest": "sha256:6b2bf910364ab29dd19c24bda3ac8ab8031bfd2dcbe3efcc5317ab3a52212b95",
+        "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "wall_ms": 208.903
+      },
+      "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
+      "ordinal": 1,
+      "preset": "vg-code-v090-react-control",
+      "provider": "openrouter",
+      "row_digest": "sha256:373b7f97bb2ad95793f5a31c0a2c19c4a8b871bf23566d0a337a4e62acd6ba3d",
+      "run_id": "v090-01",
+      "schema": "aether.frontier-benchmark/2",
+      "task_digest": "sha256:7b9d33959234e36a70f0d343accb8240efb57349238bf8fea34c922b0ddf4889",
+      "terminal": "NO_PATCH",
+      "terminal_reason": "completed_without_source_patch",
+      "trajectory_digest": "sha256:c71d8909c48f7694f57d8de284f22b924296b0e9a52a28891d9e1e524adbd17d",
+      "trajectory_linkage": {
+        "event_store_identity": "sha256:c63bc86a322fa4c1bb38a0d55a2f48fa1eeabeced2b925bc8f984172003ca44a",
+        "status": "linked",
+        "trajectory_digest": "sha256:c71d8909c48f7694f57d8de284f22b924296b0e9a52a28891d9e1e524adbd17d"
+      },
+      "usage": {
+        "cached_tokens": null,
+        "completion_tokens": 791,
+        "cost_provenance": "measured",
+        "cost_usd": 0.000954,
+        "prompt_tokens": 11254
+      }
+    }
+  ],
+  "schema": "aether.frontier-benchmark-live-report/2",
+  "total_tokens_observed": 12045
+}

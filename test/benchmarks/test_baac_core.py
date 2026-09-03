@@ -137,7 +137,7 @@ class TestBaaCAttribution(unittest.TestCase):
         self.assertEqual(classify_attribution(fail_oracle, "COMPLETED", 2, 8, changed_files=("src/a.py",)), "LLM_COGNITIVE_ERROR")
 
         # 3. Budget exhausted -> Harness error
-        self.assertEqual(classify_attribution(fail_oracle, "BUDGET_EXHAUSTED", 5, 8, budget_exceeded=True), "HARNESS_ERROR")
+        self.assertEqual(classify_attribution(fail_oracle, "BUDGET_EXHAUSTED", 5, 8, budget_exceeded=True), "BUDGET_EXHAUSTED")
 
         # 4. Missing oracle script -> Dataset invalid
         missing_oracle = OracleResult(False, 1, "", "Oracle script missing", 0.0, error="Oracle script missing")
@@ -149,6 +149,8 @@ class TestBaaCAttribution(unittest.TestCase):
             ChallengeExecutionResult(
                 challenge_id="c1",
                 tier="easy",
+                scope="single",
+                context_bracket="2K",
                 preset="vg-1-forge",
                 model="deepseek",
                 mode="lam",
@@ -166,6 +168,8 @@ class TestBaaCAttribution(unittest.TestCase):
             ChallengeExecutionResult(
                 challenge_id="c2",
                 tier="easy",
+                scope="single",
+                context_bracket="2K",
                 preset="vg-1-forge",
                 model="deepseek",
                 mode="lam",

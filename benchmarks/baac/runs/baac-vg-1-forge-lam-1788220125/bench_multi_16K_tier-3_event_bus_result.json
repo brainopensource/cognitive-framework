@@ -1,0 +1,65 @@
+{
+  "challengeId": "bench_multi_16K_tier-3_event_bus",
+  "tier": "tier-3",
+  "scope": "multi",
+  "contextBracket": "16K",
+  "preset": "vg-1-forge",
+  "model": "lam-mock",
+  "mode": "lam",
+  "status": "FAIL",
+  "attribution": "LLM_COGNITIVE_ERROR",
+  "turns": 10,
+  "promptTokens": 1500,
+  "completionTokens": 400,
+  "totalTokens": 1900,
+  "costUsd": 0.0,
+  "durationSeconds": 0.14,
+  "changedFiles": [
+    "src/main.py"
+  ],
+  "diffPatch": "--- a/main.py\n+++ b/main.py\n@@ -0,0 +1 @@\n+# Solution code\n",
+  "oracle": {
+    "passed": false,
+    "exitCode": 1,
+    "stdout": "",
+    "stderr": "test_bus (__main__.TestEventBus.test_bus) ... ERROR\n\n======================================================================\nERROR: test_bus (__main__.TestEventBus.test_bus)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rocha/Coding/Aether-D-System/benchmarks/baac/challenges/tier-3/bench_multi_16K_tier-3_event_bus/oracle/verify.py\", line 10, in test_bus\n    sub_id = bus.subscribe('user.created', lambda p: received.append(p))\n             ^^^^^^^^^^^^^\nAttributeError: 'EventBus' object has no attribute 'subscribe'\n\n----------------------------------------------------------------------\nRan 1 test in 0.002s\n\nFAILED (errors=1)\n",
+    "durationSeconds": 0.056,
+    "error": "test_bus (__main__.TestEventBus.test_bus) ... ERROR\n\n======================================================================\nERROR: test_bus (__main__.TestEventBus.test_bus)\n---------------------------",
+    "assertionCount": 1,
+    "failingAssertions": [
+      "test_bus",
+      "(errors=1)"
+    ]
+  },
+  "aiJudgeScore": null,
+  "diagnosis": "test_bus (__main__.TestEventBus.test_bus) ... ERROR\n\n======================================================================\nERROR: test_bus (__main__.TestEventBus.test_bus)\n---------------------------",
+  "metadata": {
+    "id": "bench_multi_16K_tier-3_event_bus",
+    "name": "Asynchronous In-Memory Event Bus",
+    "scope": "multi",
+    "context_bracket": "16K",
+    "tier": "tier-3",
+    "difficulty": 3,
+    "timeout_seconds": 35,
+    "entrypoint": "src/main.py",
+    "eval_type": "oracle",
+    "tags": [
+      "events",
+      "pubsub",
+      "patterns"
+    ],
+    "metadata": {},
+    "cli_args": {
+      "command": "cycle",
+      "preset": "vg-1-forge",
+      "mode": "lam",
+      "model": null,
+      "tier": "all",
+      "single": null,
+      "max_turns": 10,
+      "max_requests": 300,
+      "budget": 0.5,
+      "keep_scratch": false
+    }
+  }
+}

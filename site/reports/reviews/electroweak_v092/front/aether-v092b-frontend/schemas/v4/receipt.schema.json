@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/v4/receipt.schema.json",
+  "$comment": "Owning section: 04 §5; GTS-13C T1.6. Undeterminable occurrence remains first-class.",
+  "title": "Receipt",
+  "type": "object",
+  "required": ["descriptorDigest", "outcome", "observedAt", "resultDigest", "affectedResources"],
+  "properties": {
+    "descriptorDigest": { "$ref": "primitives.schema.json#/$defs/Digest" },
+    "grantId": { "$ref": "primitives.schema.json#/$defs/GrantId" },
+    "outcome": { "enum": ["ok", "failed", "undeterminable"] },
+    "observedAt": { "$ref": "primitives.schema.json#/$defs/Timestamp" },
+    "resultDigest": { "$ref": "primitives.schema.json#/$defs/Digest" },
+    "affectedResources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["resource", "change"],
+        "properties": {
+          "resource": { "type": "string", "minLength": 1 },
+          "change": { "enum": ["created", "modified", "deleted", "observed"] },
+          "preDigest": { "$ref": "primitives.schema.json#/$defs/Digest" },
+          "postDigest": { "$ref": "primitives.schema.json#/$defs/Digest" },
+          "patchRef": { "$ref": "primitives.schema.json#/$defs/Digest" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "workingDirectory": { "type": "string", "minLength": 1 },
+    "uncertainty": {
+      "type": "object",
+      "required": ["scope", "reason"],
+      "properties": {
+        "scope": { "enum": ["effect_occurrence", "evidence_completeness", "result"] },
+        "reason": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "note": { "type": "string" }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    { "if": { "properties": { "outcome": { "const": "undeterminable" } }, "required": ["outcome"] }, "then": { "required": ["uncertainty"] } }
+  ]
+}

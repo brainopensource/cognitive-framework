@@ -1,0 +1,182 @@
+{
+  "id": "t3-plugin-dag",
+  "tier": 3,
+  "title": "SWE-Verified: Plugin dependency DAG topological load order and cycle detection",
+  "workspace": {
+    "plugin_dag/__init__.py": "\"\"\"Plugin dependency-DAG loading package.\"\"\"\nfrom .graph import PluginGraph, PluginCycleError\nfrom .loader import PluginLoader\nfrom .registry import PluginRegistry, DuplicatePluginError, default_factory\n\n__all__ = [\n    \"PluginGraph\",\n    \"PluginCycleError\",\n    \"PluginLoader\",\n    \"PluginRegistry\",\n    \"DuplicatePluginError\",\n    \"default_factory\",\n]\n",
+    "plugin_dag/graph.py": "\"\"\"Dependency graph with topological ordering.\"\"\"\n\n\nclass PluginCycleError(Exception):\n    \"\"\"Raised when the plugin dependency graph contains a cycle.\"\"\"\n\n\nclass PluginGraph:\n    def __init__(self):\n        self._deps = {}  # node -> set of nodes it depends on\n\n    def add_node(self, name):\n        self._deps.setdefault(name, set())\n\n    def add_edge(self, dependent, dependency):\n        self.add_node(dependent)\n        self.add_node(dependency)\n        self._deps[dependent].add(dependency)\n\n    def nodes(self):\n        return sorted(self._deps)\n\n    def dependencies_of(self, name):\n        return sorted(self._deps.get(name, set()))\n\n    def topo_sort(self):\n        \"\"\"Return node names ordered so every dependency precedes dependents.\"\"\"\n        indegree = {name: 0 for name in self._deps}\n        dependents = {name: [] for name in self._deps}\n        for node, deps in self._deps.items():\n            for dep in deps:\n                dependents[dep].append(node)\n                indegree[node] += 1\n        ready = sorted(n for n, d in indegree.items() if d == 0)\n        order = []\n        while ready:\n            node = ready.pop(0)\n            order.append(node)\n            for parent in dependents[node]:\n                indegree[parent] -= 1\n                if indegree[parent] == 0:\n                    ready.append(parent)\n            ready.sort()\n        # Kahn's algorithm cannot remove nodes that are part of a cycle (or\n        # depend on one). Returning the prefix would omit declared plugins,\n        # so reject the graph instead.\n        if len(order) != len(self._deps):\n            cyclic_nodes = sorted(set(self._deps) - set(order))\n            raise PluginCycleError(\n                \"plugin dependency cycle detected: \" + \", \".join(cyclic_nodes)\n            )\n        return order\n",
+    "plugin_dag/loader.py": "\"\"\"Loads plugin instances respecting dependency order.\"\"\"\nfrom .graph import PluginGraph\nfrom .registry import PluginRegistry, default_factory\n\n\nclass PluginLoader:\n    def __init__(self, registry=None, graph=None):\n        self.registry = registry if registry is not None else PluginRegistry()\n        self.graph = graph if graph is not None else PluginGraph()\n\n    def declare(self, name, factory=None, depends_on=()):\n        self.registry.register(name, factory or default_factory)\n        self.graph.add_node(name)\n        for dep in depends_on:\n            self.graph.add_edge(name, dep)\n\n    def load_all(self):\n        \"\"\"Instantiate every declared plugin, dependencies first.\n\n        Returns ``{name: instance}``.\n        \"\"\"\n        order = self.graph.topo_sort()\n        self.last_load_order = list(order)\n        instances = {}\n        for name in order:\n            instance = self.registry.factory_for(name)(name)\n            instance[\"initialized\"] = True\n            instances[name] = instance\n        return instances\n",
+    "plugin_dag/registry.py": "\"\"\"Plugin registry with duplicate-safe factories.\"\"\"\n\n\nclass DuplicatePluginError(Exception):\n    pass\n\n\nclass PluginRegistry:\n    def __init__(self):\n        self._factories = {}\n\n    def register(self, name, factory):\n        if name in self._factories:\n            raise DuplicatePluginError(name)\n        self._factories[name] = factory\n\n    def factory_for(self, name):\n        return self._factories[name]\n\n    def __contains__(self, name):\n        return name in self._factories\n\n\ndef default_factory(name):\n    return {\"plugin\": name, \"initialized\": False}\n",
+    "problem.md": "# Challenge: Plugin DAG Loader\n\nThe plugin system loads extensions declared as a dependency DAG:\n\n1. `graph.py`: `PluginGraph.topo_sort()` silently returns a partial ordering\n   when the graph contains a cycle instead of raising `PluginCycleError`.\n2. `loader.py`: `PluginLoader.load_all()` instantiates plugins sorted by\n   name instead of topological dependency order.\n\nFix both defects. Do not modify the test suite.\n",
+    "tests/test_plugin_dag.py": "import os\nimport sys\n\nimport pytest\n\nsys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))\n\nfrom plugin_dag import (\n    DuplicatePluginError,\n    PluginCycleError,\n    PluginLoader,\n    PluginRegistry,\n)\n\n\ndef build_loader():\n    loader = PluginLoader()\n    # NOTE: names deliberately break alphabetical order relative to the\n    # dependency chain: api -> worker -> core.\n    loader.declare(\"api\", depends_on=[\"worker\"])\n    loader.declare(\"worker\", depends_on=[\"core\"])\n    loader.declare(\"core\")\n    loader.declare(\"util\")  # independent plugin\n    return loader\n\n\ndef test_dependency_order_loading():\n    loader = build_loader()\n    instances = loader.load_all()\n    assert set(instances) == {\"api\", \"worker\", \"core\", \"util\"}\n    assert all(inst[\"initialized\"] for inst in instances.values())\n\n\ndef test_topological_order_is_respected():\n    loader = build_loader()\n    loader.load_all()\n    order = loader.last_load_order\n    assert order.index(\"core\") < order.index(\"worker\") < order.index(\"api\")\n\n\ndef test_cycle_detection():\n    loader = PluginLoader()\n    loader.declare(\"alpha\", depends_on=[\"beta\"])\n    loader.declare(\"beta\", depends_on=[\"alpha\"])\n    with pytest.raises(PluginCycleError):\n        loader.load_all()\n\n\ndef test_registry_lookup():\n    registry = PluginRegistry()\n    registry.register(\"solo\", lambda n: {\"plugin\": n})\n    assert \"solo\" in registry\n    assert registry.factory_for(\"solo\")(\"solo\")[\"plugin\"] == \"solo\"\n    with pytest.raises(DuplicatePluginError):\n        registry.register(\"solo\", lambda n: n)\n\n\ndef test_single_plugin_load():\n    loader = PluginLoader()\n    loader.declare(\"only\")\n    instances = loader.load_all()\n    assert instances[\"only\"][\"initialized\"] is True\n\n",
+    "todo.md": "# Workspace Task Plan (todo.md)\n\n- [x] [T-001] Investigate codebase and plan implementation for: # Challenge: Plugin DAG Loader <!-- Inspected graph, loader, registry, exports, and tests. Root causes are explicitly localized: topo_sort omits leftover cyclic nodes; load_all ignores topo_sort. -->\n- [x] [T-002] Implement core solution and verify with tests <!-- Patched topo_sort to raise PluginCycleError when not all nodes are ordered, and changed load_all to consume graph.topo_sort(). -->\n- [x] [T-003] Run full hermetic verification and AST audit <!-- Full pytest suite passes (5/5); git diff --check passes; no temporary reproducer files were created. AST/source audit confirms topo_sort is used by load_all and cycle leftovers raise PluginCycleError. -->\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "list_dir",
+            "arguments": "{\"path\": \".\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 1,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"plugin_dag/graph.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"plugin_dag/loader.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"plugin_dag/registry.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"tests/test_plugin_dag.py\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 2,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"content\": \"\\\"\\\"\\\"Dependency graph with topological ordering.\\\"\\\"\\\"\\n\\n\\nclass PluginCycleError(Exception):\\n    \\\"\\\"\\\"Raised when the plugin dependency graph contains a cycle.\\\"\\\"\\\"\\n\\n\\nclass PluginGraph:\\n    def __init__(self):\\n        self._deps = {}  # node -> set of nodes it depends on\\n\\n    def add_node(self, name):\\n        self._deps.setdefault(name, set())\\n\\n    def add_edge(self, dependent, dependency):\\n        self.add_node(dependent)\\n        self.add_node(dependency)\\n        self._deps[dependent].add(dependency)\\n\\n    def nodes(self):\\n        return sorted(self._deps)\\n\\n    def dependencies_of(self, name):\\n        return sorted(self._deps.get(name, set()))\\n\\n    def topo_sort(self):\\n        \\\"\\\"\\\"Return node names ordered so every dependency precedes dependents.\\\"\\\"\\\"\\n        indegree = {name: 0 for name in self._deps}\\n        dependents = {name: [] for name in self._deps}\\n        for node, deps in self._deps.items():\\n            for dep in deps:\\n                dependents[dep].append(node)\\n                indegree[node] += 1\\n        ready = sorted(n for n, d in indegree.items() if d == 0)\\n        order = []\\n        while ready:\\n            node = ready.pop(0)\\n            order.append(node)\\n            for parent in dependents[node]:\\n                indegree[parent] -= 1\\n                if indegree[parent] == 0:\\n                    ready.append(parent)\\n            ready.sort()\\n        if len(order) != len(self._deps):\\n            raise PluginCycleError()\\n        return order\", \"path\": \"plugin_dag/graph.py\"}"
+          }
+        }
+      ],
+      "content": "Now I understand both bugs clearly. Let me fix them.\n\n**Bug 1** (`graph.py`): `topo_sort()` silently returns a partial order when there's a cycle, instead of raising `PluginCycleError`.\n\n**Bug 2** (`loader.py`): `load_all()` sorts by name instead of using topological order.\n\n"
+    },
+    {
+      "tool_messages_seen": 3,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"content\": \"\\\"\\\"\\\"Loads plugin instances respecting dependency order.\\\"\\\"\\\"\\nfrom .graph import PluginGraph\\nfrom .registry import PluginRegistry, default_factory\\n\\n\\nclass PluginLoader:\\n    def __init__(self, registry=None, graph=None):\\n        self.registry = registry if registry is not None else PluginRegistry()\\n        self.graph = graph if graph is not None else PluginGraph()\\n\\n    def declare(self, name, factory=None, depends_on=()):\\n        self.registry.register(name, factory or default_factory)\\n        self.graph.add_node(name)\\n        for dep in depends_on:\\n            self.graph.add_edge(name, dep)\\n\\n    def load_all(self):\\n        \\\"\\\"\\\"Instantiate every declared plugin, dependencies first.\\n\\n        Returns ``{name: instance}``.\\n        \\\"\\\"\\\"\\n        order = self.graph.topo_sort()\\n        self.last_load_order = list(order)\\n        instances = {}\\n        for name in order:\\n            instance = self.registry.factory_for(name)(name)\\n            instance[\\\"initialized\\\"] = True\\n            instances[name] = instance\\n        return instances\", \"path\": \"plugin_dag/loader.py\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 4,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"cd /workspace && python -m pytest tests/test_plugin_dag.py -v\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 5,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"cd /workspace && python -m pytest tests/test_plugin_dag.py -v 2>&1\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 6,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python -m pytest tests/test_plugin_dag.py -v\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 7,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"which python3\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 8,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python3 -m pytest tests/test_plugin_dag.py -v\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 9,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"plugin_dag/graph.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"plugin_dag/loader.py\"}"
+          }
+        }
+      ],
+      "content": "All 5 tests pass. Let me verify the final state of the two fixed files:\n\n"
+    },
+    {
+      "tool_messages_seen": 10,
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "content": "Both fixes are minimal and correct:\n\n1. **`graph.py`**: Added a check after the Kahn's algorithm loop \u2014 if `len(order) != len(self._deps)`, a cycle exists (some nodes never reached indegree 0), so `PluginCycleError` is raised instead of silently returning a partial order.\n\n2. **`loader.py`**: Changed `order = sorted(self.graph.nodes())` to `order = self.graph.topo_sort()` so plugins are instantiated in proper dependency order (dependencies before dependents) rather than alphabetical name order.\n\nAll 5 tests pass."
+    }
+  ]
+}

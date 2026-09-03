@@ -1,0 +1,180 @@
+
+======================================================================
+⚡ VANGUARD BENCHMARK DRY RUN (27 Rows Deterministic Matrix)
+======================================================================
+• Preregistration Artifact : /home/rocha/Coding/Aether-D-System/benchmarks/frontier_v090/artifacts/preregistration.json
+• Preregistration Digest   : sha256:dac286c92976f5e5a5495d3f50533c2e269baeec3298eb18a4ce278c825a4f66
+• Framework Digest        : sha256:4e33178087e69ced81069af6ff469a76110c5e9054d7a42657a06f2487da9c2c
+• Subject Digest          : sha256:3fa714a3bf34e37128f27f516d273eb8ef3c37275cfd6861224ec9949555eab9
+• Target Model            : deepseek/deepseek-v4-flash-0731
+----------------------------------------------------------------------
+
+[01/27] 79.6ms 🔹 [v090-04] CODING (Easy) | Slot: CODE-E
+        Preset   : vg-code-v090-claude-shaped (manifest: sha256:034a07f4...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are a coding CLI. Exactly ONE tool call per turn. Always use tools; do not reply with plain c..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[02/27] 11.2ms 🔹 [v090-25] BUGFIX (Hard) | Slot: BUG-H
+        Preset   : vg-bugfix-v090-v1-direct (manifest: sha256:92293c8d...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an autonomous SOTA coding agent operating on a local workspace. CRITICAL RULES: - Exactly..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[03/27] 10.9ms 🔹 [v090-20] RESEARCH (Easy) | Slot: RESEARCH-E
+        Preset   : vg-research-v090-v1-local (manifest: sha256:9a22a834...)
+        Tools    : [fs.read, fs.search]
+        Prompt   : "You are a local research agent. Search repository documents and produce a concise evidence-backed..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[04/27] 11.4ms 🔹 [v090-10] CODING (Easy) | Slot: CODE-E
+        Preset   : vg-code-v090-lex-surgical (manifest: sha256:4cebf56d...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an autonomous senior software engineer solving a real repository task. Use this evidence-..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[05/27] 11.7ms 🔹 [v090-08] CODING (Medium) | Slot: CODE-M
+        Preset   : vg-code-v090-opencode-shaped (manifest: sha256:177bf8a8...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an OpenCode-style agent. Exactly ONE tool call per turn. Always use tools; do not reply w..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[06/27] 12.7ms 🔹 [v090-13] CODING (Easy) | Slot: CODE-E
+        Preset   : vg-code-v090-lim-falsifier (manifest: sha256:b2863654...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are the LIM (LLM Intelligence Machine) inductive synthesis and falsification agent. Your prim..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[07/27] 11.0ms 🔹 [v090-21] RESEARCH (Hard) | Slot: RESEARCH-H
+        Preset   : vg-research-v090-v1-local (manifest: sha256:9a22a834...)
+        Tools    : [fs.read, fs.search]
+        Prompt   : "You are a local research agent. Search repository documents and produce a concise evidence-backed..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[08/27] 11.7ms 🔹 [v090-03] CODING (Hard) | Slot: CODE-H
+        Preset   : vg-code-v090-react-control (manifest: sha256:3f6eeee9...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an autonomous SOTA coding agent operating on a local workspace. CRITICAL RULES: - Exactly..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[09/27] 11.1ms 🔹 [v090-22] RESEARCH (Easy) | Slot: RESEARCH-E
+        Preset   : vg-research-v090-v2-web-corroborated (manifest: sha256:2afe97fa...)
+        Tools    : [fs.read, fs.search]
+        Prompt   : "You are a research agent with the same local read-only tools as Research V1. Decompose questions,..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[10/27] 11.6ms 🔹 [v090-01] CODING (Easy) | Slot: CODE-E
+        Preset   : vg-code-v090-react-control (manifest: sha256:3f6eeee9...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an autonomous SOTA coding agent operating on a local workspace. CRITICAL RULES: - Exactly..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[11/27] 12.1ms 🔹 [v090-11] CODING (Medium) | Slot: CODE-M
+        Preset   : vg-code-v090-lex-surgical (manifest: sha256:4cebf56d...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an autonomous senior software engineer solving a real repository task. Use this evidence-..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[12/27] 11.5ms 🔹 [v090-05] CODING (Medium) | Slot: CODE-M
+        Preset   : vg-code-v090-claude-shaped (manifest: sha256:034a07f4...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are a coding CLI. Exactly ONE tool call per turn. Always use tools; do not reply with plain c..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[13/27] 11.0ms 🔹 [v090-19] TUTOR (Hard) | Slot: TUTOR-H
+        Preset   : vg-tutor-v090-v2-evidence-graph (manifest: sha256:7e30a513...)
+        Tools    : [fs.read, fs.search]
+        Prompt   : "You are a read-only evidence-graph code tutor. Build a temporary graph of files, symbols, require..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[14/27] 10.9ms 🔹 [v090-16] TUTOR (Easy) | Slot: TUTOR-E
+        Preset   : vg-tutor-v090-v1-read-search (manifest: sha256:b76b6127...)
+        Tools    : [fs.read, fs.search]
+        Prompt   : "You are a read-only code tutor. Search and read the repository, then explain the requested execut..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[15/27] 12.0ms 🔹 [v090-12] CODING (Hard) | Slot: CODE-H
+        Preset   : vg-code-v090-lex-surgical (manifest: sha256:4cebf56d...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an autonomous senior software engineer solving a real repository task. Use this evidence-..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[16/27] 11.4ms 🔹 [v090-26] BUGFIX (Easy) | Slot: BUG-E
+        Preset   : vg-bugfix-v090-v2-reproduce-verify (manifest: sha256:e51a16ed...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an autonomous senior software engineer solving a real repository task. Use this evidence-..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[17/27] 12.0ms 🔹 [v090-07] CODING (Easy) | Slot: CODE-E
+        Preset   : vg-code-v090-opencode-shaped (manifest: sha256:177bf8a8...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an OpenCode-style agent. Exactly ONE tool call per turn. Always use tools; do not reply w..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[18/27] 11.5ms 🔹 [v090-24] BUGFIX (Easy) | Slot: BUG-E
+        Preset   : vg-bugfix-v090-v1-direct (manifest: sha256:92293c8d...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an autonomous SOTA coding agent operating on a local workspace. CRITICAL RULES: - Exactly..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[19/27] 10.9ms 🔹 [v090-23] RESEARCH (Hard) | Slot: RESEARCH-H
+        Preset   : vg-research-v090-v2-web-corroborated (manifest: sha256:2afe97fa...)
+        Tools    : [fs.read, fs.search]
+        Prompt   : "You are a research agent with the same local read-only tools as Research V1. Decompose questions,..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[20/27] 11.8ms 🔹 [v090-09] CODING (Hard) | Slot: CODE-H
+        Preset   : vg-code-v090-opencode-shaped (manifest: sha256:177bf8a8...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an OpenCode-style agent. Exactly ONE tool call per turn. Always use tools; do not reply w..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[21/27] 10.9ms 🔹 [v090-18] TUTOR (Easy) | Slot: TUTOR-E
+        Preset   : vg-tutor-v090-v2-evidence-graph (manifest: sha256:7e30a513...)
+        Tools    : [fs.read, fs.search]
+        Prompt   : "You are a read-only evidence-graph code tutor. Build a temporary graph of files, symbols, require..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[22/27] 11.1ms 🔹 [v090-17] TUTOR (Hard) | Slot: TUTOR-H
+        Preset   : vg-tutor-v090-v1-read-search (manifest: sha256:b76b6127...)
+        Tools    : [fs.read, fs.search]
+        Prompt   : "You are a read-only code tutor. Search and read the repository, then explain the requested execut..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[23/27] 12.0ms 🔹 [v090-02] CODING (Medium) | Slot: CODE-M
+        Preset   : vg-code-v090-react-control (manifest: sha256:3f6eeee9...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an autonomous SOTA coding agent operating on a local workspace. CRITICAL RULES: - Exactly..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[24/27] 11.7ms 🔹 [v090-06] CODING (Hard) | Slot: CODE-H
+        Preset   : vg-code-v090-claude-shaped (manifest: sha256:034a07f4...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are a coding CLI. Exactly ONE tool call per turn. Always use tools; do not reply with plain c..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[25/27] 11.3ms 🔹 [v090-27] BUGFIX (Hard) | Slot: BUG-H
+        Preset   : vg-bugfix-v090-v2-reproduce-verify (manifest: sha256:e51a16ed...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are an autonomous senior software engineer solving a real repository task. Use this evidence-..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[26/27] 11.5ms 🔹 [v090-14] CODING (Medium) | Slot: CODE-M
+        Preset   : vg-code-v090-lim-falsifier (manifest: sha256:b2863654...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are the LIM (LLM Intelligence Machine) inductive synthesis and falsification agent. Your prim..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+[27/27] 11.5ms 🔹 [v090-15] CODING (Hard) | Slot: CODE-H
+        Preset   : vg-code-v090-lim-falsifier (manifest: sha256:b2863654...)
+        Tools    : [fs.read, fs.search, patch.apply, proc.exec]
+        Prompt   : "You are the LIM (LLM Intelligence Machine) inductive synthesis and falsification agent. Your prim..."
+        Terminal : DRY_RUN_COMPLETE (non-empirical fake pass)
+        ..................................................................
+
+======================================================================
+✅ DRY RUN REPORT WRITTEN: /home/rocha/Coding/Aether-D-System/benchmarks/frontier_v090/artifacts/dry_run_report.json
+📊 Rows Verified: 27 / 27 | Mode: Non-Empirical Deterministic
+======================================================================
+
+dry-run complete: 27 rows; non-empirical

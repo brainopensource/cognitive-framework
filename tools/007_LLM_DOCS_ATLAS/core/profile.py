@@ -3,7 +3,7 @@
 A profile is pure data (a TOML/YAML file or the built-in generic default).
 Core modules must never hard-code project-specific paths, documentation
 taxonomies, or authority vocabularies — everything project-specific belongs
-in a profile. The AETHER integration is just one profile among many.
+in a profile. Project integration is configured via profiles.
 """
 from __future__ import annotations
 

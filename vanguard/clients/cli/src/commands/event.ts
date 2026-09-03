@@ -24,7 +24,7 @@ export async function handleEvent(args: string[], options: ParsedCli): Promise<n
   const afterSeqIdx = args.indexOf("--after-seq");
   const afterSeq = afterSeqIdx >= 0 && args[afterSeqIdx + 1] ? args[afterSeqIdx + 1] : undefined;
 
-  const client = clientFor(options);
+  const client = await clientFor(options);
 
   try {
     for await (const item of client.streamEvents({ runId, afterSeq })) {

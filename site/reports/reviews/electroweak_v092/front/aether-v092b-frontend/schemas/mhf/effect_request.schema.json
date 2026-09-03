@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/mhf/effect_request.schema.json",
+  "$comment": "D-21: the single unified EffectRequest shape. Generated dataclasses are the only Python mirror (A-4).",
+  "title": "EffectRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["verb", "args", "selector", "sink", "reservation"],
+  "properties": {
+    "verb": { "type": "string", "minLength": 1 },
+    "args": { "$ref": "#/$defs/JsonObject" },
+    "selector": { "$ref": "#/$defs/ResourceSelector" },
+    "sink": { "$ref": "#/$defs/SinkClass" },
+    "reservation": { "$ref": "#/$defs/Reservation" }
+  },
+  "$defs": {
+    "JsonObject": {
+      "title": "JsonObject",
+      "type": "object",
+      "additionalProperties": true
+    },
+    "SinkClass": {
+      "title": "SinkClass",
+      "type": "string",
+      "enum": ["observation", "advisory", "privileged"],
+      "$comment": "ADR-M0-11: OBSERVATION | ADVISORY | PRIVILEGED. All recorded; only privileged is grant-mediated."
+    },
+    "Reservation": {
+      "title": "Reservation",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["usd_micros", "millis", "tokens", "bytes", "turns", "depth"],
+      "properties": {
+        "usd_micros": { "type": "integer", "minimum": 0 },
+        "millis": { "type": "integer", "minimum": 0 },
+        "tokens": { "type": "integer", "minimum": 0 },
+        "bytes": { "type": "integer", "minimum": 0 },
+        "turns": { "type": "integer", "minimum": 0 },
+        "depth": { "type": "integer", "minimum": 0 }
+      },
+      "$comment": "ADR-M0-07 six-dimension budget vector."
+    },
+    "ResourceSelector": {
+      "title": "ResourceSelector",
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["fs", "network", "secret", "git", "table", "browser", "generic"]
+        }
+      },
+      "additionalProperties": true
+    },
+    "Digest": {
+      "title": "Digest",
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "BlobRef": {
+      "title": "BlobRef",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["digest"],
+      "properties": {
+        "digest": { "$ref": "#/$defs/Digest" },
+        "media_type": { "type": "string" }
+      }
+    },
+    "ArtifactRef": {
+      "title": "ArtifactRef",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["digest", "kind"],
+      "properties": {
+        "digest": { "$ref": "#/$defs/Digest" },
+        "kind": { "type": "string", "minLength": 1 }
+      }
+    },
+    "Proposal": {
+      "title": "Proposal",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requests"],
+      "properties": {
+        "thought": { "type": ["string", "null"] },
+        "requests": {
+          "type": "array",
+          "items": { "$ref": "#" }
+        },
+        "independence_groups": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "confidence": { "type": ["number", "null"] }
+      }
+    },
+    "Receipt": {
+      "title": "Receipt",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["request_digest", "outcome", "cost"],
+      "properties": {
+        "request_digest": { "$ref": "#/$defs/Digest" },
+        "outcome": {
+          "type": "string",
+          "enum": ["completed", "failed", "rejected", "undeterminable"]
+        },
+        "stdout_ref": { "anyOf": [{ "$ref": "#/$defs/BlobRef" }, { "type": "null" }] },
+        "artifacts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ArtifactRef" }
+        },
+        "cost": { "$ref": "#/$defs/Reservation" }
+      }
+    }
+  }
+}

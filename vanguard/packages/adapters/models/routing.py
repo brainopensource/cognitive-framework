@@ -19,6 +19,18 @@ class ModelRoute:
     pricing_as_of: str
     capabilities: tuple[str, ...]
 
+    def estimated_cost_micros(self, estimated_tokens: int) -> int:
+        """Conservative one-turn estimate in microdollars.
+
+        ``estimated_tokens`` is a caller-supplied bound, never provider usage;
+        the actual response usage must still reconcile before paid routing.
+        """
+        if estimated_tokens < 0:
+            raise ValueError("estimated_tokens must be non-negative")
+        completion_tokens = max(1, estimated_tokens // 4)
+        return ((self.prompt_micros_per_1m * estimated_tokens) +
+                (self.completion_micros_per_1m * completion_tokens)) // 1_000_000
+
 from .config import get_band_model, get_free_model, get_medium_model, get_pricing_micros_table, resolve_model
 
 MODEL_PRICING_MICROS = get_pricing_micros_table()

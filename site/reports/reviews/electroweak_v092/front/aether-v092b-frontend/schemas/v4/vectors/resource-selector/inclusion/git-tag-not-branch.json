@@ -1,0 +1,20 @@
+{
+  "parent": {
+    "kind": "git",
+    "repo": "git://h/r.git",
+    "refs": [
+      "refs/tags/v1"
+    ]
+  },
+  "child": {
+    "kind": "git",
+    "repo": "git://h/r.git",
+    "refs": [
+      "v1"
+    ]
+  },
+  "expected": {
+    "included": false,
+    "reason": "not_included"
+  }
+}

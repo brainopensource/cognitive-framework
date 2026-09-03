@@ -135,10 +135,13 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "prebuild": "npm run build --prefix ../client --silent",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pretypecheck": "npm run build --prefix ../client --silent",
     "test": "npm run build --silent && node --test dist/test/*.test.js"
   },
   "dependencies": {
+    "@aether/client": "*",
     "canonicalize": "^2.1.0"
   },
   "devDependencies": {

@@ -1,0 +1,4426 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="General Event-Sourced Agentic Computation Framework & Substrate">
+      
+      
+        <meta name="author" content="AETHER Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>AETHER — Vision (Law Zero, v0.7+) - AETHER Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#aether-vision-law-zero-v07" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../../../.." title="AETHER Documentation" class="md-header__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AETHER Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              AETHER — Vision (Law Zero, v0.7+)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../../../.." title="AETHER Documentation" class="md-nav__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AETHER Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Law & Norms
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Law & Norms
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../SPEC/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Specification (SPEC)
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions Index
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Overview
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../architecture/boundaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Boundaries
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../architecture/workflows/end-to-end-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-to-End Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../architecture/workflows/system-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Bootstrap
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/agency/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agency
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/application-interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Interfaces
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/assurance-evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Assurance & Evaluation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/causal-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Causal State
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/composition-extensibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Composition & Extensibility
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/delegation-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation & Topology
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kernel
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/memory-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory & Learning
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/runtime-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/workflows/request-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Request Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/workflows/agent-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/workflows/event-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/workflows/delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/workflows/recovery-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recovery & Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/compose-an-agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compose an Agent
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/add-pack-or-tool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Pack or Tool
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/add-adapter-or-provider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Adapter or Provider
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/operate-runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operate Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/run-and-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Run and Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schemas
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Port Contracts
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/api-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Reference
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/manifests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifests
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/artifacts-memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Artifacts & Memory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../../../../frontend/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product PRDs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Product PRDs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/FRONTEND_PRD_PLACEMENT_MANIFEST/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Placement Manifest
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/PRD_AETHER_CLI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD CLI
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/PRD_AETHER_DESKTOP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Desktop
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/PRD_AETHER_LAB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Lab
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/PRD_AETHER_TUI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD TUI
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/PRD_FRONTEND_PLATFORM/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Platform
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Execution
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../execution/active/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../execution/milestones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Milestones
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../execution/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & Reports
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & Reports
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../theory/agent-substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../benchmark/main/BENCHMARK_V090_FULL.MD" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmark Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/AI/openrouter_llm_models_suggested/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Models
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_2" id="__nav_9_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coding Harness
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Coding Harness
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/ARCHON_gemini_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Archon Gemini Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/DEKAS_claude_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dekas Claude Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/LLM_RESPONSE_WRANGLER/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Response Wrangler
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/LLM_benchmarkings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Benchmarking
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_2308B_gm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research 2308B GM
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_Harness_Builder_Framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Builder Framework
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_META_COGNITIVE_ENGINEERING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Cognitive Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_META_COGNITIVE_ENGINEERING_briefing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Cognitive Briefing
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_META_FRAMEWORK_2408/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Framework 2408
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_THEORETICAL_SYNTHESIS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theoretical Synthesis
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_deepseek-harness_algorithms-ideas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deepseek Harness Algorithms
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_harness_agentic_coding_builder_research_and_framework_B/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agentic Coding Builder Framework B
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_higgs_2308/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Higgs 2308
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_metaframework_2508_improved/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metaframework 2508
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/VANGUARD_FRONTIER_SWE_BENCH_AND_AGENTIC_METAFRAMEWORK_REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontier SWE Bench & Metaframework Report
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/VANGUARD_VS_LIM_INSIGHTS_SOTS_TECHNIQUES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vanguard vs LIM Insights
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/future_improvements_sota_harness_2808/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Future Improvements SOTA Harness
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/proposal_glm_harness_BETA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proposal GLM Harness Beta
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/proposal_hy3_improved/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proposal HY3 Improved
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/research_agentic_runtime_systems_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agentic Runtime Systems Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/research_harness_agentic_systems_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Agentic Systems Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/suggested_LIM_improvements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Suggested LIM Improvements
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/vanguard_body_detailed/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vanguard Body Detailed
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_3" id="__nav_9_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/frontend/AETHER_FRONTEND_MASTERPLAN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Masterplan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/frontend/frontend_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--experiment"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/frontend/frontend_prototype_beta_gem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Prototype Beta Gem
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--experiment"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/frontend/integration_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Plan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#authority-of-this-document" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Authority of this document
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ratified-constitutional-clarifications-v071" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ratified constitutional clarifications (v0.7.1)
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="aether-vision-law-zero-v07">AETHER — Vision (Law Zero, v0.7+)</h1>
+<p>The frontmatter <code>version</code> is this constitutional document's revision, not the software package
+version. The package version is owned exclusively by <code>pyproject.toml</code>.</p>
+<h2 id="authority-of-this-document">Authority of this document</h2>
+<p>This is <strong>Law Zero</strong>: the binding architectural and product authority for v0.7+, locked by
+<a href="docs/02_decisions/0095-vision-as-law-zero-and-roadmap-reconciliation.md"><code>ADR-0095</code></a>. It defines
+<em>what AETHER is and where it is going</em>. Every other active document exists to specify, implement,
+measure, or schedule this Vision.</p>
+<p><strong>Precedence ladder — highest first. In a conflict, the higher document wins.</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Layer</th>
+<th>Documents</th>
+<th>Owns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td><strong>Vision (constitutional)</strong></td>
+<td><code>VISION.md</code></td>
+<td>Architectural identity, ontology, product principles, non-negotiable direction</td>
+</tr>
+<tr>
+<td>1</td>
+<td><strong>Law (normative)</strong></td>
+<td><a href="../docs/SPEC/"><code>docs/SPEC.md</code></a> + <a href="docs/01_law/"><code>docs/01_law/</code></a></td>
+<td>Current system requirements, invariants, RFC-2119 obligations that realize the Vision</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Decisions (binding)</strong></td>
+<td><a href="docs/02_decisions/"><code>docs/02_decisions/</code></a></td>
+<td>Local architectural decisions; may refine implementation, may <strong>not</strong> contradict locked Vision</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Contracts &amp; protocols</strong></td>
+<td><a href="docs/05_contracts/"><code>docs/05_contracts/</code></a>, <a href="docs/06_protocols/"><code>docs/06_protocols/</code></a>, <code>schemas/</code></td>
+<td>Wire-level realization of the law</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Sequencing</strong></td>
+<td><a href="docs/03_execution/milestones.md"><code>docs/03_execution/milestones.md</code></a>, <a href="docs/03_execution/backlog.md"><code>backlog.md</code></a></td>
+<td>Delivery gates and stable work packages</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Authorization</strong></td>
+<td><a href="docs/03_execution/sprint_active.md"><code>docs/03_execution/sprint_active.md</code></a></td>
+<td>The only board that authorizes current work; <code>sprint_upcoming.md</code> is staging only</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Communication</strong></td>
+<td><code>README.md</code>, <a href="docs/04_architecture/"><code>docs/04_architecture/</code></a>, <a href="docs/07_engineering/"><code>docs/07_engineering/</code></a>, <a href="docs/08_theory/"><code>docs/08_theory/</code></a></td>
+<td>Current state and orientation; introduces <strong>no</strong> independent architecture</td>
+</tr>
+</tbody>
+</table>
+<p>Three rules follow from this ladder:</p>
+<ol>
+<li><strong>A lower document may not be used to reject a Vision concept.</strong> If law, an ADR, a protocol, or
+   the README still describes the previous architecture, that text is stale and MUST be reconciled —
+   it is not a counter-authority.</li>
+<li><strong>The Vision is changed only by an explicit Vision-superseding ADR</strong>, ratified by Engineering
+   Leadership and reflected here atomically. Sustained material reproducible counter-evidence MUST
+   trigger Vision review, but evidence never amends the constitution implicitly.</li>
+<li>Divergence is classified explicitly. <strong>Implementation non-conformance</strong> is a documented gap and
+   has no constitutional effect. <strong>Reproducible material counter-evidence</strong> triggers mandatory
+   architectural review and may change the Vision only through a ratified successor ADR.</li>
+</ol>
+<p>Historical ADRs remain immutable provenance. They are superseded, never rewritten.</p>
+<h2 id="ratified-constitutional-clarifications-v071">Ratified constitutional clarifications (v0.7.1)</h2>
+<p>ADR-0096 and ADR-0097 bind the following interpretations throughout this Vision:</p>
+<ul>
+<li>Event sourcing is the v0.7 reference realization of durable causal history, attributable
+  artifacts, reconstructable projections, committed outcomes, authority, cold replay, and
+  process-independent continuation. A replacement requires equivalent invariants and falsifiers.</li>
+<li>Runtime Agent objects are permitted conveniences; authoritative persistent in-memory Agent state
+  is prohibited.</li>
+<li>The causal record is authoritative; telemetry is correlated operational evidence and never a
+  second truth.</li>
+<li>Reproducibility is computed, multidimensional, time-aware, and proof-honest. Capability or
+  prerequisite presence is not executed verification.</li>
+<li>Settlement belongs to the substrate; Kernel owns admissibility, authority, and generic resource
+  invariants. The Trusted Core is its transitive executable import closure, not a directory count.</li>
+<li>Memory, topology, scheduling, learning, delegation, and metacognition are derived capability
+  families. They do not become mandatory independent layers or Kernel semantics.</li>
+<li>Composition-level promotion requires regression decomposition and distinct generator, evaluator,
+  and promoter authority.</li>
+<li>Authority provenance and capture/privacy policy are first-class protocol data. Retention never
+  grants permission to capture content.</li>
+<li>Milestone acceptance is monotonic and receipt-backed; mechanism, integration, experiment,
+  independent attestation, and accepted closure are distinct states.</li>
+<li>Durable memory and promotion remain subordinate capabilities: authorization precedes retrieval,
+  and an immutable composition is promoted or rolled back only by separated authorities.</li>
+</ul>
+<hr />
+<h1 id="aether-v07-event-sourced-general-agent-framework">AETHER v0.7+ — Event-Sourced General Agent Framework</h1>
+<h2 id="capitulo-1-tese-central-de-agent-framework-para-substrate-de-computacao-agentic">Capítulo 1 — Tese central: de Agent Framework para Substrate de Computação Agentic</h2>
+<p>AETHER deve ser definido a partir de uma tese mais fundamental do que “framework para criar agentes”. O objetivo é construir um <strong>substrate geral de computação agentic</strong>, no qual comportamento inteligente complexo emerge da composição reiterada de primitivas simples, observáveis, substituíveis e reutilizáveis. Coding agents, pesquisadores, planners, critics, equipes, sistemas de debate, memória de longo prazo e mecanismos metacognitivos não devem constituir arquiteturas independentes. Devem ser diferentes organizações sobre a mesma base operacional.</p>
+<p>A unidade fundamental do sistema, portanto, não é uma classe <code>Agent</code>, um workflow pré-programado ou uma máquina de estados específica de domínio. A unidade fundamental é uma <strong>operação causal tipada</strong>, executada dentro de determinado contexto, produzindo eventos, artefatos e alterações observáveis. Uma execução inteira é formada pela composição dessas operações.</p>
+<p>Essa formulação muda a direção do desenvolvimento. Não devemos tentar prever todos os tipos de agentes que existirão e criar abstrações específicas para cada um. Devemos construir um conjunto pequeno de primitivas suficientemente gerais e contratos suficientemente estáveis para que novas estruturas agentic possam emergir pela composição.</p>
+<p>A arquitetura já existente fornece boa parte dessa fundação: kernel domain-blind, ports tipados, runtime de composição, agency genérica, adapters, domain packs e ledger persistente. Os documentos recentes já reconhecem que comportamento de coding, research e outros domínios deve permanecer fora do kernel e ser implementado por packs, plugins, adapters e policies.</p>
+<p>A filosofia da v0.7+ deve ser, portanto, <strong>product-first, composition-first, evidence-first e experiment-first</strong>, sem abandonar a disciplina arquitetural conquistada. O sistema precisa se tornar útil rapidamente, mas sua utilidade deve surgir pela mesma arquitetura que permitirá generalização futura. Não queremos um produto temporário que posteriormente será substituído pelo Meta-Framework; queremos que o produto seja a primeira manifestação prática do Meta-Framework.</p>
+<hr />
+<h2 id="capitulo-2-event-sourcing-como-ontologia-operacional">Capítulo 2 — Event Sourcing como ontologia operacional</h2>
+<p>Event sourcing deve ser entendido em AETHER não apenas como uma técnica de persistência, mas como uma escolha de <strong>ontologia operacional</strong>. Em vez de considerar o estado atual como a verdade primária e os logs como informação secundária, consideramos a sequência causal de fatos como a verdade, enquanto o estado atual é uma projeção derivada dessa história.</p>
+<p>Se um objetivo foi declarado, um arquivo observado, uma hipótese criada, uma tool chamada, uma edição aplicada, um teste falhou, um plano foi revisado e posteriormente uma tarefa terminou, esses acontecimentos constituem a execução. O estado “atual” do sistema é apenas o resultado da redução dessa história.</p>
+<p>Essa arquitetura produz propriedades particularmente importantes para sistemas agentic. Ela permite reconstrução após crash, análise retrospectiva, comparação de estratégias, auditoria de decisões observáveis, geração de datasets de trajetória, bifurcação de execuções, criação de simulations contrafactuais e estudo científico da influência de diferentes políticas.</p>
+<p>A truth model deve permanecer simples: <strong>eventos registram fatos causais pequenos e permanentes; artifacts preservam conteúdos maiores; projections materializam estados derivados</strong>. O documento arquitetural atual já converge para essa distinção ao definir o append-only event log e content-addressed artifacts como verdade central, enquanto indexes, caches e measurements são derivados.</p>
+<p>Event sourcing não significa registrar indiscriminadamente qualquer variável interna do programa. O ledger não deve virar um dump de memória. A questão relevante é causalidade: se determinado elemento participou materialmente da geração de um resultado e é necessário para explicá-lo, reconstruí-lo ou compará-lo cientificamente, sua identidade precisa permanecer observável.</p>
+<p>Isso torna o AETHER potencialmente mais valioso como infraestrutura de pesquisa do que frameworks que guardam apenas a mensagem final. Um resultado deixa de ser apenas uma resposta. Ele passa a possuir uma trajetória experimental completa.</p>
+<hr />
+<h2 id="capitulo-3-replay-reconstrucao-e-re-execucao-probabilistica">Capítulo 3 — Replay, reconstrução e re-execução probabilística</h2>
+<p>É necessário estabelecer uma distinção normativa entre <strong>replay</strong> e <strong>re-execução</strong>.</p>
+<p>Replay significa aplicar novamente os eventos persistidos a reducers compatíveis e reconstruir o estado semanticamente equivalente que existia em determinado ponto da execução. Nesse processo, uma resposta anterior da LLM não é calculada novamente; ela já é um fato registrado. Sob schemas, reducer versions e artifacts corretamente identificados, esse processo pode ser deterministicamente reproduzível.</p>
+<p>Re-execução significa executar novamente modelos, tools ou policies com os mesmos inputs. Isso não possui a mesma garantia. Mesmo modelos executados com temperatura zero podem variar por mudanças de backend, floating-point behavior, batching, model routing, provider revisions ou diferenças de infraestrutura. Baixa temperatura reduz variância estatística, mas não transforma inferência de modelos modernos em computação puramente determinística.</p>
+<p>AETHER deve explorar ambos os conceitos, mas nunca confundi-los. O replay responde: <strong>“qual estado resulta da história que efetivamente ocorreu?”</strong>. A re-execução responde: <strong>“o que aconteceria se submetêssemos novamente condições equivalentes ao sistema?”</strong></p>
+<p>A segunda pergunta é particularmente importante para investigação científica. Uma trajectory registrada pode ser utilizada como baseline para executar variantes de modelo, prompt, topology, compaction policy, retrieval depth, recursion depth, budget, tool selection ou strategy controller.</p>
+<p>Isso cria uma plataforma para <strong>re-simulation</strong>. Podemos preservar determinada parte de uma trajetória e substituir outra. Podemos perguntar o que teria ocorrido usando um modelo diferente apenas no passo onze, utilizando outra compactação no passo vinte ou alterando a quantidade de evidence retrieval disponível a um critic.</p>
+<p>O objetivo científico não é fingir determinismo onde ele não existe. É identificar precisamente quais variáveis permaneceram constantes, quais foram modificadas e quais resultados emergiram.</p>
+<hr />
+<h2 id="capitulo-4-o-agente-como-projecao-nao-como-objeto-fisico">Capítulo 4 — O agente como projeção, não como objeto físico</h2>
+<p>A principal mudança conceitual da v0.7+ deve ser abandonar a necessidade de tratar o agente como uma entidade mutável permanente.</p>
+<p>Em vez de uma classe <code>Agent</code> que carrega dentro de si memória, plano, estado, ferramentas e objetivos, podemos definir conceitualmente:</p>
+<p><strong>Agent = Identity + Policy + Event-Derived Projection + Execution Boundary.</strong></p>
+<p>A identidade permite correlacionar uma lineage. A policy influencia quais operações serão escolhidas. A projection resume o estado semanticamente relevante derivado do ledger. A execution boundary determina recursos, contexto, budget e outros limites daquela execução.</p>
+<p>Nenhum desses elementos exige que exista permanentemente um objeto Python “vivo”. O processo pode terminar. Outro processo pode abrir o ledger, reconstruir a lineage e continuar.</p>
+<p>Um <code>AgentView</code> pode derivar goal atual, plano, observações importantes, artifacts conhecidos, ações anteriores, failures, budget consumido, contexto relevante, estratégia corrente e terminal state. A projeção pode mudar radicalmente ao longo do tempo sem destruir provenance.</p>
+<p>Isso permite agentes <strong>metamórficos</strong>. Um mesmo identificador de lineage pode começar explorando um problema, adotar posteriormente uma estratégia de planning, entrar em comportamento de debugging, solicitar delegação, abandonar uma hipótese e terminar como synthesizer. Não precisamos decidir antecipadamente a “natureza” ontológica desse agente.</p>
+<p>O agente passa a ser uma conveniência cognitiva e operacional para designar uma região coerente do grafo causal, e não a unidade fundamental da arquitetura.</p>
+<p>Esse modelo também simplifica recovery. Não recuperamos objetos mortos. Reconstruímos projeções a partir daquilo que ocorreu.</p>
+<hr />
+<h2 id="capitulo-5-primitivas-os-atomos-da-computacao-agentic">Capítulo 5 — Primitivas: os átomos da computação agentic</h2>
+<p>O segundo elemento fundamental são as primitivas. Operações como <code>list</code>, <code>search</code>, <code>read</code>, <code>model.invoke</code>, <code>write</code>, <code>patch</code>, <code>bash</code>, <code>test</code>, <code>fetch</code>, <code>retrieve</code>, <code>evaluate</code>, <code>spawn</code> ou <code>publish</code> podem ser entendidas como átomos de uma linguagem geral de ação agentic.</p>
+<p>Cada primitiva deve possuir pelo menos identidade, contrato de input, contrato de output, semantics observáveis, requisitos de capability quando aplicável, accounting de custo, possíveis side effects e representação de erro.</p>
+<p>Um fluxo para explicar uma codebase poderia surgir como listagem, seleção por LLM, leitura, nova seleção, pesquisa externa, síntese e geração de documento. Um bug fixer utiliza muitos dos mesmos átomos, mas reorganizados: search, read, reason, patch, execute tests, inspect logs, revise e patch novamente. Um researcher substitui parte das tools por search, fetch, parse, citation e synthesis.</p>
+<p>A generalidade não vem de uma primitiva chamada <code>research()</code> ou <code>fix_bug()</code>. Ela emerge da capacidade de compor operações menores.</p>
+<p>Isso também explica por que devemos evitar grandes quantidades de branches específicas de domínio dentro do runtime. Decisões continuam existindo, mas podem ser realizadas por model policies, deterministic policies, graph transitions, plugin configurations ou control logic externa.</p>
+<p>A mesma arquitetura suporta computação probabilística e determinística. Uma “caixa” pode ser uma chamada de LLM, mas outra pode ser um SMT solver, compiler, linter ou algoritmo convencional cheio de loops e <code>if/else</code>. A abstração não exige que todo processamento seja generativo; exige apenas contratos coerentes entre transformações.</p>
+<hr />
+<h2 id="capitulo-6-separacao-entre-kernel-event-substrate-runtime-e-extensibility">Capítulo 6 — Separação entre Kernel, Event Substrate, Runtime e Extensibility</h2>
+<p>O kernel deve permanecer pequeno e cognitivamente simples. Seu papel não é produzir inteligência. Seu papel é preservar invariantes mínimos associados à execução genérica: autoridade, budgets, admissibilidade de efeitos e regras fundamentais que não devem depender de coding, research ou qualquer ontology específica.</p>
+<p>Essa separação já é uma força da arquitetura atual. Os documentos recentes descrevem uma estrutura <code>domain → ports → kernel → agency → runtime → adapters</code>, com kernel domain-blind e runtime responsável por composition e lifecycle.</p>
+<p>A v0.7+ deve explicitar uma decomposição conceitual ainda mais clara.</p>
+<p>O <strong>Kernel</strong> contém invariantes mínimos.</p>
+<p>O <strong>Event/Artifact Substrate</strong> contém fatos persistentes, lineage, reducers, identities e artifacts.</p>
+<p>O <strong>Runtime</strong> executa composition, sessions, lifecycle, effects e reconstruction.</p>
+<p>A <strong>Agency Layer</strong> implementa mecanismos gerais de interação entre observations, proposals e operations, mas não agentes específicos.</p>
+<p>A <strong>Extensibility Layer</strong> contém tools, model adapters, plugins, indexes, context providers, evaluators, MCP adapters e outras capacidades substituíveis.</p>
+<p>Os <strong>Packs e Policies</strong> definem como essas capacidades são organizadas para tarefas concretas.</p>
+<p>As futuras famílias de capacidade de <strong>Topology, Scheduler, Memory, Learning e Meta-Control</strong> devem ser derivadas acima dessa fundação e utilizar as mesmas primitivas; elas não são camadas obrigatórias nem runtimes independentes.</p>
+<p>Essa separação é importante porque permite aumentar drasticamente a complexidade comportamental sem aumentar proporcionalmente o Trusted Core. Inteligência pode crescer nas bordas enquanto o substrate permanece estável.</p>
+<hr />
+<h2 id="capitulo-7-composicao-estatica-versus-trajetoria-emergente">Capítulo 7 — Composição estática versus trajetória emergente</h2>
+<p>Devemos distinguir claramente duas espécies de grafo.</p>
+<p>A primeira é a <strong>composição</strong>, que representa quais capacidades, providers, plugins, limits, schemas e policies existem para determinada execução. Ela é principalmente uma declaração do espaço de possibilidades.</p>
+<p>A segunda é a <strong>trajectory</strong>, que representa quais possibilidades foram efetivamente utilizadas, em que ordem causal, com quais inputs, outputs e resultados.</p>
+<p>Essa distinção evita transformar AETHER prematuramente em um workflow engine rígido.</p>
+<p>Uma composição pode dizer que existem <code>fs.read</code>, <code>fs.search</code>, <code>model.invoke</code>, <code>patch.apply</code> e <code>proc.exec</code>. Ela não precisa dizer antecipadamente que a execução obrigatoriamente fará read, depois LLM, depois patch, depois test.</p>
+<p>A sequência concreta pode emergir durante a execução.</p>
+<p>Isso significa que o “fluxograma orgânico” que descrevemos é principalmente <strong>observado depois de acontecer</strong>, embora portions da estrutura possam ser condicionadas por policies ou topologies.</p>
+<p>Com o avanço do framework, trajectories podem deixar de ser puramente lineares e assumir uma estrutura de causalidade parcialmente ordenada. A composição define as capacidades disponíveis. Policies decidem entre possibilidades. Topologies podem estabelecer relações estruturais. Scheduler pode organizar execução temporal. O ledger registra a história resultante.</p>
+<p>Dessa forma evitamos dois extremos: um sistema completamente hard-coded como um workflow tradicional e um sistema completamente amorfo em que qualquer coisa pode acontecer sem contratos.</p>
+<hr />
+<h2 id="capitulo-8-m-4-produto-real-como-laboratorio-arquitetural">Capítulo 8 — M-4: produto real como laboratório arquitetural</h2>
+<p>O novo M-4 deve ser a primeira manifestação concreta da filosofia inteira: um coding agent realmente utilizável.</p>
+<p>O objetivo não é provar uma arquitetura no papel. É executar tarefas reais por um loop suficientemente competente para expor falhas do substrate, das tools, do context management e das policies.</p>
+<p>O produto precisa inspecionar um repositório, pesquisar símbolos e arquivos, construir contexto, editar, executar testes, diagnosticar failures, reparar e terminar com resultado verificável. Deve persistir sua trajetória e suportar <code>resume</code>.</p>
+<p>Esse milestone deve também instalar desde o início observabilidade suficiente para sustentar todo o programa científico posterior. Devemos registrar model invocations, selected context, tool calls, effects, failures, retries, latências, tokens, custos, artifacts e outcomes.</p>
+<p>A experiência anterior mostrou que execução real encontra problemas que revisão abstrata não encontra. O próprio estado recente do projeto registrou diversas correções de runtime, composition e profiles encontradas durante convergência e qualificação.</p>
+<p>A filosofia deve ser simples: <strong>melhorar o framework utilizando tarefas reais como falsifiers</strong>.</p>
+<p>Assurance avançada continua podendo existir como profile adicional, mas não define o produto nem controla o ritmo normal da construção agentic.</p>
+<hr />
+<h2 id="capitulo-9-observabilidade-cientifica-como-parte-do-produto-nao-pos-processamento">Capítulo 9 — Observabilidade científica como parte do produto, não pós-processamento</h2>
+<p>Observabilidade não deve ser tratada como feature de debugging adicionada depois. Ela é a infraestrutura que permitirá AETHER aprender sobre o próprio comportamento.</p>
+<p>Uma trajectory útil para ciência precisa preservar muito mais que mensagens de chat. Deve ser possível correlacionar inputs, selected context, model outputs, tool invocations, transformations, costs, latency, errors, compaction operations, cache behavior, strategy changes e terminal outcome.</p>
+<p>Os documentos anteriores já defendem granular scientific telemetry, incluindo tokens, latency, exact cost, context dynamics e statistical A/B benchmarking.</p>
+<p>A v0.7+ deve ampliar essa ideia: cada execução é potencialmente uma observação experimental.</p>
+<p>Isso permite construir datasets em que o target não é apenas “texto bom versus texto ruim”, mas <strong>qual trajetória levou a determinado resultado sob determinada configuração</strong>.</p>
+<p>Sem essa infraestrutura, futuras afirmações como “metacognition melhorou performance”, “esta skill é superior” ou “esta topology funciona melhor” serão opiniões.</p>
+<p>Com ela, podemos executar paired trials, fixed task sets, held-out workloads, ablation studies e factorial experiments. Podemos isolar modelos, prompts, tools, context depth, compaction, retrieval, recursion e topology.</p>
+<p>Esse é um elemento central da visão: AETHER deve ser simultaneamente framework de execução e <strong>laboratório de agentic systems</strong>.</p>
+<hr />
+<h2 id="capitulo-10-m-5a-estado-agentic-derivado-do-ledger">Capítulo 10 — M-5a: estado agentic derivado do ledger</h2>
+<p>Depois do produto funcional, o próximo passo é formalizar o agente como projeção.</p>
+<p>M-5a deve definir quais fatos são semanticamente necessários para reconstruir uma execução agentic. Eventos candidatos incluem declaração de objetivo, criação ou revisão de plano, observação, proposal, effect settlement, avaliação de progresso, mudança de estratégia, compactação de contexto, avaliação externa ou interna e conclusão.</p>
+<p>O critério para introduzir um event kind não deve ser “isso aconteceu internamente”. Deve ser: <strong>esse acontecimento altera semanticamente a história que precisamos reconstruir ou analisar?</strong></p>
+<p>O AgentView deve ser uma projection, não um segundo banco de verdade.</p>
+<p>Também não devemos exigir que diferentes domínios compartilhem exatamente o mesmo reducer final. Um coding solver e um formal solver podem possuir projections específicas. O que deve permanecer estável são os contratos fundamentais de event identity, lineage, persistence, effects e composition.</p>
+<p>M-5a modifica o substrate de forma consciente e deve, portanto, acontecer antes de congelarmos o baseline usado para provar generalidade. Essa é uma correção importante ao roadmap anterior: seria contraditório provar “zero semantic diff” e simultaneamente alterar a semântica fundamental do agente.</p>
+<p>Depois de M-5a, o substrate pode ser novamente congelado e utilizado como baseline do próximo experimento.</p>
+<hr />
+<h2 id="capitulo-11-m-5b-generalidade-como-falsificacao-nao-como-declaracao">Capítulo 11 — M-5b: generalidade como falsificação, não como declaração</h2>
+<p>M-5b possui uma função extremamente específica: verificar se aquilo que construímos é realmente generalizável.</p>
+<p>A melhor maneira de fazer isso é utilizar um domínio materialmente diferente de coding. Formal reasoning, structured reasoning ou problemas com witness determinístico são excelentes candidatos porque oferecem oracle forte e reduzem ambiguidades de avaliação.</p>
+<p>O objetivo não é construir imediatamente um grande produto formal. O objetivo é tentar quebrar a abstração.</p>
+<p>Se para executar uma tarefa formal precisarmos inserir conhecimento matemático no kernel, alterar o generic episode mechanism ou criar um segundo runtime, então encontramos uma falha arquitetural.</p>
+<p>Se for suficiente fornecer novas tools, policies, prompts, context providers e domain-specific projections, a generalidade foi fortalecida empiricamente.</p>
+<p>Os documentos anteriores já definiam o segundo domínio como falsifier do substrate e RF-86 como mecanismo para impedir mudanças semânticas durante essa prova.</p>
+<p>A diferença no novo roadmap é que esse baseline deve ser criado <strong>depois</strong> da consolidação do AgentView event-derived.</p>
+<p>M-5b, portanto, não cria a generalidade. Ele tenta falsificá-la.</p>
+<hr />
+<h2 id="capitulo-12-recursividade-como-nested-execution-lineages">Capítulo 12 — Recursividade como nested execution lineages</h2>
+<p>Se agentes não são objetos físicos, <code>spawn</code> também precisa de uma nova interpretação.</p>
+<p>Spawn não deve significar “instanciar outra classe Agent”. Deve significar <strong>criar uma nova execution lineage subordinada à lineage atual</strong>.</p>
+<p>Essa subexecução recebe identidade, parent reference, objetivo, selected context, budget, capabilities, depth boundary e terminal conditions. A partir daí ela produz sua própria sequência de eventos e artifacts.</p>
+<p>Quando termina, seu resultado pode ser incorporado pela lineage pai.</p>
+<p>A recursividade agentic passa então a ser o <strong>aninhamento de regiões causais delimitadas</strong>.</p>
+<p>Essa formulação é particularmente poderosa para crash recovery. O parent ou child não precisa sobreviver como processo. Basta reconstruir o ledger e identificar quais lineages estão completas, interrompidas, waiting ou ainda executáveis.</p>
+<p>Uma tool normal não equivale exatamente a spawn. Uma tool é uma transformação encapsulada, ainda que internamente muito sofisticada. Uma child lineage possui seu próprio ciclo agentic, context evolution e budget.</p>
+<p>Essa diferença justifica <code>agent.spawn</code> como operação distinta, embora continue atravessando os mesmos mecanismos gerais de effects e accounting.</p>
+<p>O projeto anterior já prevê <code>ChildSpawned</code> e <code>ChildReturned</code>, mas a implementação completa de delegation ainda estava pendente.</p>
+<hr />
+<h2 id="capitulo-13-fronteiras-espaco-temporais-e-scopes-de-execucao">Capítulo 13 — Fronteiras espaço-temporais e scopes de execução</h2>
+<p>A ausência de um Agent object rígido não elimina a necessidade de boundaries. Pelo contrário: torna necessário definir boundaries explicitamente como parte do protocolo.</p>
+<p>Cada lineage deve possuir um <strong>execution scope</strong>.</p>
+<p>Esse scope pode limitar tempo, wall-clock, tokens, cost, number of turns, tool invocations, recursion depth, accessible resources e capabilities.</p>
+<p>Podemos pensar nesse scope como uma região espaço-temporal dentro do causal graph. Ela possui um início identificável, ancestry, condições de continuidade e condições terminais.</p>
+<p>Isso oferece uma definição mais rigorosa de “agente” do que muitas frameworks convencionais: não uma entidade antropomorfizada, mas uma computação orientada a objetivo dentro de uma fronteira observável.</p>
+<p>Esses scopes também permitem nested execution, teams e simulations sem perder accounting. Um parent pode possuir budget global e distribuir sub-budgets entre children. Cada child permanece identificável, mas o consumo pode ser agregado ao ancestor.</p>
+<p>Essa arquitetura será importante para experimentos de busca em árvore, debate, populations e simulations, porque cada branch pode existir como lineage separada enquanto compartilha uma raiz causal comum.</p>
+<hr />
+<h2 id="capitulo-14-m-65-adaptive-strategy-como-inicio-operacional-da-metacognicao">Capítulo 14 — M-6.5: Adaptive Strategy como início operacional da metacognição</h2>
+<p>Metacognição não deve ser introduzida como uma entidade mágica capaz de controlar o restante do sistema. Ela deve surgir como <strong>controle de ordem superior baseado nas mesmas observações e operações disponíveis ao restante da arquitetura</strong>.</p>
+<p>Um meta-controller observa projections de progresso, failures, repetition, uncertainty, budget consumption ou missing knowledge. Com base nessas observações, uma policy pode selecionar uma nova estratégia.</p>
+<p>Ela pode decidir revisar um plano, solicitar contexto adicional, abandonar uma hipótese, alterar uma verification strategy, delegar um problema ou encerrar a execução.</p>
+<p>Nenhuma dessas decisões reescreve a história. Eventos anteriores continuam existindo. Um <code>PlanRevised</code>, por exemplo, não apaga o plano anterior; ele modifica a projeção atual e preserva o caminho pelo qual a mudança aconteceu.</p>
+<p>Isso é precisamente o que torna essa abordagem útil para ciência: posteriormente conseguimos observar quando o sistema percebeu uma falha e se a alteração estratégica melhorou ou piorou o resultado.</p>
+<p>A frase normativa deve permanecer:</p>
+<p><strong>Metacognition is policy/reducer/plugin, never a kernel primitive.</strong></p>
+<p>Seu benefício deve ser medido experimentalmente comparando paired runs com e sem meta-controller. Success rate, wasted loops, tool calls, cost, latency, recovery de failures e final quality são exemplos de métricas.</p>
+<hr />
+<h2 id="capitulo-15-concorrencia-paralelismo-e-partial-order-event-graphs">Capítulo 15 — Concorrência, paralelismo e partial-order event graphs</h2>
+<p>A execução inicial pode ser sequencial sem que a arquitetura conceitual seja eternamente sequencial.</p>
+<p>Precisamos diferenciar concorrência de paralelismo. Concorrência significa várias operações em progresso ou intercaladas. Paralelismo significa execução física simultânea.</p>
+<p>Duas leituras independentes de arquivos são um caso trivial em que paralelismo deve ser possível. Duas chamadas independentes de search ou fetch também. O desafio surge quando operações compartilham recursos mutáveis ou budgets.</p>
+<p>Duas edições sobre o mesmo arquivo, dois effects disputando determinado budget, dois children produzindo uma mesma output binding ou uma interrupção durante settlement introduzem problemas de conflict detection, reservation, idempotency, ordering e recovery.</p>
+<p>A arquitetura deve, portanto, caminhar para um <strong>causal partial order</strong>. O event store pode possuir sequence numbers físicos para persistência, mas sequence number não deve ser confundido com dependência lógica.</p>
+<p>A pode anteceder C e B também pode anteceder C sem que A anteceda B.</p>
+<p>Essa interpretação aproxima AETHER de um dynamic dataflow system persistido por event sourcing.</p>
+<p>A lane de concurrency measurement já proposta continua útil: medir effect independence e contention antes de construir scheduling sofisticado. Entretanto, isso não deve impedir paralelismo simples e obviamente seguro quando os contratos permitirem.</p>
+<hr />
+<h2 id="capitulo-16-topology-e-scheduler-estrutura-espacial-e-politica-temporal">Capítulo 16 — Topology e Scheduler: estrutura espacial e política temporal</h2>
+<p>Topology e Scheduler precisam permanecer conceitualmente separados.</p>
+<p>A <strong>Topology</strong> define estrutura: quais roles ou lineages existem, quais relações causais são permitidas, quem pode solicitar trabalho a quem, quais artifacts conectam determinadas etapas e quais condições estruturais limitam a execução.</p>
+<p>O <strong>Scheduler</strong> decide temporalidade: dentre as operações atualmente ready, quais executar primeiro, onde executá-las, quais paralelizar, quais suspender e quais priorizar.</p>
+<p>Uma analogia útil é considerar topology como parte das boundary conditions estruturais e scheduler como política de evolução temporal dentro desse espaço permitido.</p>
+<p>O <strong>Kernel</strong> permanece separado de ambos: ele decide se uma operação é autorizável segundo seus invariants genéricos.</p>
+<p>O <strong>Ledger</strong> também permanece separado: ele registra o que realmente ocorreu.</p>
+<p>Assim temos quatro responsabilidades diferentes: topology define possibilidades estruturais, scheduler organiza readiness no tempo, kernel preserva admissibilidade e ledger registra fatos.</p>
+<p>Essa separação funciona particularmente bem com agentes não físicos. Um role em uma topology não precisa ser uma nova classe. Pode simplesmente significar uma lineage criada com determinada policy, context configuration, capabilities e goal.</p>
+<p>Direct agent, planner/executor, critic/reviser, debate, research fan-out e tree search tornam-se diferentes configurações de uma mesma linguagem operacional.</p>
+<hr />
+<h2 id="capitulo-17-memoria-contexto-cache-e-artefatos-persistencia-causal-seletiva">Capítulo 17 — Memória, contexto, cache e artefatos: persistência causal seletiva</h2>
+<p>Nem tudo deve ser um evento, mas “efêmero” não deve significar “irrelevante e descartável”.</p>
+<p>Devemos distinguir pelo menos três categorias.</p>
+<p>O <strong>ledger</strong> preserva fatos causais pequenos e duráveis.</p>
+<p>O <strong>artifact store</strong> preserva conteúdos potencialmente grandes, como prompts completos, outputs, source snapshots, compressed contexts, patches, reports e datasets.</p>
+<p>As <strong>projections</strong> incluem indexes, embeddings, caches, semantic memory, repo maps e outras estruturas derivadas.</p>
+<p>Essa arquitetura já está parcialmente refletida no desenho atual, que recomenda artifacts grandes fora do ledger e indexes/caches como projections rebuildable.</p>
+<p>Mas precisamos acrescentar uma regra científica: <strong>qualquer variável que possa afetar materialmente o resultado deve possuir identidade e provenance observáveis</strong>, mesmo que seu conteúdo completo seja armazenado fora do ledger ou sujeito a retention policy.</p>
+<p>Se uma compaction alterou o contexto, registre source range, compactor identity, relevant parameters, input digest e output digest. Se houve cache hit, registre cache identity, key, source artifact e validation result.</p>
+<p>Isso permite estudar posteriormente se determinada optimization foi responsável por grande parcela do desempenho.</p>
+<p>Retention também deve ser configurável, mas não autoriza captura. Experiment profiles podem reter quase todos os artifacts autorizados; interactive profiles podem manter apenas digests e alguns blobs essenciais. A reproducibilidade da execução deve ser um vetor computado e temporal que separa capacidade de verificação executada; WAL e pins isoladamente não provam replay ou reconstrução.</p>
+<hr />
+<h2 id="capitulo-18-skills-aprendizagem-e-transformacao-de-trajetorias-em-conhecimento">Capítulo 18 — Skills, aprendizagem e transformação de trajetórias em conhecimento</h2>
+<p>Skills não representam uma nova fundação. Elas são estruturas reutilizáveis construídas sobre a fundação existente.</p>
+<p>Uma skill pode ser uma prompt policy, um pequeno programa, uma sequência parametrizada de operações, um topology fragment, uma heuristic ou uma strategy policy.</p>
+<p>O aspecto importante é lifecycle.</p>
+<p>Runs produzem trajectories. Trajectories produzem dados. Análise identifica padrões de sucesso e failure. Desses padrões podem surgir candidate skills ou policies. Essas candidates são avaliadas em workloads independentes. Versões que melhoram performance são promovidas explicitamente. Versões ruins podem ser revertidas.</p>
+<p>Assim, aprendizagem deixa de significar necessariamente modificar weights de uma rede neural. O framework pode aprender em diversos níveis: retrieval policy, tool selection, prompts, context strategy, topology, budget allocation, delegation policy e reusable skills.</p>
+<p>O princípio de segurança epistemológica aqui é importante: o agente pode <strong>propor</strong> uma skill, mas não deve declarar unilateralmente que ela é melhor. Promotion precisa utilizar avaliação explícita, provenance e rollback.</p>
+<p>Os documentos anteriores já colocavam learned skills, retrieval e adaptation em fases futuras; a nova visão mantém esses elementos, mas os conecta diretamente às trajectories coletadas desde M-4.</p>
+<p>AETHER começa assim a formar um ciclo de melhoria: execução produz dados, dados produzem abstrações, abstrações alteram futuras execuções, e os resultados dessas alterações voltam ao dataset.</p>
+<hr />
+<h2 id="capitulo-19-protocolo-universal-e-evolucao-para-uma-linguagem-de-agentic-computation">Capítulo 19 — Protocolo universal e evolução para uma linguagem de agentic computation</h2>
+<p>A ambição arquitetural mais profunda é que as diferentes camadas possam se comunicar através de um conjunto pequeno de protocolos universais.</p>
+<p>Cada operation deve possuir identidade, input references, output references, causal parentage, execution scope, resource requirements, status e observability metadata.</p>
+<p>Cada artifact deve possuir identity, schema/type, provenance e lifecycle.</p>
+<p>Cada lineage deve possuir identity, ancestry, policy references, budget scope e projection semantics.</p>
+<p>Cada event deve possuir stable schema, causation, correlation e ordering information.</p>
+<p>Cada plugin deve declarar capabilities, dependencies, schemas e lifecycle hooks.</p>
+<p>Cada topology deve ser representável como configuração ou artifact versionado, não como uma segunda runtime authority.</p>
+<p>Com essas propriedades, AETHER começa a parecer menos uma coleção de agentes e mais uma <strong>linguagem operacional para computação cognitiva distribuída</strong>.</p>
+<p>Um coding agent é um programa nessa linguagem. Um researcher é outro programa. Uma equipe de agentes é uma composição de programas. Uma skill é um fragmento reutilizável. Uma metacognitive policy modifica dinamicamente qual fragmento executar. Um scheduler determina temporalidade. Memory e indexes fornecem projections que influenciam as próximas decisões.</p>
+<p>A inteligência observada não precisa estar localizada em nenhum componente individual. Ela pode emergir do comportamento global produzido pela interação entre primitives, policies, memory, models, evaluators e topology.</p>
+<p>Essa é a principal justificativa para manter o kernel mínimo: quanto menos comportamento específico ele codificar, maior será o espaço de sistemas que podem emergir acima dele.</p>
+<hr />
+<h2 id="capitulo-20-roadmap-documentacao-e-nova-identidade-da-v07">Capítulo 20 — Roadmap, documentação e nova identidade da v0.7+</h2>
+<p>A documentação da v0.7+ deve refletir essa tese de maneira inequívoca.</p>
+<p>O roadmap recomendado começa por <strong>M-4</strong>, com um coding agent útil e observabilidade de trajetória desde o primeiro dia. Depois vem <strong>M-5a</strong>, formalizando AgentView e agent state como projections event-sourced e estabilizando um baseline experimental imutável, revisado e verificável. <strong>ADR-0102 registra que o ref histórico <code>M-5A-BASE-v2</code> não é esse controle e exige <code>CONVERGENCE-BASE-v1</code> como sucessor.</strong> A partir do baseline válido, <strong>M-5b</strong> tenta falsificar a generalidade em um segundo domínio enquanto <strong>M-6</strong> implementa recursive delegation por nested lineages em uma lane independente. <strong>M-6.5</strong> introduz adaptive strategy e meta-control como policy/reducer/plugin. <strong>M-7</strong> introduz declarative topologies. <strong>M-8</strong> consolida memory, retrieval, skills e learning. <strong>M-9/M-10</strong> permanecem horizontes de compatibilidade até o aceite independente de M-8. A antiga lane de concurrency measurement deve permanecer identificável historicamente e terminar em uma decisão explícita de implementação, simplificação ou cancelamento.</p>
+<p>Essa reorganização deve ser refletida em <code>README</code>, Product Vision, <code>SPEC.md</code>, architecture documentation, protocols, milestone definitions, sprint boards e novos ADRs. ADRs antigos permanecem como provenance histórica; novas decisões supersedem apenas aquilo que realmente mudou.</p>
+<p>Locks genéricos de milestone devem ser substituídos por <strong>technical dependencies explícitas</strong>. Uma equipe deve ficar bloqueada apenas quando sua tarefa depende efetivamente de interface, schema ou semantics ainda instáveis. Coding UX, research tooling, adapters, indexing, context, telemetry e outras lanes devem avançar paralelamente sempre que seus contratos permitirem.</p>
+<p>A identidade estratégica do projeto também precisa mudar. AETHER não deve ser apresentado prioritariamente como security architecture, certification framework, coding harness ou multi-agent framework. Essas são manifestações ou capacidades secundárias.</p>
+<p>A definição central deveria ser:</p>
+<p><strong>AETHER é um event-sourced general agent framework e experimental substrate no qual operações causais tipadas, artifacts, lineages, policies e plugins formam uma linguagem comum para construir, observar, reproduzir e evoluir sistemas inteligentes. Agentes não são entidades fundamentais: são projections dinâmicas sobre regiões do causal event graph. Memória, skills, delegation, metacognition e topologies não criam novos cores; emergem da composição das mesmas primitivas. O objetivo é permitir que inteligência cada vez mais complexa surja de iterações, feedback, experimentação, seleção e recomposição, mantendo uma fundação pequena e estável.</strong></p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../../../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

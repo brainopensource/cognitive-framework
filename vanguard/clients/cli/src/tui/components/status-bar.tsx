@@ -2,7 +2,8 @@ import React from "react";
 import { Text } from "ink";
 import { theme } from "../theme/tokens.js";
 import { statusBarFromView } from "../status-bar.js";
-import type { RunViewModel, StreamSource } from "@vanguard/client-core";
+import type { RunViewModel } from "@aether/client";
+import type { StreamSource } from "@aether/contracts";
 
 export function StatusBar(props: {
   view: RunViewModel;

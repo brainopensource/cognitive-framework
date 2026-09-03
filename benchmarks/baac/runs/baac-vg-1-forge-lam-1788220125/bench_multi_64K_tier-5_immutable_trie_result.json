@@ -1,0 +1,65 @@
+{
+  "challengeId": "bench_multi_64K_tier-5_immutable_trie",
+  "tier": "tier-5",
+  "scope": "multi",
+  "contextBracket": "64K",
+  "preset": "vg-1-forge",
+  "model": "lam-mock",
+  "mode": "lam",
+  "status": "FAIL",
+  "attribution": "LLM_COGNITIVE_ERROR",
+  "turns": 10,
+  "promptTokens": 1500,
+  "completionTokens": 400,
+  "totalTokens": 1900,
+  "costUsd": 0.0,
+  "durationSeconds": 0.14,
+  "changedFiles": [
+    "src/main.py"
+  ],
+  "diffPatch": "--- a/main.py\n+++ b/main.py\n@@ -0,0 +1 @@\n+# Solution code\n",
+  "oracle": {
+    "passed": false,
+    "exitCode": 1,
+    "stdout": "",
+    "stderr": "test_trie (__main__.TestTrie.test_trie) ... ERROR\n\n======================================================================\nERROR: test_trie (__main__.TestTrie.test_trie)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rocha/Coding/Aether-D-System/benchmarks/baac/challenges/tier-5/bench_multi_64K_tier-5_immutable_trie/oracle/verify.py\", line 7, in test_trie\n    from trie import TrieNode, insert\nImportError: cannot import name 'insert' from 'trie' (/tmp/baac-scratch-bench_multi_64K_tier-5_immutable_trie-pr8y_zxg/src/trie.py)\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (errors=1)\n",
+    "durationSeconds": 0.044,
+    "error": "test_trie (__main__.TestTrie.test_trie) ... ERROR\n\n======================================================================\nERROR: test_trie (__main__.TestTrie.test_trie)\n-------------------------------",
+    "assertionCount": 1,
+    "failingAssertions": [
+      "test_trie",
+      "(errors=1)"
+    ]
+  },
+  "aiJudgeScore": null,
+  "diagnosis": "test_trie (__main__.TestTrie.test_trie) ... ERROR\n\n======================================================================\nERROR: test_trie (__main__.TestTrie.test_trie)\n-------------------------------",
+  "metadata": {
+    "id": "bench_multi_64K_tier-5_immutable_trie",
+    "name": "Persistent Immutable Prefix Trie",
+    "scope": "multi",
+    "context_bracket": "64K",
+    "tier": "tier-5",
+    "difficulty": 5,
+    "timeout_seconds": 35,
+    "entrypoint": "src/main.py",
+    "eval_type": "oracle",
+    "tags": [
+      "data_structures",
+      "immutability",
+      "persistent_trees"
+    ],
+    "metadata": {},
+    "cli_args": {
+      "command": "cycle",
+      "preset": "vg-1-forge",
+      "mode": "lam",
+      "model": null,
+      "tier": "all",
+      "single": null,
+      "max_turns": 10,
+      "max_requests": 300,
+      "budget": 0.5,
+      "keep_scratch": false
+    }
+  }
+}

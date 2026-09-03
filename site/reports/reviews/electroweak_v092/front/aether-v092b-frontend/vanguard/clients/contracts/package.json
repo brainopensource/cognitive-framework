@@ -1,0 +1,52 @@
+{
+  "name": "@aether/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AETHER canonical contracts, types, schema readers, and JCS canonicalization",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./types.js": {
+      "types": "./dist/src/types.d.ts",
+      "default": "./dist/src/types.js"
+    },
+    "./parse.js": {
+      "types": "./dist/src/parse.d.ts",
+      "default": "./dist/src/parse.js"
+    },
+    "./jcs.js": {
+      "types": "./dist/src/jcs.d.ts",
+      "default": "./dist/src/jcs.js"
+    },
+    "./errors.js": {
+      "types": "./dist/src/errors.d.ts",
+      "default": "./dist/src/errors.js"
+    }
+  },
+  "files": [
+    "dist/src/**/*.js",
+    "dist/src/**/*.d.ts",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "npm run build --silent && node --test dist/test/*.test.js"
+  },
+  "dependencies": {
+    "canonicalize": "^2.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}

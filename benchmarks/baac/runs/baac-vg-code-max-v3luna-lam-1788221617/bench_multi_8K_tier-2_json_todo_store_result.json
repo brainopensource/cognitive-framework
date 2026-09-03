@@ -1,0 +1,62 @@
+{
+  "challengeId": "bench_multi_8K_tier-2_json_todo_store",
+  "tier": "tier-2",
+  "scope": "multi",
+  "contextBracket": "8K",
+  "preset": "vg-code-max-v3luna",
+  "model": "lam-mock",
+  "mode": "lam",
+  "status": "PASS",
+  "attribution": "PASS",
+  "turns": 10,
+  "promptTokens": 1500,
+  "completionTokens": 400,
+  "totalTokens": 1900,
+  "costUsd": 0.0,
+  "durationSeconds": 0.13,
+  "changedFiles": [
+    "src/todo.py"
+  ],
+  "diffPatch": "--- a/todo.py\n+++ b/todo.py\n@@ -1,2 +1,57 @@\n+\"\"\"JSON-Backed Todo Store.\"\"\"\n+from __future__ import annotations\n+import json\n+from pathlib import Path\n+from typing import Any, List, Optional\n+\n class TodoStore:\n-    pass\n+    def __init__(self, filepath: str | Path) -> None:\n+        self.filepath = Path(filepath)\n+        self.items: list[dict[str, Any]] = []\n+        if self.filepath.is_file():\n+            try:\n+                self.items = json.loads(self.filepath.read_text(encoding=\"utf-8\"))\n+            except Exception:\n+                self.items = []\n+        else:\n+            self._save()\n+\n+    def _save(self) -> None:\n+        self.filepath.parent.mkdir(parents=True, exist_ok=True)\n+        self.filepath.write_text(json.dumps(self.items, indent=2), encoding=\"utf-8\")\n+\n+    def add(self, title: str, tags: list[str] | None = None) -> int:\n+        if not title or not title.strip():\n+            raise ValueError(\"title cannot be empty\")\n+        next_id = max([item[\"id\"] for item in self.items], default=0) + 1\n+        item = {\n+            \"id\": next_id,\n+            \"title\": title.strip(),\n+            \"completed\": False,\n+            \"tags\": list(tags or []),\n+        }\n+        self.items.append(item)\n+        self._save()\n+        return next_id\n+\n+    def complete(self, item_id: int) -> bool:\n+        for item in self.items:\n+            if item[\"id\"] == item_id:\n+                item[\"completed\"] = True\n+                self._save()\n+                return True\n+        return False\n+\n+    def get(self, item_id: int) -> dict | None:\n+        for item in self.items:\n+            if item[\"id\"] == item_id:\n+                return dict(item)\n+        return None\n+\n+    def list_pending(self) -> list[dict]:\n+        pending = [dict(item) for item in self.items if not item[\"completed\"]]\n+        return sorted(pending, key=lambda x: x[\"id\"])\n+\n+    def list_by_tag(self, tag: str) -> list[dict]:\n+        matching = [dict(item) for item in self.items if tag in item.get(\"tags\", [])]\n+        return sorted(matching, key=lambda x: x[\"id\"])\n",
+  "oracle": {
+    "passed": true,
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "test_todo (__main__.TestTodo.test_todo) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.005s\n\nOK\n",
+    "durationSeconds": 0.046,
+    "error": null,
+    "assertionCount": 1,
+    "failingAssertions": []
+  },
+  "aiJudgeScore": null,
+  "diagnosis": "All falsifiers green",
+  "metadata": {
+    "id": "bench_multi_8K_tier-2_json_todo_store",
+    "name": "JSON-Backed Todo Store",
+    "scope": "multi",
+    "context_bracket": "8K",
+    "tier": "tier-2",
+    "difficulty": 2,
+    "timeout_seconds": 35,
+    "entrypoint": "src/main.py",
+    "eval_type": "oracle",
+    "tags": [
+      "storage",
+      "json",
+      "multi_file"
+    ],
+    "metadata": {},
+    "cli_args": {
+      "command": "run",
+      "preset": "vg-code-max-v3luna",
+      "mode": "lam",
+      "model": null,
+      "tier": "all",
+      "single": null,
+      "max_turns": 10,
+      "max_requests": 300,
+      "budget": 0.5,
+      "keep_scratch": false
+    }
+  }
+}

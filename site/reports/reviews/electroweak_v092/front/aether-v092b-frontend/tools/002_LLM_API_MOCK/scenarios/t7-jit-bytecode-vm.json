@@ -1,0 +1,98 @@
+{
+  "id": "t7-jit-bytecode-vm",
+  "tier": 7,
+  "title": "SWE-bench Pro: Stack Bytecode JIT VM Opcode Execution",
+  "workspace": {
+    "problem.md": "# JIT Stack Bytecode Virtual Machine\nImplement stack opcode interpreter with JMP branching and variable environment.\n",
+    "tests/test_vm.py": "import unittest\nfrom vm import BytecodeVM\n\nclass TestBytecodeVM(unittest.TestCase):\n    def test_arithmetic_evaluation(self):\n        vm = BytecodeVM()\n        # (10 + 20) * 3 - 5 = 85\n        code = [\n            (\"PUSH\", 10),\n            (\"PUSH\", 20),\n            (\"ADD\",),\n            (\"PUSH\", 3),\n            (\"MUL\",),\n            (\"PUSH\", 5),\n            (\"SUB\",)\n        ]\n        res = vm.execute(code)\n        self.assertEqual(res, 85)\n\n    def test_environment_variable_storage_and_branching(self):\n        vm = BytecodeVM()\n        # x = 5; if x - 5 == 0 goto 6; return 999; return 42;\n        code = [\n            (\"PUSH\", 5),\n            (\"STORE\", \"x\"),\n            (\"LOAD\", \"x\"),\n            (\"PUSH\", 5),\n            (\"SUB\",),\n            (\"JMP_IF_ZERO\", 7),\n            (\"PUSH\", 999),\n            (\"PUSH\", 42)\n        ]\n        res = vm.execute(code)\n        self.assertEqual(res, 42)\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+    "vm/__init__.py": "from typing import List, Dict, Any, Optional\n\nclass BytecodeVM:\n    def __init__(self):\n        self.stack: List[int] = []\n        self.ip: int = 0\n        self.env: Dict[str, int] = {}\n\n    def execute(self, bytecode: List[tuple]) -> int:\n        self.ip = 0\n        while self.ip < len(bytecode):\n            op, *args = bytecode[self.ip]\n            if op == \"PUSH\":\n                self.stack.append(args[0])\n            elif op == \"ADD\":\n                b, a = self.stack.pop(), self.stack.pop()\n                self.stack.append(a + b)\n            elif op == \"SUB\":\n                b, a = self.stack.pop(), self.stack.pop()\n                self.stack.append(a - b)\n            elif op == \"MUL\":\n                b, a = self.stack.pop(), self.stack.pop()\n                self.stack.append(a * b)\n            elif op == \"STORE\":\n                self.env[args[0]] = self.stack.pop()\n            elif op == \"LOAD\":\n                self.stack.append(self.env[args[0]])\n            elif op == \"JMP_IF_ZERO\":\n                val = self.stack.pop()\n                if val == 0:\n                    self.ip = args[0]\n                    continue\n            self.ip += 1\n        return self.stack[-1] if self.stack else 0\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "list_dir",
+            "arguments": "{\"path\": \".\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 1,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"problem.md\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"vm/__init__.py\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 2,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"tests/test_vm.py\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 3,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python -m unittest discover tests -v\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 4,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python3 -m unittest discover tests -v\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 5,
+      "finish_reason": "stop",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"content\": \"            elif op == \\\"JMP\\\":\\n                self.ip = args[0]\\n                continue\\n            elif op == \\\"JMP_IF_ZERO\\\":\", \"path\": \"vm/__init__.py\"}"
+          }
+        }
+      ],
+      "content": "All tests pass. The problem statement also mentions plain `JMP` branching, so I'll add that opcode for completeness (a minimal addition):"
+    }
+  ]
+}

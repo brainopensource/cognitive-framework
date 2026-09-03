@@ -35,6 +35,15 @@ excluded_dirs = [
   ".git", ".venv", "node_modules", "dist", "dist-browser", "build", "site",
   ".site", "out", "__pycache__", ".tox", ".coverage", "coverage",
   ".pytest_cache", ".ruff_cache", "dev_context_logs",
+  # Shadow copies of the codebase committed under docs/reports/reviews/.
+  # These contain a full duplicate vanguard/ tree and dormant wave sources.
+  # Indexing them outranks production symbols and routes agents to edit dead
+  # code. Both names exist only under docs/reports/reviews/electroweak_v092/;
+  # the review .md files at that parent level stay indexed.
+  "front", "back", "aether-v092b-frontend",
+  # Gitignored agent scratch workspaces. Throwaway benchmark run trees that
+  # contributed 61% of all indexed symbols and dominated PageRank in repomap.
+  ".vanguard", "runs",
 ]
 
 # Bounded-growth invariant: cap globally ranked symbols at Top-K.

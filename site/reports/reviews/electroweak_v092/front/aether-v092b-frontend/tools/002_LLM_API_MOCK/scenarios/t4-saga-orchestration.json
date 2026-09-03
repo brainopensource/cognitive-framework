@@ -1,0 +1,55 @@
+{
+  "id": "t4-saga-orchestration",
+  "tier": 4,
+  "title": "Distributed Saga compensation workflow on failure",
+  "workspace": {
+    "saga.py": "class Saga:\n    def __init__(self):\n        self.steps = []\n        self.compensated = []\n\n    def add_step(self, action, compensate):\n        self.steps.append((action, compensate))\n\n    def execute(self):\n        for act, _ in self.steps:\n            act()\n",
+    "test_saga.py": "from saga import Saga\nimport pytest\n\ndef test_saga():\n    s = Saga()\n    comp = []\n    s.add_step(lambda: None, lambda: comp.append('s1'))\n    def fail(): raise RuntimeError('err')\n    s.add_step(fail, lambda: comp.append('s2'))\n    with pytest.raises(RuntimeError):\n        s.execute()\n    assert comp == ['s1']\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"saga.py\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 1,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"path\": \"saga.py\", \"target\": \"        for act, _ in self.steps:\\n            act()\", \"replacement\": \"        executed = []\\n        for act, comp in self.steps:\\n            try:\\n                act()\\n                executed.append(comp)\\n            except Exception:\\n                for rollback in reversed(executed):\\n                    rollback()\\n                raise\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 2,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"pytest\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 3,
+      "tool_calls": [],
+      "finish_reason": "stop"
+    }
+  ]
+}

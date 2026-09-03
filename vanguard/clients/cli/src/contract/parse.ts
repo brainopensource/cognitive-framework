@@ -1,1 +1,1 @@
-export * from "@vanguard/client-core/contract/parse.js";
+export * from "@aether/contracts";

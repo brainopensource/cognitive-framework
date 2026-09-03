@@ -1,0 +1,18 @@
+{
+  "name": "read",
+  "verb": "fs.read",
+  "description": "Read the contents of a specific source file (e.g. {\"path\": \"lru/cache.py\"}).",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "path": {
+        "type": "string",
+        "description": "Exact file path to read"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "additionalProperties": false
+  }
+}

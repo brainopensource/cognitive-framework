@@ -57,6 +57,7 @@ export function renderComposer(store: DesktopStore, client?: RuntimeClient): HTM
   `;
 
   const textarea = document.createElement("textarea");
+  textarea.setAttribute("data-focus-key", "composer-input");
   textarea.placeholder = state.isStreaming
     ? "Agent is responding… (Type next instruction)"
     : "Message AETHER… (Enter to send, Shift+Enter for newline)";
@@ -81,10 +82,16 @@ export function renderComposer(store: DesktopStore, client?: RuntimeClient): HTM
     textarea.style.height = `${Math.min(textarea.scrollHeight, 180)}px`;
   };
 
+  // Leaving the field is a pause by definition, so the draft is recorded then
+  // regardless of where the debounce stands.
+  textarea.onblur = () => store.flushComposerDraft();
+
   textarea.oninput = () => {
     adjustHeight();
-    store.controller.setConversationDraft(textarea.value);
-    store.update((s) => ({ ...s, composerText: textarea.value }));
+    // Draft text is recorded without notifying subscribers. The textarea is
+    // already showing the character; re-rendering the whole application to
+    // tell it so costs a full tree rebuild per keystroke and buys nothing.
+    store.setComposerDraft(textarea.value);
   };
 
   // Submit / Cancel Action Button
@@ -129,8 +136,7 @@ export function renderComposer(store: DesktopStore, client?: RuntimeClient): HTM
 
       textarea.value = "";
       textarea.style.height = "36px";
-      store.controller.setConversationDraft("");
-      store.update((s) => ({ ...s, composerText: "" }));
+      store.setComposerDraft("", { flush: true });
 
       if (client) {
         store.startRun(client, text);

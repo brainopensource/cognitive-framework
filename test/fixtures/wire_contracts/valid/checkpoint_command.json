@@ -1,0 +1,15 @@
+{
+  "version": "vg.4",
+  "frameType": "command",
+  "frameId": "frame-006",
+  "command": {
+    "name": "Checkpoint",
+    "commandId": "cmd-006",
+    "idempotencyKey": "idem-006",
+    "runId": "run-001",
+    "actor": "operator",
+    "payload": {
+      "reason": "Manual safety checkpoint"
+    }
+  }
+}

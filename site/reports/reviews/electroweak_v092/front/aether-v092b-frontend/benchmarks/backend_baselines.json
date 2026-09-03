@@ -1,0 +1,121 @@
+{
+  "schema": "aether.backend-baselines/1",
+  "environment": {
+    "python": "3.12.3",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "machine": "x86_64"
+  },
+  "model": "fake (zero network, zero model latency -- framework overhead only)",
+  "results": {
+    "no_op_turn": {
+      "repeats": 20,
+      "min_ms": 35.94640499795787,
+      "median_ms": 38.36582499934593,
+      "p95_ms": 183.59668499761028,
+      "max_ms": 183.59668499761028
+    },
+    "durable_turn": {
+      "repeats": 20,
+      "min_ms": 187.41045499700704,
+      "median_ms": 202.43102349922992,
+      "p95_ms": 221.91840699815657,
+      "max_ms": 221.91840699815657
+    },
+    "single_effect_turn_durable_minus_no_op_is_kernel_dispatch_overhead": {
+      "repeats": 20,
+      "min_ms": 206.0644939992926,
+      "median_ms": 220.7520874999318,
+      "p95_ms": 257.0815310027683,
+      "max_ms": 257.0815310027683
+    },
+    "event_append_batch_100": {
+      "repeats": 10,
+      "min_ms": 41.52232799970079,
+      "median_ms": 43.538189500395674,
+      "p95_ms": 48.1728300001123,
+      "max_ms": 48.1728300001123,
+      "events_per_batch": 100,
+      "ms_per_event_median": 0.43538189500395674
+    },
+    "fold_1000_events": {
+      "repeats": 10,
+      "min_ms": 8.618592000857461,
+      "median_ms": 9.343187501144712,
+      "p95_ms": 12.670248001086293,
+      "max_ms": 12.670248001086293,
+      "events_folded": 1000,
+      "ms_per_event_median": 0.009343187501144712
+    },
+    "checkpoint_reconstruction_500_events": {
+      "events_total": 500,
+      "checkpoint_at": 250,
+      "cold_fold": {
+        "repeats": 10,
+        "min_ms": 3.862754998408491,
+        "median_ms": 3.9670559999649413,
+        "p95_ms": 5.957651002972852,
+        "max_ms": 5.957651002972852
+      },
+      "from_checkpoint": {
+        "repeats": 10,
+        "min_ms": 2.6077560032717884,
+        "median_ms": 2.6852220016735373,
+        "p95_ms": 4.303565001464449,
+        "max_ms": 4.303565001464449
+      },
+      "speedup_median_x": 1.4773661162810798
+    },
+    "artifact_capture_batch_50": {
+      "repeats": 10,
+      "min_ms": 169.20347999985097,
+      "median_ms": 175.15754999840283,
+      "p95_ms": 192.14665999970748,
+      "max_ms": 192.14665999970748,
+      "artifacts_per_batch": 50,
+      "artifact_bytes": 4096,
+      "ms_per_artifact_median": 3.5031509999680566
+    },
+    "single_agent_execution": {
+      "repeats": 10,
+      "min_ms": 237.34566700295545,
+      "median_ms": 246.0981170006562,
+      "p95_ms": 274.14717200008454,
+      "max_ms": 274.14717200008454
+    },
+    "nested_agent_execution": {
+      "repeats": 10,
+      "min_ms": 0.5015729984734207,
+      "median_ms": 0.6074745015212102,
+      "p95_ms": 0.9771869990800042,
+      "max_ms": 0.9771869990800042
+    },
+    "storage_amplification_1000_events": {
+      "events": 1000,
+      "raw_canonical_json_bytes": 718780,
+      "sqlite_file_bytes": 1212416,
+      "amplification_x": 1.6867692478922618
+    },
+    "multi_agent_token_overhead": {
+      "repeats": 5,
+      "single_agent_direct_execution_tokens_median": 900,
+      "coordinator_only_tokens_median": 640,
+      "coordination_overhead_ratio": 0.7111111111111111,
+      "note": "coordinator cost is pure overhead on top of the child that still has to do the worker_tokens of work"
+    },
+    "recovery_latency": {
+      "repeats_requested": 5,
+      "recovery_samples_captured": 5,
+      "resume_after_kill_ms": {
+        "median": 625.9285779997299,
+        "min": 614.7502720014018,
+        "max": 651.4057630010939
+      },
+      "uninterrupted_full_run_ms": {
+        "median": 302.9550300016126,
+        "min": 295.65802099750726,
+        "max": 349.6602659979544
+      },
+      "note": "resume_after_kill_ms times only the fresh resume process; the killed process's own wall time is separate and not comparable to a full uninterrupted run"
+    }
+  }
+}

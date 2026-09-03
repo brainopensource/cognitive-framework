@@ -1,0 +1,37 @@
+{
+  "tier": "sota-easy",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "manifest": "vg-code-max-v3luna",
+  "max_turns": 15,
+  "total": 1,
+  "passed": 1,
+  "pass_rate": "1/1",
+  "spend_usd": 0.002049,
+  "llm_calls": 9,
+  "budget_usd": 0.02,
+  "max_calls": 20,
+  "rows": [
+    {
+      "challenge": "sota_easy_config_precedence",
+      "tier": "sota-easy",
+      "title": "Typed Configuration Precedence",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "manifest": "vg-code-max-v3luna",
+      "status": "PASS",
+      "llm_calls": 8,
+      "turns": 8,
+      "terminal_state": "instrument_error",
+      "cost_usd": 0.002049,
+      "latency_s": 23.18,
+      "files_modified": [
+        "config/coerce.py",
+        "config/loader.py"
+      ],
+      "oracle_output": "",
+      "error": "",
+      "terminal_detail": "test: missing required argument(s): summary",
+      "run_fields": {},
+      "cassette": "benchmarks/artifacts/ladder/v3luna_live_cheap__sota_easy_config_precedence__deepseek_deepseek-v4-flash-0731.cassette.json"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "schema_version": "vanguard.kernel-tcb-budget.v1",
+  "source_root": "vanguard/packages/kernel",
+  "baseline_logical_loc": 0,
+  "alarm_delta_lines": 0,
+  "baseline_date": "2026-08-15",
+  "decision": "MF-KRN-011"
+}

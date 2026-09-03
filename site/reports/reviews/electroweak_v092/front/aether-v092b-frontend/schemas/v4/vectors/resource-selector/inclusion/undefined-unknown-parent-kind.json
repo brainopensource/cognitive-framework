@@ -1,0 +1,17 @@
+{
+  "parent": {
+    "kind": "process",
+    "pid": 1
+  },
+  "child": {
+    "kind": "fs",
+    "root": "/w",
+    "paths": [
+      "/w"
+    ]
+  },
+  "expected": {
+    "included": false,
+    "reason": "unparsable"
+  }
+}

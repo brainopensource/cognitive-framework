@@ -1,1 +1,1 @@
-export * from "@vanguard/client-core/adapters/signer.js";
+export * from "@aether/client/signers/operator-signer.js";

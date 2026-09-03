@@ -2,10 +2,10 @@
 
 The corpus in ``schemas/v4/vectors/runtime-service/`` is data, not tests
 (``schemas/v4/vectors/README.md``): it is the cross-language contract that
-``vanguard/packages/runtime/service/contract.py`` and client-core's TypeScript
-reader must both agree with. This module is the Python half of that replay;
-``vanguard/clients/client-core/test/runtime-service-vectors.test.ts`` is the
-TypeScript half, and both read the same bytes.
+``vanguard/packages/runtime/service/contract.py`` and ``@aether/contracts``'s
+TypeScript reader must both agree with. This module is the Python half of
+that replay; ``vanguard/clients/contracts/test/runtime-service-vectors.test.ts``
+is the TypeScript half, and both read the same bytes.
 
 Per GV-1 every case is checked twice: once against the JSON Schema (when a
 ``$ref``-resolving engine is installed) and once against the handwritten

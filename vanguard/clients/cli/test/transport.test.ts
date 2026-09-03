@@ -4,6 +4,7 @@ import { createServer, type Socket } from "node:net";
 import { unlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { randomUUID } from "node:crypto";
 import { LiveRuntimeClient } from "../src/adapters/live.js";
 import { parseDaemonFrame } from "../src/contract/parse.js";
 import type { EventEnvelope } from "../src/contract/types.js";
@@ -46,17 +47,17 @@ test("socket transport reconnects after drop and resumes afterSeq", async () => 
       buf += String(chunk);
       if (!buf.includes("\n")) return;
       if (connections === 1) {
-        conn.write(JSON.stringify({ version: "vg.4", frameType: "event", event: envelope("1", "EpisodeStarted") }) + "\n");
+        conn.write(JSON.stringify({ version: "vg.4", frameType: "event", frameId: randomUUID(), event: envelope("1", "EpisodeStarted") }) + "\n");
         conn.destroy();
         return;
       }
-      conn.write(JSON.stringify({ version: "vg.4", frameType: "event", event: envelope("2", "EpisodeCompleted", { outcome: "satisfied" }) }) + "\n");
+      conn.write(JSON.stringify({ version: "vg.4", frameType: "event", frameId: randomUUID(), event: envelope("2", "EpisodeCompleted", { outcome: "satisfied" }) }) + "\n");
       conn.end();
     });
   });
   await new Promise<void>((resolve) => server.listen(socketPath, resolve));
   try {
-    const client = new LiveRuntimeClient(undefined, {
+    const client = new LiveRuntimeClient({
       socketPath,
       connectTimeoutMs: 500,
       commandTimeoutMs: 500,

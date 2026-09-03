@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vanguard-runtime"
+version = "0.9.0b1"
+description = "AETHER — Higgs development line"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "Vanguard Team" }
+]
+dependencies = [
+    "cryptography>=41",
+    "jsonschema>=4.23.0",
+]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+
+[project.scripts]
+lda = "tools.lda.cli:main"
+vanguard = "vanguard.packages.runtime.cli:main"
+vanguard-evaluator = "vanguard.packages.adapters.evaluators.daemon:main"
+vanguard-daemon = "vanguard.packages.runtime.service.server:main"
+vanguard-studio = "vanguard.packages.runtime.service.studio_gateway:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["vanguard*", "schemas*", "packs*", "tools*"]
+namespaces = true
+
+[tool.setuptools.package-data]
+# `.jcs` and `.digest` are the other two thirds of the REQ-SCHEMA-001
+# canonicalisation triples. Without them a wheel ships the inputs and none
+# of the canonical forms or digests to check them against.
+"*" = ["*.json", "*.yaml", "*.yml", "*.md", "*.txt", "*.cnf", "*.html", "*.js", "*.css", "*.map", "*.svg", "*.jcs", "*.digest"]
+
+[tool.pytest.ini_options]
+# "The suite" must mean one thing. Bare `pytest` at the repo root otherwise
+# collects tools/** and the fixture projects under test/runtime/fixtures, whose
+# imports fail outside their own environments -- 19 collection errors that say
+# nothing about this codebase.
+testpaths = ["test"]
+norecursedirs = ["test/runtime/fixtures", "*.egg-info", "build", "dist", "node_modules"]
+
+[dependency-groups]
+dev = [
+    "griffe>=2.2.0",
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.7.7",
+    "mkdocstrings>=1.0.6",
+    "mkdocstrings-python>=2.0.7",
+    "rust-just>=1.58.0",
+]

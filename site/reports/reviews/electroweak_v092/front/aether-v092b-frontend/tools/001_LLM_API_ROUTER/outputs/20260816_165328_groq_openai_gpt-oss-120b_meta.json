@@ -1,0 +1,18 @@
+{
+  "timestamp": "20260816_165328",
+  "provider": "groq",
+  "model": "openai/gpt-oss-120b",
+  "requested_model": "120b",
+  "temperature": 0.2,
+  "prompt": "the square root of 144, in one small phrase like 'the value is {answer}' ",
+  "latency_ms": 425,
+  "ttft_ms": 425,
+  "tokens": {
+    "prompt": 91,
+    "completion": 57,
+    "total": 148
+  },
+  "cost_usd_micros": 262,
+  "cost_usd": 0.000262,
+  "response_file": "tools/001_LLM_API_ROUTER/outputs/20260816_165328_groq_openai_gpt-oss-120b_response.md"
+}

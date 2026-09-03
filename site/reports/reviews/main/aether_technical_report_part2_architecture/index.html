@@ -1,0 +1,4770 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="General Event-Sourced Agentic Computation Framework & Substrate">
+      
+      
+        <meta name="author" content="AETHER Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>AETHER / Vanguard — Technical Report, Part II - AETHER Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#aether-vanguard-technical-report-part-ii" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../.." title="AETHER Documentation" class="md-header__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AETHER Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              AETHER / Vanguard — Technical Report, Part II
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../.." title="AETHER Documentation" class="md-nav__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AETHER Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Law & Norms
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Law & Norms
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../SPEC/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Specification (SPEC)
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions Index
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Overview
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../architecture/boundaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Boundaries
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../architecture/workflows/end-to-end-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-to-End Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../architecture/workflows/system-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Bootstrap
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/architecture/agency/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agency
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/architecture/application-interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Interfaces
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/architecture/assurance-evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Assurance & Evaluation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/architecture/causal-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Causal State
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/architecture/composition-extensibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Composition & Extensibility
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/architecture/delegation-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation & Topology
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/architecture/kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kernel
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/architecture/memory-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory & Learning
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/architecture/runtime-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/architecture/workflows/request-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Request Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/architecture/workflows/agent-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/architecture/workflows/event-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/architecture/workflows/delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/architecture/workflows/recovery-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recovery & Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/guides/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/guides/compose-an-agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compose an Agent
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/guides/add-pack-or-tool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Pack or Tool
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/guides/add-adapter-or-provider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Adapter or Provider
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/guides/operate-runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operate Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/guides/run-and-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Run and Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/reference/schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schemas
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/reference/runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/reference/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Port Contracts
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/reference/api-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Reference
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/reference/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/reference/manifests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifests
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../backend/reference/artifacts-memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Artifacts & Memory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../../frontend/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product PRDs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Product PRDs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../product/frontend/FRONTEND_PRD_PLACEMENT_MANIFEST/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Placement Manifest
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../product/frontend/PRD_AETHER_CLI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD CLI
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../product/frontend/PRD_AETHER_DESKTOP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Desktop
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../product/frontend/PRD_AETHER_LAB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Lab
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../product/frontend/PRD_AETHER_TUI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD TUI
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../product/frontend/PRD_FRONTEND_PLATFORM/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Platform
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Execution
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../execution/active/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../execution/milestones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Milestones
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../execution/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & Reports
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & Reports
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../theory/agent-substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../benchmark/main/BENCHMARK_V090_FULL.MD" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmark Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/AI/openrouter_llm_models_suggested/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Models
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_2" id="__nav_9_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coding Harness
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Coding Harness
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/ARCHON_gemini_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Archon Gemini Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/DEKAS_claude_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dekas Claude Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/LLM_RESPONSE_WRANGLER/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Response Wrangler
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/LLM_benchmarkings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Benchmarking
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/RESEARCH_2308B_gm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research 2308B GM
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/RESEARCH_Harness_Builder_Framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Builder Framework
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/RESEARCH_META_COGNITIVE_ENGINEERING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Cognitive Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/RESEARCH_META_COGNITIVE_ENGINEERING_briefing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Cognitive Briefing
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/RESEARCH_META_FRAMEWORK_2408/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Framework 2408
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/RESEARCH_THEORETICAL_SYNTHESIS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theoretical Synthesis
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/RESEARCH_deepseek-harness_algorithms-ideas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deepseek Harness Algorithms
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/RESEARCH_harness_agentic_coding_builder_research_and_framework_B/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agentic Coding Builder Framework B
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/RESEARCH_higgs_2308/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Higgs 2308
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/RESEARCH_metaframework_2508_improved/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metaframework 2508
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/VANGUARD_FRONTIER_SWE_BENCH_AND_AGENTIC_METAFRAMEWORK_REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontier SWE Bench & Metaframework Report
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/VANGUARD_VS_LIM_INSIGHTS_SOTS_TECHNIQUES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vanguard vs LIM Insights
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/future_improvements_sota_harness_2808/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Future Improvements SOTA Harness
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/proposal_glm_harness_BETA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proposal GLM Harness Beta
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/proposal_hy3_improved/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proposal HY3 Improved
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/research_agentic_runtime_systems_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agentic Runtime Systems Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/research_harness_agentic_systems_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Agentic Systems Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/suggested_LIM_improvements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Suggested LIM Improvements
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/coding_harness/vanguard_body_detailed/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vanguard Body Detailed
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_3" id="__nav_9_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/frontend/AETHER_FRONTEND_MASTERPLAN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Masterplan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/frontend/frontend_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--experiment"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/frontend/frontend_prototype_beta_gem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Prototype Beta Gem
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--experiment"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../research/frontend/integration_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Plan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#agent-typology-runtime-mechanics-and-the-module-topography" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Agent Typology, Runtime Mechanics, and the Module Topography
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-systemic-modeling-conceptual-formulations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Systemic Modeling &amp; Conceptual Formulations
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Systemic Modeling &amp; Conceptual Formulations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-the-central-structural-result-an-agent-is-a-manifest-not-a-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 The central structural result: an agent is a manifest, not a module
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-the-compilation-pipeline-from-declaration-to-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 The compilation pipeline: from declaration to execution
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-the-inner-loop-formally" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 The inner loop, formally
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-the-outer-loop-session-suspension-and-re-entry" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 The outer loop: session, suspension, and re-entry
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-cancellation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Cancellation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-recovery-and-retry-as-presently-implemented" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Recovery and retry, as presently implemented
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#37-verification-receipts-and-the-completion-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.7 Verification, receipts, and the completion gate
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#38-memory-four-ports-scoped-and-provenance-bearing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.8 Memory: four ports, scoped and provenance-bearing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#39-skills-generation-evaluation-promotion-with-no-self-promotion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.9 Skills: generation, evaluation, promotion — with no self-promotion
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#310-sandboxing-and-the-containment-attestation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.10 Sandboxing and the containment attestation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#311-indexing-lda-and-atlas-as-observation-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.11 Indexing: LDA and ATLAS as observation sources
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#312-model-routing-and-provider-abstraction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.12 Model routing and provider abstraction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#313-the-event-ledger-and-its-projections" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.13 The event ledger and its projections
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-complete-module-topography" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Complete Module Topography
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="aether-vanguard-technical-report-part-ii">AETHER / Vanguard — Technical Report, Part II</h1>
+<h2 id="agent-typology-runtime-mechanics-and-the-module-topography">Agent Typology, Runtime Mechanics, and the Module Topography</h2>
+<p><em>Continues Part I. Same constraint: present implementation only.</em></p>
+<hr />
+<h2 id="3-systemic-modeling-conceptual-formulations">3. Systemic Modeling &amp; Conceptual Formulations</h2>
+<h3 id="31-the-central-structural-result-an-agent-is-a-manifest-not-a-module">3.1 The central structural result: an agent is a manifest, not a module</h3>
+<p>This is the most consequential finding of the survey, and it is verifiable by direct comparison of
+artefacts rather than by argument. The repository contains <strong>38 manifests</strong> under
+<code>agency/manifests/</code>. Comparing the coding, research, and tutor compositions:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>vg-code-max</code></th>
+<th><code>vg-research-v090-v2</code></th>
+<th><code>vg-tutor-v090-v1</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>system_prompt</td>
+<td>code-default</td>
+<td>research-specific</td>
+<td>tutor-specific</td>
+</tr>
+<tr>
+<td>tools</td>
+<td>read, search, <strong>patch, test</strong></td>
+<td>read, search</td>
+<td>read, search</td>
+</tr>
+<tr>
+<td>capabilities</td>
+<td><code>fs.read</code>, <code>fs.search</code>, <strong><code>patch.apply</code></strong> (privileged/medium), <strong><code>proc.exec</code></strong> (privileged/high)</td>
+<td><code>fs.read</code>, <code>fs.search</code> (both observation/low)</td>
+<td><code>fs.read</code>, <code>fs.search</code> (both observation/low)</td>
+</tr>
+<tr>
+<td>evaluators</td>
+<td><code>coding-oracle@3</code></td>
+<td><code>answer-oracle@1</code></td>
+<td><code>answer-oracle@1</code></td>
+</tr>
+<tr>
+<td>context_policy</td>
+<td>code-default</td>
+<td><strong>code-default (shared)</strong></td>
+<td><strong>code-default (shared)</strong></td>
+</tr>
+<tr>
+<td>routing_policy</td>
+<td>code-default</td>
+<td><strong>code-default (shared)</strong></td>
+<td><strong>code-default (shared)</strong></td>
+</tr>
+<tr>
+<td>budgetPolicy</td>
+<td>code-default</td>
+<td><strong>code-default (shared)</strong></td>
+<td><strong>code-default (shared)</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The three agent types share the episode loop, the kernel, the context compiler, the routing policy,
+the budget policy, and the approval policy <strong>byte for byte</strong>. They differ in exactly three
+dimensions: the system prompt, the declared capability set, and the evaluator. A Tutor is a Coding
+agent with <code>patch.apply</code> and <code>proc.exec</code> removed from its perimeter and a different oracle judging
+it.</p>
+<p>This is the framework's generalisation claim made concrete. It is why the <code>apps/</code> package is 79
+lines. It is why <code>derive_phase</code> lives in <code>tool_policy.py</code> rather than the engine (<code>ADR-0060</code>: the
+episode loop names no domain verb). And it is why the admission gate branches on preset name to
+distinguish read-only completion semantics:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">is_write_preset</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">prefix</span> <span class="ow">in</span> <span class="n">preset_name</span> <span class="k">for</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"code"</span><span class="p">,</span> <span class="s2">"bugfix"</span><span class="p">,</span> <span class="s2">"write"</span><span class="p">))</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">is_read_only</span>    <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">prefix</span> <span class="ow">in</span> <span class="n">preset_name</span> <span class="k">for</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"tutor"</span><span class="p">,</span> <span class="s2">"research"</span><span class="p">,</span> <span class="s2">"read"</span><span class="p">))</span>
+</code></pre></div>
+<p>A read-only preset is not required to produce a source patch to be admitted as complete; it must
+still satisfy task requirements. The completion <em>criterion</em> differs by agent type while the
+completion <em>machinery</em> does not.</p>
+<p><strong>Implication for anyone extending the system:</strong> adding a new agent type — Browser, Reviewer, Data
+Analyst — is properly a manifest authoring exercise plus, where genuinely novel effects are needed,
+an adapter and a <code>SinkRegistry</code> entry. Writing a new Python subsystem for a new agent type would be
+evidence that the substrate had failed, not that the agent was ambitious.</p>
+<h3 id="32-the-compilation-pipeline-from-declaration-to-execution">3.2 The compilation pipeline: from declaration to execution</h3>
+<p>The path from a manifest to a running episode traverses the following, each stage producing an
+immutable artefact:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Manifest (JSON)
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>   -&gt; CanonicalManifest          domain/artifacts/manifest.py  (1,058 LOC)
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>   -&gt; FrozenComposition          runtime/compose.py            (579 LOC)
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>   -&gt; ActivationPlan             runtime/activation.py
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>   -&gt; RunPlan                    runtime/run_plan.py
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>   -&gt; HarnessSession             runtime/session.py            (1,461 LOC)
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>   -&gt; EpisodeEngine.run()        agency/episode/engine.py      (1,058 LOC)
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>   -&gt; Kernel.dispatch()          kernel/dispatch.py            (458 LOC)
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>   -&gt; EffectAdapter.execute()    adapters/*
+</code></pre></div>
+<p>Canonicalisation (<code>domain/canonicalisation/jcs.py</code>, <code>digest.py</code>) implements JSON Canonicalisation
+Scheme, so every artefact in this chain is content-addressable. This is what permits the ledger to
+record <em>which composition ran</em> rather than <em>which composition was requested</em> — a distinction that
+matters the moment presets are edited between runs.</p>
+<p><code>FrozenComposition</code> is the pivotal type: once frozen, the composition cannot be renegotiated by
+anything downstream. The model receives a compiled context and a tool schema; it does not receive the
+composition object and therefore cannot mutate its own configuration. This is the same structural
+refusal seen in <code>ChildRunPlan</code> — configuration is decided <em>before</em> the agent exists.</p>
+<h3 id="33-the-inner-loop-formally">3.3 The inner loop, formally</h3>
+<p>The episode loop reduces turns until terminal. Per turn:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>1. COMPILE    CompiledContext from five layers, bounded by token budget
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>2. RESOLVE    ToolPolicy := resolve_tool_policy(derive_phase(seen_verbs), ...)
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>3. PROPOSE    raw := model.propose(context, tools ∩ policy.allowed, sampling)
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>4. PARSE      Proposal := parse_proposal(raw)   | ProposalMalformed
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>   4a.RECOVER on malformed: recover_proposal(...) -&gt; accept | retry_model | fail_instrument
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>5. EMIT       ProposalProduced  (the loop's only durable emission)
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>6. BRANCH     kind ∈ {FINISH, ABSTAIN, ESCALATE} -&gt; terminal via TERMINAL_FOR_KIND
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>              kind = SPAWN                        -&gt; spawn() under attenuated budget
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>              kind = EFFECT                       -&gt; continue
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>7. GATE       AdmissionGate.evaluate(...) on FINISH  -&gt; admissible | rejection_feedback
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>8. BUILD      EffectRequest from proposal + accumulated spans
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>9. DISPATCH   Kernel.dispatch(request)  -&gt;  DispatchResult (S0..S12)
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>10.REDUCE     append Turn; accumulate result spans; check repeats(); check cancellation
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>11.ADVANCE    Accumulation.advance_turn(reply_spans, result_spans)
+</code></pre></div>
+<p>Termination is guaranteed by three independent bounds: <code>max_turns</code> (structural ceiling, not summed
+across siblings), budget exhaustion via <code>Governor</code>, and no-progress detection via
+<code>Episode.repeats()</code>. <code>RunTermination</code> is a closed enumeration — <code>COMPLETED</code>, <code>ABSTAINED</code>,
+<code>ESCALATED</code>, <code>BUDGET_EXHAUSTED</code>, <code>CANCELLED</code>, <code>RUNTIME_ERROR</code>.</p>
+<p>A crucial asymmetry: <code>_TERMINAL_FOR_FAILURE</code> maps only seven <code>FailurePath</code> values to terminations.
+<em>"Everything absent from this table is an event the loop reduces over and continues from — <code>VG-03
+§6.1</code>: denial is an event, not an exception. A denied call that silently ended the run would make the
+denial indistinguishable from a crash."</em> A scope denial is therefore <em>feedback</em>, and the agent gets
+another turn to propose something lawful.</p>
+<h3 id="34-the-outer-loop-session-suspension-and-re-entry">3.4 The outer loop: session, suspension, and re-entry</h3>
+<p><code>HarnessSession</code> (<code>runtime/session.py</code>, 1,461 LOC — the largest module in the backend) owns the
+outer loop. Its principal methods:</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>begin_episode()</code></td>
+<td>Construct the engine, bind ports</td>
+</tr>
+<tr>
+<td><code>run()</code></td>
+<td>Drive the episode, handle suspension/approval, evaluate</td>
+</tr>
+<tr>
+<td><code>dispatch(request)</code></td>
+<td>Kernel-mediated effect path with completion observation</td>
+</tr>
+<tr>
+<td><code>checkpoint(turn)</code></td>
+<td>Capture a <code>Checkpoint</code> (digests to blob store)</td>
+</tr>
+<tr>
+<td><code>reconstruct(verify)</code></td>
+<td>Rebuild <code>LedgerState</code> from checkpoint or cold fold</td>
+</tr>
+<tr>
+<td><code>state_digest()</code></td>
+<td>Content address of current state</td>
+</tr>
+<tr>
+<td><code>turns_consumed()</code></td>
+<td>Bound accounting across segments</td>
+</tr>
+<tr>
+<td><code>_consult_meta_controller()</code></td>
+<td>Between-turn <code>guarded_consult</code></td>
+</tr>
+<tr>
+<td><code>_admit_completion()</code></td>
+<td>Delegate to <code>AdmissionGate</code></td>
+</tr>
+<tr>
+<td><code>_workspace_digest()</code></td>
+<td>Subject binding for verification freshness</td>
+</tr>
+<tr>
+<td><code>_capture_evidence()</code> / <code>_evaluate()</code></td>
+<td>Exterior verdict, post-termination</td>
+</tr>
+</tbody>
+</table>
+<p>The suspension mechanism deserves particular attention because it is where the inner and outer loops
+interlock. When <code>StandardPolicy</code> returns <code>REQUIRE_APPROVAL</code> in <code>INTERACTIVE</code> mode, dispatch returns
+<code>FailurePath.APPROVAL_SUSPENDED</code> with a <code>SuspensionToken</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">class</span><span class="w"> </span><span class="nc">SuspensionToken</span><span class="p">:</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="sd">"""`K-15`: the token binds the descriptor, so an approval cannot be</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="sd">    transplanted onto a different call. `K-16`: expiry resolves as denied."""</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>    <span class="n">token_id</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>    <span class="n">descriptor_digest</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="n">principal</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>    <span class="n">expires_at</span><span class="p">:</span> <span class="nb">str</span>
+</code></pre></div>
+<p>The token binds <code>descriptor_digest</code>, so a human approving "write file A" cannot have that approval
+applied to "write file B". Expiry resolves as <em>denied</em>, not as <em>pending</em> — fail-closed. The session
+resumes through a <strong>new engine instance</strong>, which is why <code>prior_turns</code> and <code>prior_seen_verbs</code> exist:
+without them the phase ladder resets and the turn budget silently doubles.</p>
+<p><code>Mode.BENCHMARK</code> changes the semantics: approval never suspends, it denies (<code>F-07</code>). The stated
+reason is methodological — <em>"A run that blocks for a human has unbounded wall-clock and a human
+contributing to the measured outcome."</em> The framework refuses to produce benchmark numbers
+contaminated by human assistance.</p>
+<h3 id="35-cancellation">3.5 Cancellation</h3>
+<p>Cancellation is a callable injected into <code>EpisodeEngine.run(is_cancelled=...)</code>, polled at the top of
+each turn (engine line 351):</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">if</span> <span class="n">is_cancelled</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">is_cancelled</span><span class="p">():</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="n">episode</span> <span class="o">=</span> <span class="n">episode</span><span class="o">.</span><span class="n">terminated</span><span class="p">(</span><span class="n">RunTermination</span><span class="o">.</span><span class="n">CANCELLED</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</code></pre></div>
+<p>The design is cooperative and turn-granular rather than pre-emptive. This is the correct choice given
+the dispatch sequence: cancelling mid-dispatch would risk exactly the leaked-lease and
+indeterminate-effect conditions that <code>K-06</code> and <code>K-47</code> are constructed to prevent. Cancellation
+between turns is always safe because the lease is released and the receipt recorded before the loop
+re-enters. <code>FailurePath.CANCELLED</code> also maps into <code>_TERMINAL_FOR_FAILURE</code>, so a cancellation arriving
+through the kernel path terminates identically.</p>
+<h3 id="36-recovery-and-retry-as-presently-implemented">3.6 Recovery and retry, as presently implemented</h3>
+<p><code>agency/episode/protocol_recovery.py</code> implements the current recovery state machine. It tracks four
+independent counters with separate ceilings:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">transport_retries</span>   <span class="o">/</span> <span class="n">max_transport_retries</span>  <span class="o">=</span> <span class="mi">2</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">protocol_retries</span>    <span class="o">/</span> <span class="n">max_protocol_retries</span>   <span class="o">=</span> <span class="mi">2</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="n">truncation_retries</span>  <span class="o">/</span> <span class="n">max_truncation_retries</span> <span class="o">=</span> <span class="mi">1</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">effect_retries</span>      <span class="o">/</span> <span class="n">max_effect_retries</span>     <span class="o">=</span> <span class="mi">2</span>
+</code></pre></div>
+<p><code>RecoveryDecision.status ∈ {accept, retry_model, fail_instrument}</code>, carrying <code>retry_feedback</code>,
+<code>continuation</code>, <code>failure_code</code> and <code>diagnostics</code>. <code>recover_proposal()</code> is the entry point invoked
+from the engine when <code>parse_proposal</code> raises <code>ProposalMalformed</code>.</p>
+<p>Retries are consumed by the real loop rather than merely counted: <code>_apply_retry()</code> in the engine
+records a <code>Turn</code> for the retry, with <code>proposal_descriptor</code> digesting the retry reason and feedback,
+and — importantly — subjects the retry itself to <code>episode.repeats()</code>. A retry that shows no progress
+terminates the episode. This closes the most common budget-burn path.</p>
+<p>The dimensional separation is well-judged: a transport timeout and an unparseable reply have
+different natural retry counts, and collapsing them into one counter means either the transport is
+under-retried or the malformed reply is over-retried.</p>
+<h3 id="37-verification-receipts-and-the-completion-gate">3.7 Verification, receipts, and the completion gate</h3>
+<p><code>agency/episode/admission_gate.py</code> is the mechanism by which a textual claim of completion is
+prevented from constituting completion. The evaluation sequence for a write-capable preset:</p>
+<ol>
+<li><code>model_requested_finish</code> — else <code>MODEL_DID_NOT_REQUEST_FINISH</code></li>
+<li>read-only preset branch → task requirements only</li>
+<li><code>changed_files</code> non-empty — else <code>MISSING_SOURCE_PATCH</code></li>
+<li>every changed file ∈ <code>inspected_files</code> — else <code>MODIFIED_FILE_NOT_INSPECTED</code></li>
+<li><code>task_requirements_satisfied</code> — else <code>TASK_REQUIREMENTS_UNSATISFIED</code></li>
+<li>receipt present — else <code>VERIFICATION_REQUIRED</code></li>
+<li><code>receipt.passed</code> ≡ <code>exit_code == 0 ∧ executed_test_count &gt; 0</code> — else <code>VERIFICATION_FAILED</code></li>
+<li><code>receipt.workspace_digest == current_workspace_digest</code> — else <code>VERIFICATION_STALE</code></li>
+</ol>
+<p>Step 4 is subtle and valuable: <em>"Every changed file is itself part of the evidence surface... prevents
+a write receipt from standing in for an inspection receipt."</em> An agent cannot modify a file it never
+read.</p>
+<p>Step 7 is the anti-vacuity clause: a receipt claiming success with zero executed tests does not pass.
+An empty test run cannot be laundered into completion.</p>
+<p>Step 8 binds the receipt to the <em>current workspace state</em>, invalidating verification after subsequent
+modification. <code>VerificationReceipt</code> also carries a <code>task_digest</code> field. In the present <code>main</code> branch
+this field is populated in the coercion path but <strong>is not read by any check</strong> — the subject-binding
+gap analysed in Part III.</p>
+<p>The legacy boolean path is explicitly deprecated in-source: a bare <code>verification_passed=True</code> is
+<em>"deliberately insufficient for strict admission because subject freshness is not observable."</em></p>
+<h3 id="38-memory-four-ports-scoped-and-provenance-bearing">3.8 Memory: four ports, scoped and provenance-bearing</h3>
+<p><code>ports/memory.py</code> defines a segmented memory model as four distinct Protocols over a common base:</p>
+<table>
+<thead>
+<tr>
+<th>Port</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>KnowledgePort</code></td>
+<td>Semantic facts</td>
+</tr>
+<tr>
+<td><code>ExperiencePort</code></td>
+<td>Episodic trajectory-derived facts</td>
+</tr>
+<tr>
+<td><code>ProjectMemoryPort</code></td>
+<td>Workspace-scoped durable context</td>
+</tr>
+<tr>
+<td><code>SkillLibrary</code></td>
+<td>Procedural, promotable</td>
+</tr>
+</tbody>
+</table>
+<p>Access is mediated by <code>MemoryAuthorizationPort</code> with <code>MemoryAccess</code> and <code>MemoryBinding</code> values, and
+retrieval carries <code>RetrievalProvenance</code>. Memory is therefore not a free-floating vector store: a
+retrieved fact enters with provenance, and provenance determines trust, and trust participates in the
+authority predicate. A memory that could inject an untrusted fact as an authorising span would
+reopen the injection channel that <code>Accumulation</code> closes; the <code>RetrievalProvenance</code> type is what
+prevents it.</p>
+<p><code>runtime/memory.py</code> and <code>adapters/stores/memory_engine.py</code> (639 LOC) provide the concrete engine.
+<code>session.py::_emit_experience_fact()</code> shows the write path: receipts from a completed run are folded
+into experience memory.</p>
+<h3 id="39-skills-generation-evaluation-promotion-with-no-self-promotion">3.9 Skills: generation, evaluation, promotion — with no self-promotion</h3>
+<p><code>runtime/skill_lifecycle.py</code> and <code>runtime/governance/learning.py</code> (664 LOC) implement <code>M-8</code>. The
+critical structural statement: <em>"Generator, evaluator, and promoter are separate protocols. Promotion
+is an explicit signed operation and rollback restores the previous composition; </em><em>an agent has no
+method to promote itself</em><em>."</em></p>
+<p>The types are <code>SkillCandidate</code> (carrying <code>source_trajectory_digest</code>, <code>body_digest</code>,
+<code>composition_version</code>), <code>EvaluationReport</code>, and <code>PromotionEvidence</code>. <code>governance/learning.py</code>
+requires <em>"measured held-out lift, regression budgets, and signed evidence"</em>, and the composition
+registry is durable SQLite-WAL with compare-and-swap protection.</p>
+<p>This is self-improvement with the loop deliberately cut: an agent may <em>produce</em> a candidate skill from
+its trajectory, but the promotion path runs through an evaluator it does not control and a signature
+it cannot forge. The separation is the same one that keeps evaluators out of <code>agency</code>.</p>
+<h3 id="310-sandboxing-and-the-containment-attestation">3.10 Sandboxing and the containment attestation</h3>
+<p><code>adapters/sandbox/</code> (935 LOC) provides rootless Bubblewrap isolation. The design principle stated in
+<code>rootless.py</code>:</p>
+<blockquote>
+<p><em>"The adapter never infers containment from its command line. It runs the mount, network and
+denied-syscall probes inside the same constructed perimeter as the worker command."</em></p>
+</blockquote>
+<p>Containment is <em>measured</em>, not <em>asserted</em>. A constructed sandbox is probed from inside itself, and
+the resulting <code>ContainmentReport</code>/<code>ProbeResult</code> carries evidence. A runtime startup failure still
+produces an <em>unverified</em> report so callers can record the failure, and <em>"the publication gate remains
+fail-closed."</em> This is the same epistemic pattern as <code>undeterminable</code> in the child-runtime contract:
+the system distinguishes "contained" from "we could not establish containment," and treats the latter
+as disqualifying rather than as passing.</p>
+<p><code>adapters/evaluators/isolated.py</code>, <code>signing.py</code>, and <code>gate.py</code> extend this to evaluation: the
+evaluator runs in a sealed bundle at <code>/sealed-evaluator/bundle</code>, and results are signed. An agent
+cannot tamper with its own grader.</p>
+<h3 id="311-indexing-lda-and-atlas-as-observation-sources">3.11 Indexing: LDA and ATLAS as observation sources</h3>
+<p><code>ports/index.py</code> defines <code>IndexPort</code> with <code>index()</code>, <code>files()</code>, <code>symbols()</code>, <code>dependencies()</code>,
+<code>tests()</code>, <code>repo_map(token_budget)</code>, returning value-only types: <code>Symbol</code>, <code>DependencyEdge</code>,
+<code>TestAssociation</code>, <code>RepositoryMap</code>.</p>
+<p>The docstring makes the architectural ruling explicit and it is the correct one:</p>
+<blockquote>
+<p><em>"This is the slot a repo-map occupies. It is an </em><em>observation</em><em> source and nothing more... It is
+explicitly not a second loop — it proposes nothing, ranks nothing on the agent's behalf, and holds
+no authority. A retrieval component that decided what the agent should look at next would be a
+second policy wearing the word 'index'."</em></p>
+</blockquote>
+<p><code>RepositoryMap</code> carries <code>adapter_id</code>, <code>source_revision</code>, <code>truncated</code>, and <code>token_estimate</code> —
+attribution and bounded-ness are part of the value, so a caller always knows whose index answered and
+whether the answer was cut off.</p>
+<p>The concrete tooling lives <em>outside</em> <code>vanguard/packages/</code>:</p>
+<ul>
+<li><code>tools/007_LLM_DOCS_ATLAS/</code> — 43 Python modules, with a provider architecture (<code>git.py</code>,
+  <code>markdown.py</code>, <code>code_ast.py</code>, <code>filesystem.py</code>, <code>knowledge.py</code>, <code>vector_adapter.py</code>), a profile
+  system, CLI, dashboard, and its own test suite including a <code>test_genericity_guard.py</code>.</li>
+<li><code>tools/lda/</code>, <code>tools/scip_adapter.py</code>, <code>tools/ast_grep_adapter.py</code> — indexing adapters.</li>
+<li><code>lda.yaml</code> — profile selection that is <em>"EXPLICIT ONLY — via this key or <code>$LDA_PROFILE</code> — never
+  inferred from repository artifacts (no side-channel detection)."</em></li>
+</ul>
+<p><strong>On the plugin-versus-integrated question posed in the brief:</strong> the present architecture has already
+answered it, and answered it correctly. <code>IndexPort</code> is the seam; ATLAS/LDA sit behind it as adapters,
+outside the package boundary, in <code>tools/</code>. This is the right disposition and should be preserved.
+Integrating ATLAS directly into <code>agency</code> would violate the "not a second loop" constraint the port
+docstring establishes, and would couple the episode loop to a particular retrieval strategy. The
+port's <code>Result[...]</code> return type means an absent indexer degrades to empty results rather than
+raising — so the deterministic textual fallback the framework relies on is a natural consequence of
+the port design rather than a special case. The framework does <em>not</em> need external MCP plugins to
+have a capable toolkit, because the toolkit is expressed as ports and adapters; but the seam should
+remain a port, not a direct dependency.</p>
+<h3 id="312-model-routing-and-provider-abstraction">3.12 Model routing and provider abstraction</h3>
+<p><code>adapters/models/</code> contains <code>factory.py</code> (unified <code>create_model()</code>), <code>config.py</code> (registry with
+bands: <code>free</code>, <code>fast</code>, <code>smart</code>, <code>local</code>, <code>testing</code>), <code>routing.py</code>, <code>openrouter.py</code> (1,199 LOC),
+<code>ollama.py</code>, <code>cassette.py</code> (record/replay), <code>fake.py</code>, <code>stochastic.py</code>, <code>lam.py</code>, <code>planner.py</code>,
+<code>invocation.py</code> (603 LOC).</p>
+<p><code>ModelPort</code> is a single-method Protocol:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">propose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">ContextBundle</span><span class="p">,</span> <span class="n">tools</span><span class="p">:</span> <span class="n">ToolSchemas</span><span class="p">,</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>            <span class="n">sampling</span><span class="p">:</span> <span class="n">Sampling</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Result</span><span class="p">[</span><span class="n">Proposal</span><span class="p">]</span>
+</code></pre></div>
+<p>with the invariant that <em>"Rate limits, timeouts, cassette exhaustion and malformed provider replies
+are <code>instrument_error</code>. They are not task failures."</em> The distinction between instrument error and
+task failure runs throughout the codebase and is essential to honest measurement: a benchmark run
+that failed because OpenRouter returned 503 has not produced evidence about the agent.</p>
+<p>The cassette mechanism (<code>CassettePlayer</code>/<code>CassetteRecorder</code>) provides deterministic replay, which is
+what makes <code>ports/determinism.py</code>'s counterfactual replay claim tractable.</p>
+<h3 id="313-the-event-ledger-and-its-projections">3.13 The event ledger and its projections</h3>
+<p><code>domain/ledger/</code> (events, reducer at 820 LOC, <code>state.py</code>, <code>projections</code>, <code>reconciliation</code>,
+<code>progress.py</code>, <code>agent_view.py</code>, <code>session_projection.py</code>) implements event sourcing as the substrate
+of record. <code>adapters/stores/ledger_jsonl.py</code> and <code>event_store.py</code> (549 LOC) provide persistence.</p>
+<p>The read models are worth naming because they are what metacognition consumes: <code>AgentView</code>,
+<code>ProgressView</code>, <code>ConfidenceRecord</code>. The meta-controller receives <em>projections</em>, not the raw log, and
+not the live session — reinforcing that it is a pure function of observable state.</p>
+<p><code>runtime/ledger/recovery.py</code> and <code>domain/ledger/reconciliation.py</code> handle the log-repair path.</p>
+<hr />
+<h2 id="4-complete-module-topography">4. Complete Module Topography</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>vanguard/packages/
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>├── ports/                    1,580 LOC — Protocols only; imports nothing outward
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>│   ├── kernel.py             Clock, EffectAdapter, EventSink, Ledger
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>│   ├── model.py              ModelPort.propose -&gt; Result[Proposal]
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>│   ├── environment.py        10 types — filesystem/process/workspace effects
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>│   ├── evaluator.py          5 types — exterior grading
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>│   ├── index.py              IndexPort, Symbol, RepositoryMap, DependencyEdge
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>│   ├── memory.py             KnowledgePort, ExperiencePort, ProjectMemoryPort, SkillLibrary
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>│   ├── sandbox.py            SandboxRunner, ContainmentReport, ProbeResult, SandboxReceipt
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>│   ├── child_runtime.py      ChildRunPlan / ChildRunResult / ChildRuntimePort
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>│   ├── meta_controller.py    MetaController, StrategyDirective, DIRECTIVE_KINDS
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>│   ├── determinism.py        counterfactual replay contract
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>│   ├── event_store.py        Result[T], append-only store
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>│   ├── blob_store.py         content-addressed storage
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>│   ├── evidence_errors.py    evidence error taxonomy
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>│   └── spi.py                6 service-provider types
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>│
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>├── kernel/                   1,769 LOC — Trusted Computing Base
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>│   ├── dispatch.py     458   S0..S12; Kernel, DispatchResult, SuspensionToken, KernelAlarm
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>│   ├── grants.py       244   Grant, GrantIssuer, HmacAuthenticator, descriptor_of
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>│   ├── budget.py       215   Governor, Lease, Reservation, ADDITIVE_DIMENSIONS
+<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>│   ├── attenuation.py  215   Scope, Constraints, attenuate, RISK_ORDER
+<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a>│   ├── model.py        176   EffectRequest, Event, FailurePath, SinkClass, Span, Trust
+<a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a>│   ├── provenance.py   144   Accumulation, authority_violation, combine, weakest
+<a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a>│   ├── policy.py       139   StandardPolicy, Decision, Outcome, Mode
+<a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a>│   └── classifier.py   134   StandardClassifier, SinkRegistry, HeldAuthority, SinkMismatch
+<a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a>│
+<a id="__codelineno-7-28" name="__codelineno-7-28" href="#__codelineno-7-28"></a>├── domain/                   9,586 LOC — pure values
+<a id="__codelineno-7-29" name="__codelineno-7-29" href="#__codelineno-7-29"></a>│   ├── artifacts/manifest.py 1,058  CanonicalManifest; graph.py; skill_index.py
+<a id="__codelineno-7-30" name="__codelineno-7-30" href="#__codelineno-7-30"></a>│   ├── ledger/         events, reducer(820), state, projections, reconciliation,
+<a id="__codelineno-7-31" name="__codelineno-7-31" href="#__codelineno-7-31"></a>│   │                   progress, agent_view, session_projection
+<a id="__codelineno-7-32" name="__codelineno-7-32" href="#__codelineno-7-32"></a>│   ├── canonicalisation/     jcs.py (JSON Canonicalisation Scheme), digest.py
+<a id="__codelineno-7-33" name="__codelineno-7-33" href="#__codelineno-7-33"></a>│   ├── evidence/       foundation, envelope, claim, baseline, audit(586),
+<a id="__codelineno-7-34" name="__codelineno-7-34" href="#__codelineno-7-34"></a>│   │                   preregistration, guardrails
+<a id="__codelineno-7-35" name="__codelineno-7-35" href="#__codelineno-7-35"></a>│   ├── execution/      scope.py, lineage.py, operation.py
+<a id="__codelineno-7-36" name="__codelineno-7-36" href="#__codelineno-7-36"></a>│   ├── transforms/     contracts, schemas, protocol/response_wrangler,
+<a id="__codelineno-7-37" name="__codelineno-7-37" href="#__codelineno-7-37"></a>│   │                   repository/change_surface
+<a id="__codelineno-7-38" name="__codelineno-7-38" href="#__codelineno-7-38"></a>│   ├── selectors/      resource_selector(501), independence
+<a id="__codelineno-7-39" name="__codelineno-7-39" href="#__codelineno-7-39"></a>│   ├── wire/           jsonrpc, contracts, result, types_gen(707)
+<a id="__codelineno-7-40" name="__codelineno-7-40" href="#__codelineno-7-40"></a>│   ├── workflows/      contracts, reducer
+<a id="__codelineno-7-41" name="__codelineno-7-41" href="#__codelineno-7-41"></a>│   ├── primitives/     uuidv7 etc.
+<a id="__codelineno-7-42" name="__codelineno-7-42" href="#__codelineno-7-42"></a>│   └── workspace.py
+<a id="__codelineno-7-43" name="__codelineno-7-43" href="#__codelineno-7-43"></a>│
+<a id="__codelineno-7-44" name="__codelineno-7-44" href="#__codelineno-7-44"></a>├── agency/                   8,844 LOC — the loop and its cognition
+<a id="__codelineno-7-45" name="__codelineno-7-45" href="#__codelineno-7-45"></a>│   ├── episode/
+<a id="__codelineno-7-46" name="__codelineno-7-46" href="#__codelineno-7-46"></a>│   │   ├── engine.py           1,058  EpisodeEngine, EpisodeOutcome, spawn()
+<a id="__codelineno-7-47" name="__codelineno-7-47" href="#__codelineno-7-47"></a>│   │   ├── state.py                   Episode, Turn, Proposal, ProposalKind, RunTermination
+<a id="__codelineno-7-48" name="__codelineno-7-48" href="#__codelineno-7-48"></a>│   │   ├── admission_gate.py          AdmissionGate, VerificationReceipt, AdmissionVerdict
+<a id="__codelineno-7-49" name="__codelineno-7-49" href="#__codelineno-7-49"></a>│   │   ├── tool_policy.py             ToolPolicy, resolve_tool_policy, derive_phase
+<a id="__codelineno-7-50" name="__codelineno-7-50" href="#__codelineno-7-50"></a>│   │   └── protocol_recovery.py       ProtocolRecoveryState/Policy, RecoveryDecision
+<a id="__codelineno-7-51" name="__codelineno-7-51" href="#__codelineno-7-51"></a>│   ├── context/       layers.py (L1..L5), compiler.py, packet.py, compaction.py
+<a id="__codelineno-7-52" name="__codelineno-7-52" href="#__codelineno-7-52"></a>│   ├── forge/         engine(772), patcher(603), resilient_patcher(504), compiler, facade
+<a id="__codelineno-7-53" name="__codelineno-7-53" href="#__codelineno-7-53"></a>│   ├── chimera/       engine(493), blackboard(559), search, router, verification,
+<a id="__codelineno-7-54" name="__codelineno-7-54" href="#__codelineno-7-54"></a>│   │                  symbolic, skills, compiler, patcher, governor, retrieval
+<a id="__codelineno-7-55" name="__codelineno-7-55" href="#__codelineno-7-55"></a>│   ├── manifests/     38 compositions + loader, validator, discovery
+<a id="__codelineno-7-56" name="__codelineno-7-56" href="#__codelineno-7-56"></a>│   └── provenance.py
+<a id="__codelineno-7-57" name="__codelineno-7-57" href="#__codelineno-7-57"></a>│
+<a id="__codelineno-7-58" name="__codelineno-7-58" href="#__codelineno-7-58"></a>├── runtime/                 24,688 LOC — composition, session, governance
+<a id="__codelineno-7-59" name="__codelineno-7-59" href="#__codelineno-7-59"></a>│   ├── session.py      1,461  HarnessSession — the outer loop
+<a id="__codelineno-7-60" name="__codelineno-7-60" href="#__codelineno-7-60"></a>│   ├── service/        1,348  service.py, server.py, contract.py, inbox.py, studio_gateway(721)
+<a id="__codelineno-7-61" name="__codelineno-7-61" href="#__codelineno-7-61"></a>│   ├── app_service.py    838  ApplicationService
+<a id="__codelineno-7-62" name="__codelineno-7-62" href="#__codelineno-7-62"></a>│   ├── delegation.py     771  spawn planning / attenuated child plans
+<a id="__codelineno-7-63" name="__codelineno-7-63" href="#__codelineno-7-63"></a>│   ├── root.py           768  composition root
+<a id="__codelineno-7-64" name="__codelineno-7-64" href="#__codelineno-7-64"></a>│   ├── artifacts.py      689
+<a id="__codelineno-7-65" name="__codelineno-7-65" href="#__codelineno-7-65"></a>│   ├── governance/       engine, definitions, learning(664), approvals(618)
+<a id="__codelineno-7-66" name="__codelineno-7-66" href="#__codelineno-7-66"></a>│   ├── skill_evaluation.py 622 / skill_lifecycle.py / skill_index.py
+<a id="__codelineno-7-67" name="__codelineno-7-67" href="#__codelineno-7-67"></a>│   ├── checkpoints.py    583  Checkpoint, CheckpointPins, CheckpointManager, Reconstruction
+<a id="__codelineno-7-68" name="__codelineno-7-68" href="#__codelineno-7-68"></a>│   ├── compose.py        579  FrozenComposition
+<a id="__codelineno-7-69" name="__codelineno-7-69" href="#__codelineno-7-69"></a>│   ├── lab_driver.py     593
+<a id="__codelineno-7-70" name="__codelineno-7-70" href="#__codelineno-7-70"></a>│   ├── trajectory.py     474  + trajectory_reader.py
+<a id="__codelineno-7-71" name="__codelineno-7-71" href="#__codelineno-7-71"></a>│   ├── registry/         compiler, validator, broker, worker, lifecycle, sandbox
+<a id="__codelineno-7-72" name="__codelineno-7-72" href="#__codelineno-7-72"></a>│   ├── ledger/           projections.py, recovery.py
+<a id="__codelineno-7-73" name="__codelineno-7-73" href="#__codelineno-7-73"></a>│   ├── task_state.py            CodingTaskState, Discovery, DeadEnd, TodoItem, RouteDecision
+<a id="__codelineno-7-74" name="__codelineno-7-74" href="#__codelineno-7-74"></a>│   ├── meta_controller.py       consult, guarded_consult, validate_directive
+<a id="__codelineno-7-75" name="__codelineno-7-75" href="#__codelineno-7-75"></a>│   ├── activation.py / run_plan.py / topology.py / scheduler.py / workflow_scheduler.py
+<a id="__codelineno-7-76" name="__codelineno-7-76" href="#__codelineno-7-76"></a>│   ├── model_selection.py / tier_escalation.py / provider_health.py / routing
+<a id="__codelineno-7-77" name="__codelineno-7-77" href="#__codelineno-7-77"></a>│   ├── evidence_capture.py / foundation_evidence.py / formal_evidence.py / assurance.py
+<a id="__codelineno-7-78" name="__codelineno-7-78" href="#__codelineno-7-78"></a>│   ├── paired_evaluation.py / pareto_measurement.py / reproducibility.py / determinism.py
+<a id="__codelineno-7-79" name="__codelineno-7-79" href="#__codelineno-7-79"></a>│   ├── memory.py / retention.py / provenance.py / authority_audit.py
+<a id="__codelineno-7-80" name="__codelineno-7-80" href="#__codelineno-7-80"></a>│   ├── workflow_recovery.py / repair.py / staged_workflow.py
+<a id="__codelineno-7-81" name="__codelineno-7-81" href="#__codelineno-7-81"></a>│   └── cli.py / entrypoint.py / bootstrap.py / standalone_daemon.py / studio/
+<a id="__codelineno-7-82" name="__codelineno-7-82" href="#__codelineno-7-82"></a>│
+<a id="__codelineno-7-83" name="__codelineno-7-83" href="#__codelineno-7-83"></a>├── adapters/                10,927 LOC — concrete I/O
+<a id="__codelineno-7-84" name="__codelineno-7-84" href="#__codelineno-7-84"></a>│   ├── models/        openrouter(1,199), ollama, fake, cassette, stochastic, lam,
+<a id="__codelineno-7-85" name="__codelineno-7-85" href="#__codelineno-7-85"></a>│   │                  planner, invocation(603), factory, config, routing, env_loader
+<a id="__codelineno-7-86" name="__codelineno-7-86" href="#__codelineno-7-86"></a>│   ├── environment/   git(1,089), sandboxed, fake(681), tableworld
+<a id="__codelineno-7-87" name="__codelineno-7-87" href="#__codelineno-7-87"></a>│   ├── sandbox/       rootless(297), worker(251), platform(182), toolkit, ceiling, fake
+<a id="__codelineno-7-88" name="__codelineno-7-88" href="#__codelineno-7-88"></a>│   ├── stores/        event_store(549), ledger_jsonl, blob_store, memory_engine(639), repo_index
+<a id="__codelineno-7-89" name="__codelineno-7-89" href="#__codelineno-7-89"></a>│   ├── evaluators/    daemon, client, isolated, gate, signing, unavailable, fake, suites/
+<a id="__codelineno-7-90" name="__codelineno-7-90" href="#__codelineno-7-90"></a>│   ├── bindings/      base, code, table, lex_reproducer, lex_surgical_editor
+<a id="__codelineno-7-91" name="__codelineno-7-91" href="#__codelineno-7-91"></a>│   └── context/       window.py
+<a id="__codelineno-7-92" name="__codelineno-7-92" href="#__codelineno-7-92"></a>│
+<a id="__codelineno-7-93" name="__codelineno-7-93" href="#__codelineno-7-93"></a>└── apps/                        79 LOC
+<a id="__codelineno-7-94" name="__codelineno-7-94" href="#__codelineno-7-94"></a>    └── coding_max/facade.py     CodingMaxFacade — preset selection + delegation only
+</code></pre></div>
+<p><strong>Supporting trees outside the package:</strong></p>
+<ul>
+<li><code>tools/007_LLM_DOCS_ATLAS/</code> (43 modules) — the documentation/code atlas with pluggable providers</li>
+<li><code>tools/001_LLM_API_ROUTER/</code>, <code>tools/002_LLM_API_MOCK/</code> (74 modules) — provider routing and mocking</li>
+<li><code>tools/lda/</code>, <code>scip_adapter.py</code>, <code>ast_grep_adapter.py</code> — index adapters</li>
+<li><code>benchmarks/</code>, <code>evidence/</code>, <code>packs/</code>, <code>schemas/</code>, <code>test/</code> (2,486 collected tests)</li>
+<li><code>vanguard/clients/</code> — CLI, TUI, desktop, studio, lab (frontend; out of scope here)</li>
+</ul>
+<hr />
+<p><em>Part III: code health assessment, empirical anomalies, and frontier gaps. Part IV: the Aether
+meta-framework thesis and evolution path.</em></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,1 +1,2 @@
-export * from "@vanguard/client-core/contract/types.js";
+export * from "@aether/contracts";
+export type { RuntimeClient } from "@aether/client";

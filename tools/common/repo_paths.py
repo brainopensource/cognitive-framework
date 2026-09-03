@@ -21,7 +21,7 @@ from pathlib import Path
 CANONICAL = {
     "docs_law": "docs/01_law",
     "docs_decisions": "docs/02_decisions",
-    "docs_execution": "docs/03_execution",
+    "docs_execution": "docs/execution",
     "docs_architecture": "docs/04_architecture",
     "docs_contracts": "docs/05_contracts",
     "docs_protocols": "docs/06_protocols",
@@ -33,8 +33,8 @@ CANONICAL = {
     "docs_reviews": "docs/_archive/reviews",
     # Compatibility names retained for callers; they resolve to the new owners.
     "docs_main_v4": "docs/02_decisions",
-    "docs_scrum": "docs/03_execution",
-    "docs_sprints": "docs/03_execution",
+    "docs_scrum": "docs/execution",
+    "docs_sprints": "docs/execution",
     "docs_development_guides": "docs/07_engineering",
 }
 
@@ -219,7 +219,7 @@ def preregistered_oracles() -> Path:
     test_fixtures = root / "test" / "fixtures" / "preregistered_oracles.json"
     if test_fixtures.exists():
         return test_fixtures
-    docs_evidence = root / "docs" / "03_execution" / "evidence" / "preregistered_oracles.json"
+    docs_evidence = root / "evidence" / "preregistered_oracles.json"
     if docs_evidence.exists():
         return docs_evidence
     return test_fixtures

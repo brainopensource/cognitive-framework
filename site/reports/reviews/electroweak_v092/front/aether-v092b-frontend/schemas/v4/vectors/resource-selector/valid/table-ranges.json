@@ -1,0 +1,8 @@
+{
+  "kind": "table",
+  "table": "table://ledger/costs",
+  "ranges": [
+    "0..100",
+    "200..300"
+  ]
+}

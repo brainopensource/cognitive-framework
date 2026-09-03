@@ -1,0 +1,48 @@
+{
+  "name": "@vanguard/workspace",
+  "private": true,
+  "workspaces": [
+    "vanguard/packages/*",
+    "vanguard/clients/*"
+  ],
+  "scripts": {
+    "vg": "npm --workspace @vanguard/cli run vg --",
+    "aether-tui": "npm --workspace @aether/tui run tui --",
+    "build": "npm run build:contracts && npm run build:projections && npm run build:client && npm run build:ui-web && npm run build:tui && npm run build:desktop && npm run build:lab && npm run build:client-core && npm run build:cli && npm run build:studio && npm run build:studio-browser",
+    "build:contracts": "npm --workspace @aether/contracts run build",
+    "build:projections": "npm --workspace @aether/projections run build",
+    "build:client": "npm --workspace @aether/client run build",
+    "build:ui-web": "npm --workspace @aether/ui-web run build",
+    "build:tui": "npm --workspace @aether/tui run build",
+    "build:desktop": "npm --workspace @aether/desktop run build",
+    "build:lab": "npm --workspace @aether/lab run build",
+    "build:client-core": "npm --workspace @vanguard/client-core run build",
+    "build:cli": "npm --workspace @vanguard/cli run build",
+    "build:studio": "npm --workspace @vanguard/studio run build",
+    "build:studio-browser": "npm --workspace @vanguard/studio run build:browser",
+    "typecheck": "npm run typecheck:contracts && npm run typecheck:projections && npm run typecheck:client && npm run typecheck:ui-web && npm run typecheck:tui && npm run typecheck:desktop && npm run typecheck:lab && npm --workspace @vanguard/client-core run typecheck && npm --workspace @vanguard/cli run typecheck && npm --workspace @vanguard/studio run typecheck",
+    "typecheck:contracts": "npm --workspace @aether/contracts run typecheck",
+    "typecheck:projections": "npm --workspace @aether/projections run typecheck",
+    "typecheck:client": "npm --workspace @aether/client run typecheck",
+    "typecheck:ui-web": "npm --workspace @aether/ui-web run typecheck",
+    "typecheck:tui": "npm --workspace @aether/tui run typecheck",
+    "typecheck:desktop": "npm --workspace @aether/desktop run typecheck",
+    "typecheck:lab": "npm --workspace @aether/lab run typecheck",
+    "test": "npm run test:contracts && npm run test:projections && npm run test:client && npm run test:ui-web && npm run test:tui && npm run test:desktop && npm run test:lab && npm --workspace @vanguard/client-core test && npm --workspace @vanguard/cli test && npm --workspace @vanguard/studio test",
+    "test:contracts": "npm --workspace @aether/contracts test",
+    "test:projections": "npm --workspace @aether/projections test",
+    "test:client": "npm --workspace @aether/client test",
+    "test:ui-web": "npm --workspace @aether/ui-web test",
+    "test:tui": "npm --workspace @aether/tui test",
+    "test:desktop": "npm --workspace @aether/desktop test",
+    "test:lab": "npm --workspace @aether/lab test"
+  },
+  "devDependencies": {
+    "@ast-grep/cli": "^0.45.2",
+    "markdownlint-cli2": "^0.23.2"
+  },
+  "dependencies": {
+    "es-toolkit": "^1.52.0",
+    "ink": "^5.1.0"
+  }
+}

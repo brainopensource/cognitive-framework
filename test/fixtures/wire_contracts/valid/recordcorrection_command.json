@@ -1,0 +1,22 @@
+{
+  "version": "vg.4",
+  "frameType": "command",
+  "frameId": "frame-009",
+  "command": {
+    "name": "RecordCorrection",
+    "commandId": "cmd-009",
+    "idempotencyKey": "idem-009",
+    "runId": "run-001",
+    "actor": "operator",
+    "payload": {
+      "correction": {
+        "correctionId": "corr-001",
+        "runId": "run-001",
+        "reasonCode": "logic_bug",
+        "scope": "local",
+        "author": "operator",
+        "recordedAt": "2026-08-31T20:00:00Z"
+      }
+    }
+  }
+}

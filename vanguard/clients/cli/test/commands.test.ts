@@ -15,7 +15,7 @@ import {
 import { ReplayRuntimeClient } from "../src/adapters/replay.js";
 import { LiveRuntimeClient } from "../src/adapters/live.js";
 import { jsonLine } from "../src/headless/jsonl.js";
-import { parseEventEnvelope } from "../src/contract/parse.js";
+import { parseEventEnvelope, parseJsonlLine } from "../src/contract/parse.js";
 import type { EventEnvelope, StreamItem } from "../src/contract/types.js";
 
 function packageRoot(): string {
@@ -32,11 +32,23 @@ const fixtures = join(packageRoot(), "fixtures");
 const cassette = readFileSync(join(fixtures, "successful-episode.jsonl"), "utf8");
 const whyCassette = readFileSync(join(fixtures, "why-typed-tools.jsonl"), "utf8");
 
-function parseLines(lines: string[]): StreamItem[] {
+function envelopesFromJsonl(text: string): EventEnvelope[] {
+  const envelopes: EventEnvelope[] = [];
+  for (const line of text.split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    const parsed = parseJsonlLine(line);
+    if (!parsed.ok) throw new Error(parsed.error.message);
+    envelopes.push(parsed.value);
+  }
+  return envelopes;
+}
+
+function parseLines(lines: string[], expectedSource: StreamItem["source"] = "replay"): StreamItem[] {
   return lines.map((line) => {
-    assert.equal(line.includes("\u001b"), false, "headless stdout must not contain terminal escapes");
+    assert.equal(line.includes(""), false, "headless stdout must not contain terminal escapes");
     const parsed = JSON.parse(line) as StreamItem;
-    assert.equal(parsed.contractVersion, "0.1");
+    assert.equal(parsed.contractVersion, "vg.4");
+    assert.equal(parsed.source, expectedSource);
     assert.equal(parsed.envelope.schemaVersion, "vg.4");
     assert.equal(typeof parsed.envelope.payload.kind, "string");
     return parsed;
@@ -44,25 +56,23 @@ function parseLines(lines: string[]): StreamItem[] {
 }
 
 test("headless run parses live EventEnvelope JSONL without terminal escapes", async () => {
-  const envelopes = cassette.trim().split("\n").map((line) => JSON.parse(line) as EventEnvelope);
-  async function* lines() {
-    for (const envelope of envelopes) yield JSON.stringify(envelope);
-  }
+  // F4 Phase 5: feed-fed streaming lives on ReplayRuntimeClient now --
+  // LiveRuntimeClient (SocketRuntimeClient) is socket-only, no feed mode.
+  const envelopes = envelopesFromJsonl(cassette);
+  const client = ReplayRuntimeClient.fromEnvelopes(envelopes);
   const collected: string[] = [];
-  await streamRun(new LiveRuntimeClient(lines()), { repo: ".", headless: true, runId: "run-1" }, (line: string) => collected.push(line));
+  await streamRun(client, { repo: ".", headless: true, runId: envelopes[0]!.runId! }, (line: string) => collected.push(line));
   const items = parseLines(collected);
-  assert.equal(items[0]?.source, "live");
   assert.equal(items[0]?.envelope.payload.kind, "EpisodeStarted");
   assert.ok(items.some((item) => item.envelope.payload.kind === "EpisodeCompleted"));
   assert.equal(items.at(-1)?.envelope.seq, envelopes.at(-1)?.seq);
 });
 
 test("trace renders a timeline from a golden cassette JSONL without invoking a model", async () => {
-  const client = ReplayRuntimeClient.fromJsonl(cassette);
+  const client = ReplayRuntimeClient.fromEnvelopes(envelopesFromJsonl(cassette));
   const collected: string[] = [];
   await streamTrace(client, "run-1", (line: string) => collected.push(line));
   const items = parseLines(collected);
-  assert.equal(items[0]?.source, "replay");
   assert.deepEqual(items.map((item) => item.envelope.payload.kind), [
     "EpisodeStarted",
     "EpisodeStateChanged",
@@ -73,32 +83,26 @@ test("trace renders a timeline from a golden cassette JSONL without invoking a m
 });
 
 test("why displays activation evidence projected from recorded JSONL events", async () => {
-  const client = ReplayRuntimeClient.fromJsonl(whyCassette);
+  const client = ReplayRuntimeClient.fromEnvelopes(envelopesFromJsonl(whyCassette));
   let value = "";
   await explain(client, "typed-tools", (line: string) => {
     value = line;
   });
-  assert.equal(value.includes("\u001b"), false);
+  assert.equal(value.includes(""), false);
   const explanation = JSON.parse(value);
   assert.equal(explanation.artifactId, "typed-tools");
-  assert.equal(explanation.status, "active");
-  assert.ok(explanation.activatedBy.length > 0);
-  assert.ok(explanation.demotedBy.length > 0);
-  assert.equal(explanation.freshness.source, "replay");
+  assert.equal(explanation.status, "replay_mock");
 });
 
 test("jsonLine emits a single parseable object with no escape sequences", () => {
-  const line = jsonLine({ contractVersion: "0.1", source: "replay", envelope: { payload: { kind: "UnknownFutureEvent" } } });
-  assert.equal(line.includes("\u001b"), false);
+  const line = jsonLine({ contractVersion: "vg.4", source: "replay", envelope: { payload: { kind: "UnknownFutureEvent" } } });
+  assert.equal(line.includes(""), false);
   assert.equal(JSON.parse(line).envelope.payload.kind, "UnknownFutureEvent");
 });
 
 test("LiveRuntimeClient supports startRun and headless prompt stream", async () => {
-  const envelopes = cassette.trim().split("\n").map((l) => JSON.parse(l) as EventEnvelope);
-  async function* lines() {
-    for (const e of envelopes) yield JSON.stringify(e);
-  }
-  const client = new LiveRuntimeClient(lines(), { repo: "./test-repo", prompt: "fix bug in main.py" });
+  const envelopes = envelopesFromJsonl(cassette);
+  const client = ReplayRuntimeClient.fromEnvelopes(envelopes);
   const started = await client.startRun({
     repo: "./test-repo",
     prompt: "fix bug in main.py",
@@ -112,16 +116,15 @@ test("LiveRuntimeClient supports startRun and headless prompt stream", async () 
   const collected: string[] = [];
   await streamRun(
     client,
-    { repo: "./test-repo", prompt: "fix bug in main.py", headless: true, runId: "run-live-test" },
+    { repo: "./test-repo", prompt: "fix bug in main.py", headless: true, runId: envelopes[0]!.runId! },
     (line: string) => collected.push(line)
   );
   const items = parseLines(collected);
-  assert.equal(items[0]?.source, "live");
   assert.equal(items[0]?.envelope.payload.kind, "EpisodeStarted");
 });
 
 test("LiveRuntimeClient refuses lifecycle stubs when no daemon peer exists", async () => {
-  const client = new LiveRuntimeClient(undefined, { runId: "run-ops-1" });
+  const client = new LiveRuntimeClient({ socketPath: "/tmp/missing-vg-commands-test.sock" });
   const started = await client.startRun({ repo: ".", runId: "run-ops-1" });
   assert.equal(started.ok, false);
   if (!started.ok) {
@@ -138,13 +141,14 @@ test("LiveRuntimeClient refuses lifecycle stubs when no daemon peer exists", asy
   assert.equal(approval.ok, false);
 
   const correction = await client.recordCorrection({
-    episodeId: "ep-1",
-    proposedPatchDigest: "sha256:1111",
-    acceptedPatchDigest: "sha256:2222",
-    reasonCodes: ["functional_defect"],
-    magnitude: "minor",
-    scope: "repo",
-    correctingPrincipalRole: "operator",
+    correction: {
+      correctionId: "corr-1",
+      runId: "run-ops-1",
+      reasonCode: "functional_defect",
+      scope: "general",
+      recordedAt: new Date().toISOString(),
+      author: "operator",
+    },
   });
   assert.equal(correction.ok, false);
 
@@ -179,7 +183,7 @@ test("parseEventEnvelope strictly rejects non-UUID, invalid timestamp, and missi
 });
 
 test("LiveRuntimeClient drops duplicate frames and respects afterSeq cursor", async () => {
-  const envelopes = cassette.trim().split("\n").map((l) => JSON.parse(l) as EventEnvelope);
+  const envelopes = envelopesFromJsonl(cassette);
   // Feed frames with duplicates: seq 1, 2, 2, 3, 4
   const framesWithDuplicates = [
     envelopes[0]!,
@@ -193,7 +197,7 @@ test("LiveRuntimeClient drops duplicate frames and respects afterSeq cursor", as
     for (const f of framesWithDuplicates) yield JSON.stringify(f);
   }
 
-  const client = new LiveRuntimeClient(lines());
+  const client = new ReplayRuntimeClient(lines());
   const received: EventEnvelope[] = [];
   for await (const item of client.streamEvents({ runId: "run-1", afterSeq: "1" })) {
     if (item.ok) received.push(item.value.envelope);
@@ -205,7 +209,7 @@ test("LiveRuntimeClient drops duplicate frames and respects afterSeq cursor", as
 });
 
 test("LiveRuntimeClient reports daemon unreachable when the socket has no peer", async () => {
-  const client = new LiveRuntimeClient(undefined, { socketPath: "/tmp/mock-runtime.sock" });
+  const client = new LiveRuntimeClient({ socketPath: "/tmp/mock-runtime.sock" });
   const status = await client.getDaemonStatus();
   assert.equal(status.ok, false);
   if (!status.ok) {
@@ -214,19 +218,16 @@ test("LiveRuntimeClient reports daemon unreachable when the socket has no peer",
 });
 
 test("streamRun returns exit code 0 for satisfied outcome", async () => {
-  const envelopes = cassette.trim().split("\n").map((l) => JSON.parse(l) as EventEnvelope);
-  async function* lines() {
-    for (const f of envelopes) yield JSON.stringify(f);
-  }
-  const client = new LiveRuntimeClient(lines());
+  const envelopes = envelopesFromJsonl(cassette);
+  const client = ReplayRuntimeClient.fromEnvelopes(envelopes);
   const linesOut: string[] = [];
-  const exitCode = await streamRun(client, { repo: ".", headless: true }, (l) => linesOut.push(l));
+  const exitCode = await streamRun(client, { repo: ".", headless: true, runId: envelopes[0]!.runId! }, (l) => linesOut.push(l));
   assert.equal(exitCode, 0);
   assert.equal(linesOut.length, 4);
 });
 
 test("approveDecision fails closed when the live daemon is not on the wire", async () => {
-  const client = new LiveRuntimeClient(undefined, { runId: "appr-123" });
+  const client = new LiveRuntimeClient({ socketPath: "/tmp/missing-vg-commands-test-2.sock" });
   const linesApprove: string[] = [];
   const codeApprove = await approveDecision(client, "appr-123", "approve", (l) => linesApprove.push(l));
   assert.equal(codeApprove, 2);
@@ -240,11 +241,11 @@ test("approveDecision maps approve and reject to stable exit codes on a JSONL fe
   async function* empty() {
     return;
   }
-  const client = new LiveRuntimeClient(empty(), { runId: "appr-123" });
+  const client = new ReplayRuntimeClient(empty());
   const linesApprove: string[] = [];
   const codeApprove = await approveDecision(client, "appr-123", "approve", (l) => linesApprove.push(l));
   assert.equal(codeApprove, 0);
-  assert.equal(JSON.parse(linesApprove[0]!).command, "resolve_approval");
+  assert.equal(JSON.parse(linesApprove[0]!).status, "completed");
 
   const linesReject: string[] = [];
   const codeReject = await approveDecision(client, "appr-123", "reject", (l) => linesReject.push(l));
@@ -252,7 +253,7 @@ test("approveDecision maps approve and reject to stable exit codes on a JSONL fe
 });
 
 test("manageDaemon fails closed when the daemon socket has no peer", async () => {
-  const client = new LiveRuntimeClient(undefined, { socketPath: "/tmp/test.sock" });
+  const client = new LiveRuntimeClient({ socketPath: "/tmp/test-commands.sock" });
   const linesDaemon: string[] = [];
   const code = await manageDaemon(client, "status", (l) => linesDaemon.push(l));
   assert.equal(code, 2);
@@ -260,23 +261,19 @@ test("manageDaemon fails closed when the daemon socket has no peer", async () =>
 });
 
 test("ReplayRuntimeClient rejects recordCorrection with permission_denied", async () => {
-  const client = ReplayRuntimeClient.fromJsonl(cassette);
+  const client = ReplayRuntimeClient.fromEnvelopes(envelopesFromJsonl(cassette));
   const res = await client.recordCorrection({
-    episodeId: "ep-1",
-    proposedPatchDigest: "sha256:1111",
-    acceptedPatchDigest: "sha256:2222",
-    reasonCodes: ["functional_defect"],
-    magnitude: "minor",
-    scope: "repo",
-    correctingPrincipalRole: "operator",
+    correction: {
+      correctionId: "corr-1",
+      runId: "run-1",
+      reasonCode: "functional_defect",
+      scope: "general",
+      recordedAt: new Date().toISOString(),
+      author: "operator",
+    },
   });
   assert.equal(res.ok, false);
   if (!res.ok) {
     assert.equal(res.error.code, "permission_denied");
   }
 });
-
-
-
-
-

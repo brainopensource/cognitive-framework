@@ -71,6 +71,19 @@ def check(root: Path) -> list[str]:
     for path in root.rglob("*"):
         if not path.is_file():
             continue
+        relative = path.relative_to(root)
+        # Archived review exports and generated benchmark captures are
+        # historical/evidence projections, not living source surfaces. They
+        # may contain the machine paths that were intentionally captured in
+        # their original environment and are excluded from this source hygiene
+        # gate; production and canonical docs remain fully scanned.
+        if (relative.parts[:3] == ("docs", "reports", "reviews") or
+                relative.parts[:2] in {
+                    ("benchmarks", "artifacts"),
+                    ("benchmarks", "runs"),
+                    ("benchmarks", "baac"),
+                }):
+            continue
         if any(part in IGNORED_DIRS for part in path.parts):
             continue
         if path.name in IGNORED_FILES:
@@ -88,7 +101,7 @@ def check(root: Path) -> list[str]:
         for idx, line in enumerate(lines, start=1):
             for pattern, reason in FORBIDDEN_PATTERNS:
                 if pattern.search(line):
-                    rel_path = path.relative_to(root).as_posix()
+                    rel_path = relative.as_posix()
                     errors.append(f"{rel_path}:{idx}: {reason}: {line.strip()[:120]}")
 
     return errors

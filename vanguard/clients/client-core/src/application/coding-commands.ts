@@ -47,12 +47,19 @@ export function createPythonCodingBackend(options?: {
   cwd?: string;
   pythonPath?: string;
 }): CodingBackend {
-  const pythonBin = options?.pythonBin ?? process.env.VANGUARD_PYTHON ?? "python3";
-  const module = options?.module ?? "vanguard.packages.runtime.entrypoint";
   const cwd =
     options?.cwd ??
     process.env.VANGUARD_ROOT ??
     findRepoRoot(fileURLToPath(new URL(".", import.meta.url)));
+  const defaultPython = existsSync(join(cwd, ".venv", "bin", "python"))
+    ? join(cwd, ".venv", "bin", "python")
+    : "python3";
+  const pythonBin =
+    options?.pythonBin ??
+    process.env.VANGUARD_PYTHON ??
+    process.env.PYTHON_BIN ??
+    defaultPython;
+  const module = options?.module ?? "vanguard.packages.runtime.entrypoint";
   const pythonPath = options?.pythonPath ?? [cwd, process.env.PYTHONPATH ?? ""]
     .filter(Boolean)
     .join(delimiter);

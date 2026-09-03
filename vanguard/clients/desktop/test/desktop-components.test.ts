@@ -8,39 +8,11 @@ import { renderApprovalBanner } from "../src/components/ApprovalBanner.js";
 import { renderForensicDrawer } from "../src/components/ForensicDrawer.js";
 import { renderComposer } from "../src/components/Composer.js";
 import { renderTranscriptPane } from "../src/components/TranscriptPane.js";
-
-// Minimal DOM mock for Node.js test runner
-function setupMinimalDom() {
-  if (typeof globalThis.document === "undefined") {
-    class MockElement {
-      public style: Record<string, string> = {};
-      public children: MockElement[] = [];
-      public textContent: string = "";
-      public innerHTML: string = "";
-      public className: string = "";
-      public type: string = "";
-      public placeholder: string = "";
-      public value: string = "";
-      public onclick: any = null;
-      public oninput: any = null;
-      public onkeydown: any = null;
-
-      appendChild(child: MockElement) {
-        this.children.push(child);
-        return child;
-      }
-    }
-
-    (globalThis as any).document = {
-      createElement: () => new MockElement(),
-      head: new MockElement(),
-    };
-  }
-}
+import { installMockDom } from "./support/mock-dom.js";
 
 describe("@aether/desktop — Presentation Components", () => {
   before(() => {
-    setupMinimalDom();
+    installMockDom();
   });
 
   it("renders DiffViewer lines with additions and deletions", () => {

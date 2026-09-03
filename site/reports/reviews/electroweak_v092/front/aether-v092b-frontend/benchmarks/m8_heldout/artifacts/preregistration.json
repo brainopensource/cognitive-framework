@@ -1,0 +1,912 @@
+{
+  "schema": "aether.m8-preregistration/1",
+  "authority": "independent-preregistration",
+  "workload_digest": "sha256:66804731e6f58617e01b644b509bb28a586701cd555c06d09f03a504086446b9",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "provider": "openrouter",
+  "baseline_composition": "composition-v1",
+  "candidate_composition": "composition-v2",
+  "min_held_out_lift": 0.05,
+  "regression_budget": 0.02,
+  "attempt_policy": {
+    "max_attempts": 1,
+    "retry_on_instrument_error": false
+  },
+  "resource_budget": {
+    "global_cost_usd_ceiling": 1.0,
+    "global_token_ceiling": 2000000,
+    "per_task_timeout_seconds": 60.0
+  },
+  "split_counts": {
+    "dev": 2,
+    "held_out": 40,
+    "adversarial": 1,
+    "transfer": 1,
+    "total_unique_tasks": 44,
+    "total_measurements": 88,
+    "evaluation_measurements": 82
+  },
+  "rows": [
+    {
+      "ordinal": 1,
+      "task_id": "dev_01",
+      "split": "dev",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 2,
+      "task_id": "dev_02",
+      "split": "dev",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 3,
+      "task_id": "held_out_01",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 4,
+      "task_id": "held_out_02",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 5,
+      "task_id": "held_out_03",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 6,
+      "task_id": "held_out_04",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 7,
+      "task_id": "held_out_05",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 8,
+      "task_id": "held_out_06",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 9,
+      "task_id": "held_out_07",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 10,
+      "task_id": "held_out_08",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 11,
+      "task_id": "held_out_09",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 12,
+      "task_id": "held_out_10",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 13,
+      "task_id": "held_out_11",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 14,
+      "task_id": "held_out_12",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 15,
+      "task_id": "held_out_13",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 16,
+      "task_id": "held_out_14",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 17,
+      "task_id": "held_out_15",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 18,
+      "task_id": "held_out_16",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 19,
+      "task_id": "held_out_17",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 20,
+      "task_id": "held_out_18",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 21,
+      "task_id": "held_out_19",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 22,
+      "task_id": "held_out_20",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 23,
+      "task_id": "held_out_21",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 24,
+      "task_id": "held_out_22",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 25,
+      "task_id": "held_out_23",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 26,
+      "task_id": "held_out_24",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 27,
+      "task_id": "held_out_25",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 28,
+      "task_id": "held_out_26",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 29,
+      "task_id": "held_out_27",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 30,
+      "task_id": "held_out_28",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 31,
+      "task_id": "held_out_29",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 32,
+      "task_id": "held_out_30",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 33,
+      "task_id": "held_out_31",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 34,
+      "task_id": "held_out_32",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 35,
+      "task_id": "held_out_33",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 36,
+      "task_id": "held_out_34",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 37,
+      "task_id": "held_out_35",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 38,
+      "task_id": "held_out_36",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 39,
+      "task_id": "held_out_37",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 40,
+      "task_id": "held_out_38",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 41,
+      "task_id": "held_out_39",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 42,
+      "task_id": "held_out_40",
+      "split": "held_out",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 43,
+      "task_id": "adv_01",
+      "split": "adversarial",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 44,
+      "task_id": "transfer_01",
+      "split": "transfer",
+      "arm": "control",
+      "composition_version": "composition-v1",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 45,
+      "task_id": "dev_01",
+      "split": "dev",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 46,
+      "task_id": "dev_02",
+      "split": "dev",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 47,
+      "task_id": "held_out_01",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 48,
+      "task_id": "held_out_02",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 49,
+      "task_id": "held_out_03",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 50,
+      "task_id": "held_out_04",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 51,
+      "task_id": "held_out_05",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 52,
+      "task_id": "held_out_06",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 53,
+      "task_id": "held_out_07",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 54,
+      "task_id": "held_out_08",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 55,
+      "task_id": "held_out_09",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 56,
+      "task_id": "held_out_10",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 57,
+      "task_id": "held_out_11",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 58,
+      "task_id": "held_out_12",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 59,
+      "task_id": "held_out_13",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 60,
+      "task_id": "held_out_14",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 61,
+      "task_id": "held_out_15",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 62,
+      "task_id": "held_out_16",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 63,
+      "task_id": "held_out_17",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 64,
+      "task_id": "held_out_18",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 65,
+      "task_id": "held_out_19",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 66,
+      "task_id": "held_out_20",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 67,
+      "task_id": "held_out_21",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 68,
+      "task_id": "held_out_22",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 69,
+      "task_id": "held_out_23",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 70,
+      "task_id": "held_out_24",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 71,
+      "task_id": "held_out_25",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 72,
+      "task_id": "held_out_26",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 73,
+      "task_id": "held_out_27",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 74,
+      "task_id": "held_out_28",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 75,
+      "task_id": "held_out_29",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 76,
+      "task_id": "held_out_30",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 77,
+      "task_id": "held_out_31",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 78,
+      "task_id": "held_out_32",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 79,
+      "task_id": "held_out_33",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 80,
+      "task_id": "held_out_34",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 81,
+      "task_id": "held_out_35",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 82,
+      "task_id": "held_out_36",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 83,
+      "task_id": "held_out_37",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 84,
+      "task_id": "held_out_38",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 85,
+      "task_id": "held_out_39",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 86,
+      "task_id": "held_out_40",
+      "split": "held_out",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 87,
+      "task_id": "adv_01",
+      "split": "adversarial",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    },
+    {
+      "ordinal": 88,
+      "task_id": "transfer_01",
+      "split": "transfer",
+      "arm": "treatment",
+      "composition_version": "composition-v2",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "provider": "openrouter",
+      "status": "PLANNED"
+    }
+  ],
+  "preregistration_digest": "sha256:a328000cd47c5ba9b0446e31f33a83a85c518cbc9df068143ea5643804efcf12"
+}

@@ -1,0 +1,60 @@
+{
+  "schema_version": "lam.behavior-profile/1",
+  "calibration_tasks": [
+    "semver_parser",
+    "isolated_coding_test",
+    "plugin_dag",
+    "token_bucket"
+  ],
+  "audit_tasks": [
+    "circuit_breaker"
+  ],
+  "statistics": {
+    "tasks_count": 4,
+    "total_turns": 36,
+    "tool_verb_counts": {
+      "list_dir": 4,
+      "view_file": 16,
+      "edit_file": 7,
+      "run_command": 15
+    },
+    "avg_turns_per_task": 9.0,
+    "exploration_turns": 17,
+    "first_edit_turns": [
+      2,
+      2,
+      2
+    ],
+    "verification_turns": 15,
+    "pass_rate": 0.75
+  },
+  "action_sequence_prior": [
+    {
+      "phase": "explore",
+      "verbs": [
+        "list_dir",
+        "view_file"
+      ],
+      "typical_turns": 1
+    },
+    {
+      "phase": "diagnose_and_edit",
+      "verbs": [
+        "edit_file"
+      ],
+      "typical_turns": 1
+    },
+    {
+      "phase": "verify",
+      "verbs": [
+        "run_command"
+      ],
+      "command": "python3 -m pytest -q",
+      "typical_turns": 1
+    },
+    {
+      "phase": "terminate",
+      "finish_reason": "stop"
+    }
+  ]
+}

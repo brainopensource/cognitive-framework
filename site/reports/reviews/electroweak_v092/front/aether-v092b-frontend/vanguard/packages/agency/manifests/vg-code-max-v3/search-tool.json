@@ -1,0 +1,23 @@
+{
+  "name": "search",
+  "verb": "fs.search",
+  "description": "Search file CONTENTS for a regex across the workspace (e.g. {\"path\": \".\", \"pattern\": \"def get\"}). Your Repository Map already lists every file, so never use this merely to discover filenames.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "path": {
+        "type": "string",
+        "description": "Directory to search"
+      },
+      "pattern": {
+        "type": "string",
+        "description": "Pattern to match"
+      }
+    },
+    "required": [
+      "path",
+      "pattern"
+    ],
+    "additionalProperties": false
+  }
+}

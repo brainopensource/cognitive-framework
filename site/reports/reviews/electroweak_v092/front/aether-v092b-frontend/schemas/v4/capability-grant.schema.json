@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/v4/capability-grant.schema.json",
+  "$comment": "Owning section: 04 §5.2; GTS-13C T1.5. The grant binds one exact descriptor and a resource/action scope.",
+  "title": "CapabilityGrant",
+  "type": "object",
+  "required": ["grantId", "principal", "descriptorDigest", "actions", "selector", "constraints", "expiry", "maxUses", "purposeDigest"],
+  "properties": {
+    "grantId": { "$ref": "primitives.schema.json#/$defs/GrantId" },
+    "principal": { "$ref": "primitives.schema.json#/$defs/PrincipalId" },
+    "descriptorDigest": { "$ref": "primitives.schema.json#/$defs/Digest" },
+    "actions": { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1, "uniqueItems": true },
+    "selector": { "$ref": "resource-selector.schema.json" },
+    "constraints": {
+      "type": "object",
+      "required": ["budgetLeaseId"],
+      "properties": {
+        "maxBytes": { "$ref": "primitives.schema.json#/$defs/IntString" },
+        "maxEffects": { "$ref": "primitives.schema.json#/$defs/IntString" },
+        "budgetLeaseId": { "$ref": "primitives.schema.json#/$defs/LeaseId" },
+        "environmentSnapshot": { "$ref": "primitives.schema.json#/$defs/Digest" },
+        "networkPolicy": { "enum": ["deny", "allowlist"] },
+        "requirePreview": { "type": "boolean" },
+        "requireApprovalAboveRisk": { "$ref": "primitives.schema.json#/$defs/RiskTier" }
+      },
+      "additionalProperties": false
+    },
+    "expiry": { "$ref": "primitives.schema.json#/$defs/Timestamp" },
+    "maxUses": { "$ref": "primitives.schema.json#/$defs/IntString" },
+    "purposeDigest": { "$ref": "primitives.schema.json#/$defs/Digest" },
+    "parentGrantId": { "$ref": "primitives.schema.json#/$defs/GrantId" },
+    "approvalRef": { "$ref": "primitives.schema.json#/$defs/ApprovalId" },
+    "authenticator": { "type": "string", "minLength": 1 }
+  },
+  "additionalProperties": false
+}

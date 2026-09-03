@@ -1,0 +1,12 @@
+{
+  "version": "0.1",
+  "frameType": "command",
+  "frameId": "frame-bad-1",
+  "command": {
+    "name": "GetCapabilities",
+    "commandId": "cmd-011",
+    "idempotencyKey": "idem-011",
+    "actor": "operator",
+    "payload": {}
+  }
+}

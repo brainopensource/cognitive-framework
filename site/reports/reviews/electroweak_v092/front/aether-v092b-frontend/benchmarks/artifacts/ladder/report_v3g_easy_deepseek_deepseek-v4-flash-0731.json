@@ -1,0 +1,33 @@
+{
+  "tier": "easy",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "manifest": "vg-code-max-v3",
+  "max_turns": 15,
+  "total": 1,
+  "passed": 1,
+  "pass_rate": "1/1",
+  "spend_usd": 0.001743,
+  "rows": [
+    {
+      "challenge": "tier1_lru_ttl_cache",
+      "tier": "easy",
+      "title": "Thread-Safe LRU Cache with Monotonic TTL",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "manifest": "vg-code-max-v3",
+      "status": "PASS",
+      "llm_calls": 6,
+      "turns": 5,
+      "terminal_state": "instrument_error",
+      "cost_usd": 0.001743,
+      "latency_s": 11.0,
+      "files_modified": [
+        "lru/entry.py"
+      ],
+      "oracle_output": "",
+      "error": "",
+      "terminal_detail": "tool is not declared by manifest: fs.search",
+      "run_fields": {},
+      "cassette": "benchmarks/artifacts/ladder/tier1_lru_ttl_cache__deepseek_deepseek-v4-flash-0731.cassette.json"
+    }
+  ]
+}

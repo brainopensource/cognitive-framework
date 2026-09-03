@@ -151,6 +151,17 @@ class NothingReachesTheGlobalSourcesUnannounced(unittest.TestCase):
         "runtime/service/service.py",
         # The real half of the pair. It is *supposed* to reach both.
         "runtime/determinism.py",
+        # CHIMERA experimental router. Uses `random.Random(seed=42)` — a seeded
+        # instance, NOT the global RNG. Deterministic by construction given the
+        # same seed. CHIMERA is an off-trajectory research module; it does not
+        # participate in the episode replay path. Candidate for DeterminismPort
+        # injection when CHIMERA is promoted from experimental status.
+        "agency/chimera/router.py",
+        # CHIMERA verification cortex. Uses `time.time()` only to generate
+        # opaque verification ID strings (not persisted in the event trajectory
+        # or used for ordering). Off the primary episode execution path.
+        # Candidate for ClockPort injection when CHIMERA is promoted.
+        "agency/chimera/verification.py",
     }
 
     def _offenders(self) -> set[str]:

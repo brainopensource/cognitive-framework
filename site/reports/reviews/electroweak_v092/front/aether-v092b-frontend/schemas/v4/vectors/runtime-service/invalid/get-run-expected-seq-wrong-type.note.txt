@@ -1,0 +1,1 @@
+A CAS guard must be a scalar sequence, not a comparison object.

@@ -1,0 +1,15 @@
+id: bench_multi_128K_tier-6_mvcc_db
+name: Multi-Version Concurrency Control (MVCC) In-Memory Store
+scope: multi
+context_bracket: 128K
+tier: tier-6
+difficulty: 6
+timeout_seconds: 35
+entrypoint: src/main.py
+eval_type: oracle
+tags:
+- database
+- mvcc
+- concurrency
+- frontier
+metadata: {}

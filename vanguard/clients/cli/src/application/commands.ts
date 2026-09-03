@@ -1,1 +1,1 @@
-export * from "@vanguard/client-core/application/commands.js";
+export * from "@aether/client/application/commands.js";

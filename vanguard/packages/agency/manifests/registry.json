@@ -172,6 +172,7 @@
   "coding-max-v2b-preset": "vg-code-max-v2b/manifest.json",
   "forge-v2-preset": "vg-1-forge-v2/manifest.json",
   "herbs-preset": "vg-herbs/manifest.json",
+  "hermes-on-vanguard": "vg-herbs/manifest.json",
   "chimera-v1-preset": "vg-chimera-v1/manifest.json",
   "chimera-code-preset": "vg-code-chimera/manifest.json"
 }

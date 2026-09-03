@@ -1,0 +1,127 @@
+{
+  "cases": [
+    {
+      "baseline_passed": false,
+      "detail": "verified",
+      "event_reasons": [
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired"
+      ],
+      "events": 113,
+      "id": "agent_basic",
+      "oracle_passed": true,
+      "passed": true,
+      "proposal_events": 5,
+      "reason": "external_oracle_passed",
+      "receipt_verbs": [
+        "fs.read",
+        "patch.apply",
+        "proc.exec"
+      ],
+      "receipts": 3,
+      "terminal": "completed",
+      "trajectory_digest": "sha256:51e19381cea25b5df7b7b3b21c263849c82f5f148f7bcc40313a24ea3a5d2f8f"
+    },
+    {
+      "baseline_passed": false,
+      "detail": "verified",
+      "event_reasons": [
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired"
+      ],
+      "events": 123,
+      "id": "agent_multifile",
+      "oracle_passed": true,
+      "passed": true,
+      "proposal_events": 6,
+      "reason": "external_oracle_passed",
+      "receipt_verbs": [
+        "fs.read",
+        "fs.read",
+        "patch.apply",
+        "proc.exec"
+      ],
+      "receipts": 4,
+      "terminal": "completed",
+      "trajectory_digest": "sha256:125f83864aa5b5e59e11ce16f2d114e352887d5c99f67cd1f28d921c2083be0e"
+    },
+    {
+      "admissible": true,
+      "baseline_passed": false,
+      "baseline_recorded": true,
+      "behavioral_passed": true,
+      "detail": "verified",
+      "event_reasons": [
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired"
+      ],
+      "events": 115,
+      "greenfield_admitted": true,
+      "greenfield_reason": "greenfield_completion_admissible",
+      "id": "agent_greenfield",
+      "oracle_passed": true,
+      "passed": true,
+      "proposal_events": 5,
+      "reason": "external_oracle_passed",
+      "receipt_verbs": [
+        "patch.apply",
+        "patch.apply",
+        "proc.exec"
+      ],
+      "receipts": 3,
+      "structural_passed": true,
+      "terminal": "completed",
+      "trajectory_digest": "sha256:39072c46da219f16b5a70025202c7a7e63f479bbeb593132f751e75c8828a61b",
+      "workspace_effectively_empty": true
+    },
+    {
+      "empty_rejections": [
+        "IMPLICATED_SET_EMPTY"
+      ],
+      "id": "framework_fail_closed",
+      "incomplete_rejections": [
+        "PUBLIC_INTERFACE_CALLERS_UNRESOLVED"
+      ],
+      "migration_rejections": [
+        "MIGRATION_EVIDENCE_INCOMPLETE"
+      ],
+      "passed": true,
+      "truncated_rejections": [
+        "IMPLICATED_FILES_NOT_INSPECTED:1",
+        "CHANGE_SURFACE_TRUNCATED"
+      ]
+    },
+    {
+      "id": "lam_lda_contract",
+      "lam_deterministic": true,
+      "lam_scenarios_listed": 254,
+      "lam_sqlite_calls": 1,
+      "lda_head": "8d9e37e6d16129dec080618674ae962b64270803",
+      "lda_index_healthy": true,
+      "passed": true
+    }
+  ],
+  "evaluator": "independent-v091",
+  "non_empirical": false,
+  "passed": 5,
+  "schema": "aether.independent-benchmark/1",
+  "total": 5
+}

@@ -1,0 +1,1 @@
+A branch identifier is an integer.

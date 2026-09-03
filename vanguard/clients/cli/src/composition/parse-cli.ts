@@ -1,5 +1,5 @@
-import type { CliOptions } from "@vanguard/client-core";
-import { parseBudgetUsdToMicros } from "@vanguard/client-core";
+import type { CliOptions } from "@aether/client";
+import { parseBudgetUsdToMicros } from "@aether/client";
 
 export type ParsedCli = CliOptions & {
   promptExplicit: boolean;

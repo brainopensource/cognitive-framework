@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import { mkdtempSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { jcsCanonicalize, OperatorSigner } from "../src/adapters/signer.js";
+import { OperatorSigner } from "../src/adapters/signer.js";
+import { jcsCanonicalize } from "@aether/contracts";
 
 const PYTHON_OPERATOR_SIGNER_VECTOR = {
   approvalId: "appr-1",

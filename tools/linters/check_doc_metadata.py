@@ -81,7 +81,10 @@ def discover_living_docs(root: Path) -> list[Path]:
     files: list[Path] = []
     for pat in DOC_PATTERNS:
         files.extend(root.glob(pat))
-    return sorted(set(f for f in files if f.is_file()))
+    return sorted(set(
+        f for f in files
+        if f.is_file() and "docs/reports/reviews/" not in f.relative_to(root).as_posix()
+    ))
 
 
 def parse_frontmatter(text: str) -> dict[str, object] | None:

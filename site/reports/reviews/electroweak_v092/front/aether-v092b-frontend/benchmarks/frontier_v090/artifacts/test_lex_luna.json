@@ -1,0 +1,47 @@
+{
+  "model": "openai/gpt-5.6-luna",
+  "non_empirical": false,
+  "provider": "openrouter",
+  "rows": [
+    {
+      "after_digest": "sha256:66793e685e7d299b35c6581c378ce602baccaa7de01288639ec2d744680cb4b5",
+      "before_digest": "sha256:66793e685e7d299b35c6581c378ce602baccaa7de01288639ec2d744680cb4b5",
+      "challenge_id": "tier1_lru_ttl_cache",
+      "challenge_slot": "CODE-E",
+      "changed_files": [],
+      "class_name": "Coding",
+      "difficulty": "Easy",
+      "elapsed_s": 34.85,
+      "non_empirical": false,
+      "oracle": {
+        "exit_code": 1,
+        "instrument_valid": true,
+        "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
+        "reason": "oracle_failed",
+        "result": false,
+        "stderr_digest": "sha256:823f4841840376ba14ae72f58e6f9a8bf1ae20425db9b91bf83cb75752460823",
+        "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "wall_ms": 205.087
+      },
+      "oracle_digest": "sha256:45ba3a11cb17f5673b51caf08ad6ca57cc2e6acc480a5e09d6fd0c0d8cf3987d",
+      "ordinal": 10,
+      "preset": "vg-code-v090-lex-surgical",
+      "row_digest": "sha256:ab9f3ae2499fb0a7feb1723968d3679035e4283fa47367ace38d126cc34c4ce2",
+      "run_id": "v090-10",
+      "schema": "aether.frontier-benchmark/2",
+      "task_digest": "sha256:7b9d33959234e36a70f0d343accb8240efb57349238bf8fea34c922b0ddf4889",
+      "terminal": "NO_PATCH",
+      "terminal_reason": "completed_without_source_patch",
+      "trajectory_digest": null,
+      "usage": {
+        "cached_tokens": null,
+        "completion_tokens": 483,
+        "cost_provenance": "unknown",
+        "cost_usd": null,
+        "prompt_tokens": 33652
+      }
+    }
+  ],
+  "schema": "aether.frontier-benchmark-live-report/2",
+  "total_tokens_observed": 34135
+}

@@ -4391,6 +4391,11 @@
 <hr />
 <h2 id="1-schema-authority-caveat">1. Schema Authority Caveat</h2>
 <p>JSON Schemas define external wire formats, serialized validation boundaries, and test vectors. While schemas establish type contracts, execution authority resides in the code and trusted kernel boundaries. The presence of a schema definition does not alone imply that an associated subsystem is active in the production runtime.</p>
+<p>Repository change-surface estimates are domain observations rather than wire schemas. The
+<code>ChangeSurfaceEstimator</code> records primary, related, and test paths with deterministic reasons;
+pack middleware supplies bounded <code>IndexPort</code> symbol, dependency, and test observations. These
+observations do not authorize edits or completion and remain subordinate to runtime policy and
+exterior verification.</p>
 <hr />
 <h2 id="2-active-schema-families">2. Active Schema Families</h2>
 <p>The repository organizes schemas into three primary functional families:</p>

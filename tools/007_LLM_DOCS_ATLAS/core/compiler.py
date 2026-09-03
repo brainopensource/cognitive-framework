@@ -207,12 +207,32 @@ class ContextCompiler:
             "total_repo_relations": stats.get("relations", 0),
         }
 
+        # Bounded omissions: candidates considered but not selected, with an
+        # explicit reason. Capped to keep the packet itself bounded.
+        selected_locators = {
+            c.locator for c in selected_docs + enriched_symbols + selected_tests
+        }
+        omitted: List[Dict[str, Any]] = [
+            {
+                "locator": c.locator,
+                "kind": c.kind,
+                "title": c.title,
+                "score": round(c.score, 2),
+                "tokens": c.tokens,
+                "reason": "budget_exhausted",
+            }
+            for c in all_candidates
+            if c.locator not in selected_locators
+            and c.kind != "code_topology"
+        ][:12]
+
         token_accounting = {
             "budget": budget,
             "used_tokens": total_used,
             "document_tokens": doc_tokens,
             "symbol_tokens": sym_tokens,
             "test_tokens": test_tokens,
+            "omitted_count": len(omitted),
         }
 
         invariants = [
@@ -238,6 +258,7 @@ class ContextCompiler:
             invariants=invariants,
             provenance=provenance,
             token_accounting=token_accounting,
+            omitted=omitted,
         )
 
         # 9. Store in Speculative Cache
@@ -265,15 +286,35 @@ class ContextCompiler:
         if not all_symbols or not all_relations:
             return candidates, "fts5_bm25"
 
-        entity_ids = [s.get("symbol_id", "") for s in all_symbols if s.get("symbol_id")]
+        # Storage rows key symbol ids as `id` (mocks may use `symbol_id`).
+        entity_ids = [
+            s.get("symbol_id") or s.get("id", "")
+            for s in all_symbols
+            if s.get("symbol_id") or s.get("id")
+        ]
         adj, id_to_idx, out_degrees = self.ppr_engine.build_adjacency(entity_ids, all_relations)
+
+        # Locator aliases: candidates carry `path#L<line>` / `path#Name`
+        # locators, graph nodes are Kythe `sym:` ids. Seed via alias lookup so
+        # PPR fires on real data instead of silently no-opping.
+        alias_to_sym: Dict[str, str] = {}
+        for s in all_symbols:
+            sid = s.get("symbol_id") or s.get("id", "")
+            if not sid:
+                continue
+            fp = s.get("file_path", "")
+            alias_to_sym[f"{fp}#L{s.get('start_line', 1)}"] = sid
+            name = s.get("name", "")
+            if name:
+                alias_to_sym[f"{fp}#{name}"] = sid
 
         # Seed indices from top BM25 candidates
         seed_indices: List[int] = []
         seed_weights: List[float] = []
         for c in candidates[:10]:
-            if c.locator in id_to_idx:
-                seed_indices.append(id_to_idx[c.locator])
+            sym_id = alias_to_sym.get(c.locator, c.locator)
+            if sym_id in id_to_idx:
+                seed_indices.append(id_to_idx[sym_id])
                 seed_weights.append(c.score)
 
         if not seed_indices:
@@ -403,6 +444,7 @@ class ContextCompiler:
             "invariants": packet.invariants,
             "provenance": packet.provenance,
             "token_accounting": packet.token_accounting,
+            "omitted": packet.omitted,
         }
 
     def _deserialize_packet(self, data: Dict[str, Any]) -> ContextPacket:
@@ -420,4 +462,5 @@ class ContextCompiler:
             invariants=data.get("invariants", []),
             provenance=data.get("provenance", {}),
             token_accounting=data.get("token_accounting", {}),
+            omitted=data.get("omitted", []),
         )

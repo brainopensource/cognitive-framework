@@ -1,0 +1,80 @@
+{
+  "id": "t5-extract-module",
+  "tier": 5,
+  "title": "Opus-class refactor: extract digest helper, update three callers, keep prefix tests green",
+  "workspace": {
+    "app/digest.py": "import hashlib\n\ndef digest_of(text):\n    return hashlib.sha256(text.encode()).hexdigest()\n\ndef digest_file(path):\n    return digest_of(open(path).read())\n",
+    "app/ledger.py": "from app.digest import digest_of\n\ndef append(event):\n    return {\"id\": digest_of(event), \"event\": event}\n",
+    "app/compiler.py": "from app.digest import digest_of\n\ndef prefix_digest(layers):\n    return digest_of(\"|\".join(layers))\n",
+    "app/cli.py": "from app.digest import digest_file\n\ndef show(path):\n    print(digest_file(path))\n",
+    "test/test_digest.py": "from app.digest import digest_of, digest_file\nfrom app.ledger import append\nfrom app.compiler import prefix_digest\n\ndef test_stable():\n    assert digest_of(\"a\") == digest_of(\"a\")\n    assert append(\"e\")[\"id\"] == digest_of(\"e\")\n    assert prefix_digest([\"L1\", \"L2\"]) == digest_of(\"L1|L2\")\n"
+  },
+  "turns": [
+    {
+      "tool_messages": 0,
+      "finish_reason": "tool_calls",
+      "content": "Mapping callers of digest_of and digest_file before extracting a canonicalisation module.",
+      "tool_calls": [
+        {"id": "t5a", "type": "function", "function": {"name": "view_file", "arguments": "{\"path\": \"app/digest.py\"}"}},
+        {"id": "t5b", "type": "function", "function": {"name": "view_file", "arguments": "{\"path\": \"app/ledger.py\"}"}},
+        {"id": "t5c", "type": "function", "function": {"name": "view_file", "arguments": "{\"path\": \"app/compiler.py\"}"}},
+        {"id": "t5d", "type": "function", "function": {"name": "view_file", "arguments": "{\"path\": \"app/cli.py\"}"}},
+        {"id": "t5e", "type": "function", "function": {"name": "view_file", "arguments": "{\"path\": \"test/test_digest.py\"}"}}
+      ]
+    },
+    {
+      "tool_messages": 5,
+      "finish_reason": "tool_calls",
+      "content": "Creating app/canonicalisation.py with the sha256 helper.",
+      "tool_calls": [
+        {"id": "t5f", "type": "function", "function": {"name": "edit_file", "arguments": "{\"path\": \"app/canonicalisation.py\", \"target\": \"\", \"replacement\": \"import hashlib\\n\\ndef digest_of(text):\\n    return hashlib.sha256(text.encode()).hexdigest()\\n\"}"}}
+      ]
+    },
+    {
+      "tool_messages": 6,
+      "finish_reason": "tool_calls",
+      "content": "Pointing digest.py at the new module.",
+      "tool_calls": [
+        {"id": "t5g", "type": "function", "function": {"name": "edit_file", "arguments": "{\"path\": \"app/digest.py\", \"target\": \"import hashlib\\n\\ndef digest_of(text):\\n    return hashlib.sha256(text.encode()).hexdigest()\", \"replacement\": \"from app.canonicalisation import digest_of\"}"}}
+      ]
+    },
+    {
+      "tool_messages": 7,
+      "finish_reason": "tool_calls",
+      "content": "Updating ledger import (keeps working via digest.py re-export).",
+      "tool_calls": [
+        {"id": "t5h", "type": "function", "function": {"name": "edit_file", "arguments": "{\"path\": \"app/ledger.py\", \"target\": \"from app.digest import digest_of\", \"replacement\": \"from app.canonicalisation import digest_of\"}"}}
+      ]
+    },
+    {
+      "tool_messages": 8,
+      "finish_reason": "tool_calls",
+      "content": "Updating compiler import.",
+      "tool_calls": [
+        {"id": "t5i", "type": "function", "function": {"name": "edit_file", "arguments": "{\"path\": \"app/compiler.py\", \"target\": \"from app.digest import digest_of\", \"replacement\": \"from app.canonicalisation import digest_of\"}"}}
+      ]
+    },
+    {
+      "tool_messages": 9,
+      "finish_reason": "tool_calls",
+      "content": "Updating tests to import the canonical module as well.",
+      "tool_calls": [
+        {"id": "t5j", "type": "function", "function": {"name": "edit_file", "arguments": "{\"path\": \"test/test_digest.py\", \"target\": \"from app.digest import digest_of, digest_file\", \"replacement\": \"from app.canonicalisation import digest_of\\nfrom app.digest import digest_file\"}"}}
+      ]
+    },
+    {
+      "tool_messages": 10,
+      "finish_reason": "tool_calls",
+      "content": "Running the full digest suite.",
+      "tool_calls": [
+        {"id": "t5k", "type": "function", "function": {"name": "run_command", "arguments": "{\"command\": \"python3 -m pytest test/test_digest.py -q\"}"}}
+      ]
+    },
+    {
+      "tool_messages": 11,
+      "finish_reason": "stop",
+      "content": "Refactor complete: canonicalisation extracted, three callers updated, tests green. This is the T5 multi-file shape.",
+      "tool_calls": []
+    }
+  ]
+}

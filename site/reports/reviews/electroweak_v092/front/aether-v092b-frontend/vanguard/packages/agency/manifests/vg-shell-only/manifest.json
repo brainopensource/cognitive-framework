@@ -1,0 +1,20 @@
+{
+  "harness": "vg-shell-only",
+  "components": {
+    "system_prompt": ["vg-shell-only/system-prompt.txt"],
+    "tools": ["vg-shell-only/shell-tool.json"],
+    "context_policy": ["vg-shell-only/context-policy.json"],
+    "routing_policy": ["vg-shell-only/routing-policy.json"]
+  },
+  "capabilities": [
+    {
+      "verb": "proc.exec",
+      "sink": "privileged",
+      "selector": {"kind":"generic","uriPattern":"proc://exec/allow/git,pytest,ruff,python3"},
+      "risk": "high"
+    }
+  ],
+  "evaluators": ["coding-oracle@3"],
+  "budgetPolicy": "vg-shell-only/budget-policy.json",
+  "undeletable": true
+}

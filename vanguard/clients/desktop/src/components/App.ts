@@ -1,4 +1,5 @@
 import { DesktopStore } from "../state/desktop-store.js";
+import { captureFocus, restoreFocus } from "../dom/focus-preservation.js";
 import { TauriNativeBridge } from "../bridge/tauri-bridge.js";
 import { generateCssVariables, getThemeTokens } from "@aether/projections";
 import { renderSidebar } from "./Sidebar.js";
@@ -140,7 +141,7 @@ export class DesktopApp {
             this.store.openForensicDrawer("settings");
             this.store.update((s) => ({ ...s, activeSettingsTab: "providers" }));
           } else if (step.id === "runtime") {
-            this.store.controller.connectRuntime();
+            void this.store.connectRuntime();
           } else if (step.id === "workspace") {
             this.bridge.openDirectoryDialog().then((dir) => {
               if (dir) this.store.controller.selectWorkspace(dir);
@@ -154,8 +155,13 @@ export class DesktopApp {
     }
 
     if (this.rootElement) {
+      // Focus lives on a node that is about to be discarded, so it has to be
+      // carried across the swap explicitly or every keystroke blurs the field
+      // that produced it.
+      const focused = captureFocus(this.rootElement.ownerDocument ?? document);
       this.rootElement.innerHTML = "";
       this.rootElement.appendChild(appContainer);
+      restoreFocus(focused, this.rootElement);
     }
 
     return appContainer;

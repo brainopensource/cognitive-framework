@@ -28,7 +28,10 @@ import type { RuntimeTransport } from "./transport.js";
 export class FeedTransport implements RuntimeTransport {
   readonly kind = "feed" as const;
 
-  constructor(private readonly lines: AsyncIterable<string>) {}
+  constructor(
+    private readonly lines: AsyncIterable<string>,
+    private readonly source: StreamItem["source"] = "replay",
+  ) {}
 
   async sendCommand<T>(name: string, _payload: Record<string, unknown>, runId: string): Promise<Result<T>> {
     if (name === "StartRun") {
@@ -69,7 +72,7 @@ export class FeedTransport implements RuntimeTransport {
         ok: true,
         value: {
           contractVersion: "vg.4",
-          source: "replay",
+          source: this.source,
           envelope: env,
         },
       };
@@ -82,17 +85,17 @@ export class ReplayRuntimeClient implements RuntimeClient {
   private currentRunId: string = "replay-run-default";
   private status: string = "running";
 
-  constructor(lines: AsyncIterable<string>) {
-    this.feed = new FeedTransport(lines);
+  constructor(lines: AsyncIterable<string>, source: StreamItem["source"] = "replay") {
+    this.feed = new FeedTransport(lines, source);
   }
 
-  static fromEnvelopes(envelopes: readonly EventEnvelope[]): ReplayRuntimeClient {
+  static fromEnvelopes(envelopes: readonly EventEnvelope[], source: StreamItem["source"] = "replay"): ReplayRuntimeClient {
     async function* gen() {
       for (const env of envelopes) {
         yield JSON.stringify(env);
       }
     }
-    return new ReplayRuntimeClient(gen());
+    return new ReplayRuntimeClient(gen(), source);
   }
 
   async startRun(request: StartRunRequest, _signal?: AbortSignal): Promise<Result<RunRef>> {

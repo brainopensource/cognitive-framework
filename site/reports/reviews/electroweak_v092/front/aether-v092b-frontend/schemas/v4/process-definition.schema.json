@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/v4/process-definition.schema.json",
+  "$comment": "Owning section: GTS-13C T1.12; ADR-0050. Finite governance states are declared data.",
+  "title": "ProcessDefinition",
+  "type": "object",
+  "required": ["definitionDigest", "states", "initialState", "transitions", "approvalPoints", "boundEffectVerbs"],
+  "properties": {
+    "definitionDigest": { "$ref": "primitives.schema.json#/$defs/Digest" },
+    "states": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "initialState": { "type": "string", "minLength": 1 },
+    "transitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "eventKind", "to"],
+        "properties": {
+          "from": { "type": "string", "minLength": 1 },
+          "eventKind": { "type": "string", "minLength": 1 },
+          "to": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "approvalPoints": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "boundEffectVerbs": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+  },
+  "additionalProperties": false
+}

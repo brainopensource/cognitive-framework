@@ -27,6 +27,10 @@
     "./errors.js": {
       "types": "./dist/src/errors.d.ts",
       "default": "./dist/src/errors.js"
+    },
+    "./validate-command.js": {
+      "types": "./dist/src/validate-command.d.ts",
+      "default": "./dist/src/validate-command.js"
     }
   },
   "files": [

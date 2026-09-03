@@ -1,0 +1,11 @@
+{
+  "kind": "network",
+  "hosts": [
+    "api.example.com",
+    "cdn.example.com"
+  ],
+  "ports": [
+    80,
+    443
+  ]
+}

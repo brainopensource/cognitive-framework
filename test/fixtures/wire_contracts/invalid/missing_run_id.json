@@ -1,0 +1,16 @@
+{
+  "version": "vg.4",
+  "frameType": "command",
+  "frameId": "frame-bad-3",
+  "command": {
+    "name": "StartRun",
+    "commandId": "cmd-bad-3",
+    "idempotencyKey": "idem-bad-3",
+    "actor": "operator",
+    "payload": {
+      "manifestPath": "a",
+      "repoPath": "b",
+      "brief": "c"
+    }
+  }
+}

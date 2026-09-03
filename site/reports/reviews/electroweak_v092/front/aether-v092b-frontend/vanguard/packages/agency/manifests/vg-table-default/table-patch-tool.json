@@ -1,0 +1,13 @@
+{
+  "name": "TablePatch",
+  "description": "Apply field updates to a specific record in a table",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "table": {"type": "string"},
+      "record_id": {"type": "string"},
+      "updates": {"type": "object"}
+    },
+    "required": ["table", "record_id", "updates"]
+  }
+}

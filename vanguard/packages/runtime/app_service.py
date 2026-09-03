@@ -112,8 +112,19 @@ class ApplicationService:
 
     @staticmethod
     def _pack_completion_policy(manifest_path: Path) -> Any:
-        """Load the declared code-pack policy only for Coding Max manifests."""
-        if not manifest_path.parent.name in {"vg-code-fast", "vg-code-balanced", "vg-code-max", "vg-code-max-v2", "vg-code-max-v2b"}:
+        """Bind coding completion policy from declared capabilities.
+
+        Policy selection must not depend on a growing preset-name allowlist.
+        Any manifest that grants patch application receives the code-pack
+        completion policy; read-only compositions retain the generic gate.
+        """
+        try:
+            declared = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return None
+        capabilities = declared.get("capabilities", ())
+        if not any(isinstance(item, Mapping) and item.get("verb") == "patch.apply"
+                   for item in capabilities):
             return None
         pack_root = Path(__file__).resolve().parents[3] / "packs" / "code-default"
         import sys
@@ -357,10 +368,24 @@ class ApplicationService:
         # emitted and HarnessSession.dispatch reuses settled idempotent effects.
         resolved_run_id = run_id
         brief = state.objective
+        original_max_turns = next(
+            (int((getattr(ev, "payload", {}) or {}).get("maxTurns"))
+             for ev in events
+             if isinstance(getattr(ev, "payload", None), Mapping)
+             and str((getattr(ev, "payload", {}) or {}).get("maxTurns", "")).isdigit()),
+            40,
+        )
+        original_interactive = next(
+            (bool((getattr(ev, "payload", {}) or {}).get("interactive"))
+             for ev in events
+             if isinstance(getattr(ev, "payload", None), Mapping)
+             and "interactive" in (getattr(ev, "payload", {}) or {})),
+            True,
+        )
         task = TaskContext(
             brief=brief, repo_path=self.workspace, run_id=resolved_run_id,
             episode_id=f"episode-{resolved_run_id}",
-            max_turns=max(1, max(1, len([e for e in events if (getattr(e, "payload", {}) or {}).get("kind") == "ProposalProduced"])) + 1),
+            max_turns=max(1, original_max_turns),
             resume_state=state.to_canonical_dict(),
         )
         resolved_state_dir = resolved_state
@@ -378,7 +403,7 @@ class ApplicationService:
         exec_result = Runtime.execute_profiled(
             manifest_p, task, profile_id=profile_id, model=selected_model,
             store_path=str(resolved_state_dir / "events.sqlite3"),
-            interactive=False,
+            interactive=original_interactive,
             blobs=FileBlobStore(resolved_state_dir / "blobs"),
             completion_policy=self._pack_completion_policy(manifest_p),
         )

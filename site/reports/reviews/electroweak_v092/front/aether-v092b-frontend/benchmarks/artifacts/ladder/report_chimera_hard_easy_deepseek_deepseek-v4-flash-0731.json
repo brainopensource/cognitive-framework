@@ -1,0 +1,36 @@
+{
+  "tier": "easy",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "manifest": "vg-chimera-v1",
+  "max_turns": 15,
+  "total": 1,
+  "passed": 1,
+  "pass_rate": "1/1",
+  "spend_usd": 0.001356,
+  "llm_calls": 8,
+  "budget_usd": 0.02,
+  "max_calls": 30,
+  "rows": [
+    {
+      "challenge": "sota_hard_large_catalog_collision",
+      "tier": "easy",
+      "title": "Large Catalog Collision and Stable Lookup",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "manifest": "vg-chimera-v1",
+      "status": "PASS",
+      "llm_calls": 8,
+      "turns": 8,
+      "terminal_state": "completed",
+      "cost_usd": 0.001356,
+      "latency_s": 47.11,
+      "files_modified": [
+        "catalog/registry.py"
+      ],
+      "oracle_output": "",
+      "error": "",
+      "terminal_detail": "Fixed catalog/registry.py to detect duplicate aliases deterministically, raising AliasCollision naming both colliding IDs while preserving exact ID lookup.",
+      "run_fields": {},
+      "cassette": "benchmarks/artifacts/ladder/chimera_hard__sota_hard_large_catalog_collision__deepseek_deepseek-v4-flash-0731.cassette.json"
+    }
+  ]
+}

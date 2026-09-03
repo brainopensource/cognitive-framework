@@ -1,0 +1,7249 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="General Event-Sourced Agentic Computation Framework & Substrate">
+      
+      
+        <meta name="author" content="AETHER Team">
+      
+      
+      
+        <link rel="prev" href="../frontend_prototype_beta_gem/">
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Integration Plan - AETHER Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#aether-vanguard-frontend-to-runtime-integration-dossier" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="AETHER Documentation" class="md-header__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AETHER Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Integration Plan
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="AETHER Documentation" class="md-nav__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AETHER Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Law & Norms
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Law & Norms
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../SPEC/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Specification (SPEC)
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions Index
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Overview
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/boundaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Boundaries
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/end-to-end-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-to-End Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/system-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Bootstrap
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/agency/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agency
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/application-interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Interfaces
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/assurance-evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Assurance & Evaluation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/causal-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Causal State
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/composition-extensibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Composition & Extensibility
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/delegation-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation & Topology
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kernel
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/memory-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory & Learning
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/runtime-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/request-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Request Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/agent-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/event-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/recovery-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recovery & Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/guides/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/guides/compose-an-agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compose an Agent
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/guides/add-pack-or-tool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Pack or Tool
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/guides/add-adapter-or-provider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Adapter or Provider
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/guides/operate-runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operate Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/guides/run-and-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Run and Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schemas
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Port Contracts
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/api-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Reference
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/manifests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifests
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/artifacts-memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Artifacts & Memory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../frontend/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product PRDs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Product PRDs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../product/frontend/FRONTEND_PRD_PLACEMENT_MANIFEST/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Placement Manifest
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../product/frontend/PRD_AETHER_CLI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD CLI
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../product/frontend/PRD_AETHER_DESKTOP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Desktop
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../product/frontend/PRD_AETHER_LAB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Lab
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../product/frontend/PRD_AETHER_TUI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD TUI
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../product/frontend/PRD_FRONTEND_PLATFORM/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Platform
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Execution
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/active/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/milestones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Milestones
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & Reports
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & Reports
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../theory/agent-substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reports/benchmark/main/BENCHMARK_V090_FULL.MD" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmark Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../AI/openrouter_llm_models_suggested/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Models
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_2" id="__nav_9_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coding Harness
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Coding Harness
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/ARCHON_gemini_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Archon Gemini Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/DEKAS_claude_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dekas Claude Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/LLM_RESPONSE_WRANGLER/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Response Wrangler
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/LLM_benchmarkings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Benchmarking
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/RESEARCH_2308B_gm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research 2308B GM
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/RESEARCH_Harness_Builder_Framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Builder Framework
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/RESEARCH_META_COGNITIVE_ENGINEERING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Cognitive Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/RESEARCH_META_COGNITIVE_ENGINEERING_briefing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Cognitive Briefing
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/RESEARCH_META_FRAMEWORK_2408/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Framework 2408
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/RESEARCH_THEORETICAL_SYNTHESIS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theoretical Synthesis
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/RESEARCH_deepseek-harness_algorithms-ideas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deepseek Harness Algorithms
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/RESEARCH_harness_agentic_coding_builder_research_and_framework_B/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agentic Coding Builder Framework B
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/RESEARCH_higgs_2308/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Higgs 2308
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/RESEARCH_metaframework_2508_improved/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metaframework 2508
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/VANGUARD_FRONTIER_SWE_BENCH_AND_AGENTIC_METAFRAMEWORK_REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontier SWE Bench & Metaframework Report
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/VANGUARD_VS_LIM_INSIGHTS_SOTS_TECHNIQUES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vanguard vs LIM Insights
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/future_improvements_sota_harness_2808/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Future Improvements SOTA Harness
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/proposal_glm_harness_BETA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proposal GLM Harness Beta
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/proposal_hy3_improved/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proposal HY3 Improved
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/research_agentic_runtime_systems_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agentic Runtime Systems Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/research_harness_agentic_systems_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Agentic Systems Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/suggested_LIM_improvements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Suggested LIM Improvements
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../coding_harness/vanguard_body_detailed/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vanguard Body Detailed
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_9_3" id="__nav_9_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_9_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../AETHER_FRONTEND_MASTERPLAN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Masterplan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../frontend_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--experiment"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../frontend_prototype_beta_gem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Prototype Beta Gem
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--experiment"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Plan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Plan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0-status-authority-and-implementation-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0. Status, authority, and implementation rule
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-verified-baseline-and-corrections-to-the-previous-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Verified baseline and corrections to the previous plan
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-non-negotiable-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Non-negotiable architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Non-negotiable architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-layer-placement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Layer placement
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-one-write-path-many-read-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 One write path, many read paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-canonical-transport-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Canonical transport matrix
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-contract-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Contract model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Contract model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-version-vocabulary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Version vocabulary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-runtimeservice-frame-algebra" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 RuntimeService frame algebra
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-command-envelope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Command envelope
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-command-payloads-and-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Command payloads and results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-service-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Service errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-event-stream-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Event stream contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#47-cursor-race-free-algorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.7 Cursor race-free algorithm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#48-projection-envelope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.8 Projection envelope
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-runtime-composition-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Runtime composition design
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Runtime composition design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-required-runtime-service-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Required runtime service dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-runtime-runner-protocol" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Runtime runner protocol
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-event-publication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Event publication
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-gateway-and-browser-security-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Gateway and browser security profile
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Gateway and browser security profile">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-local-first-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Local-first deployment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-csrf-and-origin-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 CSRF and origin rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-workspace-file-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Workspace file access
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-secret-and-content-redaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Secret and content redaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-cryptographic-approval-protocol" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Cryptographic approval protocol
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Cryptographic approval protocol">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-trust-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Trust model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-approval-transaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Approval transaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-client-signer-implementations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Client signer implementations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-frontend-integration-standard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Frontend integration standard
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Frontend integration standard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-one-client-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 One client API
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-client-stream-state-machine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Client stream state machine
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-browser-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Browser state
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-product-api-catalog-45-routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Product API catalog — 45 routes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Product API catalog — 45 routes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-runs-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Runs — 10
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-compositions-7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Compositions — 7
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-agents-6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 Agents — 6
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-artifacts-7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 Artifacts — 7
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#95-topologies-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.5 Topologies — 5
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#96-skills-and-memory-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.6 Skills and memory — 5
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#97-governance-and-service-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.7 Governance and service — 5
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-capability-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Capability discovery
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-delivery-roadmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Delivery roadmap
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Delivery roadmap">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#f0-contract-and-falsifier-freeze" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F0 — Contract and falsifier freeze
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f1-runtimeservice-over-canonical-ledger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F1 — RuntimeService over canonical ledger
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f2-uds-daemon-and-protocol-parity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F2 — UDS daemon and protocol parity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f3-http-gateway-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F3 — HTTP gateway core
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f4-client-core-convergence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F4 — Client-core convergence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f5-clitui-live-vertical-slice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F5 — CLI/TUI live vertical slice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f6-studio-live-vertical-slice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F6 — Studio live vertical slice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f7-projection-apis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F7 — Projection APIs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f8-m-7m-8-frontend-activation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F8 — M-7/M-8 frontend activation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-failure-modes-and-required-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Failure modes and required behavior
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-verification-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Verification strategy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. Verification strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#131-test-pyramid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 Test pyramid
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#132-mandatory-falsifiers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 Mandatory falsifiers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#133-performance-budgets-to-establish-before-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.3 Performance budgets to establish before release
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-commands-and-smoke-test-runbook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Commands and smoke-test runbook
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="14. Commands and smoke-test runbook">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#141-baseline-gates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.1 Baseline gates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#142-existing-stdio-bridge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.2 Existing stdio bridge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#143-focused-existing-transport-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.3 Focused existing transport tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#144-after-daemon-entrypoint-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.4 After daemon entrypoint implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#145-after-secure-gateway-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.5 After secure gateway implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#146-replay-parity-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.6 Replay parity procedure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-definition-of-done" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Definition of done
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-first-implementation-package-recommendation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. First implementation package recommendation
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0-status-authority-and-implementation-rule" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0. Status, authority, and implementation rule
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-verified-baseline-and-corrections-to-the-previous-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Verified baseline and corrections to the previous plan
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-non-negotiable-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Non-negotiable architecture
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Non-negotiable architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-layer-placement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Layer placement
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-one-write-path-many-read-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 One write path, many read paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-canonical-transport-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Canonical transport matrix
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-contract-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Contract model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Contract model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-version-vocabulary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Version vocabulary
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-runtimeservice-frame-algebra" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 RuntimeService frame algebra
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#43-command-envelope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.3 Command envelope
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#44-command-payloads-and-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.4 Command payloads and results
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#45-service-errors" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.5 Service errors
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#46-event-stream-contract" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.6 Event stream contract
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#47-cursor-race-free-algorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.7 Cursor race-free algorithm
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#48-projection-envelope" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.8 Projection envelope
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-runtime-composition-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Runtime composition design
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Runtime composition design">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-required-runtime-service-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Required runtime service dependencies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-runtime-runner-protocol" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Runtime runner protocol
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-event-publication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Event publication
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-gateway-and-browser-security-profile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Gateway and browser security profile
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Gateway and browser security profile">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-local-first-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 Local-first deployment
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#62-csrf-and-origin-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.2 CSRF and origin rules
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#63-workspace-file-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.3 Workspace file access
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#64-secret-and-content-redaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.4 Secret and content redaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-cryptographic-approval-protocol" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Cryptographic approval protocol
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Cryptographic approval protocol">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-trust-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Trust model
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-approval-transaction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Approval transaction
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-client-signer-implementations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Client signer implementations
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-frontend-integration-standard" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Frontend integration standard
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Frontend integration standard">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-one-client-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 One client API
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-client-stream-state-machine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Client stream state machine
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#83-browser-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.3 Browser state
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-product-api-catalog-45-routes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Product API catalog — 45 routes
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Product API catalog — 45 routes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-runs-10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Runs — 10
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#92-compositions-7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.2 Compositions — 7
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#93-agents-6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.3 Agents — 6
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#94-artifacts-7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.4 Artifacts — 7
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#95-topologies-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.5 Topologies — 5
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#96-skills-and-memory-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.6 Skills and memory — 5
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#97-governance-and-service-5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.7 Governance and service — 5
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-capability-discovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Capability discovery
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-delivery-roadmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Delivery roadmap
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Delivery roadmap">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#f0-contract-and-falsifier-freeze" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F0 — Contract and falsifier freeze
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f1-runtimeservice-over-canonical-ledger" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F1 — RuntimeService over canonical ledger
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f2-uds-daemon-and-protocol-parity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F2 — UDS daemon and protocol parity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f3-http-gateway-core" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F3 — HTTP gateway core
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f4-client-core-convergence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F4 — Client-core convergence
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f5-clitui-live-vertical-slice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F5 — CLI/TUI live vertical slice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f6-studio-live-vertical-slice" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F6 — Studio live vertical slice
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f7-projection-apis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F7 — Projection APIs
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#f8-m-7m-8-frontend-activation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        F8 — M-7/M-8 frontend activation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-failure-modes-and-required-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Failure modes and required behavior
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-verification-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Verification strategy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. Verification strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#131-test-pyramid" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 Test pyramid
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#132-mandatory-falsifiers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 Mandatory falsifiers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#133-performance-budgets-to-establish-before-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.3 Performance budgets to establish before release
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-commands-and-smoke-test-runbook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Commands and smoke-test runbook
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="14. Commands and smoke-test runbook">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#141-baseline-gates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.1 Baseline gates
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#142-existing-stdio-bridge" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.2 Existing stdio bridge
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#143-focused-existing-transport-tests" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.3 Focused existing transport tests
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#144-after-daemon-entrypoint-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.4 After daemon entrypoint implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#145-after-secure-gateway-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.5 After secure gateway implementation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#146-replay-parity-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14.6 Replay parity procedure
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-definition-of-done" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Definition of done
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-first-implementation-package-recommendation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. First implementation package recommendation
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="aether-vanguard-frontend-to-runtime-integration-dossier">AETHER / Vanguard frontend-to-runtime integration dossier</h1>
+<h2 id="0-status-authority-and-implementation-rule">0. Status, authority, and implementation rule</h2>
+<p>This document is an implementation-ready technical review, not an authorization source. It lives
+under <code>_archive/</code>, so it cannot amend the Vision, specification, ADRs, schemas, milestone gates, or
+active sprint. Before starting a slice from this plan, copy its bounded work package into
+<code>docs/03_execution/sprint_active.md</code> through the repository's normal leadership process. If this
+plan conflicts with a canonical source, the canonical source wins.</p>
+<p>Authority order for this work:</p>
+<ol>
+<li><code>VISION.md</code> — constitutional identity and product direction.</li>
+<li><code>docs/SPEC.md</code> and <code>docs/01_law/</code> — normative invariants.</li>
+<li>accepted ADRs — binding decisions reflected in law.</li>
+<li><code>schemas/v4/</code> and canonical protocol documents — wire contracts.</li>
+<li><code>docs/03_execution/milestones.md</code> — stable gates.</li>
+<li><code>docs/03_execution/sprint_active.md</code> — sole current authorization.</li>
+<li>this dossier — advisory implementation decomposition only.</li>
+</ol>
+<p>The integration is governed by one rule:</p>
+<blockquote>
+<p>The Python runtime owns execution and durable truth. Stdio, UDS, HTTP, and SSE are replaceable
+transport adapters over one command vocabulary, one event contract, and event-derived read
+models. A frontend and gateway never become a second runtime, ledger, policy engine, or authority.</p>
+</blockquote>
+<p>The minimum useful product outcome is not “all 45 routes exist.” It is a vertical slice in which a
+real run can be started, observed, approved, interrupted, resumed, and reconstructed identically
+through CLI/TUI and Studio. Route count is an inventory; accepted behavior is the gate.</p>
+<h2 id="1-verified-baseline-and-corrections-to-the-previous-plan">1. Verified baseline and corrections to the previous plan</h2>
+<p>The following statements are verified against the repository on 2026-08-27:</p>
+<ul>
+<li><code>Runtime.execute_profiled()</code> is the canonical profiled execution seam.</li>
+<li><code>RuntimeService</code> and <code>RuntimeServer</code> already implement a partial vg.4 UDS service.</li>
+<li><code>studio_gateway.py</code> still starts <code>_pilot_run_simulation()</code> and emits synthetic, incomplete events.</li>
+<li>the service's <code>ServiceInboxStore.event_outbox</code> and production <code>SqliteEventStore.events</code> are
+  separate event histories; exposing both as truth would violate event-sourcing invariants.</li>
+<li><code>HttpRuntimeClient</code> implements only a subset of <code>RuntimeClient</code> and returns placeholders for run
+  snapshots.</li>
+<li>the Studio browser entry bypasses <code>@vanguard/client-core</code> for health, SSE, and approval calls.</li>
+<li>the HTTP approval body and <code>RuntimeService._cmd_ResolveApproval()</code> disagree on shape.</li>
+<li>gateway-generated event IDs and envelopes do not satisfy the TypeScript vg.4 parser.</li>
+<li>no installed Python console script starts <code>RuntimeServer</code>; smoke commands must not pretend one
+  exists until a daemon entrypoint is implemented.</li>
+<li>M-7 runtime integration is incomplete and M-8 is not authorized by current execution state.</li>
+</ul>
+<p>Corrections applied by this dossier:</p>
+<ol>
+<li>Do not create a second “service event store.” The canonical event store is the runtime ledger.
+   The command inbox may be a separate delivery/idempotency table, but it is not causal truth.</li>
+<li>Do not have the gateway call <code>Runtime.execute_profiled()</code> directly. All command transports call
+   the same <code>RuntimeService</code> application boundary; its injected runner reaches the runtime.</li>
+<li>Do not broadcast objects as if they were events. Commit a schema-valid <code>EventEnvelope</code> through
+   the sole ledger writer first; stream readers then tail committed truth.</li>
+<li>Do not freeze 45 improvised payloads inside one generic schema. Define a closed command union and
+   generated readers before exposing routes.</li>
+<li>Do not implement M-7/M-8 mutation routes merely to satisfy a frontend screen. Capability
+   discovery must distinguish <code>absent</code>, <code>read_only</code>, <code>experimental</code>, and <code>available</code>.</li>
+<li>Do not store browser signing keys in source, localStorage, event payloads, or gateway memory.</li>
+<li>Do not claim server cursor support unless reconnect, gap, race, and fresh-process tests pass.</li>
+</ol>
+<h2 id="2-non-negotiable-architecture">2. Non-negotiable architecture</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>                                      COMMAND PLANE
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>       vg/Ink ── UDS NDJSON ─┐
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                             ├──&gt; RuntimeService ──&gt; RuntimeRunner ──&gt; Runtime.execute_profiled
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a> Studio ── HTTP JSON ────────┘          │                    │
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                                        │                    └── canonical composition/runtime
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                                        └── command inbox (idempotency, not causal truth)
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>                                      STATE PLANE
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a> Runtime / LedgerEmitter ── append ──&gt; EventStorePort ──&gt; SQLite WAL `events`
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>                                              │
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>                                              ├──&gt; event-derived query projections
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>                                              ├──&gt; UDS `StreamEvents`
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>                                              ├──&gt; HTTP historical reads
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>                                              └──&gt; SSE tailer
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>                                    ARTIFACT PLANE
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a> Runtime / ArtifactWriter ────────────────&gt; BlobStorePort / content-addressed blobs
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>                                              │
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>                                              └──&gt; authorized metadata/content reads
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>                                    CLIENT PLANE
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a> @vanguard/client-core = contracts + transport ports + parsers + reducers + signer port
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>               ├──&gt; @vanguard/cli (commands and Ink presentation)
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>               └──&gt; @vanguard/studio (browser presentation)
+</code></pre></div>
+<h3 id="21-layer-placement">2.1 Layer placement</h3>
+<table>
+<thead>
+<tr>
+<th>Concern</th>
+<th>Legal location</th>
+<th>Forbidden placement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wire values and generated readers</td>
+<td><code>domain/</code>, schemas, TS domain package</td>
+<td>handwritten UI mirrors</td>
+</tr>
+<tr>
+<td>Transport/application protocols</td>
+<td><code>ports/</code> or client-core ports</td>
+<td>Kernel branches</td>
+</tr>
+<tr>
+<td>Command coordination and projections</td>
+<td><code>runtime/service/</code></td>
+<td>adapters or frontend reducers with authority</td>
+</tr>
+<tr>
+<td>Runtime composition</td>
+<td><code>runtime/root.py</code>, bootstrap/wiring</td>
+<td>HTTP handler</td>
+</tr>
+<tr>
+<td>SQLite, HTTP server, UDS, blob implementation</td>
+<td><code>adapters/</code> or runtime edge composition</td>
+<td>domain/kernel</td>
+</tr>
+<tr>
+<td>UI folds and presentation</td>
+<td><code>@vanguard/client-core</code>, CLI, Studio</td>
+<td>Python causal truth</td>
+</tr>
+<tr>
+<td>Approval verification</td>
+<td>runtime governance boundary</td>
+<td>gateway or UI</td>
+</tr>
+</tbody>
+</table>
+<p>No integration phase may add imports to <code>vanguard/packages/kernel/</code>. The kernel remains domain-blind,
+and its TCB budget remains <code>&lt;=1438</code> logical LOC.</p>
+<h3 id="22-one-write-path-many-read-paths">2.2 One write path, many read paths</h3>
+<p>Commands may enter over three transports, but they normalize to the same command value and handler.
+Queries may have transport-specific framing, but they derive from the same durable events and
+artifacts. A read model may be cached; it must be rebuildable and carry its reducer/schema version
+and <code>asOfSeq</code>.</p>
+<p><code>ServiceInboxStore</code> is allowed to own:</p>
+<ul>
+<li>command ID and idempotency key;</li>
+<li>actor/authentication context reference;</li>
+<li>accepted/completed/rejected delivery state;</li>
+<li>serialized command receipt;</li>
+<li>operational lease/heartbeat needed to recover command handling.</li>
+</ul>
+<p>It must not remain an alternative event ledger after migration. Remove or retire
+<code>event_outbox</code> only through a compatibility migration that preserves existing test fixtures and
+documents how legacy rows are read. Do not silently discard a file-backed service database.</p>
+<h2 id="3-canonical-transport-matrix">3. Canonical transport matrix</h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Stdio</th>
+<th>UDS</th>
+<th>HTTP/SSE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Primary users</td>
+<td><code>vg code</code>, <code>vg doctor</code></td>
+<td>CLI and Ink TUI</td>
+<td>browser Studio</td>
+</tr>
+<tr>
+<td>Framing</td>
+<td>one NDJSON request/result per line</td>
+<td>vg.4 NDJSON frames</td>
+<td>JSON command/query + SSE event frames</td>
+</tr>
+<tr>
+<td>Process model</td>
+<td>child process, no daemon</td>
+<td>long-lived local daemon</td>
+<td>loopback gateway over same service</td>
+</tr>
+<tr>
+<td>Command semantics</td>
+<td>coding projection request</td>
+<td>canonical runtime commands</td>
+<td>canonical runtime commands</td>
+</tr>
+<tr>
+<td>Streaming</td>
+<td>no; final structured result</td>
+<td><code>StreamEvents</code></td>
+<td>SSE plus historical query</td>
+</tr>
+<tr>
+<td>Resume cursor</td>
+<td>request field if supported</td>
+<td><code>afterSeq</code> IntString</td>
+<td><code>afterSeq</code> / <code>Last-Event-ID</code></td>
+</tr>
+<tr>
+<td>Authentication</td>
+<td>parent process identity/env</td>
+<td>peer UID + socket <code>0600</code></td>
+<td>same-origin session + operator identity</td>
+</tr>
+<tr>
+<td>Required parity</td>
+<td>outcome projection</td>
+<td>command/event semantics</td>
+<td>command/event semantics</td>
+</tr>
+</tbody>
+</table>
+<p>Stdio is intentionally not forced into the daemon protocol. It is a fast product bridge with its
+own closed request/result schema, but it must call the same runtime bootstrap and may not implement
+another execution engine.</p>
+<h2 id="4-contract-model">4. Contract model</h2>
+<h3 id="41-version-vocabulary">4.1 Version vocabulary</h3>
+<p>Do not conflate these identifiers:</p>
+<ul>
+<li><code>schemaVersion: "vg.4"</code> — event wire family currently parsed by clients.</li>
+<li><code>version: "vg.4"</code> — RuntimeService frame family.</li>
+<li><code>mhf.event/2</code> — canonical writer format named by law and milestones.</li>
+<li><code>contractVersion: "0.1"</code> — current client-core stream wrapper version.</li>
+<li>package versions — sourced from each package manifest.</li>
+</ul>
+<p>The contract-freeze slice must decide and test the exact mapping between <code>vg.4</code> and
+<code>mhf.event/2</code>; comments and aliases are insufficient. Writers single-write the active canonical
+format; compatibility readers may dual-read only where law allows it.</p>
+<h3 id="42-runtimeservice-frame-algebra">4.2 RuntimeService frame algebra</h3>
+<p>The schema must be a discriminated <code>oneOf</code>, not a loose object with optional <code>command</code>, <code>receipt</code>,
+<code>event</code>, and <code>error</code> fields.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>RuntimeServiceFrame = CommandFrame | ReceiptFrame | EventFrame | ErrorFrame
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>CommandFrame = {
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>  version, frameType="command", frameId,
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>  command: CommandEnvelope
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>}
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>ReceiptFrame = {
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>  version, frameType="receipt", frameId,
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>  inReplyTo, receipt: CommandReceipt
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>}
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>EventFrame = {
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>  version, frameType="event", frameId,
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>  event: EventEnvelope
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>}
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>ErrorFrame = {
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>  version, frameType="error", frameId,
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>  inReplyTo?, error: ServiceError
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>}
+</code></pre></div>
+<p>Closed command union for the first integration release:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Command = StartRun
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>        | GetRun
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>        | ListRuns
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>        | StreamEvents
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        | Cancel
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>        | Checkpoint
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>        | Resume
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>        | ResolveApproval
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>        | RecordCorrection
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>        | ExplainArtifact
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>        | GetCapabilities
+</code></pre></div>
+<p><code>ListRuns</code> currently appears in the gateway but is absent from
+<code>runtime-service.schema.json</code>; either add it to the closed union with tests or remove its use. No
+handler may exist only by Python <code>getattr</code> convention without schema membership.</p>
+<h3 id="43-command-envelope">4.3 Command envelope</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">  </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"StartRun"</span><span class="p">,</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">"commandId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"018f..."</span><span class="p">,</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">"idempotencyKey"</span><span class="p">:</span><span class="w"> </span><span class="s2">"018f..."</span><span class="p">,</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="nt">"runId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"run-..."</span><span class="p">,</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span><span class="nt">"actor"</span><span class="p">:</span><span class="w"> </span><span class="s2">"operator:local"</span><span class="p">,</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span><span class="nt">"expectedSeq"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0"</span><span class="p">,</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">  </span><span class="nt">"payload"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="p">}</span>
+</code></pre></div>
+<p>Rules:</p>
+<ul>
+<li><code>commandId</code> identifies one attempt; <code>idempotencyKey</code> identifies one logical command.</li>
+<li>retries reuse <code>idempotencyKey</code> and may use a new <code>commandId</code> only if the schema explicitly permits
+  attempt identity; the service always returns the first terminal logical receipt.</li>
+<li><code>runId</code> is required for run-scoped commands and forbidden only where a specific command contract
+  says so.</li>
+<li><code>expectedSeq</code> is an IntString CAS precondition for state-sensitive commands.</li>
+<li>actor identity comes from authenticated transport context. A payload cannot self-assert a more
+  privileged actor.</li>
+<li>unknown fields fail closed.</li>
+</ul>
+<h3 id="44-command-payloads-and-results">4.4 Command payloads and results</h3>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Required request fields</th>
+<th>Success result</th>
+<th>CAS/security notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>StartRun</code></td>
+<td><code>manifestPath</code>, <code>repoPath</code>, <code>brief</code>, <code>profileId</code></td>
+<td><code>runId</code>, <code>episodeId</code>, <code>status</code>, <code>acceptedAt</code></td>
+<td>canonicalize repo path; profile must fail closed</td>
+</tr>
+<tr>
+<td><code>GetRun</code></td>
+<td>none</td>
+<td><code>RunSnapshot</code></td>
+<td>event-derived, includes <code>asOfSeq</code></td>
+</tr>
+<tr>
+<td><code>ListRuns</code></td>
+<td>cursor/page limit/filter</td>
+<td><code>RunPage</code></td>
+<td>stable sort by durable identity, not active threads</td>
+</tr>
+<tr>
+<td><code>StreamEvents</code></td>
+<td><code>afterSeq</code></td>
+<td>event frames</td>
+<td>run authorization checked before each attach</td>
+</tr>
+<tr>
+<td><code>Cancel</code></td>
+<td><code>reason</code>, <code>expectedSeq</code></td>
+<td>receipt</td>
+<td>idempotent terminal transition</td>
+</tr>
+<tr>
+<td><code>Checkpoint</code></td>
+<td><code>expectedSeq</code></td>
+<td><code>checkpointId</code>, digest, seq</td>
+<td>checkpoint is cache/evidence, not truth replacement</td>
+</tr>
+<tr>
+<td><code>Resume</code></td>
+<td><code>checkpointId?</code>, <code>expectedSeq</code></td>
+<td>run ref and recovery mode</td>
+<td>cold-fold fallback on invalid checkpoint</td>
+</tr>
+<tr>
+<td><code>ResolveApproval</code></td>
+<td>complete signed decision, <code>expectedSeq</code></td>
+<td>resolution receipt</td>
+<td>one terminal decision; signature verified</td>
+</tr>
+<tr>
+<td><code>RecordCorrection</code></td>
+<td>schema-valid correction, <code>expectedSeq</code></td>
+<td>event ID and seq</td>
+<td>correction reader validates scope rules</td>
+</tr>
+<tr>
+<td><code>ExplainArtifact</code></td>
+<td><code>artifactId</code>, optional run</td>
+<td>typed explanation</td>
+<td>read-only evidence projection</td>
+</tr>
+<tr>
+<td><code>GetCapabilities</code></td>
+<td>none</td>
+<td>capability document</td>
+<td>reports implementation and authorization separately</td>
+</tr>
+</tbody>
+</table>
+<h3 id="45-service-errors">4.5 Service errors</h3>
+<p>Use one error vocabulary in Python and TypeScript:</p>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th style="text-align: right;">HTTP</th>
+<th style="text-align: right;">Retryable by default</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>invalid_request</code></td>
+<td style="text-align: right;">400</td>
+<td style="text-align: right;">no</td>
+<td>syntax/schema/semantic request failure</td>
+</tr>
+<tr>
+<td><code>unauthenticated</code></td>
+<td style="text-align: right;">401</td>
+<td style="text-align: right;">no</td>
+<td>no valid operator session</td>
+</tr>
+<tr>
+<td><code>permission_denied</code></td>
+<td style="text-align: right;">403</td>
+<td style="text-align: right;">no</td>
+<td>identity lacks authority</td>
+</tr>
+<tr>
+<td><code>not_found</code></td>
+<td style="text-align: right;">404</td>
+<td style="text-align: right;">no</td>
+<td>named durable subject absent or undisclosed</td>
+</tr>
+<tr>
+<td><code>conflict</code></td>
+<td style="text-align: right;">409</td>
+<td style="text-align: right;">yes after refresh</td>
+<td>CAS or terminal-state conflict</td>
+</tr>
+<tr>
+<td><code>incompatible_version</code></td>
+<td style="text-align: right;">426</td>
+<td style="text-align: right;">no</td>
+<td>unsupported wire version</td>
+</tr>
+<tr>
+<td><code>frame_too_large</code></td>
+<td style="text-align: right;">413</td>
+<td style="text-align: right;">no</td>
+<td>transport limit exceeded</td>
+</tr>
+<tr>
+<td><code>rate_limited</code></td>
+<td style="text-align: right;">429</td>
+<td style="text-align: right;">yes</td>
+<td>bounded gateway protection</td>
+</tr>
+<tr>
+<td><code>not_available</code></td>
+<td style="text-align: right;">503</td>
+<td style="text-align: right;">yes/declared</td>
+<td>dependency or capability unavailable</td>
+</tr>
+<tr>
+<td><code>internal</code></td>
+<td style="text-align: right;">500</td>
+<td style="text-align: right;">maybe</td>
+<td>redacted internal fault with correlation ID</td>
+</tr>
+</tbody>
+</table>
+<p>Never expose raw exception strings, filesystem roots, SQL, environment values, model keys, or
+private artifact content. Preserve a correlation ID in logs and the redacted response.</p>
+<h3 id="46-event-stream-contract">4.6 Event stream contract</h3>
+<p>An SSE message transports the same <code>EventFrame</code> used on UDS:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>id: 42
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>event: vg.4
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>data: {"version":"vg.4","frameType":"event","frameId":"...","event":{...}}
+</code></pre></div>
+<p>SSE rules:</p>
+<ul>
+<li><code>id</code> is the event's run-local sequence rendered as an IntString.</li>
+<li><code>Last-Event-ID</code> and query <code>afterSeq</code> are equivalent; conflicting values are rejected.</li>
+<li>heartbeat comments are transport metadata and never ledger events.</li>
+<li>stream order is strictly increasing for one run.</li>
+<li>duplicates may occur across reconnect boundaries; clients deduplicate by stable event identity and
+  reject same <code>(runId, seq)</code> with different digest.</li>
+<li>an idle stream sends a comment heartbeat, not a fabricated <code>Heartbeat</code> domain event.</li>
+<li>malformed stored envelopes fail the stream with a typed integrity error; they are not repaired.</li>
+</ul>
+<h3 id="47-cursor-race-free-algorithm">4.7 Cursor race-free algorithm</h3>
+<p>The ledger is authoritative; in-memory queues are wake-up hints only.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">tail</span><span class="p">(</span><span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">after_seq</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">stop</span><span class="p">:</span> <span class="n">StopToken</span><span class="p">):</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">authorize_read</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="n">cursor</span> <span class="o">=</span> <span class="n">after_seq</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="k">while</span> <span class="ow">not</span> <span class="n">stop</span><span class="o">.</span><span class="n">cancelled</span><span class="p">:</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>        <span class="n">rows</span> <span class="o">=</span> <span class="n">event_store</span><span class="o">.</span><span class="n">read_after</span><span class="p">(</span><span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span> <span class="n">after_seq</span><span class="o">=</span><span class="n">cursor</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>        <span class="k">for</span> <span class="n">envelope</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>            <span class="k">assert</span> <span class="nb">int</span><span class="p">(</span><span class="n">envelope</span><span class="o">.</span><span class="n">seq</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">cursor</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>            <span class="k">yield</span> <span class="n">envelope</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>            <span class="n">cursor</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">envelope</span><span class="o">.</span><span class="n">seq</span><span class="p">)</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>        <span class="k">if</span> <span class="n">run_projection</span><span class="p">(</span><span class="n">run_id</span><span class="p">)</span><span class="o">.</span><span class="n">terminal</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">rows</span><span class="p">:</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>            <span class="k">return</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>        <span class="n">commit_notifier</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">run_id</span><span class="o">=</span><span class="n">run_id</span><span class="p">,</span> <span class="n">after_seq</span><span class="o">=</span><span class="n">cursor</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">heartbeat_interval</span><span class="p">)</span>
+</code></pre></div>
+<p>The notifier is signalled only after successful append commit. A missed notification is harmless
+because every wake or timeout re-queries the ledger. This removes the historical-read/live-subscribe
+race without making a queue a second truth.</p>
+<h3 id="48-projection-envelope">4.8 Projection envelope</h3>
+<p>Every REST read model returns provenance:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="p">{</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w">  </span><span class="nt">"api"</span><span class="p">:</span><span class="w"> </span><span class="s2">"aether.run-view/1"</span><span class="p">,</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="w">  </span><span class="nt">"subjectId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"run-..."</span><span class="p">,</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="w">  </span><span class="nt">"reducerVersion"</span><span class="p">:</span><span class="w"> </span><span class="s2">"run-view/1"</span><span class="p">,</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="w">  </span><span class="nt">"asOfSeq"</span><span class="p">:</span><span class="w"> </span><span class="s2">"42"</span><span class="p">,</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="w">  </span><span class="nt">"sourceDigest"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sha256:..."</span><span class="p">,</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="w">  </span><span class="nt">"data"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="p">}</span>
+</code></pre></div>
+<p>Unknown event kinds are preserved by generic folds. A specialized projection may report
+<code>partial: true</code> with understood/unknown kinds; it must not silently interpret an unknown event.</p>
+<h2 id="5-runtime-composition-design">5. Runtime composition design</h2>
+<h3 id="51-required-runtime-service-dependencies">5.1 Required runtime service dependencies</h3>
+<p>Prefer explicit dependencies over handler-global construction:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="k">class</span><span class="w"> </span><span class="nc">RuntimeServiceDependencies</span><span class="p">:</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>    <span class="n">inbox</span><span class="p">:</span> <span class="n">CommandInboxPort</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="n">events</span><span class="p">:</span> <span class="n">EventStorePort</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="n">blobs</span><span class="p">:</span> <span class="n">BlobStorePort</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="n">runner</span><span class="p">:</span> <span class="n">RuntimeRunnerPort</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a>    <span class="n">approvals</span><span class="p">:</span> <span class="n">ApprovalAuthority</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>    <span class="n">clock</span><span class="p">:</span> <span class="n">ClockPort</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>    <span class="n">ids</span><span class="p">:</span> <span class="n">IdPort</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>    <span class="n">commit_notifier</span><span class="p">:</span> <span class="n">CommitNotifier</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>    <span class="n">capabilities</span><span class="p">:</span> <span class="n">CapabilityProvider</span>
+</code></pre></div>
+<p><code>RuntimeService</code> owns command normalization and lifecycle coordination. A runtime composition root
+constructs concrete SQLite/blob adapters and injects them. The HTTP handler and UDS server receive
+the already-composed service.</p>
+<h3 id="52-runtime-runner-protocol">5.2 Runtime runner protocol</h3>
+<p>The runner must represent lifecycle, not merely a callback that returns <code>Any</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="k">class</span><span class="w"> </span><span class="nc">RuntimeRunHandle</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>    <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">join</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RunOutcome</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="k">class</span><span class="w"> </span><span class="nc">RuntimeRunnerPort</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">StartRunCommand</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RuntimeRunHandle</span><span class="p">:</span> <span class="o">...</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">recover</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">checkpoint_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RuntimeRunHandle</span><span class="p">:</span> <span class="o">...</span>
+</code></pre></div>
+<p>The production implementation builds <code>TaskContext</code>, resolves the approved profile through runtime
+bootstrap, and invokes <code>Runtime.execute_profiled()</code>. It must not construct a model adapter from an
+unvalidated arbitrary endpoint supplied by the browser.</p>
+<h3 id="53-event-publication">5.3 Event publication</h3>
+<p>Preferred order:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Runtime operation
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>  -&gt; LedgerEmitter builds canonical envelope
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>  -&gt; EventStorePort.append(transaction)
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a>  -&gt; commit succeeds
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a>  -&gt; notifier emits run/seq hint
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>  -&gt; UDS/SSE readers query committed envelope
+</code></pre></div>
+<p><code>RuntimeService.publish_event()</code> must not remain a general bypass around <code>LedgerEmitter</code>. Service
+commands that legally produce causal facts use the same canonical emitter/writer authority table as
+other runtime producers.</p>
+<h2 id="6-gateway-and-browser-security-profile">6. Gateway and browser security profile</h2>
+<h3 id="61-local-first-deployment">6.1 Local-first deployment</h3>
+<p>Initial release constraints:</p>
+<ul>
+<li>bind HTTP to <code>127.0.0.1</code> only;</li>
+<li>reject non-loopback bind unless an explicit authenticated deployment profile exists;</li>
+<li>UDS parent directory is private and socket mode is <code>0600</code>;</li>
+<li>validate UDS peer credentials where supported; socket permissions remain mandatory fallback;</li>
+<li>accept only configured <code>Origin</code> values;</li>
+<li>no wildcard CORS on command routes;</li>
+<li>set request-body, header, connection, stream, and page-size limits;</li>
+<li>workspace roots are server-configured capabilities, not arbitrary browser paths.</li>
+</ul>
+<p>For Studio, prefer same-origin serving/proxy and an HttpOnly, <code>SameSite=Strict</code> session cookie. If
+the client uses bearer authentication, use fetch-based SSE so authorization headers are available.
+Do not place bearer tokens in SSE query strings.</p>
+<h3 id="62-csrf-and-origin-rules">6.2 CSRF and origin rules</h3>
+<p>Mutation routes require all of:</p>
+<ul>
+<li>authenticated operator session;</li>
+<li>allowed <code>Origin</code>/<code>Host</code>;</li>
+<li>CSRF token or same-origin double-submit mechanism;</li>
+<li>JSON content type;</li>
+<li>command idempotency key;</li>
+<li>command-specific authorization.</li>
+</ul>
+<p>Loopback is not authentication: hostile websites can target localhost.</p>
+<h3 id="63-workspace-file-access">6.3 Workspace file access</h3>
+<p>Replace string-prefix containment checks with path semantics:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="n">root</span> <span class="o">=</span> <span class="n">configured_workspace</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="n">target</span> <span class="o">=</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="n">requested_relative_path</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="k">if</span> <span class="ow">not</span> <span class="n">target</span><span class="o">.</span><span class="n">is_relative_to</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>    <span class="k">raise</span> <span class="n">NotFound</span><span class="p">()</span>
+</code></pre></div>
+<p>Additionally reject absolute paths, NULs, device files, non-files, and policy-disallowed content.
+Prefer artifact reads over arbitrary workspace reads. Never expose this route remotely by default.</p>
+<h3 id="64-secret-and-content-redaction">6.4 Secret and content redaction</h3>
+<ul>
+<li>Provider keys are read only by model adapters from environment/configured secret sources.</li>
+<li>Request/response logging uses field allowlists, not recursive “best effort” redaction.</li>
+<li>Event payload schemas mark digest-only, sensitive, and artifact-reference fields.</li>
+<li>Large prompts, diffs, outputs, and source snapshots belong in authorized artifacts, not SSE.</li>
+<li><code>trainability</code>, retention, confidentiality, owner, and redaction metadata survive every transport.</li>
+<li>Retention never grants capture authority.</li>
+</ul>
+<h2 id="7-cryptographic-approval-protocol">7. Cryptographic approval protocol</h2>
+<h3 id="71-trust-model">7.1 Trust model</h3>
+<ul>
+<li>operator client holds the private Ed25519 key;</li>
+<li>backend <code>ApprovalAuthority</code> holds registered public keys and status metadata;</li>
+<li>gateway transports a decision but cannot sign or approve;</li>
+<li>runtime verifies the decision against the durable challenge before appending resolution;</li>
+<li>effect execution re-enters the ordinary S1-S12 path.</li>
+</ul>
+<p>Canonical signed body:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="p">{</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="nt">"approvalId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span><span class="nt">"argsDigest"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sha256:..."</span><span class="p">,</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">  </span><span class="nt">"descriptorDigest"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sha256:..."</span><span class="p">,</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">  </span><span class="nt">"expiresAt"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-08-27T12:00:00.000Z"</span><span class="p">,</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">  </span><span class="nt">"keyId"</span><span class="p">:</span><span class="w"> </span><span class="s2">"operator-key-id"</span><span class="p">,</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">  </span><span class="nt">"resolution"</span><span class="p">:</span><span class="w"> </span><span class="s2">"approved"</span><span class="p">,</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">  </span><span class="nt">"reviewer"</span><span class="p">:</span><span class="w"> </span><span class="s2">"operator:local"</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="p">}</span>
+</code></pre></div>
+<p>Sign exact RFC 8785/JCS bytes. Base64 encoding, Unicode normalization, timestamp precision, field
+names, and resolution vocabulary must have cross-language golden vectors.</p>
+<h3 id="72-approval-transaction">7.2 Approval transaction</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>1. Runtime persists ApprovalRequested(challenge, challengeDigest).
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>2. Client reads it from the ledger stream.
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>3. Client shows action, normalized diff, principal, expiry, and bound digests.
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a>4. Signer signs canonical decision bytes.
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>5. Client submits ResolveApproval(decision, expectedSeq).
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>6. Runtime transaction checks pending state, CAS, expiry, key status, signature and digest binding.
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>7. Runtime appends exactly one ApprovalResolved or returns a typed rejection.
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a>8. Suspended operation resumes through the normal policy/dispatch path.
+</code></pre></div>
+<p>Two concurrent decisions must produce one winner and one <code>conflict</code>; neither may create duplicate
+resolution events.</p>
+<h3 id="73-client-signer-implementations">7.3 Client signer implementations</h3>
+<p><code>SignerPort</code> belongs in client-core. Supported adapters may include:</p>
+<ul>
+<li>Node/CLI signer using the existing Node crypto implementation;</li>
+<li>browser WebCrypto signer in a secure context with a non-exportable <code>CryptoKey</code> and explicit key
+  registration;</li>
+<li>local companion/hardware signer where browser Ed25519 support or key policy requires it.</li>
+</ul>
+<p><code>localStorage</code>, checked-in seed bytes, unsigned compatibility decisions, and gateway-generated keys
+are forbidden. If no approved signer is available, the UI is read-only for approval and reports
+<code>signer_unavailable</code>.</p>
+<h2 id="8-frontend-integration-standard">8. Frontend integration standard</h2>
+<h3 id="81-one-client-api">8.1 One client API</h3>
+<p>Studio and CLI import the public <code>@vanguard/client-core</code> API. <code>browser-entry.tsx</code> must not own direct
+<code>fetch</code>, <code>EventSource</code>, approval payload, cursor, or reconnect logic. Those belong to an HTTP
+transport implementing the same <code>RuntimeClient</code> used by the TUI.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="kd">interface</span><span class="w"> </span><span class="nx">RuntimeClient</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="w">  </span><span class="nx">startRun</span><span class="p">(</span><span class="nx">request</span><span class="o">:</span><span class="w"> </span><span class="kt">StartRunRequest</span><span class="p">,</span><span class="w"> </span><span class="nx">signal?</span><span class="o">:</span><span class="w"> </span><span class="kt">AbortSignal</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Result</span><span class="o">&lt;</span><span class="nx">RunRef</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+<a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a><span class="w">  </span><span class="nx">getRun</span><span class="p">(</span><span class="nx">runId</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">signal?</span><span class="o">:</span><span class="w"> </span><span class="kt">AbortSignal</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Result</span><span class="o">&lt;</span><span class="nx">RunSnapshot</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+<a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a><span class="w">  </span><span class="nx">listRuns</span><span class="p">(</span><span class="nx">request</span><span class="o">:</span><span class="w"> </span><span class="kt">ListRunsRequest</span><span class="p">,</span><span class="w"> </span><span class="nx">signal?</span><span class="o">:</span><span class="w"> </span><span class="kt">AbortSignal</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Result</span><span class="o">&lt;</span><span class="nx">RunPage</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+<a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a><span class="w">  </span><span class="nx">streamEvents</span><span class="p">(</span><span class="nx">cursor</span><span class="o">:</span><span class="w"> </span><span class="kt">EventCursor</span><span class="p">,</span><span class="w"> </span><span class="nx">signal?</span><span class="o">:</span><span class="w"> </span><span class="kt">AbortSignal</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">AsyncIterable</span><span class="o">&lt;</span><span class="nx">Result</span><span class="o">&lt;</span><span class="nx">StreamItem</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+<a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="w">  </span><span class="nx">requestCancel</span><span class="p">(</span><span class="nx">runId</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">expectedSeq</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Result</span><span class="o">&lt;</span><span class="nx">CommandReceipt</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+<a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="w">  </span><span class="nx">requestCheckpoint</span><span class="p">(</span><span class="nx">runId</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">expectedSeq</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Result</span><span class="o">&lt;</span><span class="nx">CheckpointRef</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+<a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="w">  </span><span class="nx">requestResume</span><span class="p">(</span><span class="nx">request</span><span class="o">:</span><span class="w"> </span><span class="kt">ResumeRunRequest</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Result</span><span class="o">&lt;</span><span class="nx">RunRef</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+<a id="__codelineno-13-9" name="__codelineno-13-9" href="#__codelineno-13-9"></a><span class="w">  </span><span class="nx">resolveApproval</span><span class="p">(</span><span class="nx">request</span><span class="o">:</span><span class="w"> </span><span class="kt">SignedApprovalRequest</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Result</span><span class="o">&lt;</span><span class="nx">CommandReceipt</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+<a id="__codelineno-13-10" name="__codelineno-13-10" href="#__codelineno-13-10"></a><span class="w">  </span><span class="nx">recordCorrection</span><span class="p">(</span><span class="nx">request</span><span class="o">:</span><span class="w"> </span><span class="kt">CorrectionRequest</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Result</span><span class="o">&lt;</span><span class="nx">CommandReceipt</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+<a id="__codelineno-13-11" name="__codelineno-13-11" href="#__codelineno-13-11"></a><span class="w">  </span><span class="nx">explainArtifact</span><span class="p">(</span><span class="nx">request</span><span class="o">:</span><span class="w"> </span><span class="kt">ExplainArtifactRequest</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Result</span><span class="o">&lt;</span><span class="nx">ArtifactExplanation</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+<a id="__codelineno-13-12" name="__codelineno-13-12" href="#__codelineno-13-12"></a><span class="w">  </span><span class="nx">getCapabilities</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="nb">Promise</span><span class="o">&lt;</span><span class="nx">Result</span><span class="o">&lt;</span><span class="nx">CapabilityDocument</span><span class="o">&gt;&gt;</span><span class="p">;</span>
+<a id="__codelineno-13-13" name="__codelineno-13-13" href="#__codelineno-13-13"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="82-client-stream-state-machine">8.2 Client stream state machine</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>idle -&gt; connecting -&gt; live -&gt; reconnecting -&gt; live
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>                       |            |
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>                       v            v
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>                     ended        failed
+</code></pre></div>
+<p>Client rules:</p>
+<ul>
+<li>persist the last validated cursor per run in session state;</li>
+<li>advance cursor only after schema validation and reducer acceptance;</li>
+<li>reject sequence regression and same-sequence/different-digest corruption;</li>
+<li>surface missing ranges to the UI; never paint a contiguous timeline over a gap;</li>
+<li>reconnect with bounded exponential backoff and jitter;</li>
+<li>reset attempt count after a stable live interval;</li>
+<li>abort fetch/UDS work when switching runs or unmounting;</li>
+<li>retain unknown events as opaque timeline entries.</li>
+</ul>
+<h3 id="83-browser-state">8.3 Browser state</h3>
+<p>Studio state is divided into:</p>
+<ul>
+<li>durable truth: validated events and artifact references;</li>
+<li>deterministic projections: run view, causal graph, approval queue, capability view;</li>
+<li>ephemeral UI state: selected panel, filters, scroll position, open modal;</li>
+<li>transport state: connected/reconnecting/gap/error.</li>
+</ul>
+<p>Never mix transport connection events into the causal fold. Demo fixtures must be selected by an
+explicit demo adapter and can never appear in live mode.</p>
+<h2 id="9-product-api-catalog-45-routes">9. Product API catalog — 45 routes</h2>
+<p>This is a target catalog, not blanket implementation authority. <code>Core</code> is required for the first
+vertical integration. <code>Projection</code> is read-only and may ship when its reducer and authorization
+exist. <code>M-7</code> and <code>M-8</code> routes remain disabled until the corresponding active work package exists.</p>
+<p>Standard response types:</p>
+<ul>
+<li>command route: RuntimeService <code>ReceiptFrame</code> translated losslessly to HTTP;</li>
+<li>projection route: <code>ProjectionEnvelope&lt;T&gt;</code>;</li>
+<li>collection: cursor page with stable ordering;</li>
+<li>unsupported capability: <code>not_available</code> with capability state, never fake data.</li>
+</ul>
+<h3 id="91-runs-10">9.1 Runs — 10</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">#</th>
+<th>Method</th>
+<th>Route</th>
+<th>Class</th>
+<th>Canonical operation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">1</td>
+<td>GET</td>
+<td><code>/api/v1/runs</code></td>
+<td>Core</td>
+<td><code>ListRuns</code> projection</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td>POST</td>
+<td><code>/api/v1/runs</code></td>
+<td>Core</td>
+<td><code>StartRun</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td>GET</td>
+<td><code>/api/v1/runs/{runId}</code></td>
+<td>Core</td>
+<td><code>GetRun</code> projection</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td>POST</td>
+<td><code>/api/v1/runs/{runId}:cancel</code></td>
+<td>Core</td>
+<td><code>Cancel</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td>POST</td>
+<td><code>/api/v1/runs/{runId}:checkpoint</code></td>
+<td>Core</td>
+<td><code>Checkpoint</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">6</td>
+<td>POST</td>
+<td><code>/api/v1/runs/{runId}:resume</code></td>
+<td>Core</td>
+<td><code>Resume</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">7</td>
+<td>GET</td>
+<td><code>/api/v1/runs/{runId}/events</code></td>
+<td>Core</td>
+<td>historical event page</td>
+</tr>
+<tr>
+<td style="text-align: right;">8</td>
+<td>GET</td>
+<td><code>/api/v1/runs/{runId}/events:stream</code></td>
+<td>Core</td>
+<td>SSE tail</td>
+</tr>
+<tr>
+<td style="text-align: right;">9</td>
+<td>GET</td>
+<td><code>/api/v1/runs/{runId}/lineage</code></td>
+<td>Projection</td>
+<td>event-derived lineage</td>
+</tr>
+<tr>
+<td style="text-align: right;">10</td>
+<td>GET</td>
+<td><code>/api/v1/runs/{runId}/trajectory</code></td>
+<td>Projection</td>
+<td>trajectory reader output</td>
+</tr>
+</tbody>
+</table>
+<h3 id="92-compositions-7">9.2 Compositions — 7</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">#</th>
+<th>Method</th>
+<th>Route</th>
+<th>Class</th>
+<th>Canonical operation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">11</td>
+<td>GET</td>
+<td><code>/api/v1/compositions</code></td>
+<td>Projection</td>
+<td>immutable composition registry page</td>
+</tr>
+<tr>
+<td style="text-align: right;">12</td>
+<td>POST</td>
+<td><code>/api/v1/compositions:validate</code></td>
+<td>Core/read-only</td>
+<td>parse/canonicalize without activation</td>
+</tr>
+<tr>
+<td style="text-align: right;">13</td>
+<td>GET</td>
+<td><code>/api/v1/compositions/{digest}</code></td>
+<td>Projection</td>
+<td>composition by digest</td>
+</tr>
+<tr>
+<td style="text-align: right;">14</td>
+<td>POST</td>
+<td><code>/api/v1/compositions/{digest}:plan-activation</code></td>
+<td>Core/read-only</td>
+<td>activation plan preview</td>
+</tr>
+<tr>
+<td style="text-align: right;">15</td>
+<td>POST</td>
+<td><code>/api/v1/compositions/{digest}:activate</code></td>
+<td>Governed</td>
+<td>ordinary runtime activation</td>
+</tr>
+<tr>
+<td style="text-align: right;">16</td>
+<td>GET</td>
+<td><code>/api/v1/compositions/{digest}/artifacts</code></td>
+<td>Projection</td>
+<td>frozen artifact references</td>
+</tr>
+<tr>
+<td style="text-align: right;">17</td>
+<td>GET</td>
+<td><code>/api/v1/compositions/{digest}/diff/{otherDigest}</code></td>
+<td>Projection</td>
+<td>immutable structural diff</td>
+</tr>
+</tbody>
+</table>
+<p>Compositions are immutable and digest-addressed. Do not expose generic PUT/DELETE CRUD. Future M-8
+promotion changes an authorized registry pointer by CAS; it does not mutate a composition.</p>
+<h3 id="93-agents-6">9.3 Agents — 6</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">#</th>
+<th>Method</th>
+<th>Route</th>
+<th>Class</th>
+<th>Canonical operation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">18</td>
+<td>GET</td>
+<td><code>/api/v1/agents</code></td>
+<td>Projection</td>
+<td>AgentView identities/page</td>
+</tr>
+<tr>
+<td style="text-align: right;">19</td>
+<td>GET</td>
+<td><code>/api/v1/agents/{lineageId}</code></td>
+<td>Projection</td>
+<td>event-derived AgentView</td>
+</tr>
+<tr>
+<td style="text-align: right;">20</td>
+<td>GET</td>
+<td><code>/api/v1/agents/{lineageId}/events</code></td>
+<td>Projection</td>
+<td>lineage-filtered events</td>
+</tr>
+<tr>
+<td style="text-align: right;">21</td>
+<td>GET</td>
+<td><code>/api/v1/agents/{lineageId}/children</code></td>
+<td>Projection</td>
+<td>durable child lineages</td>
+</tr>
+<tr>
+<td style="text-align: right;">22</td>
+<td>GET</td>
+<td><code>/api/v1/agents/{lineageId}/context</code></td>
+<td>Projection</td>
+<td>authorized context evidence</td>
+</tr>
+<tr>
+<td style="text-align: right;">23</td>
+<td>GET</td>
+<td><code>/api/v1/agents/{lineageId}/budget</code></td>
+<td>Projection</td>
+<td>event-derived budget view</td>
+</tr>
+</tbody>
+</table>
+<p>There is no mutable Agent CRUD API. An agent is a projection, not a persistent privileged object.</p>
+<h3 id="94-artifacts-7">9.4 Artifacts — 7</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">#</th>
+<th>Method</th>
+<th>Route</th>
+<th>Class</th>
+<th>Canonical operation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">24</td>
+<td>GET</td>
+<td><code>/api/v1/artifacts</code></td>
+<td>Projection</td>
+<td>authorized metadata page</td>
+</tr>
+<tr>
+<td style="text-align: right;">25</td>
+<td>POST</td>
+<td><code>/api/v1/artifacts:query</code></td>
+<td>Projection</td>
+<td>typed resource selector query</td>
+</tr>
+<tr>
+<td style="text-align: right;">26</td>
+<td>GET</td>
+<td><code>/api/v1/artifacts/{digest}</code></td>
+<td>Projection</td>
+<td>metadata and policy state</td>
+</tr>
+<tr>
+<td style="text-align: right;">27</td>
+<td>GET</td>
+<td><code>/api/v1/artifacts/{digest}/content</code></td>
+<td>Governed read</td>
+<td>authorized blob range read</td>
+</tr>
+<tr>
+<td style="text-align: right;">28</td>
+<td>GET</td>
+<td><code>/api/v1/artifacts/{digest}/lineage</code></td>
+<td>Projection</td>
+<td>provenance graph</td>
+</tr>
+<tr>
+<td style="text-align: right;">29</td>
+<td>GET</td>
+<td><code>/api/v1/artifacts/{digest}/explanation</code></td>
+<td>Projection</td>
+<td><code>ExplainArtifact</code></td>
+</tr>
+<tr>
+<td style="text-align: right;">30</td>
+<td>GET</td>
+<td><code>/api/v1/artifacts/{digest}/diff/{otherDigest}</code></td>
+<td>Projection</td>
+<td>bounded artifact diff</td>
+</tr>
+</tbody>
+</table>
+<h3 id="95-topologies-5">9.5 Topologies — 5</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">#</th>
+<th>Method</th>
+<th>Route</th>
+<th>Class</th>
+<th>Canonical operation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">31</td>
+<td>GET</td>
+<td><code>/api/v1/topologies</code></td>
+<td>M-7 projection</td>
+<td>declared topology page</td>
+</tr>
+<tr>
+<td style="text-align: right;">32</td>
+<td>POST</td>
+<td><code>/api/v1/topologies:validate</code></td>
+<td>M-7 read-only</td>
+<td>parse and reject authority</td>
+</tr>
+<tr>
+<td style="text-align: right;">33</td>
+<td>POST</td>
+<td><code>/api/v1/topologies:lower</code></td>
+<td>M-7 read-only</td>
+<td>sequential lowering preview</td>
+</tr>
+<tr>
+<td style="text-align: right;">34</td>
+<td>GET</td>
+<td><code>/api/v1/topologies/{digest}</code></td>
+<td>M-7 projection</td>
+<td>immutable declaration</td>
+</tr>
+<tr>
+<td style="text-align: right;">35</td>
+<td>GET</td>
+<td><code>/api/v1/topologies/{digest}/realization/{runId}</code></td>
+<td>M-7 projection</td>
+<td>declared/lowered/realized diff</td>
+</tr>
+</tbody>
+</table>
+<p>No topology mutation API is exposed before the immutable registry contract and M-7 runtime
+integration exist. Topology execution occurs only as a digest-pinned run-plan extension through the
+sole runtime.</p>
+<h3 id="96-skills-and-memory-5">9.6 Skills and memory — 5</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">#</th>
+<th>Method</th>
+<th>Route</th>
+<th>Class</th>
+<th>Canonical operation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">36</td>
+<td>GET</td>
+<td><code>/api/v1/skills</code></td>
+<td>M-8 projection</td>
+<td>authorized skill index</td>
+</tr>
+<tr>
+<td style="text-align: right;">37</td>
+<td>GET</td>
+<td><code>/api/v1/skills/{digest}</code></td>
+<td>M-8 projection</td>
+<td>immutable skill card</td>
+</tr>
+<tr>
+<td style="text-align: right;">38</td>
+<td>GET</td>
+<td><code>/api/v1/memory/records</code></td>
+<td>M-8 projection</td>
+<td>authorized category query</td>
+</tr>
+<tr>
+<td style="text-align: right;">39</td>
+<td>GET</td>
+<td><code>/api/v1/memory/records/{digest}</code></td>
+<td>M-8 governed read</td>
+<td>authorized record dereference</td>
+</tr>
+<tr>
+<td style="text-align: right;">40</td>
+<td>POST</td>
+<td><code>/api/v1/memory:retrieve</code></td>
+<td>M-8 governed read</td>
+<td>authorization-before-ranking retrieval</td>
+</tr>
+</tbody>
+</table>
+<p>Candidate generation, evaluation, promotion, rollback, retention, and legal hold should not be
+collapsed into casual REST CRUD. Add mutation routes only when ADR-0100 contracts and active M-8
+work specify their commands, authorities, and evidence.</p>
+<h3 id="97-governance-and-service-5">9.7 Governance and service — 5</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">#</th>
+<th>Method</th>
+<th>Route</th>
+<th>Class</th>
+<th>Canonical operation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">41</td>
+<td>GET</td>
+<td><code>/api/v1/health</code></td>
+<td>Core</td>
+<td>liveness only, no internal details</td>
+</tr>
+<tr>
+<td style="text-align: right;">42</td>
+<td>GET</td>
+<td><code>/api/v1/capabilities</code></td>
+<td>Core</td>
+<td>implementation/authorization matrix</td>
+</tr>
+<tr>
+<td style="text-align: right;">43</td>
+<td>GET</td>
+<td><code>/api/v1/approvals</code></td>
+<td>Core projection</td>
+<td>pending approval page</td>
+</tr>
+<tr>
+<td style="text-align: right;">44</td>
+<td>GET</td>
+<td><code>/api/v1/approvals/{approvalId}</code></td>
+<td>Core projection</td>
+<td>durable challenge/status</td>
+</tr>
+<tr>
+<td style="text-align: right;">45</td>
+<td>POST</td>
+<td><code>/api/v1/approvals/{approvalId}:resolve</code></td>
+<td>Core governed command</td>
+<td><code>ResolveApproval</code></td>
+</tr>
+</tbody>
+</table>
+<p>Temporary aliases (<code>/api/health</code>, <code>/api/runs/launch</code>, <code>/api/events/stream</code>,
+<code>/api/approvals/resolve</code>) may exist for one compatibility window. They must call canonical handlers,
+emit deprecation headers, have contract tests, and carry a removal version. They must not preserve
+synthetic behavior.</p>
+<h2 id="10-capability-discovery">10. Capability discovery</h2>
+<p>Capability discovery reports two independent dimensions:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a><span class="p">{</span>
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a><span class="w">  </span><span class="nt">"api"</span><span class="p">:</span><span class="w"> </span><span class="s2">"aether.capabilities/1"</span><span class="p">,</span>
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a><span class="w">  </span><span class="nt">"serverVersion"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.7.3.dev0"</span><span class="p">,</span>
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a><span class="w">  </span><span class="nt">"wireVersions"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"vg.4"</span><span class="p">],</span>
+<a id="__codelineno-15-5" name="__codelineno-15-5" href="#__codelineno-15-5"></a><span class="w">  </span><span class="nt">"capabilities"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-6" name="__codelineno-15-6" href="#__codelineno-15-6"></a><span class="w">    </span><span class="nt">"run.stream"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-7" name="__codelineno-15-7" href="#__codelineno-15-7"></a><span class="w">      </span><span class="nt">"implementation"</span><span class="p">:</span><span class="w"> </span><span class="s2">"available"</span><span class="p">,</span>
+<a id="__codelineno-15-8" name="__codelineno-15-8" href="#__codelineno-15-8"></a><span class="w">      </span><span class="nt">"authorization"</span><span class="p">:</span><span class="w"> </span><span class="s2">"enabled"</span><span class="p">,</span>
+<a id="__codelineno-15-9" name="__codelineno-15-9" href="#__codelineno-15-9"></a><span class="w">      </span><span class="nt">"contract"</span><span class="p">:</span><span class="w"> </span><span class="s2">"runtime-service/vg.4"</span>
+<a id="__codelineno-15-10" name="__codelineno-15-10" href="#__codelineno-15-10"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-15-11" name="__codelineno-15-11" href="#__codelineno-15-11"></a><span class="w">    </span><span class="nt">"topology.execute"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-12" name="__codelineno-15-12" href="#__codelineno-15-12"></a><span class="w">      </span><span class="nt">"implementation"</span><span class="p">:</span><span class="w"> </span><span class="s2">"partial"</span><span class="p">,</span>
+<a id="__codelineno-15-13" name="__codelineno-15-13" href="#__codelineno-15-13"></a><span class="w">      </span><span class="nt">"authorization"</span><span class="p">:</span><span class="w"> </span><span class="s2">"disabled"</span><span class="p">,</span>
+<a id="__codelineno-15-14" name="__codelineno-15-14" href="#__codelineno-15-14"></a><span class="w">      </span><span class="nt">"reasonCode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"milestone_gate_open"</span><span class="p">,</span>
+<a id="__codelineno-15-15" name="__codelineno-15-15" href="#__codelineno-15-15"></a><span class="w">      </span><span class="nt">"requires"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"M-7 accepted work package"</span><span class="p">]</span>
+<a id="__codelineno-15-16" name="__codelineno-15-16" href="#__codelineno-15-16"></a><span class="w">    </span><span class="p">},</span>
+<a id="__codelineno-15-17" name="__codelineno-15-17" href="#__codelineno-15-17"></a><span class="w">    </span><span class="nt">"memory.retrieve"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-15-18" name="__codelineno-15-18" href="#__codelineno-15-18"></a><span class="w">      </span><span class="nt">"implementation"</span><span class="p">:</span><span class="w"> </span><span class="s2">"prototype"</span><span class="p">,</span>
+<a id="__codelineno-15-19" name="__codelineno-15-19" href="#__codelineno-15-19"></a><span class="w">      </span><span class="nt">"authorization"</span><span class="p">:</span><span class="w"> </span><span class="s2">"disabled"</span><span class="p">,</span>
+<a id="__codelineno-15-20" name="__codelineno-15-20" href="#__codelineno-15-20"></a><span class="w">      </span><span class="nt">"reasonCode"</span><span class="p">:</span><span class="w"> </span><span class="s2">"m8_not_authorized"</span>
+<a id="__codelineno-15-21" name="__codelineno-15-21" href="#__codelineno-15-21"></a><span class="w">    </span><span class="p">}</span>
+<a id="__codelineno-15-22" name="__codelineno-15-22" href="#__codelineno-15-22"></a><span class="w">  </span><span class="p">}</span>
+<a id="__codelineno-15-23" name="__codelineno-15-23" href="#__codelineno-15-23"></a><span class="p">}</span>
+</code></pre></div>
+<p>Allowed implementation states: <code>absent</code>, <code>prototype</code>, <code>partial</code>, <code>available</code>, <code>degraded</code>.
+Allowed authorization states: <code>disabled</code>, <code>read_only</code>, <code>enabled</code>. Frontends derive disabled actions
+from this document but the backend enforces them independently.</p>
+<h2 id="11-delivery-roadmap">11. Delivery roadmap</h2>
+<p>Each phase is a vertical, independently reviewable work package. Do not combine backend milestone
+work, frontend integration, generated schemas, and unrelated leadership changes in one PR.</p>
+<h3 id="f0-contract-and-falsifier-freeze">F0 — Contract and falsifier freeze</h3>
+<p>Modify:</p>
+<ul>
+<li><code>schemas/v4/runtime-service.schema.json</code></li>
+<li>command-specific schemas or <code>$defs</code> under existing <code>schemas/v4/</code></li>
+<li><code>vanguard/clients/client-core/src/contract/*</code></li>
+<li>generated Python/TypeScript readers through the existing codegen path</li>
+</ul>
+<p>Deliver:</p>
+<ul>
+<li>discriminated frame union;</li>
+<li>closed first-release command union;</li>
+<li>command payload/result schemas;</li>
+<li>service error schema;</li>
+<li>approval JCS golden vectors;</li>
+<li>schema-version compatibility matrix;</li>
+<li>negative vectors for unknown field/name/version and malformed envelope.</li>
+</ul>
+<p>Exit gate: Python and TypeScript accept/reject the same corpus byte-for-byte. No production handler
+changes before this contract review is accepted.</p>
+<h3 id="f1-runtimeservice-over-canonical-ledger">F1 — RuntimeService over canonical ledger</h3>
+<p>Modify:</p>
+<ul>
+<li><code>runtime/service/service.py</code></li>
+<li><code>runtime/service/inbox.py</code></li>
+<li><code>runtime/root.py</code> or a dedicated runtime service composition module</li>
+<li><code>runtime/ledger_emitter.py</code></li>
+<li><code>ports/event_store.py</code> only if a required read-after-cursor operation is missing</li>
+<li>SQLite adapter implementation as required by that port</li>
+</ul>
+<p>Deliver:</p>
+<ul>
+<li>explicit service dependencies;</li>
+<li>runtime runner/handle;</li>
+<li>command inbox separated from causal events;</li>
+<li>all service events written through canonical ledger authority;</li>
+<li>event-derived run snapshots;</li>
+<li>clean recovery of commands accepted before process death;</li>
+<li>legacy service DB compatibility test.</li>
+</ul>
+<p>Exit gate: one fake-model run started through <code>RuntimeService</code> produces a valid file-backed WAL and
+fresh-process fold identical to direct canonical runtime execution.</p>
+<h3 id="f2-uds-daemon-and-protocol-parity">F2 — UDS daemon and protocol parity</h3>
+<p>Modify:</p>
+<ul>
+<li><code>runtime/service/server.py</code></li>
+<li>add an explicit daemon <code>main()</code> and project script only if authorized;</li>
+<li><code>client-core/src/adapters/transport.ts</code></li>
+<li>daemon parsers and tests.</li>
+</ul>
+<p>Deliver:</p>
+<ul>
+<li>bounded frame parser;</li>
+<li>peer/socket security;</li>
+<li>typed errors and reply correlation;</li>
+<li>cancellation-aware stream;</li>
+<li>reconnect cursor parity;</li>
+<li>graceful shutdown and stale-socket handling;</li>
+<li>daemon lifecycle command or documented foreground process.</li>
+</ul>
+<p>Exit gate: qualified Linux AF_UNIX tests prove start/get/stream/cancel/checkpoint/resume/approval,
+disconnect/reconnect, duplicate command, malformed frame, oversized frame, and shutdown cleanup.</p>
+<h3 id="f3-http-gateway-core">F3 — HTTP gateway core</h3>
+<p>Modify:</p>
+<ul>
+<li><code>runtime/service/studio_gateway.py</code></li>
+<li>runtime service composition module</li>
+<li><code>client-core/src/adapters/http.ts</code></li>
+<li>Studio proxy script only for same-origin development wiring.</li>
+</ul>
+<p>Deliver:</p>
+<ul>
+<li>remove <code>_pilot_run_simulation</code> and gateway sequence counter;</li>
+<li>core <code>/api/v1</code> routes 1-8 and 41-45;</li>
+<li>same service and contracts as UDS;</li>
+<li>secure local profile, limits, origin/CSRF checks;</li>
+<li>race-free historical/SSE cursor;</li>
+<li>compatibility aliases with deprecation policy.</li>
+</ul>
+<p>Exit gate: UDS and HTTP command receipts normalize identically, and both stream the same persisted
+event IDs, sequences, and digests.</p>
+<h3 id="f4-client-core-convergence">F4 — Client-core convergence</h3>
+<p>Modify:</p>
+<ul>
+<li><code>client-core/src/contract/*</code></li>
+<li><code>client-core/src/adapters/http.ts</code></li>
+<li><code>client-core/src/adapters/transport.ts</code></li>
+<li><code>client-core/src/application/*</code> where projection contracts require it.</li>
+</ul>
+<p>Deliver:</p>
+<ul>
+<li>one <code>RuntimeClient</code> API;</li>
+<li>transport-neutral error preservation;</li>
+<li>stream state machine and gap detection;</li>
+<li>capability negotiation;</li>
+<li>signed approval request type;</li>
+<li>contract fixtures shared by socket and HTTP adapters.</li>
+</ul>
+<p>Exit gate: identical client-core behavioral suite runs against fake HTTP and UDS servers, including
+abort, retry, stale CAS, gap, unknown event, and incompatible version.</p>
+<h3 id="f5-clitui-live-vertical-slice">F5 — CLI/TUI live vertical slice</h3>
+<p>Modify:</p>
+<ul>
+<li>CLI composition/transport wiring;</li>
+<li>TUI hooks and approval flow;</li>
+<li>no domain or authority duplication.</li>
+</ul>
+<p>Deliver:</p>
+<ul>
+<li>select/start/attach run;</li>
+<li>live timeline with visible gap state;</li>
+<li>checkpoint/cancel/resume;</li>
+<li>signed approval;</li>
+<li>artifact explanation;</li>
+<li>capability-aware commands.</li>
+</ul>
+<p>Exit gate: a hermetic fake-model scenario and a separately selected live-provider smoke complete
+through the same UI path; only the live attributable run may support promotion evidence.</p>
+<h3 id="f6-studio-live-vertical-slice">F6 — Studio live vertical slice</h3>
+<p>Modify:</p>
+<ul>
+<li><code>studio/src/browser-entry.tsx</code></li>
+<li><code>studio/src/runtime/StudioRuntime.tsx</code></li>
+<li>Studio session/store integration;</li>
+<li>browser signer adapter if separately authorized.</li>
+</ul>
+<p>Deliver:</p>
+<ul>
+<li>remove direct API calls from browser entry;</li>
+<li>inject <code>RuntimeClient</code>;</li>
+<li>explicit demo/live adapters;</li>
+<li>run selection and cursor persistence;</li>
+<li>live observatory and forensic inspector over validated events;</li>
+<li>secure approval or explicit signer-unavailable mode;</li>
+<li>capability-aware disabled panels.</li>
+</ul>
+<p>Exit gate: browser refresh/reconnect preserves truth, no demo event enters live store, and Studio and
+TUI show equivalent run terminal/approval/artifact projections.</p>
+<h3 id="f7-projection-apis">F7 — Projection APIs</h3>
+<p>Add routes 9-30 only as their reducers and artifact authorization are verified. Benchmark cold fold,
+incremental fold, cursor page, and artifact range reads. Every projection must prove rebuild parity.</p>
+<h3 id="f8-m-7m-8-frontend-activation">F8 — M-7/M-8 frontend activation</h3>
+<p>This phase is staged, not currently authorized. After the corresponding milestone work is active:</p>
+<ul>
+<li>enable topology routes 31-35 only after topology is bound into the sole runtime;</li>
+<li>enable skill/memory routes 36-40 only after verified durable authorization and provenance exist;</li>
+<li>keep unavailable actions visible with reasons when useful, but fail closed server-side;</li>
+<li>never use frontend presence as milestone evidence.</li>
+</ul>
+<h2 id="12-failure-modes-and-required-behavior">12. Failure modes and required behavior</h2>
+<table>
+<thead>
+<tr>
+<th>Failure</th>
+<th>Required behavior</th>
+<th>Prohibited behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>malformed frame</td>
+<td>typed rejection, no inbox/ledger append</td>
+<td>best-effort coercion</td>
+</tr>
+<tr>
+<td>duplicate idempotency key</td>
+<td>return original logical receipt</td>
+<td>execute twice</td>
+</tr>
+<tr>
+<td>reused key with different digest</td>
+<td>conflict and audit signal</td>
+<td>return unrelated receipt</td>
+</tr>
+<tr>
+<td>stale <code>expectedSeq</code></td>
+<td>conflict with current safe cursor</td>
+<td>last-write-wins</td>
+</tr>
+<tr>
+<td>WAL busy</td>
+<td>bounded retry then <code>not_available</code></td>
+<td>drop event</td>
+</tr>
+<tr>
+<td>append failure</td>
+<td>operation fails/undeterminable per law</td>
+<td>stream uncommitted event</td>
+</tr>
+<tr>
+<td>notifier loss</td>
+<td>ledger poll catches up</td>
+<td>declare gap from queue state</td>
+</tr>
+<tr>
+<td>SSE disconnect</td>
+<td>reconnect after last validated seq</td>
+<td>restart at zero silently</td>
+</tr>
+<tr>
+<td>sequence collision/digest mismatch</td>
+<td>integrity failure, stop fold</td>
+<td>overwrite prior event</td>
+</tr>
+<tr>
+<td>process crash after command accept</td>
+<td>recover inbox and reconcile</td>
+<td>blind re-execute</td>
+</tr>
+<tr>
+<td>approval expires</td>
+<td>reject closed</td>
+<td>extend expiry in gateway</td>
+</tr>
+<tr>
+<td>invalid/revoked signing key</td>
+<td>permission denied</td>
+<td>unsigned fallback</td>
+</tr>
+<tr>
+<td>unavailable profile/sandbox</td>
+<td>fail closed</td>
+<td>host fallback</td>
+</tr>
+<tr>
+<td>missing artifact authority</td>
+<td>not found/denied without leakage</td>
+<td>digest implies read access</td>
+</tr>
+<tr>
+<td>M-7/M-8 gate open</td>
+<td>structured disabled capability</td>
+<td>placeholder success</td>
+</tr>
+<tr>
+<td>unknown event</td>
+<td>preserve opaque fact, projection partial</td>
+<td>discard or invent semantics</td>
+</tr>
+</tbody>
+</table>
+<h2 id="13-verification-strategy">13. Verification strategy</h2>
+<h3 id="131-test-pyramid">13.1 Test pyramid</h3>
+<ol>
+<li>Schema vectors: Python/TypeScript parity and JCS signatures.</li>
+<li>Pure service tests: handlers with fake ports and deterministic clock/IDs.</li>
+<li>Adapter contract tests: SQLite WAL, UDS framing, HTTP/SSE framing.</li>
+<li>Integration tests: composed service plus fake model and file-backed stores.</li>
+<li>Fresh-process tests: crash, restart, cold fold, resume, cursor replay.</li>
+<li>UI contract tests: client-core fake/scenario adapters.</li>
+<li>Qualified E2E: Linux AF_UNIX, browser, real profile selected explicitly.</li>
+<li>External clean-room gate: new checkout/process, keys unset for hermetic suite.</li>
+</ol>
+<h3 id="132-mandatory-falsifiers">13.2 Mandatory falsifiers</h3>
+<ul>
+<li>HTTP and UDS produce different canonical command results.</li>
+<li>gateway emits an event absent from WAL.</li>
+<li>an event is visible before its append transaction commits.</li>
+<li>reconnect loses or mutates an event.</li>
+<li>same seq with different content is accepted.</li>
+<li>a second approval decision is appended.</li>
+<li>expired/tampered/revoked approval reaches effect execution.</li>
+<li>browser can resolve approval without a signer.</li>
+<li>arbitrary path escapes configured workspace.</li>
+<li>secret marker reaches logs, event stream, projection, or artifact metadata.</li>
+<li>disabled M-7/M-8 capability returns success.</li>
+<li>fresh-process projection differs from live projection.</li>
+<li>integration changes Kernel imports or exceeds TCB budget.</li>
+</ul>
+<h3 id="133-performance-budgets-to-establish-before-release">13.3 Performance budgets to establish before release</h3>
+<p>Measure and record, rather than inventing pass thresholds:</p>
+<ul>
+<li>command p50/p95/p99 latency excluding model execution;</li>
+<li>event append-to-SSE visibility latency;</li>
+<li>reconnect catch-up at 1k/10k/100k events;</li>
+<li>projection cold fold and incremental fold;</li>
+<li>memory usage for Studio event ingestion and TUI long sessions;</li>
+<li>maximum sustainable SSE clients for the local profile;</li>
+<li>SQLite busy rate and checkpoint behavior;</li>
+<li>artifact metadata and authorized range-read latency.</li>
+</ul>
+<p>The release work package must freeze explicit budgets after baseline measurement and before tuning.</p>
+<h2 id="14-commands-and-smoke-test-runbook">14. Commands and smoke-test runbook</h2>
+<p>These commands exist today unless marked “after implementation.” Run from repository root.</p>
+<h3 id="141-baseline-gates">14.1 Baseline gates</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-16-1" name="__codelineno-16-1" href="#__codelineno-16-1"></a>python3<span class="w"> </span>-m<span class="w"> </span>unittest<span class="w"> </span>discover<span class="w"> </span>-s<span class="w"> </span><span class="nb">test</span><span class="w"> </span>-t<span class="w"> </span>.
+<a id="__codelineno-16-2" name="__codelineno-16-2" href="#__codelineno-16-2"></a>python3<span class="w"> </span>tools/linters/check_boundaries.py
+<a id="__codelineno-16-3" name="__codelineno-16-3" href="#__codelineno-16-3"></a>python3<span class="w"> </span>tools/linters/check_tcb_budget.py
+<a id="__codelineno-16-4" name="__codelineno-16-4" href="#__codelineno-16-4"></a>python3<span class="w"> </span>tools/linters/scan_secrets.py
+<a id="__codelineno-16-5" name="__codelineno-16-5" href="#__codelineno-16-5"></a>python3<span class="w"> </span>tools/linters/check_domain_blindness.py
+<a id="__codelineno-16-6" name="__codelineno-16-6" href="#__codelineno-16-6"></a>python3<span class="w"> </span>tools/linters/check_isolation_policy.py
+<a id="__codelineno-16-7" name="__codelineno-16-7" href="#__codelineno-16-7"></a>python3<span class="w"> </span>tools/linters/check_falsifier_ids.py
+<a id="__codelineno-16-8" name="__codelineno-16-8" href="#__codelineno-16-8"></a>python3<span class="w"> </span>tools/linters/check_markdown_links.py
+<a id="__codelineno-16-9" name="__codelineno-16-9" href="#__codelineno-16-9"></a>python3<span class="w"> </span>tools/linters/check_stale_paths.py
+<a id="__codelineno-16-10" name="__codelineno-16-10" href="#__codelineno-16-10"></a>npm<span class="w"> </span>run<span class="w"> </span>typecheck
+<a id="__codelineno-16-11" name="__codelineno-16-11" href="#__codelineno-16-11"></a>npm<span class="w"> </span><span class="nb">test</span>
+</code></pre></div>
+<p>Frontend workspace gates:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-17-1" name="__codelineno-17-1" href="#__codelineno-17-1"></a>npm<span class="w"> </span>--workspace<span class="w"> </span>@vanguard/client-core<span class="w"> </span>run<span class="w"> </span>typecheck
+<a id="__codelineno-17-2" name="__codelineno-17-2" href="#__codelineno-17-2"></a>npm<span class="w"> </span>--workspace<span class="w"> </span>@vanguard/client-core<span class="w"> </span><span class="nb">test</span>
+<a id="__codelineno-17-3" name="__codelineno-17-3" href="#__codelineno-17-3"></a>npm<span class="w"> </span>--workspace<span class="w"> </span>@vanguard/cli<span class="w"> </span>run<span class="w"> </span>typecheck
+<a id="__codelineno-17-4" name="__codelineno-17-4" href="#__codelineno-17-4"></a>npm<span class="w"> </span>--workspace<span class="w"> </span>@vanguard/cli<span class="w"> </span><span class="nb">test</span>
+<a id="__codelineno-17-5" name="__codelineno-17-5" href="#__codelineno-17-5"></a>npm<span class="w"> </span>--workspace<span class="w"> </span>@vanguard/studio<span class="w"> </span>run<span class="w"> </span>typecheck
+<a id="__codelineno-17-6" name="__codelineno-17-6" href="#__codelineno-17-6"></a>npm<span class="w"> </span>--workspace<span class="w"> </span>@vanguard/studio<span class="w"> </span><span class="nb">test</span>
+</code></pre></div>
+<h3 id="142-existing-stdio-bridge">14.2 Existing stdio bridge</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-18-1" name="__codelineno-18-1" href="#__codelineno-18-1"></a><span class="nb">printf</span><span class="w"> </span><span class="s1">'%s\n'</span><span class="w"> </span><span class="s1">'{"command":"doctor","profile":"product","runId":"doctor-smoke"}'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-18-2" name="__codelineno-18-2" href="#__codelineno-18-2"></a><span class="w">  </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>vanguard.packages.runtime.entrypoint<span class="w"> </span>--stdin-json
+</code></pre></div>
+<p>Hermetic coding preview:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-19-1" name="__codelineno-19-1" href="#__codelineno-19-1"></a><span class="nb">printf</span><span class="w"> </span><span class="s1">'%s\n'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-19-2" name="__codelineno-19-2" href="#__codelineno-19-2"></a><span class="w">  </span><span class="s1">'{"command":"code","workspace":".","brief":"deterministic bridge smoke","fakeBackend":"deterministic","runId":"stdio-smoke"}'</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-19-3" name="__codelineno-19-3" href="#__codelineno-19-3"></a><span class="w">  </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>vanguard.packages.runtime.entrypoint<span class="w"> </span>--stdin-json
+</code></pre></div>
+<p>Assert one JSON result per input line and no logs on stdout.</p>
+<h3 id="143-focused-existing-transport-tests">14.3 Focused existing transport tests</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-20-1" name="__codelineno-20-1" href="#__codelineno-20-1"></a>python3<span class="w"> </span>-m<span class="w"> </span>unittest<span class="w"> </span>test.runtime.test_runtime_service<span class="w"> </span>-v
+<a id="__codelineno-20-2" name="__codelineno-20-2" href="#__codelineno-20-2"></a>python3<span class="w"> </span>-m<span class="w"> </span>unittest<span class="w"> </span>test.integration.test_stream_reconnect<span class="w"> </span>-v
+<a id="__codelineno-20-3" name="__codelineno-20-3" href="#__codelineno-20-3"></a>python3<span class="w"> </span>-m<span class="w"> </span>unittest<span class="w"> </span>test.governance.test_ed25519_approvals<span class="w"> </span>-v
+<a id="__codelineno-20-4" name="__codelineno-20-4" href="#__codelineno-20-4"></a>python3<span class="w"> </span>-m<span class="w"> </span>unittest<span class="w"> </span>test.runtime.test_approval_flow<span class="w"> </span>-v
+<a id="__codelineno-20-5" name="__codelineno-20-5" href="#__codelineno-20-5"></a>python3<span class="w"> </span>-m<span class="w"> </span>unittest<span class="w"> </span>test.runtime.test_coding_entrypoint<span class="w"> </span>-v
+</code></pre></div>
+<h3 id="144-after-daemon-entrypoint-implementation">14.4 After daemon entrypoint implementation</h3>
+<p>The implementation must add and document a real foreground daemon command before using it here.
+Target shape:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-21-1" name="__codelineno-21-1" href="#__codelineno-21-1"></a>vg-runtime-daemon<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-21-2" name="__codelineno-21-2" href="#__codelineno-21-2"></a><span class="w">  </span>--socket<span class="w"> </span>/tmp/vanguard-runtime-integration.sock<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-21-3" name="__codelineno-21-3" href="#__codelineno-21-3"></a><span class="w">  </span>--database<span class="w"> </span>/tmp/vanguard-runtime-integration.sqlite3<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-21-4" name="__codelineno-21-4" href="#__codelineno-21-4"></a><span class="w">  </span>--workspace<span class="w"> </span><span class="s2">"</span><span class="nv">$PWD</span><span class="s2">"</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-21-5" name="__codelineno-21-5" href="#__codelineno-21-5"></a><span class="w">  </span>--profile<span class="w"> </span><span class="nb">local</span>
+</code></pre></div>
+<p>Then exercise CLI/TUI using the explicit socket:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-22-1" name="__codelineno-22-1" href="#__codelineno-22-1"></a><span class="nv">VANGUARD_RUNTIME_SOCKET</span><span class="o">=</span>/tmp/vanguard-runtime-integration.sock<span class="w"> </span>npm<span class="w"> </span>run<span class="w"> </span>vg<span class="w"> </span>--<span class="w"> </span>doctor
+<a id="__codelineno-22-2" name="__codelineno-22-2" href="#__codelineno-22-2"></a><span class="nv">VANGUARD_RUNTIME_SOCKET</span><span class="o">=</span>/tmp/vanguard-runtime-integration.sock<span class="w"> </span>npm<span class="w"> </span>run<span class="w"> </span>vg<span class="w"> </span>--<span class="w"> </span>run
+</code></pre></div>
+<p>Exact subcommands must be verified against the implemented CLI help before freezing the runbook.</p>
+<h3 id="145-after-secure-gateway-implementation">14.5 After secure gateway implementation</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-23-1" name="__codelineno-23-1" href="#__codelineno-23-1"></a>python3<span class="w"> </span>-m<span class="w"> </span>vanguard.packages.runtime.service.studio_gateway<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-23-2" name="__codelineno-23-2" href="#__codelineno-23-2"></a><span class="w">  </span>--host<span class="w"> </span><span class="m">127</span>.0.0.1<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-23-3" name="__codelineno-23-3" href="#__codelineno-23-3"></a><span class="w">  </span>--port<span class="w"> </span><span class="m">8000</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-23-4" name="__codelineno-23-4" href="#__codelineno-23-4"></a><span class="w">  </span>--workspace<span class="w"> </span><span class="s2">"</span><span class="nv">$PWD</span><span class="s2">"</span>
+</code></pre></div>
+<p>With the issued local session/CSRF mechanism:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-24-1" name="__codelineno-24-1" href="#__codelineno-24-1"></a>curl<span class="w"> </span>--fail<span class="w"> </span>http://127.0.0.1:8000/api/v1/health
+<a id="__codelineno-24-2" name="__codelineno-24-2" href="#__codelineno-24-2"></a>curl<span class="w"> </span>--fail<span class="w"> </span>http://127.0.0.1:8000/api/v1/capabilities
+<a id="__codelineno-24-3" name="__codelineno-24-3" href="#__codelineno-24-3"></a>curl<span class="w"> </span>--fail<span class="w"> </span>http://127.0.0.1:8000/api/v1/runs
+</code></pre></div>
+<p>Launch and stream only using the documented authentication headers/cookies; do not weaken the
+gateway for curl convenience.</p>
+<p>Studio development server:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-25-1" name="__codelineno-25-1" href="#__codelineno-25-1"></a>npm<span class="w"> </span>--workspace<span class="w"> </span>@vanguard/studio<span class="w"> </span>run<span class="w"> </span>dev
+</code></pre></div>
+<p>Verify run selection, reconnect, gap display, approval, terminal state, and browser refresh.</p>
+<h3 id="146-replay-parity-procedure">14.6 Replay parity procedure</h3>
+<p>For each accepted E2E fixture:</p>
+<ol>
+<li>execute through RuntimeService with a file-backed WAL;</li>
+<li>capture event IDs, sequences, envelope digests, terminal projection, and artifact digests;</li>
+<li>terminate every Python process;</li>
+<li>start a fresh process and cold-fold the WAL;</li>
+<li>compare live and cold projections;</li>
+<li>reconnect UDS and HTTP clients from intermediate cursors;</li>
+<li>verify identical suffixes and no same-seq divergence;</li>
+<li>record environment/profile identity separately from causal truth.</li>
+</ol>
+<h2 id="15-definition-of-done">15. Definition of done</h2>
+<p>The frontend/backend integration is complete for the core release only when all of the following are
+true:</p>
+<ul>
+<li>Studio and CLI/TUI use <code>@vanguard/client-core</code> rather than independent command semantics.</li>
+<li>all command transports reach the same <code>RuntimeService</code> and canonical runtime bootstrap.</li>
+<li>synthetic pilot events and gateway-local sequence allocation are gone.</li>
+<li>exactly one canonical event ledger feeds UDS, HTTP, SSE, replay, and projections.</li>
+<li>command schemas, event schemas, error schemas, and approval signatures have cross-language vectors.</li>
+<li>cursor reconnect is race-safe, gap-aware, bounded, and fresh-process tested.</li>
+<li>signed approval is descriptor-bound, expiry-bound, CAS-protected, and fail-closed.</li>
+<li>workspace, origin, CSRF, authentication, size limits, and secret-redaction gates pass.</li>
+<li>direct runtime, UDS, and HTTP produce equivalent durable truth.</li>
+<li>Stdio remains fast, hermetic when selected, and structurally separate from daemon framing.</li>
+<li>unavailable M-7/M-8 capabilities are truthful and cannot be activated from the UI.</li>
+<li>boundaries, TCB budget, secret scan, Python tests, TypeScript tests, and qualified Linux UDS tests
+  are green.</li>
+<li>a clean-room reviewer can follow this runbook without undocumented setup or private knowledge.</li>
+</ul>
+<h2 id="16-first-implementation-package-recommendation">16. First implementation package recommendation</h2>
+<p>When leadership authorizes frontend integration, start with one bounded package containing F0 and
+the smallest part of F1:</p>
+<ol>
+<li>freeze RuntimeService frame/command/error schemas and golden vectors;</li>
+<li>reconcile <code>ListRuns</code> and <code>ResolveApproval</code> contract drift;</li>
+<li>add event-store cursor reads behind a port if needed;</li>
+<li>inject the canonical event store into <code>RuntimeService</code>;</li>
+<li>derive <code>GetRun</code>/<code>ListRuns</code> from committed events;</li>
+<li>prove direct-runtime versus service-run WAL parity with a fake model;</li>
+<li>leave HTTP route expansion and M-7/M-8 APIs out of that PR.</li>
+</ol>
+<p>That package removes the highest-risk ambiguity—two event histories—before adding another
+transport. F2 through F6 then become transport and presentation work over a stable substrate rather
+than simultaneous redesign of runtime truth.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

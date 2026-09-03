@@ -1,1 +1,14 @@
-{"kind":"single-model"}
+{
+  "kind": "single-model",
+  "role_bands": {
+    "architect": ["medium"],
+    "executor": ["free"],
+    "diagnostic": ["medium"],
+    "reviewer": ["free", "medium"]
+  },
+  "failure_escalation": ["no_progress", "instrument_error"],
+  "maximum_band": "medium",
+  "known_pricing_required": true,
+  "resolved_model_required": true,
+  "provider_usage_required": true
+}

@@ -2,7 +2,7 @@
 """Observe the M-7 topology and independence falsifiers in a fresh process.
 
 M-7's predicate is `three_topologies_verified AND adr_0099_disposition_verified`
-(`docs/03_execution/sprint_active.md`). The markers below are the two halves of
+(`docs/execution/active.md`). The markers below are the two halves of
 that predicate, plus the fail-closed rejections that make "verified" mean
 something: a topology language that accepted cycles, dangling artifacts or
 embedded authority would lower three names for one structure.

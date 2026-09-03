@@ -1,0 +1,26 @@
+{
+  "name": "read",
+  "verb": "fs.read",
+  "description": "Read file contents (e.g. {\"path\": \"lru/cache.py\"}) or slice with optional line offset (e.g. {\"path\": \"SPECIFICATION.md\", \"offset\": 1950, \"limit\": 60}).",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "path": {
+        "type": "string",
+        "description": "File path to read"
+      },
+      "offset": {
+        "type": "integer",
+        "description": "0-based line offset to start reading from"
+      },
+      "limit": {
+        "type": "integer",
+        "description": "Number of lines to read"
+      }
+    },
+    "required": [
+      "path"
+    ],
+    "additionalProperties": false
+  }
+}

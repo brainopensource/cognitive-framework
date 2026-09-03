@@ -1,0 +1,1 @@
+CT-25: no silent intersection. One uncovered path denies the whole request.

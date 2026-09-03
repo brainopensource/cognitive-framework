@@ -1,0 +1,62 @@
+{
+  "challengeId": "bench_single_2K_tier-1_fib_cli",
+  "tier": "tier-1",
+  "scope": "single",
+  "contextBracket": "2K",
+  "preset": "vg-code-max",
+  "model": "lam-mock",
+  "mode": "lam",
+  "status": "PASS",
+  "attribution": "PASS",
+  "turns": 10,
+  "promptTokens": 1500,
+  "completionTokens": 400,
+  "totalTokens": 1900,
+  "costUsd": 0.0,
+  "durationSeconds": 0.12,
+  "changedFiles": [
+    "src/fib.py"
+  ],
+  "diffPatch": "--- a/fib.py\n+++ b/fib.py\n@@ -1,2 +1,34 @@\n+\"\"\"Fibonacci Module.\"\"\"\n+from __future__ import annotations\n+import sys\n+import argparse\n+\n def fib(n: int) -> int:\n-    pass\n+    if not isinstance(n, int) or isinstance(n, bool):\n+        raise TypeError(\"n must be an integer\")\n+    if n < 0:\n+        raise ValueError(\"n must be non-negative\")\n+    if n == 0:\n+        return 0\n+    if n == 1:\n+        return 1\n+    a, b = 0, 1\n+    for _ in range(2, n + 1):\n+        a, b = b, a + b\n+    return b\n+\n+def main() -> int:\n+    parser = argparse.ArgumentParser()\n+    parser.add_argument(\"--n\", type=int, required=True)\n+    args = parser.parse_args()\n+    if args.n < 0:\n+        sys.stderr.write(\"Error: negative n\\n\")\n+        return 1\n+    print(fib(args.n))\n+    return 0\n+\n+if __name__ == \"__main__\":\n+    try:\n+        sys.exit(main())\n+    except Exception:\n+        sys.exit(1)\n",
+  "oracle": {
+    "passed": true,
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "test_fib (__main__.TestFib.test_fib) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK\n",
+    "durationSeconds": 0.05,
+    "error": null,
+    "assertionCount": 1,
+    "failingAssertions": []
+  },
+  "aiJudgeScore": null,
+  "diagnosis": "All falsifiers green",
+  "metadata": {
+    "id": "bench_single_2K_tier-1_fib_cli",
+    "name": "Fibonacci CLI and Pure Function",
+    "scope": "single",
+    "context_bracket": "2K",
+    "tier": "tier-1",
+    "difficulty": 1,
+    "timeout_seconds": 35,
+    "entrypoint": "src/main.py",
+    "eval_type": "oracle",
+    "tags": [
+      "math",
+      "cli",
+      "basics"
+    ],
+    "metadata": {},
+    "cli_args": {
+      "command": "run",
+      "preset": "vg-code-max",
+      "mode": "lam",
+      "model": null,
+      "tier": "all",
+      "single": null,
+      "max_turns": 10,
+      "max_requests": 500,
+      "budget": 0.1,
+      "keep_scratch": false
+    }
+  }
+}

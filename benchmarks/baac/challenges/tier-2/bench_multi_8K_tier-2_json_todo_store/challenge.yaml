@@ -1,0 +1,14 @@
+id: bench_multi_8K_tier-2_json_todo_store
+name: JSON-Backed Todo Store
+scope: multi
+context_bracket: 8K
+tier: tier-2
+difficulty: 2
+timeout_seconds: 35
+entrypoint: src/main.py
+eval_type: oracle
+tags:
+- storage
+- json
+- multi_file
+metadata: {}

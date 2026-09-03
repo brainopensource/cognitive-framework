@@ -1,0 +1,229 @@
+{
+  "challenge": "sota_hard_large_catalog_collision",
+  "tier": "easy",
+  "title": "Large Catalog Collision and Stable Lookup",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "manifest": "vg-chimera-v1",
+  "status": "PASS",
+  "llm_calls": 8,
+  "turns": 8,
+  "terminal_state": "completed",
+  "cost_usd": 0.001356,
+  "latency_s": 47.11,
+  "files_modified": [
+    "catalog/registry.py"
+  ],
+  "oracle_output": "",
+  "error": "",
+  "terminal_detail": "Fixed catalog/registry.py to detect duplicate aliases deterministically, raising AliasCollision naming both colliding IDs while preserving exact ID lookup.",
+  "run_fields": {},
+  "cassette": "benchmarks/artifacts/ladder/chimera_hard__sota_hard_large_catalog_collision__deepseek_deepseek-v4-flash-0731.cassette.json",
+  "trajectory": [
+    {
+      "turn": 0,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "catalog/loader.py"
+      },
+      "note": "",
+      "text": "\n\n\n\n\n\n",
+      "usage": {
+        "prompt_tokens": 3314,
+        "completion_tokens": 147,
+        "cached_tokens": 0,
+        "total_tokens": 3461,
+        "cost_usd": 0.000505,
+        "usd_micros": 505,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000505,
+      "prior_tool_result": null,
+      "recovery_feedback": null
+    },
+    {
+      "turn": 1,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "catalog/registry.py"
+      },
+      "note": "",
+      "text": "\n\n\n\n\n",
+      "usage": {
+        "prompt_tokens": 3491,
+        "completion_tokens": 114,
+        "cached_tokens": 3072,
+        "total_tokens": 3605,
+        "cost_usd": 0.000133,
+        "usd_micros": 133,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000133,
+      "prior_tool_result": "tool result turn=0 digest=sha256:f29aa1cfb99395b07e7fea9cb60704089602287b9f30525de7d6eaa1796e7b36\nfrom .data import ROWS\nfrom .registry import Registry\ndef load(): return Registry(ROWS)\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 2,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "catalog/errors.py"
+      },
+      "note": "",
+      "text": "\n\n\n",
+      "usage": {
+        "prompt_tokens": 3688,
+        "completion_tokens": 47,
+        "cached_tokens": 3328,
+        "total_tokens": 3735,
+        "cost_usd": 0.00011,
+        "usd_micros": 110,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.00011,
+      "prior_tool_result": "tool result turn=1 digest=sha256:465849ae48dc1938c783a96e25b7daae1825f6ec501c55f370d1bbe160fef566\nfrom .errors import AliasCollision\nclass Registry:\n def __init__(self,rows):\n  self.by_id={row[0]:row for row in rows}\n  self.by_alias={row[1]:row for row in rows}  # BUG: last wins\n def by_exact_id(self,item_id): return self.by_id[item_id]\n def by_name(self,alias): return self.by_alias[alias]\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 3,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "test_catalog_public.py"
+      },
+      "note": "",
+      "text": "\n\n\n",
+      "usage": {
+        "prompt_tokens": 3804,
+        "completion_tokens": 48,
+        "cached_tokens": 3584,
+        "total_tokens": 3852,
+        "cost_usd": 9.4e-05,
+        "usd_micros": 94,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 9.4e-05,
+      "prior_tool_result": "tool result turn=2 digest=sha256:d9ca1f717e92fbcc40832cfecdc89172c8c850361a2fe15cd8acbf8d071abe3c\nclass AliasCollision(ValueError):\n pass\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 4,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "catalog/__init__.py"
+      },
+      "note": "",
+      "text": "\n\n\n",
+      "usage": {
+        "prompt_tokens": 4043,
+        "completion_tokens": 49,
+        "cached_tokens": 3584,
+        "total_tokens": 4092,
+        "cost_usd": 0.000128,
+        "usd_micros": 128,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000128,
+      "prior_tool_result": "tool result turn=3 digest=sha256:39c20a2c3bcb7e9c232fbbd51300d4e468e626a691b7d15b2cfd586ad776b7c3\nimport unittest\nfrom catalog import Registry,AliasCollision\nclass Public(unittest.TestCase):\n def test_collision_is_deterministic(self):\n  rows=[(2,'same','b'),(1,'same','a')]\n  for ordered in (rows,list(reversed(rows))):\n   with self.assertRaisesRegex(AliasCollision,'1.*2|2.*1'): Registry(ordered)\n def test_exact_lookup(self): self.assertEqual(Registry([(7,'x','p')]).by_exact_id(7)[2],'p')\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 5,
+      "kind": "effect",
+      "action": "patch.apply",
+      "args": {
+        "path": "catalog/registry.py",
+        "content": "from .errors import AliasCollision\nclass Registry:\n def __init__(self,rows):\n  self.by_id={}\n  self.by_alias={}\n  for row in rows:\n   item_id,alias=row[0],row[1]\n   if alias in self.by_alias:\n    other=self.by_alias[alias][0]\n    raise AliasCollision(f\"alias {alias!r} collides between IDs {other} and {item_id}\")\n   self.by_alias[alias]=row\n   self.by_id[item_id]=row\n def by_exact_id(self,item_id): return self.by_id[item_id]\n def by_name(self,alias): return self.by_alias[alias]"
+      },
+      "note": "",
+      "text": "\n\n\n",
+      "usage": {
+        "prompt_tokens": 4161,
+        "completion_tokens": 222,
+        "cached_tokens": 3840,
+        "total_tokens": 4383,
+        "cost_usd": 0.00016,
+        "usd_micros": 160,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.00016,
+      "prior_tool_result": "tool result turn=4 digest=sha256:f9bc7fc24208e31c351f4d6a7c0613b9f82ce50e55503cef67b1a72aae054337\nfrom .registry import Registry, AliasCollision\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 6,
+      "kind": "effect",
+      "action": "proc.exec",
+      "args": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "."
+        ]
+      },
+      "note": "",
+      "text": "\n\n\n",
+      "usage": {
+        "prompt_tokens": 4381,
+        "completion_tokens": 62,
+        "cached_tokens": 4096,
+        "total_tokens": 4443,
+        "cost_usd": 0.000114,
+        "usd_micros": 114,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000114,
+      "prior_tool_result": "tool result turn=4 digest=sha256:f9bc7fc24208e31c351f4d6a7c0613b9f82ce50e55503cef67b1a72aae054337\nfrom .registry import Registry, AliasCollision\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 7,
+      "kind": "finish",
+      "action": null,
+      "args": null,
+      "note": "Fixed catalog/registry.py to detect duplicate aliases deterministically, raising AliasCollision naming both colliding IDs while preserving exact ID lookup.",
+      "text": "Tests pass. The fix detects duplicate aliases deterministically by checking against the already-built alias map, raising `AliasCollision` naming both IDs regardless of input order.\n\n\n",
+      "usage": {
+        "prompt_tokens": 4510,
+        "completion_tokens": 105,
+        "cached_tokens": 4352,
+        "total_tokens": 4615,
+        "cost_usd": 0.000112,
+        "usd_micros": 112,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000112,
+      "prior_tool_result": "tool result turn=4 digest=sha256:f9bc7fc24208e31c351f4d6a7c0613b9f82ce50e55503cef67b1a72aae054337\nfrom .registry import Registry, AliasCollision\n",
+      "recovery_feedback": null
+    }
+  ]
+}

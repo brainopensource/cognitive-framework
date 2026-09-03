@@ -1,37 +1,8 @@
-import type { ArtifactExplanation, Result } from "../contract/types.js";
-
-export type FormattedExplanation = {
-  status: string;
-  prediction: string;
-  empty: boolean;
-};
-
-export function formatExplanation(explanation: ArtifactExplanation): FormattedExplanation {
-  const status = explanation.status ?? "unknown";
-  const prediction = explanation.prediction ?? "";
-  const activatedBy = explanation.activatedBy ?? [];
-  const demotedBy = explanation.demotedBy ?? [];
-  const empty = status === "unknown" && activatedBy.length === 0 && demotedBy.length === 0;
-
-  return {
-    status,
-    prediction,
-    empty,
-  };
-}
-
-export function whyFromResult(
-  result: Result<ArtifactExplanation>
-): Result<FormattedExplanation & { explanation?: ArtifactExplanation }> {
-  if (!result.ok) {
-    return { ok: false, error: result.error };
-  }
-  const formatted = formatExplanation(result.value);
-  return {
-    ok: true,
-    value: {
-      ...formatted,
-      explanation: result.value,
-    },
-  };
-}
+// F4 Phase 3: ported to @aether/client (the converged AETHER client SDK).
+// This re-export shim keeps every existing @vanguard/client-core consumer
+// working unchanged while there is exactly one implementation underneath.
+// Safe to shim (unlike resume.ts/commands.ts this phase): why.ts never
+// calls a RuntimeClient method itself, it only formats an already-obtained
+// Result<ArtifactExplanation>, so there is no bundled-vs-split call
+// convention to break.
+export * from "@aether/client/application/why.js";

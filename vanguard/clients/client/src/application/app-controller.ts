@@ -405,9 +405,22 @@ export class FrontendAppController {
   }
 
   // 2. RUNTIME CONNECTION
-  public async connectRuntime(target?: { socketPath?: string; httpUrl?: string }): Promise<boolean> {
+  /**
+   * `transport` exists because `httpUrl` has a non-empty default for every
+   * host, so its presence cannot be read as a preference. A caller that lives
+   * in a browser -- where `SocketRuntimeClient` has no `node:net` to reach for
+   * -- says so explicitly rather than relying on a settings value that is
+   * always populated.
+   */
+  public async connectRuntime(target?: {
+    socketPath?: string;
+    httpUrl?: string;
+    transport?: "socket" | "http";
+  }): Promise<boolean> {
     const socketPath = target?.socketPath ?? this.state.settings.runtime.socketPath;
     const httpUrl = target?.httpUrl ?? this.state.settings.runtime.httpUrl;
+    const useHttp =
+      target?.transport === "http" || (target?.httpUrl !== undefined && target.transport !== "socket");
 
     this.updateState((s) => ({
       ...s,
@@ -417,7 +430,7 @@ export class FrontendAppController {
     }));
 
     try {
-      if (target?.httpUrl) {
+      if (useHttp) {
         this.client = new HttpRuntimeClient({ baseUrl: httpUrl });
       } else {
         this.client = new SocketRuntimeClient({ socketPath });
@@ -436,8 +449,10 @@ export class FrontendAppController {
         connectionState: "CONNECTED",
         daemonStatus,
         capabilities,
-        runtimeUrlOrSocket: target?.httpUrl ? httpUrl : socketPath,
-        statusMessage: `Connected to runtime (socket: ${socketPath})`,
+        runtimeUrlOrSocket: useHttp ? httpUrl : socketPath,
+        statusMessage: useHttp
+          ? `Connected to runtime (http: ${httpUrl})`
+          : `Connected to runtime (socket: ${socketPath})`,
       }));
 
       // Refresh runs list

@@ -1,0 +1,252 @@
+#!/usr/bin/env node
+
+/**
+ * AETHER Desktop launcher.
+ *
+ * One command brings up the three things the workspace needs: the Python
+ * Studio Gateway that owns the SQLite-WAL ledger, the loopback server that
+ * hosts the UI bundle and proxies `/api/*` to that gateway, and a window to
+ * put it in. On Linux the window is a Chromium `--app=` instance with its own
+ * profile directory, which gives a chrome-less native-feeling window without
+ * pulling in an Electron runtime; if no Chromium-family browser is installed
+ * it falls back to `xdg-open` on the default browser.
+ */
+
+import { spawn } from "node:child_process";
+import { accessSync, constants, existsSync, statSync } from "node:fs";
+import { mkdtemp } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const repoRoot = resolve(__dirname, "..");
+const desktopDir = join(repoRoot, "vanguard", "clients", "desktop");
+
+function parseArgs(argv) {
+  const opts = {
+    port: Number(process.env.AETHER_DESKTOP_PORT ?? 4180),
+    gatewayPort: Number(process.env.AETHER_GATEWAY_PORT ?? 8000),
+    workspace: process.cwd(),
+    open: true,
+    gateway: true,
+    build: true,
+  };
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === "--port") opts.port = Number(argv[++i]);
+    else if (arg === "--gateway-port") opts.gatewayPort = Number(argv[++i]);
+    else if (arg === "--workspace") opts.workspace = resolve(argv[++i]);
+    else if (arg === "--no-open") opts.open = false;
+    else if (arg === "--no-gateway") opts.gateway = false;
+    else if (arg === "--no-build") opts.build = false;
+    else if (arg === "--help" || arg === "-h") {
+      console.log(
+        [
+          "Usage: aether-desktop [options]",
+          "",
+          "  --workspace <dir>     Repository the agents operate on (default: cwd).",
+          "                        Substitute a real path; there is no default repo.",
+          "  --port <n>            UI port on loopback (default: 4180)",
+          "  --gateway-port <n>    Studio Gateway port (default: 8000)",
+          "  --no-gateway          Attach to a gateway that is already running",
+          "  --no-open             Print the URL instead of opening a window",
+          "  --no-build            Skip the esbuild step and serve dist-browser/ as-is",
+        ].join("\n"),
+      );
+      process.exit(0);
+    } else {
+      console.error(`Unknown option: ${arg} (try --help)`);
+      process.exit(2);
+    }
+  }
+  return opts;
+}
+
+/**
+ * The gateway creates `<workspace>/.vanguard` for its SQLite-WAL ledger, so a
+ * path that does not exist -- or that the operator cannot write -- kills it
+ * during startup with a traceback that names `state_contract.py` rather than
+ * the flag that caused it. Check here, where the answer is one line.
+ */
+function validateWorkspace(workspace) {
+  const complain = (reason) => {
+    console.error(`[aether-desktop] --workspace ${workspace}: ${reason}`);
+    console.error("[aether-desktop] pass the repository the agents should edit, e.g.");
+    console.error(`[aether-desktop]     aether-desktop --workspace ${process.cwd()}`);
+    process.exit(2);
+  };
+
+  if (!existsSync(workspace)) complain("no such directory");
+  if (!statSync(workspace).isDirectory()) complain("not a directory");
+  try {
+    accessSync(workspace, constants.W_OK);
+  } catch {
+    complain("not writable (the gateway needs to create .vanguard/ here)");
+  }
+}
+
+function run(command, args, options = {}) {
+  return new Promise((resolvePromise, reject) => {
+    const child = spawn(command, args, { stdio: "inherit", ...options });
+    child.on("error", reject);
+    child.on("exit", (code) =>
+      code === 0 ? resolvePromise() : reject(new Error(`${command} exited with ${code}`)),
+    );
+  });
+}
+
+async function isGatewayHealthy(port) {
+  try {
+    const response = await fetch(`http://127.0.0.1:${port}/api/health`, {
+      signal: AbortSignal.timeout(1500),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Resolve how to invoke the gateway, in order of least surprise: an installed
+ * console script, then this repo's uv environment, then a bare module run.
+ */
+function resolveGatewayCommand() {
+  const venvScript = join(repoRoot, ".venv", "bin", "vanguard-studio");
+  if (existsSync(venvScript)) return { command: venvScript, args: [] };
+  if (existsSync(join(repoRoot, ".venv", "bin", "python"))) {
+    return {
+      command: join(repoRoot, ".venv", "bin", "python"),
+      args: ["-m", "vanguard.packages.runtime.service.studio_gateway"],
+    };
+  }
+  return { command: "uv", args: ["run", "--project", repoRoot, "vanguard-studio"] };
+}
+
+async function startGateway(opts) {
+  if (await isGatewayHealthy(opts.gatewayPort)) {
+    console.log(`[aether-desktop] attaching to gateway already on :${opts.gatewayPort}`);
+    return null;
+  }
+  const { command, args } = resolveGatewayCommand();
+  console.log(`[aether-desktop] starting gateway: ${command} (workspace ${opts.workspace})`);
+  const child = spawn(
+    command,
+    [...args, "--port", String(opts.gatewayPort), "--workspace", opts.workspace],
+    { cwd: repoRoot, stdio: ["ignore", "inherit", "inherit"] },
+  );
+  child.on("error", (err) => {
+    console.error(`[aether-desktop] could not start the gateway: ${err.message}`);
+    console.error("[aether-desktop] install the Python side first: uv sync");
+  });
+
+  const deadline = Date.now() + 30_000;
+  while (Date.now() < deadline) {
+    if (child.exitCode !== null) {
+      throw new Error("gateway exited during startup (its traceback is above)");
+    }
+    if (await isGatewayHealthy(opts.gatewayPort)) return child;
+    await new Promise((r) => setTimeout(r, 300));
+  }
+  child.kill("SIGTERM");
+  throw new Error(`gateway did not become healthy on :${opts.gatewayPort} within 30s`);
+}
+
+const APP_BROWSERS = [
+  "google-chrome-stable",
+  "google-chrome",
+  "chromium-browser",
+  "chromium",
+  "brave-browser",
+  "microsoft-edge-stable",
+  "microsoft-edge",
+  "vivaldi",
+];
+
+function which(binary) {
+  for (const dir of (process.env.PATH ?? "").split(":")) {
+    if (!dir) continue;
+    const candidate = join(dir, binary);
+    if (existsSync(candidate)) return candidate;
+  }
+  return null;
+}
+
+async function openWindow(url) {
+  for (const name of APP_BROWSERS) {
+    const binary = which(name);
+    if (!binary) continue;
+    // A dedicated profile keeps the app window out of the user's normal
+    // session, so closing it never touches their browsing tabs.
+    const profile = await mkdtemp(join(tmpdir(), "aether-desktop-"));
+    console.log(`[aether-desktop] opening app window via ${name}`);
+    spawn(binary, [`--app=${url}`, `--user-data-dir=${profile}`, "--window-size=1440,900"], {
+      stdio: "ignore",
+      detached: true,
+    }).unref();
+    return;
+  }
+  // Firefox dropped its site-specific-browser mode, so the best it can do is a
+  // dedicated window. Installing chromium gets the frameless app window back.
+  const firefox = which("firefox");
+  if (firefox) {
+    console.log("[aether-desktop] no Chromium-family browser found; opening a Firefox window");
+    console.log("[aether-desktop] `sudo dnf install chromium` gets a frameless app window instead");
+    spawn(firefox, ["--new-window", url], { stdio: "ignore", detached: true }).unref();
+    return;
+  }
+
+  const opener = which("xdg-open");
+  if (opener) {
+    console.log("[aether-desktop] no known browser binary found; using xdg-open");
+    spawn(opener, [url], { stdio: "ignore", detached: true }).unref();
+    return;
+  }
+  console.log(`[aether-desktop] open this URL manually: ${url}`);
+}
+
+async function main() {
+  const opts = parseArgs(process.argv.slice(2));
+  validateWorkspace(opts.workspace);
+
+  if (opts.build) {
+    console.log("[aether-desktop] building browser bundle...");
+    await run("node", [join(desktopDir, "scripts", "build-browser.mjs")], { cwd: desktopDir });
+  }
+  if (!existsSync(join(desktopDir, "dist-browser", "desktop.js"))) {
+    throw new Error("dist-browser/desktop.js is missing; run without --no-build");
+  }
+
+  const gateway = opts.gateway ? await startGateway(opts) : null;
+
+  const { createDesktopServer } = await import(
+    join(desktopDir, "scripts", "serve-desktop.mjs")
+  );
+  const server = createDesktopServer({
+    gatewayPort: opts.gatewayPort,
+    workspacePath: opts.workspace,
+  });
+
+  await new Promise((resolvePromise, reject) => {
+    server.once("error", reject);
+    server.listen(opts.port, "127.0.0.1", resolvePromise);
+  });
+
+  const url = `http://127.0.0.1:${opts.port}`;
+  console.log(`[aether-desktop] ready at ${url} (workspace: ${opts.workspace})`);
+  if (opts.open) await openWindow(url);
+
+  const shutdown = () => {
+    console.log("\n[aether-desktop] shutting down");
+    server.close();
+    if (gateway) gateway.kill("SIGTERM");
+    process.exit(0);
+  };
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
+}
+
+main().catch((err) => {
+  console.error(`[aether-desktop] ${err.message}`);
+  process.exit(1);
+});

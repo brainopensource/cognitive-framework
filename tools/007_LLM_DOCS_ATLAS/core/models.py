@@ -72,6 +72,10 @@ class ContextPacket:
     invariants: list[str] = field(default_factory=list)
     provenance: dict[str, Any] = field(default_factory=dict)
     token_accounting: dict[str, int] = field(default_factory=dict)
+    # Bounded omissions: candidates considered but NOT selected, each with an
+    # explicit reason (budget_exhausted / dedup / ceiling). Agents must know
+    # what they did not see — absence of evidence must never be silent.
+    omitted: list[dict[str, Any]] = field(default_factory=list)
 
 def serialise(value: Any) -> Any:
     return to_dict(value)

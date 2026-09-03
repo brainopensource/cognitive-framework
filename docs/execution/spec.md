@@ -28,7 +28,7 @@ relationships:
 # Feature Delta Specification (execution)
 
 SHALL-contract for remaining backend work. Promote into `docs/architecture/` / `docs/backend/` / `docs/SPEC.md` only after merge (T-67).
-Lock SHA `66aa7a3c` is the forensic baseline. Implementation head for closed instrument work: `63b77116`. Resume schema landed on `8637db55`; MS-RESUME stays `OPEN`.
+Lock SHA `66aa7a3c` is the forensic baseline. Implementation head for closed instrument work: `63b77116`. Resume closed at `8637db55` (MS-RESUME `CLOSED`).
 
 Companion handbook: [`technical.md`](technical.md). Task IDs: [`tasks.md`](tasks.md).
 
@@ -41,7 +41,7 @@ Companion handbook: [`technical.md`](technical.md). Task IDs: [`tasks.md`](tasks
 - **INV-DELTA-3.** Multi-file writes are all-or-nothing. Preflight in the adapter. `[PROPOSAL]` until T-17.
 - **INV-DELTA-4.** Agents SHALL NOT mutate tests during implementation. Tamper shield `[PROPOSAL]` T-18; enumerate via IndexPort, not `Path.glob("test/**")`.
 - **INV-DELTA-5.** L1–L3 prefix-stable. Compaction SHALL NOT drop settled invariants or falsified hypotheses.
-- **I-STATE.** σ is a ledger fold (`fold_task_state`). One schema: `SemanticTaskState` with alias `CodingTaskState`. Lock: `domain/task_state.py` MISSING. Branch: landed `8637db55` — not a closed MS-RESUME FACT until gate receipts exist.
+- **I-STATE.** σ is a ledger fold (`fold_task_state`). One schema: `SemanticTaskState` with alias `CodingTaskState`. Lock: `domain/task_state.py` MISSING. Branch: LIVE `8637db55`. MS-RESUME `CLOSED`.
 - **I-TXN.** 2PC lives in `adapters/environment/transaction.py` (MISSING). Not kernel.
 - **Single-writer.** One writer per workspace.
 - **Authorize-before-retrieve.** Memory recall requires grant.

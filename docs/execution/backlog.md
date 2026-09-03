@@ -172,7 +172,7 @@ composition/lifecycle authority; infrastructure stays behind generic ports.
 | **CMX-08** | First-party reference-agent portfolio | apps + independent packs/manifests | `TECHNICAL SLICE DONE` | M-10 and stable public composition contract | Coding Max plus two non-coding supported agents install, run, resume, and emit attributable evidence through the same public framework contract |
 | **CMX-09** | Canonical Harness Convergence | runtime, code pack, manifests, thin app | `IN_PROGRESS` (Active in [`tasks.md`](tasks.md)) | W-092-F1 | Fold accepted later prompt/tool/recovery mechanisms into public presets; use one capability-derived admission/policy binding; exact technical delta governed by [`spec.md`](spec.md). |
 | **CMX-10A** | Truthful Task-Aware Completion | runtime + code-pack completion policy | `IN_PROGRESS` | CMX-09 | Parse real verification counts and fail closed on zero, stale, partial, incomplete or task-inapplicable evidence across bugfix, feature, migration, greenfield and read-only tasks. |
-| **CMX-10B** | Durable Long-Session Continuation | runtime/session/task projection | `IN_PROGRESS` | CMX-10A | Persist and restore exact task/composition/policy/budget/phase/next-action identity; prove 40+ turns and repeated fresh-process restarts without duplicate effects. |
+| **CMX-10B** | Durable Long-Session Continuation | runtime/session/task projection | `DONE` | CMX-10A | Domain `SemanticTaskState`, fold, episode_id, σ-not-in-L3, 40-turn fold parity. Falsifiers green 2026-09-03. |
 | **CMX-11** | Progressive Repository Context & Change Closure | agency context, `IndexPort`, adapters, code pack | `APPROVED` | CMX-09, CMX-10B | Put `ContextPacket` on the product path, reserve recovery/verification context, refresh by repository epoch, expose omissions, and prove multi-file/affected-test closure with deterministic fallback. |
 
 ### 2.10 Octopus Meta-Controller & Swarm Topology (VISION.md §12, §16; M-OCT Horizon)
@@ -196,7 +196,7 @@ Team capacity is chosen later. `requires:` edges live on tasks. This index maps 
 |---|---|---|---|---|
 | **INSTRUMENT** | REL-01R | T-01–T-03, T-24–T-25, T-40–T-41 | MS-INSTRUMENT | `DONE` at `63b77116` |
 | **TRUTH** | CMX-10A, W-092-F2 | T-04–T-08, T-42, T-38, T-23 | MS-TRUTH | Partial: T-23/T-38/T-42 `DONE`; T-04/T-05/T-07 open; T-08 landed `8637db55` |
-| **STATE** | CMX-10B, W-092-F3 | T-09–T-13, T-43–T-44 | MS-RESUME | `IN_PROGRESS` (B landed `8637db55`). Do not mark `DONE`. |
+| **STATE** | CMX-10B, W-092-F3 | T-09–T-13, T-43–T-44 | MS-RESUME | `DONE` at `8637db55` (closer receipt 2026-09-03). |
 | **SEE** | CMX-11, PRG-01, W-092-F4 | T-14–T-16, T-36–T-37, T-45–T-46 | MS-SEE | One ContextCompiler; ResultDistiller T-36 |
 | **CHANGE** | TXN-01, SHD-01, TLS-04/05 | T-17–T-20, T-47–T-49 | MS-CHANGE | 2PC in adapters; tamper; completeness |
 | **DIALECT** | WRN-01, TLS-02 | T-21–T-22, T-50 | — | Typed failure classes; fail-closed resolve |

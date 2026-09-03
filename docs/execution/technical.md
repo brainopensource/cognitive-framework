@@ -33,10 +33,10 @@ Developers SHALL use this file plus [`spec.md`](spec.md), [`tasks.md`](tasks.md)
 
 **Canonical task IDs** are `T-01`… in [`tasks.md`](tasks.md). v2 `SUB-*` / `TXN-*` are aliases in [`backlog.md`](backlog.md). Live kernel pipeline package `SUB-01` in the backlog is **not** v2 admission.
 
-**Recommended reading order (not a sprint):** T-01–T-08, then T-09–T-13.
+**Recommended reading order (not a sprint):** T-14–T-16 (MS-SEE). T-04 stays `[PROPOSAL]`.
 
 **FACT STORE path:** `adapters/stores/event_store.py`.
-**I-STATE.** Lock `66aa7a3c`: `domain/task_state.py` MISSING. Branch: B landed `8637db55` (`SemanticTaskState`; fold in `runtime/task_state.py`). Not MS-RESUME closed.
+**I-STATE.** Lock `66aa7a3c`: `domain/task_state.py` MISSING. Branch: LIVE `8637db55` (`SemanticTaskState`; fold in `runtime/task_state.py`). MS-RESUME `CLOSED`.
 **MS-INSTRUMENT CLOSED** at `63b77116`.
 **T-04 / `ADMISSION_GATE_EXEMPT`:** unchanged. Do not implement here.
 

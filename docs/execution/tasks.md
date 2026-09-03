@@ -33,7 +33,7 @@ confidence: high
 
 Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technical.md`](technical.md). Packages: [`backlog.md`](backlog.md). TARGET gates: [`milestones.md`](milestones.md).
 
-**No sprints. No waves.** Check boxes as work completes. **Recommended reading order (not a schedule):** T-01–T-08, then T-09–T-13.
+**No sprints. No waves.** Check boxes as work completes. **Recommended reading order (not a schedule):** T-14–T-16 next (MS-SEE). Skip T-04/T-05/T-07 until an RF-25 successor exists.
 
 B §18 tickets T-01–T-35 are canonical. A §31 maps into those IDs or T-36+ (see merge map appendix). v2 `SUB-*` are aliases. Live backlog `SUB-01` (kernel S0–S12) is a different package.
 
@@ -131,7 +131,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - [x] Land `vanguard/packages/domain/task_state.py` (stdlib + JCS) on commit `8637db55`
 - [x] `CodingTaskState is SemanticTaskState`; one fold: `runtime/task_state.py` `fold_task_state`
 - [x] A §6.2 extra types remain `[PROPOSAL]` in spec
-- Lock `66aa7a3c`: path MISSING. Branch: present on `8637db55` — B owns. MS-RESUME stays `OPEN`.  
+- Lock `66aa7a3c`: path MISSING. Branch: present on `8637db55` — B owns. MS-RESUME `CLOSED` (closer: 16 unittest OK, 2026-09-03).  
 
 **T-10 Runtime fold** (B)  
 - [x] Fold events; unknown ignored; remove `"test" in action.lower()` inference  
@@ -341,7 +341,8 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - [ ] `just docs-knowledge` — never hand-edit `.generated/`  
 
 **T-68 Link repair** (PHASE-0 §8) — can start immediately; does not wait for T-01
-- [x] Living `docs/execution/` / README / AGENTS: `active.md` → `tasks.md`; `FEATURE_SPEC.md` is a pointer (this Dev C pass)
+- [x] Living `docs/execution/` / README / AGENTS: `active.md` → `tasks.md`; `FEATURE_SPEC.md` is a pointer (Dev C pass)
+- [x] Restore `docs/SPEC.md` (deleted in `614b7800`; compact TARGET contract)
 - [ ] Remaining historical mentions in handbook appendices / research reports — do not rewrite research  
 
 

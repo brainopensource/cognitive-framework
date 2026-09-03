@@ -27,37 +27,40 @@ relationships:
 
 # Feature Delta Specification (execution)
 
-This file is the typed SHALL-contract for **all remaining backend work**. Upon a task merging, promote landed contracts into present-tense `docs/architecture/` / `docs/backend/` / `docs/SPEC.md`. Modules marked **MISSING** do not exist at lock HEAD `66aa7a3c`.
+SHALL-contract for remaining backend work. Promote into `docs/architecture/` / `docs/backend/` / `docs/SPEC.md` only after merge (T-67).
+Lock SHA `66aa7a3c` is the forensic baseline. Implementation head for closed instrument work: `63b77116`. Resume schema landed on `8637db55`; MS-RESUME stays `OPEN`.
 
 Companion handbook: [`technical.md`](technical.md). Task IDs: [`tasks.md`](tasks.md).
 
-Historical CMX-09-only delta is preserved as [Appendix H](#appendix-h-historical-cmx-09-delta).
+## 0. Invariants
 
-**Kernel (I-7).** AST preflight SHALL NOT enter `kernel/dispatch.py` S7/S8. S7/S8 remain RESERVE/VERIFY. Syntax checks belong in `adapters/environment/`.
+- **I-7.** AST preflight SHALL NOT enter `kernel/dispatch.py` S7/S8. Syntax checks: `adapters/environment/`.
+- **I-TCB.** Kernel LOC ≤ 1438 (live 1386 at last A linter pass).
+- **INV-DELTA-1.** Domain state schemas: stdlib + JCS only.
+- **INV-DELTA-2.** This program SHALL NOT grow kernel past the TCB ceiling.
+- **INV-DELTA-3.** Multi-file writes are all-or-nothing. Preflight in the adapter. `[PROPOSAL]` until T-17.
+- **INV-DELTA-4.** Agents SHALL NOT mutate tests during implementation. Tamper shield `[PROPOSAL]` T-18; enumerate via IndexPort, not `Path.glob("test/**")`.
+- **INV-DELTA-5.** L1–L3 prefix-stable. Compaction SHALL NOT drop settled invariants or falsified hypotheses.
+- **I-STATE.** σ is a ledger fold (`fold_task_state`). One schema: `SemanticTaskState` with alias `CodingTaskState`. Lock: `domain/task_state.py` MISSING. Branch: landed `8637db55` — not a closed MS-RESUME FACT until gate receipts exist.
+- **I-TXN.** 2PC lives in `adapters/environment/transaction.py` (MISSING). Not kernel.
+- **Single-writer.** One writer per workspace.
+- **Authorize-before-retrieve.** Memory recall requires grant.
 
-**FACT canonical path.** `ApplicationService` → Runtime → `HarnessSession` → `EpisodeEngine` → `Kernel.dispatch`. ForgeEngine and ChimeraEngine SHALL NOT be the product path. Coding Max report arms SHALL be ⊆ `{vg-code-fast, vg-code-balanced, vg-code-max}` (T-23).
+**Canonical path (FACT).** `ApplicationService → Runtime → HarnessSession → EpisodeEngine → Kernel.dispatch`.
+Forge/Chimera SHALL NOT be the product path. Coding Max report arms SHALL be ⊆ `{vg-code-fast, vg-code-balanced, vg-code-max}` (T-23).
 
-**Admission (FACT).** Live function is `admission_required` (`runtime/session.py`): exempt `vg-code-default` / `vg-code-lex`, else `"patch.apply" in verbs`. `ADMISSION_GATED_HARNESSES` is unused. T-04 is `[PROPOSAL]` and needs an RF-25 successor baseline.
+**Admission (FACT).** `admission_required`: exempt `vg-code-default` / `vg-code-lex`, else `"patch.apply" in verbs`. `ADMISSION_GATED_HARNESSES` unused. T-04 `[PROPOSAL]` until RF-25 successor baseline.
 
-**VerificationReceipt.passed (FACT).** `exit_code == 0 and executed_test_count > 0`. Unknown counts stay 0. Forge SHALL NOT set `test_count = 1` (T-06).
+**VerificationReceipt.passed (FACT).** `exit_code == 0 and executed_test_count > 0`. Unknown → 0. Forge SHALL NOT set `test_count = 1` (T-06). Chimera SHALL NOT invent `executed = 1` on non-zero exit without a runner summary (`63b77116`).
 
-**I-1 universal signed finish** (v2): `[PROPOSAL]` too strong. Per-class evidence (A §9.4) wins. Fail-to-pass is the **bugfix** class (T-38).
+**I-1** (v2) universal signed finish: `[PROPOSAL]` too strong. A §9.4 wins. Fail-to-pass = **bugfix** only (T-38).
+**Mutation ≥ 0.80:** T-39 `[PROPOSAL]`.
 
-**Mutation score ≥ 0.80** (v2 §5.4): `[PROPOSAL]` optional treatment T-39, not default admission.
+## 1. Instrument (CLOSED — `63b77116` + T-01–T-03)
 
-**I-STATE.** σ is a ledger fold. Schema lives in `domain/task_state.py` (`SemanticTaskState`; `CodingTaskState` is the same type). The only fold is `runtime/task_state.py` `fold_task_state`. σ is compiled into L4/L5, never dumped into frozen L3.
+B20 discovery SHALL require `aether.b20.membership/1`. Directory names insufficient. `__pycache__` / hidden / tmp are not tasks. Missing oracle, duplicate ids, digest mismatch → fail closed. Digest is order-independent. Every empirical JSON / `BenchmarkReceipt` SHALL bind `subject_sha`. Missing SHA → refuse. `dry_run` ⇒ `pass`/`cost`/`oracle`/`oracle_passed` null. PASS without patch digest → refuse. Dispositions exactly `{passed, failed, undeterminable, not_run}`. Provider / harness / `DATASET_INVALID` ≠ task fail. Qualifying dirty tree → fail closed (`require_clean_subject`). BAAC SHALL require `aether.baac.challenge/1`; bare `TASK.md` is not a challenge.
 
-**Single-writer.** One writer per workspace; children that write are sequential or isolated worktrees.
-
-**Authorize-before-retrieve.** Memory recall requires grant (`runtime/prompt_assembler.py`).
-
-**Instrument truth (T-01–T-03, T-24, T-25, T-40, T-41).** B20 task discovery SHALL require a schema-valid `membership.json` (`aether.b20.membership/1`); directory names are insufficient. `__pycache__`, hidden, and tmp names are not tasks. Missing oracle, duplicate ids, or task-set digest mismatch SHALL fail closed. The task-set digest is order-independent over admitted ids. Every empirical B20 JSON and `BenchmarkReceipt` SHALL bind `subject_sha` to the frozen candidate `git rev-parse HEAD`; a missing SHA SHALL refuse the receipt. `dry_run` SHALL emit `pass`, `cost`, `oracle`, and `oracle_passed` as null. A PASS row or PASS receipt without a patch digest SHALL be refused. Empirical dispositions SHALL be exactly `{passed, failed, undeterminable, not_run}`; provider, harness, and `DATASET_INVALID` outcomes SHALL NOT count as task fail. A qualifying empirical run on a dirty Git tree SHALL fail closed. BAAC discovery SHALL require a schema-valid `challenge.yaml` (`aether.baac.challenge/1`); a bare `TASK.md` or directory name is insufficient.
-
----
-
-## From A — product thesis, SOTA definition, non-goals
-
-## 3. Product thesis and non-goals
+## 2. Product thesis and non-goals
 
 ### 3.1 Product thesis
 
@@ -131,7 +134,9 @@ The following are explicitly deferred:
 
 ---
 
-## From A — domain values, ports, verification receipt, progressive packet, campaign, single-writer
+## 3. VerificationReceipt + counts
+
+Session parser target (T-08): `collected`/`executed`/`passed`/`failed`/`skipped`; `Ran 0 tests` / `0 passed` → 0; unknown runner stays unknown. **B landed the session parser and pack `ParsedTestOutput.runner` on `8637db55` (T-08 `[x]`). Do not uncheck.**
 
 `[PROPOSAL]` catalogs below are kept in full. Implementation merge for task state is B §6.12 (see [`technical.md`](technical.md)).
 
@@ -362,7 +367,7 @@ This avoids shared-worktree races and invisible conflict resolution.
 
 ---
 
-## From A — task classes and per-class evidence
+## 4. Task classes and per-class evidence
 
 Per-class evidence wins over v2 I-1. Fail-to-pass (v2 §5.3) applies to class `bugfix`.
 
@@ -438,7 +443,7 @@ This per-class evidence matrix **wins** as program law over v2 §5.3 / I-1 “no
 
 ---
 
-## From A — prompt/policy, model strategy, security/operator
+## 10. Prompt, policy, model, security
 
 ## 21. Agent prompt and policy architecture
 
@@ -623,7 +628,7 @@ It must not become another runtime authority.
 
 ---
 
-## From A — stop, simplify, and rollback
+## 11. Stop, simplify, and rollback
 
 ## 28. Stop, simplify, and rollback rules
 
@@ -657,7 +662,7 @@ Rollback when:
 
 ---
 
-## From A — research and explanation agents; benchmark taxonomy
+## 12. Research, explanation, and benchmark taxonomy
 
 ## 25. Benchmark task taxonomy
 
@@ -780,7 +785,7 @@ Verify:
 
 ---
 
-## From v2 — TransformSpec (proposal sketch + live fields)
+## TransformSpec (proposal sketch + live fields)
 
 ### 2.4 Pure Artifact-Transform Algebra
 All in-memory transformations (diff parsing, AST skeletonization, token estimation, linting) must implement the **Pure Transform Contract** (`domain/transforms/contracts.py`):
@@ -836,7 +841,9 @@ Live sibling types in the same module (FACT, not a replacement of the sketch abo
 
 ---
 
-## From B — live tool/verb inventory and product target loop
+## 9. CLI and verbs
+
+MECHANISM: `run` / `status` / `resume` / `evidence` / `cost`. `[PROPOSAL]`: `cancel` / `doctor` / `checkpoint` / `--non-interactive`.
 
 ## 22. Live tool/verb inventory (lock HEAD `66aa7a3c`)
 
@@ -908,6 +915,52 @@ Wire recovery: `adapters/models/dialect.py`. Malformed → Proposal: `agency/epi
 - Tamper: create `runtime/governance/tamper_shield.py` (**MISSING**). Enumerate tests via IndexPort (T-18); `Path.glob("test/**")` is insufficient.
 
 ---
+
+## 5. Task state
+
+Implementation merge is B §6.12: `SemanticTaskState` in `domain/`; `fold_task_state` in `runtime/`; unknown event kinds ignored; no `"test" in action.lower()`. A §6.2 extra types stay `[PROPOSAL]` in §16. `task_class` is a field on the projection (T-43).
+
+Branch: `vanguard/packages/domain/task_state.py` defines `SemanticTaskState` and `CodingTaskState = SemanticTaskState` (`8637db55`).
+
+## 6. Context packet and WorkspaceEpoch
+
+Keep `ContextPacket`. FEATURE_SPEC 4-tier budget is L4/L5 **policy** on existing `ContextCompiler` (not `progressive.py` as a second compiler). `WorkspaceEpoch := {treeHash, indexDigest, sourceRevision, compiledAtTurn}` `[PROPOSAL]` T-14.
+
+## 7. 2PC and tamper
+
+Living rule: create `adapters/environment/transaction.py` and `runtime/governance/tamper_shield.py` when T-17/T-18 start. Today `GitEnvironment.apply` is sequential; `ast.parse` is post-write observation. Historical CMX-09 schemas remain in Appendix H.
+
+## 8. Dialect
+
+Wire recovery: `adapters/models/dialect.py`. Malformed → Proposal: `agency/episode/protocol_recovery.py`.
+
+## 13. Stop-rollback / research-explanation remainder
+
+SHALL text for stop/simplify/rollback and research/explanation lives in §§11–12 above. Do not treat handbook prose as HEAD architecture.
+
+## 14. MISSING vs HEAD
+
+| Module | Lock `66aa7a3c` | This branch |
+|---|---|---|
+| `domain/task_state.py` | MISSING | LIVE (`8637db55`) |
+| `runtime/task_state.py` `fold_task_state` | LIVE (old schema) | Fold of domain type (`8637db55`) |
+| `adapters/environment/transaction.py` | MISSING | MISSING |
+| `runtime/governance/tamper_shield.py` | MISSING | MISSING |
+| `agency/context/progressive.py` | MISSING | Do not add — policy on `ContextCompiler` |
+| `runtime/event_store.py` | MISSING | Owner remains `adapters/stores/event_store.py` |
+| `ADMISSION_GATE_EXEMPT` | FACT | Unchanged. T-04 not started |
+
+## 15. Error / verification matrix
+
+Living refusals: T-42 / T-38 / T-25 in §1 and §4. A §24 handbook matrix stays in [`technical.md`](technical.md).
+
+## 16. `[PROPOSAL]` catalogs
+
+A §6.2 17 types, extra ports, CampaignPlan, mutation 0.80 — tagged `[PROPOSAL]`. B §6.12 wins for what to implement.
+
+---
+
+*Historical CMX-09 draft. Living §§ 0–16 win.*
 
 # Appendix H: Historical CMX-09 delta
 

@@ -37,7 +37,7 @@ Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technic
 
 B §18 tickets T-01–T-35 are canonical. A §31 maps into those IDs or T-36+ (see merge map appendix). v2 `SUB-*` are aliases. Live backlog `SUB-01` (kernel S0–S12) is a different package.
 
-Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-dag-do-not-execute-as-the-program).
+Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-dag-do-not-execute).
 
 ### Context: Instrument truth
 
@@ -90,6 +90,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 **T-06 Remove Forge `test_count = 1`** (B)
 - [x] Delete `forge/engine.py` L309–311 fallback
 - [x] Chimera `executed = 1` on bare exit 0 — same treatment (subtask from A G-01)
+- Chimera non-zero-exit leftover closed in `63b77116`.
 - Falsifier: exit 0 + empty output ⇒ not passed
 
 **T-07 Typed verification command subject** (B)  
@@ -101,6 +102,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - [x] collected/executed/passed/failed/skipped (A §31.2–3)  
 - [x] `Ran 0 tests` / `0 passed` ⇒ 0  
 - [x] Unrecognized runner remains unknown  
+- Session parser + pack `ParsedTestOutput.runner` landed `8637db55` (B). Chimera tail done by A (`63b77116`). Do not uncheck.
 - Requires: T-07  
 
 **T-42 Adversarial coding verification suite** (A §31.6)  
@@ -125,10 +127,11 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 
 ### Context: Semantic state and resume
 
-**T-09 Domain SemanticTaskState** (B) merge with `CodingTaskState`  
-- [x] Create `domain/task_state.py` stdlib + JCS  
-- [x] Do not create a second authority beside `fold_task_state`  
-- [x] A §6.2 extra types remain `[PROPOSAL]` catalog in spec, not this task’s scope  
+**T-09 Domain SemanticTaskState** (B) merge with `CodingTaskState`
+- [x] Land `vanguard/packages/domain/task_state.py` (stdlib + JCS) on commit `8637db55`
+- [x] `CodingTaskState is SemanticTaskState`; one fold: `runtime/task_state.py` `fold_task_state`
+- [x] A §6.2 extra types remain `[PROPOSAL]` in spec
+- Lock `66aa7a3c`: path MISSING. Branch: present on `8637db55` — B owns. MS-RESUME stays `OPEN`.  
 
 **T-10 Runtime fold** (B)  
 - [x] Fold events; unknown ignored; remove `"test" in action.lower()` inference  
@@ -337,10 +340,12 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - [ ] Run `docs_rag_v0.py --file` on every changed production path  
 - [ ] `just docs-knowledge` — never hand-edit `.generated/`  
 
-**T-68 Link repair** (PHASE-0 §8) — can start immediately; does not wait for T-01  
+**T-68 Link repair** (PHASE-0 §8) — can start immediately; does not wait for T-01
+- [x] Living `docs/execution/` / README / AGENTS: `active.md` → `tasks.md`; `FEATURE_SPEC.md` is a pointer (this Dev C pass)
+- [ ] Remaining historical mentions in handbook appendices / research reports — do not rewrite research  
 
 
----
+
 
 ## Appendix: B §18 ticket bodies (verbatim)
 
@@ -532,7 +537,7 @@ Dependency key: `requires:`. Status: all `PROPOSED` unless noted.
 Tickets 01–08 are the true critical path for long-horizon **truth**. Tickets 09–20 are the critical path for long-horizon **competence**. 21–25 are hygiene. 26–27 are the first honest score. 28–35 are gated. Waves 6–10 and tickets 28–35 are **`[PROPOSAL]`**; this lock does not authorize them.
 
 
----
+
 
 ## Appendix: A §31 → T-id merge map
 
@@ -568,62 +573,13 @@ Tickets 01–08 are the true critical path for long-horizon **truth**. Tickets 0
 | 29 single-agent CI | T-52 |
 | 30 first positive treatment | T-29 |
 
----
 
-## Appendix: historical CMX-09 DAG (do not execute as the program)
 
-Preserved from the pre-PHASE-0 `tasks.md`. T2–T7 map to T-09, T-17, T-18, T-15, T-21.
+## Appendix: historical CMX-09 DAG (do not execute)
 
----
-id: execution.tasks
-canonical_id: execution.tasks
-class: execution
-authority: execution
-truth_plane: TARGET
-status: living
-implementation_status: BACKEND_FINISH_ACTIVE
-owner: repository-governance
-canonical_for:
-  - active-sprint-task-dag
-  - current-work-state
-purpose: Dynamic execution graph and active task DAG for the in-flight sprint. Forensic audits quarantined.
-audience:
-  - contributor
-  - release-owner
-version: 0.9.2a4
-last_verified: 2026-09-03
-normative_authority:
-  - docs/SPEC.md
-  - docs/execution/FEATURE_SPEC.md
-relationships:
-  - execution.milestones
-  - execution.backlog
-  - execution.feature_spec
-reviewer: repository-governance
-confidence: high
----
+Pre-PHASE-0 T2–T7 map to T-09, T-17, T-18, T-15, T-21.
 
-# Active Sprint Work Runway: W-092-F1 / CMX-09
-
-```text
-====================================================================================================
-Authority: Execution (Dynamic Work DAG & Active Sub-Goal)
-Active Ticket: CMX-09 / W-092-F1 (Canonical Coding Max Convergence)
-Delta Contract: docs/execution/FEATURE_SPEC.md
-Forensic Rule: Commit SHAs, raw benchmark logs, and diagnostic autopsies are quarantined out of this file.
-====================================================================================================
-```
-
-## 1. Active WIP Lanes (WIP=1 Rule)
-
-| Lane | Assigned Owner | Active Package | Target Gate | Current Lifecycle State |
-|---|---|---|---|---|
-| **Lane A (Implementation)** | Senior Engineering Agent | **`CMX-09`** (Canonical Harness Convergence) | `W-092-F1` | `IN_PROGRESS` |
-| **Lane B (Independent Verification)** | Evaluator / Release Gate | **`REL-01R`** (Runner & Navigation Truth) | `W-092-F0` | `REVIEWING` |
-
----
-
-## 2. Dynamic Execution DAG (Lane A: `CMX-09`)
+### Historical CMX-09 DAG
 
 ```mermaid
 graph TD
@@ -636,7 +592,7 @@ graph TD
     T6 --> T7["T7: Dogfooding & Sprint Verification Gate<br/>(Milestone W-092-F1 Closure)"]
 ```
 
-### Active Sub-Goal & Task Status Matrix
+### Historical T0–T7 checklist (do not execute)
 
 - [x] **T0: Substrate Consolidation & Regression Hardening**
   - Consolidated divergent branches into `main` via PR #30.
@@ -677,36 +633,4 @@ graph TD
   - Run all boundary, TCB budget, and contract falsifiers.
   - Promote verified interfaces from `FEATURE_SPEC.md` into canonical `docs/architecture/`.
 
----
 
-## 3. Active Blockers & Dependencies
-
-- **Blocker B-1**: None currently blocking Lane A. All T0 prerequisites green.
-- **Blocker B-2**: Lane B canary runs (`REL-02R`) blocked until `REL-01R` runner repair finishes.
-- **Blocker B-3**: `TUI-01` (`aether` terminal, [`backlog.md` §2.7](backlog.md)) is not a WIP=1 lane occupant — both lanes above are full — and its milestone (`M-9`/`TC-E-047`) stays `BLOCKED` on `M-8`. Its command-registry (`clients/tui-core`) and plan-mode-enforcement (`runtime/profiles.py`/`wiring.py`/`session.py`) slices landed opportunistically as self-contained, independently falsifiable units that do not contend for either occupied lane, per `backlog.md`'s scope note that it tracks "work outside the active sprint WIP=1 constraint." The OpenTUI qualification spike (`PRD_AETHER_TUI.md` §8.1) is only partially run (RSS over budget; see `backlog.md` `TUI-01`) — the render-layer rewrite and packaging remain unauthorized and unstarted pending a full spike pass and explicit lane authorization.
-
----
-
-## 4. Verification & Falsifier Execution Commands
-
-Autonomous agents executing tasks in this sprint MUST execute the following exact commands to validate progress:
-
-```bash
-# 1. Architecture boundaries & TCB budget (threshold <= 1438 LOC)
-python3 tools/linters/check_boundaries.py
-python3 tools/linters/check_tcb_budget.py
-
-# 2. Invariant linters
-python3 tools/linters/check_domain_blindness.py
-python3 tools/linters/check_isolation_policy.py
-python3 tools/linters/check_markdown_links.py
-
-# 3. Unit & contract test suites
-python3 -m unittest discover -s test/kernel -t .
-python3 -m unittest discover -s test/contracts -t .
-python3 -m unittest discover -s test/agency -t .
-python3 -m unittest discover -s test/runtime -t .
-
-# 4. Frontend & client test suite
-npm test
-```

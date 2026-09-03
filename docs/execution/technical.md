@@ -35,7 +35,10 @@ Developers SHALL use this file plus [`spec.md`](spec.md), [`tasks.md`](tasks.md)
 
 **Recommended reading order (not a sprint):** T-01–T-08, then T-09–T-13.
 
-**FACT STORE path:** `adapters/stores/event_store.py` (not `runtime/event_store.py`). **`domain/task_state.py`** holds `SemanticTaskState`; `fold_task_state` remains the only fold in `runtime/task_state.py`.
+**FACT STORE path:** `adapters/stores/event_store.py`.
+**I-STATE.** Lock `66aa7a3c`: `domain/task_state.py` MISSING. Branch: B landed `8637db55` (`SemanticTaskState`; fold in `runtime/task_state.py`). Not MS-RESUME closed.
+**MS-INSTRUMENT CLOSED** at `63b77116`.
+**T-04 / `ADMISSION_GATE_EXEMPT`:** unchanged. Do not implement here.
 
 ## 0. Epistemic legend
 
@@ -1906,7 +1909,9 @@ Shared rollback for every wave: revert the wave’s files; do not weaken falsifi
 
 ---
 
-## 9. Sprint sequence
+## Appendix: historical schedule (do not execute)
+
+Copied A §19 / B Appendix B sprint labels. Capability recipes remain below as **Recipe: INSTRUMENT / TRUTH / RESUME / …** pointing at MS-* and T-*. This is not a calendar.
 
 Implementation lane (WIP=1) and evaluation lane (WIP=1) never share a writer.
 

@@ -1,5 +1,5 @@
 import type { TerminalScreen } from "../../terminal/screen.js";
-import { DEFAULT_THEME, type ThemeTokens } from "../../theme.js";
+import { DEFAULT_THEME, type ThemeTokens, type SemanticStyle } from "../../theme.js";
 import { renderFoldedHeader } from "./activity-card.js";
 
 export function renderToolCard(
@@ -9,11 +9,12 @@ export function renderToolCard(
   details?: string,
   durationMs?: number,
   isExpanded: boolean = false,
-  theme: ThemeTokens = DEFAULT_THEME
+  theme: ThemeTokens = DEFAULT_THEME,
+  headerStyle?: SemanticStyle
 ): number {
   let linesRendered = 1;
   const suffix = durationMs !== undefined ? `${durationMs} ms` : undefined;
-  renderFoldedHeader(screen, row, title, isExpanded, suffix, theme);
+  renderFoldedHeader(screen, row, title, isExpanded, suffix, theme, headerStyle);
 
   if (isExpanded && details) {
     const detailLines = details.split("\n");

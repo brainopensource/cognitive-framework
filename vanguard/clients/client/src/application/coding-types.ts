@@ -51,7 +51,19 @@ export type CodingProjectionKind =
   | "budget"
   | "route"
   | "note"
-  | "error";
+  | "error"
+  // Kinds the ledger already carries that the headless receipt stream used to
+  // drop on the floor (`entrypoint.py` projected only fs/proc receipts plus a
+  // trailing note), leaving `vg --headless` blind to verification, spend,
+  // approval gates, sub-agents and recovery points.
+  | "reflect"
+  | "verdict"
+  | "approval"
+  | "checkpoint"
+  | "child"
+  | "capability"
+  | "context"
+  | "conflict";
 
 export type CodingProjection = {
   kind: CodingProjectionKind;
@@ -69,6 +81,17 @@ export type CodingProjection = {
   spentUsdMicros?: number | null;
   remainingUsdMicros?: number | null;
   detail?: string;
+  verdict?: string;
+  status?: string;
+  reason?: string;
+  action?: string;
+  checkpointId?: string;
+  branchId?: string;
+  childId?: string;
+  role?: string;
+  capability?: string;
+  beforeTokens?: number;
+  afterTokens?: number;
   [key: string]: unknown;
 };
 

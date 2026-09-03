@@ -728,4 +728,8 @@ Before declaring the apply done:
 
 ---
 
+---
+
+**Applied 2026-09-03.** Content copied into `docs/execution/{milestones,spec,technical,backlog,tasks}.md`. Drafts remain unused reference. This PHASE-0 file is not day-to-day authority.
+
 *End of PHASE-0. Apply by copying triad content into the five execution files using §3–§6. Authority after apply: `docs/execution/`. Drafts remain unused reference.*

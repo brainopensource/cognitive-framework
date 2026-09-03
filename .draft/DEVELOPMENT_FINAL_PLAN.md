@@ -21,6 +21,8 @@ supersedes: []
 superseded_by: null
 ---
 
+> **Unused reference.** Day-to-day development authority is [`docs/execution/`](../docs/execution/): [`milestones.md`](../docs/execution/milestones.md), [`spec.md`](../docs/execution/spec.md), [`technical.md`](../docs/execution/technical.md), [`backlog.md`](../docs/execution/backlog.md), [`tasks.md`](../docs/execution/tasks.md). This draft remains forensic lock at HEAD `66aa7a3c`. Do not treat it as the work board.
+
 # AETHER SOTA Software-Engineering Agent Development Program
 
 ## Backend-first plan for long-horizon, greenfield, brownfield, research, and explanation agents

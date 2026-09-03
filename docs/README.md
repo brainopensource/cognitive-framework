@@ -24,14 +24,14 @@ normative_authority:
   - VISION.md
   - docs/SPEC.md
   - docs/decisions.md
-  - docs/execution/active.md
+  - docs/execution/tasks.md
 relationships:
   - arch.system.overview
   - arch.system.boundaries
   - arch.system.data-flow
   - spec.core
   - decision.index
-  - execution.active
+  - execution.tasks
 reviewer: documentation-specialist
 confidence: high
 ---
@@ -50,7 +50,7 @@ AETHER documentation strictly separates constitutional vision, normative law, ar
 | **3. Normative Spec** | [`docs/SPEC.md`](SPEC.md) | RFC 2119 normative requirements and architectural refusals. |
 | **4. Decisions Index** | [`docs/decisions.md`](decisions.md) | Compact index of accepted Architecture Decision Records (ADRs). |
 | **5. Architecture & Reference** | [`docs/architecture/`](architecture/overview.md), [`docs/backend/`](backend/architecture/runtime-execution.md), [`docs/frontend/`](frontend/README.md) | System workflows, subsystem architectures, wire contracts, and API references. |
-| **6. Active Execution Runway** | [`docs/execution/tasks.md`](execution/tasks.md), [`docs/execution/FEATURE_SPEC.md`](execution/FEATURE_SPEC.md), [`docs/execution/milestones.md`](execution/milestones.md), [`docs/execution/backlog.md`](execution/backlog.md) | The 4 operational runway documents: active work DAG, delta spec, milestone gates, and capability inventory. |
+| **6. Execution Runway** | [`docs/execution/tasks.md`](execution/tasks.md), [`docs/execution/spec.md`](execution/spec.md), [`docs/execution/technical.md`](execution/technical.md), [`docs/execution/milestones.md`](execution/milestones.md), [`docs/execution/backlog.md`](execution/backlog.md) | The 5 operational runway documents: flat task tree, delta spec, handbook, TARGET gates, and capability inventory. |
 | **7. Product PRDs** | [`docs/product/`](product/frontend/PRD_FRONTEND_PLATFORM.md) | Client application PRDs and product requirements. |
 | **8. Non-Canonical** | [`docs/theory/`](theory/agent-substrate.md), [`docs/research/`](research/), [`docs/reports/`](reports/) | Non-canonical theoretical essays, historical harness research, and post-mortem audit reports (`authority: non-canonical`). |
 
@@ -102,7 +102,7 @@ To optimize LLM context usage (e.g. 16K and 32K context windows) and prevent pro
 | **Artifacts & Evidence** | [`docs/backend/architecture/assurance-evaluation.md`](backend/architecture/assurance-evaluation.md) | [`backend/reference/artifacts-memory.md`](backend/reference/artifacts-memory.md) | ~3,200 – 5,500 tokens |
 | **CLI / TUI / Client** | [`docs/product/frontend/PRD_AETHER_CLI.md`](product/frontend/PRD_AETHER_CLI.md) | [`docs/product/frontend/PRD_AETHER_TUI.md`](product/frontend/PRD_AETHER_TUI.md) | ~4,000 – 6,500 tokens |
 | **Frontend Platform** | [`docs/product/frontend/PRD_FRONTEND_PLATFORM.md`](product/frontend/PRD_FRONTEND_PLATFORM.md) | [`docs/product/frontend/PRD_AETHER_DESKTOP.md`](product/frontend/PRD_AETHER_DESKTOP.md) | ~6,000 – 9,000 tokens |
-| **Active Tasks / Sprints**| [`docs/execution/tasks.md`](execution/tasks.md) | [`docs/execution/FEATURE_SPEC.md`](execution/FEATURE_SPEC.md) | ~2,000 – 4,000 tokens |
+| **Execution tasks**| [`docs/execution/tasks.md`](execution/tasks.md) | [`docs/execution/spec.md`](execution/spec.md), [`docs/execution/technical.md`](execution/technical.md) | ~2,000 – 8,000 tokens |
 
 ---
 

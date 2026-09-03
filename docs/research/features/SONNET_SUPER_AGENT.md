@@ -758,8 +758,8 @@ outward for its core loop).
 
 ## 8. Roadmap Assessment: Is "Next Sprint" Real?
 
-The existing milestone ladder (`docs/execution/active.md`'s
-`CMX-09`→`CMX-11` sequence; HYDRA §11.1's `M-Hydra-1`→`M-Hydra-4`) is
+The existing milestone ladder (`docs/execution/tasks.md`; historical name
+`active.md` is absent; `CMX-09`→`CMX-11` sequence; HYDRA §11.1's `M-Hydra-1`→`M-Hydra-4`) is
 directionally correct — converge presets, then truthful completion, then
 durable sessions, then repo-scale context — but it is sequenced as
 backend-plumbing-first. This session's evidence suggests the sequencing

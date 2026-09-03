@@ -119,7 +119,9 @@ nav:
       - PRD TUI: product/frontend/PRD_AETHER_TUI.md
       - PRD Platform: product/frontend/PRD_FRONTEND_PLATFORM.md
   - Execution:
-      - Active Execution: execution/active.md
+      - Tasks: execution/tasks.md
+      - Spec: execution/spec.md
+      - Technical: execution/technical.md
       - Milestones: execution/milestones.md
       - Backlog: execution/backlog.md
   - Theory & Reports:

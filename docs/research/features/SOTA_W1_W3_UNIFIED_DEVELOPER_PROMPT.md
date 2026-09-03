@@ -2,7 +2,8 @@
 
 Subject: `ca47eef7da1b4075f8a69d238fe1626fa1ab4c8e` (re-audit; do not trust this SHA blindly)
 Program of record: `.draft/VANGUARD_SOTA_BACKEND_COMPLETION_PROGRAM_2026-08-31.md`
-Canonical status owners: `docs/execution/active.md`, `milestones.md`, `backlog.md`
+Canonical status owners: `docs/execution/tasks.md`, `milestones.md`, `backlog.md`
+(`active.md` is a historical name; the file is absent).
 
 ---
 
@@ -76,7 +77,7 @@ Non-negotiable, in order:
 2. Inspect `context_summary`; run `lda doctor` and `lda context`.
 3. Reverse-route every production file you intend to touch; pin affected
    symbols, callers, and tests. Use the `lda-navigator` skill.
-4. Read, in this order: `docs/execution/active.md`, `milestones.md`,
+4. Read, in this order: `docs/execution/tasks.md`, `milestones.md`,
    `backlog.md`, then `.draft/VANGUARD_SOTA_BACKEND_COMPLETION_PROGRAM_2026-08-31.md`.
 5. Read as **non-canonical design input only** (they are not source owners):
    - `docs/reports/reviews/electroweak_v092/BACKEND_GUIDELINES_BRIEFING.md`

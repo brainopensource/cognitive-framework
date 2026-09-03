@@ -5,7 +5,8 @@
 **Date:** 2026-09-01
 
 Status and authorization resolve through [`milestones.md`](../docs/execution/milestones.md),
-[`active.md`](../docs/execution/active.md), and [`backlog.md`](../docs/execution/backlog.md).
+[`tasks.md`](../docs/execution/tasks.md), and [`backlog.md`](../docs/execution/backlog.md)
+(`active.md` is a historical name; the file is absent).
 This brief does not authorize M-9, M-10, or benchmark claims. The operator has
 separately authorized up to $0.15, 300,000 tokens, and 120 OpenRouter calls for
 SOTA-04 and internal SOTA-08 B1/B2 only; the ledger must fail closed.

@@ -48,13 +48,13 @@ observe → propose → authorize → effect → receipt → evaluate
 | **Architectural authority** | [`VISION.md`](VISION.md) — constitutional; law and roadmap are subordinate to it |
 | **Normative law** | [`docs/SPEC.md`](docs/SPEC.md) + accepted ADRs indexed through [`docs/decisions.md`](docs/decisions.md) |
 | **Development package** | `vanguard-runtime` metadata currently declares `0.9.0b1` (`pyproject.toml` is the version source); that string is not M-9 acceptance. Python `>=3.10` (tested on Python 3.12 in CI) |
-| **Current status** | [`docs/execution/active.md`](docs/execution/active.md) is the sole current-state source; status is not duplicated here. |
+| **Current status** | Execution runway: [`docs/execution/tasks.md`](docs/execution/tasks.md) (work tree), [`docs/execution/milestones.md`](docs/execution/milestones.md) (TARGET gates). Present HEAD architecture is `docs/SPEC.md` + `docs/architecture/` + `docs/backend/`. |
 | **Roadmap** | M-8 evidence integrity → Coding Max vertical slice → M-9 `0.9.0b1` → M-10 `0.9.0` → non-authorizing 1.0 qualification horizon |
 | **Production truth** | `vanguard/packages/` (`domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`; `apps` is a runtime client) |
 
 [![Vision](https://img.shields.io/badge/Law_Zero-VISION.md-purple.svg)](VISION.md)
 [![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/SPEC.md)
-[![Active board](https://img.shields.io/badge/Status-active.md-orange.svg)](docs/execution/active.md)
+[![Execution](https://img.shields.io/badge/Status-tasks.md-orange.svg)](docs/execution/tasks.md)
 
 ## 1. What exists today vs the locked target
 
@@ -77,7 +77,7 @@ This section is deliberately honest about the gap. The target below is binding a
 | Memory, retrieval, skills, learning | Durable memory ports, CAS storage, and governed learning engine implemented | verified durable memory, lift, CAS promotion/rollback (M-8) |
 | Hermetic assurance (RF-85) | **Available, optional, claims zero rows** | stays optional |
 
-Mechanism presence is not milestone acceptance; the active board cites the evidence gaps.
+Mechanism presence is not milestone acceptance; [`docs/execution/milestones.md`](docs/execution/milestones.md) cites the evidence gaps.
 
 ### Immediate delivery order
 
@@ -124,7 +124,7 @@ All model access across runtime, benchmarks, CLI, and apps is **strictly governe
 | 2 | **Decisions (binding)** | [`docs/decisions.md`](docs/decisions.md) |
 | 3 | **Architecture & Reference** | [`docs/architecture/`](docs/architecture/), [`docs/backend/`](docs/backend/), [`docs/frontend/`](docs/frontend/) |
 | 4 | **Product PRDs** | [`docs/product/`](docs/product/) |
-| 5 | **Active Execution** | [`docs/execution/active.md`](docs/execution/active.md); [`docs/execution/milestones.md`](docs/execution/milestones.md) |
+| 5 | **Execution runway** | [`docs/execution/tasks.md`](docs/execution/tasks.md), [`docs/execution/milestones.md`](docs/execution/milestones.md), [`docs/execution/spec.md`](docs/execution/spec.md), [`docs/execution/technical.md`](docs/execution/technical.md), [`docs/execution/backlog.md`](docs/execution/backlog.md) |
 | 6 | **Theory & Reports** | [`docs/theory/`](docs/theory/), [`docs/research/`](docs/research/), [`docs/reports/`](docs/reports/) |
 
 A lower document may not be used to reject a Vision concept. This README introduces no architecture
@@ -135,7 +135,7 @@ of its own.
 1. [`VISION.md`](VISION.md) — what AETHER is and where it is going.
 2. [`docs/SPEC.md`](docs/SPEC.md) — normative requirements and invariants.
 3. [`docs/decisions.md`](docs/decisions.md) — accepted ADRs and decision index.
-4. [`docs/execution/active.md`](docs/execution/active.md) & [`docs/execution/milestones.md`](docs/execution/milestones.md).
+4. [`docs/execution/tasks.md`](docs/execution/tasks.md) & [`docs/execution/milestones.md`](docs/execution/milestones.md) (future work vs TARGET gates).
 5. [`docs/architecture/overview.md`](docs/architecture/overview.md) — as-built map, navigational only.
 
 ### Fast targeted navigation
@@ -242,12 +242,12 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 
 ## 5. Roadmap & Execution Status
 
-Sequencing: [`docs/execution/milestones.md`](docs/execution/milestones.md). Authorization:
-[`docs/execution/active.md`](docs/execution/active.md).
+Sequencing: [`docs/execution/milestones.md`](docs/execution/milestones.md). Work tree:
+[`docs/execution/tasks.md`](docs/execution/tasks.md). Packages: [`docs/execution/backlog.md`](docs/execution/backlog.md). Deltas: [`docs/execution/spec.md`](docs/execution/spec.md). Handbook: [`docs/execution/technical.md`](docs/execution/technical.md).
 
 Stable dependency order is `C0 -> {M-4, M-5a}`, `M-5a -> M-5b`, `M-4 -> M-6`,
 `M-6 -> {M-6.5, M-7}`, and `{M-6.5, M-7} -> M-8`. Exact current state and permitted parallel work
-belong only to the active board.
+belong only to [`docs/execution/tasks.md`](docs/execution/tasks.md) and [`docs/execution/milestones.md`](docs/execution/milestones.md).
 
 `M7-01` remains a named parallel measurement lane (`ADR-0092`) and ends in an explicit decision to
 implement, simplify, or cancel advanced scheduling.
@@ -373,8 +373,8 @@ Model providers are strictly abstracted behind `ModelPort` (`vanguard/packages/p
 - **Testing Architecture & Guide**: [`test/README.md`](test/README.md)
 
 `AGENTS.md` is the single tool-neutral contributor contract for humans and AI agents. There are no
-model-specific instruction files; current execution state lives only in
-[`active.md`](docs/execution/active.md).
+model-specific instruction files. Future work lives in the five-file execution runway
+([`tasks.md`](docs/execution/tasks.md) and companions). Present HEAD architecture lives in `docs/SPEC.md` and `docs/architecture/`.
 
 
 ## 10. Mental models worth internalising

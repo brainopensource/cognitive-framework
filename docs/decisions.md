@@ -38,7 +38,7 @@ confidence: high
 
 This document is the single canonical repository for the foundational architectural choices and trade-offs governing AETHER. It answers strictly **why** non-obvious directions were chosen over defensible alternatives.
 
-Normative requirements belong exclusively to [`spec.core`](SPEC.md), implementation structure to [`architecture`](architecture/overview.md) and [`reference`](backend/reference/schemas.md), and execution status to [`execution.active`](execution/active.md).
+Normative requirements belong exclusively to [`spec.core`](SPEC.md), implementation structure to [`architecture`](architecture/overview.md) and [`reference`](backend/reference/schemas.md), and execution status to [`execution.tasks`](execution/tasks.md).
 
 ---
 

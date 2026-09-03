@@ -28,6 +28,8 @@ authorizes_nothing: true
 navigation_mode: degraded-locator-plus-source
 ---
 
+> **Unused reference.** Day-to-day development authority is [`docs/execution/`](../docs/execution/): [`milestones.md`](../docs/execution/milestones.md), [`spec.md`](../docs/execution/spec.md), [`technical.md`](../docs/execution/technical.md), [`backlog.md`](../docs/execution/backlog.md), [`tasks.md`](../docs/execution/tasks.md). This draft remains forensic lock at HEAD `66aa7a3c`. Do not treat it as the work board.
+
 # AETHER / Vanguard: SOTA Autonomous Coding Agent & Harness Builder Meta-Framework
 ## Architecture, Composable Primitives, and Engineering Execution Masterplan (v2)
 

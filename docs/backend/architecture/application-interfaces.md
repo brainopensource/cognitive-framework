@@ -19,7 +19,7 @@ audience:
   - contributor
 analysis_subject_sha: 9fd444674bf3a97f2673ff36a5f5928ef046c574
 version: 0.9.1a1
-last_verified: 2026-08-29
+last_verified: 2026-09-03
 evidence:
   - E-B-002
   - E-B-005
@@ -82,15 +82,15 @@ Clients interact with Vanguard through distinct entry paths depending on the hos
                │                           │
 ┌──────────────▼───────────────────────────▼──────────────────┐
 │                   CANONICAL RUNTIME CORE                    │
-│   AppService · HarnessSession · EpisodeEngine · Kernel      │
+│   ApplicationService · HarnessSession · EpisodeEngine       │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 2. In-Process Python Path (`AppService` / CLI)
+## 2. In-Process Python Path (`ApplicationService` / CLI)
 
-The Python CLI (`vanguard run`, `vanguard resume`) directly instantiates `AppService` and `HarnessSession` within the same OS process:
+The Python CLI (`vanguard run`, `vanguard resume`) and applications (`apps/coding_max`) instantiate `ApplicationService` (`vanguard.packages.runtime.app_service.ApplicationService`) and `HarnessSession` within the same OS process:
 - **Zero Serialization Overhead**: Uses in-memory domain objects directly.
 - **Direct Event Subscription**: Ingests events synchronously via callback handlers.
 - **Cassette Support**: Records and deterministically replays model interactions via local cassette files.
@@ -122,8 +122,8 @@ The TypeScript live `StartRun` builder in `client-core` omits `profileId` by def
 ### 2. Command Surface Asymmetry (`UNR-B-003`)
 The Python CLI (`vanguard`) and TypeScript CLI (`vg`) expose non-identical command sets (e.g. `cassette` exists only in Python, whereas `vg code`, `vg trace`, `vg why` exist in TypeScript) without a shared command catalog.
 
-### 3. Reserved `apps/` Slot (`UNR-B-008`)
-The directory `vanguard/packages/apps/` is currently a reserved, empty package marker in the hexagonal boundary lattice and contains no active application code.
+### 3. Applications Slot (`apps/coding_max`)
+The directory `vanguard/packages/apps/` houses thin application facades (such as `apps/coding_max/facade.py` exposing `CodingMaxFacade`). It operates strictly as a client of `ApplicationService`, selecting presets and validating input without duplicating runtime orchestration.
 
 ---
 

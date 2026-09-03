@@ -1,3 +1,14 @@
+---
+id: theory.sota-agentic-coding-harness
+class: theory
+authority: non-canonical
+canonical_for: []
+status: living
+owner: principal-ai-systems-architect
+version: "1.0.0"
+last_verified: 2026-09-03
+---
+
 # SOTA AGENTIC CODING HARNESS ENGINEERING TREATISE
 ## High-Performance Recursive Agency, Resilient Code Manipulation, Zero-Drift Benchmarking, and Context Economics
 

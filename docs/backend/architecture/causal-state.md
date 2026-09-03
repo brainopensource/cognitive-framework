@@ -19,7 +19,7 @@ audience:
   - contributor
 analysis_subject_sha: 9fd444674bf3a97f2673ff36a5f5928ef046c574
 version: 0.9.1a1
-last_verified: 2026-08-29
+last_verified: 2026-09-03
 evidence:
   - E-B-008
   - E-B-009
@@ -175,5 +175,5 @@ Benchmark evidence should bind `run_id`, task and repository digests, harness/ma
 
 - **Ledger State & Reducers**: `vanguard/packages/domain/ledger/` (`state.py`, `agent_view.py`, `progress.py`, `events.py`).
 - **Checkpoints**: `vanguard/packages/runtime/checkpoints.py`.
-- **Event Store Adapter**: `vanguard/packages/adapters/stores/sqlite.py`.
+- **Event Store Adapter**: `vanguard/packages/adapters/stores/event_store.py` (`SqliteEventStore`).
 - **Recovery Tests**: `test/falsifiers/test_rf25_cold_continuation.py`, `test/falsifiers/test_rf96_checkpoint_reconstruction.py`, `test/contracts/test_b3_wal_recovery.py`.

@@ -19,7 +19,7 @@ audience:
   - contributor
 analysis_subject_sha: 9fd444674bf3a97f2673ff36a5f5928ef046c574
 version: 0.9.1a1
-last_verified: 2026-08-29
+last_verified: 2026-09-03
 evidence:
   - E-B-013
   - E-B-031
@@ -127,5 +127,5 @@ Upon episode conclusion, `EvidenceCaptureService` compiles an immutable `Traject
 - **Evidence Capture**: `vanguard/packages/runtime/evidence_capture.py`.
 - **Trajectory Representation**: `vanguard/packages/runtime/trajectory.py`.
 - **Evaluator Gateway**: `vanguard/packages/runtime/evaluator_gateway.py`.
-- **Evaluator Daemon & Client**: `vanguard/packages/adapters/evaluators/daemon.py`, `daemon_client.py`.
+- **Evaluator Daemon & Client**: `vanguard/packages/adapters/evaluators/daemon.py`, `client.py` (`EvaluatorClient`).
 - **Assurance Tests**: `test/contracts/test_trajectory_v2.py`, `test/adapters/test_evaluator_daemon.py`, `test/runtime/test_evaluation_service.py`.

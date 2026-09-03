@@ -20,7 +20,7 @@ audience:
   - contributor
 analysis_subject_sha: 9fd444674bf3a97f2673ff36a5f5928ef046c574
 version: 0.9.1a1
-last_verified: 2026-08-29
+last_verified: 2026-09-03
 evidence:
   - E-B-002
   - E-B-007
@@ -136,7 +136,8 @@ $$\\text{domain} \\leftarrow \\text{ports} \\leftarrow \\text{kernel} \\leftarro
 - Lower layers never import higher layers.
 - Kernel and Domain are strictly domain-blind (`INV-B-002`).
 - Concrete Adapters implement Port protocols and never import Kernel or Agency.
-- Apps slot (`vanguard/packages/apps/`) is reserved as a client slot of runtime.
+- Apps slot (`vanguard/packages/apps/`) is a client slot of runtime (e.g., `apps/coding_max/` providing `CodingMaxFacade`).
+- Clients (`vanguard/clients/`) consume runtime services through CLI, Desktop, TUI, Lab, or Studio.
 
 ---
 
@@ -144,7 +145,7 @@ $$\\text{domain} \\leftarrow \\text{ports} \\leftarrow \\text{kernel} \\leftarro
 
 A typical task execution flows through the architecture as follows:
 
-1. **Invocation**: Operator runs `vanguard run "<task>"` or `vg run "<task>"`.
+1. **Invocation**: Operator runs `vanguard run "<task>"` or `vg code --preset balanced "<task>"`.
 2. **Composition & Identity**: `runtime.compose` parses the pack manifest and resolves `ExecutionProfile`, constructing the immutable `RunPlan` ($D_H, D_R$).
 3. **Session Activation**: `HarnessSession` starts, opens the SQLite WAL event store, binds `LedgerEmitter`, and emits `RunStarted`.
 4. **Turn Cognition**: `agency.EpisodeEngine` compiles context layers L1-L4 and prompts the LLM via `ModelPort`.
@@ -161,12 +162,12 @@ A typical task execution flows through the architecture as follows:
 - **`UNR-B-002` (Isolated Workflow Scheduler)**: `mhf.topology/2` workflow schedulers are unit-tested in isolation but not yet wired into the canonical runtime harness.
 - **`UNR-B-003` (CLI Command Asymmetry)**: Python and TypeScript CLIs provide distinct, non-identical command subsets without a unified registry.
 - **`UNR-B-004` (Legacy Compatibility Seam)**: `Runtime.execute_harness` remains public for legacy tests though retired from production paths.
-- **`UNR-B-008` (Empty `apps/` Slot)**: `vanguard/packages/apps/` contains only an empty package marker.
+- **`UNR-B-008` (`apps/` Client Layer)**: `vanguard/packages/apps/` houses thin application facades (e.g. `coding_max/facade.py`), which delegate composition and lifecycle to `ApplicationService`.
 
 ---
 
 ## Implementation Evidence
 
-- **Hexagonal Boundary Enforcement**: `tools/linters/check_boundaries.py` (checked across 453 files).
-- **TCB Budget Linter**: `tools/linters/check_tcb_budget.py` (1384 LOC <= 1438).
+- **Hexagonal Boundary Enforcement**: `tools/linters/check_boundaries.py` (checked across production packages).
+- **TCB Budget Linter**: `tools/linters/check_tcb_budget.py` (1386 LOC <= 1438).
 - **Lifecycle Integration Tests**: `test/contracts/test_b2_lifecycle_integration.py`, `test/falsifiers/test_rf94_single_runtime_authority.py`.

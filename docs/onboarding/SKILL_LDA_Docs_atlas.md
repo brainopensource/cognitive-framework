@@ -1,6 +1,10 @@
 ---
 id: skill-lda-docs-atlas
+class: how-to
 authority: descriptive
+canonical_for:
+  - lda-operational-atlas
+  - lda-technical-guide
 status: living
 owner: repository-governance
 version: "1.1.0"

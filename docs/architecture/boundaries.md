@@ -20,7 +20,7 @@ audience:
   - contributor
 analysis_subject_sha: 9fd444674bf3a97f2673ff36a5f5928ef046c574
 version: 0.9.1a1
-last_verified: 2026-08-29
+last_verified: 2026-09-03
 evidence:
   - E-B-002
   - E-B-013
@@ -107,13 +107,16 @@ Vanguard enforces six distinct, non-overlapping boundary perimeters:
 The production codebase (`vanguard/packages/`) strictly enforces a unidirectional layer hierarchy:
 
 $$\text{domain} \leftarrow \text{ports} \leftarrow \text{kernel} \leftarrow \text{agency} \leftarrow \text{runtime} \rightarrow \text{adapters}$$
+$$(\text{apps/ is a client slot of runtime})$$
 
-- **`domain/`**: Pure value objects, wire contracts, canonicalization, and deterministic event reducers. Standard library Python only.
-- **`ports/`**: Hexagonal port protocols and 5 frozen SPI contracts. Zero runtime dependencies.
-- **`kernel/`**: Domain-blind reference monitor (TCB $\le 1438$ LOC). Mediates effects, monotonic attenuation, and typed budget algebra.
-- **`agency/`**: Sequential turn execution loop, layered context compilation (L1–L4), and protocol recovery.
-- **`runtime/`**: Lifecycle orchestration, session activation, governance services, and event store binding.
-- **`adapters/`**: Concrete implementations of port protocols (Model APIs, SQLite WAL, Bubblewrap, Evaluator RPC). **Must not** import `kernel` or `agency`.
+- **`domain/`**: Pure value objects, wire contracts, RFC 8785 JCS canonicalization, deterministic event reducers, resource selectors, and task state models. Standard library Python only (zero I/O, zero network, zero dependencies).
+- **`ports/`**: Hexagonal port protocols (`KernelPort`, `ModelPort`, `SandboxPort`, `EvaluatorPort`, `EventStorePort`, `BlobStorePort`, `IndexPort`) and 5 frozen SPI contracts (`spi.py`). Zero runtime dependencies.
+- **`kernel/`**: Domain-blind reference monitor (TCB $\le 1438$ LOC; currently 1386 LOC). Mediates effects through 13-stage dispatch (S0–S12), monotonic attenuation, descriptor-bound capability grants, typed budget algebra, and execution provenance DAG.
+- **`agency/`**: Sequential turn execution loop (`EpisodeEngine`), attenuated child agent `spawn()`, layered context compilation (L1–L4), admission gates, and protocol recovery.
+- **`runtime/`**: Lifecycle orchestration (`compose.py`, `session.py`, `wiring.py`), single-writer `LedgerEmitter`, Ed25519 cryptographic governance (`governance/`), and SQLite WAL event storage.
+- **`adapters/`**: Concrete implementations of port protocols (Model APIs, SQLite WAL, Bubblewrap `bwrap`, Evaluator RPC). **Must not** import `kernel` or `agency`.
+- **`apps/`**: Thin application entrypoints (e.g., `vanguard/packages/apps/coding_max/facade.py` exposing `CodingMaxFacade` / `CodingMax`).
+- **`clients/`**: Front-end workspaces under `vanguard/clients/`: TypeScript CLI (`vg`), Desktop UI, TUI, Lab, and Studio.
 
 Enforced in CI by `tools/linters/check_boundaries.py` across all source packages.
 
@@ -124,15 +127,15 @@ Enforced in CI by `tools/linters/check_boundaries.py` across all source packages
 Clients access runtime services across strict transport barriers:
 - **UNIX Domain Socket (`vg.4`)**: Bound with POSIX mode `0600`, restricting access exclusively to the owning user process. Rejects unauthorized concurrent connections.
 - **Studio WebSocket Gateway**: Translates JSON-RPC frames over localhost-bound HTTP/WS bridges. Does not hold effect execution authority.
-- **Direct In-Process Python**: Instantiates `AppService` with in-memory message passing and zero privilege escalation.
+- **Direct In-Process Python**: Instantiates `ApplicationService` (`vanguard.packages.runtime.app_service.ApplicationService`) with in-memory message passing and zero privilege escalation.
 
 ---
 
 ## 4. Kernel TCB Reference Monitor Boundary
 
 The Trusted Computing Base is bounded and domain-blind (`INV-B-002`):
-- **Code Budget**: Strictly capped at $\le 1438$ logical lines of code (enforced by `check_tcb_budget.py`).
-- **Domain Blindness**: Kernel structures operate solely on abstract effect descriptors, monotonic capability grants, and typed budgets (`usd_micros`, `millis`, `tokens`, `bytes`).
+- **Code Budget**: Strictly capped at $\le 1438$ logical lines of code (enforced by `check_tcb_budget.py`; currently 1386 logical LOC).
+- **Domain Blindness**: Kernel structures operate solely on abstract effect descriptors, monotonic capability grants, and typed budgets (`usd_micros`, `millis`, `tokens`, `bytes`). Enforced by `check_domain_blindness.py`.
 - **Fail-Closed Mediation**: Privileged operations cannot execute without verified capability grants and reserved budget slices.
 
 ---

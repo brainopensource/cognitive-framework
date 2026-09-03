@@ -15,7 +15,7 @@ audience:
   - architect
   - contributor
 version: 0.9.1a1
-last_verified: 2026-08-29
+last_verified: 2026-09-03
 normative_authority:
   - ../SPEC.md
 relationships:

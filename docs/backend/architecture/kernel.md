@@ -19,7 +19,7 @@ audience:
   - contributor
 analysis_subject_sha: 9fd444674bf3a97f2673ff36a5f5928ef046c574
 version: 0.9.1a1
-last_verified: 2026-08-29
+last_verified: 2026-09-03
 evidence:
   - E-B-013
   - E-B-014
@@ -55,7 +55,7 @@ This document is the canonical architecture owner for the Vanguard Trusted Compu
 - Agent prompt compilation and turn cognition (owned by [`arch.agency.turns`](agency.md)).
 
 ## AS_BUILT Status
-- `IMPLEMENTED` — Pure, domain-blind, dependency-free Trusted Computing Base ($1384$ logical LOC $\le 1438$ budget, verified by `check_tcb_budget.py` and `check_domain_blindness.py`).
+- `IMPLEMENTED` — Pure, domain-blind, dependency-free Trusted Computing Base ($1386$ logical LOC $\le 1438$ budget, verified by `check_tcb_budget.py` and `check_domain_blindness.py`).
 
 ---
 
@@ -65,7 +65,7 @@ The Kernel (`vanguard.packages.kernel`) is the sole trusted authority for mediat
 
 ### Core Architectural Invariants
 - **Strict Domain Blindness (`INV-B-002`)**: The kernel imports zero task domain modules, zero agent logic, and zero concrete adapters. It operates strictly on generic descriptors, scopes, budgets, and capabilities.
-- **TCB Budget Constraint (`INV-B-002`)**: The entire kernel package is strictly capped at $\le 1438$ logical lines of code (currently 1384 LOC across 9 single-responsibility modules) to ensure comprehensive formal and human auditability.
+- **TCB Budget Constraint (`INV-B-002`)**: The entire kernel package is strictly capped at $\le 1438$ logical lines of code (currently 1386 LOC across 9 single-responsibility modules) to ensure comprehensive formal and human auditability.
 - **Single Dispatch Path**: There is no secondary, bypass, or administrative backdoor for physical effects; all execution flows through `Kernel.dispatch()`.
 
 ---

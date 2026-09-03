@@ -19,7 +19,7 @@ audience:
   - contributor
 analysis_subject_sha: d639ec4bda5ea7d8836a182393498a31fc43ea1a
 version: 0.9.2a2
-last_verified: 2026-08-31
+last_verified: 2026-09-03
 evidence:
   - E-B-010
   - E-B-019

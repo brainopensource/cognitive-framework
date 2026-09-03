@@ -12,7 +12,6 @@ future_canonical_owner: docs/product/frontend/PRD_AETHER_DESKTOP.md
 subordinate_to:
   - product.frontend.platform
   - ../../SPEC.md
-  - ../../../01_law/SECURITY.md
 ---
 
 # Product Requirements Document: AETHER Desktop (Consumer/Developer Workspace)

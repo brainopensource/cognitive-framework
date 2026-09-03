@@ -40,7 +40,7 @@ topic:
 
 ## 2. Great Paid Models
 
-- google/gemini-3.7-flash
+- google/gemini-3.8-flash
 - deepseek/deepseek-v4-pro
 - moonshotai/kimi-k3
 - z-ai/glm-5.3

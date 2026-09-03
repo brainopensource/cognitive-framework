@@ -17,7 +17,7 @@ audience:
   - contributor
 analysis_subject_sha: 9fd444674bf3a97f2673ff36a5f5928ef046c574
 version: 0.9.1a1
-last_verified: 2026-08-29
+last_verified: 2026-09-03
 evidence:
   - E-B-007
   - E-B-011
@@ -75,12 +75,12 @@ from vanguard.packages.ports.spi import (
 
 | SPI Interface | Key Methods | Input / Output Types | Primary Responsibility |
 |---|---|---|---|
-| `IPlanner` | `plan(view, budget)`<br>`observe(receipts, view)`<br>`reflect(outcome, trajectory)` | `EpisodeView`, `Reservation`<br>$	o$ `Result[Proposal]`, `Result[Reflection]` | Cognition engine; proposes next effect action. |
-| `IContextManager` | `compile(view, budget_tokens)`<br>`ingest(receipts)`<br>`compact(pressure)`<br>`reground(error)` | `EpisodeView`, `int`<br>$	o$ `Result[ContextBundle]`, `Result[CompactionReport]` | Prefix-stable prompt assembly and context compaction. |
-| `IToolkit` | `verbs()`<br>`execute(request, ctx)`<br>`compensate(receipt)`<br>`health()` | `EffectRequest`, `EffectContext`<br>$	o$ `Result[Receipt]`, `Health` | Physical effect execution (leased work only, never grants). |
-| `IMemoryEngine` | `query(q)`<br>`store(record)`<br>`consolidate(hits)`<br>`prune(criteria)` | `MemoryQuery`, `MemoryRecord`<br>$	o$ `Result[Sequence[MemoryHit]]` | Episodic and semantic retrieval with scoped authorization. |
-| `IEvaluationGate` | `evaluate(req)`<br>`rubrics()` | `EvaluationSubject`<br>$	o$ `Result[SignedVerdict]` | Exterior evaluation verdict provider. |
-| `ICompletionPolicy` | `evaluate(**observations)` | Runtime completion observations<br>$	o$ admission verdict | Pack-composed terminal admission policy for repository closure and greenfield evidence. |
+| `IPlanner` | `plan(view, budget)`<br>`observe(receipts, view)`<br>`reflect(outcome, trajectory)` | `EpisodeView`, `Reservation`<br>$\to$ `Result[Proposal]`, `Result[Reflection]` | Cognition engine; proposes next effect action. |
+| `IContextManager` | `compile(view, budget_tokens)`<br>`ingest(receipts)`<br>`compact(pressure)`<br>`reground(error)` | `EpisodeView`, `int`<br>$\to$ `Result[ContextBundle]`, `Result[CompactionReport]` | Prefix-stable prompt assembly and context compaction. |
+| `IToolkit` | `verbs()`<br>`execute(request, ctx)`<br>`compensate(receipt)`<br>`health()` | `EffectRequest`, `EffectContext`<br>$\to$ `Result[Receipt]`, `Health` | Physical effect execution (leased work only, never grants). |
+| `IMemoryEngine` | `query(q)`<br>`store(record)`<br>`consolidate(hits)`<br>`prune(criteria)` | `MemoryQuery`, `MemoryRecord`<br>$\to$ `Result[Sequence[MemoryHit]]` | Episodic and semantic retrieval with scoped authorization. |
+| `IEvaluationGate` | `evaluate(req)`<br>`rubrics()` | `EvaluationSubject`<br>$\to$ `Result[SignedVerdict]` | Exterior evaluation verdict provider. |
+| `ICompletionPolicy` | `evaluate(**observations)` | Runtime completion observations<br>$\to$ admission verdict | Pack-composed terminal admission policy for repository closure and greenfield evidence. |
 
 ---
 
@@ -92,16 +92,16 @@ Hexagonal ports define the interfaces required by the runtime and kernel:
 |---|---|---|
 | `KernelPort` (`kernel.py`) | `dispatch(intent, grant) -> EffectReceipt`<br>`observe(event) -> Observation` | Kernel mediation and effect dispatch pipeline entry. |
 | `ModelPort` (`model.py`) | `generate(request) -> ModelResponse`<br>`stream(request) -> Iterator[ModelStreamChunk]` | LLM inference adapter interface. |
-| `SandboxPort` (`sandbox.py`) | `execute(cmd, env, cwd) -> ExecResult`<br>`spawn(cmd, env) -> ProcessHandle` | Process isolation and execution container. |
+| `SandboxRunner` (`sandbox.py`) | `execute(cmd, env, cwd) -> SandboxResult`<br>`probe() -> ContainmentReport` | Process isolation and execution container. |
 | `EvaluatorPort` (`evaluator.py`) | `evaluate_trajectory(traj) -> EvaluationVerdict` | Exterior verification and scoring daemon. |
 | `EventStorePort` (`event_store.py`)| `append(envelope) -> None`<br>`read(range) -> Iterator[EventEnvelope]` | Append-only event persistence and causal ordering. |
 | `BlobStorePort` (`blob_store.py`) | `put(bytes) -> str (digest)`<br>`get(digest) -> bytes`<br>`has(digest) -> bool` | Content-addressed storage (CAS) for artifacts. |
-| `EnvironmentPort` (`environment.py`) | `get(key) -> str`<br>`cwd() -> Path`<br>`qualify(tool) -> bool` | Host environment inspection and path resolution. |
+| `EnvironmentAdapter` (`environment.py`) | `observe(req) -> Observation`<br>`execute(req, ctx) -> EffectReceipt` | Host environment inspection and effect execution. |
 | `ClockPort` (`determinism.py`) | `now() -> datetime` | Pluggable time source for deterministic replay. |
 | `RandomPort` (`determinism.py`) | `token() -> str`, `randint(a, b) -> int` | Pluggable entropy source for deterministic replay. |
 | `IndexPort` (`index.py`) | `index(root)`, `files(prefix)`, `symbols(name, path)`, `dependencies(path)`, `tests(path)`, `repo_map(token_budget)` | Workspace-relative, deterministic repository observations with typed failures and provenance-bearing summaries. |
 | `MemoryPort` (`memory.py`) | `search(q) -> list[MemoryHit]`, `put(r) -> None` | Memory retrieval port interface. |
-| `ChildTurnPort` (`child_turn.py`) | `spawn(child_spec) -> ChildResult` | Mediated child agent execution delegation. |
+| `ChildRuntimePort` (`child_runtime.py`) | `spawn(child_spec) -> ChildResult` | Mediated child agent execution delegation. |
 
 ---
 
@@ -112,9 +112,9 @@ Adapters live in `vanguard/packages/adapters/` and must never import `kernel` or
 | Port | Production Adapter (`adapters/`) | In-Memory / Test Double |
 |---|---|---|
 | `ModelPort` | `models.openrouter.OpenRouterModel`<br>`models.ollama.OllamaModel` | `models.cassette.CassetteModel`<br>`models.fake.FakeModel` |
-| `SandboxPort` | `sandbox.bwrap.BwrapSandbox` (Bubblewrap) | `sandbox.fake.FakeSandbox`<br>`sandbox.host.HostSandbox` |
-| `EvaluatorPort` | `evaluators.daemon_client.EvaluatorDaemonClient` | `evaluators.fake.FakeEvaluator` |
-| `EventStorePort` | `stores.sqlite.SqliteEventStore` | `stores.in_memory.InMemoryEventStore` |
+| `SandboxRunner` | `sandbox.rootless.RootlessSandboxRunner` (Bubblewrap `bwrap`) | `sandbox.fake.FakeSandboxRunner` |
+| `EvaluatorPort` | `evaluators.client.EvaluatorClient` | `evaluators.fake.FakeEvaluator` |
+| `EventStorePort` | `stores.event_store.SqliteEventStore` | `stores.event_store.InMemoryEventStore` |
 | `BlobStorePort` | `stores.blob_store.FilesystemBlobStore` | `stores.blob_store.InMemoryBlobStore` |
 | `MemoryPort` | `stores.memory_engine.SqliteMemoryEngine` | `stores.memory_engine.InMemoryMemoryEngine` |
 | `ClockPort` | `runtime.determinism.SystemClock` | `runtime.determinism.FrozenClock` |

@@ -8,7 +8,7 @@ canonical_for:
 status: living
 owner: documentation-architect
 version: "0.9.0b1"
-last_verified: 2026-08-28
+last_verified: 2026-09-03
 supersedes: []
 superseded_by: null
 ---
@@ -191,8 +191,8 @@ Aether-D-System/
 │   │   ├── agency/                   # Recursive turn machine (EpisodeEngine, context, compaction)
 │   │   ├── runtime/                  # Compose, session, wiring, LedgerEmitter, evaluator gateway
 │   │   ├── adapters/                 # Adapters: models (OpenRouter/Ollama), evaluator, bwrap, SQLite
-│   │   └── apps/                     # Reserved client lattice slot
-│   └── clients/cli/                  # TypeScript/React/Ink interactive terminal UI (`vg`)
+│   │   └── apps/                     # Thin application entrypoints (apps/coding_max)
+│   └── clients/                      # TypeScript client workspaces (CLI `vg`, Desktop UI, TUI, Studio, Lab)
 ├── packs/code-default/               # Domain Pack #1 (MHF harness, ast-patch, repo-map, terminal)
 ├── test/                             # Automated test suite (1100+ tests across 17 categories)
 ├── tools/                            # Boundary checkers, TCB budget, secrets scanner, codegen
@@ -204,16 +204,16 @@ Aether-D-System/
 
 | Subsystem | Path | Description & As-Built Capabilities |
 |---|---|---|
-| **Domain** | `vanguard/packages/domain/` | Pure stdlib Python. Implements primitives, wire contracts (`wire/contracts.py`, `jsonrpc.py`, `types_gen.py`), ledger reducers and events (`ledger/`), evidence models (`evidence/claim.py`), canonical selector algebra (`selectors/resource_selector.py`), RFC 8785 canonicalization (`canonicalisation/jcs.py`), and manifest definitions. |
+| **Domain** | `vanguard/packages/domain/` | Pure stdlib Python. Implements primitives, wire contracts (`wire/contracts.py`, `jsonrpc.py`, `types_gen.py`), ledger reducers and events (`ledger/`), evidence models (`evidence/claim.py`), canonical selector algebra (`selectors/resource_selector.py`), RFC 8785 canonicalization (`canonicalisation/jcs.py`), and manifest definitions. Zero I/O, zero network, zero external dependencies. |
 | **Ports** | `vanguard/packages/ports/` | Hexagonal abstract interfaces: `KernelPort`, `ModelPort`, `SandboxPort`, `EvaluatorPort`, `EventStorePort`, `BlobStorePort`, `EnvironmentPort`, `DeterminismPort`, `IndexPort`, and the 5 SPI protocols (`spi.py`). |
-| **Kernel (TCB)** | `vanguard/packages/kernel/` | Pure security core (`<=1438` LOC limit; currently 1365 LOC). Implements 13-stage effect dispatch (`dispatch.py` S0–S12), monotonic capability attenuation (`attenuation.py`), typed budget algebra (`budget.py`), descriptor-bound capability grants (`grants.py`), action classification (`classifier.py`), fail-closed policy (`policy.py`), and cryptographic provenance DAG (`provenance.py`). Domain-blind (Invariant I-7). |
+| **Kernel (TCB)** | `vanguard/packages/kernel/` | Pure security core (`<=1438` LOC limit; currently 1386 LOC). Implements 13-stage effect dispatch (`dispatch.py` S0–S12), monotonic capability attenuation (`attenuation.py`), typed budget algebra (`budget.py`), descriptor-bound capability grants (`grants.py`), action classification (`classifier.py`), fail-closed policy (`policy.py`), and cryptographic provenance DAG (`provenance.py`). Strictly domain-blind (Invariant I-7). |
 | **Agency** | `vanguard/packages/agency/` | Recursive turn engine. Implements `EpisodeEngine` (`episode/engine.py`) with budget enforcement and attenuated child subagent `spawn()`; context compiler & structured token compactor (`context/`). |
 | **Runtime** | `vanguard/packages/runtime/` | System composition and lifecycle. Modularly structured in place into `compose.py`, `session.py`, `wiring.py`, single-writer `ledger_emitter.py`, `evaluator_gateway.py`, governance approvals (`governance/`), and SQLite WAL event store adapters. |
-| **Adapters** | `vanguard/packages/adapters/` | Concrete implementations: Model adapters (`models/openrouter.py`, `ollama.py`, `cassette.py`, `fake.py`), Exterior Evaluator daemon & RPC client (`evaluators/daemon.py`, `gate.py`, `signing.py`), Rootless Bubblewrap Sandbox (`sandbox/rootless.py`), and SQLite WAL event store (`stores/event_store.py`). |
-| **Apps** | `vanguard/packages/apps/` | Reserved boundary slot in hexagonal lattice. |
+| **Adapters** | `vanguard/packages/adapters/` | Concrete implementations: Model adapters (`models/openrouter.py`, `ollama.py`, `cassette.py`, `fake.py`), Exterior Evaluator daemon & RPC client (`evaluators/daemon.py`, `gate.py`, `signing.py`), Rootless Bubblewrap Sandbox (`sandbox/rootless.py`), and SQLite WAL event store (`stores/event_store.py`). Must NEVER import kernel or agency. |
+| **Apps** | `vanguard/packages/apps/` | Thin application entrypoints (e.g., `vanguard/packages/apps/coding_max/facade.py` exposing `CodingMaxFacade` / `CodingMax`). Coordinates CLI/API requests into `ApplicationService` compositions. |
 | **Plugin Registry** | `vanguard/packages/runtime/registry/` | Canonical M-3 lifecycle FSM, isolation broker, worker wire, and composition compiler; M-3 falsifier closure remains active. |
 | **Code Pack #1** | `packs/code-default/` | First Modular Harness Framework (MHF) domain pack. Contains `harness.yaml`, plugin manifests (`fs`, `ast-patch`, `repo-map`, `terminal`, `evaluation-gate`, `single-planner`), prompt templates, and schema definitions. |
-| **CLI / TUI** | `vanguard/clients/cli/` | Interactive terminal UI (`vg`) written in TypeScript using React and Ink. Workspace scripts: `npm run vg`. |
+| **Clients** | `vanguard/clients/` | TypeScript workspaces: interactive CLI (`vg`) in `clients/cli/`, Desktop UI (`clients/desktop/`), TUI (`clients/tui/`), Lab (`clients/lab/`), and Studio (`clients/studio/`). |
 | **Test Suite** | `test/` | Comprehensive test suite covering all layers (`test/kernel`, `test/contracts`, `test/agency`, `test/runtime`, `test/adapters`, `test/security`, `test/trust`, `test/packs`, `test/falsifiers`, `test/registry`). Details in [`test/README.md`](test/README.md). |
 | **Tooling** | `tools/` | Static architectural linters: boundary lattice, TCB budget, secrets, domain blindness, isolation, event coverage, duplication, stale paths, Markdown links, RF-72 identifier allocation, and type codegen. |
 | **Containers** | `containers/` | Container isolation images establishing process identity: Worker UID `10001` (`worker.Dockerfile`) vs Evaluator UID `10002` (`evaluator.Dockerfile`). |
@@ -385,11 +385,11 @@ model-specific instruction files; current execution state lives only in
   `docs/SPEC.md` §1.1 (loop-over-DAG inversion) rejects.
 - **The broker grants; the sandbox contains.** Two distinct boundaries. The kernel decides *whether* an
   effect is permitted. The perimeter decides *what an attacker can reach when the kernel was wrong*. A
-  logical mediator in the host language is not containment — see `docs/01_law/DISPATCH.md` §6 before
-  writing anything near this.
+  logical mediator in the host language is not containment — see [`docs/backend/architecture/kernel.md`](docs/backend/architecture/kernel.md)
+  and [`docs/architecture/boundaries.md`](docs/architecture/boundaries.md) before writing anything near this.
 - **Content informs, never authorises.** Untrusted content may inform work; it must never authorise a
-  capability-widening effect. This has failed silently twice in this project's history (see
-  `docs/01_law/DISPATCH.md` §5.2) — read that section before touching provenance code.
+  capability-widening effect — read [`docs/backend/architecture/kernel.md`](docs/backend/architecture/kernel.md)
+  before touching provenance code.
 - **The verifier is outside everything.** No cognition or adapter module may import the evaluator gate
   or reason about its internals. If your change needs the evaluator's logic to be visible from agent
   code, the design is wrong, not the import lint.
@@ -398,12 +398,13 @@ model-specific instruction files; current execution state lives only in
   assurance.
 - **One document is normative per contract.** If you're about to write a second source of truth for
   something `docs/SPEC.md` already owns, stop — extend the section, don't fork it.
-- **Minimise what must be simultaneously correct.** Layer 0 has an LOC target for exactly this reason —
+- **Minimise what must be simultaneously correct.** The kernel has a strict <=1438 LOC target for exactly this reason —
   correctness argument size, not code golf.
 - **Polyglot plugins live outside the trusted computing base.** The wire schema (JSON Schema + JCS) *is*
   the narrow waist between languages; there is no other legitimate cross-language coupling.
-- **Adding a domain must not touch the core.** `grep -rE "coding|pytest|ast" layer0/` is expected to
-  return nothing, always. If your PR breaks that grep, the code is in the wrong package.
+- **Adding a domain must not touch the core.** The kernel is strictly domain-blind (Invariant I-7).
+  `python3 tools/linters/check_domain_blindness.py` is expected to return zero violations, always.
+  If your PR breaks that check, the code is in the wrong package.
 
 ## Testing taxonomy (kept intact from VG-01 §4)
 
@@ -422,8 +423,8 @@ shipped with a green suite.
 
 ## Where things live
 
-Read `docs/SPEC.md` §1 for the target Layer-0 lattice and the current (as-built) seven-package lattice
-(`domain, ports, kernel, agency, runtime, adapters, apps`) enforced by `tools/check_boundaries.py`.
-Manifest authoring (harness.yaml, plugin.yaml) is specified in `docs/SPEC.md` §2. Measurement rules
-(paired designs, McNemar, the A/A floor) are in `docs/01_law/MEASUREMENT.md` — read it before proposing
-any A/B claim.
+Read [`docs/SPEC.md`](docs/SPEC.md) for normative requirements and the as-built seven-package lattice
+(`domain, ports, kernel, agency, runtime, adapters, apps`) enforced by `tools/linters/check_boundaries.py`.
+Evaluation and measurement rules (paired designs, McNemar, empirical evidence) are specified in
+[`docs/backend/architecture/assurance-evaluation.md`](docs/backend/architecture/assurance-evaluation.md) —
+read it before proposing any evaluation claim.

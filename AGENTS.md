@@ -8,7 +8,7 @@ canonical_for:
 status: living
 owner: repository-governance
 version: "0.9.0b1"
-last_verified: 2026-08-23
+last_verified: 2026-09-03
 supersedes: []
 superseded_by: null
 ---
@@ -129,13 +129,14 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 
 | Subsystem | Location | Responsibilities & Contents |
 |---|---|---|
-| **`domain/`** | `vanguard/packages/domain/` | Pure value objects, wire contracts, JCS canonicalization, ledger reducers, evidence models, selector algebra (`resource_selector.py`). Stdlib Python only. |
-| **`ports/`** | `vanguard/packages/ports/` | Hexagonal port protocols (`kernel`, `model`, `sandbox`, `evaluator`, `event_store`, `blob_store`, `environment`, `determinism`, `index`, and 5 SPI protocols in `spi.py`). |
-| **`kernel/`** | `vanguard/packages/kernel/` | Trusted Computing Base (TCB limit `<=1438` LOC; currently 1365 LOC). 13-stage dispatch pipeline (S0–S12), monotonic capability attenuation, typed budget algebra, capability grants, fail-closed policy, execution provenance DAG. Domain-blind. |
-| **`agency/`** | `vanguard/packages/agency/` | Recursive turn engine. `EpisodeEngine` turn loop, attenuated child agent `spawn()`, context compiler, structured compaction. |
-| **`runtime/`** | `vanguard/packages/runtime/` | Composition and lifecycle (`compose.py`, `session.py`, `wiring.py`, `ledger_emitter.py`, `evaluator_gateway.py`), governance & Ed25519 approvals (`governance/`), SQLite WAL event store. |
-| **`adapters/`** | `vanguard/packages/adapters/` | Concrete implementations: Models (OpenRouter, Ollama, Cassette, Fake), Evaluator daemon & RPC client (UID 10002), Rootless Sandbox (bwrap UID 10001), SQLite store. **Must not** import `kernel` or `agency`. |
-| **`apps/`** | `vanguard/packages/apps/` | Reserved boundary-lattice slot. |
+| **`domain/`** | `vanguard/packages/domain/` | Pure value objects, wire contracts, RFC 8785 JCS canonicalization, ledger reducers, evidence models, selector algebra (`resource_selector.py`), task state models. Pure Python stdlib only (zero I/O, zero network, zero dependencies). |
+| **`ports/`** | `vanguard/packages/ports/` | Hexagonal port typing protocols (`KernelPort`, `ModelPort`, `SandboxPort`, `EvaluatorPort`, `EventStorePort`, `BlobStorePort`, `EnvironmentPort`, `DeterminismPort`, `IndexPort`, and 5 SPI protocols in `spi.py`). |
+| **`kernel/`** | `vanguard/packages/kernel/` | Trusted Computing Base (TCB limit `<=1438` LOC; currently 1386 LOC). 13-stage dispatch pipeline (S0–S12), monotonic capability attenuation, typed budget algebra, descriptor-bound capability grants, fail-closed policy, execution provenance DAG. Strictly domain-blind (Invariant I-7). |
+| **`agency/`** | `vanguard/packages/agency/` | Recursive turn loop engine (`EpisodeEngine`), attenuated child subagent `spawn()`, structured context compactor, admission gates, and prompt composers. |
+| **`runtime/`** | `vanguard/packages/runtime/` | System composition and lifecycle (`compose.py`, `session.py`, `wiring.py`), single-writer `LedgerEmitter`, Ed25519 cryptographic approvals (`governance/`), SQLite WAL event store. |
+| **`adapters/`** | `vanguard/packages/adapters/` | Concrete implementations: Models (OpenRouter, Ollama, Cassette, Fake), Evaluator daemon & RPC client (UID 10002), Rootless Bubblewrap Sandbox (`bwrap` UID 10001), SQLite WAL event store. **Must not** import `kernel` or `agency`. |
+| **`apps/`** | `vanguard/packages/apps/` | Thin application entrypoints (e.g., `apps/coding_max/facade.py` exposing `CodingMaxFacade` / `CodingMax`). Coordinates CLI/API requests into `ApplicationService` compositions. |
+| **`clients/`** | `vanguard/clients/` | Client workspaces: TypeScript/React/Ink CLI (`vg`), Desktop UI, TUI, and Studio interfaces. |
 
 ---
 

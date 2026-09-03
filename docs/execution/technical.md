@@ -1334,11 +1334,11 @@ Octopus mailbox, CoordinationPlan DAG, outer-loop director, Hydra emergent agenc
 
 | FEATURE_SPEC path | Source on HEAD `ebad36e` |
 |---|---|
-| `vanguard/packages/domain/task_state.py` | missing / **MISSING** |
+| `vanguard/packages/domain/task_state.py` | present (`SemanticTaskState`; fold stays in runtime) |
 | `vanguard/packages/adapters/environment/transaction.py` | missing |
 | `vanguard/packages/runtime/governance/tamper_shield.py` | missing |
 | `vanguard/packages/agency/context/progressive.py` | missing |
-| `test/contracts/test_semantic_task_state.py` | missing |
+| `test/contracts/test_semantic_task_state.py` | present |
 | `test/runtime/test_atomic_multi_file_transaction.py` | missing |
 | `test/runtime/test_tamper_shield.py` | missing |
 | `test/agency/test_progressive_context_compiler.py` | missing |
@@ -1787,7 +1787,7 @@ Shared rollback for every wave: revert the wave’s files; do not weaken falsifi
 
 - **Objective.** Domain `SemanticTaskState` + runtime fold; resume preserves episode_id; state not in L3; 40-turn / crash continuation.
 - **Dependencies.** Wave 1 (do not persist false completes).
-- **Source files.** **Create** `vanguard/packages/domain/task_state.py` (**MISSING** in HEAD); fold in `runtime/task_state.py` or sibling; `app_service.py` resume; `session.py` L619–622; `agency/context/packet.py` identity fields.
+- **Source files.** `vanguard/packages/domain/task_state.py` (landed); fold in `runtime/task_state.py`; `app_service.py` resume; `session.py` σ → L4; `agency/context/packet.py` identity fields.
 - **Contracts.** FEATURE_SPEC §3 plus provenance fields already on `CodingTaskState` (discoveries, dead_ends) merged, not duplicated forever.
 - **Packages.** domain, runtime, agency (view/compiler consumption), tests/contracts.
 - **Tests.** `test/contracts/test_semantic_task_state.py` as specified; RF-25 still green; new test: L3 prefix stable across resume+write.
@@ -2152,7 +2152,7 @@ See §2.6. Additionally, OpenAI’s evaluation note: coding evals mix signal and
 
 | Work | Create / modify | Tests | Canonical docs **after** acceptance (not this draft) |
 |---|---|---|---|
-| SemanticTaskState | **C** `vanguard/packages/domain/task_state.py` (**MISSING**) | **C** `test/contracts/test_semantic_task_state.py` | `docs/backend/architecture/runtime-execution.md`, FEATURE_SPEC promote |
+| SemanticTaskState | `vanguard/packages/domain/task_state.py` | `test/contracts/test_semantic_task_state.py` | `docs/backend/architecture/runtime-execution.md` |
 | Fold | **M** `vanguard/packages/runtime/task_state.py` | `test/agency/test_coding_state.py` | same |
 | Resume identity | **M** `vanguard/packages/runtime/app_service.py` | `test/runtime/test_resume_from_ledger.py`, RF-25 | runtime-execution |
 | Stop L3 dump | **M** `vanguard/packages/runtime/session.py` | `test/runtime/test_context_layer_residency.py` + new | agency.md |
@@ -2985,7 +2985,7 @@ It must not bypass `ApplicationService`, `Runtime`, `HarnessSession`, or the ker
 
 These values contain no model provider, filesystem I/O, or runtime authority.
 
-**FACT (HEAD `66aa7a3c`).** The current fold is `CodingTaskState` in `runtime/task_state.py` (`fold_task_state`). `vanguard/packages/domain/task_state.py` is **MISSING**. Preferred merge is B §6.12: promote schema to domain, keep the fold in runtime, do not run two authorities forever. Do not delete `GoalContract` / `CampaignPlan` / the rest of this 17-value list; they remain law-side targets.
+**FACT.** Schema is `domain/task_state.py` (`SemanticTaskState` / `CodingTaskState` alias). The only fold is `runtime/task_state.py` `fold_task_state`. Do not delete `GoalContract` / `CampaignPlan` / the rest of this 17-value list; they remain law-side `[PROPOSAL]` targets.
 
 **Historical claim.** This section read as if the 17 values were required next-code. They are `[PROPOSAL]` relative to the live fold.
 
@@ -5184,7 +5184,7 @@ Rules that separate SOTA from a sticky-note bot:
 
 **MECHANISM (HEAD `66aa7a3c`).** Authorize-then-recall is already implemented (`vanguard/packages/runtime/prompt_assembler.py`). Skills lifecycle exists (`vanguard/packages/runtime/skill_lifecycle.py`). Progressive disclosure (catalog in L2/L3; body on invoke) is the SOTA pattern for skills.
 
-**[PROPOSAL]** Product wiring that actually folds episodic \(\sigma\) into L4/L5, retrieves semantic hits under grant, and promotes skills only through held-out exterior eval (Wave 9). Current session dumping `resume_state` into env/L3 is a product bug, not the target (B §4.4; v2 §3).
+**FACT.** Session compiles episodic \(\sigma\) into L4 notes. **[PROPOSAL]** remains four-tier product wiring that retrieves semantic hits under grant and promotes skills only through held-out exterior eval (Wave 9).
 
 Long sessions are **many compacted turns over one durable \(\sigma\)**, optionally **many episodes in a campaign DAG**. One 400-turn transcript is how you get attention collapse. Campaign direction remains Wave 8 `[PROPOSAL]`; it is not a second `EpisodeEngine`.
 
@@ -5292,7 +5292,7 @@ Long sessions are **many compacted turns over one durable \(\sigma\)**, optional
 
 **MECHANISM (HEAD `66aa7a3c`).** Authorize-then-recall already exists (`runtime/prompt_assembler.py`). Skills lifecycle exists (`runtime/skill_lifecycle.py`). §17.3 authorization-before-retrieval remains law.
 
-**[PROPOSAL]** Product wiring of the four tiers into compiler packets (σ in L4, not dumped into L3). Current session puts `resume_state` into env/L3 — that is a product bug, not the target (B §4.4; v2 §3). Do not delete §17 memory classes; this table is the same idea under industry names.
+**FACT.** σ is compiled into L4, not dumped into L3. **[PROPOSAL]** remains four-tier product wiring of memory classes into compiler packets. Do not delete §17 memory classes; this table is the same idea under industry names.
 
 ---
 

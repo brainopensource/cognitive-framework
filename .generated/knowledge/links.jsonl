@@ -223,6 +223,7 @@
 {"source_id": "execution.tasks", "source_path": "docs/execution/tasks.md", "target_id": "execution.backlog", "target_path": "docs/execution/backlog.md", "relationship_type": "markdown_link"}
 {"source_id": "execution.tasks", "source_path": "docs/execution/tasks.md", "target_id": "execution.milestones", "target_path": "docs/execution/milestones.md", "relationship_type": "markdown_link"}
 {"source_id": "execution.tasks", "source_path": "docs/execution/tasks.md", "target_id": "test_completion_gate_scope", "target_path": "test/falsifiers/test_completion_gate_scope.py", "relationship_type": "markdown_link"}
+{"source_id": "execution.tasks", "source_path": "docs/execution/tasks.md", "target_id": "task_state", "target_path": "vanguard/packages/domain/task_state.py", "relationship_type": "markdown_link"}
 {"source_id": "execution.tasks", "source_path": "docs/execution/tasks.md", "target_id": "task_state", "target_path": "vanguard/packages/runtime/task_state.py", "relationship_type": "markdown_link"}
 {"source_id": "execution.tasks", "source_path": "docs/execution/tasks.md", "target_id": "execution.feature_spec.pointer", "target_path": "docs/execution/FEATURE_SPEC.md", "relationship_type": "markdown_link"}
 {"source_id": "execution.technical", "source_path": "docs/execution/technical.md", "target_id": "execution.feature_spec", "target_path": "docs/execution/spec.md", "relationship_type": "markdown_link"}

@@ -18,8 +18,8 @@ audience:
   - developer
   - contributor
   - agent
-version: 0.9.1a1
-last_verified: 2026-08-30
+version: 0.9.3
+last_verified: 2026-09-03
 normative_authority:
   - VISION.md
   - docs/SPEC.md

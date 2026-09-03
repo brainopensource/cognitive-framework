@@ -29,7 +29,7 @@ class TestAppServiceAndCli(unittest.TestCase):
         app = ApplicationService(workspace=self.workspace)
         report = app.doctor()
         self.assertIn(report.health, ("healthy", "degraded"))
-        self.assertEqual(report.version, "0.9.0b1")
+        self.assertEqual(report.version, "0.9.3")
         self.assertTrue(len(report.checks) > 0)
 
     def test_app_service_run_and_status_and_events(self) -> None:
@@ -102,7 +102,7 @@ class TestAppServiceAndCli(unittest.TestCase):
             text=True,
             check=False,
         )
-        self.assertIn("Vanguard 0.9.0b1", res_doc.stdout + res_doc.stderr)
+        self.assertIn("Vanguard 0.9.3", res_doc.stdout + res_doc.stderr)
 
         # CLI run with fake model
         res_run = subprocess.run(

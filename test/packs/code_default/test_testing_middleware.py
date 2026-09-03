@@ -87,9 +87,29 @@ FAILED tests/test_db.py::test_connection
 
     def test_parse_empty_output(self) -> None:
         parsed = parse_test_output("", exit_code=0)
-        self.assertTrue(parsed.passed)
+        self.assertFalse(parsed.passed)
         self.assertEqual(parsed.total_tests, 0)
         self.assertEqual(len(parsed.failed_tests), 0)
+        self.assertEqual(parsed.runner, "unknown")
+        self.assertIsNone(parsed.tests_collected)
+        self.assertIsNone(parsed.tests_executed)
+        self.assertIsNone(parsed.tests_passed)
+        self.assertIsNone(parsed.tests_failed)
+        self.assertIsNone(parsed.tests_skipped)
+
+    def test_parse_ran_zero_and_pytest_zero_passed(self) -> None:
+        ran_zero = parse_test_output("Ran 0 tests in 0.001s\n\nOK", exit_code=0)
+        self.assertEqual(ran_zero.runner, "unittest")
+        self.assertEqual(ran_zero.tests_collected, 0)
+        self.assertEqual(ran_zero.tests_executed, 0)
+        self.assertEqual(ran_zero.tests_passed, 0)
+        self.assertFalse(ran_zero.passed)
+
+        pytest_zero = parse_test_output("0 passed in 0.01s", exit_code=0)
+        self.assertEqual(pytest_zero.runner, "pytest")
+        self.assertEqual(pytest_zero.tests_passed, 0)
+        self.assertEqual(pytest_zero.tests_executed, 0)
+        self.assertFalse(pytest_zero.passed)
 
 
 class VerificationGateTests(unittest.TestCase):

@@ -176,7 +176,7 @@ readers remain available only when no current binding is requested.
 
 ## 7. Semantic Continuation
 
-Cold resume already reconstructs safety/accounting state and reconciles effects. `CodingTaskState` now provides the compact durable continuation value: task class, completion requirements, plan/discoveries/dead ends, implicated and modified files, route decisions, evidence-gated TODOs, latest verification, settled effects, next action, and remaining budgets. This packet is derived state; missing evidence must fail explicitly or trigger regrounding rather than silently invent context.
+Cold resume reconstructs safety/accounting state and reconciles effects. `SemanticTaskState` (`CodingTaskState` alias) in `vanguard/packages/domain/task_state.py` is the compact durable continuation value: task class, completion requirements, plan/discoveries/dead ends, implicated and modified files, route decisions, evidence-gated TODOs, latest verification, settled effects, next action, remaining budgets, monotonic revision, and backlog steps. Runtime `fold_task_state` is the only producer. Resume preserves the ledger `episode_id` and compiles σ into L4/L5; it must not dump `resume_state` JSON into frozen L3. This packet is derived state; missing evidence must fail explicitly or trigger regrounding rather than silently invent context.
 
 ---
 

@@ -79,7 +79,7 @@ These rows recast A §0 / B §1 reliability order as **capability outcomes**, no
 |---|---|---|---|
 | **MS-INSTRUMENT** | Exact-subject, schema-valid, dry-run-null empirical instrument | Enumerator digest; no `__pycache__` tasks; `subject_sha` bound; dry-run pass/cost/oracle null (B §8.4/8.5; T-01–T-03, T-24–T-25, T-40–T-41) | `CLOSED` |
 | **MS-TRUTH** | No `completed` without bound verification; Forge cannot invent counts; one gating function | AdmissionGate + `VerificationReceipt.passed`; A §9.7; T-04–T-08, T-42, T-38, T-23. T-04 remains `[PROPOSAL]` until RF-25 successor baseline | `OPEN` |
-| **MS-RESUME** | Fresh process restores episode_id, σ, prefix L1–L3; σ not in L3 | A §10.7; T-09–T-13, T-43–T-44. `domain/task_state.py` MISSING until T-09 | `OPEN` |
+| **MS-RESUME** | Fresh process restores episode_id, σ, prefix L1–L3; σ not in L3 | A §10.7; T-09–T-13, T-43–T-44. `domain/task_state.py` + `fold_task_state` landed; σ in L4/L5 | `OPEN` |
 | **MS-SEE** | Epoch-bound packets, omissions explicit, one ContextCompiler | A §11.9; v2 §3 target (not current L3 dump); T-14–T-16, T-36–T-37, T-45–T-46 | `OPEN` |
 | **MS-CHANGE** | 2PC multi-file, adapter preflight, tamper, implicated-set, greenfield oracle | A §12.8; v2 §4.2; T-17–T-20, T-47–T-49. AST never in kernel | `OPEN` |
 | **MS-CONTROL** | One EpisodeEngine coding path qualified; Forge/Chimera not in product scores | A §13.6; facade fast/balanced/max; T-26–T-27, T-51–T-52 | `OPEN` |

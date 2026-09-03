@@ -98,9 +98,9 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - Requires: T-04  
 
 **T-08 Parse counts without inventing** (B)  
-- [ ] collected/executed/passed/failed/skipped (A §31.2–3)  
-- [ ] `Ran 0 tests` / `0 passed` ⇒ 0  
-- [ ] Unrecognized runner remains unknown  
+- [x] collected/executed/passed/failed/skipped (A §31.2–3)  
+- [x] `Ran 0 tests` / `0 passed` ⇒ 0  
+- [x] Unrecognized runner remains unknown  
 - Requires: T-07  
 
 **T-42 Adversarial coding verification suite** (A §31.6)  
@@ -125,33 +125,33 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 
 ### Context: Semantic state and resume
 
-**T-09 Domain SemanticTaskState** (B) `[PROPOSAL]` merge with `CodingTaskState`  
-- [ ] Create `domain/task_state.py` (**MISSING**) stdlib + JCS  
-- [ ] Do not create a second authority beside `fold_task_state`  
-- [ ] A §6.2 extra types remain `[PROPOSAL]` catalog in spec, not this task’s scope  
+**T-09 Domain SemanticTaskState** (B) merge with `CodingTaskState`  
+- [x] Create `domain/task_state.py` stdlib + JCS  
+- [x] Do not create a second authority beside `fold_task_state`  
+- [x] A §6.2 extra types remain `[PROPOSAL]` catalog in spec, not this task’s scope  
 
 **T-10 Runtime fold** (B)  
-- [ ] Fold events; unknown ignored; remove `"test" in action.lower()` inference  
-- [ ] Durable events: classified, hypothesis open/support/reject, obligation open/satisfied, etc. (A §10.2)  
+- [x] Fold events; unknown ignored; remove `"test" in action.lower()` inference  
+- [x] Durable events: classified, hypothesis open/support/reject, obligation open/satisfied, etc. (A §10.2)  
 - Requires: T-09  
 
 **T-11 Preserve episode_id on resume** (B)  
-- [ ] Stop synthesizing only `episode-{run_id}`  
+- [x] Stop synthesizing only `episode-{run_id}`  
 - Requires: T-10  
 
 **T-12 Stop dumping resume_state into L3** (B)  
-- [ ] σ in L4/L5; L1–L3 prefix identity after resume+write  
+- [x] σ in L4/L5; L1–L3 prefix identity after resume+write  
 - Requires: T-10  
 
 **T-13 ContextPacket resume identity** (B)  
-- [ ] Populate `validate_resume_identity` fields  
+- [x] Populate `validate_resume_identity` fields  
 - Requires: T-12  
 
 **T-43 Task class on projection** (A §31.11)  
-- [ ] Explicit task class on state (if not inside T-09 schema)  
+- [x] Explicit task class on state (if not inside T-09 schema)  
 
 **T-44 Resume parity vectors** (A §31.16–19)  
-- [ ] All semantic fields; restart-after-patch; restart-after-verification; 40-turn fresh-process  
+- [x] All semantic fields; restart-after-patch; restart-after-verification; 40-turn fresh-process  
 - Requires: T-11, T-12  
 
 ### Context: Context, index, epoch
@@ -397,7 +397,7 @@ Dependency key: `requires:`. Status: all `PROPOSED` unless noted.
 - **Files:** create `domain/task_state.py` (**MISSING** in HEAD); FEATURE_SPEC §3
 - **Requires:** none technically; **schedule after** 04 so we do not persist false completes
 - **Falsifier:** `test/contracts/test_semantic_task_state.py` as specified
-- **FACT (lock HEAD `66aa7a3c`).** `vanguard/packages/domain/task_state.py` is **MISSING**. Live fold is [`runtime/task_state.py`](../../vanguard/packages/runtime/task_state.py) `CodingTaskState` + `fold_task_state`. This ticket remains **`[PROPOSAL]`**: merge FEATURE_SPEC `SemanticTaskState` with `CodingTaskState` per B §6.12 (this lattice **wins** over Plan A §6.2’s 17 domain types, which stay as a competing `[PROPOSAL]` in A). Do not invent a second task-state authority.
+- **FACT.** Schema is [`domain/task_state.py`](../../vanguard/packages/domain/task_state.py) (`SemanticTaskState`; `CodingTaskState` alias). Live fold remains [`runtime/task_state.py`](../../vanguard/packages/runtime/task_state.py) `fold_task_state`. A's 17 extra domain types stay `[PROPOSAL]`.
 
 ### Ticket 10 — Runtime fold of SemanticTaskState
 - **Files:** `runtime/task_state.py`

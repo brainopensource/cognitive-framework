@@ -49,7 +49,7 @@ from .inbox import ServiceInboxStore
 try:
     from vanguard import __version__
 except ImportError:  # pragma: no cover
-    __version__ = "0.9.0b1"
+    __version__ = "0.9.3"
 
 
 #: How long `Cancel` waits for a worker to settle before recording the outcome

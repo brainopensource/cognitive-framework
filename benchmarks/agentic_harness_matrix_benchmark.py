@@ -540,7 +540,7 @@ def main() -> None:
     # Aggregate matrix
     matrix_output = {
         "timestamp": time.time(),
-        "framework": "Vanguard / AETHER Substrate 0.9.0b1 (Horizon 2: 0.9.1+)",
+        "framework": "Vanguard / AETHER Substrate 0.9.3",
         "coding_harness_benchmarks": swe_results,
         "rag_tutor_benchmarks": rag_results,
         "codefix_critic_benchmarks": codefix_results,

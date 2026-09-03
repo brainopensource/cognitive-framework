@@ -7,13 +7,13 @@ canonical_for:
   - quick-start
 status: living
 owner: documentation-architect
-version: "0.9.0b1"
+version: "0.9.3"
 last_verified: 2026-09-03
 supersedes: []
 superseded_by: null
 ---
 
-# AETHER — Electroweak Development (Preparing for `0.9.x`)
+# AETHER — Strongforce Development (`0.9.3`)
 
 **AETHER is a general event-sourced agentic computation framework and experimental substrate.**
 
@@ -35,9 +35,9 @@ and composition, recursive delegation, declarative topologies, authorized durabl
 learning remain higher-layer capabilities rather than new cores. M-1 through M-3 are preservation
 anchors. The current delivery path is to repair the M-8 empirical-evidence path, issue an independent
 positive/negative/undeterminable disposition, then deliver Coding Max as a thin application over a
-thick declarative code-pack composition. M-9 `0.9.0b1`, M-10 `0.9.0`, and the post-M-10 1.0 horizon
-remain gated by exact-subject evidence; mechanism presence and green tests never substitute for
-independently accepted receipts.
+thick declarative code-pack composition. The living package is `0.9.3`. M-9 (historical gate name
+`0.9.0b1`), M-10 `0.9.0`, and the post-M-10 1.0 horizon remain gated by exact-subject evidence;
+mechanism presence and green tests never substitute for independently accepted receipts.
 
 ```text
 observe → propose → authorize → effect → receipt → evaluate
@@ -47,9 +47,9 @@ observe → propose → authorize → effect → receipt → evaluate
 |---|---|
 | **Architectural authority** | [`VISION.md`](VISION.md) — constitutional; law and roadmap are subordinate to it |
 | **Normative law** | [`docs/SPEC.md`](docs/SPEC.md) + accepted ADRs indexed through [`docs/decisions.md`](docs/decisions.md) |
-| **Development package** | `vanguard-runtime` metadata currently declares `0.9.0b1` (`pyproject.toml` is the version source); that string is not M-9 acceptance. Python `>=3.10` (tested on Python 3.12 in CI) |
+| **Development package** | `vanguard-runtime` **0.9.3** (`pyproject.toml` is the version source). That string is not M-9 acceptance. Python `>=3.10` (tested on Python 3.12 in CI) |
 | **Current status** | Execution runway: [`docs/execution/tasks.md`](docs/execution/tasks.md) (work tree), [`docs/execution/milestones.md`](docs/execution/milestones.md) (TARGET gates). Present HEAD architecture is `docs/SPEC.md` + `docs/architecture/` + `docs/backend/`. |
-| **Roadmap** | M-8 evidence integrity → Coding Max vertical slice → M-9 `0.9.0b1` → M-10 `0.9.0` → non-authorizing 1.0 qualification horizon |
+| **Roadmap** | `0.9.3` Strongforce line → M-8 evidence integrity → Coding Max vertical slice → M-9 installable beta (gate) → M-10 `0.9.0` → non-authorizing 1.0 qualification horizon |
 | **Production truth** | `vanguard/packages/` (`domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`; `apps` is a runtime client) |
 
 [![Vision](https://img.shields.io/badge/Law_Zero-VISION.md-purple.svg)](VISION.md)
@@ -94,7 +94,7 @@ Mechanism presence is not milestone acceptance; [`docs/execution/milestones.md`]
 5. Qualify Coding Max on frozen internal repository-scale tasks before enabling
    reviewer/specialist roles or experimental SBFL, mutation, branch-search, or
    ToolScript treatments.
-6. Authorize and qualify M-9 `0.9.0b1`, then M-10 `0.9.0`; after M-10, qualify
+6. Authorize and qualify M-9 (installable beta), then M-10 `0.9.0`; after M-10, qualify
    the stable framework plus Coding Max and two non-coding reference agents for
    the 1.0 horizon.
 7. Run official SWE-bench optimization as a separate preregistered measurement

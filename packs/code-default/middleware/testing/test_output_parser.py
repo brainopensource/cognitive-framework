@@ -19,6 +19,12 @@ class ParsedTestOutput:
     exception_types: tuple[str, ...] = field(default_factory=tuple)
     short_diagnostics: tuple[str, ...] = field(default_factory=tuple)
     raw_output_digest: str = ""
+    runner: str = "unknown"
+    tests_collected: int | None = None
+    tests_executed: int | None = None
+    tests_passed: int | None = None
+    tests_failed: int | None = None
+    tests_skipped: int | None = None
 
 
 _FAIL_PATTERN = re.compile(r"(?:FAIL|ERROR):\s+([a-zA-Z0-9_\.]+(?:\s+\([^\)]+\))?)")
@@ -59,15 +65,53 @@ def parse_test_output(output: str, exit_code: int = 0) -> ParsedTestOutput:
         if exc_type not in exceptions:
             exceptions.append(exc_type)
 
-    # total tests and passed flag
-    total_tests = 0
-    summary_match = _SUMMARY_PATTERN.search(output)
-    if summary_match:
-        total_tests = int(summary_match.group(1))
+    ran = re.search(r"Ran\s+(\d+)\s+tests?\b", output, flags=re.IGNORECASE)
+    collected_m = re.search(r"collected\s+(\d+)\s+items?\b", output, flags=re.IGNORECASE)
+    passed_m = re.search(r"(\d+)\s+passed\b", output, flags=re.IGNORECASE)
+    failed_m = re.search(r"(\d+)\s+failed\b", output, flags=re.IGNORECASE)
+    skipped_m = re.search(r"(\d+)\s+skipped\b", output, flags=re.IGNORECASE)
+    runner = "unknown"
+    tests_collected: int | None = None
+    tests_executed: int | None = None
+    tests_passed: int | None = None
+    tests_failed: int | None = None
+    tests_skipped: int | None = None
+    if ran:
+        runner = "unittest"
+        tests_collected = tests_executed = int(ran.group(1))
+        fail_block = re.search(r"FAILED\s*\(([^)]*)\)", output, flags=re.IGNORECASE)
+        if fail_block:
+            parts = fail_block.group(1)
 
-    passed = (exit_code == 0) and not failed and ("FAILED" not in output) and ("ERROR" not in output or "Ran" not in output)
-    if "OK" in output and "Ran" in output and not failed:
-        passed = True
+            def _named(name: str) -> int:
+                match = re.search(rf"{name}\s*=\s*(\d+)", parts, flags=re.IGNORECASE)
+                return int(match.group(1)) if match else 0
+
+            tests_failed = _named("failures") + _named("errors")
+            tests_skipped = _named("skipped")
+            tests_passed = max(0, tests_executed - tests_failed - tests_skipped)
+        elif re.search(r"\bOK\b", output):
+            tests_passed, tests_failed, tests_skipped = tests_executed, 0, 0
+    elif collected_m or passed_m or failed_m or skipped_m:
+        runner = "pytest"
+        tests_collected = int(collected_m.group(1)) if collected_m else None
+        tests_passed = int(passed_m.group(1)) if passed_m else None
+        tests_failed = int(failed_m.group(1)) if failed_m else None
+        tests_skipped = int(skipped_m.group(1)) if skipped_m else None
+        known = [item for item in (tests_passed, tests_failed, tests_skipped) if item is not None]
+        tests_executed = sum(known) if known else tests_collected
+        if tests_passed == 0 and tests_failed is None and tests_skipped is None:
+            tests_executed = 0
+
+    total_tests = tests_executed if tests_executed is not None else (tests_collected or 0)
+    passed = (
+        runner != "unknown"
+        and exit_code == 0
+        and not failed
+        and (tests_failed or 0) == 0
+        and (tests_executed or 0) > 0
+        and (tests_passed or 0) > 0
+    )
 
     short_diag: list[str] = []
     if failed:
@@ -84,4 +128,10 @@ def parse_test_output(output: str, exit_code: int = 0) -> ParsedTestOutput:
         exception_types=tuple(exceptions),
         short_diagnostics=tuple(short_diag),
         raw_output_digest=digest,
+        runner=runner,
+        tests_collected=tests_collected,
+        tests_executed=tests_executed,
+        tests_passed=tests_passed,
+        tests_failed=tests_failed,
+        tests_skipped=tests_skipped,
     )

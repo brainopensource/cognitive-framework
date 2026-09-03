@@ -80,6 +80,16 @@ class TheLoop(unittest.TestCase):
         self.assertIn("proposalDescriptor", produced[0].payload)
         self.assertNotIn("args", produced[0].payload)
 
+    def test_finish_proposal_discloses_note_for_narrative_visibility(self) -> None:
+        """`ProposalProduced` carries note for finish so the UI transcript can show the assistant answer."""
+        harness, engine = build([doubles.finish(note="Solution complete.")])
+        run(engine, harness)
+
+        produced = [e for e in harness.sink.events if e.kind == "ProposalProduced"]
+        self.assertEqual(len(produced), 1)
+        self.assertEqual(produced[0].payload.get("note"), "Solution complete.")
+        self.assertNotIn("args", produced[0].payload)
+
     def test_each_turn_observes_the_previous_receipt(self) -> None:
         """observe -> propose: the view is materialised from episode state, so
         the second turn can see what the first one did."""

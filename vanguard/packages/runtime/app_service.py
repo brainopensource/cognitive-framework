@@ -26,7 +26,7 @@ from .model_selection import inspect_model_providers, select_model
 from .profiles import ExecutionProfileError, SandboxUnavailable, resolve_profile
 from .root import Runtime
 from .results import RunResult, StatusResult, EvidenceResult, CostResult
-from .task_state import CodingTaskState, fold_task_state
+from .task_state import CodingTaskState, episode_id_from_events, fold_task_state
 from .state_contract import (
     StateDirectoryError,
     StateDirectoryUnwritableError,
@@ -381,7 +381,7 @@ class ApplicationService:
         if any((getattr(event, "payload", {}) or {}).get("kind") in terminal_kinds for event in events):
             status = self.status(run_id, state_dir=resolved_state)
             return RunResult(
-                run_id=run_id, episode_id=f"episode-{run_id}", outcome=status.status,
+                run_id=run_id, episode_id=episode_id_from_events(events, run_id=run_id), outcome=status.status,
                 phase="complete", turns=len([e for e in events if (getattr(e, "payload", {}) or {}).get("kind") == "ProposalProduced"]),
                 plan_digest=None, detail="run already has a durable terminal event",
                 terminal_state=status.terminal_state, task_digest=status.task_digest,
@@ -411,7 +411,7 @@ class ApplicationService:
         )
         task = TaskContext(
             brief=brief, repo_path=self.workspace, run_id=resolved_run_id,
-            episode_id=f"episode-{resolved_run_id}",
+            episode_id=episode_id_from_events(events, run_id=resolved_run_id),
             max_turns=max(1, original_max_turns),
             resume_state=state.to_canonical_dict(),
         )
@@ -657,7 +657,7 @@ class ApplicationService:
         try:
             from vanguard import __version__
         except ImportError:
-            __version__ = "0.9.0b1"
+            __version__ = "0.9.3"
 
         checks: list[DiagnosticCheck] = []
         checks.append(DiagnosticCheck(

@@ -35,7 +35,7 @@ Developers SHALL use this file plus [`spec.md`](spec.md), [`tasks.md`](tasks.md)
 
 **Recommended reading order (not a sprint):** T-01–T-08, then T-09–T-13.
 
-**FACT STORE path:** `adapters/stores/event_store.py` (not `runtime/event_store.py`). **`domain/task_state.py` is MISSING** until T-09.
+**FACT STORE path:** `adapters/stores/event_store.py` (not `runtime/event_store.py`). **`domain/task_state.py`** holds `SemanticTaskState`; `fold_task_state` remains the only fold in `runtime/task_state.py`.
 
 ## 0. Epistemic legend
 
@@ -320,7 +320,7 @@ To maximize provider prompt caching (Anthropic, DeepSeek, OpenAI) from 27% to **
 ```
 **Rule**: `PREFIX_LAYERS` (L1–L3) are byte-frozen at session startup. No turn dynamic data may enter L1–L3.
 
-**FACT (product bug, not the target design; B §4.4).** Current session puts `resume_state` and `repo_map` into env / L3: `runtime/session.py` dumps `task.resume_state` JSON into env_parts at construction (L619–622) and pulls `index.repo_map(token_budget=4000)` into the same environment prefix (L623+). That freezes σ and the map in the KV-cache prefix. Target remains: σ in L4, epoch-bound map **not** in the frozen prefix. See B ticket 12.
+**FACT.** Session compiles σ into L4 notes (`PromptAssembler`, source `task-state`); it does not dump `resume_state` JSON into frozen L3. `repo_map` still enters the environment prefix at construction. Target remains: epoch-bound map **not** in the frozen prefix.
 
 `ContextCompiler` **FACT**: L1–L3 freeze at construction (`agency/context/compiler.py`). Compile is **not** a step inside `EpisodeEngine`. Product loop is session + compiler + engine: observe → propose → `recover_proposal` → `Kernel.dispatch` → ingest (`agency/episode/engine.py`).
 
@@ -344,7 +344,7 @@ To combat "Lost in the Middle" attention degradation, the prompt compiler pins a
 ```text
 ================================== ACTIVE WORKING SET ==================================
 Goal: Implement SemanticTaskState vector and verify JCS canonicalization
-Touched Files: vanguard/packages/domain/task_state.py (2 hunks)  # MISSING in HEAD 66aa7a3c; illustrative [PROPOSAL]
+Touched Files: vanguard/packages/domain/task_state.py (2 hunks)
 Current Verification: FAILING — test_jcs_canonical: AssertionError: keys not sorted
 Rejected Dead Ends:
   [Turn 04] Sorting keys with sorted(dict) — failed slots dataclass mapping
@@ -353,7 +353,7 @@ Next Objective: Use vanguard.packages.domain.canonical.canonical_json() reducer
 ========================================================================================
 ```
 
-**FACT.** `vanguard/packages/domain/task_state.py` is **MISSING** in HEAD `66aa7a3c`. Live fold is `runtime/task_state.py` (`CodingTaskState` + `fold_task_state`). B §6.12 wins over A's 17-type explosion for the merge. The working-set example above is kept as a sketch; do not read it as claiming the domain file exists.
+**FACT.** `vanguard/packages/domain/task_state.py` holds `SemanticTaskState` (`CodingTaskState` alias). The only fold is `runtime/task_state.py` `fold_task_state`. A's 17 extra domain types stay `[PROPOSAL]`. The working-set example is a sketch of L5 pinning, not a second store.
 
 ### 3.5 The Dead-Ends Algebra (`StructuredRecord.dead_ends`)
 In long-horizon debugging, **knowing what failed and why is 10× more valuable than knowing what succeeded**. 
@@ -645,7 +645,7 @@ To transition these architectural pillars into delivery without documentation sp
 | Package ID | Capability Name | Primary Subsystem | Implementation Deliverables | Target Gate |
 |---|---|---|---|---|
 | **`SUB-01`** | **Substrate Admission Repair** | `agency/episode/` | Fix `AdmissionGate` kwargs, wire `session.py` to require verification on default pack. | `W-092-F0` |
-| **`SUB-02`** | **Semantic Task State Vector** | `domain/task_state.py` **MISSING in HEAD `66aa7a3c`** `[PROPOSAL]` | `SemanticTaskState`, `TaskStep`, monotonic revision hashing, RFC 8785 JCS serialization. | `W-092-F1` |
+| **`SUB-02`** | **Semantic Task State Vector** | `domain/task_state.py` | `SemanticTaskState`, `TaskStep`, monotonic revision, RFC 8785 JCS; fold remains `fold_task_state`. | `W-092-F1` |
 | **`TXN-01`** | **2PC Multi-File Transaction** | `adapters/environment/`| `AtomicMultiFileTransactionManager`, shadow tree, preflight syntax and symbol validator. | `W-092-F1` |
 | **`SHD-01`** | **Cryptographic Tamper Shield**| `runtime/governance/` | `TestTamperShield`, Turn-0 test hashing, fail-closed rejection on test mutation. | `W-092-F1` |
 | **`PRG-01`** | **Progressive Context Compiler**| `agency/context/` | L1–L5 prefix-stable compiler, ephemeral cache markers, working-set header with dead ends. | `W-092-F1` |
@@ -661,7 +661,7 @@ To transition these architectural pillars into delivery without documentation sp
 | **`HYD-01`** | **Dynamic Bifurcation Classifier**| `agency/topology/` | Complexity functional $\mathcal{C}$, Mode A (Fluid ReAct) vs Mode B (Multi-Head DAG). | `M-HYD-1` |
 | **`HYD-02`** | **Living Horizon Planning Engine**| `agency/topology/` | Bounded horizon ($|m_{\text{active}}| \equiv 1$, $|\mathcal{Q}| \le 2$), event-sourced plan amendments. | `M-HYD-2` |
 
-**SUB-02 FACT.** `domain/task_state.py` is **MISSING** in HEAD `66aa7a3c`. Keep the row as `[PROPOSAL]`. Preferred merge is B §6.12 with live `CodingTaskState` in `runtime/task_state.py`.
+**SUB-02 FACT.** `domain/task_state.py` exists; `CodingTaskState` is the same type. Keep one fold in `runtime/task_state.py`. A's 17 extra types stay `[PROPOSAL]`.
 
 **PRG-01 must not be a second `ContextCompiler`.** `[PROPOSAL]` is L4/L5 strategy on the **existing** compiler (`agency/context/compiler.py`), matching B §6.8: "do not fork a second ContextCompiler class hierarchy if a strategy suffices." Rollback: if progressive compiler duplicates `ContextCompiler` into a second loop, reject.
 
@@ -708,7 +708,7 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 └──────────────────┴─────────────────────────────┴─────────────────────────────────────────────────┘
 ```
 
-**FACT.** Kernel row "ZERO coding, AST, or agent concepts allowed" is the winning lattice rule (I-7). §4.3 kernel S7/S8 AST hook is `[PROPOSAL]` **rejected**; see that subsection. Agency row `ProgressiveContextCompiler` must not fork a second compiler class (PRG-01 / B §6.8). Domain `SemanticTaskState` path is `[PROPOSAL]`; `domain/task_state.py` is **MISSING**. Event store FACT owner is `adapters/stores/event_store.py`, not a `runtime/event_store.py` module.
+**FACT.** Kernel row "ZERO coding, AST, or agent concepts allowed" is the winning lattice rule (I-7). §4.3 kernel S7/S8 AST hook is `[PROPOSAL]` **rejected**; see that subsection. Agency row `ProgressiveContextCompiler` must not fork a second compiler class (PRG-01 / B §6.8). Domain `SemanticTaskState` lives in `domain/task_state.py`; the fold stays in runtime. Event store FACT owner is `adapters/stores/event_store.py`, not a `runtime/event_store.py` module.
 
 No `KernelPort` symbol exists in `vanguard/packages/ports/` (FACT; keep A's `KernelPort` row as `[PROPOSAL]` — see A §2.1). Canonical composition path: `ApplicationService → Runtime → HarnessSession → EpisodeEngine → Kernel`. Campaign Service as an extra layer is A's `[PROPOSAL]`.
 
@@ -869,7 +869,7 @@ The L1–L5 layout in §3.2 is the right SOTA shape. This section expands produc
 
 **Cache.** Byte-identical L1–L3 across turns is how you get prefix/KV cache hits (Anthropic/OpenAI cache breakpoints). Do not put timestamps, random ids, or “turn 17 of 40” in L1. `stable_prefix_builder.py` exists for this. `vg-code-default` already uses recency-window + `evict_old_tool_results`. The 27% → >72% jump in §3.2 is **ASPIRATION**.
 
-**FACT vs target.** Current session dumps `resume_state` JSON and `repo_map` into env/L3 (B §4.4, `session.py` 619–622+). That is a product bug. Target: σ in L4; epoch-bound map not in the frozen prefix.
+**FACT vs target.** σ is compiled into L4 notes. `repo_map` still enters the environment prefix. Target: epoch-bound map not in the frozen prefix.
 
 **Rolling window.** Keep the last *N* turns (policy: 64 items is a start; token ceiling is the real constraint). Older **tool bodies** become receipts: “read `foo.py` 12kb at turn 4” — fact kept, bytes dropped (`ResultEvictionStrategy`).
 
@@ -935,7 +935,7 @@ Rules that separate SOTA from a sticky-note bot:
 
 **MECHANISM.** `runtime/prompt_assembler.py` 107–113: authorize then `recall`. `runtime/memory.py` exists. Product four-tier wiring is `[PROPOSAL]`.
 
-**FACT.** Resume synthesizes `episode_id=f"episode-{run_id}"` (`app_service.py` ~414). Session dumps `resume_state` into L3. Target: persist original `episode_id`; put `CodingTaskState` in L4/L5.
+**FACT.** Resume restores the ledger `episode_id` via `episode_id_from_events`. New `run()` still synthesizes `episode-{run_id}`. σ is compiled into L4/L5.
 
 Long sessions are **many compacted turns over one durable $\sigma$**, optionally **many episodes in a campaign DAG**. One 400-turn transcript is how you get attention collapse.
 
@@ -1185,8 +1185,8 @@ Lock-time verb inventory matching pack YAML is appended as **§22** (does not re
 | Capability | Owner | Actual implementation | Current evidence | Gap | Disposition |
 |---|---|---|---|---|---|
 | HarnessSession | `runtime/session.py` L465–1443 | constructs one kernel; injects meta-controller; observes completion; exterior evaluate | session tests exist | test-count regex fail-closed (good) but coarse; resume dumps state into L3 | repair |
-| CodingTaskState | `runtime/task_state.py` L84–234, `fold_task_state` L237+ | discoveries, dead ends, todos, routes, implicated files | `test_coding_state` OK | lives in **runtime**, not domain; not consumed by ContextCompiler; `ProposalProduced` verification inference uses `"test" in action.lower()` | promote schema to domain; keep fold in runtime |
-| SemanticTaskState | `docs/execution/FEATURE_SPEC.md` §3 | **absent** / **MISSING** (`vanguard/packages/domain/task_state.py` does not exist) | claimed falsifier `test/contracts/test_semantic_task_state.py` absent | CMX-09 T2 not implemented | implement as domain value, fold from events |
+| CodingTaskState | `domain/task_state.py` (alias of `SemanticTaskState`); fold `runtime/task_state.py` `fold_task_state` | discoveries, dead ends, todos, routes, implicated files, task class, revision | `test_coding_state` + `test_semantic_task_state` OK | consumed as L4 σ notes, not frozen L3 | keep one fold |
+| SemanticTaskState | `vanguard/packages/domain/task_state.py` | merged FEATURE_SPEC + live fields; JCS digest | `test/contracts/test_semantic_task_state.py` | A's 17 extra types remain `[PROPOSAL]` | keep |
 | Checkpoints | `runtime/checkpoints.py` | blob-verified reconstruct; warm/cold parity | RF-96 tests exist | optional (needs blobs) | keep |
 | ApplicationService.resume | `runtime/app_service.py` L385–389 | `episode_id=f"episode-{resolved_run_id}"` | RF-25 proves **event fold** continuation | synthesized episode id may not match original ledger episode | repair |
 | CodingMaxFacade | `apps/coding_max/facade.py` L23–71 | thin client of `ApplicationService`; presets `fast|balanced|max` → `agency/manifests/vg-code-{preset}/manifest.json` | mechanism | no intelligence in apps; correct lattice | keep thin |
@@ -1268,7 +1268,7 @@ Each gap answers: what exists, where, what is missing, why it blocks long-horizo
 
 ### 4.4 Incomplete restart identity
 
-**Exists.** RF-25 proves fresh-process fold continuation. `ApplicationService.resume` synthesizes `episode_id=f"episode-{run_id}"`. Session dumps `task.resume_state` JSON into **immutable L3** at construction (`session.py` L619–622). `ContextPacket.validate_resume_identity` is not fully populated on that path.
+**Exists.** RF-25 proves fresh-process fold continuation. `ApplicationService.resume` restores the ledger `episode_id` via `episode_id_from_events`. Session compiles σ into L4 notes (`PromptAssembler`); it does not dump `resume_state` into frozen L3. Orientation packets populate `repository_identity` / `selection_policy_identity` and call `validate_resume_identity` when prior identities are present.
 
 **Why it blocks.** Cognitive state (plan, dead ends, active file) is frozen in the prefix-cached environment. Later writes do not update L3. The model reasons about a snapshot that is definitionally stale after the first post-resume edit. Synthesized episode ids can fork attribution.
 

@@ -112,6 +112,14 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
             projections.append({"kind": "write", "path": rec_detail or "patch", "text": rec_outcome})
         elif verb == "proc.exec":
             projections.append({"kind": "test", "path": rec_detail or "exec", "exitCode": 0 if rec_outcome == "ok" else 1})
+    last_note = ""
+    for ev in getattr(result, "events", ()) or ():
+        if getattr(ev, "kind", "") == "ProposalProduced":
+            note = getattr(ev, "payload", {}).get("note")
+            if note:
+                last_note = str(note)
+    if last_note:
+        projections.append({"kind": "note", "text": last_note})
     projections.append({"kind": "complete", "outcome": outcome, "turns": int(getattr(result.telemetry, "turns", 0))})
     return {"type": "result", "result": {
         "runId": run_id, "outcome": outcome, "phase": "complete", "attempts": 1,

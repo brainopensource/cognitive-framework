@@ -21,20 +21,6 @@ _lib_root = _current_file.parent.parent.parent.parent
 if str(_lib_root) not in sys.path:
     sys.path.insert(0, str(_lib_root))
 
-# Load .env file from workspace/repo root if present and not already in environment
-_env_path = _lib_root / ".env"
-if _env_path.is_file():
-    try:
-        for _line in _env_path.read_text(encoding="utf-8").splitlines():
-            _line = _line.strip()
-            if _line and not _line.startswith("#") and "=" in _line:
-                _k, _v = _line.split("=", 1)
-                _k = _k.strip()
-                _v = _v.strip().strip("'\"")
-                if _k and _k not in os.environ:
-                    os.environ[_k] = _v
-    except Exception:
-        pass
 
 from vanguard.packages.adapters.stores.event_store import SqliteEventStore
 from vanguard.packages.adapters.stores.blob_store import FileBlobStore
@@ -49,7 +35,7 @@ from vanguard.packages.runtime.service import (
 try:
     from vanguard import __version__
 except ImportError:
-    __version__ = "0.9.0b1"
+    __version__ = "0.9.3"
 
 
 def get_default_paths() -> tuple[Path, Path, Path, Path]:

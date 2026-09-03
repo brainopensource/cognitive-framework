@@ -24,7 +24,9 @@ from ..agency.context import (
     ContextCompiler,
     Fragment,
     build_context_packet,
+    validate_resume_identity,
 )
+from ..agency.context.compiler import CONTEXT_POLICY_VERSION
 from ..agency.manifests.discovery import WorkspaceDiscovery
 from ..agency.provenance import NullProvenanceSink, ProvenanceSink
 from ..domain.canonicalisation.digest import digest_of
@@ -75,6 +77,7 @@ from .evidence_capture import capture_evidence as _capture_evidence_pure
 from .prompt_assembler import PromptAssembler
 from .protocol_pipeline import default_protocol_pipeline
 from .response_handler import ResponseHandler
+from .task_state import fold_task_state
 from .telemetry import RunTelemetry, compute_run_telemetry, instrument_error as _telemetry_instrument_error
 from .trajectory import DelayedTerminalEmitter, assemble_trajectory
 from .governance.approvals import (
@@ -241,6 +244,7 @@ class _LayeredOperator:
             recorder=recorder,
             provenance=provenance,
             memory=memory,
+            task_state=task.resume_state,
         )
         self._handler = ResponseHandler(
             model=model,
@@ -250,6 +254,9 @@ class _LayeredOperator:
         self.contexts: list[Mapping[str, Any]] = []
         self._artifacts = artifacts
         self._meta_controller = meta_controller
+
+    def set_task_state(self, state: Mapping[str, Any] | None) -> None:
+        self._assembler.set_task_state(state)
 
     @property
     def _compiler(self) -> ContextCompiler:
@@ -360,18 +367,67 @@ def _route_of(model: Any) -> Mapping[str, Any]:
     }
 
 
-def _observed_test_count(detail: str) -> int:
-    """Extract a conservative test count from mediated verifier output.
+@dataclass(frozen=True, slots=True)
+class ObservedTestCounts:
+    """Parsed runner counts. None means unknown, never invented."""
 
-    Exit status alone is not evidence that a test was collected or executed.
-    Unknown/unparseable output intentionally returns zero so completion remains
-    fail-closed.  The parser accepts the stable summaries emitted by unittest
-    and pytest without coupling the runtime to either framework.
-    """
-    for pattern in (r"Ran\s+(\d+)\s+tests?\b", r"collected\s+(\d+)\s+items?\b"):
-        match = re.search(pattern, detail, flags=re.IGNORECASE)
-        if match:
-            return max(0, int(match.group(1)))
+    runner: str = "unknown"
+    collected: int | None = None
+    executed: int | None = None
+    passed: int | None = None
+    failed: int | None = None
+    skipped: int | None = None
+
+
+def parse_observed_test_counts(detail: str) -> ObservedTestCounts:
+    """Parse unittest/pytest summaries without inventing a runner or a count."""
+    text = detail or ""
+    ran = re.search(r"Ran\s+(\d+)\s+tests?\b", text, flags=re.IGNORECASE)
+    collected_m = re.search(r"collected\s+(\d+)\s+items?\b", text, flags=re.IGNORECASE)
+    passed_m = re.search(r"(\d+)\s+passed\b", text, flags=re.IGNORECASE)
+    failed_m = re.search(r"(\d+)\s+failed\b", text, flags=re.IGNORECASE)
+    skipped_m = re.search(r"(\d+)\s+skipped\b", text, flags=re.IGNORECASE)
+    if ran:
+        executed = max(0, int(ran.group(1)))
+        failed = skipped = passed = None
+        fail_block = re.search(r"FAILED\s*\(([^)]*)\)", text, flags=re.IGNORECASE)
+        if fail_block:
+            parts = fail_block.group(1)
+            def _named(name: str) -> int:
+                match = re.search(rf"{name}\s*=\s*(\d+)", parts, flags=re.IGNORECASE)
+                return int(match.group(1)) if match else 0
+            failed = _named("failures") + _named("errors")
+            skipped = _named("skipped")
+            passed = max(0, executed - failed - skipped)
+        elif re.search(r"\bOK\b", text):
+            passed, failed, skipped = executed, 0, 0
+        return ObservedTestCounts(
+            runner="unittest", collected=executed, executed=executed,
+            passed=passed, failed=failed, skipped=skipped,
+        )
+    if collected_m or passed_m or failed_m or skipped_m:
+        collected = int(collected_m.group(1)) if collected_m else None
+        passed = int(passed_m.group(1)) if passed_m else None
+        failed = int(failed_m.group(1)) if failed_m else None
+        skipped = int(skipped_m.group(1)) if skipped_m else None
+        known = [item for item in (passed, failed, skipped) if item is not None]
+        executed = sum(known) if known else collected
+        if passed == 0 and failed is None and skipped is None:
+            executed = 0
+        return ObservedTestCounts(
+            runner="pytest", collected=collected, executed=executed,
+            passed=passed, failed=failed, skipped=skipped,
+        )
+    return ObservedTestCounts()
+
+
+def _observed_test_count(detail: str) -> int:
+    """Conservative executed count. Unknown runners stay 0 (fail-closed)."""
+    counts = parse_observed_test_counts(detail)
+    if counts.executed is not None:
+        return max(0, counts.executed)
+    if counts.collected is not None:
+        return max(0, counts.collected)
     return 0
 
 
@@ -616,10 +672,6 @@ class HarnessSession:
                     for ref in task.artifact_refs))
         if discovered_env:
             env_parts.append(discovered_env)
-        if task.resume_state:
-            env_parts.append(
-                "=== Durable Coding Task State ===\n"
-                + json.dumps(dict(task.resume_state), sort_keys=True, default=str))
         if self.index is not None:
             # Repository intelligence is dynamic, bounded context. Never put a
             # complete flat index into the immutable environment prefix: large
@@ -651,6 +703,10 @@ class HarnessSession:
                      "source": item.source_path, "estimated_tokens": 5}
                     for item in repo_map.tests
                 )
+                selection_policy_identity = {
+                    "policyId": "agency.context-compiler/default",
+                    "policyVersion": CONTEXT_POLICY_VERSION,
+                }
                 packet = build_context_packet(
                     task_digest=digest_of({"runId": task.run_id, "brief": task.brief}),
                     repository_snapshot=repo_map.source_revision,
@@ -661,7 +717,26 @@ class HarnessSession:
                     selected=selected,
                     index_snapshot_digest=repo_map.source_revision,
                     reserve_tokens=1000,
+                    repository_identity=repo_map.source_revision,
+                    selection_policy_identity=selection_policy_identity,
                 )
+                prior = task.resume_state if isinstance(task.resume_state, Mapping) else {}
+                prior_repo = prior.get("repositoryIdentity")
+                prior_policy = prior.get("selectionPolicyIdentity")
+                prior_index = prior.get("indexSnapshotDigest")
+                if prior_repo is not None or prior_policy is not None or prior_index is not None:
+                    validate_resume_identity(
+                        packet,
+                        repository_identity=str(prior_repo or packet.repository_identity or ""),
+                        index_snapshot_digest=(
+                            str(prior_index) if prior_index is not None
+                            else packet.index_snapshot_digest
+                        ),
+                        selection_policy_identity=(
+                            dict(prior_policy) if isinstance(prior_policy, Mapping)
+                            else selection_policy_identity
+                        ),
+                    )
                 orientation = {
                     "packetDigest": packet.digest(),
                     "repositorySnapshot": packet.repository_snapshot,
@@ -1328,6 +1403,7 @@ class HarnessSession:
             path = request.args.get("path")
             if isinstance(path, str) and path and not path.startswith(("/", "\\")):
                 self._completion_changed_files.add(path.replace("\\", "/"))
+            self._refresh_sigma()
             artifacts = getattr(self, "artifacts", None)
             if (artifacts is not None
                     and "reused durable settled effect" not in str(outcome.detail or "")):
@@ -1376,6 +1452,7 @@ class HarnessSession:
                 turn=self.turns_consumed(),
             )
         self._completion_verification_command = verification_command
+        self._refresh_sigma()
         if previous_verification is not None and self._completion_verification.passed:
             self._completion_redundant_verifications += 1
             if self._completion_redundant_verifications == 1:
@@ -1406,6 +1483,19 @@ class HarnessSession:
                         ),
                         evictable=False,
                     )
+
+    def _refresh_sigma(self) -> None:
+        """Recompile L4 from the live fold after a write or verification."""
+        assembler = getattr(self.operator, "set_task_state", None)
+        if not callable(assembler):
+            return
+        read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
+        events = list(read.value or ()) if getattr(read, "ok", False) else []
+        if self.task.resume_state and not events:
+            self.operator.set_task_state(dict(self.task.resume_state))
+            return
+        folded = fold_task_state(events, objective=self.task.brief)
+        self.operator.set_task_state(folded.to_canonical_dict())
 
     def _admit_completion(self, _episode: Any, _proposal: Any) -> AdmissionVerdict:
         """Apply the coding completion contract before reducing ``finish``."""

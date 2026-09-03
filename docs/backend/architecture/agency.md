@@ -173,7 +173,7 @@ Transitions depend on observed receipts, not merely on the attempted verb. In pa
 The code pack should maintain a replayable value equivalent to:
 
 ```text
-CodingTaskState
+SemanticTaskState / CodingTaskState (`domain/task_state.py`)
   task_identity
   repository_snapshot
   goal

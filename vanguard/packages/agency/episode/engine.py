@@ -899,6 +899,8 @@ class EpisodeEngine:
             "action": proposal.action,
             "proposalDescriptor": proposal.descriptor,
         }
+        if proposal.note:
+            payload["note"] = proposal.note[:8000]
         if diagnostics:
             payload["diagnostics"] = dict(diagnostics)
         event = Event(

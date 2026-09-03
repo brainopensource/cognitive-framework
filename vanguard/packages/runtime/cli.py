@@ -29,7 +29,7 @@ from .state_contract import inspect_state_directory, resolve_state_directory
 try:
     from vanguard import __version__
 except ImportError:  # pragma: no cover - source checkout without metadata
-    __version__ = "0.9.0b1"
+    __version__ = "0.9.3"
 
 __all__ = ["main"]
 

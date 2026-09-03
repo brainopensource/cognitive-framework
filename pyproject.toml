@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "vanguard-runtime"
 version = "0.9.3"
-description = "AETHER — Higgs development line"
+description = "AETHER — Strongforce 0.9.3 development line"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }

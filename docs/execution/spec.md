@@ -45,7 +45,7 @@ Historical CMX-09-only delta is preserved as [Appendix H](#appendix-h-historical
 
 **Mutation score ≥ 0.80** (v2 §5.4): `[PROPOSAL]` optional treatment T-39, not default admission.
 
-**I-STATE.** σ is a ledger fold. Do not dump `resume_state` JSON into frozen L3 (FACT current bug; T-12). `domain/task_state.py` is **MISSING** until T-09.
+**I-STATE.** σ is a ledger fold. Schema lives in `domain/task_state.py` (`SemanticTaskState`; `CodingTaskState` is the same type). The only fold is `runtime/task_state.py` `fold_task_state`. σ is compiled into L4/L5, never dumped into frozen L3.
 
 **Single-writer.** One writer per workspace; children that write are sequential or isolated worktrees.
 
@@ -195,7 +195,7 @@ It must not bypass `ApplicationService`, `Runtime`, `HarnessSession`, or the ker
 
 These values contain no model provider, filesystem I/O, or runtime authority.
 
-**FACT (HEAD `66aa7a3c`).** The current fold is `CodingTaskState` in `runtime/task_state.py` (`fold_task_state`). `vanguard/packages/domain/task_state.py` is **MISSING**. Preferred merge is B §6.12: promote schema to domain, keep the fold in runtime, do not run two authorities forever. Do not delete `GoalContract` / `CampaignPlan` / the rest of this 17-value list; they remain law-side targets.
+**FACT.** Schema is `vanguard/packages/domain/task_state.py` (`SemanticTaskState` / `CodingTaskState` alias). The only fold remains `runtime/task_state.py` `fold_task_state`. A's 17 extra domain types stay `[PROPOSAL]` law-side targets; do not implement them here.
 
 **Historical claim.** This section read as if the 17 values were required next-code. They are `[PROPOSAL]` relative to the live fold.
 

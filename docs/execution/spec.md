@@ -35,7 +35,7 @@ Historical CMX-09-only delta is preserved as [Appendix H](#appendix-h-historical
 
 **Kernel (I-7).** AST preflight SHALL NOT enter `kernel/dispatch.py` S7/S8. S7/S8 remain RESERVE/VERIFY. Syntax checks belong in `adapters/environment/`.
 
-**FACT canonical path.** `ApplicationService` → Runtime → `HarnessSession` → `EpisodeEngine` → `Kernel.dispatch`. ForgeEngine and ChimeraEngine SHALL NOT be the product path (`[PROPOSAL]` quarantine: T-23).
+**FACT canonical path.** `ApplicationService` → Runtime → `HarnessSession` → `EpisodeEngine` → `Kernel.dispatch`. ForgeEngine and ChimeraEngine SHALL NOT be the product path. Coding Max report arms SHALL be ⊆ `{vg-code-fast, vg-code-balanced, vg-code-max}` (T-23).
 
 **Admission (FACT).** Live function is `admission_required` (`runtime/session.py`): exempt `vg-code-default` / `vg-code-lex`, else `"patch.apply" in verbs`. `ADMISSION_GATED_HARNESSES` is unused. T-04 is `[PROPOSAL]` and needs an RF-25 successor baseline.
 
@@ -51,7 +51,7 @@ Historical CMX-09-only delta is preserved as [Appendix H](#appendix-h-historical
 
 **Authorize-before-retrieve.** Memory recall requires grant (`runtime/prompt_assembler.py`).
 
-**Instrument truth (T-01–T-03).** B20 task discovery SHALL require a schema-valid `membership.json` (`aether.b20.membership/1`); directory names are insufficient. `__pycache__`, hidden, and tmp names are not tasks. Missing oracle, duplicate ids, or task-set digest mismatch SHALL fail closed. The task-set digest is order-independent over admitted ids. Every empirical B20 JSON and `BenchmarkReceipt` SHALL bind `subject_sha` to the frozen candidate `git rev-parse HEAD`; a missing SHA SHALL refuse the receipt. `dry_run` SHALL emit `pass`, `cost`, `oracle`, and `oracle_passed` as null.
+**Instrument truth (T-01–T-03, T-24, T-25, T-40, T-41).** B20 task discovery SHALL require a schema-valid `membership.json` (`aether.b20.membership/1`); directory names are insufficient. `__pycache__`, hidden, and tmp names are not tasks. Missing oracle, duplicate ids, or task-set digest mismatch SHALL fail closed. The task-set digest is order-independent over admitted ids. Every empirical B20 JSON and `BenchmarkReceipt` SHALL bind `subject_sha` to the frozen candidate `git rev-parse HEAD`; a missing SHA SHALL refuse the receipt. `dry_run` SHALL emit `pass`, `cost`, `oracle`, and `oracle_passed` as null. A PASS row or PASS receipt without a patch digest SHALL be refused. Empirical dispositions SHALL be exactly `{passed, failed, undeterminable, not_run}`; provider, harness, and `DATASET_INVALID` outcomes SHALL NOT count as task fail. A qualifying empirical run on a dirty Git tree SHALL fail closed. BAAC discovery SHALL require a schema-valid `challenge.yaml` (`aether.baac.challenge/1`); a bare `TASK.md` or directory name is insufficient.
 
 ---
 
@@ -433,7 +433,7 @@ Research requires:
 - contradiction handling;
 - no fabricated citations.
 
-This per-class evidence matrix **wins** as program law over v2 §5.3 / I-1 “no finish without signed `VerificationReceipt`”. That universal signed-finish rule remains `[PROPOSAL]` and is too strong versus this matrix and versus the local vs exterior evaluator split (B §3.4). Fail-to-pass is required for **bugfix**; it is not a universal finish law for explanation or research.
+This per-class evidence matrix **wins** as program law over v2 §5.3 / I-1 “no finish without signed `VerificationReceipt`”. That universal signed-finish rule remains `[PROPOSAL]` and is too strong versus this matrix and versus the local vs exterior evaluator split (B §3.4). Fail-to-pass is required for **bugfix**; it is not a universal finish law for explanation or research. Bugfix admission SHALL require a failing pre-verify and a passing post-verify; a vacuous reproducer (pre-verify already passing) SHALL be refused (T-38). `true` and `echo 10 tests passed` SHALL NOT admit completion (T-42).
 
 
 ---

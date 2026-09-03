@@ -27,7 +27,6 @@ import sys
 import tempfile
 import time
 from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
-import yaml
 
 from vanguard.packages.runtime.root import (
     FORGE_PRESET_NAME,
@@ -39,13 +38,14 @@ from vanguard.packages.runtime.root import (
     resolve_model,
 )
 
+from ..membership import parse_baac_challenge_manifest
 from ..schema import ChallengeMetadata
 from .budget import BudgetCapConfig, BudgetTracker, BudgetExceededError
 from .cache import clean_scratch_directories, purge_bytecode_caches
 from .eval_judge import evaluate_challenge
 from .models import LAMModelPort, OllamaModelPort, OpenRouterModelPort, load_openrouter_api_key
 from .oracle import OracleResult, run_external_oracle
-from .report import ChallengeExecutionResult, classify_attribution
+from .report import ChallengeExecutionResult, classify_attribution, status_for_attribution
 from .state import (
     clean_scratch_workspace,
     materialize_scratch_workspace,
@@ -110,27 +110,8 @@ class BaaCRunner:
         self.run_dir.mkdir(parents=True, exist_ok=True)
 
     def load_challenge_metadata(self, challenge_dir: Path) -> ChallengeMetadata:
-        """Parse challenge.yaml or construct default metadata."""
-        yaml_file = challenge_dir / "challenge.yaml"
-        if yaml_file.is_file():
-            try:
-                raw = yaml.safe_load(yaml_file.read_text(encoding="utf-8")) or {}
-                return ChallengeMetadata.from_dict(raw)
-            except Exception:
-                pass
-
-        # Fallback default inferred from path
-        cid = challenge_dir.name
-        tier_name = challenge_dir.parent.name if "tier-" in challenge_dir.parent.name else "tier-1"
-        return ChallengeMetadata(
-            id=cid,
-            name=cid.replace("_", " ").title(),
-            scope="single" if "single" in cid else "multi",
-            context_bracket="2K" if "2K" in cid else "8K",
-            tier=tier_name,
-            difficulty=int(tier_name.split("-")[-1]) if "-" in tier_name and tier_name.split("-")[-1].isdigit() else 1,
-            timeout_seconds=30,
-        )
+        """Admit a challenge only from a schema-valid challenge.yaml."""
+        return parse_baac_challenge_manifest(challenge_dir / "challenge.yaml")
 
     def run_challenge(self, challenge_dir: Path, keep_scratch: bool = False) -> ChallengeExecutionResult:
         """Run the full BaaC cycle for a single challenge."""
@@ -149,7 +130,7 @@ class BaaCRunner:
                 preset=self.preset,
                 model=self.model_name,
                 mode=self.mode,
-                status="FAIL",
+                status="UNDETERMINABLE",
                 attribution="DATASET_INVALID",
                 turns=0,
                 prompt_tokens=0,
@@ -264,7 +245,6 @@ class BaaCRunner:
                 timeout_seconds=meta.timeout_seconds,
             )
 
-            status = eval_outcome.status
             attribution = classify_attribution(
                 oracle=eval_outcome.oracle_result,
                 harness_status=harness_status,
@@ -273,6 +253,7 @@ class BaaCRunner:
                 budget_exceeded=budget_exceeded,
                 changed_files=changed_files,
             )
+            status = status_for_attribution(attribution)
 
             total_duration = round(time.perf_counter() - t_start, 2)
             diagnosis = "All falsifiers green" if status == "PASS" else eval_outcome.feedback

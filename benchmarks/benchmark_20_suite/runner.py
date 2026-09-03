@@ -40,9 +40,12 @@ if str(ROOT) not in sys.path:
 if str(ROOT / "tools" / "002_LLM_API_MOCK") not in sys.path:
     sys.path.insert(0, str(ROOT / "tools" / "002_LLM_API_MOCK"))
 
+from benchmarks.coding_max_report import CODING_MAX_ARMS, normalize_coding_max_arm, write_coding_max_report
 from benchmarks.protocols import (
     B20MembershipError,
+    DirtySubjectError,
     enumerate_b20_membership,
+    require_clean_subject,
     write_b20_report,
 )
 
@@ -181,6 +184,7 @@ class ChallengeResult:
     latency_seconds: float
     diagnosis: str
     trajectory: List[Dict[str, Any]] = field(default_factory=list)
+    patch_digest: str = ""
 
 
 def extract_tool_calls_from_content(content: str) -> List[Dict[str, Any]]:
@@ -628,6 +632,7 @@ class BenchmarkRunner:
                     latency_seconds=round(total_latency, 2),
                     diagnosis=diagnosis,
                     trajectory=outcome.trajectory,
+                    patch_digest=_workspace_patch_digest(challenge_dir, ws_path),
                 )
 
             messages = [
@@ -781,6 +786,7 @@ class BenchmarkRunner:
                 latency_seconds=round(total_latency, 2),
                 diagnosis=diagnosis,
                 trajectory=trajectory,
+                patch_digest=_workspace_patch_digest(challenge_dir, ws_path),
             )
 
 
@@ -828,6 +834,19 @@ def print_results_matrix(results: List[ChallengeResult], total_cost: float, tota
     print("=" * 120 + "\n")
 
 
+def _workspace_patch_digest(baseline: Path, workspace: Path) -> str:
+    """Bind a PASS row to the post-edit workspace identity."""
+    hasher = hashlib.sha256()
+    for root in (baseline, workspace):
+        if not root.exists():
+            hasher.update(b"<missing>")
+            continue
+        for path in sorted(item for item in root.rglob("*") if item.is_file()):
+            hasher.update(str(path.relative_to(root)).encode("utf-8"))
+            hasher.update(path.read_bytes())
+    return "sha256:" + hasher.hexdigest()
+
+
 def resolve_frozen_subject_sha(repo_root: Path = ROOT) -> str:
     """Bind empirical receipts to the frozen candidate HEAD SHA."""
     proc = subprocess.run(
@@ -846,7 +865,12 @@ def resolve_frozen_subject_sha(repo_root: Path = ROOT) -> str:
 def main():
     parser = argparse.ArgumentParser(description="Run Benchmark 20 Suite")
     parser.add_argument("--model", default=None, help="Model identifier or alias (defaults to centralized config: get_default_paid_model())")
-    parser.add_argument("--preset", default="vg-code-max", choices=["vg-code-max", "vg-1-forge"], help="Harness preset (vg-code-max or vg-1-forge)")
+    parser.add_argument(
+        "--preset",
+        default="vg-code-max",
+        choices=["vg-code-fast", "vg-code-balanced", "vg-code-max", "vg-1-forge"],
+        help="Harness preset (Coding Max arms or experimental vg-1-forge)",
+    )
     parser.add_argument("--max-turns", type=int, default=8, help="Max turns per challenge")
     parser.add_argument("--budget", type=float, default=0.20, help="Max USD budget")
     parser.add_argument("--single", default=None, help="Run single challenge name for debugging")
@@ -868,7 +892,9 @@ def main():
 
     try:
         subject_sha = resolve_frozen_subject_sha(ROOT)
-    except ValueError as exc:
+        if not args.dry_run:
+            require_clean_subject(ROOT)
+    except (ValueError, DirtySubjectError) as exc:
         print(exc)
         sys.exit(2)
 
@@ -914,6 +940,7 @@ def main():
             "cost_usd": round(r.cost_usd, 6),
             "latency_s": r.latency_seconds,
             "diagnosis": r.diagnosis,
+            "patch_digest": r.patch_digest,
         }
         for r in results
     ]
@@ -929,8 +956,12 @@ def main():
     }
     out_file = SUITE_ROOT / f"benchmark_20_results_{runner.preset.replace('-', '_')}.json"
     write_b20_report(out_file, **write_kwargs)
-    if runner.preset == "vg-code-max":
-        write_b20_report(SUITE_ROOT / "benchmark_20_results.json", **write_kwargs)
+    if normalize_coding_max_arm(runner.preset) in CODING_MAX_ARMS:
+        write_coding_max_report(
+            SUITE_ROOT / "benchmark_20_results.json",
+            arms=[runner.preset],
+            **write_kwargs,
+        )
 
 
 if __name__ == "__main__":

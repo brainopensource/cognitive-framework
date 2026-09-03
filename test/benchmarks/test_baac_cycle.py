@@ -26,7 +26,15 @@ class TestBaaCCycleIntegration(unittest.TestCase):
         (self.challenge_dir / "src").mkdir(parents=True)
         (self.challenge_dir / "oracle").mkdir(parents=True)
 
-        (self.challenge_dir / "challenge.yaml").write_text("id: sum_pair\ntier: easy\n", encoding="utf-8")
+        (self.challenge_dir / "challenge.yaml").write_text(
+            "schema: aether.baac.challenge/1\n"
+            "id: sum_pair\n"
+            "name: Sum Pair\n"
+            "scope: single\n"
+            "context_bracket: 2K\n"
+            "tier: easy\n",
+            encoding="utf-8",
+        )
         (self.challenge_dir / "TASK.md").write_text("# Task\nImplement add_two(a, b) in src/calc.py\n", encoding="utf-8")
         (self.challenge_dir / "src" / "calc.py").write_text("def add_two(a: int, b: int) -> int:\n    return a + b\n", encoding="utf-8")
 

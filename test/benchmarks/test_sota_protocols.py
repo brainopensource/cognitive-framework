@@ -30,7 +30,8 @@ class SotaProtocolTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             BenchmarkReceipt("SWE-Bench Pro", task.digest, submission.digest,
                              "h", "m", "e", outcome="PASS", split="held-out",
-                             subject_sha="86142175fcab03ff93727ad1f5b336b22e01c66b").validate_subject(task, submission)
+                             subject_sha="86142175fcab03ff93727ad1f5b336b22e01c66b",
+                             patch_digest="sha256:" + ("ab" * 32)).validate_subject(task, submission)
 
     def test_missing_subject_sha_refuses_receipt(self):
         task = BenchmarkTask("t1", "SWE-Bench Pro", "dev")

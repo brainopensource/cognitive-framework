@@ -113,8 +113,8 @@ class VerificationCortex:
 
         # 2. Pytest pattern: "X passed, Y failed" or "X passed in Ys"
         if executed == 0:
-            pytest_pass = re.search(r"(\d+)\s+passed", output)
-            pytest_fail = re.search(r"(\d+)\s+failed", output)
+            pytest_pass = re.search(r"(\d+) passed(?: in|,|$)", output)
+            pytest_fail = re.search(r"(\d+) failed", output)
             if pytest_pass:
                 p_cnt = int(pytest_pass.group(1))
                 f_cnt = int(pytest_fail.group(1)) if pytest_fail else 0
@@ -132,12 +132,8 @@ class VerificationCortex:
                 executed = p_cnt + f_cnt
                 passed = p_cnt
 
-        # Bare exit 0 is not evidence a test ran. Unknown counts stay 0 (T-06).
-        # Non-zero exit without a parsed runner summary still records a failed command.
-        if executed == 0 and exit_code != 0:
-            executed = 1
-            passed = 0
-            failed.append("CommandFailed")
+        # Bare exit, including non-zero, is not evidence a test ran (T-06 / T-08).
+        # Unknown counts stay 0; do not invent executed = 1.
 
         return VerificationRecord(
             verification_id=f"ver_{int(time.time()*1000)}",

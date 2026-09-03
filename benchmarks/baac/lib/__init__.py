@@ -5,7 +5,7 @@ from .cache import clean_scratch_directories, purge_bytecode_caches, reset_envir
 from .eval_judge import AIJudgeScore, EvaluationOutcome, evaluate_challenge
 from .models import LAMModelPort, OllamaModelPort, OpenRouterModelPort
 from .oracle import OracleResult, run_external_oracle
-from .report import BaaCReport, ChallengeExecutionResult, classify_attribution
+from .report import BaaCReport, ChallengeExecutionResult, classify_attribution, status_for_attribution
 from .runner import BaaCRunner
 from .state import (
     clean_scratch_workspace,
@@ -35,6 +35,7 @@ __all__ = [
     "clean_scratch_directories",
     "clean_scratch_workspace",
     "classify_attribution",
+    "status_for_attribution",
     "compute_directory_manifest",
     "compute_file_sha256",
     "evaluate_challenge",

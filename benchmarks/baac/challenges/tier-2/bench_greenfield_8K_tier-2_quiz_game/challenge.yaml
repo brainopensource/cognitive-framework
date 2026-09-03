@@ -1,3 +1,4 @@
+schema: aether.baac.challenge/1
 id: bench_greenfield_8K_tier-2_quiz_game
 name: Greenfield Quiz Game Engine
 scope: greenfield

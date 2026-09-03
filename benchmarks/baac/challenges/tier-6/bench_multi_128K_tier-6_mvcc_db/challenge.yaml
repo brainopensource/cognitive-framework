@@ -1,3 +1,4 @@
+schema: aether.baac.challenge/1
 id: bench_multi_128K_tier-6_mvcc_db
 name: Multi-Version Concurrency Control (MVCC) In-Memory Store
 scope: multi

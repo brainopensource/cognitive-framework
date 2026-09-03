@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping, Protocol, Sequence
@@ -19,11 +20,23 @@ __all__ = ["BenchmarkTask", "BenchmarkSubmission", "BenchmarkReceipt",
            "SUPPORTED_PROTOCOLS", "PROTOCOL_SPECS", "ProtocolSpec",
            "EvaluatorAdapter", "normalize", "B20MembershipError",
            "B20Membership", "B20TaskRecord", "B20_MEMBERSHIP_SCHEMA",
-           "B20_REPORT_SCHEMA", "task_set_digest", "is_rejected_b20_name",
-           "enumerate_b20_membership", "write_b20_report"]
+           "B20_REPORT_SCHEMA", "RESULT_DISPOSITIONS", "DirtySubjectError",
+           "task_set_digest", "is_rejected_b20_name",
+           "enumerate_b20_membership", "write_b20_report",
+           "classify_disposition", "require_clean_subject"]
 
 B20_MEMBERSHIP_SCHEMA = "aether.b20.membership/1"
 B20_REPORT_SCHEMA = "aether.b20.report/1"
+RESULT_DISPOSITIONS = frozenset({"passed", "failed", "undeterminable", "not_run"})
+_UNDETERMINABLE_MARKERS = (
+    "provider_error",
+    "provider_unavailable",
+    "harness_error",
+    "instrument_error",
+    "dataset_invalid",
+    "budget_exhausted",
+    "traceback",
+)
 _REJECTED_B20_NAMES = frozenset({
     "__pycache__",
     ".pytest_cache",
@@ -138,10 +151,13 @@ class BenchmarkReceipt:
     subject_sha: str = ""
     usage: Mapping[str, int] | None = None
     split: str = ""
+    patch_digest: str = ""
 
     def __post_init__(self) -> None:
         if not str(self.subject_sha or "").strip():
             raise ValueError("receipt refused: missing subject_sha")
+        if _is_pass_outcome(self.outcome) and not str(self.patch_digest or "").strip():
+            raise ValueError("receipt refused: PASS row missing patch digest")
 
     def to_wire(self) -> dict[str, Any]:
         return normalize({
@@ -157,6 +173,7 @@ class BenchmarkReceipt:
             "subjectSha": self.subject_sha,
             "usage": self.usage,
             "split": self.split,
+            "patchDigest": self.patch_digest,
         })
 
     def validate_subject(self, task: BenchmarkTask,
@@ -301,6 +318,12 @@ def write_b20_report(
             "pass_rate_pct": None,
             "total_cost_usd": None,
             "total_duration_seconds": None,
+            "missingness": {
+                "passed": 0,
+                "failed": 0,
+                "undeterminable": 0,
+                "not_run": len(ids),
+            },
             "results": [
                 {
                     "id": task_id,
@@ -312,13 +335,17 @@ def write_b20_report(
                     "latency_s": None,
                     "diagnosis": None,
                     "oracle_passed": None,
+                    "disposition": "not_run",
                 }
                 for task_id in ids
             ],
         }
     else:
-        rows = [dict(row) for row in (results or [])]
-        passed = sum(1 for row in rows if row.get("status") == "PASS")
+        rows = [_normalize_empirical_row(row) for row in (results or [])]
+        missingness = {name: 0 for name in sorted(RESULT_DISPOSITIONS)}
+        for row in rows:
+            missingness[str(row["disposition"])] = missingness.get(str(row["disposition"]), 0) + 1
+        passed = missingness.get("passed", 0)
         payload = {
             "schema": B20_REPORT_SCHEMA,
             "subject_sha": sha,
@@ -332,8 +359,93 @@ def write_b20_report(
             "pass_rate_pct": round((passed / len(rows)) * 100, 1) if rows else 0.0,
             "total_cost_usd": total_cost_usd,
             "total_duration_seconds": total_duration_seconds,
+            "missingness": missingness,
             "results": rows,
         }
     if path is not None:
         Path(path).write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     return payload
+
+
+class DirtySubjectError(ValueError):
+    """A qualifying empirical run cannot bind a dirty Git subject."""
+
+
+def require_clean_subject(repo_root: Path) -> str:
+    """Return HEAD SHA only when the subject tree is clean."""
+    root = Path(repo_root)
+    head = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    sha = (head.stdout or "").strip()
+    if head.returncode != 0 or not sha:
+        raise DirtySubjectError("qualifying run refused: missing subject_sha")
+    status = subprocess.run(
+        ["git", "status", "--porcelain"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if status.returncode != 0 or (status.stdout or "").strip():
+        raise DirtySubjectError("qualifying run refused: dirty subject")
+    return sha
+
+
+def classify_disposition(
+    *,
+    status: Any = None,
+    attribution: Any = None,
+    diagnosis: Any = None,
+    dry_run: bool = False,
+) -> str:
+    """Map a runner row onto the closed missingness vocabulary."""
+    if dry_run:
+        return "not_run"
+    status_text = "" if status is None else str(status).strip()
+    attribution_text = "" if attribution is None else str(attribution).strip()
+    diagnosis_text = "" if diagnosis is None else str(diagnosis).strip()
+    if not status_text and not attribution_text and not diagnosis_text:
+        return "not_run"
+    combined = " ".join((attribution_text, diagnosis_text, status_text)).lower()
+    if any(marker in combined for marker in _UNDETERMINABLE_MARKERS):
+        return "undeterminable"
+    status_upper = status_text.upper()
+    if status_upper in {"PASS", "PASSED"} or attribution_text == "PASS":
+        return "passed"
+    if status_upper in {"FAIL", "FAILED"} or attribution_text == "LLM_COGNITIVE_ERROR":
+        return "failed"
+    if status_upper in {"NOT_RUN", "NONE"}:
+        return "not_run"
+    return "undeterminable"
+
+
+def _is_pass_outcome(outcome: Any) -> bool:
+    return str(outcome or "").strip().upper() in {"PASS", "PASSED"}
+
+
+def _row_patch_digest(row: Mapping[str, Any]) -> str:
+    return str(row.get("patch_digest") or row.get("patchDigest") or "").strip()
+
+
+def _normalize_empirical_row(row: Mapping[str, Any]) -> dict[str, Any]:
+    item = dict(row)
+    diagnosis = str(item.get("diagnosis") or "")
+    if "traceback" in diagnosis.lower():
+        item["diagnosis"] = "harness_error"
+        item["status"] = "UNDETERMINABLE"
+    disposition = classify_disposition(
+        status=item.get("status"),
+        attribution=item.get("attribution"),
+        diagnosis=item.get("diagnosis"),
+    )
+    if disposition == "passed" and not _row_patch_digest(item):
+        raise ValueError("PASS row refused: missing patch digest")
+    if disposition == "undeterminable" and str(item.get("status") or "").upper() == "FAIL":
+        item["status"] = "UNDETERMINABLE"
+    item["disposition"] = disposition
+    return item

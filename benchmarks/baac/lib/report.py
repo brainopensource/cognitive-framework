@@ -15,6 +15,8 @@ import json
 import time
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
+from benchmarks.protocols import classify_disposition
+
 from .oracle import OracleResult
 
 
@@ -45,6 +47,14 @@ class ChallengeExecutionResult:
     metadata: Mapping[str, Any] = field(default_factory=dict)
     trajectory: tuple[Mapping[str, Any], ...] = ()
 
+    @property
+    def disposition(self) -> str:
+        return classify_disposition(
+            status=self.status,
+            attribution=self.attribution,
+            diagnosis=self.diagnosis,
+        )
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "challengeId": self.challenge_id,
@@ -55,6 +65,7 @@ class ChallengeExecutionResult:
             "model": self.model,
             "mode": self.mode,
             "status": self.status,
+            "disposition": self.disposition,
             "attribution": self.attribution,
             "turns": self.turns,
             "promptTokens": self.prompt_tokens,
@@ -100,6 +111,15 @@ def classify_attribution(
         return "LLM_COGNITIVE_ERROR"
 
     return "HARNESS_ERROR"
+
+
+def status_for_attribution(attribution: str) -> str:
+    """Task fail is only a cognitive oracle miss. Other classes are missingness."""
+    if attribution == "PASS":
+        return "PASS"
+    if attribution == "LLM_COGNITIVE_ERROR":
+        return "FAIL"
+    return "UNDETERMINABLE"
 
 
 @dataclass

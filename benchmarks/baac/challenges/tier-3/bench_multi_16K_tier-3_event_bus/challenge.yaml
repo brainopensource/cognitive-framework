@@ -1,3 +1,4 @@
+schema: aether.baac.challenge/1
 id: bench_multi_16K_tier-3_event_bus
 name: Asynchronous In-Memory Event Bus
 scope: multi

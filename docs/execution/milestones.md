@@ -42,6 +42,8 @@ This page defines stable release outcomes and gate predicates. It does not track
 
 Day-to-day work is the flat `T-*` tree. There is no sprint calendar and no WIP lane on this page. Status of **MS-*** rows is `OPEN` until receipts exist.
 
+Living package version is **0.9.3** (`pyproject.toml`). That is not M-9 or M-10 acceptance. The M-9/M-10 labels below remain gate IDs.
+
 | Milestone | TARGET Outcome | Acceptance Boundary | Status |
 |---|---|---|---|
 | **M-0–M-3C** | Trust foundation & canonical composition | Historical completion anchors preserved; successor changes require explicit ADR and falsifier. | `DONE` (Verified & Frozen) |
@@ -75,7 +77,7 @@ These rows recast A §0 / B §1 reliability order as **capability outcomes**, no
 
 | ID | TARGET outcome | Acceptance | Status |
 |---|---|---|---|
-| **MS-INSTRUMENT** | Exact-subject, schema-valid, dry-run-null empirical instrument | Enumerator digest; no `__pycache__` tasks; `subject_sha` bound; dry-run pass/cost/oracle null (B §8.4/8.5; T-01–T-03, T-24–T-25, T-40–T-41) | `OPEN` |
+| **MS-INSTRUMENT** | Exact-subject, schema-valid, dry-run-null empirical instrument | Enumerator digest; no `__pycache__` tasks; `subject_sha` bound; dry-run pass/cost/oracle null (B §8.4/8.5; T-01–T-03, T-24–T-25, T-40–T-41) | `CLOSED` |
 | **MS-TRUTH** | No `completed` without bound verification; Forge cannot invent counts; one gating function | AdmissionGate + `VerificationReceipt.passed`; A §9.7; T-04–T-08, T-42, T-38, T-23. T-04 remains `[PROPOSAL]` until RF-25 successor baseline | `OPEN` |
 | **MS-RESUME** | Fresh process restores episode_id, σ, prefix L1–L3; σ not in L3 | A §10.7; T-09–T-13, T-43–T-44. `domain/task_state.py` MISSING until T-09 | `OPEN` |
 | **MS-SEE** | Epoch-bound packets, omissions explicit, one ContextCompiler | A §11.9; v2 §3 target (not current L3 dump); T-14–T-16, T-36–T-37, T-45–T-46 | `OPEN` |

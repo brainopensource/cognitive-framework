@@ -59,20 +59,20 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - Files: runners; cousin `test/benchmarks/test_m8_bundle.py`  
 
 **T-24 Patch identity on results** (B)  
-- [ ] PASS row without patch digest refused  
+- [x] PASS row without patch digest refused  
 - Requires: T-02  
 
 **T-25 Missingness taxonomy** (B)  
-- [ ] Distinct `passed` / `failed` / `undeterminable` / `not_run`  
-- [ ] Provider ≠ task fail; harness ≠ model; `DATASET_INVALID` ≠ fail  
+- [x] Distinct `passed` / `failed` / `undeterminable` / `not_run`  
+- [x] Provider ≠ task fail; harness ≠ model; `DATASET_INVALID` ≠ fail  
 - Requires: T-01, T-02  
 
 **T-40 Dirty-subject fail-closed** (A §31.9)  
-- [ ] Qualifying run on dirty tree fails closed  
+- [x] Qualifying run on dirty tree fails closed  
 - Related: T-02  
 
 **T-41 BAAC schema-valid discovery** (A §31.7)  
-- [ ] Require schema-valid manifests in BAAC (if distinct from T-01, keep both)  
+- [x] Require schema-valid manifests in BAAC (if distinct from T-01, keep both)  
 
 ### Context: Admission and verification truth
 
@@ -104,15 +104,15 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - Requires: T-07  
 
 **T-42 Adversarial coding verification suite** (A §31.6)  
-- [ ] Replace retired `test/runtime/test_coding_verification.py` empty suite  
-- [ ] `true` / `echo 10 tests passed` cannot admit  
-- [ ] Unrelated suite cannot satisfy task relevance  
-- [ ] Stale verification after write rejected  
-- [ ] Foreign task/composition digest rejected  
+- [x] Replace retired `test/runtime/test_coding_verification.py` empty suite  
+- [x] `true` / `echo 10 tests passed` cannot admit  
+- [x] Unrelated suite cannot satisfy task relevance  
+- [x] Stale verification after write rejected  
+- [x] Foreign task/composition digest rejected  
 
 **T-38 Fail-to-pass reproducer (bugfix class)** (v2 §5.3, A §9.4)  
-- [ ] Pre-verify MUST fail; post-verify MUST pass; vacuous reproducer rejected  
-- [ ] Not a universal finish law (docs/research/explanation excluded)  
+- [x] Pre-verify MUST fail; post-verify MUST pass; vacuous reproducer rejected  
+- [x] Not a universal finish law (docs/research/explanation excluded)  
 
 **T-39 Mutation score ≥ 0.80** (v2 §5.4, VER-02) `[PROPOSAL]`  
 - [ ] Optional treatment; not default admission  
@@ -120,7 +120,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - Alias: `VER-02`, `TLS-06`  
 
 **T-23 Quarantine Forge/Chimera from Coding Max reports** (B)  
-- [ ] Product arms ⊆ `{vg-code-fast,balanced,max}`  
+- [x] Product arms ⊆ `{vg-code-fast,balanced,max}`  
 - Requires: T-06  
 
 ### Context: Semantic state and resume

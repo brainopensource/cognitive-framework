@@ -1250,7 +1250,7 @@ Each gap answers: what exists, where, what is missing, why it blocks long-horizo
 
 ### 4.2 Invented test counts (Forge)
 
-**FACT (T-06).** Forge `parse_test_output` no longer sets `test_count = 1` on `exit_code == 0` with empty or unparseable output. Chimera no longer sets `executed = 1` / `passed = 1` on bare exit 0. Unknown counts stay 0; `VerificationReceipt.passed` remains `exit_code == 0 and executed_test_count > 0`.
+**FACT (T-06).** Forge `parse_test_output` no longer sets `test_count = 1` on `exit_code == 0` with empty or unparseable output. Chimera no longer sets `executed = 1` / `passed = 1` on bare exit 0 **or** non-zero exit without a parsed runner summary. Unknown counts stay 0; `VerificationReceipt.passed` remains `exit_code == 0 and executed_test_count > 0`.
 
 **Contrast.** `runtime/session.py` `_observed_test_count` L363–375 already returned 0 on unparseable output.
 
@@ -2579,7 +2579,7 @@ That boundary should remain stable while cognition evolves behind declarative ma
 
 #### G-01: completion evidence can be overstated
 
-**FACT (T-06).** Forge `parse_test_output` and Chimera `VerificationCortex.parse_test_output` no longer invent `test_count = 1` / `executed = 1` on bare exit 0. Unknown counts stay 0.
+**FACT (T-06).** Forge `parse_test_output` and Chimera `VerificationCortex.parse_test_output` no longer invent `test_count = 1` / `executed = 1` on bare exit 0 or on non-zero exit without a parsed runner summary. Unknown counts stay 0.
 
 A zero exit code is still not proof that a test ran. Remaining invented-count work is typed runner adapters (T-08), not this fallback.
 
@@ -5452,7 +5452,7 @@ Signed exact-subject evidence supports acceptance.
 | LDA index HEAD | `66aa7a3c0c31` |
 | LDA freshness vs HEAD | `FRESH` |
 | Lock date | 2026-09-03 |
-| Package version string | `0.9.0b1` in `pyproject.toml` (not M-9 acceptance) |
+| Package version string | `0.9.3` in `pyproject.toml` (not M-9 acceptance; lock-time string was `0.9.0b1`) |
 | Kernel TCB | **1386 / 1438** logical LOC (lock-time reconfirm not required for this draft-lock) |
 | Domain-blindness | Invariant I-7 still law; kernel remains domain-blind |
 

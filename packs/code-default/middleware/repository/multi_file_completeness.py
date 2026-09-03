@@ -9,8 +9,14 @@ evidence.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Any, Mapping, Sequence
+
+_VACUOUS_VERIFICATION_COMMAND = re.compile(
+    r"^\s*(?:true|/bin/true|/usr/bin/true|echo\b|printf\b)\b",
+    re.IGNORECASE,
+)
 
 try:
     from .task_classifier import classify_task
@@ -216,7 +222,57 @@ class CodeDefaultCompletionPolicy:
             return {"admissible": False, "reason": "VERIFICATION_FAILED"}
         if not current_workspace_digest or workspace_digest != current_workspace_digest:
             return {"admissible": False, "reason": "VERIFICATION_STALE"}
+        command = _verification_command(verification, observations)
+        if _VACUOUS_VERIFICATION_COMMAND.match(command):
+            return {"admissible": False, "reason": "VACUOUS_VERIFICATION_COMMAND"}
+        if classification.kind == "bugfix":
+            pre_verify = observations.get("pre_verify", observations.get("pre_verification"))
+            if pre_verify is None:
+                return {"admissible": False, "reason": "FAIL_TO_PASS_REQUIRED"}
+            if _blob_passed(pre_verify):
+                return {"admissible": False, "reason": "VACUOUS_REPRODUCER"}
+            if not _blob_failed(pre_verify):
+                return {"admissible": False, "reason": "FAIL_TO_PASS_REQUIRED"}
+        task_test_ids = {str(item) for item in (observations.get("task_test_ids") or ())}
+        executed_test_ids = {str(item) for item in (observations.get("executed_test_ids") or ())}
+        if task_test_ids and task_test_ids.isdisjoint(executed_test_ids):
+            return {"admissible": False, "reason": "UNRELATED_SUITE"}
         return {"admissible": True, "reason": "completion_admissible"}
+
+
+def _verification_command(verification: Any, observations: Mapping[str, Any]) -> str:
+    if observations.get("verification_command"):
+        return str(observations["verification_command"])
+    if isinstance(verification, Mapping):
+        return str(
+            verification.get("verification_command")
+            or verification.get("verificationCommand")
+            or verification.get("command")
+            or ""
+        )
+    return str(getattr(verification, "verification_command", "") or "")
+
+
+def _blob_passed(blob: Any) -> bool:
+    if blob is None:
+        return False
+    if isinstance(blob, Mapping):
+        if blob.get("passed") is True:
+            return True
+        exit_code = int(blob.get("exit_code", blob.get("exitCode", -1)))
+        count = int(blob.get("executed_test_count", blob.get("executedTestCount", 0)))
+        return exit_code == 0 and count > 0
+    return bool(getattr(blob, "passed", False))
+
+
+def _blob_failed(blob: Any) -> bool:
+    if blob is None:
+        return False
+    if isinstance(blob, Mapping):
+        if blob.get("passed") is False:
+            return True
+        return not _blob_passed(blob)
+    return not bool(getattr(blob, "passed", False))
 
 
 # Friendly aliases used by pack composition and direct policy tests.

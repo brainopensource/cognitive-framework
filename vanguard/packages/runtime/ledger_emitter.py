@@ -277,6 +277,18 @@ class LedgerEmitter:
         self.events.append(event)
 
     def _assert_writer(self, writer: str, kind: str) -> None:
+        # The catalog is the sole live event-kind authority (ADR-0098
+        # Decision 3). `WRITABLE_KINDS` was imported here and never checked,
+        # so a typo'd or invented kind appended cleanly and the reducer then
+        # filed it into `unknown_events` -- a silent write of an event no
+        # reader has a fold for. Deprecated kinds keep their own, more
+        # specific error below: `DeprecatedKindError` is a subclass, and
+        # callers distinguish the two.
+        if kind not in WRITABLE_KINDS and kind not in DEPRECATED_KINDS:
+            raise WriterAuthorityError(
+                f"{kind!r} is not a writable ledger kind; the canonical "
+                "catalog (domain/ledger/events.WRITABLE_KINDS) is the sole "
+                "authority (ADR-0098 Decision 3)")
         if kind in DEPRECATED_KINDS:
             raise DeprecatedKindError(
                 f"{kind!r} is deprecated and readable only; new writes are "

@@ -700,6 +700,10 @@ class CodeASTProvider(BaseProvider):
             source_path=file_path,
         ))
 
+    def _parse_python(self, file_path: str, source: str) -> tuple[list[IRSymbol], list[IRRelation]]:
+        syms, rels, _, _ = self._parse_python_pass1(file_path, source)
+        return syms, rels
+
     # ------------------------------------------------------------------
     # TypeScript / JavaScript
     # ------------------------------------------------------------------

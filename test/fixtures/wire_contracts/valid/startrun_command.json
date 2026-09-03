@@ -1,0 +1,18 @@
+{
+  "version": "vg.4",
+  "frameType": "command",
+  "frameId": "frame-001",
+  "command": {
+    "name": "StartRun",
+    "commandId": "cmd-001",
+    "idempotencyKey": "idem-001",
+    "runId": "run-001",
+    "actor": "operator",
+    "payload": {
+      "manifestPath": "agency/manifests/vg-code-default",
+      "repoPath": "/tmp/workspace",
+      "brief": "Fix issue #42",
+      "profileId": "prof-default"
+    }
+  }
+}

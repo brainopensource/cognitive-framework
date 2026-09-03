@@ -154,7 +154,7 @@ class StandaloneRuntimeDaemon:
                 self._shutdown_requested = True
                 self.log(f"Received signal {sig}, initiating graceful shutdown...")
                 if self.server:
-                    self.server.close()
+                    self.server.stop()
                 self._release_lock()
                 sys.exit(0)
 
@@ -195,7 +195,7 @@ class StandaloneRuntimeDaemon:
             pass
         finally:
             if self.server:
-                self.server.close()
+                self.server.stop()
             self._release_lock()
 
         return 0

@@ -42,10 +42,12 @@ class GoalContract:
     required_checks: tuple[str, ...] = ("workspace_changed", "verification_fresh", "zero_exit_code", "positive_test_count")
     required_files: tuple[str, ...] = ()
     forbidden_conditions: tuple[str, ...] = ("unresolved_syntax_error", "untested_patch")
+    composition_digest: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "taskDigest": self.task_digest,
+            "compositionDigest": self.composition_digest,
             "mode": self.mode,
             "requiredChecks": list(self.required_checks),
             "requiredFiles": list(self.required_files),
@@ -67,6 +69,8 @@ class VerificationReceipt:
     receipt_digest: str = ""
     command: str = ""
     test_summary: str = ""
+    composition_digest: str = ""
+    verification_subject_digest: str = ""
 
     @property
     def passed(self) -> bool:
@@ -78,8 +82,10 @@ class VerificationReceipt:
             "executedTestCount": self.executed_test_count,
             "workspaceDigest": self.workspace_digest,
             "taskDigest": self.task_digest,
+            "compositionDigest": self.composition_digest,
             "receiptDigest": self.receipt_digest,
             "command": self.command,
+            "verificationSubjectDigest": self.verification_subject_digest,
             "testSummary": self.test_summary,
         }
 
@@ -161,6 +167,20 @@ class ForgeAdmissionGate:
                     "to obtain a fresh verification receipt."
                 ),
             )
+
+        if not verification.task_digest:
+            return AdmissionVerdict(False, "VERIFICATION_UNBOUND_TASK")
+        if verification.task_digest != goal_contract.task_digest:
+            return AdmissionVerdict(False, "VERIFICATION_FOREIGN_TASK")
+        if goal_contract.composition_digest:
+            if not verification.composition_digest:
+                return AdmissionVerdict(False, "VERIFICATION_UNBOUND_COMPOSITION")
+            if verification.composition_digest != goal_contract.composition_digest:
+                return AdmissionVerdict(False, "VERIFICATION_FOREIGN_COMPOSITION")
+        if not verification.command or not verification.verification_subject_digest:
+            return AdmissionVerdict(False, "VERIFICATION_UNBOUND_SUBJECT")
+        if not verification.receipt_digest:
+            return AdmissionVerdict(False, "VERIFICATION_UNBOUND_RECEIPT")
 
         # 6. Check required files if specified
         if goal_contract.required_files:
@@ -502,8 +522,10 @@ class ForgeEngine:
                     executed_test_count=t_count,
                     workspace_digest=ws_digest,
                     task_digest=goal_contract.task_digest,
+                    composition_digest=goal_contract.composition_digest,
                     receipt_digest=digest_of({"cmd": cmd, "exit": exit_code, "ws": ws_digest}),
                     command=cmd,
+                    verification_subject_digest=digest_of({"command": cmd}),
                     test_summary=output[:500],
                 )
                 last_receipt[0] = receipt

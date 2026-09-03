@@ -1,0 +1,63 @@
+{
+  "atoms_used": [
+    "view_file",
+    "edit_file",
+    "run_command"
+  ],
+  "created_from": "benchmarks/swe_bench/challenges.py::tier7_greenfield_kv_lsm_tree",
+  "id": "t7-tier7-greenfield-kv-lsm-tree",
+  "tier": 7,
+  "title": "SWE-bench: Greenfield Log-Structured Merge (LSM) Tree Key-Value Engine",
+  "turns": [
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"path\": \"lsm/__init__.py\"}",
+            "name": "view_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 0
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"content\": \"from .engine import LSMTree\\n__all__ = ['LSMTree']\\n\", \"path\": \"lsm/__init__.py\"}",
+            "name": "edit_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 1
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"command\": \"python3 -m unittest oracle_test.py\"}",
+            "name": "run_command"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 2
+    },
+    {
+      "content": "Task completed and verified for Greenfield Log-Structured Merge (LSM) Tree Key-Value Engine (tier7_greenfield_kv_lsm_tree). All test suites pass (OK).",
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "tool_messages_seen": 3
+    }
+  ],
+  "workspace": {
+    "lsm/__init__.py": "from .engine import LSMTree\n__all__ = ['LSMTree']\n",
+    "lsm/engine.py": "class LSMTree:\n    def __init__(self, memtable_threshold: int = 3):\n        self.threshold = memtable_threshold\n        self.memtable = {}\n        self.sstables: list[dict] = []\n\n    def put(self, key: str, value: str) -> None:\n        self.memtable[key] = value\n        if len(self.memtable) >= self.threshold:\n            self.sstables.insert(0, dict(self.memtable))\n            self.memtable.clear()\n\n    def get(self, key: str) -> str | None:\n        if key in self.memtable:\n            val = self.memtable[key]\n            return None if val == '__DELETED__' else val\n        for sst in self.sstables:\n            if key in sst:\n                val = sst[key]\n                return None if val == '__DELETED__' else val\n        return None\n\n    def delete(self, key: str) -> None:\n        self.put(key, '__DELETED__')\n",
+    "oracle_test.py": "import unittest\nfrom lsm.engine import LSMTree\n\nclass TestLSM(unittest.TestCase):\n    def test_lsm_ops(self):\n        tree = LSMTree(memtable_threshold=2)\n        tree.put('k1', 'v1')\n        tree.put('k2', 'v2')  # triggers flush\n        self.assertEqual(tree.get('k1'), 'v1')\n        tree.delete('k1')\n        self.assertIsNone(tree.get('k1'))\n\nif __name__ == '__main__': unittest.main()\n"
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "id": "t3-caching-engine",
+  "tier": 3,
+  "title": "SWE-Verified: Multi-policy in-memory caching engine (LRU, LFU, TTL) with eviction invariants",
+  "workspace": {
+    "caching_engine/__init__.py": "from .base import BaseCache\nfrom .lru import LRUCache\nfrom .lfu import LFUCache\nfrom .ttl import TTLCache\n\n__all__ = [\"BaseCache\", \"LRUCache\", \"LFUCache\", \"TTLCache\"]\n",
+    "caching_engine/base.py": "from abc import ABC, abstractmethod\nfrom typing import Any, Optional\n\nclass BaseCache(ABC):\n\n    @abstractmethod\n    def get(self, key: str) -> Optional[Any]:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    @abstractmethod\n    def put(self, key: str, value: Any) -> None:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    @abstractmethod\n    def delete(self, key: str) -> bool:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    @abstractmethod\n    def size(self) -> int:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n\n    @abstractmethod\n    def clear(self) -> None:\n        raise NotImplementedError('benchmark skeleton: not implemented')\n",
+    "caching_engine/lfu.py": "from collections import defaultdict, OrderedDict\nfrom typing import Any, Optional\nfrom .base import BaseCache\n\n\nclass LFUCache(BaseCache):\n    \"\"\"A bounded LFU cache; insertion order within a frequency is LRU order.\"\"\"\n\n    def __init__(self, capacity: int) -> None:\n        if capacity <= 0:\n            raise ValueError(\"Capacity must be positive\")\n        self.capacity = capacity\n        self.key_to_val: dict[str, Any] = {}\n        self.key_to_freq: dict[str, int] = {}\n        self.freq_to_keys: dict[int, OrderedDict[str, None]] = defaultdict(OrderedDict)\n        self.min_freq = 0\n\n    def get(self, key: str) -> Optional[Any]:\n        if key not in self.key_to_val:\n            return None\n        self._increment_freq(key)\n        return self.key_to_val[key]\n\n    def put(self, key: str, value: Any) -> None:\n        if key in self.key_to_val:\n            self.key_to_val[key] = value\n            self._increment_freq(key)\n            return\n        if len(self.key_to_val) >= self.capacity:\n            oldest = next(iter(self.freq_to_keys[self.min_freq]))\n            self.freq_to_keys[self.min_freq].pop(oldest)\n            del self.key_to_val[oldest]\n            del self.key_to_freq[oldest]\n        self.key_to_val[key] = value\n        self.key_to_freq[key] = 1\n        self.freq_to_keys[1][key] = None\n        self.min_freq = 1\n\n    def _increment_freq(self, key: str) -> None:\n        old_freq = self.key_to_freq[key]\n        bucket = self.freq_to_keys[old_freq]\n        del bucket[key]\n        if not bucket and self.min_freq == old_freq:\n            self.min_freq = old_freq + 1\n        new_freq = old_freq + 1\n        self.key_to_freq[key] = new_freq\n        self.freq_to_keys[new_freq][key] = None\n\n    def delete(self, key: str) -> bool:\n        if key not in self.key_to_val:\n            return False\n        freq = self.key_to_freq.pop(key)\n        del self.key_to_val[key]\n        del self.freq_to_keys[freq][key]\n        if not self.key_to_val:\n            self.min_freq = 0\n        elif freq == self.min_freq and not self.freq_to_keys[freq]:\n            self.min_freq = min(self.freq_to_keys)\n        return True\n\n    def size(self) -> int:\n        return len(self.key_to_val)\n\n    def clear(self) -> None:\n        self.key_to_val.clear()\n        self.key_to_freq.clear()\n        self.freq_to_keys.clear()\n        self.min_freq = 0\n",
+    "caching_engine/lru.py": "from collections import OrderedDict\nfrom typing import Any, Optional\nfrom .base import BaseCache\n\n\nclass LRUCache(BaseCache):\n    \"\"\"A bounded cache which removes the least recently used entry.\"\"\"\n\n    def __init__(self, capacity: int) -> None:\n        if capacity <= 0:\n            raise ValueError(\"Capacity must be positive\")\n        self.capacity = capacity\n        self.cache: OrderedDict[str, Any] = OrderedDict()\n        self.hits = 0\n        self.misses = 0\n\n    def get(self, key: str) -> Optional[Any]:\n        if key not in self.cache:\n            self.misses += 1\n            return None\n        self.hits += 1\n        value = self.cache.pop(key)\n        self.cache[key] = value\n        return value\n\n    def put(self, key: str, value: Any) -> None:\n        # Updating an item is also a use of it for LRU purposes.\n        if key in self.cache:\n            del self.cache[key]\n        self.cache[key] = value\n        if len(self.cache) > self.capacity:\n            self.cache.popitem(last=False)\n\n    def delete(self, key: str) -> bool:\n        if key not in self.cache:\n            return False\n        del self.cache[key]\n        return True\n\n    def size(self) -> int:\n        return len(self.cache)\n\n    def clear(self) -> None:\n        self.cache.clear()\n        self.hits = 0\n        self.misses = 0\n",
+    "caching_engine/ttl.py": "import time\nfrom typing import Any, Optional\nfrom .base import BaseCache\n\n\nclass TTLCache(BaseCache):\n    \"\"\"A bounded cache whose entries expire and whose overflow evicts soonest expiry.\"\"\"\n\n    def __init__(self, capacity: int, default_ttl_seconds: float = 60.0) -> None:\n        if capacity <= 0:\n            raise ValueError(\"Capacity must be positive\")\n        if default_ttl_seconds < 0:\n            raise ValueError(\"TTL must not be negative\")\n        self.capacity = capacity\n        self.default_ttl = default_ttl_seconds\n        self.entries: dict[str, tuple[Any, float]] = {}\n\n    def get(self, key: str) -> Optional[Any]:\n        entry = self.entries.get(key)\n        if entry is None:\n            return None\n        value, expires_at = entry\n        if expires_at <= time.time():\n            del self.entries[key]\n            return None\n        return value\n\n    def put(self, key: str, value: Any, ttl_seconds: Optional[float] = None) -> None:\n        ttl = self.default_ttl if ttl_seconds is None else ttl_seconds\n        if ttl < 0:\n            raise ValueError(\"TTL must not be negative\")\n        self._prune_expired()\n        self.entries[key] = (value, time.time() + ttl)\n        while len(self.entries) > self.capacity:\n            oldest_key = min(self.entries, key=lambda item: self.entries[item][1])\n            del self.entries[oldest_key]\n\n    def delete(self, key: str) -> bool:\n        if key not in self.entries:\n            return False\n        del self.entries[key]\n        return True\n\n    def clear(self) -> None:\n        self.entries.clear()\n\n    def size(self) -> int:\n        self._prune_expired()\n        return len(self.entries)\n\n    def _prune_expired(self) -> None:\n        now = time.time()\n        expired = [key for key, (_, expires_at) in self.entries.items() if expires_at <= now]\n        for key in expired:\n            del self.entries[key]\n",
+    "problem.md": "# Problem: Multi-Policy In-Memory Caching Engine\n\nImplement a high-performance, multi-policy Python caching engine supporting:\n1. `LRUCache(capacity: int)`: Evicts least recently accessed key on capacity overflow.\n2. `LFUCache(capacity: int)`: Evicts least frequently used key, breaking frequency ties using LRU order.\n3. `TTLCache(capacity: int, default_ttl_seconds: float)`: Evicts expired entries and enforces capacity bounds.\n\nEnsure all implementations adhere to `BaseCache` interface in `caching_engine.base`.\nAll unit tests in `tests/test_caching.py` must pass.\n",
+    "requirements.txt": "pytest>=7.0.0\npytest-asyncio>=0.21.0\n",
+    "tests/test_caching.py": "import time\nimport unittest\nfrom caching_engine.lru import LRUCache\nfrom caching_engine.lfu import LFUCache\nfrom caching_engine.ttl import TTLCache\n\nclass TestCaching(unittest.TestCase):\n    def test_lru_basic_and_eviction(self):\n        cache = LRUCache(2)\n        cache.put(\"a\", 1)\n        cache.put(\"b\", 2)\n        self.assertEqual(cache.get(\"a\"), 1)\n        cache.put(\"c\", 3)  # Evicts \"b\"\n        self.assertIsNone(cache.get(\"b\"))\n        self.assertEqual(cache.get(\"c\"), 3)\n        self.assertEqual(cache.get(\"a\"), 1)\n        self.assertEqual(cache.size(), 2)\n\n    def test_lfu_eviction_and_tie_breaking(self):\n        cache = LFUCache(2)\n        cache.put(\"a\", 10)\n        cache.put(\"b\", 20)\n        # Both \"a\" and \"b\" have frequency 1. \"a\" is oldest.\n        # Inserting \"c\" should evict \"a\" (LRU tie break among frequency 1)\n        cache.put(\"c\", 30)\n        self.assertIsNone(cache.get(\"a\"), \"LFU tie-break must evict oldest key 'a'\")\n        self.assertEqual(cache.get(\"b\"), 20)\n        self.assertEqual(cache.get(\"c\"), 30)\n\n    def test_ttl_expiration_and_oldest_eviction(self):\n        cache = TTLCache(2, default_ttl_seconds=60.0)\n        cache.put(\"long_lived\", 100, ttl_seconds=100.0)\n        cache.put(\"short_lived\", 200, ttl_seconds=5.0)\n        \n        # When capacity is exceeded, evict earliest expiring entry (\"short_lived\")\n        cache.put(\"new_entry\", 300, ttl_seconds=50.0)\n        self.assertEqual(cache.get(\"long_lived\"), 100)\n        self.assertIsNone(cache.get(\"short_lived\"), \"TTLCache must evict soonest-expiring key 'short_lived'\")\n        self.assertEqual(cache.get(\"new_entry\"), 300)\n\nif __name__ == \"__main__\":\n    unittest.main()\n",
+    "todo.md": "# Workspace Task Plan (todo.md)\n\n- [x] [T-001] Investigate codebase and plan implementation for: # Problem: Multi-Policy In-Memory Caching Engine <!-- Inspected BaseCache and policy skeletons; implementation plan: OrderedDict LRU, frequency buckets for LFU, monotonic expiry plus soonest-expiration eviction for TTL. -->\n- [x] [T-002] Implement core solution and verify with tests <!-- Targeted tests pass; tightened LFU bucket cleanup and verified edge cases (updates, deletes, clear, zero TTL) plus compilation. -->\n- [x] [T-003] Run full hermetic verification and AST audit <!-- Full pytest suite passes (3/3), compileall and policy edge-case smoke checks pass; no temporary reproducer files were created. -->\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "list_dir",
+            "arguments": "{\"path\": \".\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 1,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"caching_engine/base.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"caching_engine/lru.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"caching_engine/lfu.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"caching_engine/ttl.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"tests/test_caching.py\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 2,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python -m pytest tests/ -x -q 2>&1 | tail -30\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 3,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python -m pytest tests/ -q\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 4,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python3 -m pytest tests/ -q\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 5,
+      "finish_reason": "stop",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"caching_engine/__init__.py\"}"
+          }
+        }
+      ]
+    }
+  ]
+}

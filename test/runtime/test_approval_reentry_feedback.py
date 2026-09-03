@@ -20,6 +20,8 @@ class TestApprovalReentryFeedback(unittest.TestCase):
     def test_proc_exec_success_becomes_verification_evidence(self) -> None:
         session = HarnessSession.__new__(HarnessSession)
         session._completion_verification = None
+        session.run_plan = None  # BEP-01: run_plan is None-guarded in _observe_completion_dispatch
+        session.harness = SimpleNamespace(composition_digest="sha256:composition")  # fallback when run_plan is None
         session.task = SimpleNamespace(run_id="run-1", brief="fix it")
         session._workspace_digest = lambda: "sha256:workspace"
         request = SimpleNamespace(

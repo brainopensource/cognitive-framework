@@ -1,6 +1,6 @@
-export { jsonLine } from "@vanguard/client-core";
+export { jsonLine } from "@aether/client";
 export {
   formatHumanReceipt,
   renderProjectionLines,
   assertNoAnsi,
-} from "@vanguard/client-core";
+} from "@aether/client";

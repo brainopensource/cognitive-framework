@@ -1,0 +1,36 @@
+=== TIMESTAMP ===
+2026-08-31T03:36:15Z
+
+=== GIT PROVENANCE ===
+## feat/beta-release_electroweak-v091...origin/feat/beta-release_electroweak-v091
+A  .draft/LDA_improvement_plan.md
+ M .generated/knowledge/catalog.jsonl
+ M .generated/knowledge/links.jsonl
+ M .generated/knowledge/ownership.jsonl
+ M .generated/knowledge/report.json
+ M README.md
+ M dev_context_logs/01_repo_state.txt
+ M docs/backend/architecture/agency.md
+ M docs/backend/architecture/composition-extensibility.md
+MM docs/execution/active.md
+M  docs/execution/backlog.md
+M  docs/execution/milestones.md
+Branch:   feat/beta-release_electroweak-v091
+HEAD SHA: d639ec4bda5ea7d8836a182393498a31fc43ea1a
+Recent Commits:
+d639ec4 feat(T1): Electroweak - DIRECTOR REVIEW
+fb91f57 feat(T1): Electroweak - DIRECTOR REVIEW
+e079a44 feat(T1): Electroweak - DIRECTOR REVIEW
+f242ced feat(benchmarks): implement FIN-B1.2 empirical M-8 held-out corpus, preregistration, and runner
+783f221 docs(execution): reject synthetic M-8 study runner
+
+=== CAPABILITY RUNTIMES ===
+Python: Python 3.12.3
+uv:     uv 0.5.9
+Node:   v26.8.1
+npm:    11.19.0
+just:   NOT FOUND
+make:   GNU Make 4.3
+cargo:  cargo 1.97.1 (c980f4866 2026-06-30)
+go:     NOT FOUND
+rg:     ripgrep 15.2.0 (rev e89fff89ac)

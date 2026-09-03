@@ -115,7 +115,22 @@ class _EnvironmentEffect:
             )
         value = result.value
         digest = getattr(value, "result_digest", None) or getattr(
-            value, "metadata", {}).get("digest") or "sha256:" + "0" * 64
+            value, "metadata", {}).get("digest")
+        if not digest:
+            # An observation is evidence too.  The old zero digest made every
+            # successful read/search indistinguishable and could not witness
+            # a changed workspace.  Keep this at the runtime boundary: ports
+            # remain domain-only and adapters need not know ledger encoding.
+            from ..domain.canonicalisation.digest import digest_of
+            action_name = getattr(value, "action", getattr(request, "action", self.name))
+            digest = digest_of({
+                "action": action_name,
+                "content": getattr(value, "content", None),
+                "matches": list(getattr(value, "matches", ()) or ()),
+                "files": list(getattr(value, "files", ()) or ()),
+                "output": getattr(value, "output", None),
+                "metadata": dict(getattr(value, "metadata", {}) or {}),
+            })
         detail = ""
         if hasattr(value, "content") and value.content is not None:
             detail = str(value.content)

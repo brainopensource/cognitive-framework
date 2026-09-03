@@ -12,6 +12,10 @@
       "types": "./dist/src/index.d.ts",
       "default": "./dist/src/index.js"
     },
+    "./transports/transport.js": {
+      "types": "./dist/src/transports/transport.d.ts",
+      "default": "./dist/src/transports/transport.js"
+    },
     "./transports/socket.js": {
       "types": "./dist/src/transports/socket.d.ts",
       "default": "./dist/src/transports/socket.js"
@@ -31,6 +35,74 @@
     "./signers/web-signer.js": {
       "types": "./dist/src/signers/web-signer.d.ts",
       "default": "./dist/src/signers/web-signer.js"
+    },
+    "./transports/fake.js": {
+      "types": "./dist/src/transports/fake.d.ts",
+      "default": "./dist/src/transports/fake.js"
+    },
+    "./transports/scenario.js": {
+      "types": "./dist/src/transports/scenario.d.ts",
+      "default": "./dist/src/transports/scenario.js"
+    },
+    "./application/run-view.js": {
+      "types": "./dist/src/application/run-view.d.ts",
+      "default": "./dist/src/application/run-view.js"
+    },
+    "./application/trace-graph.js": {
+      "types": "./dist/src/application/trace-graph.d.ts",
+      "default": "./dist/src/application/trace-graph.js"
+    },
+    "./application/budget.js": {
+      "types": "./dist/src/application/budget.d.ts",
+      "default": "./dist/src/application/budget.js"
+    },
+    "./application/coding-types.js": {
+      "types": "./dist/src/application/coding-types.d.ts",
+      "default": "./dist/src/application/coding-types.js"
+    },
+    "./application/graph-model.js": {
+      "types": "./dist/src/application/graph-model.d.ts",
+      "default": "./dist/src/application/graph-model.js"
+    },
+    "./application/mcnemar.js": {
+      "types": "./dist/src/application/mcnemar.d.ts",
+      "default": "./dist/src/application/mcnemar.js"
+    },
+    "./application/projection-model.js": {
+      "types": "./dist/src/application/projection-model.d.ts",
+      "default": "./dist/src/application/projection-model.js"
+    },
+    "./application/approvals.js": {
+      "types": "./dist/src/application/approvals.d.ts",
+      "default": "./dist/src/application/approvals.js"
+    },
+    "./application/subscribe-run.js": {
+      "types": "./dist/src/application/subscribe-run.d.ts",
+      "default": "./dist/src/application/subscribe-run.js"
+    },
+    "./application/selectors.js": {
+      "types": "./dist/src/application/selectors.d.ts",
+      "default": "./dist/src/application/selectors.js"
+    },
+    "./application/coding-receipts.js": {
+      "types": "./dist/src/application/coding-receipts.d.ts",
+      "default": "./dist/src/application/coding-receipts.js"
+    },
+    "./application/corrections.js": {
+      "types": "./dist/src/application/corrections.d.ts",
+      "default": "./dist/src/application/corrections.js"
+    },
+    "./application/why.js": {
+      "types": "./dist/src/application/why.d.ts",
+      "default": "./dist/src/application/why.js"
+    },
+    "./application/resume.js": {
+      "types": "./dist/src/application/resume.d.ts",
+      "default": "./dist/src/application/resume.js"
+    },
+    "./application/commands.js": {
+      "types": "./dist/src/application/commands.d.ts",
+      "default": "./dist/src/application/commands.js"
     }
   },
   "files": [

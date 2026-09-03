@@ -9,6 +9,8 @@ from typing import Any, Callable, Mapping, Sequence
 from ...ports.event_store import Result
 from ...ports.model import ContextBundle, Proposal, Sampling, ToolSchemas
 from .invocation import ProposalTranslator
+from .dialect import ModelIntent, compile_intent
+from ...domain.models.profile import profile_for
 
 Transport = Callable[[str, bytes], tuple[int, bytes]]
 
@@ -59,6 +61,10 @@ class OllamaModel:
         )
         self.timeout_seconds = timeout_seconds
 
+    @property
+    def capability_profile(self):
+        return profile_for(self.model)
+
     provider = "ollama"
     mode = "live"
 
@@ -77,14 +83,19 @@ class OllamaModel:
             options["num_predict"] = 1024
         if "maxTokens" in options and "num_predict" not in options:
             options["num_predict"] = options.pop("maxTokens")
+        dialect = compile_intent(
+            ModelIntent(system="", messages=tuple(_messages(context)),
+                        tools=tuple(tools), sampling=options),
+            self.capability_profile,
+        )
         body: dict[str, Any] = {
             "model": self.model,
-            "messages": _messages(context),
+            "messages": list(dialect.messages),
             "stream": False,
-            "options": options,
+            "options": dict(dialect.sampling),
         }
-        if tools:
-            body["tools"] = [_tool_payload(tool) for tool in tools]
+        if dialect.tools:
+            body["tools"] = list(dialect.tools)
         try:
             status, raw = self._transport(self.endpoint, json.dumps(body, separators=(",", ":")).encode("utf-8"))
         except Exception as exc:

@@ -1,0 +1,15 @@
+{
+  "version": "vg.4",
+  "frameType": "command",
+  "frameId": "frame-002",
+  "command": {
+    "name": "GetRun",
+    "commandId": "cmd-002",
+    "idempotencyKey": "idem-002",
+    "runId": "run-001",
+    "actor": "operator",
+    "payload": {
+      "expectedSeq": 5
+    }
+  }
+}

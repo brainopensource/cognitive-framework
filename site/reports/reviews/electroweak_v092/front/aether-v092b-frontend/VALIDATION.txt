@@ -1,0 +1,9 @@
+PASS  python3 -m py_compile examples/aaac/coding-agent.py
+PASS  git diff --check
+BLOCKED npm run typecheck:desktop (tsc not installed)
+BLOCKED npm --workspace @vanguard/studio run typecheck (dependencies unavailable)
+BLOCKED npm run test:desktop (dependencies unavailable)
+BLOCKED npm --workspace @vanguard/studio test (dependencies unavailable)
+NOT RUN Desktop build
+NOT RUN Agent Studio browser build
+NOT RUN live RuntimeService journey

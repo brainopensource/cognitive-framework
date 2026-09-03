@@ -1,0 +1,55 @@
+{
+  "id": "t1-string-dedupe",
+  "tier": 1,
+  "title": "Fix string deduplication helper function",
+  "workspace": {
+    "utils.py": "def remove_duplicates(items: list) -> list:\n    # Bug: returns set which destroys original order\n    return list(set(items))\n",
+    "test_utils.py": "from utils import remove_duplicates\n\ndef test_remove_duplicates():\n    items = ['b', 'a', 'b', 'c', 'a']\n    assert remove_duplicates(items) == ['b', 'a', 'c']\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"utils.py\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 1,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"path\": \"utils.py\", \"target\": \"return list(set(items))\", \"replacement\": \"seen = set()\\n    res = []\\n    for x in items:\\n        if x not in seen:\\n            seen.add(x)\\n            res.append(x)\\n    return res\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 2,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"pytest\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 3,
+      "tool_calls": [],
+      "finish_reason": "stop"
+    }
+  ]
+}

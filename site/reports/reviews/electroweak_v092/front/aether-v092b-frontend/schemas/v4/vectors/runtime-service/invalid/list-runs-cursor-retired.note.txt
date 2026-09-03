@@ -1,0 +1,3 @@
+`cursor` was specified but never implemented, emitted, or written to the wire.
+B-O2-01 retired it in favour of the served limit/offset paging; a client that
+sends it is told so rather than being silently given page one.

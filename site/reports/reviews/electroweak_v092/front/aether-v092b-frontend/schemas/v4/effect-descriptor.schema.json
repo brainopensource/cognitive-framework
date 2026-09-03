@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/v4/effect-descriptor.schema.json",
+  "$comment": "Owning section: 04 §5.5; GTS-13C T1.4. argsDigest binds canonical args; sinkClass is explicit mediation data.",
+  "title": "EffectDescriptor",
+  "type": "object",
+  "required": ["verb", "sinkClass", "selector", "args", "argsDigest", "idempotencyKey", "riskTier", "provenance"],
+  "properties": {
+    "verb": { "type": "string", "minLength": 1 },
+    "sinkClass": { "enum": ["pure", "observation", "privileged"] },
+    "selector": { "$ref": "resource-selector.schema.json" },
+    "args": { "type": "object" },
+    "argsDigest": { "$ref": "primitives.schema.json#/$defs/Digest" },
+    "workingDirectory": { "type": "string", "minLength": 1 },
+    "readSet": { "type": "array", "items": { "$ref": "resource-selector.schema.json" } },
+    "writeSet": { "type": "array", "items": { "$ref": "resource-selector.schema.json" } },
+    "idempotencyKey": { "type": "string", "minLength": 1 },
+    "riskTier": { "$ref": "primitives.schema.json#/$defs/RiskTier" },
+    "provenance": { "$ref": "primitives.schema.json#/$defs/ProvenanceAxes" }
+  },
+  "additionalProperties": false
+}

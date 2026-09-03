@@ -1,0 +1,63 @@
+{
+  "atoms_used": [
+    "view_file",
+    "edit_file",
+    "run_command"
+  ],
+  "created_from": "benchmarks/swe_bench::t0-dogfood-bug-002",
+  "id": "t0-dogfood-bug-002",
+  "tier": 1,
+  "title": "Dogfood multi-file import-cycle repair",
+  "turns": [
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"path\": \"db.py\"}",
+            "name": "view_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 0
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"content\": \"class User:\\n    pass\\n\", \"path\": \"models.py\"}",
+            "name": "edit_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 1
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"command\": \"python3 -m unittest -q\"}",
+            "name": "run_command"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 2
+    },
+    {
+      "content": "Task completed and verified for Dogfood multi-file import-cycle repair (t0-dogfood-bug-002).",
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "tool_messages_seen": 3
+    }
+  ],
+  "workspace": {
+    "db.py": "from models import User\n\ndef load():\n    return User()\n",
+    "models.py": "from db import User\n",
+    "test_db.py": "import unittest\nimport db\n\nclass TestDB(unittest.TestCase):\n    def test_load(self):\n        self.assertIsNotNone(db.load())\n\nif __name__ == '__main__': unittest.main()\n"
+  }
+}

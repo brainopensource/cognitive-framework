@@ -1,0 +1,55 @@
+{
+  "id": "t4-token-bucket",
+  "tier": 4,
+  "title": "Token bucket rate limiter with automatic refill",
+  "workspace": {
+    "bucket.py": "class TokenBucket:\n    def __init__(self, capacity: int, fill_rate: float):\n        self.capacity = capacity\n        self.fill_rate = fill_rate\n        self.tokens = capacity\n        self.last_time = 0.0\n\n    def consume(self, tokens: int, now: float) -> bool:\n        if self.tokens >= tokens:\n            self.tokens -= tokens\n            return True\n        return False\n",
+    "test_bucket.py": "from bucket import TokenBucket\n\ndef test_bucket():\n    tb = TokenBucket(capacity=10, fill_rate=1.0)\n    assert tb.consume(10, 0.0) is True\n    assert tb.consume(1, 0.0) is False\n    assert tb.consume(2, 2.0) is True\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"bucket.py\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 1,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"path\": \"bucket.py\", \"target\": \"        if self.tokens >= tokens:\\n            self.tokens -= tokens\\n            return True\\n        return False\", \"replacement\": \"        delta = now - self.last_time\\n        self.tokens = min(self.capacity, self.tokens + delta * self.fill_rate)\\n        self.last_time = now\\n        if self.tokens >= tokens:\\n            self.tokens -= tokens\\n            return True\\n        return False\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 2,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"pytest\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 3,
+      "tool_calls": [],
+      "finish_reason": "stop"
+    }
+  ]
+}

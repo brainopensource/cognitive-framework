@@ -1,0 +1,36 @@
+{
+  "benchmark": "bench_append_fold",
+  "milestone": "M-4",
+  "timestamp": "2026-08-25T12:00:00.000Z",
+  "command": "python3 lab/bench.py --append-fold --out benchmarks/baseline_m4.json",
+  "environment": {
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "python_version": "3.12.3",
+    "cpu_count": 16
+  },
+  "results": {
+    "1000_events": {
+      "event_count": 1000,
+      "runs": 3,
+      "state_digest": "sha256:661131d66dc4474c5e65428850df10a642ca54dca7ed875395b01c2b4713385f",
+      "append_events_per_sec_mean": 2765.2416587878556,
+      "append_events_per_sec_max": 2853.9096873213066,
+      "fold_events_per_sec_mean": 45487.75537253302,
+      "fold_events_per_sec_max": 47917.26872735092,
+      "fold_micros_per_event_mean": 22.022574000099365,
+      "fold_micros_per_event_min": 20.86930299992673
+    },
+    "10000_events": {
+      "event_count": 10000,
+      "runs": 3,
+      "state_digest": "sha256:df396e854eff03b783fe00495beb56a5a7b7b4a979fdc5410d1586cade659b13",
+      "append_events_per_sec_mean": 794.5336096188433,
+      "append_events_per_sec_max": 807.4728853986301,
+      "fold_events_per_sec_mean": 40548.21634996987,
+      "fold_events_per_sec_max": 40912.92344578941,
+      "fold_micros_per_event_mean": 24.663271233293926,
+      "fold_micros_per_event_min": 24.44215460000123
+    }
+  },
+  "report_digest": "sha256:32d7007747d2d669d7e862ca7cb8c44afb04baa26f499d7d17ed642b365ffdd4"
+}

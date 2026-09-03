@@ -28,6 +28,9 @@ class VerificationReceipt:
     workspace_digest: str
     task_digest: str = ""
     receipt_digest: str = ""
+    composition_digest: str = ""
+    verification_command: str = ""
+    verification_subject_digest: str = ""
 
     @property
     def passed(self) -> bool:
@@ -49,6 +52,11 @@ class AdmissionGate:
         verification_passed: bool | None = None,
         verification: VerificationReceipt | Mapping[str, Any] | None = None,
         current_workspace_digest: str | None = None,
+        current_task_digest: str | None = None,
+        current_composition_digest: str | None = None,
+        current_verification_command: str | None = None,
+        current_verification_subject_digest: str | None = None,
+        current_receipt_digest: str | None = None,
         task_requirements_satisfied: bool | None = None,
         model_requested_finish: bool = True,
         inspected_files: Sequence[str] = (),
@@ -97,7 +105,10 @@ class AdmissionGate:
                 executed_test_count=int(receipt.get("executed_test_count", receipt.get("executedTestCount", 0))),
                 workspace_digest=str(receipt.get("workspace_digest", receipt.get("workspaceDigest", ""))),
                 task_digest=str(receipt.get("task_digest", receipt.get("taskDigest", ""))),
+                composition_digest=str(receipt.get("composition_digest", receipt.get("compositionDigest", ""))),
                 receipt_digest=str(receipt.get("receipt_digest", receipt.get("receiptDigest", ""))),
+                verification_command=str(receipt.get("verification_command", receipt.get("verificationCommand", receipt.get("command", "")))),
+                verification_subject_digest=str(receipt.get("verification_subject_digest", receipt.get("verificationSubjectDigest", ""))),
             )
         elif receipt is None and verification_passed is not None:
             # Legacy callers may provide only a boolean; it is deliberately
@@ -112,5 +123,30 @@ class AdmissionGate:
             return AdmissionVerdict(False, "VERIFICATION_FAILED")
         if current_workspace_digest is None or receipt.workspace_digest != current_workspace_digest:
             return AdmissionVerdict(False, "VERIFICATION_STALE")
+        if current_task_digest is not None:
+            if not receipt.task_digest:
+                return AdmissionVerdict(False, "VERIFICATION_UNBOUND_TASK")
+            if receipt.task_digest != current_task_digest:
+                return AdmissionVerdict(False, "VERIFICATION_FOREIGN_TASK")
+        if current_composition_digest is not None:
+            if not receipt.composition_digest:
+                return AdmissionVerdict(False, "VERIFICATION_UNBOUND_COMPOSITION")
+            if receipt.composition_digest != current_composition_digest:
+                return AdmissionVerdict(False, "VERIFICATION_FOREIGN_COMPOSITION")
+        if current_verification_command is not None:
+            if not receipt.verification_command:
+                return AdmissionVerdict(False, "VERIFICATION_UNBOUND_SUBJECT")
+            if receipt.verification_command != current_verification_command:
+                return AdmissionVerdict(False, "VERIFICATION_FOREIGN_SUBJECT")
+        if current_verification_subject_digest is not None:
+            if not receipt.verification_subject_digest:
+                return AdmissionVerdict(False, "VERIFICATION_UNBOUND_SUBJECT")
+            if receipt.verification_subject_digest != current_verification_subject_digest:
+                return AdmissionVerdict(False, "VERIFICATION_FOREIGN_SUBJECT")
+        if current_receipt_digest is not None:
+            if not receipt.receipt_digest:
+                return AdmissionVerdict(False, "VERIFICATION_UNBOUND_RECEIPT")
+            if receipt.receipt_digest != current_receipt_digest:
+                return AdmissionVerdict(False, "VERIFICATION_FOREIGN_RECEIPT")
 
         return AdmissionVerdict(admissible=True, reason="completion_admissible")

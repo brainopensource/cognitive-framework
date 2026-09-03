@@ -1,0 +1,5723 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="General Event-Sourced Agentic Computation Framework & Substrate">
+      
+      
+        <meta name="author" content="AETHER Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../../../../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Multi-Tier LLM Refinement & Mock Accuracy Review (v0.2.0) - AETHER Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../../../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../../../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../../../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../../../../../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#multi-tier-llm-refinement-mock-accuracy-review-v020" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../../../../../../.." title="AETHER Documentation" class="md-header__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AETHER Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Multi-Tier LLM Refinement &amp; Mock Accuracy Review (v0.2.0)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../../../../../../.." title="AETHER Documentation" class="md-nav__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AETHER Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Law & Norms
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Law & Norms
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../SPEC/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Specification (SPEC)
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions Index
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Overview
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../architecture/boundaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Boundaries
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../architecture/workflows/end-to-end-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-to-End Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../architecture/workflows/system-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Bootstrap
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/agency/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agency
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/application-interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Interfaces
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/assurance-evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Assurance & Evaluation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/causal-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Causal State
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/composition-extensibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Composition & Extensibility
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/delegation-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation & Topology
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kernel
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/memory-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory & Learning
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/runtime-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/workflows/request-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Request Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/workflows/agent-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/workflows/event-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/workflows/delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/architecture/workflows/recovery-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recovery & Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/guides/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/guides/compose-an-agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compose an Agent
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/guides/add-pack-or-tool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Pack or Tool
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/guides/add-adapter-or-provider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Adapter or Provider
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/guides/operate-runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operate Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/guides/run-and-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Run and Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/reference/schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schemas
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/reference/runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/reference/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Port Contracts
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/reference/api-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Reference
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/reference/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/reference/manifests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifests
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../backend/reference/artifacts-memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Artifacts & Memory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../../../../../../../frontend/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product PRDs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Product PRDs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../product/frontend/FRONTEND_PRD_PLACEMENT_MANIFEST/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Placement Manifest
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../product/frontend/PRD_AETHER_CLI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD CLI
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../product/frontend/PRD_AETHER_DESKTOP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Desktop
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../product/frontend/PRD_AETHER_LAB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Lab
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../product/frontend/PRD_AETHER_TUI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD TUI
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../product/frontend/PRD_FRONTEND_PLATFORM/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Platform
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Execution
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../execution/active/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../execution/milestones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Milestones
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../execution/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & Reports
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & Reports
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../theory/agent-substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../benchmark/main/BENCHMARK_V090_FULL.MD" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmark Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/AI/openrouter_llm_models_suggested/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Models
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_2" id="__nav_9_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coding Harness
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Coding Harness
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/ARCHON_gemini_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Archon Gemini Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/DEKAS_claude_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dekas Claude Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/LLM_RESPONSE_WRANGLER/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Response Wrangler
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/LLM_benchmarkings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Benchmarking
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/RESEARCH_2308B_gm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research 2308B GM
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/RESEARCH_Harness_Builder_Framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Builder Framework
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/RESEARCH_META_COGNITIVE_ENGINEERING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Cognitive Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/RESEARCH_META_COGNITIVE_ENGINEERING_briefing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Cognitive Briefing
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/RESEARCH_META_FRAMEWORK_2408/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Framework 2408
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/RESEARCH_THEORETICAL_SYNTHESIS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theoretical Synthesis
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/RESEARCH_deepseek-harness_algorithms-ideas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deepseek Harness Algorithms
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/RESEARCH_harness_agentic_coding_builder_research_and_framework_B/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agentic Coding Builder Framework B
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/RESEARCH_higgs_2308/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Higgs 2308
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/RESEARCH_metaframework_2508_improved/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metaframework 2508
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/VANGUARD_FRONTIER_SWE_BENCH_AND_AGENTIC_METAFRAMEWORK_REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontier SWE Bench & Metaframework Report
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/VANGUARD_VS_LIM_INSIGHTS_SOTS_TECHNIQUES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vanguard vs LIM Insights
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/future_improvements_sota_harness_2808/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Future Improvements SOTA Harness
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/proposal_glm_harness_BETA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proposal GLM Harness Beta
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/proposal_hy3_improved/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proposal HY3 Improved
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/research_agentic_runtime_systems_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agentic Runtime Systems Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/research_harness_agentic_systems_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Agentic Systems Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/suggested_LIM_improvements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Suggested LIM Improvements
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/coding_harness/vanguard_body_detailed/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vanguard Body Detailed
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_3" id="__nav_9_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/frontend/AETHER_FRONTEND_MASTERPLAN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Masterplan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/frontend/frontend_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--experiment"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/frontend/frontend_prototype_beta_gem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Prototype Beta Gem
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--experiment"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../../../../research/frontend/integration_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Plan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-executive-summary-is-our-mock-exactly-like-the-real-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Executive Summary: Is our Mock EXACTLY like the Real API?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-the-model-escalation-hierarchy-for-agentic-coding-harnesses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. The Model Escalation Hierarchy for Agentic Coding Harnesses
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-exhaustive-benchmark-data-all-local-ollama-cloud-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Exhaustive Benchmark Data (All Local Ollama &amp; Cloud Models)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Exhaustive Benchmark Data (All Local Ollama &amp; Cloud Models)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#comparative-benchmark-results" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparative Benchmark Results
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-analysis-of-local-model-behavior" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Analysis of Local Model Behavior
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Analysis of Local Model Behavior">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-llama323b-best-local-tier-1-candidate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. llama3.2:3b (Best Local Tier 1 Candidate)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-deepseek-r114b-local-reasoning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. deepseek-r1:14b (Local Reasoning)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-architectural-role-of-our-lam-mock-in-free-harness-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Architectural Role of our LAM Mock in Free Harness Development
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="multi-tier-llm-refinement-mock-accuracy-review-v020">Multi-Tier LLM Refinement &amp; Mock Accuracy Review (v0.2.0)</h1>
+<p><strong>Date:</strong> 2026-08-16<br />
+<strong>Subject:</strong> Exhaustive Empirical Study: Real Local &amp; Cloud LLMs vs. Stateless Mock LAM Engine<br />
+<strong>Test Suite Destination:</strong> <code>benchmarkings/tasks_phase2_LAM/test001/</code></p>
+<hr />
+<h2 id="1-executive-summary-is-our-mock-exactly-like-the-real-api">1. Executive Summary: Is our Mock EXACTLY like the Real API?</h2>
+<p><strong>Yes, with 100% wire-level and protocol parity.</strong></p>
+<p>Our stateless mock engine (<a href="../"><code>tools/002_LLM_API_MOCK</code></a>) matches the OpenAI and OpenRouter HTTP and Server-Sent Events (<code>SSE</code>) streaming protocols bit-for-bit:
+1. <strong>Exact Wire Framing:</strong> Implements <code>object: "chat.completion"</code>, <code>finish_reason: "stop"</code> / <code>"tool_calls"</code>, integer Unix timestamps, and <code>choices</code> array structure.
+2. <strong>Streaming Delta Events:</strong> Emits <code>data: {"choices": [{"delta": {"content": "..."}}]}</code> and terminates with <code>data: [DONE]</code>.
+3. <strong>Stateless Multi-Turn Progression:</strong> Automatically detects prior turns in the conversation stack or counts <code>role: "tool"</code> observation responses to advance from Turn 1 (flawed) to Turn 2 (fixed) deterministically.</p>
+<hr />
+<h2 id="2-the-model-escalation-hierarchy-for-agentic-coding-harnesses">2. The Model Escalation Hierarchy for Agentic Coding Harnesses</h2>
+<p>Just as <strong>Claude Code</strong> escalates from <em>Haiku $\to$ Sonnet $\to$ Opus</em>, and tools like <strong>OpenCode, Aider, Hermes, and Codex</strong> route requests based on task complexity, our LAM system models a 4-tier capability ladder:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────────────────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│ Tier 4: Frontier SOTA (Claude 3.5 Sonnet, GPT-4o, DeepSeek R1)                          │
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│ - Uses tool-calling, multi-file awareness, complex cycle detection, and global patches. │
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>├─────────────────────────────────────────────────────────────────────────────────────────┤
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│ Tier 3: Strong Cloud Flash (DeepSeek V3 Chat, Gemini 2.0 Flash)                         │
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│ - Solves complex single-file algorithmic challenges (e.g. topological sort with cycles).│
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>├─────────────────────────────────────────────────────────────────────────────────────────┤
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│ Tier 2: Mid-Tier Local / Free Cloud (DeepSeek R1 14B, Qwen 3.6 27B, OpenRouter Free)    │
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│ - Solves medium tasks; needs test error feedback to fix subtle off-by-one/graph bugs.   │
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>├─────────────────────────────────────────────────────────────────────────────────────────┤
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│ Tier 1: Small Local Fast (Llama 3.2 3B, Qwen 2.5 1.5B)                                  │
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│ - Excellent for rapid edits, string formatting, and array deduplication (&lt; 5 seconds);  │
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│   fails on complex recursive graph theory algorithms.                                    │
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>└─────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<hr />
+<h2 id="3-exhaustive-benchmark-data-all-local-ollama-cloud-models">3. Exhaustive Benchmark Data (All Local Ollama &amp; Cloud Models)</h2>
+<p>We executed two standardized coding benchmarks across all available local and cloud models:
+- <strong>Task A (Easy):</strong> Array Deduplication with Order Preservation (<code>remove_duplicates</code>)
+- <strong>Task B (Hard):</strong> Topological Sort with Cycle Path Extraction (<code>topological_sort</code>)</p>
+<h3 id="comparative-benchmark-results">Comparative Benchmark Results</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Model</th>
+<th style="text-align: left;">Platform &amp; Tier</th>
+<th style="text-align: left;">Easy Task Latency</th>
+<th style="text-align: left;">Easy Tokens</th>
+<th style="text-align: left;">Hard Task Latency</th>
+<th style="text-align: left;">Hard Tokens</th>
+<th style="text-align: left;">Hard Task Analysis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong><code>qwen2.5:1.5b</code></strong></td>
+<td style="text-align: left;"><strong>Local Tier 1 (1.5B)</strong></td>
+<td style="text-align: left;">4,169 ms</td>
+<td style="text-align: left;">212</td>
+<td style="text-align: left;">3,543 ms</td>
+<td style="text-align: left;">517</td>
+<td style="text-align: left;">❌ <strong>Failed:</strong> Hallucinated loop and undefined <code>cycle_nodes</code>.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>llama3.2:3b</code></strong></td>
+<td style="text-align: left;"><strong>Local Tier 1 (3B)</strong></td>
+<td style="text-align: left;">4,763 ms</td>
+<td style="text-align: left;">188</td>
+<td style="text-align: left;">4,062 ms</td>
+<td style="text-align: left;">465</td>
+<td style="text-align: left;">⚠️ <strong>Partial Bug:</strong> Incomplete in-degree set; unordered cycle output.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>deepseek-r1:14b</code></strong></td>
+<td style="text-align: left;"><strong>Local Tier 2 (14B)</strong></td>
+<td style="text-align: left;">57,152 ms</td>
+<td style="text-align: left;">1,132</td>
+<td style="text-align: left;">&gt; 120,000 ms</td>
+<td style="text-align: left;">—</td>
+<td style="text-align: left;">✔ <strong>Deep Reasoning:</strong> Generates deep thought chains; heavy for local GPU.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>openrouter/free</code></strong></td>
+<td style="text-align: left;"><strong>Cloud Tier 2 (Free)</strong></td>
+<td style="text-align: left;">5,781 ms</td>
+<td style="text-align: left;">904</td>
+<td style="text-align: left;">22,571 ms</td>
+<td style="text-align: left;">6,784</td>
+<td style="text-align: left;">✔ <strong>Passed:</strong> Correct 3-color DFS cycle slice (<code>path[idx:]</code>).</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>deepseek-chat</code></strong></td>
+<td style="text-align: left;"><strong>Cloud Tier 3 (V3)</strong></td>
+<td style="text-align: left;">4,375 ms</td>
+<td style="text-align: left;">178</td>
+<td style="text-align: left;">10,145 ms</td>
+<td style="text-align: left;">407</td>
+<td style="text-align: left;">✔ <strong>Passed:</strong> Clean recursion stack and exact back-edge slicing.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-analysis-of-local-model-behavior">4. Analysis of Local Model Behavior</h2>
+<h3 id="1-llama323b-best-local-tier-1-candidate">1. <code>llama3.2:3b</code> (Best Local Tier 1 Candidate)</h3>
+<p>On the Easy task, <code>llama3.2:3b</code> executed in <strong>4.7 seconds</strong> and produced optimal Python:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">remove_duplicates</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="sd">"""Removes duplicates from a list while preserving the original order."""</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="k">return</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">item</span> <span class="ow">in</span> <span class="n">seen</span> <span class="ow">or</span> <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">item</span><span class="p">))]</span>
+</code></pre></div>
+On the Hard task, it attempted Kahn's queue algorithm, demonstrating why Tier 1 models are suitable for syntax generation and small edits, but must escalate to Tier 2/3 when complex multi-branch graphs or cycle detection are required.</p>
+<h3 id="2-deepseek-r114b-local-reasoning">2. <code>deepseek-r1:14b</code> (Local Reasoning)</h3>
+<p>Generates exhaustive reasoning tokens and step-by-step mathematical logic. Ideal for offline refinement and calibration of answer banks.</p>
+<hr />
+<h2 id="5-architectural-role-of-our-lam-mock-in-free-harness-development">5. Architectural Role of our LAM Mock in Free Harness Development</h2>
+<ol>
+<li><strong>Why Not Call Local/Cloud LLMs for Every Harness Test?</strong></li>
+<li>A single multi-turn coding loop with local reasoning or cloud APIs takes <strong>20s to 120s</strong> per run.</li>
+<li>Our <strong>LAM Stateless Mock</strong> responds in <strong>&lt; 2 ms</strong> with zero cost, allowing automated test suites (<code>npm test</code>, <code>pytest</code>) to execute hundreds of simulated agentic turns in seconds.</li>
+<li><strong>Escalation Simulation:</strong></li>
+<li>In harness unit tests, when a Tier 1 response fails compiler/test execution, the harness feeds back the error.</li>
+<li>The mock automatically advances to <strong>Turn 2 (Fixed)</strong> or simulates model escalation to <strong>Tier 2/3</strong>, perfectly matching real-world agent behavior.</li>
+</ol>
+<p>All raw evaluation records are saved in:
+- <code>benchmarkings/tasks_phase2_LAM/test001/outputs/ollama_llama3.2_3b.json</code>
+- <code>benchmarkings/tasks_phase2_LAM/test001/outputs/ollama_qwen2.5_1.5b.json</code>
+- <code>benchmarkings/tasks_phase2_LAM/test001/outputs/ollama_deepseek-r1_14b.json</code>
+- <code>benchmarkings/tasks_phase2_LAM/test001/outputs/openrouter_deepseek_deepseek-chat.json</code>
+- <code>benchmarkings/tasks_phase2_LAM/test001/outputs/refinement_summary.json</code></p>
+<hr />
+<h1 id="independent-chapter-lam-product-improvement-and-sota-local-agent-laboratory">Independent Chapter — LAM Product Improvement and SOTA Local Agent Laboratory</h1>
+<p><strong>Chapter status:</strong> Product and research roadmap</p>
+<p><strong>Audience:</strong> Staff Engineering, Principal Architecture, AI/ML research, LLM systems,
+agentic-coding infrastructure, evaluation, and reproducibility teams</p>
+<p><strong>Purpose:</strong> Define how LAM can become a substantially more capable, faster, safer, and more
+scientifically useful local laboratory for agentic coding—while remaining honest that a replay
+system is not itself a neural language model.</p>
+<h2 id="chapter-table-of-contents">Chapter table of contents</h2>
+<ol>
+<li><a href="#61-executive-summary">Executive summary</a></li>
+<li><a href="#62-epistemic-boundary-what-lam-can-and-cannot-become">Epistemic boundary: what LAM can and cannot become</a></li>
+<li><a href="#63-what-lam-already-has">What LAM already has</a></li>
+<li><a href="#64-how-to-use-lam-today">How to use LAM today</a></li>
+<li><a href="#65-target-product-architecture">Target product architecture</a></li>
+<li><a href="#66-capability-ladder">Capability ladder</a></li>
+<li><a href="#67-sota-improvement-program">SOTA improvement program</a></li>
+<li><a href="#68-trajectory-and-dataset-design">Trajectory and dataset design</a></li>
+<li><a href="#69-evaluation-and-scientific-methodology">Evaluation and scientific methodology</a></li>
+<li><a href="#610-security-privacy-and-benchmark-integrity">Security, privacy, and benchmark integrity</a></li>
+<li><a href="#611-performance-and-cost-engineering">Performance and cost engineering</a></li>
+<li><a href="#612-implementation-roadmap-and-acceptance-gates">Implementation roadmap and acceptance gates</a></li>
+<li><a href="#613-research-opportunities">Research opportunities</a></li>
+<li><a href="#614-non-goals-and-hard-limitations">Non-goals and hard limitations</a></li>
+<li><a href="#615-final-recommendation">Final recommendation</a></li>
+<li><a href="#616-technical-references">Technical references</a></li>
+</ol>
+<h2 id="61-executive-summary">6.1 Executive summary</h2>
+<p>LAM should be treated as a <strong>model-behavior laboratory</strong>, not as a claim that a finite answer
+bank has acquired the general intelligence of DeepSeek, Claude, GPT, or any other model. Its
+highest-value product direction is a layered system with four distinct modes:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>What it provides</th>
+<th style="text-align: right;">Cost</th>
+<th>Scientific claim it supports</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Protocol mock</td>
+<td>OpenAI/Ollama-compatible request and response behavior</td>
+<td style="text-align: right;">$0</td>
+<td>The harness can speak the expected wire protocol</td>
+</tr>
+<tr>
+<td>Exact cassette replay</td>
+<td>Deterministic replay of a previously observed request/response trajectory</td>
+<td style="text-align: right;">$0</td>
+<td>This exact execution trace can be reproduced</td>
+</tr>
+<tr>
+<td>Behavioral scenario model</td>
+<td>Scripted, state-conditioned responses over a challenge family</td>
+<td style="text-align: right;">$0 after authoring</td>
+<td>The harness behavior is robust to controlled response patterns</td>
+</tr>
+<tr>
+<td>Live teacher collection</td>
+<td>Real model decisions, tool calls, failures, and verifier outcomes</td>
+<td style="text-align: right;">Paid or local compute</td>
+<td>This model/harness/task run produced the recorded evidence</td>
+</tr>
+</tbody>
+</table>
+<p>The product should move upward through these layers without collapsing their labels. A replayed
+DeepSeek trajectory is valuable because it enables fast regression testing, but it is not a new
+DeepSeek inference. A learned local surrogate may approximate a model’s action distribution, but
+it is not equivalent to the source model unless equivalence is demonstrated for a declared task
+distribution and metric.</p>
+<p>The recommended target is therefore:</p>
+<blockquote>
+<p><strong>A local, deterministic, evidence-labeled agentic-coding laboratory that can replay real
+model behavior, perturb the harness, compare policies, train or fit bounded surrogates, and
+expose every causal step needed to explain success or failure.</strong></p>
+</blockquote>
+<p>LAM already has the essential seed of this product: a stateless scenario engine, an HTTP server,
+OpenAI/Ollama wire adapters, exact cassettes, a live proxy, a SQLite metrics store, a model
+router, a Vanguard tool-name bridge, and a standalone live coding collector. The next work is
+not to make the mock pretend to be live. It is to make the distinction between live, replayed,
+synthetic, and inferred behavior mechanically explicit while increasing the fidelity and utility
+of each mode.</p>
+<p>The most important near-term priorities are:</p>
+<ol>
+<li>preserve complete live trajectories rather than short snippets;</li>
+<li>make replay state- and request-conditioned instead of only turn-count-conditioned;</li>
+<li>formalize a challenge/workspace/evaluator protocol;</li>
+<li>add systematic failure, retry, reflection, and context-policy experiments;</li>
+<li>build controlled behavioral surrogates from real traces;</li>
+<li>measure harness effects with paired, reproducible experiments;</li>
+<li>keep benchmark leakage, secret exposure, and false live claims impossible by construction.</li>
+</ol>
+<h2 id="62-epistemic-boundary-what-lam-can-and-cannot-become">6.2 Epistemic boundary: what LAM can and cannot become</h2>
+<h3 id="621-a-mock-is-not-a-language-model">6.2.1 A mock is not a language model</h3>
+<p>A language model computes a conditional distribution over token sequences, approximately:</p>
+<p>[
+P(y_{1:n} \mid x_{1:m}, \theta),
+]</p>
+<p>where (\theta) is a learned parameterization and the output is sampled or decoded under a
+policy. The current LAM engine does not compute that distribution. It selects a stored response
+from a scenario using observable conversation features such as tool-result count or prior text.</p>
+<p>That is not a defect for replay. It is the correct mechanism for deterministic infrastructure
+tests. It becomes a defect only if LAM labels the result as a measurement of general model
+capability.</p>
+<h3 id="622-four-useful-notions-of-similarity">6.2.2 Four useful notions of “similarity”</h3>
+<p>LAM can approach a real model along several independent axes:</p>
+<table>
+<thead>
+<tr>
+<th>Similarity axis</th>
+<th>Definition</th>
+<th>Measurement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Protocol fidelity</td>
+<td>Same request/response schema, streaming, errors, and tool-call encoding</td>
+<td>Contract tests and wire fixtures</td>
+</tr>
+<tr>
+<td>Trace fidelity</td>
+<td>Same response for the same canonical request and history</td>
+<td>Request digest and byte comparison</td>
+</tr>
+<tr>
+<td>Behavioral fidelity</td>
+<td>Similar action/tool/test/error distributions over a task distribution</td>
+<td>Distributional metrics and held-out tasks</td>
+</tr>
+<tr>
+<td>Capability fidelity</td>
+<td>Similar solve rate, patch quality, calibration, and generalization</td>
+<td>Paired benchmark evaluation</td>
+</tr>
+</tbody>
+</table>
+<p>Exact cassette replay can reach near-100% trace fidelity for the recorded trace while providing
+zero evidence about capability fidelity on a new task. A learned surrogate can improve
+behavioral fidelity, but it requires held-out evaluation and must not inherit labels from its
+teacher traces without accounting for leakage and selection bias.</p>
+<h3 id="623-why-free-and-local-has-a-limit">6.2.3 Why “free and local” has a limit</h3>
+<p>There are three different meanings of free:</p>
+<ol>
+<li><strong>Free replay:</strong> already-collected traces can be replayed locally at negligible cost.</li>
+<li><strong>Free local inference:</strong> an open-weight model can run on local hardware, with latency and
+   quality determined by model size, quantization, memory, and runtime.</li>
+<li><strong>Free general intelligence:</strong> impossible without either a capable pre-trained model or a
+   substantial training/distillation investment.</li>
+</ol>
+<p>LAM can make the first two highly efficient. It cannot create the third by recording a few dozen
+responses. The honest product objective is a local laboratory that maximizes the value extracted
+from each expensive or slow inference and allows thousands of no-cost controlled experiments
+afterward.</p>
+<h2 id="63-what-lam-already-has">6.3 What LAM already has</h2>
+<h3 id="631-existing-system-components">6.3.1 Existing system components</h3>
+<p>The present LAM implementation includes:</p>
+<ul>
+<li>a stateless scenario engine with multi-turn tool-observation progression;</li>
+<li>a gold answer/scenario bank organized into task tiers;</li>
+<li>OpenAI-compatible <code>/v1/chat/completions</code> responses;</li>
+<li>Ollama-compatible <code>/api/chat</code> and <code>/api/generate</code> responses;</li>
+<li>optional SSE-style OpenAI streaming;</li>
+<li>exact request-hash cassette loading and replay;</li>
+<li>an upstream proxy path for live Ollama-compatible services;</li>
+<li>explicit evidence labels such as <code>lam-replay</code>, <code>cassette-exact</code>, and live-provider labels;</li>
+<li>SQLite call and benchmark provenance records;</li>
+<li>model-router integration through the existing mock provider;</li>
+<li>LAM/Vanguard tool-name translation;</li>
+<li>scenario import and secret-redaction helpers;</li>
+<li>a standalone real-model coding collector in <code>live_coding.py</code>;</li>
+<li>temporary workspaces, safe tool execution, test verification, diff capture, and budget guards;</li>
+<li>complete JSON trajectories and exact cassettes for collected runs.</li>
+</ul>
+<h3 id="632-empirical-baseline-already-collected">6.3.2 Empirical baseline already collected</h3>
+<p>The standalone collector has now exercised four real coding challenges from the LEX laboratory
+as read-only source inputs copied into temporary workspaces:</p>
+<table>
+<thead>
+<tr>
+<th>Challenge</th>
+<th>Problem family</th>
+<th>Result in the recorded DeepSeek run</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>semver_parser</code></td>
+<td>Semantic-version precedence and build metadata</td>
+<td>Failed verification; the model corrupted the file, and the evaluator caught it</td>
+</tr>
+<tr>
+<td><code>isolated_coding_test</code></td>
+<td>LRU/TTL expiry and recency</td>
+<td>Passed</td>
+</tr>
+<tr>
+<td><code>plugin_dag</code></td>
+<td>Cycle detection and topological load order</td>
+<td>Passed</td>
+</tr>
+<tr>
+<td><code>token_bucket</code></td>
+<td>Refill saturation boundary</td>
+<td>Passed</td>
+</tr>
+</tbody>
+</table>
+<p>The collection used 51 total API calls including the validation call, spent approximately
+<code>$0.00837</code>, and produced complete trajectories and replay cassettes. The result is not a
+benchmark score. It is a useful first teacher corpus showing that the harness can observe both
+successful repair and catastrophic editing failure without mutating the source challenge tree.</p>
+<h3 id="633-current-strengths">6.3.3 Current strengths</h3>
+<p>LAM is already particularly strong for:</p>
+<ul>
+<li>deterministic CI and regression tests;</li>
+<li>validating tool schemas and turn-loop state transitions;</li>
+<li>testing harness behavior without network or provider credentials;</li>
+<li>replaying expensive agent trajectories;</li>
+<li>comparing prompt or tool-policy changes against identical model outputs;</li>
+<li>collecting latency, token, cost, and verifier outcomes;</li>
+<li>fault injection and negative fixtures;</li>
+<li>rapidly exercising many model/harness combinations after traces exist.</li>
+</ul>
+<h3 id="634-current-weaknesses">6.3.4 Current weaknesses</h3>
+<p>The major gaps are:</p>
+<ul>
+<li>the older recorder stores hashes and short snippets rather than a canonical full-fidelity event
+  log;</li>
+<li>scenario progression based on tool count is not equivalent to response selection from the
+  actual workspace state;</li>
+<li>exact cassettes are brittle when prompts, tool schemas, or context formatting change;</li>
+<li>replay does not yet model alternative branches, uncertainty, or response distributions;</li>
+<li>the SQLite schema is a metrics index, not a complete trajectory database;</li>
+<li>there is no first-class challenge manifest and evaluator contract for arbitrary repositories;</li>
+<li>the standalone collector’s tool surface is intentionally small and not yet configurable as an
+  agent-computer interface profile;</li>
+<li>no learned surrogate or calibrated behavior model exists;</li>
+<li>no systematic policy-ablation runner exists for context, retry, reflection, or memory;</li>
+<li>no automatic leakage detector proves that gold patches and hidden tests stayed outside the
+  model-visible context;</li>
+<li>a live model’s nondeterminism, provider routing, and changing model snapshot are not yet
+  represented as complete compatibility metadata.</li>
+</ul>
+<h2 id="64-how-to-use-lam-today">6.4 How to use LAM today</h2>
+<h3 id="641-run-the-deterministic-scenario-bank">6.4.1 Run the deterministic scenario bank</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>python3<span class="w"> </span>tools/002_LLM_API_MOCK/simulate.py
+</code></pre></div>
+<p>This exercises the pre-authored LAM scenarios without network access or API credentials.</p>
+<h3 id="642-run-the-hermetic-lam-tests">6.4.2 Run the hermetic LAM tests</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>python3<span class="w"> </span>-m<span class="w"> </span>unittest<span class="w"> </span>test.tools.test_llm_api_mock
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>python3<span class="w"> </span>-m<span class="w"> </span>unittest<span class="w"> </span>test.tools.test_lam_live_coding
+</code></pre></div>
+<h3 id="643-collect-bounded-real-model-coding-traces">6.4.3 Collect bounded real-model coding traces</h3>
+<p>The collector reads the configured OpenRouter key internally from the environment or the
+specified dotenv file. It never prints the key or places it in a trajectory:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>python3<span class="w"> </span>tools/002_LLM_API_MOCK/live_coding.py<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="w">  </span>--challenge<span class="w"> </span>semver_parser<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="w">  </span>--challenge<span class="w"> </span>isolated_coding_test<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="w">  </span>--challenge<span class="w"> </span>plugin_dag<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">  </span>--challenge<span class="w"> </span>token_bucket<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w">  </span>--max-calls<span class="w"> </span><span class="m">60</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">  </span>--max-usd<span class="w"> </span><span class="m">0</span>.10
+</code></pre></div>
+<p>Every challenge is copied into a temporary workspace. The model can use the declared tools to
+inspect and edit files and run bounded commands. The collector then runs the verifier, records
+the final diff, and saves:</p>
+<ul>
+<li><code>trajectory.json</code> — full request/response/tool-result history;</li>
+<li><code>cassette.jsonl</code> — exact request-hash to response mapping;</li>
+<li><code>result.json</code> — pass/fail, cost, call count, verification output, and diff;</li>
+<li><code>collection_summary.json</code> — aggregate collection metadata.</li>
+</ul>
+<p>Generated live captures belong under the ignored run-artifact directory and should be treated as
+experimental evidence, not casually committed model-output dumps.</p>
+<h3 id="644-replay-a-captured-model-response">6.4.4 Replay a captured model response</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>python3<span class="w"> </span>tools/002_LLM_API_MOCK/server.py<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="w">  </span>--cassette<span class="w"> </span>tools/002_LLM_API_MOCK/runs/live_captures/&lt;run-id&gt;/cassette.jsonl<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="w">  </span>--port<span class="w"> </span><span class="m">8787</span>
+</code></pre></div>
+<p>The harness must send the same canonical request body to obtain an exact cassette hit. A changed
+system prompt, tool schema, or message serialization should produce a mismatch rather than a
+silent approximate answer. That failure is useful: it identifies a compatibility change.</p>
+<h2 id="65-target-product-architecture">6.5 Target product architecture</h2>
+<p>The mature LAM laboratory should be organized as a set of explicit planes:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>┌───────────────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>│  Challenge Plane                                                          │
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>│  task manifest · base workspace · hidden/public tests · evaluator policy │
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>└───────────────────────────────────────────────────────────────────────────┘
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>                                  │
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>                                  ▼
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>┌───────────────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>│  Agent Controller Plane                                                   │
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>│  prompt compiler · context policy · turn loop · retry · reflection       │
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>│  planning · memory · tool choice · stop/continue policy                   │
+<a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>└───────────────────────────────────────────────────────────────────────────┘
+<a id="__codelineno-6-12" name="__codelineno-6-12" href="#__codelineno-6-12"></a>                                  │
+<a id="__codelineno-6-13" name="__codelineno-6-13" href="#__codelineno-6-13"></a>                                  ▼
+<a id="__codelineno-6-14" name="__codelineno-6-14" href="#__codelineno-6-14"></a>┌───────────────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-6-15" name="__codelineno-6-15" href="#__codelineno-6-15"></a>│  Model Plane                                                              │
+<a id="__codelineno-6-16" name="__codelineno-6-16" href="#__codelineno-6-16"></a>│  live OpenRouter · local Ollama · exact cassette · behavioral surrogate   │
+<a id="__codelineno-6-17" name="__codelineno-6-17" href="#__codelineno-6-17"></a>└───────────────────────────────────────────────────────────────────────────┘
+<a id="__codelineno-6-18" name="__codelineno-6-18" href="#__codelineno-6-18"></a>                                  │
+<a id="__codelineno-6-19" name="__codelineno-6-19" href="#__codelineno-6-19"></a>                                  ▼
+<a id="__codelineno-6-20" name="__codelineno-6-20" href="#__codelineno-6-20"></a>┌───────────────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-6-21" name="__codelineno-6-21" href="#__codelineno-6-21"></a>│  Environment Plane                                                        │
+<a id="__codelineno-6-22" name="__codelineno-6-22" href="#__codelineno-6-22"></a>│  read · search · edit · execute · test · patch · reset · snapshot         │
+<a id="__codelineno-6-23" name="__codelineno-6-23" href="#__codelineno-6-23"></a>└───────────────────────────────────────────────────────────────────────────┘
+<a id="__codelineno-6-24" name="__codelineno-6-24" href="#__codelineno-6-24"></a>                                  │
+<a id="__codelineno-6-25" name="__codelineno-6-25" href="#__codelineno-6-25"></a>                                  ▼
+<a id="__codelineno-6-26" name="__codelineno-6-26" href="#__codelineno-6-26"></a>┌───────────────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-6-27" name="__codelineno-6-27" href="#__codelineno-6-27"></a>│  Evidence Plane                                                           │
+<a id="__codelineno-6-28" name="__codelineno-6-28" href="#__codelineno-6-28"></a>│  causal trajectory · artifacts · evaluator receipts · metrics · cassettes│
+<a id="__codelineno-6-29" name="__codelineno-6-29" href="#__codelineno-6-29"></a>└───────────────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<p>The essential architectural rule is that the model plane must be replaceable without changing
+the challenge, controller, environment, or evaluator contracts. This makes LAM useful for
+isolating whether a result came from the model, the harness, the task environment, or the
+verification policy.</p>
+<h3 id="651-challenge-manifest">6.5.1 Challenge manifest</h3>
+<p>Every challenge should have a machine-readable manifest containing:</p>
+<ul>
+<li>stable challenge ID and version;</li>
+<li>source repository or fixture digest;</li>
+<li>base commit/workspace digest;</li>
+<li>public task statement digest;</li>
+<li>allowed file mutation scope;</li>
+<li>setup command and dependency lock;</li>
+<li>visible test command;</li>
+<li>hidden evaluator command or evaluator image digest;</li>
+<li>expected patch region, when known;</li>
+<li>difficulty dimensions;</li>
+<li>leakage classification;</li>
+<li>timeout, memory, and process limits;</li>
+<li>dataset split and provenance.</li>
+</ul>
+<p>The model must receive only the public projection of this manifest. The evaluator retains the
+oracle projection. This separates task construction from task execution and makes leakage
+auditable.</p>
+<h3 id="652-agent-computer-interface-profiles">6.5.2 Agent-computer interface profiles</h3>
+<p>LAM should support multiple tool profiles rather than one fixed tool vocabulary:</p>
+<ol>
+<li><strong>Minimal shell profile:</strong> <code>view_file</code>, <code>edit_file</code>, <code>run_command</code>.</li>
+<li><strong>Repository profile:</strong> add <code>list_dir</code>, <code>grep_file</code>, <code>find_references</code>, <code>git_diff</code>.</li>
+<li><strong>Structured patch profile:</strong> replace whole-file editing with validated unified patches.</li>
+<li><strong>CodeAct profile:</strong> permit a bounded Python/bash execution action under a sandbox.</li>
+<li><strong>Review profile:</strong> expose test failures, diff summaries, and static-analysis findings.</li>
+</ol>
+<p>Agent-computer interface design materially affects software-engineering performance; this is a
+central finding of the SWE-agent research program, not merely a UI concern. LAM should therefore
+make the interface a versioned experimental variable rather than burying it in the server.</p>
+<h2 id="66-capability-ladder">6.6 Capability ladder</h2>
+<p>LAM should expose capability levels with separate evidence labels and acceptance criteria.</p>
+<h3 id="level-0-protocol-compatible-mock">Level 0 — Protocol-compatible mock</h3>
+<p>Purpose: validate clients, schemas, errors, streaming, and tool-call parsing.</p>
+<p>Required properties:</p>
+<ul>
+<li>OpenAI and Ollama shape conformance;</li>
+<li>deterministic error responses;</li>
+<li>explicit model-not-found behavior;</li>
+<li>streaming termination correctness;</li>
+<li>no live label on replay traffic.</li>
+</ul>
+<h3 id="level-1-exact-trajectory-player">Level 1 — Exact trajectory player</h3>
+<p>Purpose: replay a real model run exactly.</p>
+<p>Required properties:</p>
+<ul>
+<li>canonical request digest;</li>
+<li>response byte digest;</li>
+<li>ordered tool-observation history;</li>
+<li>mismatch refusal;</li>
+<li>cassette version and schema identity;</li>
+<li>fresh-process replay parity.</li>
+</ul>
+<h3 id="level-2-state-conditioned-scenario-engine">Level 2 — State-conditioned scenario engine</h3>
+<p>Purpose: respond to the harness state rather than only to the number of tool messages.</p>
+<p>The scenario should declare predicates over:</p>
+<ul>
+<li>visible file contents or file digests;</li>
+<li>previous tool outcomes;</li>
+<li>test failure classes;</li>
+<li>changed-file set;</li>
+<li>remaining budget;</li>
+<li>prior model action;</li>
+<li>current phase of the repair plan.</li>
+</ul>
+<p>The engine chooses a response from a finite state machine or policy table. It remains scripted,
+but it is much more useful than a global turn counter because it can test recovery and branching.</p>
+<h3 id="level-3-distributional-behavioral-surrogate">Level 3 — Distributional behavioral surrogate</h3>
+<p>Purpose: approximate the action distribution of a teacher model over a declared challenge family.</p>
+<p>Possible implementations, in increasing complexity:</p>
+<ul>
+<li>nearest-neighbor retrieval over canonicalized prompt/history states;</li>
+<li>decision trees over tool/error/test features;</li>
+<li>gradient-boosted action selection;</li>
+<li>small local language model fine-tuned on sanitized trajectories;</li>
+<li>constrained sequence model over tool calls and patches;</li>
+<li>hybrid retrieval plus local generation with verifier filtering.</li>
+</ul>
+<p>This level needs held-out tasks and calibration. It must report similarity metrics and uncertainty,
+not claim identity with the teacher model.</p>
+<h3 id="level-4-local-agent-with-an-open-weight-model">Level 4 — Local agent with an open-weight model</h3>
+<p>Purpose: run a genuinely generative model locally through the same LAM controller and evaluator.</p>
+<p>LAM becomes the stable experiment harness while Ollama or another local runtime supplies neural
+inference. The local model can be compared against recorded DeepSeek traces under identical task,
+tool, prompt, timeout, and evaluator conditions.</p>
+<h3 id="level-5-teacher-student-laboratory">Level 5 — Teacher-student laboratory</h3>
+<p>Purpose: use limited paid teacher calls to improve a local student or policy.</p>
+<p>The teacher supplies trajectories, critiques, repair alternatives, and failure explanations. The
+student is evaluated on tasks and perturbations excluded from teacher collection. Improvement is
+accepted only when held-out solve rate or efficiency improves without unacceptable regressions.</p>
+<h2 id="67-sota-improvement-program">6.7 SOTA improvement program</h2>
+<h3 id="671-react-style-interleaved-reasoning-and-action">6.7.1 ReAct-style interleaved reasoning and action</h3>
+<p>The original ReAct work established the value of interleaving reasoning traces and environment
+actions so that the agent can update a plan from observations rather than produce one isolated
+answer. LAM should implement this as a configurable controller policy:</p>
+<ul>
+<li><code>inspect → hypothesize → act → observe → verify</code> phases;</li>
+<li>explicit phase transitions in the trajectory;</li>
+<li>action justification as optional diagnostic metadata;</li>
+<li>no requirement to expose private chain-of-thought in the stored corpus;</li>
+<li>compact decision summaries instead of unrestricted hidden-reasoning retention;</li>
+<li>ablation runs with and without phase guidance.</li>
+</ul>
+<p>The useful research object is not the private prose itself. It is the causal relationship between
+observation, action selection, verification feedback, and state transition. See <a href="https://arxiv.org/abs/2210.03629">ReAct</a>.</p>
+<h3 id="672-swe-agent-style-agent-computer-interfaces">6.7.2 SWE-agent-style agent-computer interfaces</h3>
+<p>LAM should make interface design measurable:</p>
+<ul>
+<li>compare whole-file edit, patch edit, and CodeAct execution;</li>
+<li>test bounded search versus unrestricted shell;</li>
+<li>measure context returned per tool call;</li>
+<li>expose line ranges, symbol summaries, and dependency references;</li>
+<li>add command output truncation with explicit continuation handles;</li>
+<li>preserve nonzero exit code, signal, timeout, and stderr as typed observations;</li>
+<li>record every interface version in the compatibility key.</li>
+</ul>
+<p>The interface should optimize for information gained per token and per tool call. A tool that
+returns 200 lines of irrelevant code is worse than a tool that returns the exact symbol and its
+callers, provided the retrieval policy is itself measured.</p>
+<h3 id="673-codeact-compatible-execution">6.7.3 CodeAct-compatible execution</h3>
+<p>OpenHands documents a CodeAct-style agent in which the model can execute code as its primary
+action space. LAM can support a constrained CodeAct profile without granting unrestricted host
+authority:</p>
+<ul>
+<li>execute only inside a temporary workspace;</li>
+<li>disable network by default;</li>
+<li>mount only declared files and tools;</li>
+<li>enforce CPU, memory, process-count, and wall-clock limits;</li>
+<li>record stdout, stderr, exit status, signals, and changed files;</li>
+<li>classify commands into read-only, mutation, test, and forbidden classes;</li>
+<li>require evaluator confirmation before treating a result as solved.</li>
+</ul>
+<p>This can improve model flexibility while preserving reproducibility. It should be compared against
+the structured-tool profile, not silently replace it. See <a href="https://docs.openhands.dev/openhands/usage/agents">OpenHands CodeAct documentation</a>.</p>
+<h3 id="674-reflexion-style-verbal-feedback-and-episodic-memory">6.7.4 Reflexion-style verbal feedback and episodic memory</h3>
+<p>After a failed verification, LAM can generate a compact diagnostic record containing:</p>
+<ul>
+<li>failure class;</li>
+<li>likely causal file and symbol;</li>
+<li>attempted change;</li>
+<li>evidence that falsified the hypothesis;</li>
+<li>next testable hypothesis;</li>
+<li>constraints that must not be violated on retry.</li>
+</ul>
+<p>That record can be returned to the same model on a fresh attempt or used as a retrieved memory on
+a related task. The memory must be versioned and evaluated against a no-memory control. This is a
+practical, no-weight-update improvement path inspired by Reflexion’s verbal reinforcement idea.
+See <a href="https://arxiv.org/abs/2303.11366">Reflexion</a>.</p>
+<p>Important safeguards:</p>
+<ul>
+<li>reflection cannot rewrite the original trajectory;</li>
+<li>the evaluator result remains authoritative;</li>
+<li>reflection text is a derived artifact, not ground truth;</li>
+<li>memory retrieval must not leak the gold patch from another task;</li>
+<li>gains must be measured on held-out tasks.</li>
+</ul>
+<h3 id="675-test-driven-repair-controller">6.7.5 Test-driven repair controller</h3>
+<p>The controller should treat tests as evidence, not as an afterthought. Add a typed failure
+classifier for:</p>
+<ul>
+<li>syntax/import failure;</li>
+<li>assertion mismatch;</li>
+<li>timeout/deadlock;</li>
+<li>flaky or nondeterministic test;</li>
+<li>dependency/setup failure;</li>
+<li>environment mismatch;</li>
+<li>unchanged bug after patch;</li>
+<li>regression in previously passing tests.</li>
+</ul>
+<p>Each category can trigger a different next action. For example, an import failure should usually
+reduce the search space to module/package structure, while an assertion mismatch should expose
+the failing input and expected/actual values. The classifier itself must be evaluated against a
+labeled corpus and should never silently convert infrastructure failure into model failure.</p>
+<h3 id="676-context-engineering-and-retrieval">6.7.6 Context engineering and retrieval</h3>
+<p>Implement context policies as interchangeable modules:</p>
+<ul>
+<li>recent-window history;</li>
+<li>failure-focused history;</li>
+<li>symbol-level retrieval;</li>
+<li>dependency-graph retrieval;</li>
+<li>test-name retrieval;</li>
+<li>patch-history retrieval;</li>
+<li>repository map summaries;</li>
+<li>semantic search over prior successful repairs;</li>
+<li>compaction with digest-preserving provenance.</li>
+</ul>
+<p>Measure:</p>
+<ul>
+<li>tokens per successful repair;</li>
+<li>tool calls per successful repair;</li>
+<li>context recall of the eventual changed symbols;</li>
+<li>irrelevant-context ratio;</li>
+<li>latency and cost;</li>
+<li>regression rate after compaction;</li>
+<li>performance under a fixed context budget.</li>
+</ul>
+<p>The central question is not “does retrieval help?” but “which information policy helps which task
+family under which budget, and does it generalize beyond the tasks used to tune it?”</p>
+<h3 id="677-candidate-generation-patch-ranking-and-verifier-selection">6.7.7 Candidate generation, patch ranking, and verifier selection</h3>
+<p>For small tasks, generate multiple candidate patches and rank them using cheap checks before
+spending expensive model turns:</p>
+<ol>
+<li>syntax and import checks;</li>
+<li>targeted unit tests;</li>
+<li>static type/lint checks;</li>
+<li>full visible tests;</li>
+<li>hidden evaluator;</li>
+<li>independent review or second-model critique.</li>
+</ol>
+<p>Candidate generation can be done by repeated temperature seeds, model variants, or retrieved
+repair templates. The ranking policy must not see hidden tests or gold patches. Store every
+candidate, rejection reason, and evaluator receipt so that selection quality can be measured
+separately from generation quality.</p>
+<h3 id="678-model-routing-and-adaptive-escalation">6.7.8 Model routing and adaptive escalation</h3>
+<p>LAM can become a routing research platform:</p>
+<ul>
+<li>start with a cheap local model;</li>
+<li>detect uncertainty from repeated failures, tool loops, or budget waste;</li>
+<li>escalate to a stronger local/cloud model;</li>
+<li>optionally return the stronger model’s repair to the cheaper model for explanation or review;</li>
+<li>compare fixed routing against adaptive routing under equal cost budgets.</li>
+</ul>
+<p>Routing signals should include behavioral evidence rather than self-report alone:</p>
+<ul>
+<li>test progress;</li>
+<li>changed-file locality;</li>
+<li>repeated identical actions;</li>
+<li>increasing error severity;</li>
+<li>unresolved symbols;</li>
+<li>token and time burn;</li>
+<li>patch churn;</li>
+<li>verifier disagreement.</li>
+</ul>
+<p>An escalation decision is itself a recorded policy event. Otherwise routing improvements cannot be
+distinguished from luck in model assignment.</p>
+<h3 id="679-teacher-student-distillation-without-pretending-equivalence">6.7.9 Teacher-student distillation without pretending equivalence</h3>
+<p>The collected DeepSeek trajectories can support a local surrogate program:</p>
+<ul>
+<li>normalize messages and tool schemas;</li>
+<li>remove credentials and unrelated repository content;</li>
+<li>represent tool calls as structured actions;</li>
+<li>represent observations as typed, bounded features plus content digests;</li>
+<li>store task and repository split boundaries;</li>
+<li>train or fit only on the training split;</li>
+<li>evaluate on held-out challenge families and unseen repositories;</li>
+<li>compare action accuracy, tool sequence edit distance, patch validity, solve rate, and cost.</li>
+</ul>
+<p>Possible student targets include:</p>
+<ul>
+<li>next-tool classifier;</li>
+<li>stop/continue classifier;</li>
+<li>error-category predictor;</li>
+<li>patch-ranking model;</li>
+<li>retrieval policy;</li>
+<li>small local instruction model fine-tuned on full sanitized interactions;</li>
+<li>hybrid finite-state policy for common repair patterns.</li>
+</ul>
+<p>The student should be allowed to disagree with the teacher. The purpose is not to clone every
+teacher mistake; it is to learn useful, measurable behavior at lower cost. Teacher and student
+results must carry separate evidence labels.</p>
+<h3 id="6710-controlled-self-improvement-loop">6.7.10 Controlled self-improvement loop</h3>
+<p>A safe LAM improvement loop is:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>collect → verify → classify failures → propose policy change →
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>run paired evaluation → accept only with held-out evidence → version policy
+</code></pre></div>
+<p>The policy may change prompts, retrieval, tools, retry limits, reflection, routing, or candidate
+selection. It must not mutate historical trajectories or retroactively relabel failures. Every
+accepted policy receives a content digest, parent policy, training/evaluation split, and rollback
+record.</p>
+<h3 id="6711-multi-agent-and-debate-experiments">6.7.11 Multi-agent and debate experiments</h3>
+<p>LAM can simulate or run multiple roles without claiming that more agents are automatically better:</p>
+<ul>
+<li>investigator: reads and localizes the defect;</li>
+<li>implementer: edits the workspace;</li>
+<li>verifier: runs tests and classifies failure;</li>
+<li>reviewer: critiques the diff;</li>
+<li>synthesizer: chooses among candidates.</li>
+</ul>
+<p>Run these roles sequentially first. Add parallelism only when the resources and artifact sinks are
+provably independent. Metrics should include coordination overhead, duplicate work, wall time,
+token cost, and failure recovery—not only pass rate.</p>
+<h3 id="6712-counterfactual-and-fault-injection-laboratory">6.7.12 Counterfactual and fault-injection laboratory</h3>
+<p>Once a trajectory is recorded, LAM can replay it under controlled perturbations:</p>
+<ul>
+<li>remove one tool observation;</li>
+<li>corrupt a test output;</li>
+<li>delay a command;</li>
+<li>return a transient failure;</li>
+<li>alter context ordering;</li>
+<li>truncate a file read;</li>
+<li>inject a stale cache result;</li>
+<li>change a tool schema version;</li>
+<li>kill the agent process after an edit;</li>
+<li>remove one previous memory item.</li>
+</ul>
+<p>This exposes which observations and controller decisions were causally necessary. Counterfactual
+results must be labeled synthetic and never merged with live-model evidence.</p>
+<h2 id="68-trajectory-and-dataset-design">6.8 Trajectory and dataset design</h2>
+<h3 id="681-canonical-run-record">6.8.1 Canonical run record</h3>
+<p>Each run should have a stable envelope containing:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="p">{</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="w">  </span><span class="nt">"run_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="w">  </span><span class="nt">"challenge_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="w">  </span><span class="nt">"challenge_version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="w">  </span><span class="nt">"workspace_digest"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="w">  </span><span class="nt">"model_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="w">  </span><span class="nt">"provider"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="w">  </span><span class="nt">"model_snapshot"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="w">  </span><span class="nt">"sampling"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">"temperature"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.2</span><span class="p">,</span><span class="w"> </span><span class="nt">"top_p"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"> </span><span class="nt">"seed"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">},</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="w">  </span><span class="nt">"agent_policy_digest"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+<a id="__codelineno-8-11" name="__codelineno-8-11" href="#__codelineno-8-11"></a><span class="w">  </span><span class="nt">"tool_profile_digest"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+<a id="__codelineno-8-12" name="__codelineno-8-12" href="#__codelineno-8-12"></a><span class="w">  </span><span class="nt">"evaluator_digest"</span><span class="p">:</span><span class="w"> </span><span class="s2">"..."</span><span class="p">,</span>
+<a id="__codelineno-8-13" name="__codelineno-8-13" href="#__codelineno-8-13"></a><span class="w">  </span><span class="nt">"evidence_label"</span><span class="p">:</span><span class="w"> </span><span class="s2">"openrouter-live"</span><span class="p">,</span>
+<a id="__codelineno-8-14" name="__codelineno-8-14" href="#__codelineno-8-14"></a><span class="w">  </span><span class="nt">"turns"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<a id="__codelineno-8-15" name="__codelineno-8-15" href="#__codelineno-8-15"></a><span class="w">  </span><span class="nt">"artifacts"</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span>
+<a id="__codelineno-8-16" name="__codelineno-8-16" href="#__codelineno-8-16"></a><span class="w">  </span><span class="nt">"outcome"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<a id="__codelineno-8-17" name="__codelineno-8-17" href="#__codelineno-8-17"></a><span class="w">  </span><span class="nt">"cost"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span>
+<a id="__codelineno-8-18" name="__codelineno-8-18" href="#__codelineno-8-18"></a><span class="w">  </span><span class="nt">"timing"</span><span class="p">:</span><span class="w"> </span><span class="p">{}</span>
+<a id="__codelineno-8-19" name="__codelineno-8-19" href="#__codelineno-8-19"></a><span class="p">}</span>
+</code></pre></div>
+<p>The exact field names may evolve, but the semantics should remain stable: a reviewer must be able
+to reconstruct what the model saw, what it produced, what the environment returned, what changed,
+and how success was determined.</p>
+<h3 id="682-separate-content-from-ledger-metadata">6.8.2 Separate content from ledger metadata</h3>
+<p>Large prompts, model outputs, file snapshots, diffs, and test logs belong in content-addressed
+artifacts. The SQLite index should hold:</p>
+<ul>
+<li>digest;</li>
+<li>media type;</li>
+<li>size;</li>
+<li>run/turn/attempt relation;</li>
+<li>retention class;</li>
+<li>redaction policy;</li>
+<li>creation time;</li>
+<li>evidence label.</li>
+</ul>
+<p>This avoids turning <code>lam.sqlite</code> into an unbounded text dump while preserving complete retrieval.</p>
+<h3 id="683-dataset-splits">6.8.3 Dataset splits</h3>
+<p>At minimum, maintain:</p>
+<ul>
+<li><strong>development:</strong> prompt/tool/controller tuning;</li>
+<li><strong>validation:</strong> model and policy selection;</li>
+<li><strong>held-out test:</strong> final claims;</li>
+<li><strong>counterfactual:</strong> perturbation studies;</li>
+<li><strong>replay regression:</strong> fixed traces for infrastructure changes;</li>
+<li><strong>fresh live:</strong> tasks not represented in the teacher corpus.</li>
+</ul>
+<p>Repository, issue, author, and temporal leakage must be considered. A model that has seen the
+original patch or a near-duplicate task may produce a useful engineering result but does not
+provide clean evidence of generalization.</p>
+<h3 id="684-artifact-retention-and-privacy">6.8.4 Artifact retention and privacy</h3>
+<p>Raw model interactions can contain proprietary source, secrets accidentally emitted by tools, and
+personal data from issue text. The collector should support:</p>
+<ul>
+<li>capture authorization before persistence;</li>
+<li>secret scanning and redaction;</li>
+<li>path allowlists;</li>
+<li>configurable <code>digests_only</code>, <code>standard</code>, and <code>full</code> retention;</li>
+<li>encrypted or access-controlled full artifacts;</li>
+<li>deterministic redaction receipts;</li>
+<li>legal hold and deletion eligibility;</li>
+<li>no API key in request artifacts, logs, cassettes, or SQLite.</li>
+</ul>
+<h2 id="69-evaluation-and-scientific-methodology">6.9 Evaluation and scientific methodology</h2>
+<h3 id="691-primary-outcome-metrics">6.9.1 Primary outcome metrics</h3>
+<p>For coding tasks, report at least:</p>
+<ul>
+<li>verifier pass rate;</li>
+<li>patch validity rate;</li>
+<li>regression-free pass rate;</li>
+<li>first-pass success;</li>
+<li>pass@1 and pass@k where repeated candidates are used;</li>
+<li>task completion time;</li>
+<li>model calls and tool calls;</li>
+<li>input/output tokens;</li>
+<li>direct cost;</li>
+<li>wall-clock latency;</li>
+<li>changed-line count and patch churn;</li>
+<li>human-review acceptance, if applicable.</li>
+</ul>
+<h3 id="692-harness-metrics">6.9.2 Harness metrics</h3>
+<p>To measure the harness independently from the model, hold the model response trace fixed and vary:</p>
+<ul>
+<li>context compiler;</li>
+<li>tool descriptions;</li>
+<li>observation truncation;</li>
+<li>retry policy;</li>
+<li>test feedback formatting;</li>
+<li>reflection memory;</li>
+<li>routing policy;</li>
+<li>candidate ranking;</li>
+<li>workspace interface.</li>
+</ul>
+<p>This is the most important use of exact replay: it turns a stochastic model into a controlled
+experimental input while retaining the causal sequence that actually occurred.</p>
+<h3 id="693-paired-evaluation">6.9.3 Paired evaluation</h3>
+<p>Every policy claim should use paired tasks and a compatibility key containing:</p>
+<ul>
+<li>benchmark and split hash;</li>
+<li>challenge version;</li>
+<li>model/provider/snapshot;</li>
+<li>sampling parameters;</li>
+<li>harness commit;</li>
+<li>agent-policy digest;</li>
+<li>tool-profile digest;</li>
+<li>evaluator image and test digest;</li>
+<li>LAM schema version.</li>
+</ul>
+<p>Comparisons with different keys are descriptive, not controlled causal comparisons.</p>
+<h3 id="694-calibration-and-uncertainty">6.9.4 Calibration and uncertainty</h3>
+<p>LAM should capture agent confidence only as a diagnostic signal. A useful calibration report
+compares:</p>
+<ul>
+<li>self-reported confidence;</li>
+<li>behavioral confidence from repeated success/failure;</li>
+<li>verifier status;</li>
+<li>candidate disagreement;</li>
+<li>estimated probability of success;</li>
+<li>actual held-out outcome.</li>
+</ul>
+<p>Report reliability diagrams, Brier score where binary outcomes exist, abstention quality, and
+selective risk. Never promote self-reported confidence to truth.</p>
+<h3 id="695-replay-determinism-tests">6.9.5 Replay determinism tests</h3>
+<p>For every cassette:</p>
+<ol>
+<li>replay in a fresh process;</li>
+<li>verify request digest matching;</li>
+<li>verify response digest matching;</li>
+<li>verify tool-result order;</li>
+<li>verify final workspace diff;</li>
+<li>verify evaluator result;</li>
+<li>verify that a deliberate request mutation fails closed.</li>
+</ol>
+<h2 id="610-security-privacy-and-benchmark-integrity">6.10 Security, privacy, and benchmark integrity</h2>
+<p>LAM executes model-generated actions. Even a local “mock” can become dangerous if its tool layer
+is connected to the real repository or host. The default security posture should be:</p>
+<ul>
+<li>temporary workspace only;</li>
+<li>no write access outside workspace;</li>
+<li>no network from task commands;</li>
+<li>no process-kill or privilege escalation tools;</li>
+<li>command allowlists or sandboxed execution;</li>
+<li>CPU, memory, file-count, and wall-clock quotas;</li>
+<li>no inherited provider credentials inside task subprocesses;</li>
+<li>test and evaluator separation;</li>
+<li>immutable original task snapshot;</li>
+<li>complete changed-file manifest;</li>
+<li>fail-closed on path traversal and malformed tool arguments.</li>
+</ul>
+<p>Benchmark integrity requires additional controls:</p>
+<ul>
+<li>hide gold patches and hidden tests;</li>
+<li>detect references to oracle paths;</li>
+<li>scan prompts and tool observations for leaked gold content;</li>
+<li>prevent the model from editing tests unless the experiment explicitly studies that behavior;</li>
+<li>distinguish infrastructure failure from agent failure;</li>
+<li>preserve failed runs without repair;</li>
+<li>do not count a replay pass as a live-model pass;</li>
+<li>do not use the same run for policy tuning and final evaluation.</li>
+</ul>
+<h2 id="611-performance-and-cost-engineering">6.11 Performance and cost engineering</h2>
+<h3 id="6111-fast-replay-path">6.11.1 Fast replay path</h3>
+<p>The fast path should avoid network, model initialization, and unnecessary serialization:</p>
+<ul>
+<li>memory-map or cache cassette indexes;</li>
+<li>use request digests before parsing large payloads;</li>
+<li>store compressed response bodies;</li>
+<li>stream large artifacts rather than copying them through SQLite;</li>
+<li>use one writer and batched metadata transactions;</li>
+<li>precompute challenge and policy digests;</li>
+<li>parallelize independent replay runs;</li>
+<li>keep evaluator images warm where isolation permits.</li>
+</ul>
+<h3 id="6112-live-collection-path">6.11.2 Live collection path</h3>
+<p>Live calls are expensive and slow relative to replay. The collector should:</p>
+<ul>
+<li>reserve budget before each request;</li>
+<li>stop on call or spend ceiling;</li>
+<li>use short, explicit timeouts;</li>
+<li>preserve partial trajectories after timeout;</li>
+<li>avoid retries unless they are part of the experiment;</li>
+<li>record provider usage rather than estimating silently;</li>
+<li>use small pilot sets before a full benchmark;</li>
+<li>cache exact successful responses only when the experiment declares caching;</li>
+<li>preserve model route and provider metadata.</li>
+</ul>
+<h3 id="6113-cost-aware-experiment-design">6.11.3 Cost-aware experiment design</h3>
+<p>The best use of a small paid budget is not a broad but shallow sweep. Prefer:</p>
+<ol>
+<li>a few diverse challenges;</li>
+<li>one fixed harness baseline;</li>
+<li>one controlled policy change;</li>
+<li>full trajectory capture;</li>
+<li>replay-based ablations;</li>
+<li>only then a larger live sample.</li>
+</ol>
+<p>This maximizes information per paid call and prevents a misleading “average” from hiding distinct
+failure modes.</p>
+<h2 id="612-implementation-roadmap-and-acceptance-gates">6.12 Implementation roadmap and acceptance gates</h2>
+<h3 id="phase-a-evidence-grade-capture">Phase A — Evidence-grade capture</h3>
+<p>Implement:</p>
+<ul>
+<li>versioned run envelope;</li>
+<li>full request/response artifact writer;</li>
+<li>typed tool-result records;</li>
+<li>provider/model/sampling metadata;</li>
+<li>redaction and secret scan;</li>
+<li>SQLite index references;</li>
+<li>partial-run persistence on timeout and budget stop.</li>
+</ul>
+<p>Acceptance:</p>
+<ul>
+<li>no full content lost when a run fails;</li>
+<li>fresh-process readback works;</li>
+<li>request/response hashes verify;</li>
+<li>API credentials never appear in artifacts;</li>
+<li>failed runs remain inspectable.</li>
+</ul>
+<h3 id="phase-b-challenge-and-evaluator-protocol">Phase B — Challenge and evaluator protocol</h3>
+<p>Implement:</p>
+<ul>
+<li>JSON challenge manifests;</li>
+<li>public/oracle projections;</li>
+<li>workspace snapshot and restore;</li>
+<li>evaluator subprocess contract;</li>
+<li>hidden-test separation;</li>
+<li>challenge version and split digests.</li>
+</ul>
+<p>Acceptance:</p>
+<ul>
+<li>the same challenge can run under live, replay, and local-model backends;</li>
+<li>the evaluator cannot read the model’s private prompt state;</li>
+<li>task mutations are fully accounted for.</li>
+</ul>
+<h3 id="phase-c-stateful-replay">Phase C — Stateful replay</h3>
+<p>Implement:</p>
+<ul>
+<li>predicates over workspace and observations;</li>
+<li>branching scenario graphs;</li>
+<li>state transitions and exhaustion policies;</li>
+<li>deterministic fault injection;</li>
+<li>mismatch diagnostics.</li>
+</ul>
+<p>Acceptance:</p>
+<ul>
+<li>replay can distinguish a correct edit, failed test, retry, and stop decision;</li>
+<li>changing an observation selects the declared alternate branch;</li>
+<li>unsupported state produces an explicit refusal.</li>
+</ul>
+<h3 id="phase-d-harness-policy-laboratory">Phase D — Harness policy laboratory</h3>
+<p>Implement configurable policies for:</p>
+<ul>
+<li>context compilation;</li>
+<li>observation truncation;</li>
+<li>retry and escalation;</li>
+<li>reflection memory;</li>
+<li>candidate generation/ranking;</li>
+<li>tool profile;</li>
+<li>model routing.</li>
+</ul>
+<p>Acceptance:</p>
+<ul>
+<li>all policies are versioned and digest-bound;</li>
+<li>paired replay experiments produce comparable metrics;</li>
+<li>policy changes cannot alter historical traces.</li>
+</ul>
+<h3 id="phase-e-behavioral-surrogate">Phase E — Behavioral surrogate</h3>
+<p>Implement first a non-neural baseline:</p>
+<ul>
+<li>nearest-neighbor state retrieval;</li>
+<li>tool-action classifier;</li>
+<li>stop/continue classifier;</li>
+<li>verifier-outcome predictor;</li>
+<li>uncertainty and abstention.</li>
+</ul>
+<p>Then evaluate whether a local open-weight sequence model adds value. Do not begin fine-tuning
+before the trajectory schema and splits are stable.</p>
+<p>Acceptance:</p>
+<ul>
+<li>held-out behavioral similarity is reported;</li>
+<li>surrogate failures are labeled as surrogate failures;</li>
+<li>no teacher/test leakage is detected;</li>
+<li>the surrogate is cheaper or faster for the declared use case.</li>
+</ul>
+<h3 id="phase-f-local-model-and-teacher-student-operation">Phase F — Local model and teacher-student operation</h3>
+<p>Implement:</p>
+<ul>
+<li>Ollama/local backend under the same controller;</li>
+<li>OpenRouter teacher backend;</li>
+<li>automatic trace comparison;</li>
+<li>model routing and escalation;</li>
+<li>distillation/feedback experiments;</li>
+<li>rollback and model registry metadata.</li>
+</ul>
+<p>Acceptance:</p>
+<ul>
+<li>live, local, replay, and surrogate modes share the same challenge/evaluator contract;</li>
+<li>quality, latency, cost, and uncertainty are reported together;</li>
+<li>a claimed improvement survives held-out paired evaluation.</li>
+</ul>
+<h2 id="613-research-opportunities">6.13 Research opportunities</h2>
+<p>LAM can support publishable or internally valuable research questions:</p>
+<ol>
+<li><strong>Interface causality:</strong> which tool representation most improves repair under a fixed model?</li>
+<li><strong>Observation value:</strong> which test outputs and file slices have the highest marginal information?</li>
+<li><strong>Failure recovery:</strong> can typed failure classes reduce repeated invalid actions?</li>
+<li><strong>Reflection value:</strong> when does verbal memory help, and when does it amplify a wrong hypothesis?</li>
+<li><strong>Routing economics:</strong> what behavioral signal best predicts when escalation is worth its cost?</li>
+<li><strong>Patch selection:</strong> can cheap static checks predict which candidate deserves full verification?</li>
+<li><strong>Surrogate fidelity:</strong> which action-level statistics predict useful harness substitution?</li>
+<li><strong>Context compression:</strong> how much evidence can be removed before solve rate degrades?</li>
+<li><strong>Reproducibility:</strong> which provider metadata is necessary to explain run-to-run variance?</li>
+<li><strong>Multi-agent economics:</strong> when does a reviewer or planner repay its coordination overhead?</li>
+<li><strong>Counterfactual replay:</strong> which observations are causally necessary for a successful repair?</li>
+<li><strong>Transfer:</strong> do repair trajectories transfer across repositories or merely memorize patterns?</li>
+</ol>
+<p>Each question should have a preregistered outcome, a control arm, a compatibility key, and a
+held-out evaluation set.</p>
+<h2 id="614-non-goals-and-hard-limitations">6.14 Non-goals and hard limitations</h2>
+<p>LAM must not claim any of the following without new evidence:</p>
+<ul>
+<li>that a finite scenario bank is equivalent to a general LLM;</li>
+<li>that a replay pass is a live-model benchmark result;</li>
+<li>that a scripted response demonstrates reasoning;</li>
+<li>that a local surrogate has the teacher’s capability on unseen tasks;</li>
+<li>that a model’s self-reported confidence is calibrated truth;</li>
+<li>that a coding task was solved merely because the model emitted a plausible patch;</li>
+<li>that a hidden-test result is valid if the oracle leaked into the prompt;</li>
+<li>that a policy improvement is causal when task/model/evaluator keys changed;</li>
+<li>that more turns, more agents, or more tokens are inherently better;</li>
+<li>that an API proxy is free when it forwards requests to a paid provider.</li>
+</ul>
+<p>The closest realistic endpoint is not “a free DeepSeek clone.” It is a <strong>high-fidelity local
+experimental substrate</strong> that gives us the same controllable surfaces around a model: challenges,
+tools, observations, memory, evaluation, replay, and evidence. That is more useful and more
+defensible than pretending the model itself has been reproduced.</p>
+<h2 id="615-final-recommendation">6.15 Final recommendation</h2>
+<p>The recommended order is:</p>
+<ol>
+<li>finish evidence-grade full trajectory capture;</li>
+<li>formalize challenge and evaluator manifests;</li>
+<li>implement state-conditioned replay and fault injection;</li>
+<li>add ReAct-style controller phases and typed test-failure feedback;</li>
+<li>add configurable context, reflection, routing, and candidate policies;</li>
+<li>collect a small, diverse teacher corpus with strict budget and leakage controls;</li>
+<li>build a simple behavioral surrogate before attempting neural distillation;</li>
+<li>add local open-weight inference under the same contract;</li>
+<li>evaluate all improvements on held-out tasks with paired metrics;</li>
+<li>only then expand toward multi-agent search, retrieval, skills, and adaptive strategy.</li>
+</ol>
+<p>This roadmap turns LAM from a useful mock into a progressively more capable <strong>agentic coding
+laboratory</strong>. Its scientific value comes from preserving the boundary between what was observed,
+what was replayed, what was generated synthetically, and what was inferred by a surrogate.</p>
+<h2 id="616-technical-references">6.16 Technical references</h2>
+<ul>
+<li><a href="https://arxiv.org/abs/2210.03629">ReAct: Synergizing Reasoning and Acting in Language Models</a>
+  — interleaved reasoning/action trajectories and environment feedback.</li>
+<li><a href="https://arxiv.org/abs/2405.15793">SWE-agent: Agent-Computer Interfaces Enable Automated Software Engineering</a>
+  — evidence that the agent-computer interface is a first-class performance variable.</li>
+<li><a href="https://arxiv.org/abs/2303.11366">Reflexion: Language Agents with Verbal Reinforcement Learning</a>
+  — verbal feedback and episodic memory without weight updates.</li>
+<li><a href="https://docs.openhands.dev/openhands/usage/agents">OpenHands CodeAct documentation</a>
+  — code execution as an agent action space for software engineering.</li>
+<li><a href="https://github.com/SWE-bench/SWE-bench/blob/main/docs/guides/datasets.md">SWE-bench official dataset guide</a>
+  — task manifests, repository/base-commit metadata, evaluator fields, and benchmark split handling.</li>
+</ul>
+<h2 id="617-internal-benchmark-validation-targets">6.17 Internal benchmark-validation targets</h2>
+<p>For future project validation, LAM should maintain two fixed, stratified internal subsets:</p>
+<table>
+<thead>
+<tr>
+<th>Benchmark family</th>
+<th style="text-align: right;">Internal target</th>
+<th>Approximate 90% confidence interpretation</th>
+<th style="text-align: right;">Current distinct live coverage</th>
+<th style="text-align: right;">Additional target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SWE-bench Verified</td>
+<td style="text-align: right;"><strong>60 tasks</strong></td>
+<td>Approximately ±10 percentage points for a finite population of 500</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;"><strong>56 more</strong></td>
+</tr>
+<tr>
+<td>SWE-bench Pro public-scale subset</td>
+<td style="text-align: right;"><strong>70 tasks</strong></td>
+<td>More conservative than the minimum ~62–63-task sample for a population around 731–800</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;"><strong>66 more</strong></td>
+</tr>
+</tbody>
+</table>
+<p>These are <strong>internal directional-validation targets</strong>, not official leaderboard evaluations. Official
+benchmark claims still require the complete declared benchmark split. The 60-task Verified subset
+and 70-task Pro subset must be selected with a frozen seed and stratified by repository, task
+difficulty, context size, patch size, language or framework where applicable, and expected test
+complexity. The same task IDs, base commits, evaluator versions, and compatibility key must be
+used when comparing harness or policy variants.</p>
+<p>Repeated trajectories on the same task do not increase population coverage. LAM may record many
+DeepSeek, local-model, replay, or counterfactual runs for one task, but confidence in the
+benchmark-wide pass-rate estimate comes primarily from the number and representativeness of
+<strong>distinct tasks</strong>. The current inventory is four distinct real DeepSeek coding challenges and
+39 scripted LAM scenarios; the future objective is to expand the live, evaluator-backed corpus to
+60 Verified tasks and 70 Pro tasks, then use LAM replay for large-scale zero-cost harness
+regression experiments.</p>
+<h1 id="hybrid-real-mocked-swe-verified-challenges-3070-of-16-coding-challenges">Hybrid REAL + MOCKED SWE Verified Challenges (30/70 of 16 coding challenges)</h1>
+<h2 id="purpose-and-operating-rule">Purpose and operating rule</h2>
+<p>The immediate objective is not to claim that LAM reproduces DeepSeek, ChatGPT, or any other
+specific model. The objective is to validate the harness: message construction, tool schemas,
+workspace isolation, file editing, test feedback, retry behavior, termination, replay, accounting,
+and evidence capture. A hybrid corpus is appropriate for that objective because five real runs can
+anchor the behavioral distribution while eleven synthetic runs expand task and failure coverage at
+nearly zero inference cost.</p>
+<p>For a 16-task corpus, the nearest integer implementation of a 30/70 split is:</p>
+<table>
+<thead>
+<tr>
+<th>Corpus segment</th>
+<th style="text-align: right;">Count</th>
+<th>Evidence label</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Real OpenRouter runs</td>
+<td style="text-align: right;"><strong>5</strong></td>
+<td><code>real-openrouter</code></td>
+<td>Behavioral calibration and audit</td>
+</tr>
+<tr>
+<td>LAM-generated traces</td>
+<td style="text-align: right;"><strong>11</strong></td>
+<td><code>synthetic-chatgpt-proxy</code></td>
+<td>Broad harness and replay coverage</td>
+</tr>
+<tr>
+<td>Total</td>
+<td style="text-align: right;"><strong>16</strong></td>
+<td>—</td>
+<td>Fixed internal validation corpus</td>
+</tr>
+</tbody>
+</table>
+<p>Four existing live traces from the LEX lab may be used as a generic prior for tool-use patterns,
+but they must not be counted as SWE-bench Verified calibration unless their task IDs and evaluator
+semantics are actually part of this 16-task manifest. If only four SWE tasks are run live, the
+corpus is 25/75 rather than 30/70; that is acceptable, but it must be recorded honestly.</p>
+<p>The central data-integrity rule is:</p>
+<blockquote>
+<p>Synthetic traces may validate harness behavior and populate replay scenarios, but they must never
+be combined with real pass/fail outcomes and reported as a real model benchmark score.</p>
+</blockquote>
+<h2 id="1-freeze-the-16-task-and-calibration-manifests">1. Freeze the 16-task and calibration manifests</h2>
+<p>Create one immutable manifest before collecting or generating responses. It should reference the
+existing compact fixtures under <code>tools/005_SWE_VERIFIED_REPO/</code>, the four existing tasks if they are
+part of the final 16, and the exact base commit for every repository. Freeze a seed and never
+silently replace a task after results exist.</p>
+<p>Recommended allocation:</p>
+<ol>
+<li>Select five tasks using stratification across repository, difficulty, patch size, number of
+   changed files, and expected test complexity.</li>
+<li>Use four of those five real runs as the calibration set.</li>
+<li>Keep the fifth real run untouched as an audit set. Do not show its trajectory to the synthetic
+   generator; use it only to test whether calibration generalized.</li>
+<li>Generate the eleven synthetic traces from the remaining tasks.</li>
+<li>Use the audit task to measure whether the synthetic behavior profile is directionally plausible.</li>
+</ol>
+<p>The five real tasks should not all be easy one-file fixes. A practical small sample is two easy,
+two medium, and one multi-file or high-context task, with repository diversity preserved. The exact
+selection belongs in <code>calibration_split.json</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="p">{</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w">  </span><span class="nt">"schema_version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"lam.swe-calibration-split/1"</span><span class="p">,</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="nt">"seed"</span><span class="p">:</span><span class="w"> </span><span class="mi">20260825</span><span class="p">,</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span><span class="nt">"total_tasks"</span><span class="p">:</span><span class="w"> </span><span class="mi">16</span><span class="p">,</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">  </span><span class="nt">"real_task_ids"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"task-a"</span><span class="p">,</span><span class="w"> </span><span class="s2">"task-b"</span><span class="p">,</span><span class="w"> </span><span class="s2">"task-c"</span><span class="p">,</span><span class="w"> </span><span class="s2">"task-d"</span><span class="p">,</span><span class="w"> </span><span class="s2">"task-e"</span><span class="p">],</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">  </span><span class="nt">"real_calibration_task_ids"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"task-a"</span><span class="p">,</span><span class="w"> </span><span class="s2">"task-b"</span><span class="p">,</span><span class="w"> </span><span class="s2">"task-c"</span><span class="p">,</span><span class="w"> </span><span class="s2">"task-d"</span><span class="p">],</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">  </span><span class="nt">"real_audit_task_ids"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"task-e"</span><span class="p">],</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">  </span><span class="nt">"synthetic_task_ids"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"task-f"</span><span class="p">,</span><span class="w"> </span><span class="s2">"task-g"</span><span class="p">,</span><span class="w"> </span><span class="s2">"task-h"</span><span class="p">],</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">  </span><span class="nt">"policy"</span><span class="p">:</span><span class="w"> </span><span class="s2">"real traces calibrate behavior; synthetic traces validate harness mechanics"</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="p">}</span>
+</code></pre></div>
+<p>The actual manifest should contain all 16 IDs; the abbreviated example only shows the contract.</p>
+<h2 id="2-what-the-current-live-coding-collector-does">2. What the current live-coding collector does</h2>
+<p><code>tools/002_LLM_API_MOCK/live_coding.py</code> already provides the essential real-run loop:</p>
+<ul>
+<li>reads <code>OPENROUTER_API_KEY</code> from the environment or the configured dotenv file without printing
+  it;</li>
+<li>calls the OpenRouter chat-completions endpoint with a bounded model, call count, token budget,
+  and dollar budget;</li>
+<li>exposes <code>view_file</code>, <code>edit_file</code>, <code>run_command</code>, and <code>list_dir</code> tools;</li>
+<li>copies a task into a temporary workspace;</li>
+<li>records every request, response, tool call, tool result, cassette entry, final diff, verification
+  output, stop reason, call count, and spend;</li>
+<li>emits <code>trajectory.json</code>, <code>cassette.jsonl</code>, and <code>result.json</code> for later replay and analysis.</li>
+</ul>
+<p>The current collector was built for the LEX tasks and expects <code>problem.md</code> plus an already runnable
+workspace. The new SWE fixtures use <code>context.md</code>, <code>challenge.json</code>, and a compact <code>public/</code> source
+slice, so they should not be passed to the current collector unchanged. The collector needs a SWE
+fixture adapter before a run can be called an evaluator-backed SWE run.</p>
+<p>The existing LEX command remains useful for regression testing the collector itself:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>python3<span class="w"> </span>tools/002_LLM_API_MOCK/live_coding.py<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="w">  </span>--challenge-root<span class="w"> </span>lab<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span>--challenge<span class="w"> </span>semver_parser<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">  </span>--dotenv<span class="w"> </span>.env<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">  </span>--model<span class="w"> </span>deepseek/deepseek-v4-flash<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">  </span>--max-calls<span class="w"> </span><span class="m">60</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">  </span>--max-usd<span class="w"> </span><span class="m">0</span>.10
+</code></pre></div>
+<p>The target SWE-capable interface should retain those safety flags and add an explicit fixture
+format, for example:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>python3<span class="w"> </span>tools/002_LLM_API_MOCK/live_coding.py<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span>--fixture-root<span class="w"> </span>tools/005_SWE_VERIFIED_REPO<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="w">  </span>--challenge<span class="w"> </span>astropy__astropy-12907<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="w">  </span>--format<span class="w"> </span>swe-verified<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="w">  </span>--evaluator-root<span class="w"> </span>/var/tmp/lam-swe-evaluator<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="w">  </span>--dotenv<span class="w"> </span>.env<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a><span class="w">  </span>--model<span class="w"> </span>deepseek/deepseek-v4-flash<span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="w">  </span>--max-calls<span class="w"> </span><span class="m">60</span><span class="w"> </span><span class="se">\</span>
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="w">  </span>--max-usd<span class="w"> </span><span class="m">0</span>.10
+</code></pre></div>
+<p>That command is the target runbook, not a claim that the current LEX-only loader already supports
+those flags.</p>
+<h2 id="3-required-swe-fixture-adapter-and-evaluator-separation">3. Required SWE fixture adapter and evaluator separation</h2>
+<p>The adapter must make the public/private boundary mechanical:</p>
+<ol>
+<li>Read <code>challenge.json</code> and <code>context.md</code>.</li>
+<li>Copy only <code>public/</code> into the agent workspace. Never copy the task directory wholesale.</li>
+<li>For a real evaluator-backed run, materialize a repository checkout at <code>base_commit</code> in a
+   separate evaluator workspace. The compact source slice is useful for prompt and harness tests,
+   but it is not a substitute for dependencies and the full test suite.</li>
+<li>Apply <code>private/test.patch</code> only in the evaluator workspace, never in the agent workspace.</li>
+<li>Let the agent inspect and edit its workspace through the existing tool contract.</li>
+<li>When the agent stops, compute its diff and apply that diff to a fresh evaluator checkout.</li>
+<li>Run the recorded <code>FAIL_TO_PASS</code> tests and verify that the recorded <code>PASS_TO_PASS</code> tests do not
+   regress. The evaluator owns the verdict; the model cannot self-report success.</li>
+<li>Store only evaluator status, test names, exit codes, and sanitized output in the LAM record.
+   Never send <code>gold.patch</code> or <code>test.patch</code> to the model, synthetic generator, or replay client.</li>
+</ol>
+<p>The <code>Challenge</code> abstraction should therefore carry at least:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>task_id, repo, base_commit, problem_statement, public_root,
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>evaluator_recipe, fail_to_pass, pass_to_pass, difficulty, provenance
+</code></pre></div>
+<p>The evaluator should be keyed by <code>(repo, base_commit, evaluator_version, dependency_image)</code> so a
+later library upgrade cannot silently invalidate old scores. If a full checkout is too expensive
+for the first harness smoke test, run compact mode and label its result
+<code>compact-no-evaluator</code>; never call that result a SWE-bench pass.</p>
+<h2 id="4-real-calibration-runbook-five-tasks">4. Real calibration runbook: five tasks</h2>
+<p>Run the five real tasks with exactly the same harness configuration intended for LAM replay. Do
+not give the model special prompts, extra tools, hidden tests, or a different timeout. Capture the
+following for every turn:</p>
+<ul>
+<li>canonical request JSON and request hash;</li>
+<li>model name, provider, temperature, token limits, and API response metadata;</li>
+<li>assistant text and every structured tool call;</li>
+<li>tool arguments, tool result, exit status, timeout, and truncation marker;</li>
+<li>workspace snapshot or content-addressed file diff after each edit;</li>
+<li>visible test commands and outputs;</li>
+<li>hidden evaluator commands and verdict, stored outside the model-visible trajectory;</li>
+<li>wall time, token usage, estimated/provider-reported cost, and stop reason;</li>
+<li>harness version, fixture hash, base commit, and evaluator version.</li>
+</ul>
+<p>Use a single bounded budget for the five-task batch. The current collector defaults to 60 calls and
+$0.10, but the budget must be treated as a hard ceiling, not a target. A run that stops because of
+the budget is a valid <code>budget_stop</code> trajectory, not a failed API or a passed coding task.</p>
+<p>After collection, normalize the four calibration trajectories into behavioral atoms:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>observe -&gt; locate -&gt; inspect -&gt; hypothesize -&gt; edit -&gt; test -&gt; diagnose -&gt; repair -&gt; retest -&gt; stop
+</code></pre></div>
+<p>Record distributions rather than copying only successful answers:</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Examples to measure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Exploration</td>
+<td>files listed, files viewed, bytes read before first edit</td>
+</tr>
+<tr>
+<td>Editing</td>
+<td>first-edit turn, files changed, diff size, overwrite frequency</td>
+</tr>
+<tr>
+<td>Verification</td>
+<td>tests per task, test timing, test-before-edit behavior</td>
+</tr>
+<tr>
+<td>Recovery</td>
+<td>failed commands, parse errors, retries, revert attempts</td>
+</tr>
+<tr>
+<td>Termination</td>
+<td>verified stop, premature stop, max-turn stop, budget stop</td>
+</tr>
+<tr>
+<td>Tool protocol</td>
+<td>valid calls, unknown tools, malformed arguments, repeated calls</td>
+</tr>
+<tr>
+<td>Outcome</td>
+<td>pass, partial, fail, evaluator error, environment error</td>
+</tr>
+</tbody>
+</table>
+<p>The fifth real trajectory is an audit: compare it to the profile only after synthetic generation is
+complete. This prevents accidentally tuning the generator to the answer it is later judged against.</p>
+<h2 id="5-generate-the-eleven-synthetic-traces">5. Generate the eleven synthetic traces</h2>
+<p>The synthetic generator uses the SWE challenge context, public source slice, harness tool schema,
+and the <em>summarized behavior profile</em> from the four real calibration runs. It must not receive the
+gold patch, test patch, hidden evaluator output, or the audit trajectory. ChatGPT's coding knowledge
+is used as a teacher for plausible generic-agent behavior, not as evidence of what DeepSeek would
+have done.</p>
+<p>Each generated trace should contain a deliberate mixture of behaviors:</p>
+<ul>
+<li>a competent path that inspects before editing and verifies the change;</li>
+<li>a path with a realistic wrong hypothesis followed by test-driven repair;</li>
+<li>a path that stops early, hits a tool error, times out, or makes an incomplete change;</li>
+<li>malformed or redundant tool calls when testing protocol robustness;</li>
+<li>environment/evaluator failures clearly separated from agent failures.</li>
+</ul>
+<p>Do not force all eleven synthetic tasks to pass. For harness testing, a varied corpus is more useful
+than an artificially perfect corpus. The outcome distribution must be documented as a generation
+policy and must never be presented as an empirical model score.</p>
+<p>Recommended generation sequence:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a>for task in synthetic_tasks:
+<a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a>    public_context = load(task.context.md, task.challenge.json, task.public/)
+<a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a>    behavior_profile = fit_profile(real_calibration_trajectories)
+<a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a>
+<a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a>    draft = teacher_generate(
+<a id="__codelineno-14-6" name="__codelineno-14-6" href="#__codelineno-14-6"></a>        task=public_context,
+<a id="__codelineno-14-7" name="__codelineno-14-7" href="#__codelineno-14-7"></a>        tools=lam_tool_schema,
+<a id="__codelineno-14-8" name="__codelineno-14-8" href="#__codelineno-14-8"></a>        behavior_profile=behavior_profile,
+<a id="__codelineno-14-9" name="__codelineno-14-9" href="#__codelineno-14-9"></a>        constraints=[no_oracle, bounded_turns, valid_trace_schema],
+<a id="__codelineno-14-10" name="__codelineno-14-10" href="#__codelineno-14-10"></a>    )
+<a id="__codelineno-14-11" name="__codelineno-14-11" href="#__codelineno-14-11"></a>
+<a id="__codelineno-14-12" name="__codelineno-14-12" href="#__codelineno-14-12"></a>    trace = execute_in_isolated_workspace(draft, task.public/)
+<a id="__codelineno-14-13" name="__codelineno-14-13" href="#__codelineno-14-13"></a>    outcome = evaluator_or_compact_verifier(trace.diff, task)
+<a id="__codelineno-14-14" name="__codelineno-14-14" href="#__codelineno-14-14"></a>
+<a id="__codelineno-14-15" name="__codelineno-14-15" href="#__codelineno-14-15"></a>    if trace_is_invalid(trace):
+<a id="__codelineno-14-16" name="__codelineno-14-16" href="#__codelineno-14-16"></a>        trace = bounded_repair(trace, reason="schema/tool/workspace violation")
+<a id="__codelineno-14-17" name="__codelineno-14-17" href="#__codelineno-14-17"></a>        outcome = evaluator_or_compact_verifier(trace.diff, task)
+<a id="__codelineno-14-18" name="__codelineno-14-18" href="#__codelineno-14-18"></a>
+<a id="__codelineno-14-19" name="__codelineno-14-19" href="#__codelineno-14-19"></a>    record(
+<a id="__codelineno-14-20" name="__codelineno-14-20" href="#__codelineno-14-20"></a>        trace=trace,
+<a id="__codelineno-14-21" name="__codelineno-14-21" href="#__codelineno-14-21"></a>        outcome=outcome,
+<a id="__codelineno-14-22" name="__codelineno-14-22" href="#__codelineno-14-22"></a>        source_kind="synthetic",
+<a id="__codelineno-14-23" name="__codelineno-14-23" href="#__codelineno-14-23"></a>        teacher_model="chatgpt-proxy",
+<a id="__codelineno-14-24" name="__codelineno-14-24" href="#__codelineno-14-24"></a>        calibrated_from=real_calibration_task_ids,
+<a id="__codelineno-14-25" name="__codelineno-14-25" href="#__codelineno-14-25"></a>        confidence="low-to-medium",
+<a id="__codelineno-14-26" name="__codelineno-14-26" href="#__codelineno-14-26"></a>    )
+</code></pre></div>
+<p><code>execute_in_isolated_workspace</code> is essential. A generated JSON trace must not be trusted merely
+because it parses: the harness must execute its tool calls, enforce path boundaries, capture the
+resulting diff, and replay the same request sequence successfully. If the trace is meant to model a
+live agent, its tool results should be generated by the workspace rather than invented by the
+teacher.</p>
+<h2 id="6-import-synthetic-and-real-traces-into-lam">6. Import synthetic and real traces into LAM</h2>
+<p>LAM should preserve two related artifacts:</p>
+<ol>
+<li><strong>Trajectory artifact</strong> — the complete evidence record, including requests, responses, tools,
+   files, evaluator result, and provenance.</li>
+<li><strong>Replay scenario</strong> — the normalized LAM response sequence or exact cassette used by the mock
+   server. This is the cheap deterministic object consumed by harness regression tests.</li>
+</ol>
+<p>The existing <code>importer.py</code> and scenario schema can be extended to accept the collector's
+<code>trajectory.json</code>. The importer should:</p>
+<ul>
+<li>validate every turn and tool argument against the canonical schema;</li>
+<li>assign a stable scenario ID such as <code>t6-swe-astropy-12907-real</code> or
+  <code>t6-swe-astropy-12907-synthetic</code>;</li>
+<li>preserve <code>source_kind</code>, <code>teacher_model</code>, <code>calibration_set</code>, task ID, base commit, and evaluator
+  version;</li>
+<li>store exact request hashes for cassette replay;</li>
+<li>reject traces containing private patch text, hidden test output, API keys, or workspace paths
+  outside the sandbox;</li>
+<li>write an immutable import manifest recording the source hashes and generator configuration.</li>
+</ul>
+<p>The SQLite record should include at least:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-15-1" name="__codelineno-15-1" href="#__codelineno-15-1"></a>run_id, task_id, scenario_id, source_kind, model, teacher_model,
+<a id="__codelineno-15-2" name="__codelineno-15-2" href="#__codelineno-15-2"></a>base_commit, fixture_sha256, harness_version, evaluator_version,
+<a id="__codelineno-15-3" name="__codelineno-15-3" href="#__codelineno-15-3"></a>turn_count, tool_call_count, passed, stop_reason, cost_usd,
+<a id="__codelineno-15-4" name="__codelineno-15-4" href="#__codelineno-15-4"></a>trajectory_path, cassette_path, created_at
+</code></pre></div>
+<p>Real and synthetic records must remain queryable together but never indistinguishable. Every report
+should be able to answer: “Was this observed from a provider, generated by a teacher, replayed from
+a cassette, or inferred by a profile?”</p>
+<h2 id="7-calibration-checks-before-trusting-the-70-percent">7. Calibration checks before trusting the 70 percent</h2>
+<p>Run these gates before using the populated LAM corpus for harness comparisons:</p>
+<ol>
+<li><strong>Schema gate:</strong> all 16 trajectories validate; all tool calls are executable or explicitly
+   marked as provider errors.</li>
+<li><strong>Isolation gate:</strong> no public artifact contains <code>gold.patch</code>, <code>test.patch</code>, hidden test output,
+   API keys, or an evaluator-only path.</li>
+<li><strong>Replay gate:</strong> every imported cassette reproduces the same response sequence under the same
+   request hashes.</li>
+<li><strong>Workspace gate:</strong> replayed tool calls produce the recorded file diff and cannot escape the
+   task workspace.</li>
+<li><strong>Evaluator gate:</strong> real pass/fail results come only from the separate evaluator workspace.</li>
+<li><strong>Behavioral gate:</strong> compare real and synthetic distributions for tool calls, first-edit turn,
+   retry count, test frequency, stop reasons, and diff size. Large divergence means the generator
+   needs recalibration; it does not mean the synthetic score is wrong in a benchmark sense.</li>
+<li><strong>Audit gate:</strong> evaluate the fifth real task against the profile created from the other four.</li>
+<li><strong>Label gate:</strong> every chart and aggregate separates <code>real-openrouter</code>, <code>synthetic-chatgpt-proxy</code>,
+   <code>replay</code>, and <code>inferred</code> evidence.</li>
+</ol>
+<p>With only four calibration trajectories, use descriptive statistics and bootstrap ranges rather than
+strong claims about population behavior. A useful first target is harness stability: identical
+inputs and cassettes should produce identical tool/evidence outcomes, while controlled fault
+injection should produce the expected recovery or failure classification.</p>
+<h2 id="8-development-plan">8. Development plan</h2>
+<h3 id="phase-a-manifest-and-loader">Phase A — Manifest and loader</h3>
+<p>Add a SWE fixture loader that understands <code>challenge.json</code>, <code>context.md</code>, <code>public/</code>, and provenance.
+Add a frozen 16-task manifest and the five-task real/synthetic split. Add tests proving that copying a
+fixture never copies <code>private/</code>.</p>
+<h3 id="phase-b-evaluator-bridge">Phase B — Evaluator bridge</h3>
+<p>Implement repository checkout caching by <code>(repo, base_commit)</code>, private test-patch application in a
+separate workspace, changed-diff transfer, <code>FAIL_TO_PASS</code>/<code>PASS_TO_PASS</code> execution, timeout limits,
+and structured evaluator results. Make compact mode explicit and non-benchmark-labelled.</p>
+<h3 id="phase-c-collector-hardening">Phase C — Collector hardening</h3>
+<p>Refactor <code>live_coding.py</code> so the LEX and SWE loaders share the same agent loop. Add per-turn
+snapshots, tool-result truncation metadata, evaluator callbacks, run IDs, fixture hashes, and
+provider retry/error classification. Keep the existing call and dollar guards.</p>
+<h3 id="phase-d-five-real-calibration-runs">Phase D — Five real calibration runs</h3>
+<p>Run the selected five tasks with one frozen harness configuration. Inspect the four calibration
+trajectories, preserve the fifth as audit, and import all five with <code>source_kind=real-openrouter</code>.</p>
+<h3 id="phase-e-eleven-synthetic-traces">Phase E — Eleven synthetic traces</h3>
+<p>Fit the behavior profile from four real traces plus the clearly labelled existing LEX prior. Generate
+and execute eleven public-context-only traces. Validate them in isolated workspaces, import them as
+<code>synthetic-chatgpt-proxy</code>, and retain generation prompts/configuration for reproducibility.</p>
+<h3 id="phase-f-lam-replay-and-harness-experiments">Phase F — LAM replay and harness experiments</h3>
+<p>Convert every accepted trajectory into a deterministic scenario/cassette. Run the same harness over
+all 16 scenarios repeatedly while varying only one harness variable at a time: tool schema,
+context compiler, retry policy, test-feedback policy, timeout, or stopping rule. Compare harness
+metrics within source-kind strata and then report the combined corpus only as a synthetic validation
+corpus.</p>
+<h3 id="phase-g-expansion">Phase G — Expansion</h3>
+<p>Once the adapter and evaluator are stable, increase real coverage gradually. The next meaningful
+milestone is not more synthetic answers; it is more distinct evaluator-backed tasks. Synthetic
+traces remain valuable for edge-case and fault-injection coverage, while real traces anchor claims
+about provider behavior.</p>
+<h2 id="recommended-first-execution">Recommended first execution</h2>
+<ol>
+<li>Freeze five real task IDs and eleven synthetic task IDs.</li>
+<li>Extend the collector to load SWE fixtures without exposing <code>private/</code>.</li>
+<li>Run one real task end-to-end and verify the evaluator, trajectory, cassette, and SQLite record.</li>
+<li>Run the remaining four real tasks under the same budget and configuration.</li>
+<li>Generate one synthetic trace and pass it through exactly the same workspace, schema, and replay
+   gates.</li>
+<li>Only after those two paths are identical at the harness boundary, generate the remaining ten
+   synthetic traces and import the full 16-task corpus.</li>
+</ol>
+<p>The result is a useful, low-cost LAM laboratory: five observed provider trajectories for calibration,
+eleven explicitly synthetic trajectories for breadth, and a common executable harness contract for
+both. It is strong evidence about LAM and the harness; it is intentionally not evidence that the
+synthetic traces equal a real DeepSeek benchmark score.</p>
+<h1 id="notes">NOTES</h1>
+<p>Root Cause in Tiers 4–6                 │ Why It Happened                               │ Recommended Improvement / Solution
+  ─────────────────────────────────────────┼───────────────────────────────────────────────┼───────────────────────────────────────────────
+   Tight Turn Budget (6–10 turns)          │ Models used 4–6 turns just exploring multi-   │ Increase call budget to 20–30 turns for Tier
+                                           │ file repos (list_dir, view_file) before       │ 4–6 tasks during live collection.
+                                           │ writing code.                                 │
+   Context Window Saturation (length stop) │ Repeated full file reads bloated the prompt   │ Implement rolling tool message compaction or
+                                           │ context past provider token limits.           │ sub-file viewing (line ranges).
+   Lack of Sub-Agent / Planning Loop       │ Flat single-agent loop tackled complex        │ Inject a 2-phase strategy prompt: Phase 1
+                                           │ architectures reactively without pre-         │ (Plan &amp; locate invariant) → Phase 2 (Targeted
+                                           │ planning.                                     │ patch &amp; pytest).
+   Absence of Test Feedback Loop           │ Models stopped after first attempt or ran out │ Ensure models run pytest -q early in the turn
+                                           │ of calls before seeing test assertion         │ loop to use compiler/assertion errors as
+                                           │ failures.                                     │ guidance.
+   LAM Replay Fidelity                     │ LAM faithfully records and replays whatever   │ No fix needed in LAM itself; LAM's value is
+                                           │ the LLM did (including failures).             │ precisely preserving both gold passes and
+                                           │                                               │ real-world failure modes.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../../../../../../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../../../../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../../../../../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

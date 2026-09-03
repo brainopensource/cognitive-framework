@@ -1,0 +1,12 @@
+{
+  "version": "vg.4",
+  "frameType": "command",
+  "frameId": "frame-bad-2",
+  "command": {
+    "name": "DeleteDatabase",
+    "commandId": "cmd-bad",
+    "idempotencyKey": "idem-bad",
+    "actor": "operator",
+    "payload": {}
+  }
+}

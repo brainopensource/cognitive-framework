@@ -1,7 +1,7 @@
 """EVO-14: read-only concurrent dispatch is correct, not just fast.
 
 Owning contract: ADR-0106 (authorized by the preregistered study in
-`docs/03_execution/prereg/EVO-14-concurrent-readonly-study.md`, full numbers
+`evidence/prereg/EVO-14-concurrent-readonly-study.md`, full numbers
 reproducible via `lab/evo14_concurrent_readonly_study.py`).
 
 This is the permanent regression coverage for the mechanism the study

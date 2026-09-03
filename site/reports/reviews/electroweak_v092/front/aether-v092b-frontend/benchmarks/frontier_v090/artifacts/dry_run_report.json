@@ -1,0 +1,627 @@
+{
+  "non_empirical": true,
+  "rows": [
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:034a07f4ca5773c7a41d7f86337a4aafe242454afa99b6dce92d21123d1148db",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-04",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:87e27b7f28eeae1c34b865bd1265b79d566ab4041158354305156c0bb3d7afd5",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:92293c8d907d0a6d8393235fa97a15300eddfa74ee06b31fdd764dc448f6e739",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-25",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:3c773df3a7c8ae56c79919c8fdce7473c9cefb6e21a806393c5c219755fea036",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:9a22a8345d0ad26ca9828b2232b54803751dcb529c56b9a9575fe92569ab1d63",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-20",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:7e803a0a2b6ab8b91e293351affda0a9f396498f7d6c1e77a1c6a81c6426bb11",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:4cebf56df07b0fd781e88b29b57c71e55d08813557bd65cb7a1091a5aa3f642b",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-10",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:87e27b7f28eeae1c34b865bd1265b79d566ab4041158354305156c0bb3d7afd5",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:177bf8a89239192972a8fb62e5efdc4ebfa620c4d834a37ebac6872e63746bc1",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-08",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:aadbe951db59fa5ba78ea2f6da66940266f0e594a1810db6f4b82fc6641ac783",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:b28636549c3bb41c655c209b96e76abebde29f198d9f64a927e2649a88060223",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-13",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:87e27b7f28eeae1c34b865bd1265b79d566ab4041158354305156c0bb3d7afd5",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:9a22a8345d0ad26ca9828b2232b54803751dcb529c56b9a9575fe92569ab1d63",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-21",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:211a0a5cd64bd78e61c7c0b0275c2315138f5d8b6813ebc6cf160b4db2a04b8b",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:3f6eeee95c35069a2fcdb78e05c81dabed621b04da4cf5a65c419478f988cbba",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-03",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:c8bbd51df31f37142a81fee95cc5e7e3629e6d4caf6f39f56c44f10d6cdb3540",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:2afe97faafe7a6cf9d4cc44991df5b2261eccdfcbcb639885f4600378a3c107a",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-22",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:7e803a0a2b6ab8b91e293351affda0a9f396498f7d6c1e77a1c6a81c6426bb11",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:3f6eeee95c35069a2fcdb78e05c81dabed621b04da4cf5a65c419478f988cbba",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-01",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:87e27b7f28eeae1c34b865bd1265b79d566ab4041158354305156c0bb3d7afd5",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:4cebf56df07b0fd781e88b29b57c71e55d08813557bd65cb7a1091a5aa3f642b",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-11",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:aadbe951db59fa5ba78ea2f6da66940266f0e594a1810db6f4b82fc6641ac783",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:034a07f4ca5773c7a41d7f86337a4aafe242454afa99b6dce92d21123d1148db",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-05",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:aadbe951db59fa5ba78ea2f6da66940266f0e594a1810db6f4b82fc6641ac783",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:7e30a513e0d27efd7eeb766163c483555ed2b0a7752530cca3f61eb1886379e5",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-19",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:f8952b04db9d7ba3a9cf849cfcb1439e9f1aef8582a221155f10c6066664c4bf",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:b76b6127b75c61fe9b2e49b321bd4ff02382d68ddaab6116be176c6b652c0ab8",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-16",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:b06d93b8be833deeef238116435378727e9c8fbb9edbe48856163955a74ea5b2",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:4cebf56df07b0fd781e88b29b57c71e55d08813557bd65cb7a1091a5aa3f642b",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-12",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:c8bbd51df31f37142a81fee95cc5e7e3629e6d4caf6f39f56c44f10d6cdb3540",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:e51a16ed28c5ec87392aec4963462b51107aa1e3771c43c207fb3265f95e47d3",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-26",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:13e47229a7c4572ece6f50a090489edd5a726b593c8fd552a85e0056bc64f137",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:177bf8a89239192972a8fb62e5efdc4ebfa620c4d834a37ebac6872e63746bc1",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-07",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:87e27b7f28eeae1c34b865bd1265b79d566ab4041158354305156c0bb3d7afd5",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:92293c8d907d0a6d8393235fa97a15300eddfa74ee06b31fdd764dc448f6e739",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-24",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:13e47229a7c4572ece6f50a090489edd5a726b593c8fd552a85e0056bc64f137",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:2afe97faafe7a6cf9d4cc44991df5b2261eccdfcbcb639885f4600378a3c107a",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-23",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:211a0a5cd64bd78e61c7c0b0275c2315138f5d8b6813ebc6cf160b4db2a04b8b",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:177bf8a89239192972a8fb62e5efdc4ebfa620c4d834a37ebac6872e63746bc1",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-09",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:c8bbd51df31f37142a81fee95cc5e7e3629e6d4caf6f39f56c44f10d6cdb3540",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:7e30a513e0d27efd7eeb766163c483555ed2b0a7752530cca3f61eb1886379e5",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-18",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:b06d93b8be833deeef238116435378727e9c8fbb9edbe48856163955a74ea5b2",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:b76b6127b75c61fe9b2e49b321bd4ff02382d68ddaab6116be176c6b652c0ab8",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-17",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:f8952b04db9d7ba3a9cf849cfcb1439e9f1aef8582a221155f10c6066664c4bf",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:3f6eeee95c35069a2fcdb78e05c81dabed621b04da4cf5a65c419478f988cbba",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-02",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:aadbe951db59fa5ba78ea2f6da66940266f0e594a1810db6f4b82fc6641ac783",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:034a07f4ca5773c7a41d7f86337a4aafe242454afa99b6dce92d21123d1148db",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-06",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:c8bbd51df31f37142a81fee95cc5e7e3629e6d4caf6f39f56c44f10d6cdb3540",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:e51a16ed28c5ec87392aec4963462b51107aa1e3771c43c207fb3265f95e47d3",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-27",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:3c773df3a7c8ae56c79919c8fdce7473c9cefb6e21a806393c5c219755fea036",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:b28636549c3bb41c655c209b96e76abebde29f198d9f64a927e2649a88060223",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-14",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:aadbe951db59fa5ba78ea2f6da66940266f0e594a1810db6f4b82fc6641ac783",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    },
+    {
+      "failure_taxonomy": [],
+      "framework_digest": "sha256:f571fbfa09b2f4d9fa7019110969507b57aa7c71a1be7253ebd199685049f074",
+      "manifest_digest": "sha256:b28636549c3bb41c655c209b96e76abebde29f198d9f64a927e2649a88060223",
+      "model_requested": "deepseek/deepseek-v4-flash-0731",
+      "model_returned": null,
+      "non_empirical": true,
+      "oracle": {
+        "instrument_valid": true,
+        "result": null
+      },
+      "patch": null,
+      "preregistration_digest": "sha256:94fe16f2fca7f7f33c41741bfc21b80b187279dd3282bb61e0aae7089a473838",
+      "provider": "cassette/fake",
+      "run_id": "v090-15",
+      "schema": "aether.frontier-benchmark/1",
+      "task_digest": "sha256:c8bbd51df31f37142a81fee95cc5e7e3629e6d4caf6f39f56c44f10d6cdb3540",
+      "telemetry": {
+        "reason": "provider_not_called; telemetry_not_available"
+      },
+      "terminal": "DRY_RUN_COMPLETE",
+      "trajectory_digest": null
+    }
+  ],
+  "schema": "aether.frontier-benchmark-report/1"
+}

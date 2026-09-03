@@ -22,13 +22,13 @@ import { performResume } from "../src/composition/resume-session.js";
 import { whyText } from "../src/tui/why-display.js";
 import { HELP_TEXT } from "../src/tui/focus.js";
 import { subscribeRun } from "@vanguard/client-core";
-import type {
-  CorrectionRecord,
-  EventEnvelope,
-  Result,
-  ResolveApprovalRequest,
-  RuntimeClient,
-} from "../src/contract/types.js";
+import type { CorrectionRecord, EventEnvelope, RecordCorrectionRequest, Result as CoreResult } from "../src/contract/types.js";
+// F4 Phase 2: dispatchApproval is now ported to @aether/client, typed against
+// @aether/contracts's ResolveApprovalRequest/CommandReceipt (approvalId is
+// optional there vs. required in this package's own contract/types.js).
+// recordCorrection stays on this package's own CorrectionRecord shape --
+// corrections.ts is deliberately not shimmed yet (see F4 plan).
+import type { CommandReceipt, ResolveApprovalRequest, Result } from "@aether/contracts";
 
 const DIGEST_A = "sha256:1111111111111111111111111111111111111111111111111111111111111111";
 const DIGEST_B = "sha256:2222222222222222222222222222222222222222222222222222222222222222";
@@ -58,18 +58,18 @@ function envelope(kind: string, payload: Record<string, unknown> = {}, extra: Pa
   };
 }
 
-class RecordingClient implements Pick<RuntimeClient, "resolveApproval" | "recordCorrection"> {
+class RecordingClient {
   readonly approvals: ResolveApprovalRequest[] = [];
-  readonly corrections: CorrectionRecord[] = [];
+  readonly corrections: (CorrectionRecord & { proposedPatchDigest?: string; acceptedPatchDigest?: string })[] = [];
 
-  async resolveApproval(request: ResolveApprovalRequest): Promise<Result<{ runId: string; command: "resolve_approval"; status: "requested" }>> {
+  async resolveApproval(request: ResolveApprovalRequest): Promise<Result<CommandReceipt>> {
     this.approvals.push(request);
-    return { ok: true, value: { runId: "run-1", command: "resolve_approval", status: "requested" } };
+    return { ok: true, value: { commandId: "cmd-resolve-approval", runId: "run-1", status: "completed" } };
   }
 
-  async recordCorrection(record: CorrectionRecord): Promise<Result<{ runId: string; command: "record_correction"; status: "requested" }>> {
-    this.corrections.push(record);
-    return { ok: true, value: { runId: "run-1", command: "record_correction", status: "requested" } };
+  async recordCorrection(request: RecordCorrectionRequest): Promise<Result<CommandReceipt>> {
+    this.corrections.push(request.correction);
+    return { ok: true, value: { commandId: `rec-${request.correction.correctionId}`, runId: request.correction.runId, status: "completed" } };
   }
 }
 
@@ -240,7 +240,9 @@ test("interactive approval without challenge digests does not fabricate a signat
   assert.deepEqual(client.approvals, [{ approvalId: "appr-1", decision: "approve" }]);
 });
 
-test("TUI presentation consumes @vanguard/client-core", () => {
+test("TUI presentation consumes @aether/client", () => {
+  // F4 Phase 5: the CLI's runtime SDK dependency moved from
+  // @vanguard/client-core to @aether/client across the whole call surface.
   let dir = dirname(fileURLToPath(import.meta.url));
   while (!existsSync(join(dir, "package.json"))) dir = dirname(dir);
   const files = [
@@ -255,7 +257,7 @@ test("TUI presentation consumes @vanguard/client-core", () => {
   ];
   for (const rel of files) {
     const source = readFileSync(join(dir, rel), "utf8");
-    assert.match(source, /@vanguard\/client-core/, rel);
+    assert.match(source, /@aether\/client/, rel);
   }
 });
 
@@ -270,6 +272,7 @@ test("correction keys map onto VG-04 reason codes including security and archite
 test("correction capture persists a typed CorrectionRecord through RuntimeClient", async () => {
   const client = new RecordingClient();
   const result = await captureCorrection(client, {
+    runId: "run-1",
     episodeId: "episode-1",
     proposedPatchDigest: DIGEST_A,
     acceptedPatchDigest: DIGEST_B,
@@ -278,11 +281,11 @@ test("correction capture persists a typed CorrectionRecord through RuntimeClient
   assert.equal(result.ok, true);
   assert.equal(client.corrections.length, 1);
   const record = client.corrections[0]!;
+  assert.equal(record.runId, "run-1");
   assert.equal(record.episodeId, "episode-1");
-  assert.deepEqual(record.reasonCodes, ["functional_defect"]);
-  assert.equal(record.magnitude, "minor");
-  assert.equal(record.scope, "repo");
-  assert.equal(record.correctingPrincipalRole, "user");
+  assert.equal(record.reasonCode, "functional_defect");
+  assert.equal(record.scope, "local");
+  assert.equal(record.author, "operator");
   assert.equal(record.proposedPatchDigest, DIGEST_A);
   assert.equal(record.acceptedPatchDigest, DIGEST_B);
 });
@@ -290,14 +293,14 @@ test("correction capture persists a typed CorrectionRecord through RuntimeClient
 test("style corrections stay local-scoped so they cannot become general competence", async () => {
   const client = new RecordingClient();
   const result = await captureCorrection(client, {
+    runId: "run-1",
     episodeId: "episode-1",
     proposedPatchDigest: DIGEST_A,
     acceptedPatchDigest: DIGEST_A,
     key: "s",
   });
   assert.equal(result.ok, true);
-  assert.equal(client.corrections[0]?.reasonCodes[0], "style");
-  assert.equal(client.corrections[0]?.scope, "repo");
+  assert.equal(client.corrections[0]?.reasonCode, "style");
 });
 
 test("unified diff renderer tags additions and deletions without emitting raw CSI in the model", () => {

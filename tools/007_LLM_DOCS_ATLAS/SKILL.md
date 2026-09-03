@@ -15,11 +15,12 @@ description: >
 - After editing docs or code: check drift/consolidation and knowledge health.
 
 ## Golden order (token-efficient)
-1. `lda doctor --json` — index health. If `index_healthy: false`: run `lda index` (or `lda index --rebuild` after mass deletions).
-2. `lda context "<task>" --budget 6000 --json` — bounded packet: canonical docs, symbols, tests, provenance (HEAD-bound).
-3. `lda brief "<task>" --json` — when you want obligations + falsifiers + markdown narrative.
-4. Implement. Then `lda drift --json` and `lda consolidate --json` to see what your change left stale.
-5. `lda tests <touched-files> --json` — targeted falsifiers for what you touched.
+1. `lda identity --json` — which repo/branch/commit; is the index bound to it (FRESH/STALE)?
+2. `lda doctor --json` — index health. If `index_healthy: false`: run `lda index` (or `lda index --rebuild` after mass deletions).
+3. `lda context "<task>" --budget 6000 --json` — bounded packet: canonical docs, symbols, tests, provenance (HEAD-bound). Check `omitted` to know what was left out.
+4. `lda brief "<task>" --json` — when you want obligations + falsifiers + markdown narrative.
+5. Implement. Then `lda diff --json` (or `--since <sha>`), `lda drift --json`, `lda consolidate --json` to see what your change left stale.
+6. `lda tests <touched-files> --json` — targeted falsifiers for what you touched.
 
 ## Strategies
 - `ppr_submodular` (default): graph diffusion — best for architectural/graph tasks.

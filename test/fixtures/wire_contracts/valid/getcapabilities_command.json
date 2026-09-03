@@ -1,0 +1,12 @@
+{
+  "version": "vg.4",
+  "frameType": "command",
+  "frameId": "frame-011",
+  "command": {
+    "name": "GetCapabilities",
+    "commandId": "cmd-011",
+    "idempotencyKey": "idem-011",
+    "actor": "operator",
+    "payload": {}
+  }
+}

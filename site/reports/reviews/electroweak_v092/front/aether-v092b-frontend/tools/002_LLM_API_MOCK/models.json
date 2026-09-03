@@ -1,0 +1,4 @@
+{
+  "$ref": "../../vanguard/packages/adapters/models/models_registry.json",
+  "note": "Authoritative model tiers are loaded from the referenced Vanguard registry; this file is not a model catalog."
+}

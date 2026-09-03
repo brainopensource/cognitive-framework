@@ -2,7 +2,7 @@
 """EVO-14: the preregistered concurrent-read-only study.
 
 Preregistration (frozen before this was run):
-`docs/03_execution/prereg/EVO-14-concurrent-readonly-study.md`.
+`evidence/prereg/EVO-14-concurrent-readonly-study.md`.
 
 Runs the frozen workload -- 12 provably-independent `fs.read` operations,
 each with a realistic injected 20ms round-trip latency -- through the real
@@ -149,7 +149,7 @@ def main() -> int:
 
     report = {
         "study": "EVO-14-concurrent-readonly",
-        "preregistration": "docs/03_execution/prereg/EVO-14-concurrent-readonly-study.md",
+        "preregistration": "evidence/prereg/EVO-14-concurrent-readonly-study.md",
         "workload": {"n_operations": N_FILES, "injected_latency_ms": INJECTED_LATENCY_S * 1000,
                      "repeats_per_arm": REPEATS, "max_workers": MAX_WORKERS},
         "sequential": sequential,

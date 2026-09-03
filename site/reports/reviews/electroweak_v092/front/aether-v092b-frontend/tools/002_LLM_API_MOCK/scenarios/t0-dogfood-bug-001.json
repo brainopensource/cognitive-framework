@@ -1,0 +1,62 @@
+{
+  "atoms_used": [
+    "view_file",
+    "edit_file",
+    "run_command"
+  ],
+  "created_from": "benchmarks/swe_bench::t0-dogfood-bug-001",
+  "id": "t0-dogfood-bug-001",
+  "tier": 1,
+  "title": "Dogfood single-file calculator repair",
+  "turns": [
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"path\": \"src/calculator.py\"}",
+            "name": "view_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 0
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"content\": \"def calculate(A, B):\\n    return (A + B) * B\\n\", \"path\": \"src/calculator.py\"}",
+            "name": "edit_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 1
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"command\": \"python3 -m unittest -q\"}",
+            "name": "run_command"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 2
+    },
+    {
+      "content": "Task completed and verified for Dogfood single-file calculator repair (t0-dogfood-bug-001).",
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "tool_messages_seen": 3
+    }
+  ],
+  "workspace": {
+    "src/calculator.py": "def calculate(A, B):\n    return (A + B) * A\n",
+    "test_calculator.py": "import unittest\nfrom src.calculator import calculate\n\nclass TestCalculator(unittest.TestCase):\n    def test_calc(self):\n        self.assertEqual(calculate(2, 3), 15)\n\nif __name__ == '__main__': unittest.main()\n"
+  }
+}

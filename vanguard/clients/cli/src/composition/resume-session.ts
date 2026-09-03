@@ -2,7 +2,7 @@ import {
   buildResumeRequest,
   describeResumeFailure,
   type RuntimeClient,
-} from "@vanguard/client-core";
+} from "@aether/client";
 
 export type ResumeOutcome =
   | { ok: true; runId: string }
@@ -17,7 +17,7 @@ export async function performResume(
   if (!built.ok) {
     return { ok: false, code: built.error.code, message: built.error.message };
   }
-  const resumed = await client.requestResume(built.value);
+  const resumed = await client.requestResume(built.value.runId, built.value.options);
   if (!resumed.ok) {
     return {
       ok: false,
@@ -25,5 +25,5 @@ export async function performResume(
       message: `${resumed.error.code}: ${describeResumeFailure(resumed)}`,
     };
   }
-  return { ok: true, runId: resumed.value.runId };
+  return { ok: true, runId: resumed.value.runId ?? built.value.runId };
 }

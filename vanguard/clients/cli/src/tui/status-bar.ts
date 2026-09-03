@@ -1,5 +1,6 @@
 import { sourceLabel } from "./theme/tokens.js";
-import { selectSessionChrome, type RunViewModel, type StreamSource } from "@vanguard/client-core";
+import { selectSessionChrome, type RunViewModel } from "@aether/client";
+import type { StreamSource } from "@aether/contracts";
 
 export function formatStatusBar(input: {
   source: string;

@@ -1,0 +1,1 @@
+{"strategy": "adaptive", "bands": {"cheap": ["anthropic/claude-haiku-4.5"], "mid": ["anthropic/claude-sonnet-4.5"]}, "roles": {"classifier": "deterministic", "worker": "mid", "summarizer": "cheap"}, "escalation": {"enabled": false}}

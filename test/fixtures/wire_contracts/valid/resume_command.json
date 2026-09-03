@@ -1,0 +1,16 @@
+{
+  "version": "vg.4",
+  "frameType": "command",
+  "frameId": "frame-007",
+  "command": {
+    "name": "Resume",
+    "commandId": "cmd-007",
+    "idempotencyKey": "idem-007",
+    "runId": "run-001",
+    "actor": "operator",
+    "payload": {
+      "checkpointId": "chk-001",
+      "expectedSeq": 15
+    }
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/mhf/harness_manifest.schema.json",
+  "$comment": "Declarative harness manifest. compose() freezes this into FrozenHarness (SPEC §2.3).",
+  "title": "HarnessManifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["api", "id", "plugins"],
+  "properties": {
+    "api": { "type": "string", "const": "mhf.harness/1" },
+    "id": { "type": "string", "minLength": 1 },
+    "plugins": { "$ref": "#/$defs/PluginBindings" },
+    "system_prompt": { "type": ["string", "null"] },
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "budget": { "$ref": "effect_request.schema.json#/$defs/Reservation" },
+    "approval_policy": { "type": ["string", "null"] },
+    "undeletable": { "type": "boolean", "default": false }
+  },
+  "$defs": {
+    "PluginRef": {
+      "title": "PluginRef",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ref"],
+      "properties": {
+        "ref": { "type": "string", "minLength": 1 },
+        "config": { "type": "object" }
+      }
+    },
+    "ModelRoute": {
+      "title": "ModelRoute",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tier", "provider", "model"],
+      "properties": {
+        "tier": { "type": "integer", "minimum": 1 },
+        "provider": { "type": "string", "minLength": 1 },
+        "model": { "type": "string", "minLength": 1 },
+        "escalate_on": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "PluginBindings": {
+      "title": "PluginBindings",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "planner": { "$ref": "#/$defs/PluginRef" },
+        "context": { "$ref": "#/$defs/PluginRef" },
+        "memory": { "$ref": "#/$defs/PluginRef" },
+        "toolkits": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/PluginRef" }
+        },
+        "evaluation": { "$ref": "#/$defs/PluginRef" },
+        "completion": { "$ref": "#/$defs/PluginRef" },
+        "model_routes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ModelRoute" }
+        }
+      }
+    },
+    "FrozenHarness": {
+      "title": "FrozenHarness",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["api", "id", "digest", "resolved_refs", "budget"],
+      "properties": {
+        "api": { "type": "string", "const": "mhf.frozen-harness/1" },
+        "id": { "type": "string", "minLength": 1 },
+        "digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "resolved_refs": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "budget": { "$ref": "effect_request.schema.json#/$defs/Reservation" },
+        "capability_ceiling": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "undeletable": { "type": "boolean" }
+      }
+    }
+  }
+}

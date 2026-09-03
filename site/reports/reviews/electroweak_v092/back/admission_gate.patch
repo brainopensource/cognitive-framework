@@ -1,0 +1,77 @@
+diff --git a/vanguard/packages/agency/episode/admission_gate.py b/vanguard/packages/agency/episode/admission_gate.py
+index edd0b11..8ba3893 100644
+--- a/vanguard/packages/agency/episode/admission_gate.py
++++ b/vanguard/packages/agency/episode/admission_gate.py
+@@ -21,13 +21,20 @@ class AdmissionVerdict:
+ 
+ @dataclass(frozen=True, slots=True)
+ class VerificationReceipt:
+-    """Minimal local-verification identity bound to the current workspace."""
++    """Minimal local-verification identity bound to the current workspace.
++
++    The three binding fields (`workspace_digest`, `task_digest`,
++    `composition_digest`) are what make a receipt *this* task's evidence rather
++    than merely some passing test run. A receipt missing a binding the gate is
++    asked to check is treated as unbound, never as satisfied.
++    """
+ 
+     exit_code: int
+     executed_test_count: int
+     workspace_digest: str
+     task_digest: str = ""
+     receipt_digest: str = ""
++    composition_digest: str = ""
+ 
+     @property
+     def passed(self) -> bool:
+@@ -49,6 +56,8 @@ class AdmissionGate:
+         verification_passed: bool | None = None,
+         verification: VerificationReceipt | Mapping[str, Any] | None = None,
+         current_workspace_digest: str | None = None,
++        current_task_digest: str | None = None,
++        current_composition_digest: str | None = None,
+         task_requirements_satisfied: bool | None = None,
+         model_requested_finish: bool = True,
+         inspected_files: Sequence[str] = (),
+@@ -98,6 +107,8 @@ class AdmissionGate:
+                 workspace_digest=str(receipt.get("workspace_digest", receipt.get("workspaceDigest", ""))),
+                 task_digest=str(receipt.get("task_digest", receipt.get("taskDigest", ""))),
+                 receipt_digest=str(receipt.get("receipt_digest", receipt.get("receiptDigest", ""))),
++                composition_digest=str(
++                    receipt.get("composition_digest", receipt.get("compositionDigest", ""))),
+             )
+         elif receipt is None and verification_passed is not None:
+             # Legacy callers may provide only a boolean; it is deliberately
+@@ -113,4 +124,32 @@ class AdmissionGate:
+         if current_workspace_digest is None or receipt.workspace_digest != current_workspace_digest:
+             return AdmissionVerdict(False, "VERIFICATION_STALE")
+ 
++        # Subject binding. A green test run proves nothing about *this* task
++        # unless it is tied to this task and this composition. Without these
++        # checks a receipt earned by an earlier task in the same workspace
++        # would silently admit completion of the current one.
++        if current_task_digest is not None:
++            if not receipt.task_digest:
++                return AdmissionVerdict(
++                    False, "VERIFICATION_UNBOUND_TASK",
++                    rejection_feedback=(
++                        "ADMISSION GATE REJECTION: the verification receipt carries no task "
++                        "binding, so it cannot be attributed to this task. Re-run verification."
++                    ),
++                )
++            if receipt.task_digest != current_task_digest:
++                return AdmissionVerdict(
++                    False, "VERIFICATION_FOREIGN_TASK",
++                    rejection_feedback=(
++                        "ADMISSION GATE REJECTION: the verification receipt belongs to a "
++                        "different task. Re-run verification for the current task."
++                    ),
++                )
++
++        if current_composition_digest is not None:
++            if not receipt.composition_digest:
++                return AdmissionVerdict(False, "VERIFICATION_UNBOUND_COMPOSITION")
++            if receipt.composition_digest != current_composition_digest:
++                return AdmissionVerdict(False, "VERIFICATION_FOREIGN_COMPOSITION")
++
+         return AdmissionVerdict(admissible=True, reason="completion_admissible")

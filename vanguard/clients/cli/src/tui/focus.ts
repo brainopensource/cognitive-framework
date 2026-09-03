@@ -1,4 +1,4 @@
-import type { Result } from "@vanguard/client-core";
+import type { Result } from "@aether/contracts";
 
 export type TuiMode = "prompt" | "approval" | "correct" | "help" | "run" | "resume" | "command_palette" | "timeline" | "inspector";
 

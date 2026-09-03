@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Text } from "ink";
 import { colorizeUnifiedDiff } from "../diff.js";
-import type { PendingApproval } from "@vanguard/client-core";
+import type { PendingApproval } from "@aether/client";
 
 /** Display-only: keyboard routing lives in RunTui, not in unused callbacks. */
 export function ApprovalModal({ approval }: { approval: PendingApproval }) {

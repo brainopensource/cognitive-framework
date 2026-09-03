@@ -1,0 +1,14 @@
+id: bench_single_2K_tier-1_calculator
+name: Single-File Formula Repair
+scope: single
+context_bracket: 2K
+tier: tier-1
+difficulty: 1
+timeout_seconds: 35
+entrypoint: src/main.py
+eval_type: oracle
+tags:
+- math
+- single_file
+- formula
+metadata: {}

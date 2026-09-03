@@ -10,12 +10,14 @@
     "build:browser": "node scripts/build-browser.mjs",
     "dev": "npm run build:browser && node scripts/serve-browser.mjs",
     "preview": "npm run build:browser && node scripts/serve-browser.mjs",
-    "prebuild": "npm run build --prefix ../client-core --silent",
+    "prebuild": "npm run build --prefix ../client --silent && npm run build --prefix ../client-core --silent",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "pretypecheck": "npm run build --prefix ../client-core --silent",
+    "pretypecheck": "npm run build --prefix ../client --silent && npm run build --prefix ../client-core --silent",
     "test": "npm run build --silent && node --test dist/test/*.test.js"
   },
   "dependencies": {
+    "@aether/client": "*",
+    "@aether/contracts": "*",
     "@vanguard/client-core": "file:../client-core",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

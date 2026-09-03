@@ -1,7 +1,7 @@
 import {
   windowTranscript,
   type TranscriptRow,
-} from "@vanguard/client-core";
+} from "@aether/client";
 
 export { windowTranscript, type TranscriptRow };
 

@@ -1,1 +1,1 @@
-export * from "@vanguard/client-core/adapters/scenario.js";
+export * from "@aether/client/transports/scenario.js";

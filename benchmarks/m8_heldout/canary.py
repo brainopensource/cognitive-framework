@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import argparse
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping
@@ -24,6 +25,7 @@ __all__ = [
     "digest_of",
     "verify_canary",
     "load_canary",
+    "preflight_check",
 ]
 
 CANARY_SCHEMA = "aether.m8-canary/1"
@@ -143,3 +145,44 @@ def load_canary(path: str | Path | None = None) -> Mapping[str, Any]:
             + "; ".join(verification.failures)
         )
     return manifest
+
+
+def preflight_check(path: str | Path | None = None,
+                    preregistration_path: str | Path | None = None) -> CanaryVerification:
+    """Run the non-empirical canary gate and report every mismatch structurally."""
+    manifest_path = Path(path) if path else Path(__file__).resolve().parent / "artifacts" / "canary_manifest.json"
+    prereg_path = Path(preregistration_path) if preregistration_path else Path(__file__).resolve().parent / "artifacts" / "preregistration.json"
+    failures: list[str] = []
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        verification = verify_canary(manifest)
+        failures.extend(verification.failures)
+        prereg = json.loads(prereg_path.read_text(encoding="utf-8"))
+        if manifest.get("workload_digest") != prereg.get("workload_digest"):
+            failures.append("WORKLOAD_DIGEST_MISMATCH")
+        tasks = manifest.get("tasks", [])
+        if len(tasks) != 10:
+            failures.append("CANARY_TASK_COUNT_NOT_TEN")
+        payloads = [task.get("payload_digest") for task in tasks if isinstance(task, Mapping)]
+        if len(payloads) != len(tasks) or len(set(payloads)) != len(payloads):
+            failures.append("PAYLOAD_DIGESTS_UNSTABLE")
+        if failures:
+            return CanaryVerification(False, failures[0], tuple(failures))
+        return CanaryVerification(True)
+    except (OSError, ValueError, TypeError, json.JSONDecodeError) as exc:
+        return CanaryVerification(False, "PREFLIGHT_INPUT_ERROR", (f"PREFLIGHT_INPUT_ERROR:{type(exc).__name__}",))
+
+
+def _main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--preflight", action="store_true")
+    args = parser.parse_args()
+    if not args.preflight:
+        parser.error("only --preflight is supported")
+    result = preflight_check()
+    print(json.dumps({"ok": result.ok, "reason": result.reason, "failures": list(result.failures)}))
+    return 0 if result.ok else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(_main())

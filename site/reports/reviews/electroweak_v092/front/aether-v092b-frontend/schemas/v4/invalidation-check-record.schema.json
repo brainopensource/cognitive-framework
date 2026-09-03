@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/v4/invalidation-check-record.schema.json",
+  "$comment": "Owning section: 04 §10.3. Mutable check state, held outside the content-addressed artifact per CT-53.",
+  "title": "InvalidationCheckRecord",
+  "type": "object",
+  "required": ["artifact", "conditionIndex", "lastChecked", "outcome"],
+  "properties": {
+    "artifact": { "type": "string" },
+    "conditionIndex": { "type": "integer", "minimum": 0 },
+    "lastChecked": { "$ref": "primitives.schema.json#/$defs/Timestamp" },
+    "outcome": { "enum": ["holds", "violated", "inconclusive"] },
+    "checkedBy": { "$ref": "primitives.schema.json#/$defs/EvaluatorId" }
+  },
+  "additionalProperties": false
+}

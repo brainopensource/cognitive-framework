@@ -1,0 +1,153 @@
+{
+  "id": "t3-connection-pool",
+  "tier": 3,
+  "title": "SWE-Verified: Thread-safe database connection pool with health checks and lease timeouts",
+  "workspace": {
+    "pool/__init__.py": "\"\"\"Connection pool package.\"\"\"\nfrom .connection import Connection, Lease\nfrom .health import HealthPolicy\nfrom .manager import ConnectionPool, PoolExhaustedError, ReservationTicket\n\n__all__ = [\n    \"Connection\",\n    \"Lease\",\n    \"HealthPolicy\",\n    \"ConnectionPool\",\n    \"PoolExhaustedError\",\n    \"ReservationTicket\",\n]\n",
+    "pool/connection.py": "\"\"\"Pooled connection handle.\"\"\"\n\n\nclass Connection:\n    def __init__(self, conn_id):\n        self.conn_id = conn_id\n        self.healthy = True\n        self.last_heartbeat = 0.0\n\n    def __repr__(self):\n        return \"Connection({!r})\".format(self.conn_id)\n\n\nclass Lease:\n    \"\"\"Exclusive checkout of a pooled connection.\"\"\"\n\n    def __init__(self, connection):\n        self.connection = connection\n\n    @property\n    def conn_id(self):\n        return self.connection.conn_id\n",
+    "pool/health.py": "\"\"\"Heartbeat staleness policy for pooled connections.\"\"\"\n\n\nclass HealthPolicy:\n    def __init__(self, idle_ttl=30.0):\n        if idle_ttl <= 0:\n            raise ValueError(\"idle_ttl must be positive\")\n        self.idle_ttl = float(idle_ttl)\n\n    def is_stale(self, connection, now):\n        return connection.last_heartbeat + self.idle_ttl <= now\n",
+    "pool/manager.py": "\"\"\"Fair connection pool with health-based culling.\"\"\"\nfrom .connection import Connection, Lease\n\n\nclass PoolExhaustedError(RuntimeError):\n    pass\n\n\nclass ReservationTicket:\n    def __init__(self):\n        self.lease = None\n        self.fulfilled = False\n\n\nclass ConnectionPool:\n    def __init__(self, size, health_policy=None, clock=None):\n        if size <= 0:\n            raise ValueError(\"size must be positive\")\n        self.size = int(size)\n        self._health_policy = health_policy\n        self._clock = clock or (lambda: 0.0)\n        self._connections = [Connection(i) for i in range(self.size)]\n        self._free = list(self._connections)\n        self._waiters = []           # pending ReservationTickets\n        self.fulfillment_log = []    # order in which tickets were fulfilled\n\n    def acquire(self):\n        \"\"\"Check out a connection immediately or raise PoolExhaustedError.\"\"\"\n        if not self._free:\n            raise PoolExhaustedError(\"no idle connections available\")\n        return Lease(self._free.pop(0))\n\n    def reserve(self):\n        \"\"\"Queue a waiter ticket to be fulfilled by a future release().\"\"\"\n        ticket = ReservationTicket()\n        self._waiters.append(ticket)\n        return ticket\n\n    def release(self, lease_or_connection):\n        conn = getattr(lease_or_connection, \"connection\", lease_or_connection)\n        while self._waiters:\n            # BENCHMARK BUG: pop() takes the LAST waiter (LIFO unfairness).\n            ticket = self._waiters.pop()\n            ticket.lease = Lease(conn)\n            ticket.fulfilled = True\n            self.fulfillment_log.append(id(ticket))\n            return\n        self._free.append(conn)\n\n    def cull(self, now=None):\n        \"\"\"Evict free connections with stale heartbeats; returns count.\"\"\"\n        # BENCHMARK BUG: maintenance hook missing entirely.\n        raise NotImplementedError\n\n    @property\n    def available(self):\n        return len(self._free)\n",
+    "problem.md": "# Challenge: Thread-Safe Connection Pool Health Leases\n\nThe connection pool has two defects:\n\n1. `manager.py`: `release()` fulfills queued reservation tickets in\n   last-in-first-out order instead of FIFO fairness.\n2. `manager.py`: there is no `cull()` maintenance hook that evicts free\n   connections whose health heartbeat went stale.\n\nFix both defects. Do not modify the test suite.\n",
+    "tests/test_connection_pool.py": "import os\nimport sys\n\nimport pytest\n\nsys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))\n\nfrom pool import ConnectionPool, HealthPolicy, PoolExhaustedError\n\n\ndef test_acquire_timeout_fair_queue():\n    pool = ConnectionPool(size=2)\n    lease1 = pool.acquire()\n    lease2 = pool.acquire()\n    with pytest.raises(PoolExhaustedError):\n        pool.acquire()\n\n    ticket3 = pool.reserve()\n    ticket4 = pool.reserve()\n\n    pool.release(lease1)\n    assert ticket3.fulfilled and not ticket4.fulfilled\n    pool.release(lease2)\n    assert ticket4.fulfilled\n    # FIFO fairness: ticket3 must be fulfilled strictly before ticket4.\n    assert pool.fulfillment_log == [id(ticket3), id(ticket4)]\n\n\ndef test_idle_connection_heartbeat_cull():\n    t = [100.0]\n    policy = HealthPolicy(idle_ttl=30.0)\n    pool = ConnectionPool(size=3, health_policy=policy, clock=lambda: t[0])\n\n    leases = [pool.acquire() for _ in range(3)]\n    for conn in pool._connections:\n        conn.last_heartbeat = t[0]\n    pool.release(leases[0])\n    pool.release(leases[1])  # two idle connections, one still leased\n\n    t[0] += 60.0  # heartbeats of the idle connections went stale\n    culled = pool.cull()\n    assert culled == 2\n    assert pool.available == 0\n\n\ndef test_basic_acquire_release():\n    pool = ConnectionPool(size=1)\n    lease = pool.acquire()\n    assert lease.conn_id == 0\n    with pytest.raises(PoolExhaustedError):\n        pool.acquire()\n    pool.release(lease)\n    assert pool.available == 1\n\n\ndef test_max_capacity_block():\n    pool = ConnectionPool(size=2, health_policy=HealthPolicy(idle_ttl=10.0))\n    held = [pool.acquire() for _ in range(2)]\n    with pytest.raises(PoolExhaustedError):\n        pool.acquire()\n    pool.release(held.pop())\n    assert pool.available == 1\n",
+    "todo.md": "# Workspace Task Plan (todo.md)\n\n- [ ] [T-001] Investigate codebase and plan implementation for: # Challenge: Thread-Safe Connection Pool Health Leases\n- [ ] [T-002] Implement core solution and verify with tests\n- [ ] [T-003] Run full hermetic verification and AST audit\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "list_dir",
+            "arguments": "{\"path\": \".\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 1,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"pool/manager.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"tests/test_connection_pool.py\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 2,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"pool/health.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"pool/connection.py\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 3,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"content\": \"    def release(self, lease_or_connection):\\n        conn = getattr(lease_or_connection, \\\"connection\\\", lease_or_connection)\\n        while self._waiters:\\n            # FIFO fairness: fulfill the earliest queued waiter first.\\n            ticket = self._waiters.pop(0)\\n            ticket.lease = Lease(conn)\\n            ticket.fulfilled = True\\n            self.fulfillment_log.append(id(ticket))\\n            return\\n        self._free.append(conn)\\n\\n    def cull(self, now=None):\\n        \\\"\\\"\\\"Evict free connections with stale heartbeats; returns count.\\\"\\\"\\\"\\n        if now is None:\\n            now = self._clock()\\n        if self._health_policy is None:\\n            return 0\\n        still_free = []\\n        culled = 0\\n        for conn in self._free:\\n            if self._health_policy.is_stale(conn, now):\\n                culled += 1\\n            else:\\n                still_free.append(conn)\\n        self._free = still_free\\n        return culled\\n\", \"path\": \"pool/manager.py\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 4,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python -m pytest tests/ -q\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 5,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python3 -m pytest tests/ -q\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 6,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"pool/manager.py\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 7,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"content\": \"\\\"\\\"\\\"Fair connection pool with health-based culling.\\\"\\\"\\\"\\nfrom .connection import Connection, Lease\\n\\n\\nclass PoolExhaustedError(RuntimeError):\\n    pass\\n\\n\\nclass ReservationTicket:\\n    def __init__(self):\\n        self.lease = None\\n        self.fulfilled = False\\n\\n\\nclass ConnectionPool:\\n    def __init__(self, size, health_policy=None, clock=None):\\n        if size <= 0:\\n            raise ValueError(\\\"size must be positive\\\")\\n        self.size = int(size)\\n        self._health_policy = health_policy\\n        self._clock = clock or (lambda: 0.0)\\n        self._connections = [Connection(i) for i in range(self.size)]\\n        self._free = list(self._connections)\\n        self._waiters = []           # pending ReservationTickets\\n        self.fulfillment_log = []    # order in which tickets were fulfilled\\n\\n    def acquire(self):\\n        \\\"\\\"\\\"Check out a connection immediately or raise PoolExhaustedError.\\\"\\\"\\\"\\n        if not self._free:\\n            raise PoolExhaustedError(\\\"no idle connections available\\\")\\n        return Lease(self._free.pop(0))\\n\\n    def reserve(self):\\n        \\\"\\\"\\\"Queue a waiter ticket to be fulfilled by a future release().\\\"\\\"\\\"\\n        ticket = ReservationTicket()\\n        self._waiters.append(ticket)\\n        return ticket\\n\\n    def release(self, lease_or_connection):\\n        conn = getattr(lease_or_connection, \\\"connection\\\", lease_or_connection)\\n        while self._waiters:\\n            # FIFO fairness: fulfill the earliest queued waiter first.\\n            ticket = self._waiters.pop(0)\\n            ticket.lease = Lease(conn)\\n            ticket.fulfilled = True\\n            self.fulfillment_log.append(id(ticket))\\n            return\\n        self._free.append(conn)\\n\\n    def cull(self, now=None):\\n        \\\"\\\"\\\"Evict free connections with stale heartbeats; returns count.\\\"\\\"\\\"\\n        if now is None:\\n            now = self._clock()\\n        if self._health_policy is None:\\n            return 0\\n        still_free = []\\n        culled = 0\\n        for conn in self._free:\\n            if self._health_policy.is_stale(conn, now):\\n                culled += 1\\n            else:\\n                still_free.append(conn)\\n        self._free = still_free\\n        return culled\\n\\n    @property\\n    def available(self):\\n        return len(self._free)\\n\", \"path\": \"pool/manager.py\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 8,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"python3 -m pytest tests/ -q\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 9,
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "content": "Both defects fixed in `pool/manager.py`:\n\n1. **FIFO fairness**: `release()` now uses `self._waiters.pop(0)` instead of `pop()`, so the earliest queued reservation ticket is fulfilled first.\n2. **`cull()` hook**: implemented to evict free connections whose heartbeat is stale per `HealthPolicy.is_stale`, defaulting `now` from the pool's clock, returning the number culled (and a no-op returning 0 when no health policy is set).\n\nAll 4 tests pass."
+    }
+  ]
+}

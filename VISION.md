@@ -39,12 +39,12 @@ measure, or schedule this Vision.
 | # | Layer | Documents | Owns |
 |---|---|---|---|
 | 0 | **Vision (constitutional)** | `VISION.md` | Architectural identity, ontology, product principles, non-negotiable direction |
-| 1 | **Law (normative)** | [`docs/SPEC.md`](docs/SPEC.md) + [`docs/01_law/`](docs/01_law/) | Current system requirements, invariants, RFC-2119 obligations that realize the Vision |
-| 2 | **Decisions (binding)** | [`docs/02_decisions/`](docs/02_decisions/) | Local architectural decisions; may refine implementation, may **not** contradict locked Vision |
-| 3 | **Contracts & protocols** | [`docs/05_contracts/`](docs/05_contracts/), [`docs/06_protocols/`](docs/06_protocols/), `schemas/` | Wire-level realization of the law |
-| 4 | **Sequencing** | [`docs/03_execution/milestones.md`](docs/03_execution/milestones.md), [`backlog.md`](docs/03_execution/backlog.md) | Delivery gates and stable work packages |
-| 5 | **Authorization** | [`docs/03_execution/sprint_active.md`](docs/03_execution/sprint_active.md) | The only board that authorizes current work; `sprint_upcoming.md` is staging only |
-| 6 | **Communication** | `README.md`, [`docs/04_architecture/`](docs/04_architecture/), [`docs/07_engineering/`](docs/07_engineering/), [`docs/08_theory/`](docs/08_theory/) | Current state and orientation; introduces **no** independent architecture |
+| 1 | **Law (normative)** | [`docs/SPEC.md`](docs/SPEC.md) | Current system requirements, invariants, RFC-2119 obligations that realize the Vision |
+| 2 | **Decisions (binding)** | [`docs/decisions.md`](docs/decisions.md) | Local architectural decisions; may refine implementation, may **not** contradict locked Vision |
+| 3 | **Architecture & product** | [`docs/architecture/`](docs/architecture/), [`docs/backend/`](docs/backend/), [`docs/frontend/`](docs/frontend/), [`docs/product/`](docs/product/), `schemas/` | Wire-level and component realization of the law |
+| 4 | **Sequencing** | [`docs/execution/milestones.md`](docs/execution/milestones.md), [`backlog.md`](docs/execution/backlog.md) | Delivery gates and stable work packages |
+| 5 | **Authorization** | [`docs/execution/active.md`](docs/execution/active.md) | The only board that authorizes current work; `sprint_upcoming.md` is staging only |
+| 6 | **Communication** | `README.md`, [`docs/theory/`](docs/theory/), [`docs/research/`](docs/research/), [`docs/reports/`](docs/reports/) | Current state and orientation; introduces **no** independent architecture |
 
 Three rules follow from this ladder:
 

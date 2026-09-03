@@ -1,0 +1,62 @@
+{
+  "challengeId": "bench_multi_64K_tier-5_immutable_trie",
+  "tier": "tier-5",
+  "scope": "multi",
+  "contextBracket": "64K",
+  "preset": "vg-code-max",
+  "model": "lam-mock",
+  "mode": "lam",
+  "status": "PASS",
+  "attribution": "PASS",
+  "turns": 10,
+  "promptTokens": 1500,
+  "completionTokens": 400,
+  "totalTokens": 1900,
+  "costUsd": 0.0,
+  "durationSeconds": 0.1,
+  "changedFiles": [
+    "src/trie.py"
+  ],
+  "diffPatch": "--- a/trie.py\n+++ b/trie.py\n@@ -1,2 +1,17 @@\n+from dataclasses import dataclass, field\n+from typing import Dict\n+\n+@dataclass(frozen=True)\n class TrieNode:\n-    pass\n+    is_end: bool = False\n+    children: Dict[str, \"TrieNode\"] = field(default_factory=dict)\n+\n+def insert(root: TrieNode, word: str) -> TrieNode:\n+    if not word:\n+        return TrieNode(is_end=True, children=root.children)\n+    ch = word[0]\n+    child = root.children.get(ch, TrieNode())\n+    new_child = insert(child, word[1:])\n+    new_children = dict(root.children)\n+    new_children[ch] = new_child\n+    return TrieNode(is_end=root.is_end, children=new_children)\n",
+  "oracle": {
+    "passed": true,
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "test_trie (__main__.TestTrie.test_trie) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.003s\n\nOK\n",
+    "durationSeconds": 0.039,
+    "error": null,
+    "assertionCount": 1,
+    "failingAssertions": []
+  },
+  "aiJudgeScore": null,
+  "diagnosis": "All falsifiers green",
+  "metadata": {
+    "id": "bench_multi_64K_tier-5_immutable_trie",
+    "name": "Persistent Immutable Prefix Trie",
+    "scope": "multi",
+    "context_bracket": "64K",
+    "tier": "tier-5",
+    "difficulty": 5,
+    "timeout_seconds": 35,
+    "entrypoint": "src/main.py",
+    "eval_type": "oracle",
+    "tags": [
+      "data_structures",
+      "immutability",
+      "persistent_trees"
+    ],
+    "metadata": {},
+    "cli_args": {
+      "command": "run",
+      "preset": "vg-code-max",
+      "mode": "lam",
+      "model": null,
+      "tier": "all",
+      "single": null,
+      "max_turns": 10,
+      "max_requests": 500,
+      "budget": 0.1,
+      "keep_scratch": false
+    }
+  }
+}

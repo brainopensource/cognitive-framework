@@ -1,11 +1,5 @@
-import {
-  dispatchApproval,
-  OperatorSigner,
-  type PendingApproval,
-  type Result,
-  type CommandReceipt,
-  type RuntimeClient,
-} from "@vanguard/client-core";
+import { dispatchApproval, OperatorSigner, type PendingApproval, type RuntimeClient } from "@aether/client";
+import type { CommandReceipt, Result } from "@aether/contracts";
 
 function hasChallengeDigests(approval: PendingApproval): boolean {
   return Boolean(approval.argsDigest && approval.descriptorDigest && approval.expiresAt);

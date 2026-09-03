@@ -50,9 +50,18 @@ class RouteDecision:
     route: str
     reason: str
     failure: str | None = None
+    trigger: str = ""
+    parent_episode_id: str | None = None
+    parent_state_digest: str | None = None
+    budget_snapshot: Mapping[str, int] = field(default_factory=dict)
+    provider_usage_status: str = "unknown"
 
     def to_dict(self) -> dict[str, str | None]:
-        return {"route": self.route, "reason": self.reason, "failure": self.failure}
+        return {"route": self.route, "reason": self.reason, "failure": self.failure,
+                "trigger": self.trigger, "parentEpisodeId": self.parent_episode_id,
+                "parentStateDigest": self.parent_state_digest,
+                "budgetSnapshot": dict(self.budget_snapshot),
+                "providerUsageStatus": self.provider_usage_status}
 
 
 @dataclass(frozen=True, slots=True)
@@ -96,6 +105,7 @@ class CodingTaskState:
     change_surface: tuple[str, ...] = ()
     todo_items: tuple[TodoItem, ...] = ()
     route_decisions: tuple[RouteDecision, ...] = ()
+    recovery_state: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         if not self.objective.strip():
@@ -120,6 +130,8 @@ class CodingTaskState:
             raise TypeError("todo_items must contain TodoItem values")
         if not all(isinstance(v, RouteDecision) for v in self.route_decisions):
             raise TypeError("route_decisions must contain RouteDecision values")
+        if not isinstance(self.recovery_state, Mapping):
+            raise TypeError("recovery_state must be a mapping")
 
     def to_canonical_dict(self) -> dict[str, Any]:
         return {
@@ -146,6 +158,7 @@ class CodingTaskState:
                            "status": item.status, "receiptDigest": item.receipt_digest}
                           for item in self.todo_items],
             "routeDecisions": [item.to_dict() for item in self.route_decisions],
+            "recoveryState": dict(self.recovery_state),
         }
 
     def digest(self) -> str:
@@ -169,7 +182,12 @@ class CodingTaskState:
                          for item in raw.get("deadEnds", ()) if isinstance(item, Mapping))
         todos = tuple(TodoItem(str(item["todoId"]), str(item["description"]), str(item.get("status", "pending")), item.get("receiptDigest"))
                       for item in raw.get("todoItems", ()) if isinstance(item, Mapping))
-        routes = tuple(RouteDecision(str(item["route"]), str(item["reason"]), item.get("failure"))
+        routes = tuple(RouteDecision(
+            str(item["route"]), str(item["reason"]), item.get("failure"),
+            str(item.get("trigger", "")), item.get("parentEpisodeId"),
+            item.get("parentStateDigest"),
+            dict(item.get("budgetSnapshot", {}) or {}),
+            str(item.get("providerUsageStatus", "unknown")))
                        for item in raw.get("routeDecisions", ()) if isinstance(item, Mapping))
         return cls(
             objective=str(raw.get("objective", "")),
@@ -193,6 +211,7 @@ class CodingTaskState:
             change_surface=strings("change_surface", "changeSurface"),
             todo_items=todos,
             route_decisions=routes,
+            recovery_state=dict(raw.get("recoveryState", raw.get("recovery_state", {})) or {}),
         )
 
     def transition_todo(self, todo_id: str, status: str, *, receipt_digest: str | None = None,
@@ -222,7 +241,8 @@ def fold_task_state(events: Sequence[Any], *, objective: str = "") -> CodingTask
     what a fresh process should tell the next planner. Unknown payload fields
     are ignored so older runs remain readable.
     """
-    state: dict[str, Any] = {"objective": objective or "", "remainingBudgets": {}}
+    state: dict[str, Any] = {"objective": objective or "", "remainingBudgets": {},
+                             "recoveryState": {}}
     inspected: set[str] = set()
     modified: set[str] = set()
     settled: set[str] = set()
@@ -234,7 +254,8 @@ def fold_task_state(events: Sequence[Any], *, objective: str = "") -> CodingTask
         payload = getattr(event, "payload", {})
         if not isinstance(payload, Mapping):
             continue
-        kind = str(payload.get("kind") or getattr(event, "mhf_kind", ""))
+        kind = str(payload.get("kind") or getattr(event, "mhf_kind", "")
+                   or getattr(event, "kind", ""))
         if isinstance(payload.get("plan"), Sequence) and not isinstance(payload.get("plan"), (str, bytes)):
             state["plan"] = [str(item) for item in payload["plan"]]
         if isinstance(payload.get("nextAction"), str):
@@ -306,6 +327,8 @@ def fold_task_state(events: Sequence[Any], *, objective: str = "") -> CodingTask
             last_verification = dict(payload)
         if kind in {"EpisodeCompleted", "RunCompleted"}:
             state["nextAction"] = None
+        if kind in {"RecoveryStateUpdated", "EpisodeStateChanged"} and isinstance(payload.get("recoveryState"), Mapping):
+            state["recoveryState"] = dict(payload["recoveryState"])
 
     state["inspectedFiles"] = sorted(inspected)
     state["modifiedFiles"] = sorted(modified)

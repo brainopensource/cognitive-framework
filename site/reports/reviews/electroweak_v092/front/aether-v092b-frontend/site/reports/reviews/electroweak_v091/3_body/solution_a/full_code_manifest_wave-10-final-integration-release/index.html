@@ -1,0 +1,5714 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="General Event-Sourced Agentic Computation Framework & Substrate">
+      
+      
+        <meta name="author" content="AETHER Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Full Code Manifest — Wave 10: Integração Final, Migração e Release do Coding Harness - AETHER Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#full-code-manifest-wave-10-integracao-final-migracao-e-release-do-coding-harness" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../../../.." title="AETHER Documentation" class="md-header__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AETHER Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Full Code Manifest — Wave 10: Integração Final, Migração e Release do Coding Harness
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../../../.." title="AETHER Documentation" class="md-nav__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AETHER Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Law & Norms
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Law & Norms
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../SPEC/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Specification (SPEC)
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions Index
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Overview
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../architecture/boundaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Boundaries
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../architecture/workflows/end-to-end-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-to-End Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../architecture/workflows/system-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Bootstrap
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/agency/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agency
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/application-interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Interfaces
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/assurance-evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Assurance & Evaluation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/causal-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Causal State
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/composition-extensibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Composition & Extensibility
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/delegation-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation & Topology
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kernel
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/memory-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory & Learning
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/runtime-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/workflows/request-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Request Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/workflows/agent-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/workflows/event-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/workflows/delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/workflows/recovery-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recovery & Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/compose-an-agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compose an Agent
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/add-pack-or-tool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Pack or Tool
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/add-adapter-or-provider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Adapter or Provider
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/operate-runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operate Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/run-and-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Run and Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schemas
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Port Contracts
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/api-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Reference
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/manifests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifests
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/artifacts-memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Artifacts & Memory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../../../../frontend/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product PRDs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Product PRDs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/FRONTEND_PRD_PLACEMENT_MANIFEST/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Placement Manifest
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/PRD_AETHER_CLI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD CLI
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/PRD_AETHER_DESKTOP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Desktop
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/PRD_AETHER_LAB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Lab
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/PRD_AETHER_TUI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD TUI
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/PRD_FRONTEND_PLATFORM/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Platform
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Execution
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../execution/active/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../execution/milestones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Milestones
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../execution/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & Reports
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & Reports
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../theory/agent-substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../benchmark/main/BENCHMARK_V090_FULL.MD" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmark Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/AI/openrouter_llm_models_suggested/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Models
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_2" id="__nav_9_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coding Harness
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Coding Harness
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/ARCHON_gemini_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Archon Gemini Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/DEKAS_claude_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dekas Claude Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/LLM_RESPONSE_WRANGLER/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Response Wrangler
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/LLM_benchmarkings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Benchmarking
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_2308B_gm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research 2308B GM
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_Harness_Builder_Framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Builder Framework
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_META_COGNITIVE_ENGINEERING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Cognitive Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_META_COGNITIVE_ENGINEERING_briefing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Cognitive Briefing
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_META_FRAMEWORK_2408/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Framework 2408
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_THEORETICAL_SYNTHESIS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theoretical Synthesis
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_deepseek-harness_algorithms-ideas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deepseek Harness Algorithms
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_harness_agentic_coding_builder_research_and_framework_B/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agentic Coding Builder Framework B
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_higgs_2308/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Higgs 2308
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_metaframework_2508_improved/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metaframework 2508
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/VANGUARD_FRONTIER_SWE_BENCH_AND_AGENTIC_METAFRAMEWORK_REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontier SWE Bench & Metaframework Report
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/VANGUARD_VS_LIM_INSIGHTS_SOTS_TECHNIQUES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vanguard vs LIM Insights
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/future_improvements_sota_harness_2808/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Future Improvements SOTA Harness
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/proposal_glm_harness_BETA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proposal GLM Harness Beta
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/proposal_hy3_improved/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proposal HY3 Improved
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/research_agentic_runtime_systems_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agentic Runtime Systems Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/research_harness_agentic_systems_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Agentic Systems Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/suggested_LIM_improvements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Suggested LIM Improvements
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/vanguard_body_detailed/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vanguard Body Detailed
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_3" id="__nav_9_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/frontend/AETHER_FRONTEND_MASTERPLAN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Masterplan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/frontend/frontend_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--experiment"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/frontend/frontend_prototype_beta_gem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Prototype Beta Gem
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--experiment"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/frontend/integration_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Plan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0-finalidade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0. Finalidade
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-dependencia-total" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Dependência total
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-estrutura-final" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Estrutura final
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-feature-flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Feature flags
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-presets-finais" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Presets finais
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-composition-factory" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Composition factory
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-startup-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Startup validation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-migracao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Migração
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-compatibilidade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Compatibilidade
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-commit-plan" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Commit plan
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-test-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Test matrix
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-minimal-command-runbook" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Minimal command runbook
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-observability-schema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Observability schema
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-slos-iniciais" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. SLOs iniciais
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-rollback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Rollback
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-stop-ship-conditions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Stop-ship conditions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-acceptance-levels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. Acceptance levels
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="16. Acceptance levels">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#alpha" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Alpha
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#beta" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Beta
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#production" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Production
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sota-claim" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SOTA claim
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#17-ownership-map" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17. Ownership map
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#18-checklist-final-por-arquivo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18. Checklist final por arquivo
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#19-definition-of-done-final" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        19. Definition of Done final
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="full-code-manifest-wave-10-integracao-final-migracao-e-release-do-coding-harness">Full Code Manifest — Wave 10: Integração Final, Migração e Release do Coding Harness</h1>
+<h2 id="0-finalidade">0. Finalidade</h2>
+<p>Este manifest é o índice executável que une Waves 1–9, resolve dependências, define commits/feature flags, testes mínimos, rollback, observabilidade e critérios honestos para declarar o harness pronto. Ele não repete todo o código; referencia os manifests que contêm os diffs completos.</p>
+<h2 id="1-dependencia-total">1. Dependência total</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>W1 classify/plan/presets
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>  ├─ W2 intelligence/context
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>  └─ W3 verify/recovery/routing
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>        ↓
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>W4 coordinator/Vanguard integration
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>        ↓
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>W5 workspace/tools/verification
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>        ↓
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>W6 durable state/checkpoint/resume
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>        ├─ W7 reflex/branch/mutation/capsules
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>        ├─ W8 LDA/LAM/benchmark qualification
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>        └─ W9 ToolScript/specialists/reviewer
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>                         ↓
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>                    W10 release
+</code></pre></div>
+<h2 id="2-estrutura-final">2. Estrutura final</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>packs/code-default/
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>├── coding_max/
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>│   ├── __init__.py
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>│   ├── contracts.py
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>│   ├── classifier.py
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>│   ├── planning.py
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>│   ├── intelligence.py
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>│   ├── intelligence_router.py
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>│   ├── lda_adapter.py
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>│   ├── context.py
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>│   ├── test_selector.py
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>│   ├── verification.py
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>│   ├── verification_pipeline.py
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>│   ├── recovery.py
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>│   ├── routing.py
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>│   ├── workflow.py
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>│   ├── coordinator.py
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>│   ├── state_bridge.py
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>│   ├── durable_state.py
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>│   ├── durable_store.py
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>│   ├── resume.py
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>│   ├── workspace_tx.py
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>│   ├── tool_results.py
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>│   ├── reflex.py
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>│   ├── branch_search.py
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>│   ├── mutation.py
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>│   ├── capsules.py
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>│   ├── toolscript.py
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>│   ├── toolscript_broker.py
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>│   ├── specialists.py
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>│   ├── reviewer.py
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>│   └── distill.py
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>├── presets/
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>│   ├── coding-fast.yaml
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>│   ├── coding-balanced.yaml
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>│   └── coding-max.yaml
+<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>└── toolkits/
+<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>    ├── fs_toolkit.py
+<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>    ├── ast_patch.py
+<a id="__codelineno-1-40" name="__codelineno-1-40" href="#__codelineno-1-40"></a>    └── terminal_runner.py
+<a id="__codelineno-1-41" name="__codelineno-1-41" href="#__codelineno-1-41"></a>benchmarks/coding_max/
+<a id="__codelineno-1-42" name="__codelineno-1-42" href="#__codelineno-1-42"></a>├── task_protocol.py
+<a id="__codelineno-1-43" name="__codelineno-1-43" href="#__codelineno-1-43"></a>├── preflight.py
+<a id="__codelineno-1-44" name="__codelineno-1-44" href="#__codelineno-1-44"></a>└── runner.py
+<a id="__codelineno-1-45" name="__codelineno-1-45" href="#__codelineno-1-45"></a>test/packs/code_default/
+<a id="__codelineno-1-46" name="__codelineno-1-46" href="#__codelineno-1-46"></a>├── test_coding_max.py
+<a id="__codelineno-1-47" name="__codelineno-1-47" href="#__codelineno-1-47"></a>├── test_coding_max_coordinator.py
+<a id="__codelineno-1-48" name="__codelineno-1-48" href="#__codelineno-1-48"></a>├── test_workspace_tools.py
+<a id="__codelineno-1-49" name="__codelineno-1-49" href="#__codelineno-1-49"></a>├── test_durable_coding_state.py
+<a id="__codelineno-1-50" name="__codelineno-1-50" href="#__codelineno-1-50"></a>├── test_metamorphosis.py
+<a id="__codelineno-1-51" name="__codelineno-1-51" href="#__codelineno-1-51"></a>└── test_toolscript_specialists.py
+</code></pre></div>
+<h2 id="3-feature-flags">3. Feature flags</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># packs/code-default/coding_max/features.py</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="k">class</span><span class="w"> </span><span class="nc">CodingFeatures</span><span class="p">:</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">progressive_context</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="n">durable_state</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="n">lda</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    <span class="n">toolscript</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="n">specialists</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>    <span class="n">conditional_reviewer</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>    <span class="n">branch_search</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>    <span class="n">mutation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>    <span class="n">capsules</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>    <span class="nd">@classmethod</span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">from_mapping</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">raw</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]):</span>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>        <span class="n">unknown</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__dataclass_fields__</span><span class="p">)</span>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>        <span class="k">if</span> <span class="n">unknown</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unknown coding feature flags: </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">unknown</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">bool</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">raw</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+</code></pre></div>
+<h2 id="4-presets-finais">4. Presets finais</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># coding-fast</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nt">features</span><span class="p">:</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">  </span><span class="nt">progressive_context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">  </span><span class="nt">durable_state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">  </span><span class="nt">lda</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">  </span><span class="nt">toolscript</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">  </span><span class="nt">specialists</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">  </span><span class="nt">conditional_reviewer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">  </span><span class="nt">branch_search</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">  </span><span class="nt">mutation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">  </span><span class="nt">capsules</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="c1"># coding-balanced</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="nt">features</span><span class="p">:</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="w">  </span><span class="nt">progressive_context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="w">  </span><span class="nt">durable_state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="w">  </span><span class="nt">lda</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">optional</span>
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a><span class="w">  </span><span class="nt">toolscript</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="w">  </span><span class="nt">specialists</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="w">  </span><span class="nt">conditional_reviewer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a><span class="w">  </span><span class="nt">branch_search</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a><span class="w">  </span><span class="nt">mutation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a><span class="w">  </span><span class="nt">capsules</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>
+<a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a><span class="c1"># coding-max</span>
+<a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a><span class="nt">features</span><span class="p">:</span>
+<a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a><span class="w">  </span><span class="nt">progressive_context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a><span class="w">  </span><span class="nt">durable_state</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a><span class="w">  </span><span class="nt">lda</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">optional</span>
+<a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a><span class="w">  </span><span class="nt">toolscript</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-3-31" name="__codelineno-3-31" href="#__codelineno-3-31"></a><span class="w">  </span><span class="nt">specialists</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-3-32" name="__codelineno-3-32" href="#__codelineno-3-32"></a><span class="w">  </span><span class="nt">conditional_reviewer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<a id="__codelineno-3-33" name="__codelineno-3-33" href="#__codelineno-3-33"></a><span class="w">  </span><span class="nt">branch_search</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">conditional</span>
+<a id="__codelineno-3-34" name="__codelineno-3-34" href="#__codelineno-3-34"></a><span class="w">  </span><span class="nt">mutation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">experiment_only</span>
+<a id="__codelineno-3-35" name="__codelineno-3-35" href="#__codelineno-3-35"></a><span class="w">  </span><span class="nt">capsules</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">governed_only</span>
+</code></pre></div>
+<h2 id="5-composition-factory">5. Composition factory</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># packs/code-default/coding_max/factory.py</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">.features</span><span class="w"> </span><span class="kn">import</span> <span class="n">CodingFeatures</span>
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="k">class</span><span class="w"> </span><span class="nc">CodingMaxComponents</span><span class="p">:</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>    <span class="n">coordinator</span><span class="p">:</span> <span class="nb">object</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>    <span class="n">intelligence</span><span class="p">:</span> <span class="nb">object</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>    <span class="n">verifier</span><span class="p">:</span> <span class="nb">object</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>    <span class="n">resumer</span><span class="p">:</span> <span class="nb">object</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>    <span class="n">optional</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">]</span>
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a>
+<a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="k">def</span><span class="w"> </span><span class="nf">build_coding_max</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">ports</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">routes</span><span class="p">,</span> <span class="n">preset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CodingMaxComponents</span><span class="p">:</span>
+<a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a>    <span class="n">features</span> <span class="o">=</span> <span class="n">CodingFeatures</span><span class="o">.</span><span class="n">from_mapping</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"features"</span><span class="p">,</span> <span class="p">{}))</span>
+<a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>    <span class="n">native</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">"native_intelligence_factory"</span><span class="p">](</span><span class="n">ports</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
+<a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a>    <span class="n">enriched</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a>    <span class="k">if</span> <span class="n">features</span><span class="o">.</span><span class="n">lda</span><span class="p">:</span>
+<a id="__codelineno-4-21" name="__codelineno-4-21" href="#__codelineno-4-21"></a>        <span class="n">enriched</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">"lda_factory"</span><span class="p">](</span><span class="n">ports</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
+<a id="__codelineno-4-22" name="__codelineno-4-22" href="#__codelineno-4-22"></a>    <span class="n">intelligence</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">"intelligence_router"</span><span class="p">](</span><span class="n">native</span><span class="p">,</span> <span class="n">enriched</span><span class="p">)</span>
+<a id="__codelineno-4-23" name="__codelineno-4-23" href="#__codelineno-4-23"></a>    <span class="n">verifier</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">"verifier_factory"</span><span class="p">](</span><span class="n">ports</span><span class="o">.</span><span class="n">workspace</span><span class="p">)</span>
+<a id="__codelineno-4-24" name="__codelineno-4-24" href="#__codelineno-4-24"></a>    <span class="n">durable</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">"durable_store_factory"</span><span class="p">](</span><span class="n">ports</span><span class="o">.</span><span class="n">artifacts</span><span class="p">,</span> <span class="n">ports</span><span class="o">.</span><span class="n">blobs</span><span class="p">)</span>
+<a id="__codelineno-4-25" name="__codelineno-4-25" href="#__codelineno-4-25"></a>    <span class="n">resumer</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">"resumer_factory"</span><span class="p">](</span><span class="n">ports</span><span class="o">.</span><span class="n">checkpoints</span><span class="p">,</span> <span class="n">durable</span><span class="o">.</span><span class="n">load</span><span class="p">,</span> <span class="n">ports</span><span class="o">.</span><span class="n">workspace</span><span class="o">.</span><span class="n">digest</span><span class="p">)</span>
+<a id="__codelineno-4-26" name="__codelineno-4-26" href="#__codelineno-4-26"></a>    <span class="n">workflow</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">"workflow_factory"</span><span class="p">](</span><span class="n">routes</span><span class="p">)</span>
+<a id="__codelineno-4-27" name="__codelineno-4-27" href="#__codelineno-4-27"></a>    <span class="n">coordinator</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">"coordinator_factory"</span><span class="p">](</span>
+<a id="__codelineno-4-28" name="__codelineno-4-28" href="#__codelineno-4-28"></a>        <span class="n">workflow</span><span class="o">=</span><span class="n">workflow</span><span class="p">,</span> <span class="n">session_factory</span><span class="o">=</span><span class="n">ports</span><span class="o">.</span><span class="n">session_factory</span><span class="p">,</span>
+<a id="__codelineno-4-29" name="__codelineno-4-29" href="#__codelineno-4-29"></a>        <span class="n">workspace</span><span class="o">=</span><span class="n">ports</span><span class="o">.</span><span class="n">workspace</span><span class="p">,</span> <span class="n">state_sink</span><span class="o">=</span><span class="n">durable</span><span class="p">,</span> <span class="n">verifier</span><span class="o">=</span><span class="n">verifier</span><span class="o">.</span><span class="n">verify</span><span class="p">,</span>
+<a id="__codelineno-4-30" name="__codelineno-4-30" href="#__codelineno-4-30"></a>    <span class="p">)</span>
+<a id="__codelineno-4-31" name="__codelineno-4-31" href="#__codelineno-4-31"></a>    <span class="n">optional</span> <span class="o">=</span> <span class="p">{}</span>
+<a id="__codelineno-4-32" name="__codelineno-4-32" href="#__codelineno-4-32"></a>    <span class="k">if</span> <span class="n">features</span><span class="o">.</span><span class="n">toolscript</span><span class="p">:</span> <span class="n">optional</span><span class="p">[</span><span class="s2">"toolscript"</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">"toolscript_factory"</span><span class="p">](</span><span class="n">intelligence</span><span class="p">)</span>
+<a id="__codelineno-4-33" name="__codelineno-4-33" href="#__codelineno-4-33"></a>    <span class="k">if</span> <span class="n">features</span><span class="o">.</span><span class="n">specialists</span><span class="p">:</span> <span class="n">optional</span><span class="p">[</span><span class="s2">"specialists"</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">"specialist_factory"</span><span class="p">](</span><span class="n">ports</span><span class="o">.</span><span class="n">models</span><span class="p">)</span>
+<a id="__codelineno-4-34" name="__codelineno-4-34" href="#__codelineno-4-34"></a>    <span class="k">if</span> <span class="n">features</span><span class="o">.</span><span class="n">conditional_reviewer</span><span class="p">:</span> <span class="n">optional</span><span class="p">[</span><span class="s2">"reviewer"</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">"reviewer_factory"</span><span class="p">](</span><span class="n">ports</span><span class="o">.</span><span class="n">models</span><span class="p">)</span>
+<a id="__codelineno-4-35" name="__codelineno-4-35" href="#__codelineno-4-35"></a>    <span class="k">if</span> <span class="n">features</span><span class="o">.</span><span class="n">branch_search</span><span class="p">:</span> <span class="n">optional</span><span class="p">[</span><span class="s2">"branch_search"</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">"branch_factory"</span><span class="p">](</span><span class="n">ports</span><span class="o">.</span><span class="n">child_runtime</span><span class="p">)</span>
+<a id="__codelineno-4-36" name="__codelineno-4-36" href="#__codelineno-4-36"></a>    <span class="k">if</span> <span class="n">features</span><span class="o">.</span><span class="n">mutation</span><span class="p">:</span> <span class="n">optional</span><span class="p">[</span><span class="s2">"mutator"</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">"mutator_factory"</span><span class="p">]()</span>
+<a id="__codelineno-4-37" name="__codelineno-4-37" href="#__codelineno-4-37"></a>    <span class="k">if</span> <span class="n">features</span><span class="o">.</span><span class="n">capsules</span><span class="p">:</span> <span class="n">optional</span><span class="p">[</span><span class="s2">"capsules"</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span><span class="p">[</span><span class="s2">"capsule_registry_factory"</span><span class="p">]()</span>
+<a id="__codelineno-4-38" name="__codelineno-4-38" href="#__codelineno-4-38"></a>    <span class="k">return</span> <span class="n">CodingMaxComponents</span><span class="p">(</span><span class="n">coordinator</span><span class="p">,</span> <span class="n">intelligence</span><span class="p">,</span> <span class="n">verifier</span><span class="p">,</span> <span class="n">resumer</span><span class="p">,</span> <span class="n">optional</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="6-startup-validation">6. Startup validation</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="k">def</span><span class="w"> </span><span class="nf">validate_startup</span><span class="p">(</span><span class="n">components</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">preset</span><span class="p">,</span> <span class="n">profile</span><span class="p">):</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="k">if</span> <span class="n">components</span><span class="o">.</span><span class="n">coordinator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"coordinator unavailable"</span><span class="p">)</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    <span class="k">if</span> <span class="n">components</span><span class="o">.</span><span class="n">verifier</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"verifier unavailable"</span><span class="p">)</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>    <span class="k">if</span> <span class="n">components</span><span class="o">.</span><span class="n">resumer</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">preset</span> <span class="o">!=</span> <span class="s2">"coding-fast"</span><span class="p">:</span> <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"resume unavailable"</span><span class="p">)</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>    <span class="k">if</span> <span class="n">profile</span><span class="o">.</span><span class="n">promotion_eligible</span> <span class="ow">and</span> <span class="n">profile</span><span class="o">.</span><span class="n">assurance_level</span> <span class="o">!=</span> <span class="s2">"hermetic"</span><span class="p">:</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>        <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"promotion requires hermetic assurance"</span><span class="p">)</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>    <span class="k">if</span> <span class="n">errors</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"; "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">errors</span><span class="p">))</span>
+</code></pre></div>
+<h2 id="7-migracao">7. Migração</h2>
+<ol>
+<li>Merge W1–W3 em commit único de componentes puros.</li>
+<li>Merge W4 com flag interna desligada.</li>
+<li>Merge W5 e executar smoke transacional.</li>
+<li>Merge W6 e executar fresh-process resume.</li>
+<li>Ativar <code>coding-fast</code> para dogfood local.</li>
+<li>Ativar <code>coding-balanced</code> após 20 tarefas internas sem regressão.</li>
+<li>Merge W8 benchmark truth antes de otimização.</li>
+<li>Merge W9 ToolScript/reviewer atrás de flags.</li>
+<li>Merge W7 branch/mutation somente como experimento.</li>
+<li>Promover <code>coding-max</code> após ablations.</li>
+</ol>
+<h2 id="8-compatibilidade">8. Compatibilidade</h2>
+<table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Compatibilidade</th>
+<th>Estratégia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Harness manifest wire</td>
+<td>preservada</td>
+<td>presets externos</td>
+</tr>
+<tr>
+<td>Kernel dispatch</td>
+<td>preservada</td>
+<td>nenhuma mudança</td>
+</tr>
+<tr>
+<td>Event identities</td>
+<td>preservadas</td>
+<td>artifacts/metadata existentes</td>
+</tr>
+<tr>
+<td>Run digest</td>
+<td>preservado/aditivo via extensions</td>
+<td>digest-pin config</td>
+</tr>
+<tr>
+<td>Checkpoint</td>
+<td>preservado</td>
+<td>state digest metadata</td>
+</tr>
+<tr>
+<td>CLI</td>
+<td>backend-only nesta entrega</td>
+<td>entrypoint posterior</td>
+</tr>
+<tr>
+<td>Existing code-default</td>
+<td>preservado</td>
+<td>feature flags off</td>
+</tr>
+<tr>
+<td>Model adapters</td>
+<td>reutilizados</td>
+<td>router compõe</td>
+</tr>
+</tbody>
+</table>
+<h2 id="9-commit-plan">9. Commit plan</h2>
+<table>
+<thead>
+<tr>
+<th>Commit</th>
+<th>Conteúdo</th>
+<th style="text-align: right;">Reversível</th>
+<th>Gate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C1</td>
+<td>classifier/planning/context</td>
+<td style="text-align: right;">sim</td>
+<td>unit</td>
+</tr>
+<tr>
+<td>C2</td>
+<td>verification/recovery/router</td>
+<td style="text-align: right;">sim</td>
+<td>pack tests</td>
+</tr>
+<tr>
+<td>C3</td>
+<td>coordinator/state bridge</td>
+<td style="text-align: right;">sim</td>
+<td>session contract</td>
+</tr>
+<tr>
+<td>C4</td>
+<td>workspace/tool hardening</td>
+<td style="text-align: right;">sim</td>
+<td>adversarial</td>
+</tr>
+<tr>
+<td>C5</td>
+<td>durability/resume</td>
+<td style="text-align: right;">sim</td>
+<td>fresh process</td>
+</tr>
+<tr>
+<td>C6</td>
+<td>benchmark truth</td>
+<td style="text-align: right;">sim</td>
+<td>preflight</td>
+</tr>
+<tr>
+<td>C7</td>
+<td>LDA/ToolScript</td>
+<td style="text-align: right;">flag</td>
+<td>fallback</td>
+</tr>
+<tr>
+<td>C8</td>
+<td>reviewer/specialists</td>
+<td style="text-align: right;">flag</td>
+<td>ablation</td>
+</tr>
+<tr>
+<td>C9</td>
+<td>branching</td>
+<td style="text-align: right;">flag</td>
+<td>budget/authority</td>
+</tr>
+<tr>
+<td>C10</td>
+<td>mutation/capsules</td>
+<td style="text-align: right;">experiment</td>
+<td>heldout/governance</td>
+</tr>
+</tbody>
+</table>
+<h2 id="10-test-matrix">10. Test matrix</h2>
+<table>
+<thead>
+<tr>
+<th>Suite</th>
+<th style="text-align: right;">Required per commit</th>
+<th style="text-align: right;">Required before beta</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>new unit</td>
+<td style="text-align: right;">yes</td>
+<td style="text-align: right;">yes</td>
+</tr>
+<tr>
+<td>code-default pack</td>
+<td style="text-align: right;">yes</td>
+<td style="text-align: right;">yes</td>
+</tr>
+<tr>
+<td>agency admission/context</td>
+<td style="text-align: right;">affected</td>
+<td style="text-align: right;">yes</td>
+</tr>
+<tr>
+<td>runtime session/checkpoint</td>
+<td style="text-align: right;">affected</td>
+<td style="text-align: right;">yes</td>
+</tr>
+<tr>
+<td>boundary/TCB/duplication</td>
+<td style="text-align: right;">yes</td>
+<td style="text-align: right;">yes</td>
+</tr>
+<tr>
+<td>secret scan</td>
+<td style="text-align: right;">yes</td>
+<td style="text-align: right;">yes</td>
+</tr>
+<tr>
+<td>transactional smoke</td>
+<td style="text-align: right;">C4+</td>
+<td style="text-align: right;">yes</td>
+</tr>
+<tr>
+<td>fresh-process resume</td>
+<td style="text-align: right;">C5+</td>
+<td style="text-align: right;">yes</td>
+</tr>
+<tr>
+<td>LAM truth</td>
+<td style="text-align: right;">C6+</td>
+<td style="text-align: right;">yes</td>
+</tr>
+<tr>
+<td>real-model canary</td>
+<td style="text-align: right;">no</td>
+<td style="text-align: right;">yes</td>
+</tr>
+<tr>
+<td>full suite</td>
+<td style="text-align: right;">no</td>
+<td style="text-align: right;">yes</td>
+</tr>
+<tr>
+<td>official benchmark</td>
+<td style="text-align: right;">no</td>
+<td style="text-align: right;">claim-only</td>
+</tr>
+</tbody>
+</table>
+<h2 id="11-minimal-command-runbook">11. Minimal command runbook</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>python3<span class="w"> </span>-m<span class="w"> </span>unittest<span class="w"> </span>test.packs.code_default.test_coding_max<span class="w"> </span>-v
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>python3<span class="w"> </span>-m<span class="w"> </span>unittest<span class="w"> </span>test.packs.code_default.test_coding_max_coordinator<span class="w"> </span>-v
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>python3<span class="w"> </span>-m<span class="w"> </span>unittest<span class="w"> </span>test.packs.code_default.test_workspace_tools<span class="w"> </span>-v
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>python3<span class="w"> </span>-m<span class="w"> </span>unittest<span class="w"> </span>test.packs.code_default.test_durable_coding_state<span class="w"> </span>-v
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>python3<span class="w"> </span>-m<span class="w"> </span>unittest<span class="w"> </span>test.packs.code_default.test_metamorphosis<span class="w"> </span>-v
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>python3<span class="w"> </span>-m<span class="w"> </span>unittest<span class="w"> </span>discover<span class="w"> </span>-s<span class="w"> </span>test/packs/code_default<span class="w"> </span>-t<span class="w"> </span>.
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>python3<span class="w"> </span>tools/linters/check_boundaries.py
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>python3<span class="w"> </span>tools/linters/check_tcb_budget.py
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>python3<span class="w"> </span>tools/linters/check_duplication.py<span class="w"> </span>--enforce
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>python3<span class="w"> </span>tools/linters/scan_secrets.py
+</code></pre></div>
+<h2 id="12-observability-schema">12. Observability schema</h2>
+<p>Cada run deve expor: task/profile/preset, feature flags, composition/run digests, repository subject, model routes, context selection/drop metrics, tool calls, patch digests, test receipts/count/duration, failures, recoveries, branch summaries, reviewer verdict, state/checkpoint digests, tokens/cost/latency e terminal reason.</p>
+<h2 id="13-slos-iniciais">13. SLOs iniciais</h2>
+<table>
+<thead>
+<tr>
+<th>SLO</th>
+<th style="text-align: right;">coding-fast</th>
+<th style="text-align: right;">balanced</th>
+<th style="text-align: right;">max</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>startup p95</td>
+<td style="text-align: right;">&lt;1s</td>
+<td style="text-align: right;">&lt;2s</td>
+<td style="text-align: right;">&lt;3s</td>
+</tr>
+<tr>
+<td>first tool p95</td>
+<td style="text-align: right;">&lt;5s</td>
+<td style="text-align: right;">&lt;10s</td>
+<td style="text-align: right;">&lt;15s</td>
+</tr>
+<tr>
+<td>zero-test acceptance</td>
+<td style="text-align: right;">0%</td>
+<td style="text-align: right;">0%</td>
+<td style="text-align: right;">0%</td>
+</tr>
+<tr>
+<td>stale receipt acceptance</td>
+<td style="text-align: right;">0%</td>
+<td style="text-align: right;">0%</td>
+<td style="text-align: right;">0%</td>
+</tr>
+<tr>
+<td>resume correctness</td>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">100%</td>
+<td style="text-align: right;">100%</td>
+</tr>
+<tr>
+<td>branch ceiling</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr>
+<td>reviewer rate</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">conditional</td>
+<td style="text-align: right;">conditional</td>
+</tr>
+</tbody>
+</table>
+<h2 id="14-rollback">14. Rollback</h2>
+<ul>
+<li>Feature flags permitem desligar LDA, ToolScript, specialists, reviewer, branch, mutation e capsules independentemente.</li>
+<li>Coordinator pode voltar ao planner atual sem migração de ledger.</li>
+<li>Artifacts novos são roles adicionais e podem permanecer legíveis.</li>
+<li>Checkpoints incompatíveis devem cold-fold events.</li>
+<li>Capsule rollback exige receipt e restaura configuração anterior.</li>
+<li>Nunca apagar evidência de runs falhos.</li>
+</ul>
+<h2 id="15-stop-ship-conditions">15. Stop-ship conditions</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Condição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SS-001</td>
+<td>any path escape</td>
+</tr>
+<tr>
+<td>SS-002</td>
+<td>any capability expansion</td>
+</tr>
+<tr>
+<td>SS-003</td>
+<td>budget increase after resume</td>
+</tr>
+<tr>
+<td>SS-004</td>
+<td>zero-test admitted</td>
+</tr>
+<tr>
+<td>SS-005</td>
+<td>stale receipt admitted</td>
+</tr>
+<tr>
+<td>SS-006</td>
+<td>no-patch marked success</td>
+</tr>
+<tr>
+<td>SS-007</td>
+<td>synthetic benchmark metric</td>
+</tr>
+<tr>
+<td>SS-008</td>
+<td>answer leakage</td>
+</tr>
+<tr>
+<td>SS-009</td>
+<td>checkpoint trusted after pin mismatch</td>
+</tr>
+<tr>
+<td>SS-010</td>
+<td>duplicate effect after resume</td>
+</tr>
+<tr>
+<td>SS-011</td>
+<td>branch writes parent directly</td>
+</tr>
+<tr>
+<td>SS-012</td>
+<td>reviewer overrides failed evaluator</td>
+</tr>
+<tr>
+<td>SS-013</td>
+<td>capsule self-promotes</td>
+</tr>
+<tr>
+<td>SS-014</td>
+<td>missing trajectory link</td>
+</tr>
+<tr>
+<td>SS-015</td>
+<td>secret in artifact/log</td>
+</tr>
+<tr>
+<td>SS-016</td>
+<td>full suite regression attributable to change</td>
+</tr>
+<tr>
+<td>SS-017</td>
+<td>fallback silently disables verification</td>
+</tr>
+<tr>
+<td>SS-018</td>
+<td>unbounded retry</td>
+</tr>
+<tr>
+<td>SS-019</td>
+<td>unbounded branch</td>
+</tr>
+<tr>
+<td>SS-020</td>
+<td>wrong Git subject</td>
+</tr>
+</tbody>
+</table>
+<h2 id="16-acceptance-levels">16. Acceptance levels</h2>
+<h3 id="alpha">Alpha</h3>
+<ul>
+<li>Single-agent path, real patch/test, recovery, durable resume.</li>
+<li>No SWE claim.</li>
+</ul>
+<h3 id="beta">Beta</h3>
+<ul>
+<li>Pack/runtime suites green, dogfood, canary, flags/rollback.</li>
+<li>LDA/ToolScript optional.</li>
+<li>Branch/mutation experimental.</li>
+</ul>
+<h3 id="production">Production</h3>
+<ul>
+<li>Release qualification, installable artifact, backup/restore, security/performance gates.</li>
+</ul>
+<h3 id="sota-claim">SOTA claim</h3>
+<ul>
+<li>Official or reproducible benchmark protocol.</li>
+<li>Competitive score with exact model/hardware/cost disclosure.</li>
+<li>Ablations showing harness contribution.</li>
+<li>Independent reproduction.</li>
+</ul>
+<h2 id="17-ownership-map">17. Ownership map</h2>
+<table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Owner</th>
+<th>Forbidden owner action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>kernel</td>
+<td>core</td>
+<td>coding semantics</td>
+</tr>
+<tr>
+<td>coordinator</td>
+<td>code pack</td>
+<td>bypass dispatch</td>
+</tr>
+<tr>
+<td>tools</td>
+<td>code pack</td>
+<td>expand capability</td>
+</tr>
+<tr>
+<td>model adapter</td>
+<td>adapters</td>
+<td>decide completion</td>
+</tr>
+<tr>
+<td>verifier</td>
+<td>external/runtime</td>
+<td>trust model prose</td>
+</tr>
+<tr>
+<td>benchmark</td>
+<td>benchmark program</td>
+<td>synthesize result</td>
+</tr>
+<tr>
+<td>capsule registry</td>
+<td>governance</td>
+<td>self-promotion</td>
+</tr>
+</tbody>
+</table>
+<h2 id="18-checklist-final-por-arquivo">18. Checklist final por arquivo</h2>
+<ul>
+<li>[ ] FINAL-0001 — <code>classifier.py</code>: path exists.</li>
+<li>[ ] FINAL-0002 — <code>classifier.py</code>: types strict.</li>
+<li>[ ] FINAL-0003 — <code>classifier.py</code>: public exports.</li>
+<li>[ ] FINAL-0004 — <code>classifier.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0005 — <code>classifier.py</code>: typed errors.</li>
+<li>[ ] FINAL-0006 — <code>classifier.py</code>: budget bound.</li>
+<li>[ ] FINAL-0007 — <code>classifier.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0008 — <code>classifier.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0009 — <code>classifier.py</code>: unit success.</li>
+<li>[ ] FINAL-0010 — <code>classifier.py</code>: unit failure.</li>
+<li>[ ] FINAL-0011 — <code>classifier.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0012 — <code>classifier.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0013 — <code>classifier.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0014 — <code>classifier.py</code>: timeout.</li>
+<li>[ ] FINAL-0015 — <code>classifier.py</code>: idempotency.</li>
+<li>[ ] FINAL-0016 — <code>classifier.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0017 — <code>classifier.py</code>: telemetry.</li>
+<li>[ ] FINAL-0018 — <code>classifier.py</code>: secret safety.</li>
+<li>[ ] FINAL-0019 — <code>classifier.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0020 — <code>classifier.py</code>: feature flag.</li>
+<li>[ ] FINAL-0021 — <code>classifier.py</code>: rollback.</li>
+<li>[ ] FINAL-0022 — <code>classifier.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0023 — <code>planning.py</code>: path exists.</li>
+<li>[ ] FINAL-0024 — <code>planning.py</code>: types strict.</li>
+<li>[ ] FINAL-0025 — <code>planning.py</code>: public exports.</li>
+<li>[ ] FINAL-0026 — <code>planning.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0027 — <code>planning.py</code>: typed errors.</li>
+<li>[ ] FINAL-0028 — <code>planning.py</code>: budget bound.</li>
+<li>[ ] FINAL-0029 — <code>planning.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0030 — <code>planning.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0031 — <code>planning.py</code>: unit success.</li>
+<li>[ ] FINAL-0032 — <code>planning.py</code>: unit failure.</li>
+<li>[ ] FINAL-0033 — <code>planning.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0034 — <code>planning.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0035 — <code>planning.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0036 — <code>planning.py</code>: timeout.</li>
+<li>[ ] FINAL-0037 — <code>planning.py</code>: idempotency.</li>
+<li>[ ] FINAL-0038 — <code>planning.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0039 — <code>planning.py</code>: telemetry.</li>
+<li>[ ] FINAL-0040 — <code>planning.py</code>: secret safety.</li>
+<li>[ ] FINAL-0041 — <code>planning.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0042 — <code>planning.py</code>: feature flag.</li>
+<li>[ ] FINAL-0043 — <code>planning.py</code>: rollback.</li>
+<li>[ ] FINAL-0044 — <code>planning.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0045 — <code>intelligence.py</code>: path exists.</li>
+<li>[ ] FINAL-0046 — <code>intelligence.py</code>: types strict.</li>
+<li>[ ] FINAL-0047 — <code>intelligence.py</code>: public exports.</li>
+<li>[ ] FINAL-0048 — <code>intelligence.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0049 — <code>intelligence.py</code>: typed errors.</li>
+<li>[ ] FINAL-0050 — <code>intelligence.py</code>: budget bound.</li>
+<li>[ ] FINAL-0051 — <code>intelligence.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0052 — <code>intelligence.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0053 — <code>intelligence.py</code>: unit success.</li>
+<li>[ ] FINAL-0054 — <code>intelligence.py</code>: unit failure.</li>
+<li>[ ] FINAL-0055 — <code>intelligence.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0056 — <code>intelligence.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0057 — <code>intelligence.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0058 — <code>intelligence.py</code>: timeout.</li>
+<li>[ ] FINAL-0059 — <code>intelligence.py</code>: idempotency.</li>
+<li>[ ] FINAL-0060 — <code>intelligence.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0061 — <code>intelligence.py</code>: telemetry.</li>
+<li>[ ] FINAL-0062 — <code>intelligence.py</code>: secret safety.</li>
+<li>[ ] FINAL-0063 — <code>intelligence.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0064 — <code>intelligence.py</code>: feature flag.</li>
+<li>[ ] FINAL-0065 — <code>intelligence.py</code>: rollback.</li>
+<li>[ ] FINAL-0066 — <code>intelligence.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0067 — <code>context.py</code>: path exists.</li>
+<li>[ ] FINAL-0068 — <code>context.py</code>: types strict.</li>
+<li>[ ] FINAL-0069 — <code>context.py</code>: public exports.</li>
+<li>[ ] FINAL-0070 — <code>context.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0071 — <code>context.py</code>: typed errors.</li>
+<li>[ ] FINAL-0072 — <code>context.py</code>: budget bound.</li>
+<li>[ ] FINAL-0073 — <code>context.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0074 — <code>context.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0075 — <code>context.py</code>: unit success.</li>
+<li>[ ] FINAL-0076 — <code>context.py</code>: unit failure.</li>
+<li>[ ] FINAL-0077 — <code>context.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0078 — <code>context.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0079 — <code>context.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0080 — <code>context.py</code>: timeout.</li>
+<li>[ ] FINAL-0081 — <code>context.py</code>: idempotency.</li>
+<li>[ ] FINAL-0082 — <code>context.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0083 — <code>context.py</code>: telemetry.</li>
+<li>[ ] FINAL-0084 — <code>context.py</code>: secret safety.</li>
+<li>[ ] FINAL-0085 — <code>context.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0086 — <code>context.py</code>: feature flag.</li>
+<li>[ ] FINAL-0087 — <code>context.py</code>: rollback.</li>
+<li>[ ] FINAL-0088 — <code>context.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0089 — <code>verification.py</code>: path exists.</li>
+<li>[ ] FINAL-0090 — <code>verification.py</code>: types strict.</li>
+<li>[ ] FINAL-0091 — <code>verification.py</code>: public exports.</li>
+<li>[ ] FINAL-0092 — <code>verification.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0093 — <code>verification.py</code>: typed errors.</li>
+<li>[ ] FINAL-0094 — <code>verification.py</code>: budget bound.</li>
+<li>[ ] FINAL-0095 — <code>verification.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0096 — <code>verification.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0097 — <code>verification.py</code>: unit success.</li>
+<li>[ ] FINAL-0098 — <code>verification.py</code>: unit failure.</li>
+<li>[ ] FINAL-0099 — <code>verification.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0100 — <code>verification.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0101 — <code>verification.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0102 — <code>verification.py</code>: timeout.</li>
+<li>[ ] FINAL-0103 — <code>verification.py</code>: idempotency.</li>
+<li>[ ] FINAL-0104 — <code>verification.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0105 — <code>verification.py</code>: telemetry.</li>
+<li>[ ] FINAL-0106 — <code>verification.py</code>: secret safety.</li>
+<li>[ ] FINAL-0107 — <code>verification.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0108 — <code>verification.py</code>: feature flag.</li>
+<li>[ ] FINAL-0109 — <code>verification.py</code>: rollback.</li>
+<li>[ ] FINAL-0110 — <code>verification.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0111 — <code>recovery.py</code>: path exists.</li>
+<li>[ ] FINAL-0112 — <code>recovery.py</code>: types strict.</li>
+<li>[ ] FINAL-0113 — <code>recovery.py</code>: public exports.</li>
+<li>[ ] FINAL-0114 — <code>recovery.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0115 — <code>recovery.py</code>: typed errors.</li>
+<li>[ ] FINAL-0116 — <code>recovery.py</code>: budget bound.</li>
+<li>[ ] FINAL-0117 — <code>recovery.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0118 — <code>recovery.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0119 — <code>recovery.py</code>: unit success.</li>
+<li>[ ] FINAL-0120 — <code>recovery.py</code>: unit failure.</li>
+<li>[ ] FINAL-0121 — <code>recovery.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0122 — <code>recovery.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0123 — <code>recovery.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0124 — <code>recovery.py</code>: timeout.</li>
+<li>[ ] FINAL-0125 — <code>recovery.py</code>: idempotency.</li>
+<li>[ ] FINAL-0126 — <code>recovery.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0127 — <code>recovery.py</code>: telemetry.</li>
+<li>[ ] FINAL-0128 — <code>recovery.py</code>: secret safety.</li>
+<li>[ ] FINAL-0129 — <code>recovery.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0130 — <code>recovery.py</code>: feature flag.</li>
+<li>[ ] FINAL-0131 — <code>recovery.py</code>: rollback.</li>
+<li>[ ] FINAL-0132 — <code>recovery.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0133 — <code>routing.py</code>: path exists.</li>
+<li>[ ] FINAL-0134 — <code>routing.py</code>: types strict.</li>
+<li>[ ] FINAL-0135 — <code>routing.py</code>: public exports.</li>
+<li>[ ] FINAL-0136 — <code>routing.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0137 — <code>routing.py</code>: typed errors.</li>
+<li>[ ] FINAL-0138 — <code>routing.py</code>: budget bound.</li>
+<li>[ ] FINAL-0139 — <code>routing.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0140 — <code>routing.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0141 — <code>routing.py</code>: unit success.</li>
+<li>[ ] FINAL-0142 — <code>routing.py</code>: unit failure.</li>
+<li>[ ] FINAL-0143 — <code>routing.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0144 — <code>routing.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0145 — <code>routing.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0146 — <code>routing.py</code>: timeout.</li>
+<li>[ ] FINAL-0147 — <code>routing.py</code>: idempotency.</li>
+<li>[ ] FINAL-0148 — <code>routing.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0149 — <code>routing.py</code>: telemetry.</li>
+<li>[ ] FINAL-0150 — <code>routing.py</code>: secret safety.</li>
+<li>[ ] FINAL-0151 — <code>routing.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0152 — <code>routing.py</code>: feature flag.</li>
+<li>[ ] FINAL-0153 — <code>routing.py</code>: rollback.</li>
+<li>[ ] FINAL-0154 — <code>routing.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0155 — <code>workflow.py</code>: path exists.</li>
+<li>[ ] FINAL-0156 — <code>workflow.py</code>: types strict.</li>
+<li>[ ] FINAL-0157 — <code>workflow.py</code>: public exports.</li>
+<li>[ ] FINAL-0158 — <code>workflow.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0159 — <code>workflow.py</code>: typed errors.</li>
+<li>[ ] FINAL-0160 — <code>workflow.py</code>: budget bound.</li>
+<li>[ ] FINAL-0161 — <code>workflow.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0162 — <code>workflow.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0163 — <code>workflow.py</code>: unit success.</li>
+<li>[ ] FINAL-0164 — <code>workflow.py</code>: unit failure.</li>
+<li>[ ] FINAL-0165 — <code>workflow.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0166 — <code>workflow.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0167 — <code>workflow.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0168 — <code>workflow.py</code>: timeout.</li>
+<li>[ ] FINAL-0169 — <code>workflow.py</code>: idempotency.</li>
+<li>[ ] FINAL-0170 — <code>workflow.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0171 — <code>workflow.py</code>: telemetry.</li>
+<li>[ ] FINAL-0172 — <code>workflow.py</code>: secret safety.</li>
+<li>[ ] FINAL-0173 — <code>workflow.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0174 — <code>workflow.py</code>: feature flag.</li>
+<li>[ ] FINAL-0175 — <code>workflow.py</code>: rollback.</li>
+<li>[ ] FINAL-0176 — <code>workflow.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0177 — <code>coordinator.py</code>: path exists.</li>
+<li>[ ] FINAL-0178 — <code>coordinator.py</code>: types strict.</li>
+<li>[ ] FINAL-0179 — <code>coordinator.py</code>: public exports.</li>
+<li>[ ] FINAL-0180 — <code>coordinator.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0181 — <code>coordinator.py</code>: typed errors.</li>
+<li>[ ] FINAL-0182 — <code>coordinator.py</code>: budget bound.</li>
+<li>[ ] FINAL-0183 — <code>coordinator.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0184 — <code>coordinator.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0185 — <code>coordinator.py</code>: unit success.</li>
+<li>[ ] FINAL-0186 — <code>coordinator.py</code>: unit failure.</li>
+<li>[ ] FINAL-0187 — <code>coordinator.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0188 — <code>coordinator.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0189 — <code>coordinator.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0190 — <code>coordinator.py</code>: timeout.</li>
+<li>[ ] FINAL-0191 — <code>coordinator.py</code>: idempotency.</li>
+<li>[ ] FINAL-0192 — <code>coordinator.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0193 — <code>coordinator.py</code>: telemetry.</li>
+<li>[ ] FINAL-0194 — <code>coordinator.py</code>: secret safety.</li>
+<li>[ ] FINAL-0195 — <code>coordinator.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0196 — <code>coordinator.py</code>: feature flag.</li>
+<li>[ ] FINAL-0197 — <code>coordinator.py</code>: rollback.</li>
+<li>[ ] FINAL-0198 — <code>coordinator.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0199 — <code>state_bridge.py</code>: path exists.</li>
+<li>[ ] FINAL-0200 — <code>state_bridge.py</code>: types strict.</li>
+<li>[ ] FINAL-0201 — <code>state_bridge.py</code>: public exports.</li>
+<li>[ ] FINAL-0202 — <code>state_bridge.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0203 — <code>state_bridge.py</code>: typed errors.</li>
+<li>[ ] FINAL-0204 — <code>state_bridge.py</code>: budget bound.</li>
+<li>[ ] FINAL-0205 — <code>state_bridge.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0206 — <code>state_bridge.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0207 — <code>state_bridge.py</code>: unit success.</li>
+<li>[ ] FINAL-0208 — <code>state_bridge.py</code>: unit failure.</li>
+<li>[ ] FINAL-0209 — <code>state_bridge.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0210 — <code>state_bridge.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0211 — <code>state_bridge.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0212 — <code>state_bridge.py</code>: timeout.</li>
+<li>[ ] FINAL-0213 — <code>state_bridge.py</code>: idempotency.</li>
+<li>[ ] FINAL-0214 — <code>state_bridge.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0215 — <code>state_bridge.py</code>: telemetry.</li>
+<li>[ ] FINAL-0216 — <code>state_bridge.py</code>: secret safety.</li>
+<li>[ ] FINAL-0217 — <code>state_bridge.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0218 — <code>state_bridge.py</code>: feature flag.</li>
+<li>[ ] FINAL-0219 — <code>state_bridge.py</code>: rollback.</li>
+<li>[ ] FINAL-0220 — <code>state_bridge.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0221 — <code>workspace_tx.py</code>: path exists.</li>
+<li>[ ] FINAL-0222 — <code>workspace_tx.py</code>: types strict.</li>
+<li>[ ] FINAL-0223 — <code>workspace_tx.py</code>: public exports.</li>
+<li>[ ] FINAL-0224 — <code>workspace_tx.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0225 — <code>workspace_tx.py</code>: typed errors.</li>
+<li>[ ] FINAL-0226 — <code>workspace_tx.py</code>: budget bound.</li>
+<li>[ ] FINAL-0227 — <code>workspace_tx.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0228 — <code>workspace_tx.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0229 — <code>workspace_tx.py</code>: unit success.</li>
+<li>[ ] FINAL-0230 — <code>workspace_tx.py</code>: unit failure.</li>
+<li>[ ] FINAL-0231 — <code>workspace_tx.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0232 — <code>workspace_tx.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0233 — <code>workspace_tx.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0234 — <code>workspace_tx.py</code>: timeout.</li>
+<li>[ ] FINAL-0235 — <code>workspace_tx.py</code>: idempotency.</li>
+<li>[ ] FINAL-0236 — <code>workspace_tx.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0237 — <code>workspace_tx.py</code>: telemetry.</li>
+<li>[ ] FINAL-0238 — <code>workspace_tx.py</code>: secret safety.</li>
+<li>[ ] FINAL-0239 — <code>workspace_tx.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0240 — <code>workspace_tx.py</code>: feature flag.</li>
+<li>[ ] FINAL-0241 — <code>workspace_tx.py</code>: rollback.</li>
+<li>[ ] FINAL-0242 — <code>workspace_tx.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0243 — <code>tool_results.py</code>: path exists.</li>
+<li>[ ] FINAL-0244 — <code>tool_results.py</code>: types strict.</li>
+<li>[ ] FINAL-0245 — <code>tool_results.py</code>: public exports.</li>
+<li>[ ] FINAL-0246 — <code>tool_results.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0247 — <code>tool_results.py</code>: typed errors.</li>
+<li>[ ] FINAL-0248 — <code>tool_results.py</code>: budget bound.</li>
+<li>[ ] FINAL-0249 — <code>tool_results.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0250 — <code>tool_results.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0251 — <code>tool_results.py</code>: unit success.</li>
+<li>[ ] FINAL-0252 — <code>tool_results.py</code>: unit failure.</li>
+<li>[ ] FINAL-0253 — <code>tool_results.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0254 — <code>tool_results.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0255 — <code>tool_results.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0256 — <code>tool_results.py</code>: timeout.</li>
+<li>[ ] FINAL-0257 — <code>tool_results.py</code>: idempotency.</li>
+<li>[ ] FINAL-0258 — <code>tool_results.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0259 — <code>tool_results.py</code>: telemetry.</li>
+<li>[ ] FINAL-0260 — <code>tool_results.py</code>: secret safety.</li>
+<li>[ ] FINAL-0261 — <code>tool_results.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0262 — <code>tool_results.py</code>: feature flag.</li>
+<li>[ ] FINAL-0263 — <code>tool_results.py</code>: rollback.</li>
+<li>[ ] FINAL-0264 — <code>tool_results.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0265 — <code>test_selector.py</code>: path exists.</li>
+<li>[ ] FINAL-0266 — <code>test_selector.py</code>: types strict.</li>
+<li>[ ] FINAL-0267 — <code>test_selector.py</code>: public exports.</li>
+<li>[ ] FINAL-0268 — <code>test_selector.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0269 — <code>test_selector.py</code>: typed errors.</li>
+<li>[ ] FINAL-0270 — <code>test_selector.py</code>: budget bound.</li>
+<li>[ ] FINAL-0271 — <code>test_selector.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0272 — <code>test_selector.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0273 — <code>test_selector.py</code>: unit success.</li>
+<li>[ ] FINAL-0274 — <code>test_selector.py</code>: unit failure.</li>
+<li>[ ] FINAL-0275 — <code>test_selector.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0276 — <code>test_selector.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0277 — <code>test_selector.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0278 — <code>test_selector.py</code>: timeout.</li>
+<li>[ ] FINAL-0279 — <code>test_selector.py</code>: idempotency.</li>
+<li>[ ] FINAL-0280 — <code>test_selector.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0281 — <code>test_selector.py</code>: telemetry.</li>
+<li>[ ] FINAL-0282 — <code>test_selector.py</code>: secret safety.</li>
+<li>[ ] FINAL-0283 — <code>test_selector.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0284 — <code>test_selector.py</code>: feature flag.</li>
+<li>[ ] FINAL-0285 — <code>test_selector.py</code>: rollback.</li>
+<li>[ ] FINAL-0286 — <code>test_selector.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0287 — <code>verification_pipeline.py</code>: path exists.</li>
+<li>[ ] FINAL-0288 — <code>verification_pipeline.py</code>: types strict.</li>
+<li>[ ] FINAL-0289 — <code>verification_pipeline.py</code>: public exports.</li>
+<li>[ ] FINAL-0290 — <code>verification_pipeline.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0291 — <code>verification_pipeline.py</code>: typed errors.</li>
+<li>[ ] FINAL-0292 — <code>verification_pipeline.py</code>: budget bound.</li>
+<li>[ ] FINAL-0293 — <code>verification_pipeline.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0294 — <code>verification_pipeline.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0295 — <code>verification_pipeline.py</code>: unit success.</li>
+<li>[ ] FINAL-0296 — <code>verification_pipeline.py</code>: unit failure.</li>
+<li>[ ] FINAL-0297 — <code>verification_pipeline.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0298 — <code>verification_pipeline.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0299 — <code>verification_pipeline.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0300 — <code>verification_pipeline.py</code>: timeout.</li>
+<li>[ ] FINAL-0301 — <code>verification_pipeline.py</code>: idempotency.</li>
+<li>[ ] FINAL-0302 — <code>verification_pipeline.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0303 — <code>verification_pipeline.py</code>: telemetry.</li>
+<li>[ ] FINAL-0304 — <code>verification_pipeline.py</code>: secret safety.</li>
+<li>[ ] FINAL-0305 — <code>verification_pipeline.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0306 — <code>verification_pipeline.py</code>: feature flag.</li>
+<li>[ ] FINAL-0307 — <code>verification_pipeline.py</code>: rollback.</li>
+<li>[ ] FINAL-0308 — <code>verification_pipeline.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0309 — <code>durable_state.py</code>: path exists.</li>
+<li>[ ] FINAL-0310 — <code>durable_state.py</code>: types strict.</li>
+<li>[ ] FINAL-0311 — <code>durable_state.py</code>: public exports.</li>
+<li>[ ] FINAL-0312 — <code>durable_state.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0313 — <code>durable_state.py</code>: typed errors.</li>
+<li>[ ] FINAL-0314 — <code>durable_state.py</code>: budget bound.</li>
+<li>[ ] FINAL-0315 — <code>durable_state.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0316 — <code>durable_state.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0317 — <code>durable_state.py</code>: unit success.</li>
+<li>[ ] FINAL-0318 — <code>durable_state.py</code>: unit failure.</li>
+<li>[ ] FINAL-0319 — <code>durable_state.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0320 — <code>durable_state.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0321 — <code>durable_state.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0322 — <code>durable_state.py</code>: timeout.</li>
+<li>[ ] FINAL-0323 — <code>durable_state.py</code>: idempotency.</li>
+<li>[ ] FINAL-0324 — <code>durable_state.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0325 — <code>durable_state.py</code>: telemetry.</li>
+<li>[ ] FINAL-0326 — <code>durable_state.py</code>: secret safety.</li>
+<li>[ ] FINAL-0327 — <code>durable_state.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0328 — <code>durable_state.py</code>: feature flag.</li>
+<li>[ ] FINAL-0329 — <code>durable_state.py</code>: rollback.</li>
+<li>[ ] FINAL-0330 — <code>durable_state.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0331 — <code>durable_store.py</code>: path exists.</li>
+<li>[ ] FINAL-0332 — <code>durable_store.py</code>: types strict.</li>
+<li>[ ] FINAL-0333 — <code>durable_store.py</code>: public exports.</li>
+<li>[ ] FINAL-0334 — <code>durable_store.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0335 — <code>durable_store.py</code>: typed errors.</li>
+<li>[ ] FINAL-0336 — <code>durable_store.py</code>: budget bound.</li>
+<li>[ ] FINAL-0337 — <code>durable_store.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0338 — <code>durable_store.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0339 — <code>durable_store.py</code>: unit success.</li>
+<li>[ ] FINAL-0340 — <code>durable_store.py</code>: unit failure.</li>
+<li>[ ] FINAL-0341 — <code>durable_store.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0342 — <code>durable_store.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0343 — <code>durable_store.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0344 — <code>durable_store.py</code>: timeout.</li>
+<li>[ ] FINAL-0345 — <code>durable_store.py</code>: idempotency.</li>
+<li>[ ] FINAL-0346 — <code>durable_store.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0347 — <code>durable_store.py</code>: telemetry.</li>
+<li>[ ] FINAL-0348 — <code>durable_store.py</code>: secret safety.</li>
+<li>[ ] FINAL-0349 — <code>durable_store.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0350 — <code>durable_store.py</code>: feature flag.</li>
+<li>[ ] FINAL-0351 — <code>durable_store.py</code>: rollback.</li>
+<li>[ ] FINAL-0352 — <code>durable_store.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0353 — <code>resume.py</code>: path exists.</li>
+<li>[ ] FINAL-0354 — <code>resume.py</code>: types strict.</li>
+<li>[ ] FINAL-0355 — <code>resume.py</code>: public exports.</li>
+<li>[ ] FINAL-0356 — <code>resume.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0357 — <code>resume.py</code>: typed errors.</li>
+<li>[ ] FINAL-0358 — <code>resume.py</code>: budget bound.</li>
+<li>[ ] FINAL-0359 — <code>resume.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0360 — <code>resume.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0361 — <code>resume.py</code>: unit success.</li>
+<li>[ ] FINAL-0362 — <code>resume.py</code>: unit failure.</li>
+<li>[ ] FINAL-0363 — <code>resume.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0364 — <code>resume.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0365 — <code>resume.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0366 — <code>resume.py</code>: timeout.</li>
+<li>[ ] FINAL-0367 — <code>resume.py</code>: idempotency.</li>
+<li>[ ] FINAL-0368 — <code>resume.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0369 — <code>resume.py</code>: telemetry.</li>
+<li>[ ] FINAL-0370 — <code>resume.py</code>: secret safety.</li>
+<li>[ ] FINAL-0371 — <code>resume.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0372 — <code>resume.py</code>: feature flag.</li>
+<li>[ ] FINAL-0373 — <code>resume.py</code>: rollback.</li>
+<li>[ ] FINAL-0374 — <code>resume.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0375 — <code>reflex.py</code>: path exists.</li>
+<li>[ ] FINAL-0376 — <code>reflex.py</code>: types strict.</li>
+<li>[ ] FINAL-0377 — <code>reflex.py</code>: public exports.</li>
+<li>[ ] FINAL-0378 — <code>reflex.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0379 — <code>reflex.py</code>: typed errors.</li>
+<li>[ ] FINAL-0380 — <code>reflex.py</code>: budget bound.</li>
+<li>[ ] FINAL-0381 — <code>reflex.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0382 — <code>reflex.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0383 — <code>reflex.py</code>: unit success.</li>
+<li>[ ] FINAL-0384 — <code>reflex.py</code>: unit failure.</li>
+<li>[ ] FINAL-0385 — <code>reflex.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0386 — <code>reflex.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0387 — <code>reflex.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0388 — <code>reflex.py</code>: timeout.</li>
+<li>[ ] FINAL-0389 — <code>reflex.py</code>: idempotency.</li>
+<li>[ ] FINAL-0390 — <code>reflex.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0391 — <code>reflex.py</code>: telemetry.</li>
+<li>[ ] FINAL-0392 — <code>reflex.py</code>: secret safety.</li>
+<li>[ ] FINAL-0393 — <code>reflex.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0394 — <code>reflex.py</code>: feature flag.</li>
+<li>[ ] FINAL-0395 — <code>reflex.py</code>: rollback.</li>
+<li>[ ] FINAL-0396 — <code>reflex.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0397 — <code>branch_search.py</code>: path exists.</li>
+<li>[ ] FINAL-0398 — <code>branch_search.py</code>: types strict.</li>
+<li>[ ] FINAL-0399 — <code>branch_search.py</code>: public exports.</li>
+<li>[ ] FINAL-0400 — <code>branch_search.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0401 — <code>branch_search.py</code>: typed errors.</li>
+<li>[ ] FINAL-0402 — <code>branch_search.py</code>: budget bound.</li>
+<li>[ ] FINAL-0403 — <code>branch_search.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0404 — <code>branch_search.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0405 — <code>branch_search.py</code>: unit success.</li>
+<li>[ ] FINAL-0406 — <code>branch_search.py</code>: unit failure.</li>
+<li>[ ] FINAL-0407 — <code>branch_search.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0408 — <code>branch_search.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0409 — <code>branch_search.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0410 — <code>branch_search.py</code>: timeout.</li>
+<li>[ ] FINAL-0411 — <code>branch_search.py</code>: idempotency.</li>
+<li>[ ] FINAL-0412 — <code>branch_search.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0413 — <code>branch_search.py</code>: telemetry.</li>
+<li>[ ] FINAL-0414 — <code>branch_search.py</code>: secret safety.</li>
+<li>[ ] FINAL-0415 — <code>branch_search.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0416 — <code>branch_search.py</code>: feature flag.</li>
+<li>[ ] FINAL-0417 — <code>branch_search.py</code>: rollback.</li>
+<li>[ ] FINAL-0418 — <code>branch_search.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0419 — <code>mutation.py</code>: path exists.</li>
+<li>[ ] FINAL-0420 — <code>mutation.py</code>: types strict.</li>
+<li>[ ] FINAL-0421 — <code>mutation.py</code>: public exports.</li>
+<li>[ ] FINAL-0422 — <code>mutation.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0423 — <code>mutation.py</code>: typed errors.</li>
+<li>[ ] FINAL-0424 — <code>mutation.py</code>: budget bound.</li>
+<li>[ ] FINAL-0425 — <code>mutation.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0426 — <code>mutation.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0427 — <code>mutation.py</code>: unit success.</li>
+<li>[ ] FINAL-0428 — <code>mutation.py</code>: unit failure.</li>
+<li>[ ] FINAL-0429 — <code>mutation.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0430 — <code>mutation.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0431 — <code>mutation.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0432 — <code>mutation.py</code>: timeout.</li>
+<li>[ ] FINAL-0433 — <code>mutation.py</code>: idempotency.</li>
+<li>[ ] FINAL-0434 — <code>mutation.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0435 — <code>mutation.py</code>: telemetry.</li>
+<li>[ ] FINAL-0436 — <code>mutation.py</code>: secret safety.</li>
+<li>[ ] FINAL-0437 — <code>mutation.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0438 — <code>mutation.py</code>: feature flag.</li>
+<li>[ ] FINAL-0439 — <code>mutation.py</code>: rollback.</li>
+<li>[ ] FINAL-0440 — <code>mutation.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0441 — <code>capsules.py</code>: path exists.</li>
+<li>[ ] FINAL-0442 — <code>capsules.py</code>: types strict.</li>
+<li>[ ] FINAL-0443 — <code>capsules.py</code>: public exports.</li>
+<li>[ ] FINAL-0444 — <code>capsules.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0445 — <code>capsules.py</code>: typed errors.</li>
+<li>[ ] FINAL-0446 — <code>capsules.py</code>: budget bound.</li>
+<li>[ ] FINAL-0447 — <code>capsules.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0448 — <code>capsules.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0449 — <code>capsules.py</code>: unit success.</li>
+<li>[ ] FINAL-0450 — <code>capsules.py</code>: unit failure.</li>
+<li>[ ] FINAL-0451 — <code>capsules.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0452 — <code>capsules.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0453 — <code>capsules.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0454 — <code>capsules.py</code>: timeout.</li>
+<li>[ ] FINAL-0455 — <code>capsules.py</code>: idempotency.</li>
+<li>[ ] FINAL-0456 — <code>capsules.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0457 — <code>capsules.py</code>: telemetry.</li>
+<li>[ ] FINAL-0458 — <code>capsules.py</code>: secret safety.</li>
+<li>[ ] FINAL-0459 — <code>capsules.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0460 — <code>capsules.py</code>: feature flag.</li>
+<li>[ ] FINAL-0461 — <code>capsules.py</code>: rollback.</li>
+<li>[ ] FINAL-0462 — <code>capsules.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0463 — <code>toolscript.py</code>: path exists.</li>
+<li>[ ] FINAL-0464 — <code>toolscript.py</code>: types strict.</li>
+<li>[ ] FINAL-0465 — <code>toolscript.py</code>: public exports.</li>
+<li>[ ] FINAL-0466 — <code>toolscript.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0467 — <code>toolscript.py</code>: typed errors.</li>
+<li>[ ] FINAL-0468 — <code>toolscript.py</code>: budget bound.</li>
+<li>[ ] FINAL-0469 — <code>toolscript.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0470 — <code>toolscript.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0471 — <code>toolscript.py</code>: unit success.</li>
+<li>[ ] FINAL-0472 — <code>toolscript.py</code>: unit failure.</li>
+<li>[ ] FINAL-0473 — <code>toolscript.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0474 — <code>toolscript.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0475 — <code>toolscript.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0476 — <code>toolscript.py</code>: timeout.</li>
+<li>[ ] FINAL-0477 — <code>toolscript.py</code>: idempotency.</li>
+<li>[ ] FINAL-0478 — <code>toolscript.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0479 — <code>toolscript.py</code>: telemetry.</li>
+<li>[ ] FINAL-0480 — <code>toolscript.py</code>: secret safety.</li>
+<li>[ ] FINAL-0481 — <code>toolscript.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0482 — <code>toolscript.py</code>: feature flag.</li>
+<li>[ ] FINAL-0483 — <code>toolscript.py</code>: rollback.</li>
+<li>[ ] FINAL-0484 — <code>toolscript.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0485 — <code>toolscript_broker.py</code>: path exists.</li>
+<li>[ ] FINAL-0486 — <code>toolscript_broker.py</code>: types strict.</li>
+<li>[ ] FINAL-0487 — <code>toolscript_broker.py</code>: public exports.</li>
+<li>[ ] FINAL-0488 — <code>toolscript_broker.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0489 — <code>toolscript_broker.py</code>: typed errors.</li>
+<li>[ ] FINAL-0490 — <code>toolscript_broker.py</code>: budget bound.</li>
+<li>[ ] FINAL-0491 — <code>toolscript_broker.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0492 — <code>toolscript_broker.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0493 — <code>toolscript_broker.py</code>: unit success.</li>
+<li>[ ] FINAL-0494 — <code>toolscript_broker.py</code>: unit failure.</li>
+<li>[ ] FINAL-0495 — <code>toolscript_broker.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0496 — <code>toolscript_broker.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0497 — <code>toolscript_broker.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0498 — <code>toolscript_broker.py</code>: timeout.</li>
+<li>[ ] FINAL-0499 — <code>toolscript_broker.py</code>: idempotency.</li>
+<li>[ ] FINAL-0500 — <code>toolscript_broker.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0501 — <code>toolscript_broker.py</code>: telemetry.</li>
+<li>[ ] FINAL-0502 — <code>toolscript_broker.py</code>: secret safety.</li>
+<li>[ ] FINAL-0503 — <code>toolscript_broker.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0504 — <code>toolscript_broker.py</code>: feature flag.</li>
+<li>[ ] FINAL-0505 — <code>toolscript_broker.py</code>: rollback.</li>
+<li>[ ] FINAL-0506 — <code>toolscript_broker.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0507 — <code>specialists.py</code>: path exists.</li>
+<li>[ ] FINAL-0508 — <code>specialists.py</code>: types strict.</li>
+<li>[ ] FINAL-0509 — <code>specialists.py</code>: public exports.</li>
+<li>[ ] FINAL-0510 — <code>specialists.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0511 — <code>specialists.py</code>: typed errors.</li>
+<li>[ ] FINAL-0512 — <code>specialists.py</code>: budget bound.</li>
+<li>[ ] FINAL-0513 — <code>specialists.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0514 — <code>specialists.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0515 — <code>specialists.py</code>: unit success.</li>
+<li>[ ] FINAL-0516 — <code>specialists.py</code>: unit failure.</li>
+<li>[ ] FINAL-0517 — <code>specialists.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0518 — <code>specialists.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0519 — <code>specialists.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0520 — <code>specialists.py</code>: timeout.</li>
+<li>[ ] FINAL-0521 — <code>specialists.py</code>: idempotency.</li>
+<li>[ ] FINAL-0522 — <code>specialists.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0523 — <code>specialists.py</code>: telemetry.</li>
+<li>[ ] FINAL-0524 — <code>specialists.py</code>: secret safety.</li>
+<li>[ ] FINAL-0525 — <code>specialists.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0526 — <code>specialists.py</code>: feature flag.</li>
+<li>[ ] FINAL-0527 — <code>specialists.py</code>: rollback.</li>
+<li>[ ] FINAL-0528 — <code>specialists.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0529 — <code>reviewer.py</code>: path exists.</li>
+<li>[ ] FINAL-0530 — <code>reviewer.py</code>: types strict.</li>
+<li>[ ] FINAL-0531 — <code>reviewer.py</code>: public exports.</li>
+<li>[ ] FINAL-0532 — <code>reviewer.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0533 — <code>reviewer.py</code>: typed errors.</li>
+<li>[ ] FINAL-0534 — <code>reviewer.py</code>: budget bound.</li>
+<li>[ ] FINAL-0535 — <code>reviewer.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0536 — <code>reviewer.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0537 — <code>reviewer.py</code>: unit success.</li>
+<li>[ ] FINAL-0538 — <code>reviewer.py</code>: unit failure.</li>
+<li>[ ] FINAL-0539 — <code>reviewer.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0540 — <code>reviewer.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0541 — <code>reviewer.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0542 — <code>reviewer.py</code>: timeout.</li>
+<li>[ ] FINAL-0543 — <code>reviewer.py</code>: idempotency.</li>
+<li>[ ] FINAL-0544 — <code>reviewer.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0545 — <code>reviewer.py</code>: telemetry.</li>
+<li>[ ] FINAL-0546 — <code>reviewer.py</code>: secret safety.</li>
+<li>[ ] FINAL-0547 — <code>reviewer.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0548 — <code>reviewer.py</code>: feature flag.</li>
+<li>[ ] FINAL-0549 — <code>reviewer.py</code>: rollback.</li>
+<li>[ ] FINAL-0550 — <code>reviewer.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0551 — <code>distill.py</code>: path exists.</li>
+<li>[ ] FINAL-0552 — <code>distill.py</code>: types strict.</li>
+<li>[ ] FINAL-0553 — <code>distill.py</code>: public exports.</li>
+<li>[ ] FINAL-0554 — <code>distill.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0555 — <code>distill.py</code>: typed errors.</li>
+<li>[ ] FINAL-0556 — <code>distill.py</code>: budget bound.</li>
+<li>[ ] FINAL-0557 — <code>distill.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0558 — <code>distill.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0559 — <code>distill.py</code>: unit success.</li>
+<li>[ ] FINAL-0560 — <code>distill.py</code>: unit failure.</li>
+<li>[ ] FINAL-0561 — <code>distill.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0562 — <code>distill.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0563 — <code>distill.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0564 — <code>distill.py</code>: timeout.</li>
+<li>[ ] FINAL-0565 — <code>distill.py</code>: idempotency.</li>
+<li>[ ] FINAL-0566 — <code>distill.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0567 — <code>distill.py</code>: telemetry.</li>
+<li>[ ] FINAL-0568 — <code>distill.py</code>: secret safety.</li>
+<li>[ ] FINAL-0569 — <code>distill.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0570 — <code>distill.py</code>: feature flag.</li>
+<li>[ ] FINAL-0571 — <code>distill.py</code>: rollback.</li>
+<li>[ ] FINAL-0572 — <code>distill.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0573 — <code>lda_adapter.py</code>: path exists.</li>
+<li>[ ] FINAL-0574 — <code>lda_adapter.py</code>: types strict.</li>
+<li>[ ] FINAL-0575 — <code>lda_adapter.py</code>: public exports.</li>
+<li>[ ] FINAL-0576 — <code>lda_adapter.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0577 — <code>lda_adapter.py</code>: typed errors.</li>
+<li>[ ] FINAL-0578 — <code>lda_adapter.py</code>: budget bound.</li>
+<li>[ ] FINAL-0579 — <code>lda_adapter.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0580 — <code>lda_adapter.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0581 — <code>lda_adapter.py</code>: unit success.</li>
+<li>[ ] FINAL-0582 — <code>lda_adapter.py</code>: unit failure.</li>
+<li>[ ] FINAL-0583 — <code>lda_adapter.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0584 — <code>lda_adapter.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0585 — <code>lda_adapter.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0586 — <code>lda_adapter.py</code>: timeout.</li>
+<li>[ ] FINAL-0587 — <code>lda_adapter.py</code>: idempotency.</li>
+<li>[ ] FINAL-0588 — <code>lda_adapter.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0589 — <code>lda_adapter.py</code>: telemetry.</li>
+<li>[ ] FINAL-0590 — <code>lda_adapter.py</code>: secret safety.</li>
+<li>[ ] FINAL-0591 — <code>lda_adapter.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0592 — <code>lda_adapter.py</code>: feature flag.</li>
+<li>[ ] FINAL-0593 — <code>lda_adapter.py</code>: rollback.</li>
+<li>[ ] FINAL-0594 — <code>lda_adapter.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0595 — <code>intelligence_router.py</code>: path exists.</li>
+<li>[ ] FINAL-0596 — <code>intelligence_router.py</code>: types strict.</li>
+<li>[ ] FINAL-0597 — <code>intelligence_router.py</code>: public exports.</li>
+<li>[ ] FINAL-0598 — <code>intelligence_router.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0599 — <code>intelligence_router.py</code>: typed errors.</li>
+<li>[ ] FINAL-0600 — <code>intelligence_router.py</code>: budget bound.</li>
+<li>[ ] FINAL-0601 — <code>intelligence_router.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0602 — <code>intelligence_router.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0603 — <code>intelligence_router.py</code>: unit success.</li>
+<li>[ ] FINAL-0604 — <code>intelligence_router.py</code>: unit failure.</li>
+<li>[ ] FINAL-0605 — <code>intelligence_router.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0606 — <code>intelligence_router.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0607 — <code>intelligence_router.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0608 — <code>intelligence_router.py</code>: timeout.</li>
+<li>[ ] FINAL-0609 — <code>intelligence_router.py</code>: idempotency.</li>
+<li>[ ] FINAL-0610 — <code>intelligence_router.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0611 — <code>intelligence_router.py</code>: telemetry.</li>
+<li>[ ] FINAL-0612 — <code>intelligence_router.py</code>: secret safety.</li>
+<li>[ ] FINAL-0613 — <code>intelligence_router.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0614 — <code>intelligence_router.py</code>: feature flag.</li>
+<li>[ ] FINAL-0615 — <code>intelligence_router.py</code>: rollback.</li>
+<li>[ ] FINAL-0616 — <code>intelligence_router.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0617 — <code>factory.py</code>: path exists.</li>
+<li>[ ] FINAL-0618 — <code>factory.py</code>: types strict.</li>
+<li>[ ] FINAL-0619 — <code>factory.py</code>: public exports.</li>
+<li>[ ] FINAL-0620 — <code>factory.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0621 — <code>factory.py</code>: typed errors.</li>
+<li>[ ] FINAL-0622 — <code>factory.py</code>: budget bound.</li>
+<li>[ ] FINAL-0623 — <code>factory.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0624 — <code>factory.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0625 — <code>factory.py</code>: unit success.</li>
+<li>[ ] FINAL-0626 — <code>factory.py</code>: unit failure.</li>
+<li>[ ] FINAL-0627 — <code>factory.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0628 — <code>factory.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0629 — <code>factory.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0630 — <code>factory.py</code>: timeout.</li>
+<li>[ ] FINAL-0631 — <code>factory.py</code>: idempotency.</li>
+<li>[ ] FINAL-0632 — <code>factory.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0633 — <code>factory.py</code>: telemetry.</li>
+<li>[ ] FINAL-0634 — <code>factory.py</code>: secret safety.</li>
+<li>[ ] FINAL-0635 — <code>factory.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0636 — <code>factory.py</code>: feature flag.</li>
+<li>[ ] FINAL-0637 — <code>factory.py</code>: rollback.</li>
+<li>[ ] FINAL-0638 — <code>factory.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0639 — <code>features.py</code>: path exists.</li>
+<li>[ ] FINAL-0640 — <code>features.py</code>: types strict.</li>
+<li>[ ] FINAL-0641 — <code>features.py</code>: public exports.</li>
+<li>[ ] FINAL-0642 — <code>features.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0643 — <code>features.py</code>: typed errors.</li>
+<li>[ ] FINAL-0644 — <code>features.py</code>: budget bound.</li>
+<li>[ ] FINAL-0645 — <code>features.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0646 — <code>features.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0647 — <code>features.py</code>: unit success.</li>
+<li>[ ] FINAL-0648 — <code>features.py</code>: unit failure.</li>
+<li>[ ] FINAL-0649 — <code>features.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0650 — <code>features.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0651 — <code>features.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0652 — <code>features.py</code>: timeout.</li>
+<li>[ ] FINAL-0653 — <code>features.py</code>: idempotency.</li>
+<li>[ ] FINAL-0654 — <code>features.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0655 — <code>features.py</code>: telemetry.</li>
+<li>[ ] FINAL-0656 — <code>features.py</code>: secret safety.</li>
+<li>[ ] FINAL-0657 — <code>features.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0658 — <code>features.py</code>: feature flag.</li>
+<li>[ ] FINAL-0659 — <code>features.py</code>: rollback.</li>
+<li>[ ] FINAL-0660 — <code>features.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0661 — <code>benchmarks/coding_max/runner.py</code>: path exists.</li>
+<li>[ ] FINAL-0662 — <code>benchmarks/coding_max/runner.py</code>: types strict.</li>
+<li>[ ] FINAL-0663 — <code>benchmarks/coding_max/runner.py</code>: public exports.</li>
+<li>[ ] FINAL-0664 — <code>benchmarks/coding_max/runner.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0665 — <code>benchmarks/coding_max/runner.py</code>: typed errors.</li>
+<li>[ ] FINAL-0666 — <code>benchmarks/coding_max/runner.py</code>: budget bound.</li>
+<li>[ ] FINAL-0667 — <code>benchmarks/coding_max/runner.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0668 — <code>benchmarks/coding_max/runner.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0669 — <code>benchmarks/coding_max/runner.py</code>: unit success.</li>
+<li>[ ] FINAL-0670 — <code>benchmarks/coding_max/runner.py</code>: unit failure.</li>
+<li>[ ] FINAL-0671 — <code>benchmarks/coding_max/runner.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0672 — <code>benchmarks/coding_max/runner.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0673 — <code>benchmarks/coding_max/runner.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0674 — <code>benchmarks/coding_max/runner.py</code>: timeout.</li>
+<li>[ ] FINAL-0675 — <code>benchmarks/coding_max/runner.py</code>: idempotency.</li>
+<li>[ ] FINAL-0676 — <code>benchmarks/coding_max/runner.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0677 — <code>benchmarks/coding_max/runner.py</code>: telemetry.</li>
+<li>[ ] FINAL-0678 — <code>benchmarks/coding_max/runner.py</code>: secret safety.</li>
+<li>[ ] FINAL-0679 — <code>benchmarks/coding_max/runner.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0680 — <code>benchmarks/coding_max/runner.py</code>: feature flag.</li>
+<li>[ ] FINAL-0681 — <code>benchmarks/coding_max/runner.py</code>: rollback.</li>
+<li>[ ] FINAL-0682 — <code>benchmarks/coding_max/runner.py</code>: docs manifest reference.</li>
+<li>[ ] FINAL-0683 — <code>benchmarks/coding_max/preflight.py</code>: path exists.</li>
+<li>[ ] FINAL-0684 — <code>benchmarks/coding_max/preflight.py</code>: types strict.</li>
+<li>[ ] FINAL-0685 — <code>benchmarks/coding_max/preflight.py</code>: public exports.</li>
+<li>[ ] FINAL-0686 — <code>benchmarks/coding_max/preflight.py</code>: unknown inputs rejected.</li>
+<li>[ ] FINAL-0687 — <code>benchmarks/coding_max/preflight.py</code>: typed errors.</li>
+<li>[ ] FINAL-0688 — <code>benchmarks/coding_max/preflight.py</code>: budget bound.</li>
+<li>[ ] FINAL-0689 — <code>benchmarks/coding_max/preflight.py</code>: authority preserved.</li>
+<li>[ ] FINAL-0690 — <code>benchmarks/coding_max/preflight.py</code>: artifacts referenced.</li>
+<li>[ ] FINAL-0691 — <code>benchmarks/coding_max/preflight.py</code>: unit success.</li>
+<li>[ ] FINAL-0692 — <code>benchmarks/coding_max/preflight.py</code>: unit failure.</li>
+<li>[ ] FINAL-0693 — <code>benchmarks/coding_max/preflight.py</code>: adversarial test.</li>
+<li>[ ] FINAL-0694 — <code>benchmarks/coding_max/preflight.py</code>: integration coverage.</li>
+<li>[ ] FINAL-0695 — <code>benchmarks/coding_max/preflight.py</code>: offline deterministic.</li>
+<li>[ ] FINAL-0696 — <code>benchmarks/coding_max/preflight.py</code>: timeout.</li>
+<li>[ ] FINAL-0697 — <code>benchmarks/coding_max/preflight.py</code>: idempotency.</li>
+<li>[ ] FINAL-0698 — <code>benchmarks/coding_max/preflight.py</code>: replay semantics.</li>
+<li>[ ] FINAL-0699 — <code>benchmarks/coding_max/preflight.py</code>: telemetry.</li>
+<li>[ ] FINAL-0700 — <code>benchmarks/coding_max/preflight.py</code>: secret safety.</li>
+<li>[ ] FINAL-0701 — <code>benchmarks/coding_max/preflight.py</code>: backward compatibility.</li>
+<li>[ ] FINAL-0702 — <code>benchmarks/coding_max/preflight.py</code>: feature flag.</li>
+<li>[ ] FINAL-0703 — <code>benchmarks/coding_max/preflight.py</code>: rollback.</li>
+<li>[ ] FINAL-0704 — <code>benchmarks/coding_max/preflight.py</code>: docs manifest reference.</li>
+</ul>
+<h2 id="19-definition-of-done-final">19. Definition of Done final</h2>
+<p>O harness está implementado quando o caminho causal completo funciona em repositório real, sobre Vanguard, com patch transacional, verificação externa, recuperação, resume fresh-process, artifacts/trajectory e budgets corretos. Está qualificado quando canary e release gates passam. É SOTA apenas quando benchmark oficial/reprodutível e ablations sustentam a afirmação.</p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../../../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

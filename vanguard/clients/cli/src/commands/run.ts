@@ -15,7 +15,7 @@ import {
   ReplayRuntimeClient,
   type RuntimeClient,
 } from "@aether/client";
-import { streamRun } from "@vanguard/client-core";
+import { streamRun } from "@aether/client";
 import type { ParsedCli } from "../composition/parse-cli.js";
 import { clientFor } from "../composition/client-for.js";
 import { RunTui } from "../tui/screens/run-tui.js";
@@ -76,11 +76,11 @@ export async function handleRun(args: string[], options: ParsedCli): Promise<num
   }
 
   if (options.headless) {
-    const runtime = clientFor(options);
+    const runtime = await clientFor(options);
     return await streamRun(runtime, options, console.log);
   }
 
-  const runtime = clientFor(options);
+  const runtime = await clientFor(options);
   return new Promise<number>((resolve) => {
     const { waitUntilExit } = render(
       React.createElement(RunTui, {
@@ -111,7 +111,7 @@ async function executeRun(options: ParsedCli): Promise<number> {
     }
     runtime = new ReplayRuntimeClient(gen());
   } else {
-    runtime = clientFor(options);
+    runtime = await clientFor(options);
   }
 
   const startReq: StartRunRequest = {
@@ -248,7 +248,7 @@ async function executeRun(options: ParsedCli): Promise<number> {
 }
 
 export async function handleRunList(args: string[], options: ParsedCli): Promise<number> {
-  const client = clientFor(options) as any;
+  const client = await clientFor(options) as any;
   const limitIdx = args.indexOf("--limit");
   const limit = limitIdx >= 0 && args[limitIdx + 1] ? Number(args[limitIdx + 1]) : 20;
 
@@ -296,7 +296,7 @@ export async function handleRunInspect(args: string[], options: ParsedCli): Prom
     return CLI_EXIT_CODES.INVALID_INPUT;
   }
 
-  const client = clientFor(options);
+  const client = await clientFor(options);
   const res = await client.getRun(runId);
   if (!res.ok) {
     logDiagnostic(`Inspect run ${runId} failed [${res.error.code}]: ${res.error.message}`);
@@ -332,7 +332,7 @@ export async function handleRunStream(args: string[], options: ParsedCli): Promi
   const afterSeqIdx = args.indexOf("--after-seq");
   const afterSeq = afterSeqIdx >= 0 && args[afterSeqIdx + 1] ? args[afterSeqIdx + 1] : undefined;
 
-  const client = clientFor(options);
+  const client = await clientFor(options);
   for await (const item of client.streamEvents({ runId, afterSeq })) {
     if (!item.ok) {
       logDiagnostic(`Stream failed [${item.error.code}]: ${item.error.message}`);
@@ -359,7 +359,7 @@ export async function handleRunCancel(args: string[], options: ParsedCli): Promi
   const reasonIdx = args.indexOf("--reason");
   const reason = reasonIdx >= 0 && args[reasonIdx + 1] ? args[reasonIdx + 1] : "Operator requested cancellation";
 
-  const client = clientFor(options) as any;
+  const client = await clientFor(options) as any;
   const res = await client.requestCancel(runId, { reason });
   if (!res.ok) {
     logDiagnostic(`Cancel failed [${res.error.code}]: ${res.error.message}`);
@@ -388,7 +388,7 @@ export async function handleRunCheckpoint(args: string[], options: ParsedCli): P
     return CLI_EXIT_CODES.INVALID_INPUT;
   }
 
-  const client = clientFor(options) as any;
+  const client = await clientFor(options) as any;
   const res = await client.requestCheckpoint(runId);
   if (!res.ok) {
     logDiagnostic(`Checkpoint failed [${res.error.code}]: ${res.error.message}`);
@@ -420,7 +420,7 @@ export async function handleRunResume(args: string[], options: ParsedCli): Promi
   const cpIdx = args.indexOf("--checkpoint");
   const checkpointId = cpIdx >= 0 && args[cpIdx + 1] ? args[cpIdx + 1] : undefined;
 
-  const client = clientFor(options) as any;
+  const client = await clientFor(options) as any;
   const res = await client.requestResume(runId, { checkpointId });
   if (!res.ok) {
     logDiagnostic(`Resume failed [${res.error.code}]: ${res.error.message}`);

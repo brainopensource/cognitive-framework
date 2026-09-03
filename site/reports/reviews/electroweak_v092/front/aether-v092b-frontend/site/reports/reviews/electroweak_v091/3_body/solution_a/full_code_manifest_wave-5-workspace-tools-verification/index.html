@@ -1,0 +1,5226 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="General Event-Sourced Agentic Computation Framework & Substrate">
+      
+      
+        <meta name="author" content="AETHER Team">
+      
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Full Code Manifest — Wave 5: Workspace, Patching, Tools e Verificação Real - AETHER Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../../../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#full-code-manifest-wave-5-workspace-patching-tools-e-verificacao-real" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../../../.." title="AETHER Documentation" class="md-header__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AETHER Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Full Code Manifest — Wave 5: Workspace, Patching, Tools e Verificação Real
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../../../.." title="AETHER Documentation" class="md-nav__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AETHER Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Law & Norms
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Law & Norms
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../SPEC/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Specification (SPEC)
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions Index
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Overview
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../architecture/boundaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Boundaries
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../architecture/workflows/end-to-end-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-to-End Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../architecture/workflows/system-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Bootstrap
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/agency/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agency
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/application-interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Interfaces
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/assurance-evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Assurance & Evaluation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/causal-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Causal State
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/composition-extensibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Composition & Extensibility
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/delegation-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation & Topology
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kernel
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/memory-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory & Learning
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/runtime-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/workflows/request-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Request Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/workflows/agent-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/workflows/event-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/workflows/delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/architecture/workflows/recovery-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recovery & Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/compose-an-agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compose an Agent
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/add-pack-or-tool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Pack or Tool
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/add-adapter-or-provider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Adapter or Provider
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/operate-runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operate Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/guides/run-and-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Run and Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schemas
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Port Contracts
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/api-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Reference
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/manifests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifests
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../backend/reference/artifacts-memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Artifacts & Memory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../../../../frontend/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product PRDs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Product PRDs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/FRONTEND_PRD_PLACEMENT_MANIFEST/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Placement Manifest
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/PRD_AETHER_CLI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD CLI
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/PRD_AETHER_DESKTOP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Desktop
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/PRD_AETHER_LAB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Lab
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/PRD_AETHER_TUI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD TUI
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../product/frontend/PRD_FRONTEND_PLATFORM/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Platform
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Execution
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../execution/active/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../execution/milestones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Milestones
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../execution/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & Reports
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & Reports
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../theory/agent-substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../benchmark/main/BENCHMARK_V090_FULL.MD" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmark Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/AI/openrouter_llm_models_suggested/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Models
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_2" id="__nav_9_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coding Harness
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Coding Harness
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/ARCHON_gemini_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Archon Gemini Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/DEKAS_claude_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dekas Claude Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/LLM_RESPONSE_WRANGLER/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Response Wrangler
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/LLM_benchmarkings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Benchmarking
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_2308B_gm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research 2308B GM
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_Harness_Builder_Framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Builder Framework
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_META_COGNITIVE_ENGINEERING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Cognitive Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_META_COGNITIVE_ENGINEERING_briefing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Cognitive Briefing
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_META_FRAMEWORK_2408/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Framework 2408
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_THEORETICAL_SYNTHESIS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theoretical Synthesis
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_deepseek-harness_algorithms-ideas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deepseek Harness Algorithms
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_harness_agentic_coding_builder_research_and_framework_B/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agentic Coding Builder Framework B
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_higgs_2308/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Higgs 2308
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/RESEARCH_metaframework_2508_improved/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metaframework 2508
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/VANGUARD_FRONTIER_SWE_BENCH_AND_AGENTIC_METAFRAMEWORK_REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontier SWE Bench & Metaframework Report
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/VANGUARD_VS_LIM_INSIGHTS_SOTS_TECHNIQUES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vanguard vs LIM Insights
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/future_improvements_sota_harness_2808/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Future Improvements SOTA Harness
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/proposal_glm_harness_BETA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proposal GLM Harness Beta
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/proposal_hy3_improved/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proposal HY3 Improved
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/research_agentic_runtime_systems_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agentic Runtime Systems Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/research_harness_agentic_systems_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Agentic Systems Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/suggested_LIM_improvements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Suggested LIM Improvements
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/coding_harness/vanguard_body_detailed/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vanguard Body Detailed
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_3" id="__nav_9_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/frontend/AETHER_FRONTEND_MASTERPLAN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Masterplan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/frontend/frontend_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--experiment"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/frontend/frontend_prototype_beta_gem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Prototype Beta Gem
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--experiment"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../../../research/frontend/integration_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Plan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0-resultado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0. Resultado
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-paths-reais-reutilizados" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Paths reais reutilizados
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-novo-arquivo-packscode-defaultcoding_maxworkspace_txpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Novo arquivo: packs/code-default/coding_max/workspace_tx.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-correcao-recomendada-para-producao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Correção recomendada para produção
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-novo-arquivo-packscode-defaultcoding_maxtool_resultspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Novo arquivo: packs/code-default/coding_max/tool_results.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-novo-arquivo-packscode-defaultcoding_maxtest_selectorpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Novo arquivo: packs/code-default/coding_max/test_selector.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-novo-arquivo-packscode-defaultcoding_maxverification_pipelinepy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Novo arquivo: packs/code-default/coding_max/verification_pipeline.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-diff-em-terminal_runnerpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Diff em terminal_runner.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-diff-em-fs_toolkitpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Diff em fs_toolkit.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-diff-em-ast_patchpy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Diff em ast_patch.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-testes-testpackscode_defaulttest_workspace_toolspy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Testes: test/packs/code_default/test_workspace_tools.py
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-security-invariants" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Security invariants
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-tool-contracts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Tool contracts
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-test-corpus-obrigatorio" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Test corpus obrigatório
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-ordem-de-integracao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Ordem de integração
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-review-checklist-detalhado" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Review checklist detalhado
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-acceptance-gates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. Acceptance gates
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#17-definition-of-done" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17. Definition of Done
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="full-code-manifest-wave-5-workspace-patching-tools-e-verificacao-real">Full Code Manifest — Wave 5: Workspace, Patching, Tools e Verificação Real</h1>
+<h2 id="0-resultado">0. Resultado</h2>
+<p>Implementar uma superfície transacional de engenharia dentro de <code>packs/code-default</code>, usando os toolkits existentes e sem bypass do dispatch. A onda fecha edição atômica, rollback, comandos allowlisted, seleção de testes, receipts frescos e patch artifacts.</p>
+<h2 id="1-paths-reais-reutilizados">1. Paths reais reutilizados</h2>
+<ul>
+<li><code>packs/code-default/toolkits/fs_toolkit.py</code> — leitura/escrita confinada.</li>
+<li><code>packs/code-default/toolkits/ast_patch.py</code> — patch estrutural/unified.</li>
+<li><code>packs/code-default/toolkits/terminal_runner.py</code> — processos limitados.</li>
+<li><code>packs/code-default/toolkits/composite.py</code> — resolução de verbs.</li>
+<li><code>vanguard/packages/runtime/artifacts.py</code> — CAS/evidence.</li>
+<li><code>vanguard/packages/agency/episode/admission_gate.py</code> — admissão.</li>
+</ul>
+<h2 id="2-novo-arquivo-packscode-defaultcoding_maxworkspace_txpy">2. Novo arquivo: <code>packs/code-default/coding_max/workspace_tx.py</code></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">hashlib</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="k">class</span><span class="w"> </span><span class="nc">WorkspaceState</span><span class="p">:</span>
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="n">digest</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="n">changed_files</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="n">deleted_files</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="k">class</span><span class="w"> </span><span class="nc">WorkspaceTransaction</span><span class="p">:</span>
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="s2">".git"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"workspace must be a git repository"</span><span class="p">)</span>
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_baseline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">()</span>
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">begin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"transaction already active"</span><span class="p">)</span>
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">"aether-workspace-"</span><span class="p">))</span>
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tracked_files</span><span class="p">():</span>
+<a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>            <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span> <span class="o">/</span> <span class="n">path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+<a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>            <span class="n">target</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a>            <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+<a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a>
+<a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">commit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WorkspaceState</span><span class="p">:</span>
+<a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a>            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"no active transaction"</span><span class="p">)</span>
+<a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a>        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">()</span>
+<a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a>        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span><span class="p">)</span>
+<a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_baseline</span> <span class="o">=</span> <span class="n">state</span>
+<a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>        <span class="k">return</span> <span class="n">state</span>
+<a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>
+<a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">rollback</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WorkspaceState</span><span class="p">:</span>
+<a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a>            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">"no active transaction"</span><span class="p">)</span>
+<a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a>        <span class="n">snapshot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span>
+<a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a>        <span class="n">current</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tracked_files</span><span class="p">()}</span>
+<a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a>        <span class="n">original</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">snapshot</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">"*"</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_file</span><span class="p">()}</span>
+<a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a>        <span class="k">for</span> <span class="n">relative</span> <span class="ow">in</span> <span class="n">current</span> <span class="o">-</span> <span class="n">original</span><span class="p">:</span>
+<a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a>            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="n">relative</span><span class="p">)</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+<a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a>        <span class="k">for</span> <span class="n">relative</span> <span class="ow">in</span> <span class="n">original</span><span class="p">:</span>
+<a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a>            <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">/</span> <span class="n">relative</span>
+<a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a>            <span class="n">target</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-0-54" name="__codelineno-0-54" href="#__codelineno-0-54"></a>            <span class="n">os</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">snapshot</span> <span class="o">/</span> <span class="n">relative</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+<a id="__codelineno-0-55" name="__codelineno-0-55" href="#__codelineno-0-55"></a>        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">snapshot</span><span class="p">,</span> <span class="n">ignore_errors</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-0-56" name="__codelineno-0-56" href="#__codelineno-0-56"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">_snapshot</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-57" name="__codelineno-0-57" href="#__codelineno-0-57"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">()</span>
+<a id="__codelineno-0-58" name="__codelineno-0-58" href="#__codelineno-0-58"></a>
+<a id="__codelineno-0-59" name="__codelineno-0-59" href="#__codelineno-0-59"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">state</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">WorkspaceState</span><span class="p">:</span>
+<a id="__codelineno-0-60" name="__codelineno-0-60" href="#__codelineno-0-60"></a>        <span class="n">current</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">():</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hash</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tracked_files</span><span class="p">()}</span>
+<a id="__codelineno-0-61" name="__codelineno-0-61" href="#__codelineno-0-61"></a>        <span class="n">baseline</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">"_baseline"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+<a id="__codelineno-0-62" name="__codelineno-0-62" href="#__codelineno-0-62"></a>        <span class="n">base_map</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">baseline</span><span class="p">,</span> <span class="s2">"_files"</span><span class="p">,</span> <span class="p">{})</span> <span class="k">if</span> <span class="n">baseline</span> <span class="k">else</span> <span class="p">{}</span>
+<a id="__codelineno-0-63" name="__codelineno-0-63" href="#__codelineno-0-63"></a>        <span class="n">changed</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">path</span> <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">digest</span> <span class="ow">in</span> <span class="n">current</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">base_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">!=</span> <span class="n">digest</span><span class="p">))</span>
+<a id="__codelineno-0-64" name="__codelineno-0-64" href="#__codelineno-0-64"></a>        <span class="n">deleted</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">base_map</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">current</span><span class="p">)))</span>
+<a id="__codelineno-0-65" name="__codelineno-0-65" href="#__codelineno-0-65"></a>        <span class="n">aggregate</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">()</span>
+<a id="__codelineno-0-66" name="__codelineno-0-66" href="#__codelineno-0-66"></a>        <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">digest</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">current</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+<a id="__codelineno-0-67" name="__codelineno-0-67" href="#__codelineno-0-67"></a>            <span class="n">aggregate</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
+<a id="__codelineno-0-68" name="__codelineno-0-68" href="#__codelineno-0-68"></a>            <span class="n">aggregate</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">digest</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
+<a id="__codelineno-0-69" name="__codelineno-0-69" href="#__codelineno-0-69"></a>        <span class="n">state</span> <span class="o">=</span> <span class="n">WorkspaceState</span><span class="p">(</span><span class="n">aggregate</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">(),</span> <span class="n">changed</span><span class="p">,</span> <span class="n">deleted</span><span class="p">)</span>
+<a id="__codelineno-0-70" name="__codelineno-0-70" href="#__codelineno-0-70"></a>        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="s2">"_files"</span><span class="p">,</span> <span class="n">current</span><span class="p">)</span>
+<a id="__codelineno-0-71" name="__codelineno-0-71" href="#__codelineno-0-71"></a>        <span class="k">return</span> <span class="n">state</span>
+<a id="__codelineno-0-72" name="__codelineno-0-72" href="#__codelineno-0-72"></a>
+<a id="__codelineno-0-73" name="__codelineno-0-73" href="#__codelineno-0-73"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">changed_files</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<a id="__codelineno-0-74" name="__codelineno-0-74" href="#__codelineno-0-74"></a>        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">()</span>
+<a id="__codelineno-0-75" name="__codelineno-0-75" href="#__codelineno-0-75"></a>        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">changed_files</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">deleted_files</span><span class="p">)))</span>
+<a id="__codelineno-0-76" name="__codelineno-0-76" href="#__codelineno-0-76"></a>
+<a id="__codelineno-0-77" name="__codelineno-0-77" href="#__codelineno-0-77"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">digest</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-78" name="__codelineno-0-78" href="#__codelineno-0-78"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">()</span><span class="o">.</span><span class="n">digest</span>
+<a id="__codelineno-0-79" name="__codelineno-0-79" href="#__codelineno-0-79"></a>
+<a id="__codelineno-0-80" name="__codelineno-0-80" href="#__codelineno-0-80"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_tracked_files</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
+<a id="__codelineno-0-81" name="__codelineno-0-81" href="#__codelineno-0-81"></a>        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">"*"</span><span class="p">):</span>
+<a id="__codelineno-0-82" name="__codelineno-0-82" href="#__codelineno-0-82"></a>            <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">".git"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">path</span><span class="o">.</span><span class="n">parts</span> <span class="ow">and</span> <span class="s2">"node_modules"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">path</span><span class="o">.</span><span class="n">parts</span><span class="p">:</span>
+<a id="__codelineno-0-83" name="__codelineno-0-83" href="#__codelineno-0-83"></a>                <span class="k">yield</span> <span class="n">path</span>
+<a id="__codelineno-0-84" name="__codelineno-0-84" href="#__codelineno-0-84"></a>
+<a id="__codelineno-0-85" name="__codelineno-0-85" href="#__codelineno-0-85"></a>    <span class="nd">@staticmethod</span>
+<a id="__codelineno-0-86" name="__codelineno-0-86" href="#__codelineno-0-86"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_hash</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<a id="__codelineno-0-87" name="__codelineno-0-87" href="#__codelineno-0-87"></a>        <span class="k">return</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">sha256</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_bytes</span><span class="p">())</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+</code></pre></div>
+<h2 id="3-correcao-recomendada-para-producao">3. Correção recomendada para produção</h2>
+<p>O exemplo acima documenta semântica, mas a implementação final deve trocar cópia ampla por <code>git worktree</code> ou snapshot por hardlink/reflink quando disponível. Nunca usar <code>git reset --hard</code>; rollback deve atuar somente no workspace efêmero criado para a execução.</p>
+<h2 id="4-novo-arquivo-packscode-defaultcoding_maxtool_resultspy">4. Novo arquivo: <code>packs/code-default/coding_max/tool_results.py</code></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Mapping</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">vanguard.packages.runtime.artifacts</span><span class="w"> </span><span class="kn">import</span> <span class="n">ArtifactWriter</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="k">class</span><span class="w"> </span><span class="nc">ToolResultRef</span><span class="p">:</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>    <span class="n">verb</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>    <span class="n">exit_code</span><span class="p">:</span> <span class="nb">int</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">stdout_digest</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">stderr_digest</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="n">truncated</span><span class="p">:</span> <span class="nb">bool</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>    <span class="n">metadata</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="k">class</span><span class="w"> </span><span class="nc">ToolResultCapturer</span><span class="p">:</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">writer</span><span class="p">:</span> <span class="n">ArtifactWriter</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">run_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">episode_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">16000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="o">=</span> <span class="n">writer</span>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">run_id</span> <span class="o">=</span> <span class="n">run_id</span>
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">episode_id</span> <span class="o">=</span> <span class="n">episode_id</span>
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">limit</span> <span class="o">=</span> <span class="n">limit</span>
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">capture</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">verb</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exit_code</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">stdout</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">stderr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ToolResultRef</span><span class="p">:</span>
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>        <span class="n">out_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">capture</span><span class="p">(</span>
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>            <span class="n">role</span><span class="o">=</span><span class="s2">"tool_stdout"</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">stdout</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">run_id</span><span class="p">,</span>
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>            <span class="n">episode_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_id</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>        <span class="p">)</span> <span class="k">if</span> <span class="n">stdout</span> <span class="k">else</span> <span class="kc">None</span>
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a>        <span class="n">err_ref</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">capture</span><span class="p">(</span>
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>            <span class="n">role</span><span class="o">=</span><span class="s2">"tool_stderr"</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">stderr</span><span class="p">,</span> <span class="n">run_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">run_id</span><span class="p">,</span>
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>            <span class="n">episode_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_id</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>        <span class="p">)</span> <span class="k">if</span> <span class="n">stderr</span> <span class="k">else</span> <span class="kc">None</span>
+<a id="__codelineno-1-33" name="__codelineno-1-33" href="#__codelineno-1-33"></a>        <span class="k">return</span> <span class="n">ToolResultRef</span><span class="p">(</span>
+<a id="__codelineno-1-34" name="__codelineno-1-34" href="#__codelineno-1-34"></a>            <span class="n">verb</span><span class="o">=</span><span class="n">verb</span><span class="p">,</span> <span class="n">exit_code</span><span class="o">=</span><span class="n">exit_code</span><span class="p">,</span>
+<a id="__codelineno-1-35" name="__codelineno-1-35" href="#__codelineno-1-35"></a>            <span class="n">stdout_digest</span><span class="o">=</span><span class="n">out_ref</span><span class="o">.</span><span class="n">digest</span> <span class="k">if</span> <span class="n">out_ref</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-1-36" name="__codelineno-1-36" href="#__codelineno-1-36"></a>            <span class="n">stderr_digest</span><span class="o">=</span><span class="n">err_ref</span><span class="o">.</span><span class="n">digest</span> <span class="k">if</span> <span class="n">err_ref</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-1-37" name="__codelineno-1-37" href="#__codelineno-1-37"></a>            <span class="n">truncated</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">stdout</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">stderr</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit</span><span class="p">,</span>
+<a id="__codelineno-1-38" name="__codelineno-1-38" href="#__codelineno-1-38"></a>            <span class="n">metadata</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">metadata</span> <span class="ow">or</span> <span class="p">{}),</span>
+<a id="__codelineno-1-39" name="__codelineno-1-39" href="#__codelineno-1-39"></a>        <span class="p">)</span>
+</code></pre></div>
+<h2 id="5-novo-arquivo-packscode-defaultcoding_maxtest_selectorpy">5. Novo arquivo: <code>packs/code-default/coding_max/test_selector.py</code></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="kn">from</span><span class="w"> </span><span class="nn">.intelligence</span><span class="w"> </span><span class="kn">import</span> <span class="n">RepositoryIntelligence</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="k">class</span><span class="w"> </span><span class="nc">TestPlan</span><span class="p">:</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>    <span class="n">targeted</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>    <span class="n">affected</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>    <span class="n">regression</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="k">class</span><span class="w"> </span><span class="nc">TestSelector</span><span class="p">:</span>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">intelligence</span><span class="p">:</span> <span class="n">RepositoryIntelligence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">root</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">intelligence</span> <span class="o">=</span> <span class="n">intelligence</span>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">select</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">changed_files</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TestPlan</span><span class="p">:</span>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a>        <span class="n">related</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">changed_files</span><span class="p">:</span>
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a>            <span class="n">related</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">hit</span><span class="o">.</span><span class="n">path</span> <span class="k">for</span> <span class="n">hit</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">intelligence</span><span class="o">.</span><span class="n">tests_for</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>        <span class="n">tests</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">related</span><span class="p">))</span>
+<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a>        <span class="n">targeted</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="s2">"python3"</span><span class="p">,</span> <span class="s2">"-m"</span><span class="p">,</span> <span class="s2">"pytest"</span><span class="p">,</span> <span class="n">test</span><span class="p">,</span> <span class="s2">"-q"</span><span class="p">)</span> <span class="k">for</span> <span class="n">test</span> <span class="ow">in</span> <span class="n">tests</span><span class="p">[:</span><span class="mi">8</span><span class="p">])</span>
+<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a>        <span class="n">affected</span> <span class="o">=</span> <span class="p">((</span><span class="s2">"python3"</span><span class="p">,</span> <span class="s2">"-m"</span><span class="p">,</span> <span class="s2">"pytest"</span><span class="p">,</span> <span class="o">*</span><span class="n">tests</span><span class="p">,</span> <span class="s2">"-q"</span><span class="p">),)</span> <span class="k">if</span> <span class="n">tests</span> <span class="k">else</span> <span class="p">()</span>
+<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a>        <span class="n">regression</span> <span class="o">=</span> <span class="p">((</span><span class="s2">"python3"</span><span class="p">,</span> <span class="s2">"-m"</span><span class="p">,</span> <span class="s2">"unittest"</span><span class="p">,</span> <span class="s2">"discover"</span><span class="p">,</span> <span class="s2">"-s"</span><span class="p">,</span> <span class="s2">"test"</span><span class="p">,</span> <span class="s2">"-t"</span><span class="p">,</span> <span class="s2">"."</span><span class="p">),)</span>
+<a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a>        <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s2">"targeted"</span><span class="p">:</span>
+<a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a>            <span class="k">return</span> <span class="n">TestPlan</span><span class="p">(</span><span class="n">targeted</span><span class="p">,</span> <span class="p">(),</span> <span class="p">())</span>
+<a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>        <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s2">"affected"</span><span class="p">:</span>
+<a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a>            <span class="k">return</span> <span class="n">TestPlan</span><span class="p">(</span><span class="n">targeted</span><span class="p">,</span> <span class="n">affected</span><span class="p">,</span> <span class="p">())</span>
+<a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a>        <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s2">"regression"</span><span class="p">:</span>
+<a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a>            <span class="k">return</span> <span class="n">TestPlan</span><span class="p">(</span><span class="n">targeted</span><span class="p">,</span> <span class="n">affected</span><span class="p">,</span> <span class="n">regression</span><span class="p">)</span>
+<a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"unknown verification level </span><span class="si">{</span><span class="n">level</span><span class="si">!r}</span><span class="s2">"</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="6-novo-arquivo-packscode-defaultcoding_maxverification_pipelinepy">6. Novo arquivo: <code>packs/code-default/coding_max/verification_pipeline.py</code></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">.verification</span><span class="w"> </span><span class="kn">import</span> <span class="n">LayeredVerifier</span><span class="p">,</span> <span class="n">VerificationResult</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">slots</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="k">class</span><span class="w"> </span><span class="nc">VerificationBundle</span><span class="p">:</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="n">workspace_digest</span><span class="p">:</span> <span class="nb">str</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>    <span class="n">results</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">VerificationResult</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>    <span class="n">passed</span><span class="p">:</span> <span class="nb">bool</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>    <span class="n">executed_test_count</span><span class="p">:</span> <span class="nb">int</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a><span class="k">class</span><span class="w"> </span><span class="nc">VerificationPipeline</span><span class="p">:</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verifier</span><span class="p">:</span> <span class="n">LayeredVerifier</span><span class="p">,</span> <span class="n">workspace_digest</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">verifier</span> <span class="o">=</span> <span class="n">verifier</span>
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">workspace_digest</span> <span class="o">=</span> <span class="n">workspace_digest</span>
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>
+<a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">commands</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">VerificationBundle</span><span class="p">:</span>
+<a id="__codelineno-3-21" name="__codelineno-3-21" href="#__codelineno-3-21"></a>        <span class="n">before</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace_digest</span><span class="p">()</span>
+<a id="__codelineno-3-22" name="__codelineno-3-22" href="#__codelineno-3-22"></a>        <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verifier</span><span class="o">.</span><span class="n">verify</span><span class="p">(</span><span class="n">commands</span><span class="p">)</span>
+<a id="__codelineno-3-23" name="__codelineno-3-23" href="#__codelineno-3-23"></a>        <span class="n">after</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace_digest</span><span class="p">()</span>
+<a id="__codelineno-3-24" name="__codelineno-3-24" href="#__codelineno-3-24"></a>        <span class="k">if</span> <span class="n">before</span> <span class="o">!=</span> <span class="n">after</span><span class="p">:</span>
+<a id="__codelineno-3-25" name="__codelineno-3-25" href="#__codelineno-3-25"></a>            <span class="k">return</span> <span class="n">VerificationBundle</span><span class="p">(</span><span class="n">after</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">test_count</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="p">))</span>
+<a id="__codelineno-3-26" name="__codelineno-3-26" href="#__codelineno-3-26"></a>        <span class="n">passed</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">passed</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">)</span>
+<a id="__codelineno-3-27" name="__codelineno-3-27" href="#__codelineno-3-27"></a>        <span class="k">return</span> <span class="n">VerificationBundle</span><span class="p">(</span>
+<a id="__codelineno-3-28" name="__codelineno-3-28" href="#__codelineno-3-28"></a>            <span class="n">workspace_digest</span><span class="o">=</span><span class="n">after</span><span class="p">,</span> <span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="p">,</span> <span class="n">passed</span><span class="o">=</span><span class="n">passed</span><span class="p">,</span>
+<a id="__codelineno-3-29" name="__codelineno-3-29" href="#__codelineno-3-29"></a>            <span class="n">executed_test_count</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">test_count</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">),</span>
+<a id="__codelineno-3-30" name="__codelineno-3-30" href="#__codelineno-3-30"></a>        <span class="p">)</span>
+</code></pre></div>
+<h2 id="7-diff-em-terminal_runnerpy">7. Diff em <code>terminal_runner.py</code></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="gu">@@ class TerminalToolkit:</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="gd">-    def __init__(self, workspace: str | Path, timeout_seconds: float = 30.0) -&gt; None:</span>
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="gi">+    def __init__(self, workspace: str | Path, timeout_seconds: float = 30.0,</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="gi">+                 allowed_programs: Sequence[str] = ("git", "pytest", "python3", "ruff")) -&gt; None:</span>
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w"> </span>        self._workspace = Path(workspace).resolve()
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="w"> </span>        self._timeout = timeout_seconds
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="gi">+        self._allowed = frozenset(allowed_programs)</span>
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="gu">@@ def execute(self, request, ctx):</span>
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="gi">+        program = Path(command[0]).name</span>
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="gi">+        if program not in self._allowed:</span>
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="gi">+            return Err("program_denied", f"{program} is not allowlisted")</span>
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="gi">+        if request.args.get("cwd"):</span>
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="gi">+            cwd = (self._workspace / str(request.args["cwd"])).resolve()</span>
+<a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a><span class="gi">+            if self._workspace not in cwd.parents and cwd != self._workspace:</span>
+<a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="gi">+                return Err("cwd_escape", "cwd escapes workspace")</span>
+</code></pre></div>
+<h2 id="8-diff-em-fs_toolkitpy">8. Diff em <code>fs_toolkit.py</code></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="gu">@@ class FsToolkit:</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="gi">+    def _resolve(self, raw: str) -&gt; Path:</span>
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="gi">+        target = (self._workspace / raw).resolve()</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="gi">+        if target != self._workspace and self._workspace not in target.parents:</span>
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="gi">+            raise ValueError("path escapes workspace")</span>
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="gi">+        return target</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="gu">@@ def execute(self, request, ctx):</span>
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="gd">-        path = self._workspace / str(request.args["path"])</span>
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="gi">+        try:</span>
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="gi">+            path = self._resolve(str(request.args["path"]))</span>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="gi">+        except ValueError as exc:</span>
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="gi">+            return Err("path_escape", str(exc))</span>
+</code></pre></div>
+<h2 id="9-diff-em-ast_patchpy">9. Diff em <code>ast_patch.py</code></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="gu">@@ class AstPatchToolkit:</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="gi">+        expected = str(request.args.get("before_digest") or "")</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="gi">+        current = hashlib.sha256(before.encode("utf-8")).hexdigest()</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="gi">+        if expected and expected != current:</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a><span class="gi">+            return Err("stale_patch", "before_digest does not match current file")</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a><span class="gi">+        if after == before:</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="gi">+            return Err("no_op_patch", "patch produced no change")</span>
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a><span class="gi">+        temp = path.with_suffix(path.suffix + ".aether-tmp")</span>
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a><span class="gi">+        temp.write_text(after, encoding="utf-8")</span>
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a><span class="gi">+        os.replace(temp, path)</span>
+</code></pre></div>
+<h2 id="10-testes-testpackscode_defaulttest_workspace_toolspy">10. Testes: <code>test/packs/code_default/test_workspace_tools.py</code></h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="kn">import</span><span class="w"> </span><span class="nn">unittest</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="kn">from</span><span class="w"> </span><span class="nn">coding_max.verification</span><span class="w"> </span><span class="kn">import</span> <span class="n">LayeredVerifier</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="kn">from</span><span class="w"> </span><span class="nn">coding_max.verification_pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">VerificationPipeline</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="k">class</span><span class="w"> </span><span class="nc">VerificationPipelineTests</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">TestCase</span><span class="p">):</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_zero_tests_is_failure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>        <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a>            <span class="n">verifier</span> <span class="o">=</span> <span class="n">LayeredVerifier</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">))</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>            <span class="n">pipeline</span> <span class="o">=</span> <span class="n">VerificationPipeline</span><span class="p">(</span><span class="n">verifier</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="s2">"same"</span><span class="p">)</span>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>            <span class="n">bundle</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">(((</span><span class="s2">"python3"</span><span class="p">,</span> <span class="s2">"-c"</span><span class="p">,</span> <span class="s2">"print('ok')"</span><span class="p">),))</span>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="n">bundle</span><span class="o">.</span><span class="n">passed</span><span class="p">)</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_workspace_mutation_during_tests_is_stale</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a>        <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a>            <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">)</span>
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a>            <span class="n">marker</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">"marker"</span>
+<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a>            <span class="n">digest</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">marker</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span> <span class="k">if</span> <span class="n">marker</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"before"</span>
+<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a>            <span class="n">verifier</span> <span class="o">=</span> <span class="n">LayeredVerifier</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+<a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a>            <span class="n">pipeline</span> <span class="o">=</span> <span class="n">VerificationPipeline</span><span class="p">(</span><span class="n">verifier</span><span class="p">,</span> <span class="n">digest</span><span class="p">)</span>
+<a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a>            <span class="n">command</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"python3"</span><span class="p">,</span> <span class="s2">"-c"</span><span class="p">,</span> <span class="s2">"open('marker','w').write('after'); print('1 passed')"</span><span class="p">)</span>
+<a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a>            <span class="n">bundle</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">((</span><span class="n">command</span><span class="p">,))</span>
+<a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">assertFalse</span><span class="p">(</span><span class="n">bundle</span><span class="o">.</span><span class="n">passed</span><span class="p">)</span>
+<a id="__codelineno-7-28" name="__codelineno-7-28" href="#__codelineno-7-28"></a>
+<a id="__codelineno-7-29" name="__codelineno-7-29" href="#__codelineno-7-29"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">test_observed_tests_pass_on_unchanged_subject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<a id="__codelineno-7-30" name="__codelineno-7-30" href="#__codelineno-7-30"></a>        <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span> <span class="k">as</span> <span class="n">tmp</span><span class="p">:</span>
+<a id="__codelineno-7-31" name="__codelineno-7-31" href="#__codelineno-7-31"></a>            <span class="n">verifier</span> <span class="o">=</span> <span class="n">LayeredVerifier</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">tmp</span><span class="p">))</span>
+<a id="__codelineno-7-32" name="__codelineno-7-32" href="#__codelineno-7-32"></a>            <span class="n">pipeline</span> <span class="o">=</span> <span class="n">VerificationPipeline</span><span class="p">(</span><span class="n">verifier</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="s2">"stable"</span><span class="p">)</span>
+<a id="__codelineno-7-33" name="__codelineno-7-33" href="#__codelineno-7-33"></a>            <span class="n">bundle</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">(((</span><span class="s2">"python3"</span><span class="p">,</span> <span class="s2">"-c"</span><span class="p">,</span> <span class="s2">"print('2 passed')"</span><span class="p">),))</span>
+<a id="__codelineno-7-34" name="__codelineno-7-34" href="#__codelineno-7-34"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">bundle</span><span class="o">.</span><span class="n">passed</span><span class="p">)</span>
+<a id="__codelineno-7-35" name="__codelineno-7-35" href="#__codelineno-7-35"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">bundle</span><span class="o">.</span><span class="n">executed_test_count</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="11-security-invariants">11. Security invariants</h2>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Invariant</th>
+<th>Falsifier</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>WS-001</td>
+<td>No path traversal</td>
+<td>adversarial focused test</td>
+</tr>
+<tr>
+<td>WS-002</td>
+<td>No cwd escape</td>
+<td>adversarial focused test</td>
+</tr>
+<tr>
+<td>WS-003</td>
+<td>No unallowlisted executable</td>
+<td>adversarial focused test</td>
+</tr>
+<tr>
+<td>WS-004</td>
+<td>No stale patch</td>
+<td>adversarial focused test</td>
+</tr>
+<tr>
+<td>WS-005</td>
+<td>No no-op patch</td>
+<td>adversarial focused test</td>
+</tr>
+<tr>
+<td>WS-006</td>
+<td>Atomic file replacement</td>
+<td>adversarial focused test</td>
+</tr>
+<tr>
+<td>WS-007</td>
+<td>Rollback only in ephemeral workspace</td>
+<td>adversarial focused test</td>
+</tr>
+<tr>
+<td>WS-008</td>
+<td>Stdout/stderr artifact-backed</td>
+<td>adversarial focused test</td>
+</tr>
+<tr>
+<td>WS-009</td>
+<td>Output truncation explicit</td>
+<td>adversarial focused test</td>
+</tr>
+<tr>
+<td>WS-010</td>
+<td>Tests cannot mutate subject silently</td>
+<td>adversarial focused test</td>
+</tr>
+<tr>
+<td>WS-011</td>
+<td>Zero tests rejected</td>
+<td>adversarial focused test</td>
+</tr>
+<tr>
+<td>WS-012</td>
+<td>Timeout typed</td>
+<td>adversarial focused test</td>
+</tr>
+<tr>
+<td>WS-013</td>
+<td>Exit code preserved</td>
+<td>adversarial focused test</td>
+</tr>
+<tr>
+<td>WS-014</td>
+<td>Changed files derived physically</td>
+<td>adversarial focused test</td>
+</tr>
+<tr>
+<td>WS-015</td>
+<td>Patch digest bound to before/after</td>
+<td>adversarial focused test</td>
+</tr>
+<tr>
+<td>WS-016</td>
+<td>Symlink escape rejected</td>
+<td>adversarial focused test</td>
+</tr>
+<tr>
+<td>WS-017</td>
+<td>Secrets redacted by ArtifactWriter</td>
+<td>adversarial focused test</td>
+</tr>
+<tr>
+<td>WS-018</td>
+<td>No shell=True</td>
+<td>adversarial focused test</td>
+</tr>
+<tr>
+<td>WS-019</td>
+<td>No implicit network</td>
+<td>adversarial focused test</td>
+</tr>
+<tr>
+<td>WS-020</td>
+<td>No destructive git reset</td>
+<td>adversarial focused test</td>
+</tr>
+</tbody>
+</table>
+<h2 id="12-tool-contracts">12. Tool contracts</h2>
+<table>
+<thead>
+<tr>
+<th>Verb</th>
+<th>Inputs</th>
+<th>Receipt</th>
+<th>Recoverable failures</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>fs.read</td>
+<td>path/range</td>
+<td>digest, bytes</td>
+<td>missing/range</td>
+</tr>
+<tr>
+<td>fs.search</td>
+<td>query/globs</td>
+<td>matches artifact</td>
+<td>no matches</td>
+</tr>
+<tr>
+<td>patch.apply</td>
+<td>path/diff/before_digest</td>
+<td>before/after/diff digests</td>
+<td>stale/conflict</td>
+</tr>
+<tr>
+<td>proc.exec</td>
+<td>argv/cwd/timeout</td>
+<td>exit/stdout/stderr digests</td>
+<td>timeout/nonzero</td>
+</tr>
+<tr>
+<td>test.run</td>
+<td>selection/level</td>
+<td>counts/duration/workspace digest</td>
+<td>fail/zero/stale</td>
+</tr>
+<tr>
+<td>git.diff</td>
+<td>base/path</td>
+<td>diff artifact</td>
+<td>dirty baseline</td>
+</tr>
+</tbody>
+</table>
+<h2 id="13-test-corpus-obrigatorio">13. Test corpus obrigatório</h2>
+<ul>
+<li>traversal <code>../../etc/passwd</code>.</li>
+<li>absolute path fora da raiz.</li>
+<li>symlink interno apontando para fora.</li>
+<li>patch com digest antigo.</li>
+<li>patch que não altera bytes.</li>
+<li>patch parcialmente aplicável.</li>
+<li>processo não allowlisted.</li>
+<li>processo que excede timeout.</li>
+<li>output acima do limite.</li>
+<li>testes com exit 0 e zero count.</li>
+<li>testes com exit 1 e count positivo.</li>
+<li>testes que alteram workspace.</li>
+<li>rollback após patch inválido.</li>
+<li>commit após patch válido.</li>
+<li>arquivo binário rejeitado por editor textual.</li>
+<li>concorrência sobre o mesmo arquivo recusada.</li>
+</ul>
+<h2 id="14-ordem-de-integracao">14. Ordem de integração</h2>
+<ol>
+<li>Implementar <code>_resolve</code> comum e testes de escape.</li>
+<li>Implementar atomic patch com <code>before_digest</code>.</li>
+<li>Adicionar captura artifact-backed de resultados.</li>
+<li>Implementar TestSelector.</li>
+<li>Implementar VerificationPipeline.</li>
+<li>Integrar transaction begin/commit/rollback no coordinator.</li>
+<li>Rodar smoke em repositório temporário.</li>
+<li>Só depois habilitar <code>coding-max</code> em runs reais.</li>
+</ol>
+<h2 id="15-review-checklist-detalhado">15. Review checklist detalhado</h2>
+<ul>
+<li>[ ] WS-R001 — <code>WorkspaceTransaction.begin</code> validates root.</li>
+<li>[ ] WS-R002 — <code>WorkspaceTransaction.begin</code> rejects traversal.</li>
+<li>[ ] WS-R003 — <code>WorkspaceTransaction.begin</code> handles symlink.</li>
+<li>[ ] WS-R004 — <code>WorkspaceTransaction.begin</code> preserves digest.</li>
+<li>[ ] WS-R005 — <code>WorkspaceTransaction.begin</code> returns typed error.</li>
+<li>[ ] WS-R006 — <code>WorkspaceTransaction.begin</code> records artifact.</li>
+<li>[ ] WS-R007 — <code>WorkspaceTransaction.begin</code> propagates budget.</li>
+<li>[ ] WS-R008 — <code>WorkspaceTransaction.begin</code> has timeout.</li>
+<li>[ ] WS-R009 — <code>WorkspaceTransaction.begin</code> is idempotent.</li>
+<li>[ ] WS-R010 — <code>WorkspaceTransaction.begin</code> supports retry.</li>
+<li>[ ] WS-R011 — <code>WorkspaceTransaction.begin</code> does not use shell.</li>
+<li>[ ] WS-R012 — <code>WorkspaceTransaction.begin</code> does not leak secret.</li>
+<li>[ ] WS-R013 — <code>WorkspaceTransaction.begin</code> bounds output.</li>
+<li>[ ] WS-R014 — <code>WorkspaceTransaction.begin</code> tests success.</li>
+<li>[ ] WS-R015 — <code>WorkspaceTransaction.begin</code> tests failure.</li>
+<li>[ ] WS-R016 — <code>WorkspaceTransaction.begin</code> tests stale input.</li>
+<li>[ ] WS-R017 — <code>WorkspaceTransaction.begin</code> tests interruption.</li>
+<li>[ ] WS-R018 — <code>WorkspaceTransaction.begin</code> tests rollback.</li>
+<li>[ ] WS-R019 — <code>WorkspaceTransaction.begin</code> documents failure.</li>
+<li>[ ] WS-R020 — <code>WorkspaceTransaction.begin</code> keeps authority in kernel.</li>
+<li>[ ] WS-R021 — <code>WorkspaceTransaction.begin</code> works offline.</li>
+<li>[ ] WS-R022 — <code>WorkspaceTransaction.begin</code> uses atomic replace.</li>
+<li>[ ] WS-R023 — <code>WorkspaceTransaction.begin</code> reports changed files.</li>
+<li>[ ] WS-R024 — <code>WorkspaceTransaction.begin</code> binds workspace identity.</li>
+<li>[ ] WS-R025 — <code>WorkspaceTransaction.begin</code> avoids full repo copy when possible.</li>
+<li>[ ] WS-R026 — <code>WorkspaceTransaction.commit</code> validates root.</li>
+<li>[ ] WS-R027 — <code>WorkspaceTransaction.commit</code> rejects traversal.</li>
+<li>[ ] WS-R028 — <code>WorkspaceTransaction.commit</code> handles symlink.</li>
+<li>[ ] WS-R029 — <code>WorkspaceTransaction.commit</code> preserves digest.</li>
+<li>[ ] WS-R030 — <code>WorkspaceTransaction.commit</code> returns typed error.</li>
+<li>[ ] WS-R031 — <code>WorkspaceTransaction.commit</code> records artifact.</li>
+<li>[ ] WS-R032 — <code>WorkspaceTransaction.commit</code> propagates budget.</li>
+<li>[ ] WS-R033 — <code>WorkspaceTransaction.commit</code> has timeout.</li>
+<li>[ ] WS-R034 — <code>WorkspaceTransaction.commit</code> is idempotent.</li>
+<li>[ ] WS-R035 — <code>WorkspaceTransaction.commit</code> supports retry.</li>
+<li>[ ] WS-R036 — <code>WorkspaceTransaction.commit</code> does not use shell.</li>
+<li>[ ] WS-R037 — <code>WorkspaceTransaction.commit</code> does not leak secret.</li>
+<li>[ ] WS-R038 — <code>WorkspaceTransaction.commit</code> bounds output.</li>
+<li>[ ] WS-R039 — <code>WorkspaceTransaction.commit</code> tests success.</li>
+<li>[ ] WS-R040 — <code>WorkspaceTransaction.commit</code> tests failure.</li>
+<li>[ ] WS-R041 — <code>WorkspaceTransaction.commit</code> tests stale input.</li>
+<li>[ ] WS-R042 — <code>WorkspaceTransaction.commit</code> tests interruption.</li>
+<li>[ ] WS-R043 — <code>WorkspaceTransaction.commit</code> tests rollback.</li>
+<li>[ ] WS-R044 — <code>WorkspaceTransaction.commit</code> documents failure.</li>
+<li>[ ] WS-R045 — <code>WorkspaceTransaction.commit</code> keeps authority in kernel.</li>
+<li>[ ] WS-R046 — <code>WorkspaceTransaction.commit</code> works offline.</li>
+<li>[ ] WS-R047 — <code>WorkspaceTransaction.commit</code> uses atomic replace.</li>
+<li>[ ] WS-R048 — <code>WorkspaceTransaction.commit</code> reports changed files.</li>
+<li>[ ] WS-R049 — <code>WorkspaceTransaction.commit</code> binds workspace identity.</li>
+<li>[ ] WS-R050 — <code>WorkspaceTransaction.commit</code> avoids full repo copy when possible.</li>
+<li>[ ] WS-R051 — <code>WorkspaceTransaction.rollback</code> validates root.</li>
+<li>[ ] WS-R052 — <code>WorkspaceTransaction.rollback</code> rejects traversal.</li>
+<li>[ ] WS-R053 — <code>WorkspaceTransaction.rollback</code> handles symlink.</li>
+<li>[ ] WS-R054 — <code>WorkspaceTransaction.rollback</code> preserves digest.</li>
+<li>[ ] WS-R055 — <code>WorkspaceTransaction.rollback</code> returns typed error.</li>
+<li>[ ] WS-R056 — <code>WorkspaceTransaction.rollback</code> records artifact.</li>
+<li>[ ] WS-R057 — <code>WorkspaceTransaction.rollback</code> propagates budget.</li>
+<li>[ ] WS-R058 — <code>WorkspaceTransaction.rollback</code> has timeout.</li>
+<li>[ ] WS-R059 — <code>WorkspaceTransaction.rollback</code> is idempotent.</li>
+<li>[ ] WS-R060 — <code>WorkspaceTransaction.rollback</code> supports retry.</li>
+<li>[ ] WS-R061 — <code>WorkspaceTransaction.rollback</code> does not use shell.</li>
+<li>[ ] WS-R062 — <code>WorkspaceTransaction.rollback</code> does not leak secret.</li>
+<li>[ ] WS-R063 — <code>WorkspaceTransaction.rollback</code> bounds output.</li>
+<li>[ ] WS-R064 — <code>WorkspaceTransaction.rollback</code> tests success.</li>
+<li>[ ] WS-R065 — <code>WorkspaceTransaction.rollback</code> tests failure.</li>
+<li>[ ] WS-R066 — <code>WorkspaceTransaction.rollback</code> tests stale input.</li>
+<li>[ ] WS-R067 — <code>WorkspaceTransaction.rollback</code> tests interruption.</li>
+<li>[ ] WS-R068 — <code>WorkspaceTransaction.rollback</code> tests rollback.</li>
+<li>[ ] WS-R069 — <code>WorkspaceTransaction.rollback</code> documents failure.</li>
+<li>[ ] WS-R070 — <code>WorkspaceTransaction.rollback</code> keeps authority in kernel.</li>
+<li>[ ] WS-R071 — <code>WorkspaceTransaction.rollback</code> works offline.</li>
+<li>[ ] WS-R072 — <code>WorkspaceTransaction.rollback</code> uses atomic replace.</li>
+<li>[ ] WS-R073 — <code>WorkspaceTransaction.rollback</code> reports changed files.</li>
+<li>[ ] WS-R074 — <code>WorkspaceTransaction.rollback</code> binds workspace identity.</li>
+<li>[ ] WS-R075 — <code>WorkspaceTransaction.rollback</code> avoids full repo copy when possible.</li>
+<li>[ ] WS-R076 — <code>WorkspaceTransaction.state</code> validates root.</li>
+<li>[ ] WS-R077 — <code>WorkspaceTransaction.state</code> rejects traversal.</li>
+<li>[ ] WS-R078 — <code>WorkspaceTransaction.state</code> handles symlink.</li>
+<li>[ ] WS-R079 — <code>WorkspaceTransaction.state</code> preserves digest.</li>
+<li>[ ] WS-R080 — <code>WorkspaceTransaction.state</code> returns typed error.</li>
+<li>[ ] WS-R081 — <code>WorkspaceTransaction.state</code> records artifact.</li>
+<li>[ ] WS-R082 — <code>WorkspaceTransaction.state</code> propagates budget.</li>
+<li>[ ] WS-R083 — <code>WorkspaceTransaction.state</code> has timeout.</li>
+<li>[ ] WS-R084 — <code>WorkspaceTransaction.state</code> is idempotent.</li>
+<li>[ ] WS-R085 — <code>WorkspaceTransaction.state</code> supports retry.</li>
+<li>[ ] WS-R086 — <code>WorkspaceTransaction.state</code> does not use shell.</li>
+<li>[ ] WS-R087 — <code>WorkspaceTransaction.state</code> does not leak secret.</li>
+<li>[ ] WS-R088 — <code>WorkspaceTransaction.state</code> bounds output.</li>
+<li>[ ] WS-R089 — <code>WorkspaceTransaction.state</code> tests success.</li>
+<li>[ ] WS-R090 — <code>WorkspaceTransaction.state</code> tests failure.</li>
+<li>[ ] WS-R091 — <code>WorkspaceTransaction.state</code> tests stale input.</li>
+<li>[ ] WS-R092 — <code>WorkspaceTransaction.state</code> tests interruption.</li>
+<li>[ ] WS-R093 — <code>WorkspaceTransaction.state</code> tests rollback.</li>
+<li>[ ] WS-R094 — <code>WorkspaceTransaction.state</code> documents failure.</li>
+<li>[ ] WS-R095 — <code>WorkspaceTransaction.state</code> keeps authority in kernel.</li>
+<li>[ ] WS-R096 — <code>WorkspaceTransaction.state</code> works offline.</li>
+<li>[ ] WS-R097 — <code>WorkspaceTransaction.state</code> uses atomic replace.</li>
+<li>[ ] WS-R098 — <code>WorkspaceTransaction.state</code> reports changed files.</li>
+<li>[ ] WS-R099 — <code>WorkspaceTransaction.state</code> binds workspace identity.</li>
+<li>[ ] WS-R100 — <code>WorkspaceTransaction.state</code> avoids full repo copy when possible.</li>
+<li>[ ] WS-R101 — <code>ToolResultCapturer.capture</code> validates root.</li>
+<li>[ ] WS-R102 — <code>ToolResultCapturer.capture</code> rejects traversal.</li>
+<li>[ ] WS-R103 — <code>ToolResultCapturer.capture</code> handles symlink.</li>
+<li>[ ] WS-R104 — <code>ToolResultCapturer.capture</code> preserves digest.</li>
+<li>[ ] WS-R105 — <code>ToolResultCapturer.capture</code> returns typed error.</li>
+<li>[ ] WS-R106 — <code>ToolResultCapturer.capture</code> records artifact.</li>
+<li>[ ] WS-R107 — <code>ToolResultCapturer.capture</code> propagates budget.</li>
+<li>[ ] WS-R108 — <code>ToolResultCapturer.capture</code> has timeout.</li>
+<li>[ ] WS-R109 — <code>ToolResultCapturer.capture</code> is idempotent.</li>
+<li>[ ] WS-R110 — <code>ToolResultCapturer.capture</code> supports retry.</li>
+<li>[ ] WS-R111 — <code>ToolResultCapturer.capture</code> does not use shell.</li>
+<li>[ ] WS-R112 — <code>ToolResultCapturer.capture</code> does not leak secret.</li>
+<li>[ ] WS-R113 — <code>ToolResultCapturer.capture</code> bounds output.</li>
+<li>[ ] WS-R114 — <code>ToolResultCapturer.capture</code> tests success.</li>
+<li>[ ] WS-R115 — <code>ToolResultCapturer.capture</code> tests failure.</li>
+<li>[ ] WS-R116 — <code>ToolResultCapturer.capture</code> tests stale input.</li>
+<li>[ ] WS-R117 — <code>ToolResultCapturer.capture</code> tests interruption.</li>
+<li>[ ] WS-R118 — <code>ToolResultCapturer.capture</code> tests rollback.</li>
+<li>[ ] WS-R119 — <code>ToolResultCapturer.capture</code> documents failure.</li>
+<li>[ ] WS-R120 — <code>ToolResultCapturer.capture</code> keeps authority in kernel.</li>
+<li>[ ] WS-R121 — <code>ToolResultCapturer.capture</code> works offline.</li>
+<li>[ ] WS-R122 — <code>ToolResultCapturer.capture</code> uses atomic replace.</li>
+<li>[ ] WS-R123 — <code>ToolResultCapturer.capture</code> reports changed files.</li>
+<li>[ ] WS-R124 — <code>ToolResultCapturer.capture</code> binds workspace identity.</li>
+<li>[ ] WS-R125 — <code>ToolResultCapturer.capture</code> avoids full repo copy when possible.</li>
+<li>[ ] WS-R126 — <code>TestSelector.select</code> validates root.</li>
+<li>[ ] WS-R127 — <code>TestSelector.select</code> rejects traversal.</li>
+<li>[ ] WS-R128 — <code>TestSelector.select</code> handles symlink.</li>
+<li>[ ] WS-R129 — <code>TestSelector.select</code> preserves digest.</li>
+<li>[ ] WS-R130 — <code>TestSelector.select</code> returns typed error.</li>
+<li>[ ] WS-R131 — <code>TestSelector.select</code> records artifact.</li>
+<li>[ ] WS-R132 — <code>TestSelector.select</code> propagates budget.</li>
+<li>[ ] WS-R133 — <code>TestSelector.select</code> has timeout.</li>
+<li>[ ] WS-R134 — <code>TestSelector.select</code> is idempotent.</li>
+<li>[ ] WS-R135 — <code>TestSelector.select</code> supports retry.</li>
+<li>[ ] WS-R136 — <code>TestSelector.select</code> does not use shell.</li>
+<li>[ ] WS-R137 — <code>TestSelector.select</code> does not leak secret.</li>
+<li>[ ] WS-R138 — <code>TestSelector.select</code> bounds output.</li>
+<li>[ ] WS-R139 — <code>TestSelector.select</code> tests success.</li>
+<li>[ ] WS-R140 — <code>TestSelector.select</code> tests failure.</li>
+<li>[ ] WS-R141 — <code>TestSelector.select</code> tests stale input.</li>
+<li>[ ] WS-R142 — <code>TestSelector.select</code> tests interruption.</li>
+<li>[ ] WS-R143 — <code>TestSelector.select</code> tests rollback.</li>
+<li>[ ] WS-R144 — <code>TestSelector.select</code> documents failure.</li>
+<li>[ ] WS-R145 — <code>TestSelector.select</code> keeps authority in kernel.</li>
+<li>[ ] WS-R146 — <code>TestSelector.select</code> works offline.</li>
+<li>[ ] WS-R147 — <code>TestSelector.select</code> uses atomic replace.</li>
+<li>[ ] WS-R148 — <code>TestSelector.select</code> reports changed files.</li>
+<li>[ ] WS-R149 — <code>TestSelector.select</code> binds workspace identity.</li>
+<li>[ ] WS-R150 — <code>TestSelector.select</code> avoids full repo copy when possible.</li>
+<li>[ ] WS-R151 — <code>VerificationPipeline.run</code> validates root.</li>
+<li>[ ] WS-R152 — <code>VerificationPipeline.run</code> rejects traversal.</li>
+<li>[ ] WS-R153 — <code>VerificationPipeline.run</code> handles symlink.</li>
+<li>[ ] WS-R154 — <code>VerificationPipeline.run</code> preserves digest.</li>
+<li>[ ] WS-R155 — <code>VerificationPipeline.run</code> returns typed error.</li>
+<li>[ ] WS-R156 — <code>VerificationPipeline.run</code> records artifact.</li>
+<li>[ ] WS-R157 — <code>VerificationPipeline.run</code> propagates budget.</li>
+<li>[ ] WS-R158 — <code>VerificationPipeline.run</code> has timeout.</li>
+<li>[ ] WS-R159 — <code>VerificationPipeline.run</code> is idempotent.</li>
+<li>[ ] WS-R160 — <code>VerificationPipeline.run</code> supports retry.</li>
+<li>[ ] WS-R161 — <code>VerificationPipeline.run</code> does not use shell.</li>
+<li>[ ] WS-R162 — <code>VerificationPipeline.run</code> does not leak secret.</li>
+<li>[ ] WS-R163 — <code>VerificationPipeline.run</code> bounds output.</li>
+<li>[ ] WS-R164 — <code>VerificationPipeline.run</code> tests success.</li>
+<li>[ ] WS-R165 — <code>VerificationPipeline.run</code> tests failure.</li>
+<li>[ ] WS-R166 — <code>VerificationPipeline.run</code> tests stale input.</li>
+<li>[ ] WS-R167 — <code>VerificationPipeline.run</code> tests interruption.</li>
+<li>[ ] WS-R168 — <code>VerificationPipeline.run</code> tests rollback.</li>
+<li>[ ] WS-R169 — <code>VerificationPipeline.run</code> documents failure.</li>
+<li>[ ] WS-R170 — <code>VerificationPipeline.run</code> keeps authority in kernel.</li>
+<li>[ ] WS-R171 — <code>VerificationPipeline.run</code> works offline.</li>
+<li>[ ] WS-R172 — <code>VerificationPipeline.run</code> uses atomic replace.</li>
+<li>[ ] WS-R173 — <code>VerificationPipeline.run</code> reports changed files.</li>
+<li>[ ] WS-R174 — <code>VerificationPipeline.run</code> binds workspace identity.</li>
+<li>[ ] WS-R175 — <code>VerificationPipeline.run</code> avoids full repo copy when possible.</li>
+<li>[ ] WS-R176 — <code>TerminalToolkit.execute</code> validates root.</li>
+<li>[ ] WS-R177 — <code>TerminalToolkit.execute</code> rejects traversal.</li>
+<li>[ ] WS-R178 — <code>TerminalToolkit.execute</code> handles symlink.</li>
+<li>[ ] WS-R179 — <code>TerminalToolkit.execute</code> preserves digest.</li>
+<li>[ ] WS-R180 — <code>TerminalToolkit.execute</code> returns typed error.</li>
+<li>[ ] WS-R181 — <code>TerminalToolkit.execute</code> records artifact.</li>
+<li>[ ] WS-R182 — <code>TerminalToolkit.execute</code> propagates budget.</li>
+<li>[ ] WS-R183 — <code>TerminalToolkit.execute</code> has timeout.</li>
+<li>[ ] WS-R184 — <code>TerminalToolkit.execute</code> is idempotent.</li>
+<li>[ ] WS-R185 — <code>TerminalToolkit.execute</code> supports retry.</li>
+<li>[ ] WS-R186 — <code>TerminalToolkit.execute</code> does not use shell.</li>
+<li>[ ] WS-R187 — <code>TerminalToolkit.execute</code> does not leak secret.</li>
+<li>[ ] WS-R188 — <code>TerminalToolkit.execute</code> bounds output.</li>
+<li>[ ] WS-R189 — <code>TerminalToolkit.execute</code> tests success.</li>
+<li>[ ] WS-R190 — <code>TerminalToolkit.execute</code> tests failure.</li>
+<li>[ ] WS-R191 — <code>TerminalToolkit.execute</code> tests stale input.</li>
+<li>[ ] WS-R192 — <code>TerminalToolkit.execute</code> tests interruption.</li>
+<li>[ ] WS-R193 — <code>TerminalToolkit.execute</code> tests rollback.</li>
+<li>[ ] WS-R194 — <code>TerminalToolkit.execute</code> documents failure.</li>
+<li>[ ] WS-R195 — <code>TerminalToolkit.execute</code> keeps authority in kernel.</li>
+<li>[ ] WS-R196 — <code>TerminalToolkit.execute</code> works offline.</li>
+<li>[ ] WS-R197 — <code>TerminalToolkit.execute</code> uses atomic replace.</li>
+<li>[ ] WS-R198 — <code>TerminalToolkit.execute</code> reports changed files.</li>
+<li>[ ] WS-R199 — <code>TerminalToolkit.execute</code> binds workspace identity.</li>
+<li>[ ] WS-R200 — <code>TerminalToolkit.execute</code> avoids full repo copy when possible.</li>
+<li>[ ] WS-R201 — <code>FsToolkit.execute</code> validates root.</li>
+<li>[ ] WS-R202 — <code>FsToolkit.execute</code> rejects traversal.</li>
+<li>[ ] WS-R203 — <code>FsToolkit.execute</code> handles symlink.</li>
+<li>[ ] WS-R204 — <code>FsToolkit.execute</code> preserves digest.</li>
+<li>[ ] WS-R205 — <code>FsToolkit.execute</code> returns typed error.</li>
+<li>[ ] WS-R206 — <code>FsToolkit.execute</code> records artifact.</li>
+<li>[ ] WS-R207 — <code>FsToolkit.execute</code> propagates budget.</li>
+<li>[ ] WS-R208 — <code>FsToolkit.execute</code> has timeout.</li>
+<li>[ ] WS-R209 — <code>FsToolkit.execute</code> is idempotent.</li>
+<li>[ ] WS-R210 — <code>FsToolkit.execute</code> supports retry.</li>
+<li>[ ] WS-R211 — <code>FsToolkit.execute</code> does not use shell.</li>
+<li>[ ] WS-R212 — <code>FsToolkit.execute</code> does not leak secret.</li>
+<li>[ ] WS-R213 — <code>FsToolkit.execute</code> bounds output.</li>
+<li>[ ] WS-R214 — <code>FsToolkit.execute</code> tests success.</li>
+<li>[ ] WS-R215 — <code>FsToolkit.execute</code> tests failure.</li>
+<li>[ ] WS-R216 — <code>FsToolkit.execute</code> tests stale input.</li>
+<li>[ ] WS-R217 — <code>FsToolkit.execute</code> tests interruption.</li>
+<li>[ ] WS-R218 — <code>FsToolkit.execute</code> tests rollback.</li>
+<li>[ ] WS-R219 — <code>FsToolkit.execute</code> documents failure.</li>
+<li>[ ] WS-R220 — <code>FsToolkit.execute</code> keeps authority in kernel.</li>
+<li>[ ] WS-R221 — <code>FsToolkit.execute</code> works offline.</li>
+<li>[ ] WS-R222 — <code>FsToolkit.execute</code> uses atomic replace.</li>
+<li>[ ] WS-R223 — <code>FsToolkit.execute</code> reports changed files.</li>
+<li>[ ] WS-R224 — <code>FsToolkit.execute</code> binds workspace identity.</li>
+<li>[ ] WS-R225 — <code>FsToolkit.execute</code> avoids full repo copy when possible.</li>
+<li>[ ] WS-R226 — <code>AstPatchToolkit.execute</code> validates root.</li>
+<li>[ ] WS-R227 — <code>AstPatchToolkit.execute</code> rejects traversal.</li>
+<li>[ ] WS-R228 — <code>AstPatchToolkit.execute</code> handles symlink.</li>
+<li>[ ] WS-R229 — <code>AstPatchToolkit.execute</code> preserves digest.</li>
+<li>[ ] WS-R230 — <code>AstPatchToolkit.execute</code> returns typed error.</li>
+<li>[ ] WS-R231 — <code>AstPatchToolkit.execute</code> records artifact.</li>
+<li>[ ] WS-R232 — <code>AstPatchToolkit.execute</code> propagates budget.</li>
+<li>[ ] WS-R233 — <code>AstPatchToolkit.execute</code> has timeout.</li>
+<li>[ ] WS-R234 — <code>AstPatchToolkit.execute</code> is idempotent.</li>
+<li>[ ] WS-R235 — <code>AstPatchToolkit.execute</code> supports retry.</li>
+<li>[ ] WS-R236 — <code>AstPatchToolkit.execute</code> does not use shell.</li>
+<li>[ ] WS-R237 — <code>AstPatchToolkit.execute</code> does not leak secret.</li>
+<li>[ ] WS-R238 — <code>AstPatchToolkit.execute</code> bounds output.</li>
+<li>[ ] WS-R239 — <code>AstPatchToolkit.execute</code> tests success.</li>
+<li>[ ] WS-R240 — <code>AstPatchToolkit.execute</code> tests failure.</li>
+<li>[ ] WS-R241 — <code>AstPatchToolkit.execute</code> tests stale input.</li>
+<li>[ ] WS-R242 — <code>AstPatchToolkit.execute</code> tests interruption.</li>
+<li>[ ] WS-R243 — <code>AstPatchToolkit.execute</code> tests rollback.</li>
+<li>[ ] WS-R244 — <code>AstPatchToolkit.execute</code> documents failure.</li>
+<li>[ ] WS-R245 — <code>AstPatchToolkit.execute</code> keeps authority in kernel.</li>
+<li>[ ] WS-R246 — <code>AstPatchToolkit.execute</code> works offline.</li>
+<li>[ ] WS-R247 — <code>AstPatchToolkit.execute</code> uses atomic replace.</li>
+<li>[ ] WS-R248 — <code>AstPatchToolkit.execute</code> reports changed files.</li>
+<li>[ ] WS-R249 — <code>AstPatchToolkit.execute</code> binds workspace identity.</li>
+<li>[ ] WS-R250 — <code>AstPatchToolkit.execute</code> avoids full repo copy when possible.</li>
+</ul>
+<h2 id="16-acceptance-gates">16. Acceptance gates</h2>
+<ul>
+<li>[ ] Patch real altera bytes dentro do workspace.</li>
+<li>[ ] Receipt contém before/after/diff digests.</li>
+<li>[ ] Teste real executa e count é observado.</li>
+<li>[ ] Digest do workspace é igual antes/depois da verificação.</li>
+<li>[ ] Falha restaura snapshot sem tocar checkout do usuário.</li>
+<li>[ ] Nenhum command usa <code>shell=True</code>.</li>
+<li>[ ] Nenhum path escapa via <code>..</code>, absoluto ou symlink.</li>
+<li>[ ] Artifacts grandes ficam no CAS.</li>
+<li>[ ] Coordinator recebe somente referências compactas.</li>
+<li>[ ] AdmissionGate consome receipt fresco.</li>
+</ul>
+<h2 id="17-definition-of-done">17. Definition of Done</h2>
+<p>A onda termina com um smoke <code>task → edit atômico → teste real → receipt fresco → commit</code>, mais falsificadores de traversal, stale patch, zero-test, timeout e rollback. Qualquer resultado sem patch físico e execução observada permanece não concluído.</p>
+<ul>
+<li>[ ] WS-X657 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X658 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X659 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X660 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X661 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X662 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X663 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X664 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X665 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X666 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X667 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X668 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X669 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X670 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X671 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X672 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X673 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X674 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X675 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X676 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X677 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X678 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X679 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X680 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X681 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X682 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X683 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X684 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X685 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X686 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X687 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X688 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X689 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X690 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X691 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X692 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X693 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X694 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X695 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X696 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X697 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X698 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X699 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X700 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X701 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X702 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X703 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X704 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X705 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X706 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X707 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X708 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X709 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X710 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X711 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X712 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X713 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X714 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X715 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X716 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X717 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X718 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X719 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X720 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X721 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X722 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X723 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X724 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X725 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X726 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X727 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X728 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X729 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X730 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X731 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X732 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X733 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X734 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X735 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X736 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X737 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X738 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X739 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X740 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X741 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X742 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X743 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X744 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X745 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X746 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X747 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X748 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X749 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X750 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X751 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X752 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X753 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X754 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X755 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X756 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X757 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X758 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X759 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X760 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X761 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X762 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X763 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X764 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X765 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X766 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X767 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X768 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X769 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X770 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X771 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X772 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X773 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X774 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X775 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X776 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X777 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X778 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X779 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X780 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X781 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X782 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X783 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X784 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X785 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X786 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X787 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X788 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X789 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X790 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X791 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X792 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X793 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X794 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X795 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X796 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X797 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X798 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X799 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X800 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X801 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X802 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X803 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X804 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X805 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X806 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X807 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X808 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X809 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X810 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X811 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X812 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X813 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X814 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X815 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X816 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X817 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X818 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X819 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X820 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X821 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X822 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X823 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X824 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X825 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X826 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X827 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X828 — Validar obrigação transacional remanescente antes de integrar.</li>
+<li>[ ] WS-X829 — Validar obrigação transacional remanescente antes de integrar.</li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../../../../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

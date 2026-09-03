@@ -1,0 +1,2 @@
+expectedSeq as a CT-06 decimal string. A run sequence may exceed 2^53-1, so the
+SeqGuard union accepts both forms and int() normalises them identically.

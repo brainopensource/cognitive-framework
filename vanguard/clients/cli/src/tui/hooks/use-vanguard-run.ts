@@ -5,8 +5,8 @@ import {
   subscribeRun,
   type RuntimeClient,
   type RunViewModel,
-  type StreamSource,
-} from "@vanguard/client-core";
+} from "@aether/client";
+import type { StreamSource } from "@aether/contracts";
 import { performResume } from "../../composition/resume-session.js";
 
 export type UseVanguardRunOptions = {

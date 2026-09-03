@@ -47,9 +47,11 @@ class GeneDigests(unittest.TestCase):
             self.assertTrue(harness.gene_digests)
             names = {item.get("name") for item in harness.tool_schemas}
             if entry["name"] == "vg-code-claude-shaped":
-                self.assertIn("Read", names)
+                self.assertNotIn("Read", names)
+                self.assertIn("read", names)
             if entry["name"] == "vg-code-opencode-shaped":
-                self.assertIn("view_file", names)
+                self.assertNotIn("view_file", names)
+                self.assertIn("read", names)
 
 
 class PackAliases(unittest.TestCase):
@@ -74,4 +76,3 @@ class PackAliases(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

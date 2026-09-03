@@ -1,0 +1,63 @@
+{
+  "id": "t1-calculator",
+  "tier": 1,
+  "title": "Single-file formula bug: (A+B)*B implemented as (A+B)+B",
+  "workspace": {
+    "src/__init__.py": "",
+    "src/calculator.py": "def calculate_value(A: float, B: float) -> float:\n    resultado = (A + B) + B\n    return resultado\n",
+    "test_calculator.py": "from src.calculator import calculate_value\n\ndef test_formula():\n    assert calculate_value(2, 3) == 15\n    assert calculate_value(0, 4) == 16\n    assert calculate_value(1, 1) == 2\n"
+  },
+  "turns": [
+    {
+      "tool_messages": 0,
+      "finish_reason": "tool_calls",
+      "content": "I will inspect `src/calculator.py` to check the current implementation of `calculate_value`.",
+      "tool_calls": [
+        {
+          "id": "call_read_001",
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"src/calculator.py\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages": 1,
+      "finish_reason": "tool_calls",
+      "content": "I see the bug: `(A + B) + B` adds `B` instead of multiplying by `B`. I will apply the fix.",
+      "tool_calls": [
+        {
+          "id": "call_patch_002",
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"path\": \"src/calculator.py\", \"diff\": \"--- a/src/calculator.py\\n+++ b/src/calculator.py\\n@@ -1,3 +1,3 @@\\n def calculate_value(A: float, B: float) -> float:\\n-    resultado = (A + B) + B\\n+    resultado = (A + B) * B\\n     return resultado\\n\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages": 2,
+      "finish_reason": "tool_calls",
+      "content": "I will run the unit tests to verify the formula.",
+      "tool_calls": [
+        {
+          "id": "call_exec_003",
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"argv\": [\"python3\", \"-m\", \"pytest\", \"test_calculator.py\", \"-q\"]}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages": 3,
+      "finish_reason": "stop",
+      "content": "I have fixed `src/calculator.py` by changing `(A + B) + B` to `(A + B) * B`. All unit tests pass.",
+      "tool_calls": []
+    }
+  ]
+}

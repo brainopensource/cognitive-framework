@@ -1,0 +1,3 @@
+Offset paging, the only paging the served implementation has ever had
+(service.py _cmd_ListRuns). The schema previously specified an unimplemented
+`cursor` field instead; B-O2-01 replaced it with limit/offset.

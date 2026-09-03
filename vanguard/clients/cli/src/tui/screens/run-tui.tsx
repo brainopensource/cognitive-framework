@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Box, Text, useApp, useInput, useStdout } from "ink";
-import { captureCorrection, type RuntimeClient } from "@vanguard/client-core";
+import { captureCorrection, type RuntimeClient } from "@aether/client";
 import { submitInteractiveApproval } from "../../composition/operator-approval.js";
 import { DetailPane } from "../components/detail-pane.js";
 import { HelpOverlay } from "../components/help-overlay.js";
@@ -141,6 +141,7 @@ export function RunTui({
         return;
       }
       void captureCorrection(runtime, {
+        runId: activeRunId || approval.episodeId,
         episodeId: approval.episodeId,
         proposedPatchDigest: approval.proposedPatchDigest,
         acceptedPatchDigest: approval.proposedPatchDigest,

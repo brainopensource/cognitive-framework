@@ -1,37 +1,7 @@
-import { fail } from "../contract/parse.js";
-import type { CorrectionRecord, Result, RuntimeClient } from "../contract/types.js";
-
-const REASONS = {
-  d: "functional_defect",
-  s: "style",
-  t: "test_inadequacy",
-  e: "security_policy",
-  a: "architecture_preference",
-} as const;
-
-export type CorrectionReason = (typeof REASONS)[keyof typeof REASONS];
-
-export function correctionReasonForKey(key: string): CorrectionReason | undefined {
-  if (key === "S") return "security_policy";
-  return REASONS[key as keyof typeof REASONS];
-}
-
-export async function captureCorrection(
-  client: Pick<RuntimeClient, "recordCorrection">,
-  draft: { episodeId: string; proposedPatchDigest: string; acceptedPatchDigest: string; key: string },
-): Promise<Result<CorrectionRecord>> {
-  const reason = correctionReasonForKey(draft.key);
-  if (!reason) return fail("invalid_request", `unknown correction key ${draft.key}`);
-  const record: CorrectionRecord = {
-    episodeId: draft.episodeId,
-    proposedPatchDigest: draft.proposedPatchDigest,
-    acceptedPatchDigest: draft.acceptedPatchDigest,
-    reasonCodes: [reason],
-    magnitude: "minor",
-    scope: "repo",
-    correctingPrincipalRole: "user",
-  };
-  const saved = await client.recordCorrection(record);
-  if (!saved.ok) return saved;
-  return { ok: true, value: record };
-}
+// F4 Phase 5: ported to @aether/client (the converged AETHER client SDK),
+// standardized on the canonical vg.4 CorrectionRecord shape. This re-export
+// shim keeps every existing @vanguard/client-core consumer working
+// unchanged while there is exactly one implementation underneath -- safe
+// now that the CLI's real consumer (run-tui.tsx) has cut over to
+// @aether/client's RuntimeClient for its whole runtime object.
+export * from "@aether/client/application/corrections.js";

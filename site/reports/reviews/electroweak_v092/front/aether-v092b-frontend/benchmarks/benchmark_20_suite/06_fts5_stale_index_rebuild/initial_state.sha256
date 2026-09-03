@@ -1,0 +1,3 @@
+e1da131f7ca9726b7ca53ecb19ca55f96817dc3c827e7d289e3db5f84a21e88a  docs/SPEC.md
+5ee8b7dbd84c30ec633eebb6b4dd15afbd089731f539af5838f7600c6e515554  src/symbol_indexer.py
+3263a2afddb4ebf36bd8fa8382e16de25a00e6aefef27c64951b4ded2738a4dc  test/test_indexer_falsifier.py

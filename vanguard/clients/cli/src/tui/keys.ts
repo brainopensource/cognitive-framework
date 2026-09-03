@@ -1,1 +1,1 @@
-export { approvalActionForKey, type ApprovalAction } from "@vanguard/client-core";
+export { approvalActionForKey, type ApprovalAction } from "@aether/client";

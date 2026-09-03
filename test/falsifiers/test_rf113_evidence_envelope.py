@@ -152,7 +152,7 @@ class RF113TheShippedBundlesAreWellFormed(unittest.TestCase):
     """The two envelopes WP-A1 actually produced must survive their own rules."""
 
     def _load(self, name: str) -> EvidenceEnvelope:
-        path = ROOT / "docs/03_execution/evidence" / name
+        path = ROOT / "evidence" / name
         if not path.exists():
             self.skipTest(f"{name} not present")
         return parse_envelope(json.loads(path.read_text(encoding="utf-8")))

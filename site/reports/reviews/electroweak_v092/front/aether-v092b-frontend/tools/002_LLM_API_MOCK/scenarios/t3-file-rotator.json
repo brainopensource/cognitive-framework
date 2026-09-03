@@ -1,0 +1,55 @@
+{
+  "id": "t3-file-rotator",
+  "tier": 3,
+  "title": "Log file rotation with maximum backup files count",
+  "workspace": {
+    "rotator.py": "class LogRotator:\n    def __init__(self, max_files=2):\n        self.max_files = max_files\n        self.logs = []\n\n    def write(self, msg: str):\n        self.logs.append(msg)\n",
+    "test_rotator.py": "from rotator import LogRotator\n\ndef test_rotator():\n    lr = LogRotator(max_files=2)\n    lr.write('l1'); lr.write('l2'); lr.write('l3')\n    assert len(lr.logs) == 2\n    assert lr.logs == ['l2', 'l3']\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"rotator.py\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 1,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "edit_file",
+            "arguments": "{\"path\": \"rotator.py\", \"target\": \"        self.logs.append(msg)\", \"replacement\": \"        self.logs.append(msg)\\n        if len(self.logs) > self.max_files:\\n            self.logs.pop(0)\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 2,
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "run_command",
+            "arguments": "{\"command\": \"pytest\"}"
+          }
+        }
+      ],
+      "finish_reason": "tool_calls"
+    },
+    {
+      "tool_messages_seen": 3,
+      "tool_calls": [],
+      "finish_reason": "stop"
+    }
+  ]
+}

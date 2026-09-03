@@ -1,0 +1,15 @@
+{
+  "version": "vg.4",
+  "frameType": "command",
+  "frameId": "frame-004",
+  "command": {
+    "name": "StreamEvents",
+    "commandId": "cmd-004",
+    "idempotencyKey": "idem-004",
+    "runId": "run-001",
+    "actor": "operator",
+    "payload": {
+      "afterSeq": 10
+    }
+  }
+}

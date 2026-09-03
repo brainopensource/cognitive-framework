@@ -1,0 +1,25 @@
+{
+  "api": "mhf.formal-task-set/1",
+  "id": "formal-graph-coloring-fixed-v1",
+  "oracle": "vanguard.packages.adapters.evaluators.suites.formal_graph_coloring",
+  "oracleDigest": "sha256:1aee49f680c5baf18321d9d47436ffa046cf7a275222a2b5f43021e3570c4834",
+  "status": "fixed-not-run",
+  "tasks": [
+    {
+      "id": "GC-001",
+      "formula": "tasks/gc-001.graph.json",
+      "formulaDigest": "sha256:11cdc31d671a058ce4817742af9d87c6460669fdfc73ba93a2282d61518e2acb",
+      "positiveWitness": "tasks/gc-001.witness.json",
+      "positiveWitnessDigest": "sha256:72f861c82aea8ad1e307c62cc0c7d415dbdb4b27445f0271ba0bc84222f2ffb3",
+      "negativeVector": "tasks/gc-001.invalid-edge-conflict.json",
+      "negativeVectors": {
+        "edge_conflict": "tasks/gc-001.invalid-edge-conflict.json",
+        "incomplete": "tasks/gc-001.invalid-incomplete.json",
+        "out_of_range": "tasks/gc-001.invalid-range.json",
+        "duplicate": "tasks/gc-001.invalid-duplicate.json",
+        "malformed": "tasks/gc-001.invalid-malformed.json",
+        "disordered_graph": "tasks/gc-001.invalid-disordered-graph.json"
+      }
+    }
+  ]
+}

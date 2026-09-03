@@ -1,0 +1,64 @@
+{
+  "atoms_used": [
+    "view_file",
+    "edit_file",
+    "run_command"
+  ],
+  "created_from": "benchmarks/swe_bench/challenges.py::tier2_event_bus",
+  "id": "t2-tier2-event-bus",
+  "tier": 2,
+  "title": "SWE-bench: Hierarchical Wildcard Event Emitter",
+  "turns": [
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"path\": \"events/__init__.py\"}",
+            "name": "view_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 0
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"content\": \"def topic_matches(pattern: str, topic: str) -> bool:\\n    if pattern == topic or pattern == '**':\\n        return True\\n    p_parts = pattern.split('.')\\n    t_parts = topic.split('.')\\n    def _match(pi: int, ti: int) -> bool:\\n        if pi == len(p_parts) and ti == len(t_parts):\\n            return True\\n        if pi == len(p_parts):\\n            return False\\n        if p_parts[pi] == '**':\\n            for skip in range(len(t_parts) - ti + 1):\\n                if _match(pi + 1, ti + skip):\\n                    return True\\n            return False\\n        if ti == len(t_parts):\\n            return False\\n        if p_parts[pi] == '*' or p_parts[pi] == t_parts[ti]:\\n            return _match(pi + 1, ti + 1)\\n        return False\\n    return _match(0, 0)\\n\", \"path\": \"events/matcher.py\"}",
+            "name": "edit_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 1
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"command\": \"python3 -m unittest oracle_test.py\"}",
+            "name": "run_command"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 2
+    },
+    {
+      "content": "Task completed and verified for Hierarchical Wildcard Event Emitter (tier2_event_bus). All test suites pass (OK).",
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "tool_messages_seen": 3
+    }
+  ],
+  "workspace": {
+    "events/__init__.py": "from .bus import EventBus\n__all__ = ['EventBus']\n",
+    "events/bus.py": "from typing import Callable, Any\nfrom .matcher import topic_matches\n\nclass Subscription:\n    def __init__(self, bus: 'EventBus', pattern: str, callback: Callable[[str, Any], None]):\n        self.bus = bus\n        self.pattern = pattern\n        self.callback = callback\n        self.active = True\n\n    def unsubscribe(self) -> None:\n        self.active = False\n        self.bus._subs = [s for s in self.bus._subs if s is not self]\n\nclass EventBus:\n    def __init__(self):\n        self._subs: list[Subscription] = []\n\n    def subscribe(self, pattern: str, cb: Callable[[str, Any], None]) -> Subscription:\n        s = Subscription(self, pattern, cb)\n        self._subs.append(s)\n        return s\n\n    def publish(self, topic: str, payload: Any = None) -> int:\n        count = 0\n        for s in list(self._subs):\n            if s.active and topic_matches(s.pattern, topic):\n                s.callback(topic, payload)\n                count += 1\n        return count\n",
+    "events/matcher.py": "import re\n\ndef topic_matches(pattern: str, topic: str) -> bool:\n    if pattern == topic or pattern == '**': return True\n    parts = pattern.split('.')\n    rx = []\n    for p in parts:\n        if p == '*': rx.append(r'[^.]+')\n        elif p == '**': rx.append(r'.*')\n        else: rx.append(re.escape(p))\n    return bool(re.match('^' + r'\\.'.join(rx) + '$', topic))\n",
+    "oracle_test.py": "import unittest\nfrom events.bus import EventBus\n\nclass TestEventBus(unittest.TestCase):\n    def test_pub_sub(self):\n        bus = EventBus()\n        res = []\n        s1 = bus.subscribe('order.**.created', lambda t, p: res.append(p))\n        bus.publish('order.created', 10)\n        bus.publish('order.us.east.created', 20)\n        self.assertEqual(res, [10, 20])\n        single = bus.subscribe('order.*.created', lambda t, p: res.append(p))\n        bus.publish('order.us.created', 25)\n        bus.publish('order.us.east.created', 26)\n        self.assertEqual(res, [10, 20, 25, 25, 26])\n        single.unsubscribe()\n        s1.unsubscribe()\n        self.assertEqual(len(bus._subs), 0)\n        bus.publish('order.created', 30)\n        self.assertEqual(res, [10, 20, 25, 25, 26])\n\nif __name__ == '__main__': unittest.main()\n"
+  }
+}

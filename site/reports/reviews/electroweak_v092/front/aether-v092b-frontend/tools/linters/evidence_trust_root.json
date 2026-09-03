@@ -1,0 +1,47 @@
+{
+  "schema": "aether.evidence.trust-root/1",
+  "note": "Reviewer and producer keys this verifier will accept. A key that is not listed here is not an authority: an envelope signed by it is undeterminable, never passed. Registration is a deliberate Lane B act; a key that first appears inside the document it authenticates proves nothing, because anyone able to write the document can also mint the key.",
+  "reviewers": {
+    "independent-reviewer-key": {
+      "identity": "independent-reviewer",
+      "publicKey": "14apQEIMwInV4MBxsMis5uXkeuED+krKWY2D09W63V8=",
+      "registeredAt": "08c0847",
+      "registeredBy": "lane-b",
+      "note": "Historical acceptance authority for the M-4, M-5b, M-6 and M-6.5 acceptances that predate this trust root. No private key for it exists on disk, so acceptances cannot be re-issued under it; it stays registered so those historical envelopes remain checkable, and new acceptances use aether-evidence-reviewer-1."
+    },
+    "aether-evidence-reviewer-1": {
+      "identity": "aether-evidence-reviewer",
+      "publicKey": "tqlbr760xpdZxgusEeqFQLYdSJRGCJIcr8LblfQ7Yfw=",
+      "registeredAt": "61d0d89",
+      "registeredBy": "lane-b",
+      "note": "Acceptance authority for bundles published from Order 10 onward. Generated out-of-band by tools/runners/keygen_evidence_key.py and registered here before any evidence was signed against it; the private key is held outside the repository."
+    }
+  },
+  "producers": {
+    "dev-a-operator": {
+      "identity": "dev-a",
+      "publicKey": "myYZXk7pygpqWYLry9Bm3U7B/M7Dm8sh3IiR0bhGN9c=",
+      "registeredAt": "662c80d",
+      "note": "Lane A producer key, supplied by Lane A and verified here against the candidate-05 bundle it signs. Registering a producer key is lower-stakes than registering a reviewer: a producer attests to its own run, while a reviewer attests to someone else's, so reviewer entries are added only by the verifying lane."
+    },
+    "dev-b-key": {
+      "identity": "dev-b",
+      "publicKey": null,
+      "registeredAt": "662c80d",
+      "note": "Identity is known; no published key. Same disposition as dev-a-operator."
+    },
+    "dev-b-evidence-1": {
+      "identity": "dev-b",
+      "publicKey": "MdssqA2PqR2vu4TYBmxOhu0Jt+8oiLstduqZR7/JSmw=",
+      "registeredAt": "61d0d89",
+      "note": "Lane B producer key. Distinct identity and key from every reviewer entry above."
+    },
+    "dev-a-evidence-1": {
+      "identity": "dev-a",
+      "publicKey": "G+vymuPXnikMp/TlxcFhUuDQ57dM44o3MNpj/oieZDg=",
+      "registeredAt": "b494dee",
+      "registeredBy": "lane-b",
+      "note": "Lane A producer key for the RF-95 candidate-06 re-execution. Supplied out-of-band by Lane A as a public key only; no private key for it exists in this repository. Registered here before the evidence it signs was published, which is the whole point: a key that first appears inside the document it authenticates proves nothing."
+    }
+  }
+}

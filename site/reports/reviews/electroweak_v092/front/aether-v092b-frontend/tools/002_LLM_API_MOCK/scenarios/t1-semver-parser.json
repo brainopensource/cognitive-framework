@@ -1,0 +1,59 @@
+{
+  "id": "t1-semver-parser",
+  "tier": 1,
+  "title": "SWE-Verified: Semantic Version 2.0.0 parser and total ordering with pre-release precedence",
+  "workspace": {
+    "problem.md": "# Challenge: Semantic Version Parser \u2014 Pre-release Precedence\n\n`semver.py` violates SemVer 2.0.0 \u00a711 precedence rules:\n\n1. Pre-release dot-separated identifiers are compared as a single string\n   instead of identifier-by-identifier, so numeric identifiers compare\n   lexicographically (`alpha.10 < alpha.9`) instead of numerically.\n2. Build metadata is included in equality/ordering comparisons; per spec it\n   must be ignored entirely.\n\nFix the comparison logic. Do not modify the test suite.\n",
+    "semver.py": "\"\"\"Semantic Version 2.0.0 parser and total ordering.\"\"\"\nimport re\n\n_SEMVER_RE = re.compile(\n    r\"^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\"\n    r\"(?:-([0-9A-Za-z.-]+))?(?:\\+([0-9A-Za-z.-]+))?$\"\n)\n\n\nclass InvalidVersionError(ValueError):\n    pass\n\n\nclass Version:\n    def __init__(self, major, minor, patch, prerelease=None, build=None):\n        self.major = int(major)\n        self.minor = int(minor)\n        self.patch = int(patch)\n        self.prerelease = prerelease  # raw string without leading '-' or None\n        self.build = build            # raw string without leading '+' or None\n\n    @classmethod\n    def parse(cls, text):\n        m = _SEMVER_RE.match(text.strip())\n        if m is None:\n            raise InvalidVersionError(\"not a valid semver: {!r}\".format(text))\n        major, minor, patch, prerelease, build = m.groups()\n        return cls(major, minor, patch, prerelease=prerelease, build=build)\n\n    @property\n    def core(self):\n        return (self.major, self.minor, self.patch)\n\n    def _identifiers(self):\n        if self.prerelease is None:\n            return []\n        return [int(x) if x.isdigit() else x for x in self.prerelease.split(\".\")]\n\n    def _compare(self, other):\n        if self.core != other.core:\n            return -1 if self.core < other.core else 1\n        mine, theirs = self._identifiers(), other._identifiers()\n\n        # A release version has higher precedence than any pre-release.\n        # Build metadata is intentionally ignored by SemVer precedence.\n        if not mine or not theirs:\n            if not mine and not theirs:\n                return 0\n            return 1 if not mine else -1\n\n        # Compare each pre-release identifier in sequence. Numeric values\n        # compare numerically and have lower precedence than alphanumeric\n        # identifiers; a shorter otherwise-equal sequence comes first.\n        for left, right in zip(mine, theirs):\n            if left == right:\n                continue\n            left_numeric = isinstance(left, int)\n            right_numeric = isinstance(right, int)\n            if left_numeric and right_numeric:\n                return -1 if left < right else 1\n            if left_numeric != right_numeric:\n                return -1 if left_numeric else 1\n            return -1 if left < right else 1\n\n        if len(mine) == len(theirs):\n            return 0\n        return -1 if len(mine) < len(theirs) else 1\n\n    def __eq__(self, other):\n        return isinstance(other, Version) and self._compare(other) == 0\n\n    def __lt__(self, other):\n        return self._compare(other) < 0\n\n    def __le__(self, other):\n        return self._compare(other) <= 0\n\n    def __gt__(self, other):\n        return self._compare(other) > 0\n\n    def __ge__(self, other):\n        return self._compare(other) >= 0\n\n    def __hash__(self):\n        # Equal versions may differ only in build metadata.\n        return hash((self.core, tuple(self._identifiers())))\n\n    def __repr__(self):\n        base = \"{}.{}.{}\".format(self.major, self.minor, self.patch)\n        if self.prerelease:\n            base += \"-\" + self.prerelease\n        if self.build:\n            base += \"+\" + self.build\n        return \"Version({})\".format(base)\n",
+    "tests/test_semver.py": "import os\nimport sys\n\nimport pytest\n\nsys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))\n\nfrom semver import InvalidVersionError, Version\n\n\ndef v(text):\n    return Version.parse(text)\n\n\ndef test_prerelease_lexicographical_sort():\n    versions = [\n        v(\"1.0.0-alpha.beta\"),\n        v(\"1.0.0-alpha.10\"),\n        v(\"1.0.0\"),\n        v(\"1.0.0-alpha.9\"),\n        v(\"1.0.0-alpha\"),\n    ]\n    ordered = sorted(versions)\n    assert [x.prerelease for x in ordered[:4]] == [\n        \"alpha\",       # first identifier equal, shorter list wins\n        \"alpha.9\",     # numeric 9 < 10\n        \"alpha.10\",    # numeric ordering, NOT lexicographic\n        \"alpha.beta\",  # alphanumeric sorts above any numeric identifier\n    ]\n    assert ordered[4].prerelease is None  # release outranks every pre-release\n    assert v(\"1.0.0-alpha.10\") > v(\"1.0.0-alpha.9\")\n    assert v(\"1.0.0-alpha.1\") < v(\"1.0.0-alpha.beta\")\n\n\ndef test_build_metadata_ignored_in_comparison():\n    assert v(\"1.0.0+build.1\") == v(\"1.0.0+build.999\")\n    assert v(\"1.0.0+a\") < v(\"1.0.1+a\")  # build still allows normal ordering\n    assert not (v(\"2.0.0+local\") < v(\"2.0.0\"))\n\n\ndef test_major_minor_patch_ordering():\n    assert v(\"2.1.0\") > v(\"2.0.9\")\n    assert v(\"1.9.9\") < v(\"2.0.0\")\n    assert v(\"10.0.0\") > v(\"9.99.99\")\n\n\ndef test_invalid_versions_rejected():\n    with pytest.raises(InvalidVersionError):\n        Version.parse(\"1.2\")\n    with pytest.raises(InvalidVersionError):\n        Version.parse(\"01.2.3\")\n",
+    "todo.md": "# Workspace Task Plan (todo.md)\n\n- [x] [T-001] Investigate codebase and plan implementation for: # Challenge: Semantic Version Parser \u2014 Pre-release Precedence <!-- Inspected semver.py and existing tests. _compare currently uses raw prerelease/build strings; needs SemVer identifier comparison and build omission. Existing tests reproduce both defects. -->\n- [x] [T-002] Implement core solution and verify with tests <!-- Targeted tests and independent SemVer edge-case checks pass. Proceeding to full verification and audit. -->\n- [x] [T-003] Run full hermetic verification and AST audit <!-- Full pytest suite passes (4/4); py_compile and git diff --check pass. AST/code audit confirms only semver.py comparison and hash changed, with no test modifications. -->\n"
+  },
+  "turns": [
+    {
+      "tool_messages_seen": 0,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "list_dir",
+            "arguments": "{\"path\": \".\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 1,
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"semver.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"tests/test_semver.py\"}"
+          }
+        },
+        {
+          "type": "function",
+          "function": {
+            "name": "view_file",
+            "arguments": "{\"path\": \"problem.md\"}"
+          }
+        }
+      ]
+    },
+    {
+      "tool_messages_seen": 2,
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "content": "Now I can see the bugs clearly. Let me fix the `_compare` method and `__hash__`:\n\n1"
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+[
+  {
+    "sample": "Sample 1: Free Tier Model",
+    "model_requested": "openrouter/free",
+    "model_actual": "liquid/lfm-2.5-2.6b:free",
+    "lam_scenario": "t3-fail-premature_no_patch_exit-v05",
+    "live_latency_s": 0.776,
+    "lam_latency_ms": 0.039,
+    "live_cost_usd": 0.0,
+    "live_finish_reason": "tool_calls",
+    "lam_finish_reason": "stop",
+    "live_tool_calls": [
+      {
+        "type": "function",
+        "index": 0,
+        "id": "chatcmpl-tool-99b781b03edc2c95",
+        "function": {
+          "name": "view_file",
+          "arguments": "{\"path\": \"calculate.py\"}"
+        }
+      }
+    ],
+    "lam_tool_calls": null,
+    "live_content": "",
+    "lam_content": "I have thoroughly analyzed the problem and the solution is straightforward. The logic requires updating format_output."
+  },
+  {
+    "sample": "Sample 2: DeepSeek-v4 Flash (Coding SOTA Mid-Tier)",
+    "model_requested": "deepseek/deepseek-v4-flash-0731",
+    "model_actual": "deepseek/deepseek-v4-flash-0731",
+    "lam_scenario": "t3-json-patch",
+    "live_latency_s": 3.193,
+    "lam_latency_ms": 0.071,
+    "live_cost_usd": 2.5666e-05,
+    "live_finish_reason": "tool_calls",
+    "lam_finish_reason": "tool_calls",
+    "live_tool_calls": [
+      {
+        "type": "function",
+        "index": 0,
+        "id": "call_6eb28a8f6fce4435914b0bd7",
+        "function": {
+          "name": "view_file",
+          "arguments": "{\"path\": \"patcher.py\"}"
+        }
+      }
+    ],
+    "lam_tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "view_file",
+          "arguments": "{\"path\": \"patcher.py\"}"
+        }
+      }
+    ],
+    "live_content": "",
+    "lam_content": ""
+  },
+  {
+    "sample": "Sample 3: GLM-5.3 Flash (Fast Reasoning Coding)",
+    "model_requested": "z-ai/glm-5.3-flash",
+    "model_actual": "z-ai/glm-5.3-flash",
+    "lam_scenario": "t3-json-patch",
+    "live_latency_s": 6.965,
+    "lam_latency_ms": 0.057,
+    "live_cost_usd": 1.578e-05,
+    "live_finish_reason": "tool_calls",
+    "lam_finish_reason": "tool_calls",
+    "live_tool_calls": [
+      {
+        "type": "function",
+        "index": 0,
+        "id": "call_5140b8898ae041de960b8875",
+        "function": {
+          "name": "view_file",
+          "arguments": "{\"path\":\"patcher.py\"}"
+        }
+      }
+    ],
+    "lam_tool_calls": [
+      {
+        "type": "function",
+        "function": {
+          "name": "view_file",
+          "arguments": "{\"path\": \"patcher.py\"}"
+        }
+      }
+    ],
+    "live_content": "",
+    "lam_content": ""
+  }
+]

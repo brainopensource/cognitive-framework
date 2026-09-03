@@ -1,0 +1,62 @@
+{
+  "challengeId": "bench_multi_32K_tier-4_circuit_breaker",
+  "tier": "tier-4",
+  "scope": "multi",
+  "contextBracket": "32K",
+  "preset": "vg-1-forge",
+  "model": "lam-mock",
+  "mode": "lam",
+  "status": "PASS",
+  "attribution": "PASS",
+  "turns": 10,
+  "promptTokens": 1500,
+  "completionTokens": 400,
+  "totalTokens": 1900,
+  "costUsd": 0.0,
+  "durationSeconds": 0.11,
+  "changedFiles": [
+    "src/circuit.py"
+  ],
+  "diffPatch": "--- a/circuit.py\n+++ b/circuit.py\n@@ -1,2 +1,18 @@\n class CircuitBreaker:\n-    pass\n+    def __init__(self, threshold: int = 2):\n+        self.threshold = threshold\n+        self.failures = 0\n+        self.state = \"CLOSED\"\n+\n+    def call(self, func):\n+        if self.state == \"OPEN\":\n+            raise RuntimeError(\"Circuit is OPEN\")\n+        try:\n+            res = func()\n+            self.failures = 0\n+            return res\n+        except Exception:\n+            self.failures += 1\n+            if self.failures >= self.threshold:\n+                self.state = \"OPEN\"\n+            raise\n",
+  "oracle": {
+    "passed": true,
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "test_circuit (__main__.TestCircuit.test_circuit) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+    "durationSeconds": 0.036,
+    "error": null,
+    "assertionCount": 1,
+    "failingAssertions": []
+  },
+  "aiJudgeScore": null,
+  "diagnosis": "All falsifiers green",
+  "metadata": {
+    "id": "bench_multi_32K_tier-4_circuit_breaker",
+    "name": "Stateful Service Circuit Breaker",
+    "scope": "multi",
+    "context_bracket": "32K",
+    "tier": "tier-4",
+    "difficulty": 4,
+    "timeout_seconds": 35,
+    "entrypoint": "src/main.py",
+    "eval_type": "oracle",
+    "tags": [
+      "fault_tolerance",
+      "resilience",
+      "patterns"
+    ],
+    "metadata": {},
+    "cli_args": {
+      "command": "run",
+      "preset": "vg-1-forge",
+      "mode": "lam",
+      "model": null,
+      "tier": "all",
+      "single": null,
+      "max_turns": 10,
+      "max_requests": 500,
+      "budget": 0.1,
+      "keep_scratch": false
+    }
+  }
+}

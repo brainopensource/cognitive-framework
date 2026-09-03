@@ -1,0 +1,16 @@
+{
+  "version": "vg.4",
+  "frameType": "command",
+  "frameId": "frame-010",
+  "command": {
+    "name": "ExplainArtifact",
+    "commandId": "cmd-010",
+    "idempotencyKey": "idem-010",
+    "runId": "run-001",
+    "actor": "operator",
+    "payload": {
+      "artifactId": "art-001",
+      "substrateProfile": "standard"
+    }
+  }
+}

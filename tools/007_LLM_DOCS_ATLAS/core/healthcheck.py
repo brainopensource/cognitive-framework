@@ -61,8 +61,8 @@ def run_healthcheck(
            f"catalog rows: {catalog_rows} (status: {kb_status})")
     if catalog_rows == 0 and profile.name != "generic":
         recommendations.append(
-            "catalog.jsonl is missing/empty: run the canonical generator "
-            "(`just docs-knowledge` in AETHER) before trusting packets.")
+            "knowledge base is not validated: run canonical documentation generator "
+            "(`just docs-knowledge` or profile validation commands) before trusting packets.")
 
     # 3. Fact-graph index
     stats = storage.get_stats()

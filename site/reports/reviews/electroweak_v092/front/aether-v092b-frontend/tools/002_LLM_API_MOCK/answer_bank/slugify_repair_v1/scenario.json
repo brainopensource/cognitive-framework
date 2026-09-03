@@ -1,0 +1,36 @@
+{
+  "format_version": 1,
+  "key": "slugify_repair_v1",
+  "keywords": [
+    "slugify",
+    "URL-safe slug",
+    "slug"
+  ],
+  "turn_exhaustion": "repeat_last",
+  "tiers": {
+    "1": {
+      "turns": [
+        { "content_file": "tier-1/turn-001.md" },
+        { "content_file": "tier-1/turn-002.md" }
+      ]
+    },
+    "2": {
+      "turns": [
+        { "content_file": "tier-2/turn-001.md" },
+        { "content_file": "tier-2/turn-002.md" }
+      ]
+    },
+    "3": {
+      "turns": [
+        { "content_file": "tier-3/turn-001.md" },
+        { "content_file": "tier-3/turn-002.md" }
+      ]
+    },
+    "4": {
+      "turns": [
+        { "content_file": "tier-4/turn-001.md" },
+        { "content_file": "tier-4/turn-002.md" }
+      ]
+    }
+  }
+}

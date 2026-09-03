@@ -1,1 +1,1 @@
-export * from "@vanguard/client-core/adapters/live.js";
+export * from "@aether/client/transports/socket.js";

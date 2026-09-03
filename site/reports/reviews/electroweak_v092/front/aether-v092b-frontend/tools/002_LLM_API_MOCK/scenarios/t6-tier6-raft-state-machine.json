@@ -1,0 +1,64 @@
+{
+  "atoms_used": [
+    "view_file",
+    "edit_file",
+    "run_command"
+  ],
+  "created_from": "benchmarks/swe_bench/challenges.py::tier6_raft_state_machine",
+  "id": "t6-tier6-raft-state-machine",
+  "tier": 6,
+  "title": "SWE-bench: Raft Log Replication State Machine",
+  "turns": [
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"path\": \"raft/__init__.py\"}",
+            "name": "view_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 0
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"content\": \"from .state import RaftNode\\n__all__ = ['RaftNode']\\n\", \"path\": \"raft/__init__.py\"}",
+            "name": "edit_file"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 1
+    },
+    {
+      "finish_reason": "tool_calls",
+      "tool_calls": [
+        {
+          "function": {
+            "arguments": "{\"command\": \"python3 -m unittest oracle_test.py\"}",
+            "name": "run_command"
+          },
+          "type": "function"
+        }
+      ],
+      "tool_messages_seen": 2
+    },
+    {
+      "content": "Task completed and verified for Raft Log Replication State Machine (tier6_raft_state_machine). All test suites pass (OK).",
+      "finish_reason": "stop",
+      "tool_calls": [],
+      "tool_messages_seen": 3
+    }
+  ],
+  "workspace": {
+    "oracle_test.py": "import unittest\nfrom raft.state import RaftNode\n\nclass TestRaft(unittest.TestCase):\n    def test_raft(self):\n        n = RaftNode('n1')\n        n.current_term = 3\n        ok, t = n.handle_append_entries(term=1, leader_commit=0)\n        self.assertFalse(ok)\n        ok2, t2 = n.handle_append_entries(term=4, leader_commit=2)\n        self.assertTrue(ok2)\n        self.assertEqual(n.log.commit_index, 2)\n\nif __name__ == '__main__': unittest.main()\n",
+    "raft/__init__.py": "from .state import RaftNode\n__all__ = ['RaftNode']\n",
+    "raft/log.py": "class ReplicatedLog:\n    def __init__(self):\n        self.entries = []\n        self.commit_index = 0\n",
+    "raft/state.py": "from .log import ReplicatedLog\n\nclass RaftNode:\n    def __init__(self, node_id: str):\n        self.node_id = node_id\n        self.current_term = 0\n        self.log = ReplicatedLog()\n\n    def handle_append_entries(self, term: int, leader_commit: int) -> tuple[bool, int]:\n        if term < self.current_term:\n            return False, self.current_term\n        self.current_term = term\n        self.log.commit_index = leader_commit\n        return True, self.current_term\n"
+  }
+}

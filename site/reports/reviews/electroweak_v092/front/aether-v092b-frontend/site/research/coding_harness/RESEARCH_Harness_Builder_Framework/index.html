@@ -1,0 +1,6520 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="General Event-Sourced Agentic Computation Framework & Substrate">
+      
+      
+        <meta name="author" content="AETHER Team">
+      
+      
+      
+        <link rel="prev" href="../RESEARCH_2308B_gm/">
+      
+      
+        <link rel="next" href="../RESEARCH_META_COGNITIVE_ENGINEERING/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Harness Builder Framework - AETHER Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#product-requirements-document-prd" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="AETHER Documentation" class="md-header__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AETHER Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Harness Builder Framework
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="AETHER Documentation" class="md-nav__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AETHER Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Law & Norms
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Law & Norms
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../SPEC/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Specification (SPEC)
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions Index
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Overview
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/boundaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Boundaries
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/end-to-end-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-to-End Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/system-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Bootstrap
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/agency/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agency
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/application-interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Interfaces
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/assurance-evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Assurance & Evaluation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/causal-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Causal State
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/composition-extensibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Composition & Extensibility
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/delegation-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation & Topology
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kernel
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/memory-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory & Learning
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/runtime-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/request-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Request Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/agent-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/event-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/recovery-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recovery & Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/guides/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/guides/compose-an-agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compose an Agent
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/guides/add-pack-or-tool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Pack or Tool
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/guides/add-adapter-or-provider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Adapter or Provider
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/guides/operate-runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operate Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/guides/run-and-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Run and Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schemas
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Port Contracts
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/api-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Reference
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/manifests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifests
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/artifacts-memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Artifacts & Memory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../frontend/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product PRDs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Product PRDs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../product/frontend/FRONTEND_PRD_PLACEMENT_MANIFEST/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Placement Manifest
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../product/frontend/PRD_AETHER_CLI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD CLI
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../product/frontend/PRD_AETHER_DESKTOP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Desktop
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../product/frontend/PRD_AETHER_LAB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Lab
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../product/frontend/PRD_AETHER_TUI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD TUI
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../product/frontend/PRD_FRONTEND_PLATFORM/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Platform
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Execution
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/active/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/milestones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Milestones
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & Reports
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & Reports
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../theory/agent-substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reports/benchmark/main/BENCHMARK_V090_FULL.MD" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmark Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../AI/openrouter_llm_models_suggested/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Models
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_9_2" id="__nav_9_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coding Harness
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_9_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Coding Harness
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ARCHON_gemini_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Archon Gemini Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DEKAS_claude_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dekas Claude Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../LLM_RESPONSE_WRANGLER/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Response Wrangler
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../LLM_benchmarkings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Benchmarking
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RESEARCH_2308B_gm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research 2308B GM
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Builder Framework
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Builder Framework
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#harness-builder-framework-agentic-autonomous-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Harness Builder Framework &amp; Agentic Autonomous Project
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-visao-e-objetivo-estrategico" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Visão e Objetivo Estratégico
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Visão e Objetivo Estratégico">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-visao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Visão
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-objetivo-de-longo-prazo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Objetivo de Longo Prazo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-filosofia-de-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Filosofia de Design
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-arquitetura-de-alto-nivel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Arquitetura de Alto Nível
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Arquitetura de Alto Nível">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-diagrama-conceitual" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Diagrama Conceitual
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-camadas-da-arquitetura" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Camadas da Arquitetura
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-componentes-detalhados" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Componentes Detalhados
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Componentes Detalhados">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-core-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Core / Kernel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.1 Core / Kernel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#311-protocolos-universais-contracts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1.1 Protocolos Universais (Contracts)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#312-plugin-registry-dependency-injection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1.2 Plugin Registry &amp; Dependency Injection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#313-event-bus-mensageria-central" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1.3 Event Bus (Mensageria Central)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-orquestrador-central" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Orquestrador Central
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.2 Orquestrador Central">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#321-workflow-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2.1 Workflow Engine
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#322-parallel-execution-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2.2 Parallel Execution Manager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#323-state-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2.3 State Manager
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-harness-builder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Harness Builder
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.3 Harness Builder">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#331-definicao-de-harness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3.1 Definição de Harness
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#332-harness-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3.2 Harness Lifecycle
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#333-harness-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3.3 Harness Templates
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-plugin-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Plugin Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.4 Plugin Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#341-llm-adapters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4.1 LLM Adapters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#342-memory-adapters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4.2 Memory Adapters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#343-tool-adapters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4.3 Tool Adapters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#344-prompt-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4.4 Prompt Engine
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#345-cache-adapters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4.5 Cache Adapters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#346-compression-adapters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4.6 Compression Adapters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-data-observability-platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Data &amp; Observability Platform
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.5 Data &amp; Observability Platform">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#351-event-store" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5.1 Event Store
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#352-telemetry-tracing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5.2 Telemetry &amp; Tracing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#353-data-lake" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5.3 Data Lake
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-meta-cognitive-self-improvement-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Meta-Cognitive &amp; Self-Improvement Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.6 Meta-Cognitive &amp; Self-Improvement Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#361-meta-harness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6.1 Meta-Harness
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#362-self-improvement-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6.2 Self-Improvement Loop
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#363-training-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6.3 Training Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-tech-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Tech Stack
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Tech Stack">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-linguagens-e-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Linguagens e Runtime
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-estrutura-de-diretorios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Estrutura de Diretórios
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-casos-de-uso-iniciais-coding-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Casos de Uso Iniciais (Coding Agents)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Casos de Uso Iniciais (Coding Agents)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-code-analyzer-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Code Analyzer Agent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-code-reviewer-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Code Reviewer Agent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-test-generator-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Test Generator Agent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-pipeline-completo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Pipeline Completo
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-roadmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Roadmap
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Roadmap">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fase-1-foundation-semanas-1-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fase 1: Foundation (Semanas 1-4)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fase-2-parallel-execution-observability-semanas-5-8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fase 2: Parallel Execution &amp; Observability (Semanas 5-8)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fase-3-coding-agents-suite-semanas-9-14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fase 3: Coding Agents Suite (Semanas 9-14)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fase-4-meta-cognitive-layer-semanas-15-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fase 4: Meta-Cognitive Layer (Semanas 15-20)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fase-5-generalization-scale-semanas-21-30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fase 5: Generalization &amp; Scale (Semanas 21-30)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-metricas-de-sucesso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Métricas de Sucesso
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Métricas de Sucesso">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-metricas-tecnicas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Métricas Técnicas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-metricas-de-negocio-coding-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Métricas de Negócio (Coding Agents)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-metricas-de-meta-cognicao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Métricas de Meta-Cognição
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-consideracoes-de-seguranca" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Considerações de Segurança
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-consideracoes-de-escalabilidade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Considerações de Escalabilidade
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-padroes-de-codigo-e-qualidade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Padrões de Código e Qualidade
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-glossario" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Glossário
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-apendice-exemplo-de-configuracao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Apêndice: Exemplo de Configuração
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RESEARCH_META_COGNITIVE_ENGINEERING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Cognitive Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RESEARCH_META_COGNITIVE_ENGINEERING_briefing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Cognitive Briefing
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RESEARCH_META_FRAMEWORK_2408/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Framework 2408
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RESEARCH_THEORETICAL_SYNTHESIS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theoretical Synthesis
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RESEARCH_deepseek-harness_algorithms-ideas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deepseek Harness Algorithms
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RESEARCH_harness_agentic_coding_builder_research_and_framework_B/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agentic Coding Builder Framework B
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RESEARCH_higgs_2308/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Higgs 2308
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../RESEARCH_metaframework_2508_improved/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metaframework 2508
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../VANGUARD_FRONTIER_SWE_BENCH_AND_AGENTIC_METAFRAMEWORK_REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontier SWE Bench & Metaframework Report
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../VANGUARD_VS_LIM_INSIGHTS_SOTS_TECHNIQUES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vanguard vs LIM Insights
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../future_improvements_sota_harness_2808/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Future Improvements SOTA Harness
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proposal_glm_harness_BETA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proposal GLM Harness Beta
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../proposal_hy3_improved/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proposal HY3 Improved
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../research_agentic_runtime_systems_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agentic Runtime Systems Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../research_harness_agentic_systems_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Agentic Systems Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../suggested_LIM_improvements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Suggested LIM Improvements
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../vanguard_body_detailed/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vanguard Body Detailed
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_3" id="__nav_9_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../frontend/AETHER_FRONTEND_MASTERPLAN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Masterplan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../frontend/frontend_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--experiment"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../frontend/frontend_prototype_beta_gem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Prototype Beta Gem
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--experiment"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../frontend/integration_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Plan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#harness-builder-framework-agentic-autonomous-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Harness Builder Framework &amp; Agentic Autonomous Project
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1-visao-e-objetivo-estrategico" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Visão e Objetivo Estratégico
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Visão e Objetivo Estratégico">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-visao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Visão
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-objetivo-de-longo-prazo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 Objetivo de Longo Prazo
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13-filosofia-de-design" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 Filosofia de Design
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-arquitetura-de-alto-nivel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Arquitetura de Alto Nível
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Arquitetura de Alto Nível">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#21-diagrama-conceitual" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.1 Diagrama Conceitual
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#22-camadas-da-arquitetura" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2.2 Camadas da Arquitetura
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-componentes-detalhados" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Componentes Detalhados
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Componentes Detalhados">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#31-core-kernel" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1 Core / Kernel
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.1 Core / Kernel">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#311-protocolos-universais-contracts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1.1 Protocolos Universais (Contracts)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#312-plugin-registry-dependency-injection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1.2 Plugin Registry &amp; Dependency Injection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#313-event-bus-mensageria-central" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1.3 Event Bus (Mensageria Central)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#32-orquestrador-central" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2 Orquestrador Central
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.2 Orquestrador Central">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#321-workflow-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2.1 Workflow Engine
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#322-parallel-execution-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2.2 Parallel Execution Manager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#323-state-manager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.2.3 State Manager
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#33-harness-builder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3 Harness Builder
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.3 Harness Builder">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#331-definicao-de-harness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3.1 Definição de Harness
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#332-harness-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3.2 Harness Lifecycle
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#333-harness-templates" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.3.3 Harness Templates
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#34-plugin-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4 Plugin Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.4 Plugin Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#341-llm-adapters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4.1 LLM Adapters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#342-memory-adapters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4.2 Memory Adapters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#343-tool-adapters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4.3 Tool Adapters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#344-prompt-engine" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4.4 Prompt Engine
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#345-cache-adapters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4.5 Cache Adapters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#346-compression-adapters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.4.6 Compression Adapters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#35-data-observability-platform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5 Data &amp; Observability Platform
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.5 Data &amp; Observability Platform">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#351-event-store" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5.1 Event Store
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#352-telemetry-tracing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5.2 Telemetry &amp; Tracing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#353-data-lake" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.5.3 Data Lake
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#36-meta-cognitive-self-improvement-layer" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6 Meta-Cognitive &amp; Self-Improvement Layer
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.6 Meta-Cognitive &amp; Self-Improvement Layer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#361-meta-harness" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6.1 Meta-Harness
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#362-self-improvement-loop" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6.2 Self-Improvement Loop
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#363-training-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.6.3 Training Pipeline
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-tech-stack" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Tech Stack
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. Tech Stack">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#41-linguagens-e-runtime" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.1 Linguagens e Runtime
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#42-estrutura-de-diretorios" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4.2 Estrutura de Diretórios
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-casos-de-uso-iniciais-coding-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Casos de Uso Iniciais (Coding Agents)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Casos de Uso Iniciais (Coding Agents)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-code-analyzer-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Code Analyzer Agent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#52-code-reviewer-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.2 Code Reviewer Agent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#53-test-generator-agent" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.3 Test Generator Agent
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#54-pipeline-completo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.4 Pipeline Completo
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-roadmap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Roadmap
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. Roadmap">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fase-1-foundation-semanas-1-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fase 1: Foundation (Semanas 1-4)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fase-2-parallel-execution-observability-semanas-5-8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fase 2: Parallel Execution &amp; Observability (Semanas 5-8)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fase-3-coding-agents-suite-semanas-9-14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fase 3: Coding Agents Suite (Semanas 9-14)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fase-4-meta-cognitive-layer-semanas-15-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fase 4: Meta-Cognitive Layer (Semanas 15-20)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fase-5-generalization-scale-semanas-21-30" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fase 5: Generalization &amp; Scale (Semanas 21-30)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-metricas-de-sucesso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Métricas de Sucesso
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Métricas de Sucesso">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-metricas-tecnicas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Métricas Técnicas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#72-metricas-de-negocio-coding-agents" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.2 Métricas de Negócio (Coding Agents)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#73-metricas-de-meta-cognicao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.3 Métricas de Meta-Cognição
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-consideracoes-de-seguranca" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Considerações de Segurança
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-consideracoes-de-escalabilidade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Considerações de Escalabilidade
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-padroes-de-codigo-e-qualidade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Padrões de Código e Qualidade
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-glossario" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Glossário
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-apendice-exemplo-de-configuracao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Apêndice: Exemplo de Configuração
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="product-requirements-document-prd">Product Requirements Document (PRD)</h1>
+<h2 id="harness-builder-framework-agentic-autonomous-project">Harness Builder Framework &amp; Agentic Autonomous Project</h2>
+<p><strong>Versão:</strong> 1.0<br />
+<strong>Data:</strong> 2026-08-19<br />
+<strong>Status:</strong> Draft → Ready for Development<br />
+<strong>Autor:</strong> Product &amp; Architecture Team  </p>
+<hr />
+<h2 id="1-visao-e-objetivo-estrategico">1. Visão e Objetivo Estratégico</h2>
+<h3 id="11-visao">1.1 Visão</h3>
+<p>Construir um <strong>framework Harness Builder</strong> de classe mundial (SOTA) que sirva como fundação para projetos de agentes autônomos. O framework deve ser a espinha dorsal de um ecossistema onde agentes inteligentes colaboram, aprendem e evoluem de forma autônoma.</p>
+<h3 id="12-objetivo-de-longo-prazo">1.2 Objetivo de Longo Prazo</h3>
+<ul>
+<li>Ter um <strong>produto SOTA, World Class</strong> na categoria de frameworks para agentes autônomos.</li>
+<li>Usar o próprio framework para construir um <strong>Agentic Autonomous Project</strong> que resolva tarefas complexas de forma autônoma.</li>
+<li>Começar validando o framework com <strong>Coding Agents</strong> e expandir para <strong>General Task Solvers</strong>.</li>
+<li>Criar uma base de dados rica de execuções para alimentar processos de <strong>Self-Improvement</strong> e <strong>Meta-Cognition</strong>.</li>
+</ul>
+<h3 id="13-filosofia-de-design">1.3 Filosofia de Design</h3>
+<blockquote>
+<p><em>"Cada caixa do sistema é um plugin. Cada plugin é substituível. Cada protocolo é universal."</em></p>
+</blockquote>
+<ul>
+<li><strong>Desacoplamento total:</strong> Nenhum componente deve conhecer a implementação interna de outro.</li>
+<li><strong>Modularidade extrema:</strong> Toda funcionalidade é um plugin que pode ser trocado, melhorado ou removido.</li>
+<li><strong>Observabilidade nativa:</strong> Tudo que acontece no sistema é um evento registrado.</li>
+<li><strong>Evolução contínua:</strong> O sistema deve melhorar a si mesmo usando seus próprios dados de execução.</li>
+</ul>
+<hr />
+<h2 id="2-arquitetura-de-alto-nivel">2. Arquitetura de Alto Nível</h2>
+<h3 id="21-diagrama-conceitual">2.1 Diagrama Conceitual</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>┌─────────────────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>│                         AGENTIC AUTONOMOUS PROJECT                          │
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>│  (Aplicação construída com o Harness Builder Framework)                     │
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>├─────────────────────────────────────────────────────────────────────────────┤
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>│                                                                             │
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>│   ┌─────────────────────────────────────────────────────────────────────┐   │
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>│   │                    ORQUESTRADOR CENTRAL                              │   │
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>│   │  (Event Bus + Workflow Engine + Telemetry + Meta-Cognitive Loop)    │   │
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>│   └─────────────────────────────────────────────────────────────────────┘   │
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>│                              │                                              │
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>│           ┌──────────────────┼──────────────────┐                          │
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>│           ▼                  ▼                  ▼                          │
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>│   ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                   │
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>│   │  Harness A   │  │  Harness B   │  │  Harness C   │  ...              │
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>│   │ (CodingAgent)│  │ (CodeReview) │  │  (Planner)   │                   │
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>│   └──────────────┘  └──────────────┘  └──────────────┘                   │
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>│                                                                             │
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>│   Cada Harness é composto por Plugins independentes:                        │
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>│   ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐            │
+<a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>│   │  LLM    │ │  Memory │ │  Tools  │ │ Prompt  │ │  Cache  │            │
+<a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>│   │ Adapter │ │ Adapter │ │ Adapter │ │  Engine │ │ Adapter │            │
+<a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>│   └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘            │
+<a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a>│                                                                             │
+<a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>│   ┌─────────────────────────────────────────────────────────────────────┐   │
+<a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>│   │              DATA LAKE / OBSERVABILITY PLATFORM                      │   │
+<a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>│   │  (Event Store + Metrics + Traces + Logs → Training Data)           │   │
+<a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>│   └─────────────────────────────────────────────────────────────────────┘   │
+<a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>│                                                                             │
+<a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>└─────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<h3 id="22-camadas-da-arquitetura">2.2 Camadas da Arquitetura</h3>
+<table>
+<thead>
+<tr>
+<th>Camada</th>
+<th>Responsabilidade</th>
+<th>Exemplos</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Core / Kernel</strong></td>
+<td>Contratos, protocolos, event bus, lifecycle management</td>
+<td>Protocolos, interfaces, registro de plugins</td>
+</tr>
+<tr>
+<td><strong>Orchestration</strong></td>
+<td>Orquestrador central, workflow engine, scheduling, telemetry</td>
+<td>Event Bus, Workflow DAG, Parallel Execution</td>
+</tr>
+<tr>
+<td><strong>Harness Layer</strong></td>
+<td>Definição e execução de agentes individuais</td>
+<td>CodingAgent, ReviewAgent, PlannerAgent</td>
+</tr>
+<tr>
+<td><strong>Plugin Layer</strong></td>
+<td>Implementações concretas de capacidades</td>
+<td>LLM Adapters, Memory Adapters, Tool Adapters</td>
+</tr>
+<tr>
+<td><strong>Data &amp; Observability</strong></td>
+<td>Coleta, armazenamento e análise de dados de execução</td>
+<td>Event Store, Metrics, Training Pipeline</td>
+</tr>
+<tr>
+<td><strong>Meta-Cognitive</strong></td>
+<td>Self-improvement, meta-learning, auto-tuning</td>
+<td>Meta-Harness, Feedback Loops, A/B Testing</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-componentes-detalhados">3. Componentes Detalhados</h2>
+<h3 id="31-core-kernel">3.1 Core / Kernel</h3>
+<h4 id="311-protocolos-universais-contracts">3.1.1 Protocolos Universais (Contracts)</h4>
+<p>Todo componente do sistema se comunica através de <strong>protocolos padronizados</strong> definidos como interfaces/abstract classes.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Exemplo conceitual de protocolo</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">class</span><span class="w"> </span><span class="nc">ILLMAdapter</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">generate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Message</span><span class="p">],</span> <span class="n">config</span><span class="p">:</span> <span class="n">GenerationConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span> <span class="o">...</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Message</span><span class="p">],</span> <span class="n">config</span><span class="p">:</span> <span class="n">GenerationConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AsyncIterator</span><span class="p">[</span><span class="n">Chunk</span><span class="p">]:</span> <span class="o">...</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="k">class</span><span class="w"> </span><span class="nc">IMemoryAdapter</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">store</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ttl</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span> <span class="o">...</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">retrieve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span> <span class="o">...</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">top_k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">MemoryResult</span><span class="p">]:</span> <span class="o">...</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="k">class</span><span class="w"> </span><span class="nc">IToolAdapter</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="nd">@property</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span> <span class="o">...</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>    <span class="nd">@property</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">schema</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ToolSchema</span><span class="p">:</span> <span class="o">...</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">context</span><span class="p">:</span> <span class="n">ExecutionContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ToolResult</span><span class="p">:</span> <span class="o">...</span>
+</code></pre></div>
+<p><strong>Protocolos Obrigatórios:</strong>
+- <code>ILLMAdapter</code> — Abstração para provedores de LLM (OpenAI, Anthropic, Local, etc.)
+- <code>IMemoryAdapter</code> — Memória de curto e longo prazo
+- <code>IToolAdapter</code> — Ferramentas que o agente pode invocar
+- <code>IPromptEngine</code> — Engine de engenharia de prompt
+- <code>ICacheAdapter</code> — Cache de resultados
+- <code>IEventPublisher</code> / <code>IEventSubscriber</code> — Comunicação via eventos
+- <code>ITelemetryAdapter</code> — Coleta de métricas e traces
+- <code>ICompressionAdapter</code> — Compressão de contexto/memória
+- <code>ISelfImprovementAdapter</code> — Loop de auto-melhoria</p>
+<h4 id="312-plugin-registry-dependency-injection">3.1.2 Plugin Registry &amp; Dependency Injection</h4>
+<ul>
+<li>Sistema de <strong>registro dinâmico</strong> de plugins.</li>
+<li><strong>DI Container</strong> que resolve dependências via protocolos.</li>
+<li>Plugins são carregados por <strong>discovery</strong> (auto-registro) ou <strong>configuração explícita</strong>.</li>
+<li>Suporte a <strong>hot-swap</strong> de plugins em runtime (graceful).</li>
+</ul>
+<h4 id="313-event-bus-mensageria-central">3.1.3 Event Bus (Mensageria Central)</h4>
+<ul>
+<li><strong>Event-driven architecture</strong> como backbone de comunicação.</li>
+<li>Todos os componentes publicam e consomem eventos através do Event Bus.</li>
+<li>Suporte a <strong>eventos síncronos e assíncronos</strong>.</li>
+<li><strong>Event Schema</strong> versionado e tipado.</li>
+</ul>
+<p><strong>Tipos de Eventos:</strong>
+- <code>HarnessStarted</code>, <code>HarnessCompleted</code>, <code>HarnessFailed</code>
+- <code>ToolCallStarted</code>, <code>ToolCallCompleted</code>, <code>ToolCallFailed</code>
+- <code>LLMRequest</code>, <code>LLMResponse</code>, <code>LLMStreamChunk</code>
+- <code>MemoryStore</code>, <code>MemoryRetrieve</code>
+- <code>WorkflowStepStarted</code>, <code>WorkflowStepCompleted</code>
+- <code>SelfImprovementTriggered</code>, <code>MetaCognitiveFeedback</code></p>
+<h3 id="32-orquestrador-central">3.2 Orquestrador Central</h3>
+<h4 id="321-workflow-engine">3.2.1 Workflow Engine</h4>
+<ul>
+<li>Definição de workflows como <strong>DAGs (Directed Acyclic Graphs)</strong>.</li>
+<li>Suporte a <strong>execução paralela</strong> de harnesses independentes.</li>
+<li><strong>Conditional branching</strong> e <strong>loops</strong> dentro de workflows.</li>
+<li><strong>Retry policies</strong> configuráveis por nó.</li>
+<li><strong>Timeout e circuit breaker</strong> por harness.</li>
+</ul>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="c1"># Exemplo de workflow definition</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nt">workflow</span><span class="p">:</span>
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"code_review_pipeline"</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="w">  </span><span class="nt">steps</span><span class="p">:</span>
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="s">"analyze_code"</span>
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">      </span><span class="nt">harness</span><span class="p">:</span><span class="w"> </span><span class="s">"coding_analyzer"</span>
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">      </span><span class="nt">inputs</span><span class="p">:</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">        </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="s">"${workflow.inputs.code}"</span>
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="s">"review_code"</span>
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">      </span><span class="nt">harness</span><span class="p">:</span><span class="w"> </span><span class="s">"code_reviewer"</span>
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="w">      </span><span class="nt">inputs</span><span class="p">:</span>
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">        </span><span class="nt">analysis</span><span class="p">:</span><span class="w"> </span><span class="s">"${steps.analyze_code.output}"</span>
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">      </span><span class="nt">depends_on</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"analyze_code"</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a>
+<a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="s">"generate_tests"</span>
+<a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a><span class="w">      </span><span class="nt">harness</span><span class="p">:</span><span class="w"> </span><span class="s">"test_generator"</span>
+<a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="w">      </span><span class="nt">inputs</span><span class="p">:</span>
+<a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">        </span><span class="nt">code</span><span class="p">:</span><span class="w"> </span><span class="s">"${workflow.inputs.code}"</span>
+<a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">        </span><span class="nt">review</span><span class="p">:</span><span class="w"> </span><span class="s">"${steps.review_code.output}"</span>
+<a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="w">      </span><span class="nt">depends_on</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"review_code"</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a>
+<a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="s">"run_tests"</span>
+<a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a><span class="w">      </span><span class="nt">harness</span><span class="p">:</span><span class="w"> </span><span class="s">"test_runner"</span>
+<a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="w">      </span><span class="nt">inputs</span><span class="p">:</span>
+<a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="w">        </span><span class="nt">tests</span><span class="p">:</span><span class="w"> </span><span class="s">"${steps.generate_tests.output}"</span>
+<a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="w">      </span><span class="nt">depends_on</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"generate_tests"</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+<h4 id="322-parallel-execution-manager">3.2.2 Parallel Execution Manager</h4>
+<ul>
+<li>Pool de workers para execução paralela de harnesses.</li>
+<li><strong>Backpressure handling</strong>.</li>
+<li><strong>Resource quotas</strong> por harness/workflow.</li>
+<li><strong>Priority queues</strong> para tarefas críticas.</li>
+</ul>
+<h4 id="323-state-manager">3.2.3 State Manager</h4>
+<ul>
+<li>Persistência de estado de workflows (checkpointing).</li>
+<li>Recuperação de falhas (<strong>fault tolerance</strong>).</li>
+<li><strong>Idempotency</strong> garantida para re-execuções.</li>
+</ul>
+<h3 id="33-harness-builder">3.3 Harness Builder</h3>
+<h4 id="331-definicao-de-harness">3.3.1 Definição de Harness</h4>
+<p>Um <strong>Harness</strong> é a unidade fundamental de execução — um agente autônomo com um propósito específico.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="c1"># Exemplo conceitual</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">class</span><span class="w"> </span><span class="nc">CodingAgentHarness</span><span class="p">(</span><span class="n">Harness</span><span class="p">):</span>
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">HarnessConfig</span><span class="p">):</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">llm</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">ILLMAdapter</span><span class="p">)</span>
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">memory</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">IMemoryAdapter</span><span class="p">)</span>
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">tools</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">resolve_all</span><span class="p">(</span><span class="n">IToolAdapter</span><span class="p">)</span>
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">prompt_engine</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">IPromptEngine</span><span class="p">)</span>
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">telemetry</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">ITelemetryAdapter</span><span class="p">)</span>
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">ExecutionContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">HarnessResult</span><span class="p">:</span>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a>        <span class="c1"># 1. Carregar contexto da memória</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>        <span class="c1"># 2. Construir prompt via Prompt Engine</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a>        <span class="c1"># 3. Chamar LLM</span>
+<a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a>        <span class="c1"># 4. Parsear resposta e identificar tool calls</span>
+<a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>        <span class="c1"># 5. Executar tools em paralelo</span>
+<a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a>        <span class="c1"># 6. Consolidar resultados</span>
+<a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a>        <span class="c1"># 7. Armazenar na memória</span>
+<a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>        <span class="c1"># 8. Retornar resultado</span>
+<a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a>        <span class="k">pass</span>
+</code></pre></div>
+<h4 id="332-harness-lifecycle">3.3.2 Harness Lifecycle</h4>
+<ol>
+<li><strong>Instantiate</strong> — Criação com configuração e resolução de plugins</li>
+<li><strong>Validate</strong> — Validação de configuração e dependências</li>
+<li><strong>Execute</strong> — Execução principal com telemetry ativa</li>
+<li><strong>Cleanup</strong> — Liberação de recursos e persistência final</li>
+<li><strong>Report</strong> — Emissão de eventos de conclusão</li>
+</ol>
+<h4 id="333-harness-templates">3.3.3 Harness Templates</h4>
+<ul>
+<li>Templates pré-definidos para casos de uso comuns:</li>
+<li><code>ReActHarness</code> — Reasoning + Acting</li>
+<li><code>PlanAndExecuteHarness</code> — Planejamento → Execução</li>
+<li><code>ReflexionHarness</code> — Com loop de reflexão</li>
+<li><code>MultiAgentHarness</code> — Coordenação de múltiplos sub-agentes</li>
+</ul>
+<h3 id="34-plugin-layer">3.4 Plugin Layer</h3>
+<h4 id="341-llm-adapters">3.4.1 LLM Adapters</h4>
+<table>
+<thead>
+<tr>
+<th>Implementação</th>
+<th>Provedor</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OpenAIAdapter</code></td>
+<td>OpenAI GPT-4/4o</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td><code>AnthropicAdapter</code></td>
+<td>Claude 3.5/4</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td><code>LocalLLMAdapter</code></td>
+<td>Ollama, vLLM, etc.</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><code>AzureOpenAIAdapter</code></td>
+<td>Azure OpenAI</td>
+<td>P2</td>
+</tr>
+<tr>
+<td><code>GeminiAdapter</code></td>
+<td>Google Gemini</td>
+<td>P2</td>
+</tr>
+</tbody>
+</table>
+<h4 id="342-memory-adapters">3.4.2 Memory Adapters</h4>
+<table>
+<thead>
+<tr>
+<th>Implementação</th>
+<th>Tipo</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>InMemoryAdapter</code></td>
+<td>Curto prazo, volátil</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td><code>RedisAdapter</code></td>
+<td>Curto prazo, persistente</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td><code>ChromaAdapter</code></td>
+<td>Longo prazo, vetorial</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><code>PostgreSQLAdapter</code></td>
+<td>Longo prazo, estruturado</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><code>HybridMemoryAdapter</code></td>
+<td>Composição de curto + longo</td>
+<td>P1</td>
+</tr>
+</tbody>
+</table>
+<h4 id="343-tool-adapters">3.4.3 Tool Adapters</h4>
+<ul>
+<li><strong>FileSystemTool</strong> — Leitura/escrita de arquivos</li>
+<li><strong>ShellTool</strong> — Execução de comandos shell</li>
+<li><strong>CodeExecutionTool</strong> — Execução segura de código (sandbox)</li>
+<li><strong>GitTool</strong> — Operações git</li>
+<li><strong>WebSearchTool</strong> — Busca na web</li>
+<li><strong>LinterTool</strong> — Análise estática de código</li>
+<li><strong>TestRunnerTool</strong> — Execução de testes</li>
+</ul>
+<h4 id="344-prompt-engine">3.4.4 Prompt Engine</h4>
+<ul>
+<li><strong>Template system</strong> com variáveis e condicionais.</li>
+<li><strong>Prompt versioning</strong> e A/B testing.</li>
+<li><strong>Dynamic prompt optimization</strong> baseado em feedback.</li>
+<li><strong>Prompt compression</strong> automática quando contexto excede limites.</li>
+</ul>
+<h4 id="345-cache-adapters">3.4.5 Cache Adapters</h4>
+<table>
+<thead>
+<tr>
+<th>Implementação</th>
+<th>Estratégia</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>InMemoryCache</code></td>
+<td>LRU local</td>
+<td>MVP</td>
+</tr>
+<tr>
+<td><code>RedisCache</code></td>
+<td>Distribuído</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><code>SemanticCache</code></td>
+<td>Cache por similaridade semântica</td>
+<td>P2</td>
+</tr>
+</tbody>
+</table>
+<h4 id="346-compression-adapters">3.4.6 Compression Adapters</h4>
+<ul>
+<li><strong>Token-based compression</strong> — Redução de tokens para LLM.</li>
+<li><strong>Semantic compression</strong> — Resumo semântico de contexto.</li>
+<li><strong>Hierarchical compression</strong> — Compressão em múltiplos níveis.</li>
+</ul>
+<h3 id="35-data-observability-platform">3.5 Data &amp; Observability Platform</h3>
+<h4 id="351-event-store">3.5.1 Event Store</h4>
+<ul>
+<li><strong>Append-only log</strong> de todos os eventos do sistema.</li>
+<li><strong>Schema registry</strong> para validação de eventos.</li>
+<li><strong>Retention policies</strong> configuráveis.</li>
+<li><strong>Replay capability</strong> para debugging e análise.</li>
+</ul>
+<h4 id="352-telemetry-tracing">3.5.2 Telemetry &amp; Tracing</h4>
+<ul>
+<li><strong>Distributed tracing</strong> — Cada execução é uma trace tree.</li>
+<li><strong>Metrics collection</strong> — Latência, throughput, error rates, token usage.</li>
+<li><strong>Structured logging</strong> — Logs correlacionados com traces.</li>
+<li><strong>Real-time dashboards</strong> — Visibilidade do sistema em tempo real.</li>
+</ul>
+<h4 id="353-data-lake">3.5.3 Data Lake</h4>
+<ul>
+<li>Armazenamento de:</li>
+<li>Inputs/outputs de cada harness</li>
+<li>Tool calls e seus resultados</li>
+<li>Prompts e responses de LLM</li>
+<li>Estados de memória</li>
+<li>Métricas de performance</li>
+<li><strong>Formato:</strong> Parquet/JSONL para análise eficiente.</li>
+<li><strong>Pipeline ETL</strong> para transformar dados brutos em datasets de treinamento.</li>
+</ul>
+<h3 id="36-meta-cognitive-self-improvement-layer">3.6 Meta-Cognitive &amp; Self-Improvement Layer</h3>
+<h4 id="361-meta-harness">3.6.1 Meta-Harness</h4>
+<p>Um harness especial que analisa a performance de outros harnesses e sugere/executa melhorias.</p>
+<p><strong>Responsabilidades:</strong>
+- Analisar traces de execução para identificar padrões de falha.
+- Comparar performance de diferentes configurações de plugins.
+- Sugerir otimizações de prompts.
+- Identificar gargalos de performance.
+- Gerar relatórios de auto-melhoria.</p>
+<h4 id="362-self-improvement-loop">3.6.2 Self-Improvement Loop</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>│   EXECUTE   │────▶│   OBSERVE   │────▶│   ANALYZE   │────▶│   IMPROVE   │
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>│  (Run Agent)│     │(Collect Data)│     │(Meta-Harness)│    │(Apply Changes)│
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>└─────────────┘     └─────────────┘     └─────────────┘     └──────┬──────┘
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>       ▲                                                           │
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>       └─────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<p><strong>Mecanismos de Melhoria:</strong>
+- <strong>Prompt Optimization</strong> — Ajuste automático de prompts baseado em success rate.
+- <strong>Tool Selection Optimization</strong> — Aprender quais tools são mais eficazes para cada tipo de tarefa.
+- <strong>Memory Strategy Optimization</strong> — Ajustar estratégias de recuperação de memória.
+- <strong>Hyperparameter Tuning</strong> — Ajustar temperatura, top_p, max_tokens, etc.
+- <strong>Plugin Recommendation</strong> — Sugerir troca de plugins baseado em métricas.</p>
+<h4 id="363-training-pipeline">3.6.3 Training Pipeline</h4>
+<ul>
+<li>Geração de datasets de treinamento a partir dos dados de execução.</li>
+<li><strong>Fine-tuning</strong> de modelos menores para tarefas específicas do domínio.</li>
+<li><strong>Reinforcement Learning from Agent Feedback (RLAF)</strong>.</li>
+<li><strong>Evaluation framework</strong> para medir impacto das melhorias.</li>
+</ul>
+<hr />
+<h2 id="4-tech-stack">4. Tech Stack</h2>
+<h3 id="41-linguagens-e-runtime">4.1 Linguagens e Runtime</h3>
+<table>
+<thead>
+<tr>
+<th>Componente</th>
+<th>Tecnologia</th>
+<th>Justificativa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Core / Framework</strong></td>
+<td>Python 3.12+</td>
+<td>Ecossistema de AI/ML maduro, async nativo</td>
+</tr>
+<tr>
+<td><strong>Frontend / Dashboard</strong></td>
+<td>TypeScript + React</td>
+<td>Observability e interfaces de configuração</td>
+</tr>
+<tr>
+<td><strong>Protocolos</strong></td>
+<td>Pydantic + Protocol (Python) / Zod + Interface (TS)</td>
+<td>Validação e tipagem forte</td>
+</tr>
+<tr>
+<td><strong>Event Bus</strong></td>
+<td>Redis Pub/Sub ou NATS</td>
+<td>Alta performance, baixa latência</td>
+</tr>
+<tr>
+<td><strong>Data Store</strong></td>
+<td>PostgreSQL + Redis + ChromaDB</td>
+<td>Dados estruturados, cache, vetorial</td>
+</tr>
+<tr>
+<td><strong>Observability</strong></td>
+<td>OpenTelemetry + Prometheus + Grafana</td>
+<td>Padrão de mercado</td>
+</tr>
+<tr>
+<td><strong>Containerização</strong></td>
+<td>Docker + Docker Compose (dev) / Kubernetes (prod)</td>
+<td>Portabilidade e escalabilidade</td>
+</tr>
+<tr>
+<td><strong>CI/CD</strong></td>
+<td>GitHub Actions</td>
+<td>Automação de testes e deploy</td>
+</tr>
+</tbody>
+</table>
+<h3 id="42-estrutura-de-diretorios">4.2 Estrutura de Diretórios</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>harness-builder/
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>├── core/                          # Kernel e protocolos
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>│   ├── protocols/                 # Interfaces e contratos
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>│   ├── event_bus/                 # Sistema de eventos
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>│   ├── plugin_registry/           # Registro e DI de plugins
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>│   └── lifecycle/                 # Gerenciamento de lifecycle
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>│
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>├── orchestrator/                  # Orquestrador central
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>│   ├── workflow_engine/           # Engine de workflows DAG
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>│   ├── parallel_executor/         # Gerenciador de execução paralela
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a>│   └── state_manager/             # Persistência de estado
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>│
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>├── harness/                       # Harness Builder
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>│   ├── base/                      # Classes base e abstrações
+<a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a>│   ├── templates/                 # Templates pré-definidos
+<a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>│   └── built_in/                  # Harnesses built-in
+<a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a>│
+<a id="__codelineno-5-18" name="__codelineno-5-18" href="#__codelineno-5-18"></a>├── plugins/                       # Implementações de plugins
+<a id="__codelineno-5-19" name="__codelineno-5-19" href="#__codelineno-5-19"></a>│   ├── llm/                       # Adapters de LLM
+<a id="__codelineno-5-20" name="__codelineno-5-20" href="#__codelineno-5-20"></a>│   ├── memory/                    # Adapters de memória
+<a id="__codelineno-5-21" name="__codelineno-5-21" href="#__codelineno-5-21"></a>│   ├── tools/                     # Adapters de ferramentas
+<a id="__codelineno-5-22" name="__codelineno-5-22" href="#__codelineno-5-22"></a>│   ├── prompt_engine/             # Engines de prompt
+<a id="__codelineno-5-23" name="__codelineno-5-23" href="#__codelineno-5-23"></a>│   ├── cache/                     # Adapters de cache
+<a id="__codelineno-5-24" name="__codelineno-5-24" href="#__codelineno-5-24"></a>│   ├── compression/               # Adapters de compressão
+<a id="__codelineno-5-25" name="__codelineno-5-25" href="#__codelineno-5-25"></a>│   └── telemetry/                 # Adapters de telemetria
+<a id="__codelineno-5-26" name="__codelineno-5-26" href="#__codelineno-5-26"></a>│
+<a id="__codelineno-5-27" name="__codelineno-5-27" href="#__codelineno-5-27"></a>├── observability/                 # Plataforma de observabilidade
+<a id="__codelineno-5-28" name="__codelineno-5-28" href="#__codelineno-5-28"></a>│   ├── event_store/               # Armazenamento de eventos
+<a id="__codelineno-5-29" name="__codelineno-5-29" href="#__codelineno-5-29"></a>│   ├── telemetry/                 # Coleta de métricas e traces
+<a id="__codelineno-5-30" name="__codelineno-5-30" href="#__codelineno-5-30"></a>│   └── data_lake/                 # Pipeline de dados
+<a id="__codelineno-5-31" name="__codelineno-5-31" href="#__codelineno-5-31"></a>│
+<a id="__codelineno-5-32" name="__codelineno-5-32" href="#__codelineno-5-32"></a>├── meta_cognitive/                # Camada de meta-cognição
+<a id="__codelineno-5-33" name="__codelineno-5-33" href="#__codelineno-5-33"></a>│   ├── meta_harness/              # Implementação do Meta-Harness
+<a id="__codelineno-5-34" name="__codelineno-5-34" href="#__codelineno-5-34"></a>│   ├── self_improvement/          # Loops de auto-melhoria
+<a id="__codelineno-5-35" name="__codelineno-5-35" href="#__codelineno-5-35"></a>│   └── training_pipeline/         # Pipeline de treinamento
+<a id="__codelineno-5-36" name="__codelineno-5-36" href="#__codelineno-5-36"></a>│
+<a id="__codelineno-5-37" name="__codelineno-5-37" href="#__codelineno-5-37"></a>├── agents/                        # Agentes construídos com o framework
+<a id="__codelineno-5-38" name="__codelineno-5-38" href="#__codelineno-5-38"></a>│   └── coding/                    # Coding Agents (MVP)
+<a id="__codelineno-5-39" name="__codelineno-5-39" href="#__codelineno-5-39"></a>│       ├── code_analyzer/
+<a id="__codelineno-5-40" name="__codelineno-5-40" href="#__codelineno-5-40"></a>│       ├── code_reviewer/
+<a id="__codelineno-5-41" name="__codelineno-5-41" href="#__codelineno-5-41"></a>│       ├── test_generator/
+<a id="__codelineno-5-42" name="__codelineno-5-42" href="#__codelineno-5-42"></a>│       └── test_runner/
+<a id="__codelineno-5-43" name="__codelineno-5-43" href="#__codelineno-5-43"></a>│
+<a id="__codelineno-5-44" name="__codelineno-5-44" href="#__codelineno-5-44"></a>├── dashboard/                     # Frontend de observabilidade (TS/React)
+<a id="__codelineno-5-45" name="__codelineno-5-45" href="#__codelineno-5-45"></a>│   ├── src/
+<a id="__codelineno-5-46" name="__codelineno-5-46" href="#__codelineno-5-46"></a>│   └── public/
+<a id="__codelineno-5-47" name="__codelineno-5-47" href="#__codelineno-5-47"></a>│
+<a id="__codelineno-5-48" name="__codelineno-5-48" href="#__codelineno-5-48"></a>├── tests/                         # Testes
+<a id="__codelineno-5-49" name="__codelineno-5-49" href="#__codelineno-5-49"></a>│   ├── unit/
+<a id="__codelineno-5-50" name="__codelineno-5-50" href="#__codelineno-5-50"></a>│   ├── integration/
+<a id="__codelineno-5-51" name="__codelineno-5-51" href="#__codelineno-5-51"></a>│   └── e2e/
+<a id="__codelineno-5-52" name="__codelineno-5-52" href="#__codelineno-5-52"></a>│
+<a id="__codelineno-5-53" name="__codelineno-5-53" href="#__codelineno-5-53"></a>├── docs/                          # Documentação
+<a id="__codelineno-5-54" name="__codelineno-5-54" href="#__codelineno-5-54"></a>├── scripts/                       # Scripts utilitários
+<a id="__codelineno-5-55" name="__codelineno-5-55" href="#__codelineno-5-55"></a>├── docker/                        # Configurações Docker
+<a id="__codelineno-5-56" name="__codelineno-5-56" href="#__codelineno-5-56"></a>├── pyproject.toml                 # Config Python
+<a id="__codelineno-5-57" name="__codelineno-5-57" href="#__codelineno-5-57"></a>├── package.json                   # Config TS (dashboard)
+<a id="__codelineno-5-58" name="__codelineno-5-58" href="#__codelineno-5-58"></a>└── README.md
+</code></pre></div>
+<hr />
+<h2 id="5-casos-de-uso-iniciais-coding-agents">5. Casos de Uso Iniciais (Coding Agents)</h2>
+<h3 id="51-code-analyzer-agent">5.1 Code Analyzer Agent</h3>
+<p><strong>Objetivo:</strong> Analisar código fonte e identificar problemas, smells, e oportunidades de refatoração.</p>
+<p><strong>Harness:</strong> <code>ReActHarness</code>
+<strong>Plugins:</strong> OpenAIAdapter, InMemoryAdapter, FileSystemTool, LinterTool
+<strong>Workflow:</strong>
+1. Ler arquivo(s) de código
+2. Executar linter para coletar métricas
+3. Analisar com LLM considerando contexto do projeto
+4. Gerar relatório estruturado</p>
+<h3 id="52-code-reviewer-agent">5.2 Code Reviewer Agent</h3>
+<p><strong>Objetivo:</strong> Revisar Pull Requests de forma autônoma.</p>
+<p><strong>Harness:</strong> <code>ReflexionHarness</code>
+<strong>Plugins:</strong> AnthropicAdapter, HybridMemoryAdapter, GitTool, FileSystemTool
+<strong>Workflow:</strong>
+1. Extrair diff do PR
+2. Analisar mudanças linha por linha
+3. Verificar padrões do projeto (buscar na memória)
+4. Gerar comentários de review
+5. Refletir sobre a qualidade do review</p>
+<h3 id="53-test-generator-agent">5.3 Test Generator Agent</h3>
+<p><strong>Objetivo:</strong> Gerar testes unitários/integração para código existente.</p>
+<p><strong>Harness:</strong> <code>PlanAndExecuteHarness</code>
+<strong>Plugins:</strong> OpenAIAdapter, InMemoryAdapter, FileSystemTool, TestRunnerTool
+<strong>Workflow:</strong>
+1. Analisar código alvo
+2. Planejar casos de teste necessários
+3. Gerar código de teste
+4. Executar testes
+5. Iterar em caso de falha</p>
+<h3 id="54-pipeline-completo">5.4 Pipeline Completo</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>│   Commit    │───▶│   Analyze   │───▶│   Review    │───▶│   Generate  │
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>│   Detected  │    │    Code     │    │    Code     │    │    Tests    │
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>└─────────────┘    └─────────────┘    └─────────────┘    └──────┬──────┘
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>                                                                  │
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>                                                                  ▼
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>│   Report    │◀───│   Meta-     │◀───│   Store     │◀───│    Run      │
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>│   Results   │    │   Harness   │    │   Events    │    │    Tests    │
+<a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+</code></pre></div>
+<hr />
+<h2 id="6-roadmap">6. Roadmap</h2>
+<h3 id="fase-1-foundation-semanas-1-4">Fase 1: Foundation (Semanas 1-4)</h3>
+<ul>
+<li>[ ] Implementar Core/Kernel (protocolos, event bus, plugin registry)</li>
+<li>[ ] Implementar Orquestrador Central básico (workflow engine sequencial)</li>
+<li>[ ] Implementar 2 LLM Adapters (OpenAI, Anthropic)</li>
+<li>[ ] Implementar 2 Memory Adapters (InMemory, Redis)</li>
+<li>[ ] Implementar 3 Tool Adapters (FileSystem, Shell, CodeExecution)</li>
+<li>[ ] Implementar Prompt Engine básico</li>
+<li>[ ] Implementar Telemetry básica (OpenTelemetry)</li>
+<li>[ ] Implementar 1 Harness Template (ReAct)</li>
+<li>[ ] <strong>Deliverable:</strong> Framework funcional com 1 agente de coding simples</li>
+</ul>
+<h3 id="fase-2-parallel-execution-observability-semanas-5-8">Fase 2: Parallel Execution &amp; Observability (Semanas 5-8)</h3>
+<ul>
+<li>[ ] Implementar execução paralela no Orquestrador</li>
+<li>[ ] Implementar Event Store completo</li>
+<li>[ ] Implementar Data Lake e pipeline ETL</li>
+<li>[ ] Implementar Dashboard de observabilidade (TS/React)</li>
+<li>[ ] Implementar State Manager com checkpointing</li>
+<li>[ ] Implementar Circuit Breaker e Retry Policies</li>
+<li>[ ] <strong>Deliverable:</strong> Múltiplos agents executando em paralelo com observabilidade full</li>
+</ul>
+<h3 id="fase-3-coding-agents-suite-semanas-9-14">Fase 3: Coding Agents Suite (Semanas 9-14)</h3>
+<ul>
+<li>[ ] Implementar Code Analyzer Agent</li>
+<li>[ ] Implementar Code Reviewer Agent</li>
+<li>[ ] Implementar Test Generator Agent</li>
+<li>[ ] Implementar Test Runner Agent</li>
+<li>[ ] Criar workflows complexos combinando agents</li>
+<li>[ ] Benchmark de performance vs. soluções existentes</li>
+<li>[ ] <strong>Deliverable:</strong> Suite completa de coding agents validando o framework</li>
+</ul>
+<h3 id="fase-4-meta-cognitive-layer-semanas-15-20">Fase 4: Meta-Cognitive Layer (Semanas 15-20)</h3>
+<ul>
+<li>[ ] Implementar Meta-Harness</li>
+<li>[ ] Implementar Self-Improvement Loop básico</li>
+<li>[ ] Implementar Prompt Optimization automática</li>
+<li>[ ] Implementar Training Pipeline para fine-tuning</li>
+<li>[ ] Implementar A/B Testing de plugins</li>
+<li>[ ] <strong>Deliverable:</strong> Sistema com capacidade de auto-melhoria mensurável</li>
+</ul>
+<h3 id="fase-5-generalization-scale-semanas-21-30">Fase 5: Generalization &amp; Scale (Semanas 21-30)</h3>
+<ul>
+<li>[ ] Expandir Tool Adapters para domínios além de coding</li>
+<li>[ ] Implementar Multi-Agent Coordination avançada</li>
+<li>[ ] Implementar Plugin Marketplace / Discovery</li>
+<li>[ ] Otimizações de performance e escala horizontal</li>
+<li>[ ] Documentação completa e exemplos</li>
+<li>[ ] <strong>Deliverable:</strong> Framework SOTA, pronto para general task solving</li>
+</ul>
+<hr />
+<h2 id="7-metricas-de-sucesso">7. Métricas de Sucesso</h2>
+<h3 id="71-metricas-tecnicas">7.1 Métricas Técnicas</h3>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Target Fase 1</th>
+<th>Target Fase 3</th>
+<th>Target Fase 5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Latência média de harness</td>
+<td>&lt; 5s</td>
+<td>&lt; 2s</td>
+<td>&lt; 1s</td>
+</tr>
+<tr>
+<td>Throughput (harnesses/min)</td>
+<td>10</td>
+<td>100</td>
+<td>1000+</td>
+</tr>
+<tr>
+<td>Taxa de sucesso de workflows</td>
+<td>&gt; 80%</td>
+<td>&gt; 90%</td>
+<td>&gt; 95%</td>
+</tr>
+<tr>
+<td>Tempo de swap de plugin</td>
+<td>&lt; 1min</td>
+<td>&lt; 30s</td>
+<td>&lt; 10s</td>
+</tr>
+<tr>
+<td>Cobertura de observabilidade</td>
+<td>100% events</td>
+<td>100% + traces</td>
+<td>100% + métricas</td>
+</tr>
+</tbody>
+</table>
+<h3 id="72-metricas-de-negocio-coding-agents">7.2 Métricas de Negócio (Coding Agents)</h3>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Target Fase 3</th>
+<th>Target Fase 5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Precisão de análise de código</td>
+<td>&gt; 85%</td>
+<td>&gt; 92%</td>
+</tr>
+<tr>
+<td>Cobertura de testes gerados</td>
+<td>&gt; 70%</td>
+<td>&gt; 85%</td>
+</tr>
+<tr>
+<td>Tempo economizado em review</td>
+<td>30%</td>
+<td>60%</td>
+</tr>
+<tr>
+<td>Aceitação de sugestões do agente</td>
+<td>&gt; 60%</td>
+<td>&gt; 80%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="73-metricas-de-meta-cognicao">7.3 Métricas de Meta-Cognição</h3>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Target Fase 4</th>
+<th>Target Fase 5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Taxa de melhoria de prompt</td>
+<td>+10%</td>
+<td>+25%</td>
+</tr>
+<tr>
+<td>Redução de falhas recorrentes</td>
+<td>-20%</td>
+<td>-50%</td>
+</tr>
+<tr>
+<td>Eficácia de troca de plugin</td>
+<td>Manual</td>
+<td>Semi-automática</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="8-consideracoes-de-seguranca">8. Considerações de Segurança</h2>
+<ul>
+<li><strong>Sandboxing</strong> — Execução de código em containers isolados (Firecracker/gVisor).</li>
+<li><strong>Secrets Management</strong> — Integração com Vault/AWS Secrets Manager.</li>
+<li><strong>Rate Limiting</strong> — Controle de uso de APIs externas.</li>
+<li><strong>Audit Trail</strong> — Toda ação é registrada e imutável.</li>
+<li><strong>Permission Model</strong> — RBAC para diferentes tipos de harnesses e tools.</li>
+<li><strong>Input Sanitization</strong> — Validação rigorosa de todos os inputs.</li>
+</ul>
+<hr />
+<h2 id="9-consideracoes-de-escalabilidade">9. Considerações de Escalabilidade</h2>
+<ul>
+<li><strong>Horizontal Scaling</strong> — Workers stateless escaláveis via Kubernetes.</li>
+<li><strong>Event Bus Distribuído</strong> — NATS ou Kafka para alta escala.</li>
+<li><strong>Database Sharding</strong> — Particionamento por tenant/workflow.</li>
+<li><strong>Caching Multi-Nível</strong> — Local + Distribuído + CDN.</li>
+<li><strong>Async Everything</strong> — Modelo totalmente assíncrono para não bloquear.</li>
+</ul>
+<hr />
+<h2 id="10-padroes-de-codigo-e-qualidade">10. Padrões de Código e Qualidade</h2>
+<ul>
+<li><strong>Type Hints</strong> obrigatórios em 100% do código Python.</li>
+<li><strong>Protocol/Interface</strong> para toda dependência externa.</li>
+<li><strong>Testes:</strong></li>
+<li>Unitários: &gt; 80% cobertura</li>
+<li>Integração: Todos os adapters</li>
+<li>E2E: Workflows completos</li>
+<li><strong>Linting:</strong> Ruff, MyPy strict mode</li>
+<li><strong>Documentação:</strong> Docstrings em todos os módulos públicos</li>
+<li><strong>Commits:</strong> Conventional Commits</li>
+</ul>
+<hr />
+<h2 id="11-glossario">11. Glossário</h2>
+<table>
+<thead>
+<tr>
+<th>Termo</th>
+<th>Definição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Harness</strong></td>
+<td>Unidade de execução autônoma — um agente configurado com plugins</td>
+</tr>
+<tr>
+<td><strong>Plugin</strong></td>
+<td>Implementação concreta de uma capacidade definida por protocolo</td>
+</tr>
+<tr>
+<td><strong>Protocolo</strong></td>
+<td>Interface/contract que define como um plugin deve se comportar</td>
+</tr>
+<tr>
+<td><strong>Orquestrador</strong></td>
+<td>Componente central que coordena a execução de múltiplos harnesses</td>
+</tr>
+<tr>
+<td><strong>Event Bus</strong></td>
+<td>Sistema de mensageria que permite comunicação desacoplada entre componentes</td>
+</tr>
+<tr>
+<td><strong>Meta-Harness</strong></td>
+<td>Harness especial que analisa e melhora a performance de outros harnesses</td>
+</tr>
+<tr>
+<td><strong>Self-Improvement Loop</strong></td>
+<td>Processo contínuo onde o sistema usa seus próprios dados para evoluir</td>
+</tr>
+<tr>
+<td><strong>SOTA</strong></td>
+<td>State Of The Art — estado da arte</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="12-apendice-exemplo-de-configuracao">12. Apêndice: Exemplo de Configuração</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="c1"># harness-config.yaml</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="nt">project</span><span class="p">:</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"coding_agent_suite"</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">"1.0.0"</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="nt">orchestrator</span><span class="p">:</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span><span class="nt">max_parallel_harnesses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">  </span><span class="nt">default_retry_policy</span><span class="p">:</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="nt">max_attempts</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span><span class="nt">backoff</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">exponential</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">  </span><span class="nt">event_bus</span><span class="p">:</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="s">"redis"</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">"redis://localhost:6379"</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a>
+<a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a><span class="nt">plugins</span><span class="p">:</span>
+<a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">  </span><span class="nt">llm</span><span class="p">:</span>
+<a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="s">"openai"</span>
+<a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">    </span><span class="nt">adapters</span><span class="p">:</span>
+<a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="w">      </span><span class="nt">openai</span><span class="p">:</span>
+<a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="w">        </span><span class="nt">class</span><span class="p">:</span><span class="w"> </span><span class="s">"plugins.llm.OpenAIAdapter"</span>
+<a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="w">        </span><span class="nt">config</span><span class="p">:</span>
+<a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a><span class="w">          </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="s">"gpt-4o"</span>
+<a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a><span class="w">          </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.2</span>
+<a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a><span class="w">          </span><span class="nt">max_tokens</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4096</span>
+<a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a>
+<a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a><span class="w">      </span><span class="nt">anthropic</span><span class="p">:</span>
+<a id="__codelineno-7-27" name="__codelineno-7-27" href="#__codelineno-7-27"></a><span class="w">        </span><span class="nt">class</span><span class="p">:</span><span class="w"> </span><span class="s">"plugins.llm.AnthropicAdapter"</span>
+<a id="__codelineno-7-28" name="__codelineno-7-28" href="#__codelineno-7-28"></a><span class="w">        </span><span class="nt">config</span><span class="p">:</span>
+<a id="__codelineno-7-29" name="__codelineno-7-29" href="#__codelineno-7-29"></a><span class="w">          </span><span class="nt">model</span><span class="p">:</span><span class="w"> </span><span class="s">"claude-3-5-sonnet"</span>
+<a id="__codelineno-7-30" name="__codelineno-7-30" href="#__codelineno-7-30"></a><span class="w">          </span><span class="nt">temperature</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span>
+<a id="__codelineno-7-31" name="__codelineno-7-31" href="#__codelineno-7-31"></a>
+<a id="__codelineno-7-32" name="__codelineno-7-32" href="#__codelineno-7-32"></a><span class="w">  </span><span class="nt">memory</span><span class="p">:</span>
+<a id="__codelineno-7-33" name="__codelineno-7-33" href="#__codelineno-7-33"></a><span class="w">    </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="s">"hybrid"</span>
+<a id="__codelineno-7-34" name="__codelineno-7-34" href="#__codelineno-7-34"></a><span class="w">    </span><span class="nt">adapters</span><span class="p">:</span>
+<a id="__codelineno-7-35" name="__codelineno-7-35" href="#__codelineno-7-35"></a><span class="w">      </span><span class="nt">hybrid</span><span class="p">:</span>
+<a id="__codelineno-7-36" name="__codelineno-7-36" href="#__codelineno-7-36"></a><span class="w">        </span><span class="nt">class</span><span class="p">:</span><span class="w"> </span><span class="s">"plugins.memory.HybridMemoryAdapter"</span>
+<a id="__codelineno-7-37" name="__codelineno-7-37" href="#__codelineno-7-37"></a><span class="w">        </span><span class="nt">config</span><span class="p">:</span>
+<a id="__codelineno-7-38" name="__codelineno-7-38" href="#__codelineno-7-38"></a><span class="w">          </span><span class="nt">short_term</span><span class="p">:</span><span class="w"> </span><span class="s">"redis"</span>
+<a id="__codelineno-7-39" name="__codelineno-7-39" href="#__codelineno-7-39"></a><span class="w">          </span><span class="nt">long_term</span><span class="p">:</span><span class="w"> </span><span class="s">"chroma"</span>
+<a id="__codelineno-7-40" name="__codelineno-7-40" href="#__codelineno-7-40"></a>
+<a id="__codelineno-7-41" name="__codelineno-7-41" href="#__codelineno-7-41"></a><span class="w">  </span><span class="nt">tools</span><span class="p">:</span>
+<a id="__codelineno-7-42" name="__codelineno-7-42" href="#__codelineno-7-42"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class</span><span class="p">:</span><span class="w"> </span><span class="s">"plugins.tools.FileSystemTool"</span>
+<a id="__codelineno-7-43" name="__codelineno-7-43" href="#__codelineno-7-43"></a><span class="w">      </span><span class="nt">config</span><span class="p">:</span>
+<a id="__codelineno-7-44" name="__codelineno-7-44" href="#__codelineno-7-44"></a><span class="w">        </span><span class="nt">allowed_paths</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"/workspace"</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-7-45" name="__codelineno-7-45" href="#__codelineno-7-45"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class</span><span class="p">:</span><span class="w"> </span><span class="s">"plugins.tools.ShellTool"</span>
+<a id="__codelineno-7-46" name="__codelineno-7-46" href="#__codelineno-7-46"></a><span class="w">      </span><span class="nt">config</span><span class="p">:</span>
+<a id="__codelineno-7-47" name="__codelineno-7-47" href="#__codelineno-7-47"></a><span class="w">        </span><span class="nt">allowed_commands</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"git"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"npm"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"pytest"</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-7-48" name="__codelineno-7-48" href="#__codelineno-7-48"></a><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class</span><span class="p">:</span><span class="w"> </span><span class="s">"plugins.tools.LinterTool"</span>
+<a id="__codelineno-7-49" name="__codelineno-7-49" href="#__codelineno-7-49"></a><span class="w">      </span><span class="nt">config</span><span class="p">:</span>
+<a id="__codelineno-7-50" name="__codelineno-7-50" href="#__codelineno-7-50"></a><span class="w">        </span><span class="nt">linters</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"pylint"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"mypy"</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-7-51" name="__codelineno-7-51" href="#__codelineno-7-51"></a>
+<a id="__codelineno-7-52" name="__codelineno-7-52" href="#__codelineno-7-52"></a><span class="w">  </span><span class="nt">telemetry</span><span class="p">:</span>
+<a id="__codelineno-7-53" name="__codelineno-7-53" href="#__codelineno-7-53"></a><span class="w">    </span><span class="nt">class</span><span class="p">:</span><span class="w"> </span><span class="s">"plugins.telemetry.OpenTelemetryAdapter"</span>
+<a id="__codelineno-7-54" name="__codelineno-7-54" href="#__codelineno-7-54"></a><span class="w">    </span><span class="nt">config</span><span class="p">:</span>
+<a id="__codelineno-7-55" name="__codelineno-7-55" href="#__codelineno-7-55"></a><span class="w">      </span><span class="nt">exporter</span><span class="p">:</span><span class="w"> </span><span class="s">"otlp"</span>
+<a id="__codelineno-7-56" name="__codelineno-7-56" href="#__codelineno-7-56"></a><span class="w">      </span><span class="nt">endpoint</span><span class="p">:</span><span class="w"> </span><span class="s">"http://jaeger:4317"</span>
+<a id="__codelineno-7-57" name="__codelineno-7-57" href="#__codelineno-7-57"></a>
+<a id="__codelineno-7-58" name="__codelineno-7-58" href="#__codelineno-7-58"></a><span class="nt">harnesses</span><span class="p">:</span>
+<a id="__codelineno-7-59" name="__codelineno-7-59" href="#__codelineno-7-59"></a><span class="w">  </span><span class="nt">code_analyzer</span><span class="p">:</span>
+<a id="__codelineno-7-60" name="__codelineno-7-60" href="#__codelineno-7-60"></a><span class="w">    </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="s">"ReActHarness"</span>
+<a id="__codelineno-7-61" name="__codelineno-7-61" href="#__codelineno-7-61"></a><span class="w">    </span><span class="nt">plugins</span><span class="p">:</span>
+<a id="__codelineno-7-62" name="__codelineno-7-62" href="#__codelineno-7-62"></a><span class="w">      </span><span class="nt">llm</span><span class="p">:</span><span class="w"> </span><span class="s">"openai"</span>
+<a id="__codelineno-7-63" name="__codelineno-7-63" href="#__codelineno-7-63"></a><span class="w">      </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">"hybrid"</span>
+<a id="__codelineno-7-64" name="__codelineno-7-64" href="#__codelineno-7-64"></a><span class="w">      </span><span class="nt">tools</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"FileSystemTool"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"LinterTool"</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-7-65" name="__codelineno-7-65" href="#__codelineno-7-65"></a><span class="w">    </span><span class="nt">config</span><span class="p">:</span>
+<a id="__codelineno-7-66" name="__codelineno-7-66" href="#__codelineno-7-66"></a><span class="w">      </span><span class="nt">max_iterations</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<a id="__codelineno-7-67" name="__codelineno-7-67" href="#__codelineno-7-67"></a>
+<a id="__codelineno-7-68" name="__codelineno-7-68" href="#__codelineno-7-68"></a><span class="w">  </span><span class="nt">code_reviewer</span><span class="p">:</span>
+<a id="__codelineno-7-69" name="__codelineno-7-69" href="#__codelineno-7-69"></a><span class="w">    </span><span class="nt">template</span><span class="p">:</span><span class="w"> </span><span class="s">"ReflexionHarness"</span>
+<a id="__codelineno-7-70" name="__codelineno-7-70" href="#__codelineno-7-70"></a><span class="w">    </span><span class="nt">plugins</span><span class="p">:</span>
+<a id="__codelineno-7-71" name="__codelineno-7-71" href="#__codelineno-7-71"></a><span class="w">      </span><span class="nt">llm</span><span class="p">:</span><span class="w"> </span><span class="s">"anthropic"</span>
+<a id="__codelineno-7-72" name="__codelineno-7-72" href="#__codelineno-7-72"></a><span class="w">      </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="s">"hybrid"</span>
+<a id="__codelineno-7-73" name="__codelineno-7-73" href="#__codelineno-7-73"></a><span class="w">      </span><span class="nt">tools</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"FileSystemTool"</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"GitTool"</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-7-74" name="__codelineno-7-74" href="#__codelineno-7-74"></a><span class="w">    </span><span class="nt">config</span><span class="p">:</span>
+<a id="__codelineno-7-75" name="__codelineno-7-75" href="#__codelineno-7-75"></a><span class="w">      </span><span class="nt">reflection_rounds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<a id="__codelineno-7-76" name="__codelineno-7-76" href="#__codelineno-7-76"></a>
+<a id="__codelineno-7-77" name="__codelineno-7-77" href="#__codelineno-7-77"></a><span class="nt">workflows</span><span class="p">:</span>
+<a id="__codelineno-7-78" name="__codelineno-7-78" href="#__codelineno-7-78"></a><span class="w">  </span><span class="nt">pr_pipeline</span><span class="p">:</span>
+<a id="__codelineno-7-79" name="__codelineno-7-79" href="#__codelineno-7-79"></a><span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<a id="__codelineno-7-80" name="__codelineno-7-80" href="#__codelineno-7-80"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="s">"analyze"</span>
+<a id="__codelineno-7-81" name="__codelineno-7-81" href="#__codelineno-7-81"></a><span class="w">        </span><span class="nt">harness</span><span class="p">:</span><span class="w"> </span><span class="s">"code_analyzer"</span>
+<a id="__codelineno-7-82" name="__codelineno-7-82" href="#__codelineno-7-82"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="s">"review"</span>
+<a id="__codelineno-7-83" name="__codelineno-7-83" href="#__codelineno-7-83"></a><span class="w">        </span><span class="nt">harness</span><span class="p">:</span><span class="w"> </span><span class="s">"code_reviewer"</span>
+<a id="__codelineno-7-84" name="__codelineno-7-84" href="#__codelineno-7-84"></a><span class="w">        </span><span class="nt">depends_on</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"analyze"</span><span class="p p-Indicator">]</span>
+<a id="__codelineno-7-85" name="__codelineno-7-85" href="#__codelineno-7-85"></a><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="s">"generate_tests"</span>
+<a id="__codelineno-7-86" name="__codelineno-7-86" href="#__codelineno-7-86"></a><span class="w">        </span><span class="nt">harness</span><span class="p">:</span><span class="w"> </span><span class="s">"test_generator"</span>
+<a id="__codelineno-7-87" name="__codelineno-7-87" href="#__codelineno-7-87"></a><span class="w">        </span><span class="nt">depends_on</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"review"</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+<hr />
+<p><em>Documento elaborado para guiar o desenvolvimento de um framework de agentes autônomos de classe mundial. Foco em robustez, modularidade, observabilidade e evolução contínua.</em></p>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

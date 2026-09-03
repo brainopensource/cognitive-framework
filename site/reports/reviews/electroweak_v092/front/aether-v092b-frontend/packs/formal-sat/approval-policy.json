@@ -1,0 +1,9 @@
+{
+  "api": "mhf.approval-policy/1",
+  "default": "deny",
+  "rules": [
+    {"verb": "fs.read", "decision": "allow"},
+    {"verb": "patch.apply", "decision": "require_approval"},
+    {"verb": "proc.exec", "decision": "allow"}
+  ]
+}

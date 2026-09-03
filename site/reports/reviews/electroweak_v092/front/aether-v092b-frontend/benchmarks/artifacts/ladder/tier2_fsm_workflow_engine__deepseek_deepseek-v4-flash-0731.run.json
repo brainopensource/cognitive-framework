@@ -1,0 +1,312 @@
+{
+  "challenge": "tier2_fsm_workflow_engine",
+  "tier": "easy",
+  "title": "Hierarchical State Machine with Rollback",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "manifest": "vg-code-max-v3",
+  "status": "PASS",
+  "llm_calls": 9,
+  "turns": 6,
+  "terminal_state": "abandoned",
+  "cost_usd": 0.001354,
+  "latency_s": 13.49,
+  "files_modified": [
+    "fsm/machine.py"
+  ],
+  "oracle_output": "",
+  "error": "",
+  "terminal_detail": "repeated action proc.exec over 3 turns",
+  "run_fields": {},
+  "cassette": "benchmarks/artifacts/ladder/tier2_fsm_workflow_engine__deepseek_deepseek-v4-flash-0731.cassette.json",
+  "trajectory": [
+    {
+      "turn": 0,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "fsm/machine.py"
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 3159,
+        "completion_tokens": 47,
+        "cached_tokens": 0,
+        "total_tokens": 3206,
+        "cost_usd": 0.000455,
+        "usd_micros": 455,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000455,
+      "prior_tool_result": null,
+      "recovery_feedback": null
+    },
+    {
+      "turn": 1,
+      "kind": "effect",
+      "action": "fs.read",
+      "args": {
+        "path": "fsm/__init__.py"
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 3479,
+        "completion_tokens": 49,
+        "cached_tokens": 3072,
+        "total_tokens": 3528,
+        "cost_usd": 0.000113,
+        "usd_micros": 113,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000113,
+      "prior_tool_result": "tool result turn=0 digest=sha256:05c9f8124ecd5308be251c2b306aaeb6a890502fb1f263b1e71ddeacf6f79436\nclass StateError(Exception):\n    pass\n\nclass StateMachine:\n    def __init__(self, initial_state: str):\n        self.current_state = initial_state\n        self.transitions = {}\n\n    def add_transition(self, event: str, source: str, target: str, guard=None) -> None:\n        self.transitions[(event, source)] = (target, guard)\n\n    def trigger(self, event: str) -> str:\n        key = (event, self.current_state)\n        if key not in self.transitions:\n            return self.current_state  # BUG: ignores invalid transition without raising StateError\n        target, guard = self.transitions[key]\n        if guard and not guard():\n            raise StateError('Guard rejected')\n        self.current_state = target\n        return self.current_state\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 2,
+      "kind": "effect",
+      "action": "patch.apply",
+      "args": {
+        "path": "fsm/machine.py",
+        "content": "class StateError(Exception):\n    pass\n\nclass StateMachine:\n    def __init__(self, initial_state: str):\n        self.current_state = initial_state\n        self.transitions = {}\n\n    def add_transition(self, event: str, source: str, target: str, guard=None) -> None:\n        self.transitions[(event, source)] = (target, guard)\n\n    def trigger(self, event: str) -> str:\n        key = (event, self.current_state)\n        if key not in self.transitions:\n            raise StateError(f'No transition for event {event!r} in state {self.current_state!r}')\n        target, guard = self.transitions[key]\n        if guard and not guard():\n            raise StateError('Guard rejected')\n        self.current_state = target\n        return self.current_state"
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 3609,
+        "completion_tokens": 233,
+        "cached_tokens": 3328,
+        "total_tokens": 3842,
+        "cost_usd": 0.000151,
+        "usd_micros": 151,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000151,
+      "prior_tool_result": "tool result turn=1 digest=sha256:63ed9ae6d2421ffb945aee8454932dff7adc36d4cacde8da0faba6ad42745271\nfrom .machine import StateMachine, StateError\n__all__ = ['StateMachine', 'StateError']\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 3,
+      "kind": "effect",
+      "action": "proc.exec",
+      "args": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "."
+        ]
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 3843,
+        "completion_tokens": 62,
+        "cached_tokens": 3328,
+        "total_tokens": 3905,
+        "cost_usd": 0.000136,
+        "usd_micros": 136,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000136,
+      "prior_tool_result": "tool result turn=1 digest=sha256:63ed9ae6d2421ffb945aee8454932dff7adc36d4cacde8da0faba6ad42745271\nfrom .machine import StateMachine, StateError\n__all__ = ['StateMachine', 'StateError']\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 4,
+      "kind": "effect",
+      "action": "proc.exec",
+      "args": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "."
+        ]
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 3843,
+        "completion_tokens": 62,
+        "cached_tokens": 3840,
+        "total_tokens": 3905,
+        "cost_usd": 7.1e-05,
+        "usd_micros": 71,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 7.1e-05,
+      "prior_tool_result": "tool result turn=1 digest=sha256:63ed9ae6d2421ffb945aee8454932dff7adc36d4cacde8da0faba6ad42745271\nfrom .machine import StateMachine, StateError\n__all__ = ['StateMachine', 'StateError']\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 5,
+      "kind": "effect",
+      "action": "proc.exec",
+      "args": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "."
+        ]
+      },
+      "note": "",
+      "text": "\n\n",
+      "usage": {
+        "prompt_tokens": 3909,
+        "completion_tokens": 62,
+        "cached_tokens": 3840,
+        "total_tokens": 3971,
+        "cost_usd": 8e-05,
+        "usd_micros": 80,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 8e-05,
+      "prior_tool_result": "tool result turn=1 digest=sha256:63ed9ae6d2421ffb945aee8454932dff7adc36d4cacde8da0faba6ad42745271\nfrom .machine import StateMachine, StateError\n__all__ = ['StateMachine', 'StateError']\n",
+      "recovery_feedback": null
+    },
+    {
+      "turn": 6,
+      "kind": "effect",
+      "action": "proc.exec",
+      "args": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "."
+        ]
+      },
+      "note": "",
+      "text": "The test tool didn't return output. Let me run it once more to see the result.\n\n",
+      "usage": {
+        "prompt_tokens": 4166,
+        "completion_tokens": 80,
+        "cached_tokens": 3840,
+        "total_tokens": 4246,
+        "cost_usd": 0.000121,
+        "usd_micros": 121,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.000121,
+      "prior_tool_result": "tool result turn=1 digest=sha256:63ed9ae6d2421ffb945aee8454932dff7adc36d4cacde8da0faba6ad42745271\nfrom .machine import StateMachine, StateError\n__all__ = ['StateMachine', 'StateError']\n",
+      "recovery_feedback": {
+        "repeatedAction": "proc.exec",
+        "repeatCount": 3,
+        "lastReceiptDigest": null,
+        "availableTools": [
+          "agency.finish",
+          "fs.read",
+          "fs.search",
+          "patch.apply",
+          "proc.exec"
+        ],
+        "message": "You have proposed proc.exec with the same arguments 3 times and the result has not changed. Repeating it again will not change it either. Read the result you already have and do something different: if the work is finished, declare completion; if it is not, act on a different file or a different command.",
+        "reason": "REPEATED_ACTION"
+      }
+    },
+    {
+      "turn": 7,
+      "kind": "finish",
+      "action": null,
+      "args": null,
+      "note": "Fixed fsm/machine.py so trigger() raises StateError on invalid transitions instead of silently returning the current state.",
+      "text": "The test tool didn't return output but the patch was applied. The fix addresses the bug described in the code comment: invalid transitions should raise `StateError` instead of silently returning the current state. Let me finish.",
+      "usage": {
+        "prompt_tokens": 4246,
+        "completion_tokens": 108,
+        "cached_tokens": 3840,
+        "total_tokens": 4354,
+        "cost_usd": 0.00014,
+        "usd_micros": 140,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 0.00014,
+      "prior_tool_result": "tool result turn=1 digest=sha256:63ed9ae6d2421ffb945aee8454932dff7adc36d4cacde8da0faba6ad42745271\nfrom .machine import StateMachine, StateError\n__all__ = ['StateMachine', 'StateError']\n",
+      "recovery_feedback": {
+        "repeatedAction": "proc.exec",
+        "repeatCount": 3,
+        "lastReceiptDigest": null,
+        "availableTools": [
+          "agency.finish",
+          "fs.read",
+          "fs.search",
+          "patch.apply",
+          "proc.exec"
+        ],
+        "message": "You have proposed proc.exec with the same arguments 3 times and the result has not changed. Repeating it again will not change it either. Read the result you already have and do something different: if the work is finished, declare completion; if it is not, act on a different file or a different command.",
+        "reason": "REPEATED_ACTION"
+      }
+    },
+    {
+      "turn": 8,
+      "kind": "effect",
+      "action": "proc.exec",
+      "args": {
+        "argv": [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "."
+        ]
+      },
+      "note": "",
+      "text": "The test tool isn't returning output. Let me try running it via proc.exec.",
+      "usage": {
+        "prompt_tokens": 4153,
+        "completion_tokens": 79,
+        "cached_tokens": 4096,
+        "total_tokens": 4232,
+        "cost_usd": 8.7e-05,
+        "usd_micros": 87,
+        "pricing_known": true,
+        "pricing_source": "hardcoded",
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "ttft_millis": 0
+      },
+      "cost_usd": 8.7e-05,
+      "prior_tool_result": "tool result turn=1 digest=sha256:63ed9ae6d2421ffb945aee8454932dff7adc36d4cacde8da0faba6ad42745271\nfrom .machine import StateMachine, StateError\n__all__ = ['StateMachine', 'StateError']\n",
+      "recovery_feedback": {
+        "admissionReason": "VERIFICATION_REQUIRED",
+        "feedback": "VERIFICATION_REQUIRED",
+        "reason": "COMPLETION_ADMISSION_REJECTED"
+      }
+    }
+  ]
+}

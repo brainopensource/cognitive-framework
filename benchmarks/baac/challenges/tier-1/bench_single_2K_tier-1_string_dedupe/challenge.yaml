@@ -1,0 +1,14 @@
+id: bench_single_2K_tier-1_string_dedupe
+name: Consecutive String Deduplication
+scope: single
+context_bracket: 2K
+tier: tier-1
+difficulty: 1
+timeout_seconds: 35
+entrypoint: src/main.py
+eval_type: oracle
+tags:
+- string
+- algorithms
+- single_file
+metadata: {}

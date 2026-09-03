@@ -1,0 +1,14 @@
+id: bench_multi_64K_tier-5_immutable_trie
+name: Persistent Immutable Prefix Trie
+scope: multi
+context_bracket: 64K
+tier: tier-5
+difficulty: 5
+timeout_seconds: 35
+entrypoint: src/main.py
+eval_type: oracle
+tags:
+- data_structures
+- immutability
+- persistent_trees
+metadata: {}

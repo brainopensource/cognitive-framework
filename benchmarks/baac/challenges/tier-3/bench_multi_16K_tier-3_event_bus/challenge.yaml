@@ -1,0 +1,14 @@
+id: bench_multi_16K_tier-3_event_bus
+name: Asynchronous In-Memory Event Bus
+scope: multi
+context_bracket: 16K
+tier: tier-3
+difficulty: 3
+timeout_seconds: 35
+entrypoint: src/main.py
+eval_type: oracle
+tags:
+- events
+- pubsub
+- patterns
+metadata: {}

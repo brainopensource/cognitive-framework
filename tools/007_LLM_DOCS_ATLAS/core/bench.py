@@ -44,7 +44,7 @@ def build_fixture_repo(root: Path) -> None:
         '    """Spawn an attenuated child agent with reduced budgets."""\n'
         "    ...\n"
     ))
-    w("test/kernel/test_budget.py", (
+    w("test/suite/test_budget.py", (
         "def test_budget_commit_fails_closed():\n"
         "    ...\n"
     ))

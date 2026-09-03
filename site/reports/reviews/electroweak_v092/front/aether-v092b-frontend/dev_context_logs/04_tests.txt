@@ -1,0 +1,71 @@
+=== TCB & HEXAGONAL LINTERS ===
+BOUNDARY PASS: 634 source files checked
+{"alarm_delta_lines": 131, "baseline_logical_loc": 1307, "current_logical_loc": 1386, "files": {"vanguard/packages/kernel/__init__.py": 41, "vanguard/packages/kernel/attenuation.py": 171, "vanguard/packages/kernel/budget.py": 150, "vanguard/packages/kernel/classifier.py": 96, "vanguard/packages/kernel/dispatch.py": 374, "vanguard/packages/kernel/grants.py": 201, "vanguard/packages/kernel/model.py": 137, "vanguard/packages/kernel/policy.py": 106, "vanguard/packages/kernel/provenance.py": 110}, "threshold": 1438}
+TCB PASS: 1386 logical lines across 9 files (alarm above 1438)
+DOMAIN-BLINDNESS WARN: scan target missing (not an error): layer0/
+DOMAIN-BLINDNESS PASS: no coding|pytest|ast tokens in vanguard/packages/domain/, vanguard/packages/kernel/
+ISOLATION POLICY PASS: proc.exec plugins declare container/subprocess
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_1_wave_1_architecture_and_composition.md:68: forbidden machine-specific file:// URI: 1. **Zero Kernel Mutation**: The Trusted Computing Base ([`vanguard/packages/kernel/`](file:///home/rocha/Coding/Aether-
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_1_wave_1_architecture_and_composition.md:68: forbidden machine-local user directory path: 1. **Zero Kernel Mutation**: The Trusted Computing Base ([`vanguard/packages/kernel/`](file:///home/rocha/Coding/Aether-
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_1_wave_1_architecture_and_composition.md:68: forbidden developer username occurrence: 1. **Zero Kernel Mutation**: The Trusted Computing Base ([`vanguard/packages/kernel/`](file:///home/rocha/Coding/Aether-
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_1_wave_1_architecture_and_composition.md:69: forbidden machine-specific file:// URI: 2. **App-Layer Encapsulation**: The entire end-to-end agent intelligence, task classification, multi-stage planning, and
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_1_wave_1_architecture_and_composition.md:69: forbidden machine-local user directory path: 2. **App-Layer Encapsulation**: The entire end-to-end agent intelligence, task classification, multi-stage planning, and
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_1_wave_1_architecture_and_composition.md:69: forbidden developer username occurrence: 2. **App-Layer Encapsulation**: The entire end-to-end agent intelligence, task classification, multi-stage planning, and
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_1_wave_1_architecture_and_composition.md:70: forbidden machine-specific file:// URI: 3. **Clean Pack Decoupling**: The [`packs/code-default/`](file:///home/rocha/Coding/Aether-D-System/packs/code-default) 
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_1_wave_1_architecture_and_composition.md:70: forbidden machine-local user directory path: 3. **Clean Pack Decoupling**: The [`packs/code-default/`](file:///home/rocha/Coding/Aether-D-System/packs/code-default) 
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_1_wave_1_architecture_and_composition.md:70: forbidden developer username occurrence: 3. **Clean Pack Decoupling**: The [`packs/code-default/`](file:///home/rocha/Coding/Aether-D-System/packs/code-default) 
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_1_wave_1_architecture_and_composition.md:530: forbidden machine-specific file:// URI: * **Production Application Service**: [`CodingMaxAppService`](file:///home/rocha/Coding/Aether-D-System/vanguard/package
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_1_wave_1_architecture_and_composition.md:530: forbidden machine-local user directory path: * **Production Application Service**: [`CodingMaxAppService`](file:///home/rocha/Coding/Aether-D-System/vanguard/package
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_1_wave_1_architecture_and_composition.md:530: forbidden developer username occurrence: * **Production Application Service**: [`CodingMaxAppService`](file:///home/rocha/Coding/Aether-D-System/vanguard/package
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_3_wave_3_repo_intelligence_and_sbfl.md:38: forbidden machine-specific file:// URI: Solution C eliminates this inefficiency by implementing a **dual-engine intelligence layer** via the [`vanguard.packages
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_3_wave_3_repo_intelligence_and_sbfl.md:38: forbidden machine-local user directory path: Solution C eliminates this inefficiency by implementing a **dual-engine intelligence layer** via the [`vanguard.packages
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_3_wave_3_repo_intelligence_and_sbfl.md:38: forbidden developer username occurrence: Solution C eliminates this inefficiency by implementing a **dual-engine intelligence layer** via the [`vanguard.packages
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_5_wave_5_verification_and_admission_gate.md:39: forbidden machine-specific file:// URI: 1. **Admission Gate ([`AdmissionGate`](file:///home/rocha/Coding/Aether-D-System/vanguard/packages/agency/episode/admiss
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_5_wave_5_verification_and_admission_gate.md:39: forbidden machine-local user directory path: 1. **Admission Gate ([`AdmissionGate`](file:///home/rocha/Coding/Aether-D-System/vanguard/packages/agency/episode/admiss
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_5_wave_5_verification_and_admission_gate.md:39: forbidden developer username occurrence: 1. **Admission Gate ([`AdmissionGate`](file:///home/rocha/Coding/Aether-D-System/vanguard/packages/agency/episode/admiss
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_2_wave_2_meta_controller_and_planning.md:40: forbidden machine-specific file:// URI: 2. **`CodingMaxMetaController`**: A stateful policy implementing [`vanguard.packages.ports.meta_controller.MetaControlle
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_2_wave_2_meta_controller_and_planning.md:40: forbidden machine-local user directory path: 2. **`CodingMaxMetaController`**: A stateful policy implementing [`vanguard.packages.ports.meta_controller.MetaControlle
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_2_wave_2_meta_controller_and_planning.md:40: forbidden developer username occurrence: 2. **`CodingMaxMetaController`**: A stateful policy implementing [`vanguard.packages.ports.meta_controller.MetaControlle
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_6_wave_6_product_apps_and_manifests.md:36: forbidden machine-specific file:// URI: A true general agentic substrate does not force every domain into a single monolithic codebase. Instead, **each product 
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_6_wave_6_product_apps_and_manifests.md:36: forbidden machine-local user directory path: A true general agentic substrate does not force every domain into a single monolithic codebase. Instead, **each product 
+PATH HYGIENE FAIL: docs/reports/reviews/electroweak_v091/3_body/solution_c/report_6_wave_6_product_apps_and_manifests.md:36: forbidden developer username occurrence: A true general agentic substrate does not force every domain into a single monolithic codebase. Instead, **each product 
+Linter skipped
+
+=== UNIT TEST SUITES ===
+.................................................................................................
+----------------------------------------------------------------------
+Ran 97 tests in 0.600s
+
+OK
+..............................................................................................................................
+----------------------------------------------------------------------
+Ran 126 tests in 1.656s
+
+OK
+.................................EE.......................................................................................................s..s.......s....ss....................................................................................................................................s.................................................................................................................................
+======================================================================
+ERROR: test_b2_04_uds_subprocess_lifecycle_and_leak_free_cleanup (test.contracts.test_b2_lifecycle_integration.B2LifecycleIntegrationTests.test_b2_04_uds_subprocess_lifecycle_and_leak_free_cleanup)
+RF-80: Subprocess cells start over UDS, execute health/calls, and clean up sockets/workdirs.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/rocha/Coding/Aether-D-System/test/contracts/test_b2_lifecycle_integration.py", line 156, in test_b2_04_uds_subprocess_lifecycle_and_leak_free_cleanup
+    self.broker.start(cell)
+  File "/home/rocha/Coding/Aether-D-System/vanguard/packages/runtime/registry/broker.py", line 180, in start
+    raise TimeoutError(f"plugin {cell.plugin_id} did not bind UDS")
+TimeoutError: plugin subproc-worker did not bind UDS
+
+======================================================================
+ERROR: test_b2_05_unexpected_child_crash_contained (test.contracts.test_b2_lifecycle_integration.B2LifecycleIntegrationTests.test_b2_05_unexpected_child_crash_contained)
+RF-80: Subprocess crash is caught gracefully without terminating the host runtime.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/rocha/Coding/Aether-D-System/test/contracts/test_b2_lifecycle_integration.py", line 181, in test_b2_05_unexpected_child_crash_contained
+    self.broker.start(cell)
+  File "/home/rocha/Coding/Aether-D-System/vanguard/packages/runtime/registry/broker.py", line 180, in start
+    raise TimeoutError(f"plugin {cell.plugin_id} did not bind UDS")
+TimeoutError: plugin crashing-worker did not bind UDS
+
+----------------------------------------------------------------------
+Ran 417 tests in 18.804s
+
+FAILED (errors=2, skipped=6)

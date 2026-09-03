@@ -36,7 +36,7 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from vanguard.packages.domain.workspace import get_workspace_path
-EVIDENCE_DIR = _ROOT / "docs" / "03_execution" / "evidence"
+EVIDENCE_DIR = _ROOT / "evidence"
 
 
 def _run(command: list[str], **kwargs) -> subprocess.CompletedProcess:

@@ -1,0 +1,5401 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="General Event-Sourced Agentic Computation Framework & Substrate">
+      
+      
+        <meta name="author" content="AETHER Team">
+      
+      
+      
+        <link rel="prev" href="../PRD_AETHER_TUI/">
+      
+      
+        <link rel="next" href="../../../execution/active/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>PRD Platform - AETHER Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#product-requirements-document-aether-frontend-platform-shared-client-substrate" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="AETHER Documentation" class="md-header__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            AETHER Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              PRD Platform
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="AETHER Documentation" class="md-nav__button md-logo" aria-label="AETHER Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    AETHER Documentation
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Law & Norms
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Law & Norms
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../SPEC/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Specification (SPEC)
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../decisions/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions Index
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Overview
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/boundaries/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Boundaries
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/data-flow/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Data Flow
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/end-to-end-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    End-to-End Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../architecture/workflows/system-bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    System Bootstrap
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Backend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/agency/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agency
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/application-interfaces/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Application Interfaces
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/assurance-evaluation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Assurance & Evaluation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/causal-state/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Causal State
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/composition-extensibility/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Composition & Extensibility
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/delegation-topology/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation & Topology
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/kernel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kernel
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/memory-learning/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Memory & Learning
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/runtime-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workflows
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workflows
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/request-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Request Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/agent-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agent Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/event-lifecycle/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Event Lifecycle
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/delegation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Delegation
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/architecture/workflows/recovery-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recovery & Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Guides
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Guides
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/guides/getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/guides/compose-an-agent/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Compose an Agent
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/guides/add-pack-or-tool/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Pack or Tool
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/guides/add-adapter-or-provider/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Adapter or Provider
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/guides/operate-runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Operate Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/guides/run-and-resume/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Run and Resume
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/schemas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Schemas
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/runtime-service/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Runtime Service
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Port Contracts
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/api-ports/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Python API Reference
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/events/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Events
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/manifests/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Manifests
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/configuration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Configuration
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../backend/reference/artifacts-memory/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Artifacts & Memory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../../frontend/" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+            </a>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Product PRDs
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Product PRDs
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../FRONTEND_PRD_PLACEMENT_MANIFEST/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Placement Manifest
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PRD_AETHER_CLI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD CLI
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PRD_AETHER_DESKTOP/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Desktop
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PRD_AETHER_LAB/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Lab
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PRD_AETHER_TUI/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD TUI
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Platform
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    PRD Platform
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposed"></span>
+  
+
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-executive-summary-product-thesis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Executive Summary &amp; Product Thesis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Executive Summary &amp; Product Thesis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-core-thesis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Core Thesis
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-the-conceptual-composition-hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 The Conceptual Composition Hierarchy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-as_built-vs-target-state-assessment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. AS_BUILT vs. TARGET State Assessment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-frontend-capability-contract-availability-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Frontend Capability &amp; Contract Availability Matrix
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-product-ecosystem-surface-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Product Ecosystem &amp; Surface Boundaries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-shared-client-substrate-package-seams" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Shared Client Substrate &amp; Package Seams
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Shared Client Substrate &amp; Package Seams">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-proposed-package-matrix-candidate-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Proposed Package Matrix (Candidate Architecture)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-dry-architecture-renderer-seams" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. DRY Architecture &amp; Renderer Seams
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. DRY Architecture &amp; Renderer Seams">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-the-semantic-boundary-invariant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 The Semantic Boundary Invariant
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-shared-design-system-semantic-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Shared Design System &amp; Semantic Tokens
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Shared Design System &amp; Semantic Tokens">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-token-dimensions-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Token Dimensions &amp; Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-public-runtime-dependency-boundary-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Public Runtime Dependency &amp; Boundary Constraints
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Public Runtime Dependency &amp; Boundary Constraints">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-boundary-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Boundary Constraints
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-approved-communication-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Approved Communication Paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-event-derived-state-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Event-Derived State Model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Event-Derived State Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-tripartite-state-separation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Tripartite State Separation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-session-conversation-abstraction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Session &amp; Conversation Abstraction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Session &amp; Conversation Abstraction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-product-abstraction-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Product Abstraction Mapping
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-cryptographic-approval-governance-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Cryptographic Approval &amp; Governance Requirements
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Cryptographic Approval &amp; Governance Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-approval-flow-protocol-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Approval Flow Protocol Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-security-content-isolation-sandboxing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Security, Content Isolation &amp; Sandboxing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Security, Content Isolation &amp; Sandboxing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-threat-model-defenses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 Threat Model &amp; Defenses
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-accessibility-requirements-universal-renderer-specific" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Accessibility Requirements (Universal &amp; Renderer-Specific)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. Accessibility Requirements (Universal &amp; Renderer-Specific)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#131-desktop-lab-web-dom" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 Desktop &amp; Lab (Web / DOM)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#132-tui-terminal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 TUI (Terminal)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-performance-philosophy-provisional-budgets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Performance Philosophy &amp; Provisional Budgets
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-testing-strategy-deterministic-fixtures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Testing Strategy &amp; Deterministic Fixtures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="15. Testing Strategy &amp; Deterministic Fixtures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#151-universal-golden-trajectory-invariant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.1 Universal Golden Trajectory Invariant
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-cross-client-acceptance-scenario" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. Cross-Client Acceptance Scenario
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#17-non-goals-out-of-scope-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17. Non-Goals &amp; Out-of-Scope Boundaries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#18-candidate-future-documents-ownership-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18. Candidate Future Documents &amp; Ownership References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Execution
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Execution
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/active/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Active Execution
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/milestones/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Milestones
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../execution/backlog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backlog
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory & Reports
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Theory & Reports
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../theory/agent-substrate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theory
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--living"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../reports/benchmark/main/BENCHMARK_V090_FULL.MD" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Benchmark Report
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/AI/openrouter_llm_models_suggested/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AI Models
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_2" id="__nav_9_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Coding Harness
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Coding Harness
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/ARCHON_gemini_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Archon Gemini Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/DEKAS_claude_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dekas Claude Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/LLM_RESPONSE_WRANGLER/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Response Wrangler
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/LLM_benchmarkings/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    LLM Benchmarking
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/RESEARCH_2308B_gm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Research 2308B GM
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/RESEARCH_Harness_Builder_Framework/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Builder Framework
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/RESEARCH_META_COGNITIVE_ENGINEERING/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Cognitive Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/RESEARCH_META_COGNITIVE_ENGINEERING_briefing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Cognitive Briefing
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/RESEARCH_META_FRAMEWORK_2408/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Meta Framework 2408
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/RESEARCH_THEORETICAL_SYNTHESIS/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Theoretical Synthesis
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/RESEARCH_deepseek-harness_algorithms-ideas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Deepseek Harness Algorithms
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/RESEARCH_harness_agentic_coding_builder_research_and_framework_B/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agentic Coding Builder Framework B
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/RESEARCH_higgs_2308/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Higgs 2308
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/RESEARCH_metaframework_2508_improved/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metaframework 2508
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/VANGUARD_FRONTIER_SWE_BENCH_AND_AGENTIC_METAFRAMEWORK_REPORT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontier SWE Bench & Metaframework Report
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/VANGUARD_VS_LIM_INSIGHTS_SOTS_TECHNIQUES/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vanguard vs LIM Insights
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/future_improvements_sota_harness_2808/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Future Improvements SOTA Harness
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/proposal_glm_harness_BETA/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proposal GLM Harness Beta
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/proposal_hy3_improved/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Proposal HY3 Improved
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/research_agentic_runtime_systems_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Agentic Runtime Systems Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/research_harness_agentic_systems_engineering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Harness Agentic Systems Engineering
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/suggested_LIM_improvements/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Suggested LIM Improvements
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--proposal"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/coding_harness/vanguard_body_detailed/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Vanguard Body Detailed
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_9_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_9_3" id="__nav_9_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Research
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_9_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Frontend Research
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/frontend/AETHER_FRONTEND_MASTERPLAN/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Masterplan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/frontend/frontend_prototype/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Prototype
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--experiment"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/frontend/frontend_prototype_beta_gem/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Frontend Prototype Beta Gem
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--experiment"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../research/frontend/integration_plan/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integration Plan
+  
+
+    
+  </span>
+  
+  
+    
+  
+  
+    <span class="md-status md-status--historical-reference"></span>
+  
+
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-executive-summary-product-thesis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Executive Summary &amp; Product Thesis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. Executive Summary &amp; Product Thesis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11-core-thesis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 Core Thesis
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12-the-conceptual-composition-hierarchy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 The Conceptual Composition Hierarchy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-as_built-vs-target-state-assessment" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. AS_BUILT vs. TARGET State Assessment
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-frontend-capability-contract-availability-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Frontend Capability &amp; Contract Availability Matrix
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-product-ecosystem-surface-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Product Ecosystem &amp; Surface Boundaries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-shared-client-substrate-package-seams" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Shared Client Substrate &amp; Package Seams
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="5. Shared Client Substrate &amp; Package Seams">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#51-proposed-package-matrix-candidate-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5.1 Proposed Package Matrix (Candidate Architecture)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-dry-architecture-renderer-seams" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. DRY Architecture &amp; Renderer Seams
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="6. DRY Architecture &amp; Renderer Seams">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#61-the-semantic-boundary-invariant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6.1 The Semantic Boundary Invariant
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-shared-design-system-semantic-tokens" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Shared Design System &amp; Semantic Tokens
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="7. Shared Design System &amp; Semantic Tokens">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#71-token-dimensions-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7.1 Token Dimensions &amp; Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-public-runtime-dependency-boundary-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Public Runtime Dependency &amp; Boundary Constraints
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="8. Public Runtime Dependency &amp; Boundary Constraints">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#81-boundary-constraints" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.1 Boundary Constraints
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#82-approved-communication-paths" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8.2 Approved Communication Paths
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-event-derived-state-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Event-Derived State Model
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="9. Event-Derived State Model">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#91-tripartite-state-separation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9.1 Tripartite State Separation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#10-session-conversation-abstraction" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10. Session &amp; Conversation Abstraction
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="10. Session &amp; Conversation Abstraction">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#101-product-abstraction-mapping" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        10.1 Product Abstraction Mapping
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#11-cryptographic-approval-governance-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11. Cryptographic Approval &amp; Governance Requirements
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="11. Cryptographic Approval &amp; Governance Requirements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#111-approval-flow-protocol-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        11.1 Approval Flow Protocol Requirements
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#12-security-content-isolation-sandboxing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12. Security, Content Isolation &amp; Sandboxing
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="12. Security, Content Isolation &amp; Sandboxing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#121-threat-model-defenses" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        12.1 Threat Model &amp; Defenses
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#13-accessibility-requirements-universal-renderer-specific" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13. Accessibility Requirements (Universal &amp; Renderer-Specific)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="13. Accessibility Requirements (Universal &amp; Renderer-Specific)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#131-desktop-lab-web-dom" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.1 Desktop &amp; Lab (Web / DOM)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#132-tui-terminal" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        13.2 TUI (Terminal)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#14-performance-philosophy-provisional-budgets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        14. Performance Philosophy &amp; Provisional Budgets
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#15-testing-strategy-deterministic-fixtures" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15. Testing Strategy &amp; Deterministic Fixtures
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="15. Testing Strategy &amp; Deterministic Fixtures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#151-universal-golden-trajectory-invariant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        15.1 Universal Golden Trajectory Invariant
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#16-cross-client-acceptance-scenario" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        16. Cross-Client Acceptance Scenario
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#17-non-goals-out-of-scope-boundaries" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        17. Non-Goals &amp; Out-of-Scope Boundaries
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#18-candidate-future-documents-ownership-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        18. Candidate Future Documents &amp; Ownership References
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="product-requirements-document-aether-frontend-platform-shared-client-substrate">Product Requirements Document: AETHER Frontend Platform &amp; Shared Client Substrate</h1>
+<h2 id="1-executive-summary-product-thesis">1. Executive Summary &amp; Product Thesis</h2>
+<p>The <strong>AETHER Frontend Platform</strong> defines the foundational requirements, shared client substrate capabilities, state models, design token expectations, security boundaries, and provisional performance targets for all user-facing client applications in the AETHER / ELECTROWEAK ecosystem.</p>
+<h3 id="11-core-thesis">1.1 Core Thesis</h3>
+<blockquote>
+<p><strong>One authoritative backend runtime, one shared TypeScript client substrate, multiple specialized renderers.</strong></p>
+</blockquote>
+<p>The AETHER architecture is fundamentally event-native and Python-first. The backend Python Trusted Computing Base (TCB) remains the sole authoritative source of truth for execution, policy enforcement, budget attenuation, causal lineage, and durable event recording. Frontend clients are strictly <strong>intention dispatchers and projection engines</strong>. They MUST NOT duplicate or replace backend execution, policy evaluation, or ledger authority.</p>
+<h3 id="12-the-conceptual-composition-hierarchy">1.2 The Conceptual Composition Hierarchy</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>                               ┌─────────────────────────────────────────┐
+<a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>                               │       AETHER RUNTIME (PYTHON TCB)       │
+<a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>                               │   Observe ──► Decide ──► Authorize ──►  │
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>                               │        Execute ──► Record (Ledger)      │
+<a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>                               └────────────────────┬────────────────────┘
+<a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                                                    │ UDS NDJSON / HTTP SSE
+<a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>                               ┌────────────────────▼────────────────────┐
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>                               │   SHARED CLIENT SUBSTRATE (TS / BUN)    │
+<a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>                               │  @aether/contracts   @aether/client     │
+<a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>                               │  @aether/projections @aether/state      │
+<a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>                               │         @aether/design-tokens           │
+<a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>                               └────────────────────┬────────────────────┘
+<a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>                                                    │
+<a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>                 ┌──────────────────┬───────────────┴───────────────┬──────────────────┐
+<a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>                 │                  │                               │                  │
+<a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>        ┌────────▼────────┐┌────────▼────────┐             ┌────────▼────────┐┌────────▼────────┐
+<a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>        │   AETHER CLI    ││   AETHER TUI    │             │ AETHER DESKTOP  ││   AETHER LAB    │
+<a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a>        │ (Headless / Bun)││(Solid+OpenTUI)  │             │ (Tauri 2+Solid) ││ (Solid Web/App) │
+<a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>        └─────────────────┘└─────────────────┘             └─────────────────┘└─────────────────┘
+</code></pre></div>
+<hr />
+<h2 id="2-as_built-vs-target-state-assessment">2. AS_BUILT vs. TARGET State Assessment</h2>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>AS_BUILT (Repository Evidence)</th>
+<th>TARGET (Electroweak Baseline)</th>
+<th>Strategic Gap &amp; Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Client Workspace Structure</strong></td>
+<td>Tri-furcated packages (<code>@vanguard/client-core</code>, <code>@vanguard/cli</code>, <code>@vanguard/studio</code>) with fragmented build scripts and local relative links.</td>
+<td>Unified Bun monorepo workspace under <code>vanguard/clients/</code> with explicit package separation.</td>
+<td>Restructure workspace packages into pure shared semantic modules and lightweight renderer shells.</td>
+</tr>
+<tr>
+<td><strong>Terminal Rendering</strong></td>
+<td><code>@vanguard/cli</code> uses React 18 + Ink (<code>ink@^5.1.0</code>), which relies on React VDOM reconciliation over terminal cells.</td>
+<td><code>@aether/tui</code> uses OpenTUI + SolidJS on Bun for fine-grained cell-buffer reactive rendering.</td>
+<td>Adopt OpenTUI + SolidJS conditionally; retire Ink only after a platform qualification benchmark spike proves stability.</td>
+</tr>
+<tr>
+<td><strong>Desktop / GUI Substrate</strong></td>
+<td><code>@vanguard/studio</code> is an exploratory React 18 SPA with 22 custom views and a custom Node/esbuild server script.</td>
+<td><code>@aether/desktop</code> is a minimalist SolidJS application packaged via Tauri 2 with a thin Rust native layer.</td>
+<td>Migrate from React DOM to SolidJS + Tauri 2; eliminate Node.js runtime dependency on user machines.</td>
+</tr>
+<tr>
+<td><strong>Gateway &amp; Transports</strong></td>
+<td><code>studio_gateway.py</code> is a legitimate zero-dependency <code>RuntimeService</code> HTTP/SSE transport bridge over SQLite WAL events.</td>
+<td>Hardened <code>RuntimeService</code> transport bridge supporting canonical operations, strict <code>Host</code> validation, and loopback security.</td>
+<td>Maintain canonical <code>RuntimeService</code> boundary; add explicit <code>Host</code> header allowlisting and structured error envelopes.</td>
+</tr>
+<tr>
+<td><strong>Wire &amp; Contract Validation</strong></td>
+<td>Manual parsing in <code>client-core/src/contract/parse.ts</code> mirroring <code>schemas/v4/</code>.</td>
+<td>Generated TypeScript types and validation readers compiled directly from canonical JSON schemas.</td>
+<td>Establish automated JSON Schema to TypeScript code generation pipeline to eliminate contract drift.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-frontend-capability-contract-availability-matrix">3. Frontend Capability &amp; Contract Availability Matrix</h2>
+<p>To prevent ad-hoc client endpoint invention, all TARGET operations are explicitly mapped against the canonical <code>RuntimeService</code> command roster (<code>StartRun</code>, <code>GetRun</code>, <code>ListRuns</code>, <code>StreamEvents</code>, <code>Cancel</code>, <code>Checkpoint</code>, <code>Resume</code>, <code>ResolveApproval</code>, <code>RecordCorrection</code>, <code>ExplainArtifact</code>, <code>GetCapabilities</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Capability / Operation</th>
+<th>Category</th>
+<th>Status in Backend</th>
+<th>Frontend Implementation Seam</th>
+<th>Required Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Start / Stop Run</strong></td>
+<td>Core Lifecycle</td>
+<td><code>CURRENT</code></td>
+<td><code>RuntimeClient.startRun()</code>, <code>requestCancel()</code></td>
+<td>Direct mapping to <code>StartRun</code> and <code>Cancel</code> commands.</td>
+</tr>
+<tr>
+<td><strong>Get / List Runs</strong></td>
+<td>Core Query</td>
+<td><code>CURRENT</code></td>
+<td><code>RuntimeClient.getRun()</code>, <code>listRuns()</code></td>
+<td>Direct mapping to <code>GetRun</code> and <code>ListRuns</code> projections.</td>
+</tr>
+<tr>
+<td><strong>Event Stream / Resume</strong></td>
+<td>Event Ledger</td>
+<td><code>CURRENT</code></td>
+<td><code>RuntimeClient.streamEvents(cursor)</code></td>
+<td>UDS NDJSON / HTTP SSE stream with <code>afterSeq</code> CAS cursor.</td>
+</tr>
+<tr>
+<td><strong>Checkpoint / Resume</strong></td>
+<td>State Recovery</td>
+<td><code>CURRENT</code></td>
+<td><code>RuntimeClient.requestCheckpoint()</code>, <code>requestResume()</code></td>
+<td>Direct mapping to <code>Checkpoint</code> and <code>Resume</code> commands.</td>
+</tr>
+<tr>
+<td><strong>Resolve Approval</strong></td>
+<td>Governance</td>
+<td><code>CURRENT</code></td>
+<td><code>RuntimeClient.resolveApproval(signedDecision)</code></td>
+<td>Signs RFC 8785 canonical bytes; dispatches <code>ResolveApproval</code>.</td>
+</tr>
+<tr>
+<td><strong>Explain Artifact</strong></td>
+<td>Evidence</td>
+<td><code>CURRENT</code></td>
+<td><code>RuntimeClient.explainArtifact(artifactId)</code></td>
+<td>Read-only provenance explanation projection.</td>
+</tr>
+<tr>
+<td><strong>Raw Blob Retrieval</strong></td>
+<td>Content Store</td>
+<td><code>BACKEND-GAP</code></td>
+<td>Planned <code>BlobStore</code> content endpoint</td>
+<td>Access via audited runtime endpoint; direct filesystem/DB reads forbidden.</td>
+</tr>
+<tr>
+<td><strong>Agent / Workflow Discovery</strong></td>
+<td>Composition</td>
+<td><code>FRONTEND-LOCAL</code></td>
+<td>Local manifest scanner + schema validation</td>
+<td>Initial v0.9 scans local repo manifests; backend registry deferred.</td>
+</tr>
+<tr>
+<td><strong>Conversation Indexing</strong></td>
+<td>Product Layer</td>
+<td><code>FRONTEND-LOCAL</code></td>
+<td>Client-side SQLite/IndexedDB projection index</td>
+<td>Derived purely from run/episode events; no backend kernel entity.</td>
+</tr>
+<tr>
+<td><strong>Capability Discovery</strong></td>
+<td>Introspection</td>
+<td><code>CURRENT</code></td>
+<td><code>RuntimeClient.getCapabilities()</code></td>
+<td>Queries <code>/api/v1/capabilities</code> for dynamic UI feature gating.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-product-ecosystem-surface-boundaries">4. Product Ecosystem &amp; Surface Boundaries</h2>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>┌─────────────────┬─────────────────┬─────────────────────────────────────────────────────────────┐
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>│ Product Surface │ Primary Runtime │ Target Personas &amp; Primary Use Cases                         │
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>├─────────────────┼─────────────────┼─────────────────────────────────────────────────────────────┤
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>│ **CLI**         │ Bun / TS        │ CI pipelines, DevOps, automated shell scripting, batch runs.│
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>│ **TUI**         │ Bun / SolidTUI  │ Software engineers, terminal power users, deep-focus coding.│
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>│ **Desktop**     │ Tauri 2 / Solid │ General developers, researchers, daily conversational tasks.│
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>│ **Lab**         │ Solid / Web     │ Core systems engineers, benchmark evaluators, kernel audits.│
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>└─────────────────┴─────────────────┴─────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<hr />
+<h2 id="5-shared-client-substrate-package-seams">5. Shared Client Substrate &amp; Package Seams</h2>
+<h3 id="51-proposed-package-matrix-candidate-architecture">5.1 Proposed Package Matrix (Candidate Architecture)</h3>
+<p>The shared substrate is structured around clear dependency boundaries:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>canonical JSON schemas (schemas/v4/, schemas/mhf/)
+<a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>        │
+<a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>        ▼
+<a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>@aether/contracts (Generated TypeScript types &amp; schema readers)
+<a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>        │
+<a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>        ▼
+<a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>@aether/client (Transport ports, UDS/HTTP, RuntimeClient protocol, SignerPort)
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a>        │
+<a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>        ▼
+<a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>@aether/projections (Pure deterministic reducers, event folds, trace graph generators)
+<a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>        │
+<a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a>   ┌────┴──────────────────────────┐
+<a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a>   ▼                               ▼
+<a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a>@aether/ui-web (SolidJS Web/App)  @aether/ui-tui (OpenTUI Terminal Primitives)
+</code></pre></div>
+<ol>
+<li><strong><code>@aether/contracts</code></strong>: Generated TypeScript types, error codes, and validation readers compiled directly from canonical schemas.</li>
+<li><strong><code>@aether/client</code></strong>: Transport abstractions (AF_UNIX UDS NDJSON client, HTTP/SSE client), cursor-resumption state machines, and <code>RuntimeClient</code> protocol.</li>
+<li><strong><code>@aether/projections</code></strong>: Pure, deterministic reducer functions that fold canonical event streams into view models (<code>RunSnapshot</code>, <code>TraceGraph</code>, <code>EvidenceGrid</code>, <code>ApprovalState</code>).</li>
+<li><strong><code>@aether/state</code> (Candidate)</strong>: Optional renderer-independent application controllers and cache orchestrators. <strong>MUST NOT</strong> duplicate event folds or maintain secondary event stores.</li>
+<li><strong><code>@aether/design-tokens</code></strong>: Semantic design token definitions (color palettes, elevation surfaces, spacing, typography, motion curves).</li>
+<li><strong><code>@aether/ui-web</code></strong>: Reusable SolidJS web components shared between Desktop and Lab (DiffViewer, MessageList, ArtifactCard, ApprovalModal).</li>
+<li><strong><code>@aether/ui-tui</code></strong>: Reusable OpenTUI terminal presentation primitives for the interactive TUI.</li>
+<li><strong><code>@aether/testkit</code></strong>: Deterministic test doubles, fake transports, golden event fixtures, and contract validation suites.</li>
+</ol>
+<hr />
+<h2 id="6-dry-architecture-renderer-seams">6. DRY Architecture &amp; Renderer Seams</h2>
+<h3 id="61-the-semantic-boundary-invariant">6.1 The Semantic Boundary Invariant</h3>
+<blockquote>
+<p><strong>DRY applies to semantics, state machines, and projections; DRY MUST NOT force false component sharing across incompatible rendering targets.</strong></p>
+</blockquote>
+<ul>
+<li><strong>Shared Semantics Across All Clients</strong>:</li>
+<li>Event parsing, validation, and normalization logic.</li>
+<li>Causal trace graph generation and fold algorithms.</li>
+<li>Cryptographically authenticated approval transaction workflows.</li>
+<li>Command serialization and CAS precondition checks (<code>expectedSeq</code>).</li>
+<li>Capability discovery negotiation and error code mapping.</li>
+<li><strong>Isolated Per Renderer Target</strong>:</li>
+<li>Terminal ANSI formatting, terminal cell buffers, and keypress interpreters (<code>ui-tui</code>).</li>
+<li>DOM structures, CSS classes, WebGL canvases, and mouse/touch handlers (<code>ui-web</code>).</li>
+</ul>
+<hr />
+<h2 id="7-shared-design-system-semantic-tokens">7. Shared Design System &amp; Semantic Tokens</h2>
+<p>All visual products MUST embody the unified aesthetic of AETHER: calm, dense, precise, and evidence-focused.</p>
+<h3 id="71-token-dimensions-requirements">7.1 Token Dimensions &amp; Requirements</h3>
+<ul>
+<li><strong>Product Requirement</strong>: All AETHER interactive surfaces (Desktop, Lab, TUI) MUST share a coherent semantic visual language, including consistent surface elevation hierarchies, 4px/8px spacing grids, monospace formatting for code and cryptographic hashes, and uniform status signaling (proof/pass, hold/review, fail/denied, active flow).</li>
+<li><strong>Renderer Mapping</strong>:</li>
+<li>Web applications (Desktop/Lab) consume design tokens via typed TypeScript token constants and CSS Custom Properties.</li>
+<li>Terminal applications (TUI) consume semantic color mappings translated into 24-bit TrueColor ANSI codes (with automatic 256-color and 16-color fallbacks).</li>
+</ul>
+<p><em>Note: The exhaustive design token catalog and exact CSS custom property definitions belong to future reference documentation (<code>docs/reference/frontend/design-tokens.md</code>).</em></p>
+<hr />
+<h2 id="8-public-runtime-dependency-boundary-constraints">8. Public Runtime Dependency &amp; Boundary Constraints</h2>
+<h3 id="81-boundary-constraints">8.1 Boundary Constraints</h3>
+<p>Frontend code MUST strictly adhere to hexagonal boundary rules:</p>
+<ul>
+<li><strong>FORBIDDEN</strong>: Frontend importing Python kernel modules or adapters directly.</li>
+<li><strong>FORBIDDEN</strong>: Frontend executing raw SQL queries against backend SQLite databases.</li>
+<li><strong>FORBIDDEN</strong>: Frontend relying on unverified in-memory simulation event loops in production modes.</li>
+<li><strong>FORBIDDEN</strong>: Frontend re-implementing budget algebra, policy gates, or agent spawning logic.</li>
+</ul>
+<h3 id="82-approved-communication-paths">8.2 Approved Communication Paths</h3>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>[Frontend Application]
+<a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>        │
+<a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>        ▼
+<a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>[@aether/client (RuntimeClient)]
+<a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>        │  (UDS NDJSON Frames / HTTP JSON + SSE Stream)
+<a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        ▼
+<a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>[AETHER RuntimeService Gateway]
+<a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a>        │
+<a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>        ▼
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>[AETHER Runtime / LedgerEmitter / SqliteEventStore]
+</code></pre></div>
+<hr />
+<h2 id="9-event-derived-state-model">9. Event-Derived State Model</h2>
+<h3 id="91-tripartite-state-separation">9.1 Tripartite State Separation</h3>
+<p>The frontend MUST maintain a strict separation across three distinct categories of state:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+<a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>│ 1. AUTHORITATIVE REMOTE FACTS                                                                │
+<a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>│    Derived strictly from the immutable event ledger (EventEnvelope) and BlobStore references.│
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>│    Immutable, append-only, reproducible via deterministic cold replay.                       │
+<a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>├──────────────────────────────────────────────────────────────────────────────────────────────┤
+<a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>│ 2. REBUILDABLE CLIENT CACHE                                                                  │
+<a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>│    Projection snapshots, search indexes, layout caches, and stream sequence cursors.         │
+<a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a>│    Keyed by `(runId, asOfSeq)` and safely discardable/rebuildable on demand.                 │
+<a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>├──────────────────────────────────────────────────────────────────────────────────────────────┤
+<a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a>│ 3. EPHEMERAL PRESENTATION STATE                                                              │
+<a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>│    Active tab, sidebar open/collapsed state, draft input text, scroll offsets, pane sizes.   │
+<a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a>│    Local to the current UI process; zero authority over execution truth.                     │
+<a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a>└──────────────────────────────────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+<hr />
+<h2 id="10-session-conversation-abstraction">10. Session &amp; Conversation Abstraction</h2>
+<h3 id="101-product-abstraction-mapping">10.1 Product Abstraction Mapping</h3>
+<p>A "Conversation" is strictly a <strong>client-side presentation projection and index</strong> over canonical kernel executions, not an authoritative backend entity:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Conversation (Client-Side Projection &amp; Index)
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>  ├── Conversation ID (Client UUIDv7)
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>  ├── User Metadata (title, tags, draft prompt, scroll position)
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>  ├── Canonical Run References (runId, episodeId)
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>  ├── Projected Turn Cards (User Prompts &amp; Agent Turns)
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>  └── Content-Addressed Artifact References (digest)
+</code></pre></div>
+<ul>
+<li><strong>Invariant</strong>: The kernel does NOT maintain a <code>Conversation</code> table. The frontend derives conversation history by projecting event streams from associated <code>runId</code> instances.</li>
+<li><strong>Persistence</strong>: Conversation indexes are stored locally in rebuildable client storage (SQLite/IndexedDB). Deleting client metadata never alters the durable runtime event ledger.</li>
+</ul>
+<hr />
+<h2 id="11-cryptographic-approval-governance-requirements">11. Cryptographic Approval &amp; Governance Requirements</h2>
+<p>Mutating or privileged actions (file writes, shell execution, network calls, workspace patches) require operator approval under governed execution profiles.</p>
+<h3 id="111-approval-flow-protocol-requirements">11.1 Approval Flow Protocol Requirements</h3>
+<ol>
+<li><strong>Challenge Presentation</strong>: Frontend renders the challenge with exact syntax-highlighted diffs and parameter breakdowns.</li>
+<li><strong>Cryptographic Signing</strong>:</li>
+<li>The client signs canonical RFC 8785 JSON bytes of the approval decision using an authenticated, versioned operator key.</li>
+<li>Private keys MUST be stored securely (WebCrypto non-exportable keys, OS Keychain, or hardware tokens) and NEVER transmitted over the wire.</li>
+<li><strong>Native Signer Validation</strong>: The native signing boundary (Rust/OS Keychain) MUST validate the restricted approval security envelope (checking action, argsDigest, descriptorDigest, expiry) before signing, preventing a compromised WebView from acting as an arbitrary byte-signing oracle.</li>
+<li><strong>Resolution Submission</strong>: Client dispatches <code>ResolveApproval</code> containing the cryptographically signed decision and the CAS precondition <code>expectedSeq</code>.</li>
+<li><strong>Settlement</strong>: Runtime validates the signature against registered trust roots and emits <code>ApprovalResolved</code>.</li>
+</ol>
+<hr />
+<h2 id="12-security-content-isolation-sandboxing">12. Security, Content Isolation &amp; Sandboxing</h2>
+<h3 id="121-threat-model-defenses">12.1 Threat Model &amp; Defenses</h3>
+<ul>
+<li><strong>Untrusted Model Outputs</strong>: All model text and external tool results MUST be treated as untrusted. Direct HTML injection (<code>innerHTML</code>) is strictly prohibited. Markdown rendering MUST sanitize HTML tags and enforce safe URI schemes (<code>http:</code>, <code>https:</code>).</li>
+<li><strong>Workspace Access Isolation</strong>: WebViews MUST NOT have unrestricted direct access to arbitrary local files. Workspace file reads MUST be mediated through audited runtime endpoints.</li>
+<li><strong>Local Origin &amp; Host Hardening</strong>: Local HTTP gateways MUST bind to <code>127.0.0.1</code>, validate <code>Origin</code> against allowlists, and enforce explicit <code>Host</code> header validation (<code>127.0.0.1</code>, <code>localhost</code>) to prevent DNS-rebinding attacks. Wildcard CORS (<code>*</code>) is strictly forbidden on mutating routes.</li>
+<li><strong>Approval Replay Protection</strong>: Each approval challenge binds an immutable challenge digest and expiration timestamp. Expired or replayed decisions are rejected by the runtime.</li>
+</ul>
+<hr />
+<h2 id="13-accessibility-requirements-universal-renderer-specific">13. Accessibility Requirements (Universal &amp; Renderer-Specific)</h2>
+<h3 id="131-desktop-lab-web-dom">13.1 Desktop &amp; Lab (Web / DOM)</h3>
+<ul>
+<li><strong>Standard Compliance</strong>: Target WCAG 2.2 Level AA compliance.</li>
+<li><strong>Keyboard Operability</strong>: 100% of functional actions (navigation, conversation selection, diff reviewing, approval resolution) MUST be executable via keyboard alone with visible focus rings.</li>
+<li><strong>Screen Reader Semantics</strong>: Use semantic HTML landmarks (<code>&lt;nav&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;aside&gt;</code>), ARIA live regions for streaming updates, and descriptive labels on all interactive controls.</li>
+<li><strong>Visual Ergonomics</strong>: Support high-contrast themes; never convey critical operational status (proof/fail/hold) by color alone. Support <code>prefers-reduced-motion</code>.</li>
+</ul>
+<h3 id="132-tui-terminal">13.2 TUI (Terminal)</h3>
+<ul>
+<li><strong>Keyboard Grammar</strong>: Full keyboard-only operational cockpit with predictable modal focus.</li>
+<li><strong>Color Degradation</strong>: Graceful fallback from 24-bit TrueColor to 256-color and 16-color palettes without loss of information hierarchy.</li>
+<li><strong>Non-Color Status Cues</strong>: Status must include explicit text labels or Unicode symbols alongside color indicators.</li>
+<li><strong>Animation Controls</strong>: Support a low-motion / no-animation configuration for low-bandwidth SSH sessions.</li>
+</ul>
+<hr />
+<h2 id="14-performance-philosophy-provisional-budgets">14. Performance Philosophy &amp; Provisional Budgets</h2>
+<p>Performance is an architectural invariant. The following figures represent <strong>provisional engineering budgets (proposed TARGET thresholds)</strong> subject to formal benchmark validation on defined reference workstations (<code>reference-standard</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Metric Dimension</th>
+<th>Provisional Engineering Target</th>
+<th>Evaluation Scope / Context</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cold Startup Latency (P95)</strong></td>
+<td>$&lt;15\text{ ms}$ (CLI), $&lt;40\text{ ms}$ (TUI), $&lt;1.2\text{ s}$ (Desktop Shell)</td>
+<td>From binary launch to interactive ready state on reference hardware.</td>
+</tr>
+<tr>
+<td><strong>Keystroke / Input Latency (P95)</strong></td>
+<td>$&lt;12\text{ ms}$ (TUI), $&lt;16\text{ ms}$ (Desktop)</td>
+<td>Physical keypress to visible buffer update.</td>
+</tr>
+<tr>
+<td><strong>Stream Ingestion Throughput</strong></td>
+<td>$&gt;1,000\text{ events/sec}$ with $&lt;5\%$ CPU utilization</td>
+<td>Main thread event validation and projection fold rate.</td>
+</tr>
+<tr>
+<td><strong>Main-Thread Long Tasks</strong></td>
+<td>Zero tasks $&gt;50\text{ ms}$ during continuous streaming</td>
+<td>Target threshold to prevent UI frame dropping.</td>
+</tr>
+<tr>
+<td><strong>Memory Footprint (Idle Shell)</strong></td>
+<td>$&lt;35\text{ MB}$ (CLI), $&lt;45\text{ MB}$ (TUI), $&lt;60\text{ MB}$ (Desktop WebView Shell)</td>
+<td>Resident memory consumption excluding Python sidecar.</td>
+</tr>
+<tr>
+<td><strong>Memory Footprint (100k events)</strong></td>
+<td>$&lt;200\text{ MB}$ total client heap</td>
+<td>Bounded cache target enforced via virtualized rendering.</td>
+</tr>
+</tbody>
+</table>
+<p><em>Note: Frontend shell memory and Python runtime sidecar memory MUST be measured and reported separately.</em></p>
+<hr />
+<h2 id="15-testing-strategy-deterministic-fixtures">15. Testing Strategy &amp; Deterministic Fixtures</h2>
+<h3 id="151-universal-golden-trajectory-invariant">15.1 Universal Golden Trajectory Invariant</h3>
+<p>All client applications MUST be validated against a shared suite of golden event fixtures (<code>schemas/v4/vectors/</code>):</p>
+<ol>
+<li><strong>Contract Parity Tests</strong>: Verify that TypeScript parsers and Python backend serializers produce byte-identical canonical JSON representations.</li>
+<li><strong>Projection Fold Tests</strong>: Ensure that replaying a recorded trajectory (<code>successful-episode.jsonl</code>) produces bit-for-bit identical <code>RunSnapshot</code> and <code>EvidenceGrid</code> projection models across CLI, TUI, Desktop, and Lab.</li>
+<li><strong>Cryptographic Signing Tests</strong>: Cross-verify signature generation and verification between TypeScript client signers and backend approval authorities.</li>
+<li><strong>Disconnection &amp; Reconnection Tests</strong>: Verify that clients handle network interruptions, simulate cursor gaps, and resume event tailing without duplicate or lost events.</li>
+</ol>
+<hr />
+<h2 id="16-cross-client-acceptance-scenario">16. Cross-Client Acceptance Scenario</h2>
+<p>To achieve product acceptance, the platform MUST support the following end-to-end multi-client workflow:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>1. Operator launches AETHER Desktop and opens local repository workspace.
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>2. Operator creates a conversation, selects "Coding Agent", and prompts: "Fix auth race condition".
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>3. Desktop dispatches `StartRun` -&gt; Python Runtime initiates execution.
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>4. Runtime emits `ApprovalRequested` for modifying authentication middleware.
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>5. Operator inspects unified diff in Desktop and cryptographically signs approval.
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>6. Patch is applied, tests execute, and episode completes with `satisfied` verdict.
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>7. Operator closes Desktop, opens terminal, and launches AETHER TUI.
+<a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>8. TUI attaches to the same run ID, reconstructs identical event history and artifacts.
+<a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>9. Operator runs `aether run inspect &lt;run-id&gt; --json` via CLI and receives valid JSON matching the TUI/Desktop state.
+</code></pre></div>
+<hr />
+<h2 id="17-non-goals-out-of-scope-boundaries">17. Non-Goals &amp; Out-of-Scope Boundaries</h2>
+<ul>
+<li><strong>NON-GOAL 1</strong>: Creating a browser-side Python execution engine or WebAssembly kernel.</li>
+<li><strong>NON-GOAL 2</strong>: Supporting arbitrary third-party plugin execution inside the frontend process.</li>
+<li><strong>NON-GOAL 3</strong>: Implementing ad-hoc, unversioned REST CRUD endpoints that bypass the canonical RuntimeService API catalog.</li>
+<li><strong>NON-GOAL 4</strong>: Introducing heavy, multi-megabyte visualization or dashboard frameworks into minimal client surfaces.</li>
+</ul>
+<hr />
+<h2 id="18-candidate-future-documents-ownership-references">18. Candidate Future Documents &amp; Ownership References</h2>
+<p>This PRD establishes high-level product requirements. Detailed architectural designs, interface specifications, decision records, and sprint backlogs are deferred to their candidate future owners:</p>
+<ul>
+<li><strong>Candidate Architecture Owner</strong>: <code>docs/architecture/frontend/platform-architecture.md</code></li>
+<li><strong>Candidate Reference Owner</strong>: <code>docs/reference/frontend/client-sdk.md</code></li>
+<li><strong>Candidate Decisions Owner</strong>: <code>docs/decisions/frontend/adr-candidate-frontend-stack.md</code></li>
+<li><strong>Candidate Execution Owner</strong>: <code>docs/execution/frontend/roadmap.md</code></li>
+</ul>
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>

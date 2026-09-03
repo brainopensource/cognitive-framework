@@ -9,7 +9,7 @@ import {
 
 export async function handleArtifact(args: string[], options: ParsedCli): Promise<number> {
   const subcommand = args[0];
-  const client = clientFor(options) as any;
+  const client = await clientFor(options) as any;
 
   if (!subcommand || subcommand === "--help") {
     logDiagnostic("Usage: aether artifact explain <digest> [--json]");

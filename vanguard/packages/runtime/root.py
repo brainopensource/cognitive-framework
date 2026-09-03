@@ -23,6 +23,7 @@ from ..adapters.stores.blob_store import FileBlobStore
 from ..adapters.models.cassette import Cassette, CassetteRecorder
 from ..adapters.models.openrouter import OpenRouterModel
 from ..domain.canonicalisation.digest import digest_of
+from ..domain.canonicalisation.jcs import canonical_bytes
 from .workspace import (
     controlled_environment,
     get_workspace_path,
@@ -748,6 +749,7 @@ __all__ = [
     "resolve_capture_policy",
     "TaskContext",
     "_admit_turn_result",
+    "canonical_bytes",
     "_bwrap_path",
     "_environment_effector",
     "_operator_span",

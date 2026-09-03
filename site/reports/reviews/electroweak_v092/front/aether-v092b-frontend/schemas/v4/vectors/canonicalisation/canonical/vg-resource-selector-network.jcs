@@ -1,0 +1,1 @@
+{"hosts":["*.example.com"],"kind":"network","ports":[443,80]}

@@ -1,0 +1,62 @@
+{
+  "challengeId": "bench_single_2K_tier-1_string_dedupe",
+  "tier": "tier-1",
+  "scope": "single",
+  "contextBracket": "2K",
+  "preset": "vg-1-forge",
+  "model": "lam-mock",
+  "mode": "lam",
+  "status": "PASS",
+  "attribution": "PASS",
+  "turns": 10,
+  "promptTokens": 1500,
+  "completionTokens": 400,
+  "totalTokens": 1900,
+  "costUsd": 0.0,
+  "durationSeconds": 0.12,
+  "changedFiles": [
+    "src/dedupe.py"
+  ],
+  "diffPatch": "--- a/dedupe.py\n+++ b/dedupe.py\n@@ -1,2 +1,8 @@\n def remove_consecutive_duplicates(s: str) -> str:\n-    pass\n+    if not s:\n+        return \"\"\n+    res = [s[0]]\n+    for ch in s[1:]:\n+        if ch != res[-1]:\n+            res.append(ch)\n+    return \"\".join(res)\n",
+  "oracle": {
+    "passed": true,
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "test_dedupe (__main__.TestDedupe.test_dedupe) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+    "durationSeconds": 0.04,
+    "error": null,
+    "assertionCount": 1,
+    "failingAssertions": []
+  },
+  "aiJudgeScore": null,
+  "diagnosis": "All falsifiers green",
+  "metadata": {
+    "id": "bench_single_2K_tier-1_string_dedupe",
+    "name": "Consecutive String Deduplication",
+    "scope": "single",
+    "context_bracket": "2K",
+    "tier": "tier-1",
+    "difficulty": 1,
+    "timeout_seconds": 35,
+    "entrypoint": "src/main.py",
+    "eval_type": "oracle",
+    "tags": [
+      "string",
+      "algorithms",
+      "single_file"
+    ],
+    "metadata": {},
+    "cli_args": {
+      "command": "cycle",
+      "preset": "vg-1-forge",
+      "mode": "lam",
+      "model": null,
+      "tier": "all",
+      "single": null,
+      "max_turns": 10,
+      "max_requests": 300,
+      "budget": 0.5,
+      "keep_scratch": false
+    }
+  }
+}

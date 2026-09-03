@@ -169,8 +169,10 @@ These artifacts are navigation aids, not authorities. Confirm their repository r
 non-zero content, and referenced paths before use; an index that merely opens is not necessarily
 current or usable. If LDA or generated knowledge is empty, stale, or inconsistent, fall back to
 `rg --files`, targeted `rg`, canonical documentation, source, and tests. Prefer selected entries and
-sections over loading whole indexes or log directories into an AI context window. The mandatory
-agent procedure and authority rules are defined in [`AGENTS.md`](AGENTS.md#repository-intelligence-navigation-protocol).
+sections over loading whole indexes or log directories into an AI context window. The canonical
+skill guide for repository intelligence is [`.agents/skills/lda-navigator/SKILL.md`](.agents/skills/lda-navigator/SKILL.md)
+(with in-depth technical formulation in [`docs/onboarding/SKILL_LDA_Docs_atlas.md`](docs/onboarding/SKILL_LDA_Docs_atlas.md)).
+The mandatory agent procedure and authority rules are defined in [`AGENTS.md`](AGENTS.md#repository-intelligence-navigation-protocol).
 
 ---
 

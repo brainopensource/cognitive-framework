@@ -320,4 +320,4 @@ Reused, not rebuilt
 
 Sequencing
 
-W0 gates W2. W1 is independent and can start immediately. W3's backend half  is independent of the whole frontend and is the highest-value single change inthe plan.
+W0 gates W2. W1 is independent and can start immediately. W3's backend half  is independent of the whole frontend and is the highest-value single change inthe plan./

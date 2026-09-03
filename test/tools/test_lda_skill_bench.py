@@ -50,8 +50,8 @@ class TestMcpResourcesPrompts(unittest.TestCase):
 
 class TestSkillManifest(unittest.TestCase):
     def test_skill_md_declares_workflow_and_mcp_tools(self):
-        skill = (REPO_ROOT / "tools" / "007_LLM_DOCS_ATLAS" / "SKILL.md").read_text(encoding="utf-8")
-        self.assertIn("name: lda-repository-intelligence", skill)
+        skill = (REPO_ROOT / ".agents" / "skills" / "lda-navigator" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("name: lda-navigator", skill)
         for token in ("lda doctor", "lda context", "lda brief", "lda drift", "lda_brief"):
             self.assertIn(token, skill)
 

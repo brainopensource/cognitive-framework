@@ -92,9 +92,10 @@ grep "<Symbol>" .generated/knowledge/symbols.jsonl
 
 **Health check before trust**: `.generated/knowledge/report.json` must report
 `"status": "VALIDATED"` with non-zero row counts. LDA users must additionally confirm
-`uv run lda doctor --json` reports `"index_healthy": true`. Otherwise, report the degraded
-navigation mode and fall back deterministically to `rg --files`, targeted `rg`, canonical
-documents, source, and tests. A worked example of the full sequence is in
+`uv run lda doctor --json` reports `"index_healthy": true`. Operational workflows, MCP tools,
+and the token-efficient Golden Order are defined in [`.agents/skills/lda-navigator/SKILL.md`](.agents/skills/lda-navigator/SKILL.md).
+Otherwise, report the degraded navigation mode and fall back deterministically to `rg --files`,
+targeted `rg`, canonical documents, source, and tests. A worked example of the full sequence is in
 [`docs/README.md`](docs/README.md) (§ Worked Example).
 
 The authority rule is:

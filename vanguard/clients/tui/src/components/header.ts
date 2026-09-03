@@ -1,7 +1,14 @@
 import type { TerminalScreen } from "../terminal/screen.js";
 import { DEFAULT_THEME, type ThemeTokens, STATUS_TAGS } from "../theme.js";
 import type { TuiStoreState } from "../store.js";
-import { padToWidth, truncateToWidth } from "../terminal/cell.js";
+import { truncateToWidth } from "../terminal/cell.js";
+
+/** Shows the last `segments` path components instead of an unbounded absolute path. */
+export function shortenPath(path: string, segments: number = 2): string {
+  const parts = path.split("/").filter(Boolean);
+  if (parts.length <= segments) return path;
+  return "…/" + parts.slice(-segments).join("/");
+}
 
 export function renderHeader(
   screen: TerminalScreen,
@@ -40,21 +47,21 @@ export function renderHeader(
   const brand = " AETHER ";
   screen.writeString(row, 0, brand, theme.accent);
 
-  let leftOffset = brand.length;
-  if (!isNarrow) {
-    const info = `│ agent:${state.agentId} │ repo:${state.workspacePath} │ model:${state.model} `;
-    screen.writeString(row, leftOffset, info, theme.textMuted);
-    leftOffset += info.length;
-  } else {
-    const compactInfo = `│ ${state.agentId} │ ${state.model} `;
-    screen.writeString(row, leftOffset, compactInfo, theme.textMuted);
-    leftOffset += compactInfo.length;
-  }
-
-  // Right: Run ID & Status Tag
+  // Right side is reserved first, so the left side always has a known,
+  // non-overlapping budget to truncate into on narrow terminals.
   const planBadge = state.planMode ? "[PLAN] " : "";
   const rightPart = `${planBadge}${state.runId ? "run:" + state.runId.slice(0, 8) + " " : ""}${statusTag} `;
-  const rightCol = Math.max(leftOffset, width - rightPart.length);
+  const rightCol = Math.max(brand.length, width - rightPart.length);
+
+  let leftOffset = brand.length;
+  const shortRepo = shortenPath(state.workspacePath, isNarrow ? 1 : 2);
+  const info = isNarrow
+    ? `│ ${state.agentId} │ ${state.model} `
+    : `│ agent:${state.agentId} │ repo:${shortRepo} │ model:${state.model} `;
+  const availableForInfo = Math.max(0, rightCol - leftOffset - 1);
+  screen.writeString(row, leftOffset, truncateToWidth(info, availableForInfo), theme.textMuted);
+  leftOffset += Math.min(info.length, availableForInfo);
+
   if (planBadge) {
     screen.writeString(row, rightCol, planBadge, theme.warning);
     screen.writeString(row, rightCol + planBadge.length, rightPart.slice(planBadge.length), statusStyle);

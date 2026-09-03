@@ -4,6 +4,8 @@ import {
   listCommands,
   findCommand,
   executeCommandLine,
+  filterCommandsByQuery,
+  splitCommandQuery,
   type TuiCommandContext,
 } from "../src/commands/registry.js";
 
@@ -36,6 +38,7 @@ function makeCtx(calls: string[]): TuiCommandContext {
     showDiff: record("showDiff"),
     undo: record("undo"),
     initWorkspace: record("initWorkspace"),
+    setBusyMode: record("setBusyMode"),
   };
 }
 
@@ -93,4 +96,30 @@ test("unknown command returns an error instead of throwing", () => {
   const ctx = makeCtx([]);
   const result = executeCommandLine("/bogus", ctx);
   assert.equal(result.ok, false);
+});
+
+test("filterCommandsByQuery matches on the first token only, ignoring typed args", () => {
+  // Regression: typing "/busy queue" must still find /busy, not zero results
+  // (a plain substring match against the whole query, including the args,
+  // matches nothing).
+  const matches = filterCommandsByQuery("busy queue");
+  assert.equal(matches.length, 1);
+  assert.equal(matches[0]?.name, "busy");
+});
+
+test("filterCommandsByQuery returns the full registry for an empty query", () => {
+  assert.deepEqual(filterCommandsByQuery(""), listCommands());
+  assert.deepEqual(filterCommandsByQuery("   "), listCommands());
+});
+
+test("filterCommandsByQuery matches by prefix, including aliases", () => {
+  assert.ok(filterCommandsByQuery("q").some((c) => c.name === "exit"), "alias 'q' should surface /exit");
+  assert.ok(filterCommandsByQuery("age").every((c) => c.name === "agents"));
+});
+
+test("splitCommandQuery separates the command name from its args", () => {
+  assert.deepEqual(splitCommandQuery("busy queue"), { name: "busy", args: "queue" });
+  assert.deepEqual(splitCommandQuery("model  free  "), { name: "model", args: "free" });
+  assert.deepEqual(splitCommandQuery("help"), { name: "help", args: "" });
+  assert.deepEqual(splitCommandQuery(""), { name: "", args: "" });
 });

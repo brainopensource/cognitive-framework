@@ -36,11 +36,10 @@ export function renderCommandPalette(
   // Separator
   screen.writeString(startRow + 2, startCol, "├" + "─".repeat(modalWidth - 2) + "┤", theme.borderActive);
 
-  const filtered = commands.filter(
-    (c) =>
-      c.id.toLowerCase().includes(filterQuery.toLowerCase()) ||
-      c.name.toLowerCase().includes(filterQuery.toLowerCase())
-  );
+  // Filtering happens once, upstream (app.ts, via @aether/tui-core's
+  // filterCommandsByQuery) so what's rendered here and what keyboard.ts
+  // dispatches on Enter can never disagree about which commands match.
+  const filtered = commands;
 
   const listHeight = modalHeight - 4;
   for (let i = 0; i < listHeight; i++) {

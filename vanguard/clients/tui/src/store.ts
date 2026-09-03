@@ -490,6 +490,7 @@ export class TuiStore {
         }));
       },
       initWorkspace: () => this.initWorkspace(),
+      setBusyMode: (mode) => this.setBusyMode(mode),
     };
   }
 

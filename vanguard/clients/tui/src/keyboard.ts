@@ -1,7 +1,7 @@
 import type { KeyEvent } from "./terminal/input.js";
 import type { TuiStore } from "./store.js";
 import type { RuntimeClient } from "@aether/client";
-import { listCommands } from "@aether/tui-core";
+import { filterCommandsByQuery, splitCommandQuery } from "@aether/tui-core";
 
 export class KeyboardManager {
   private commandSelectedIndex: number = 0;
@@ -298,10 +298,7 @@ export class KeyboardManager {
         return;
       }
       if (key.name === "down") {
-        const q = state.activeCommandQuery.toLowerCase();
-        const filteredCount = listCommands().filter(
-          (c) => c.name.toLowerCase().includes(q) || c.aliases.some((a) => a.toLowerCase().includes(q))
-        ).length;
+        const filteredCount = filterCommandsByQuery(state.activeCommandQuery).length;
         this.commandSelectedIndex = Math.min(Math.max(0, filteredCount - 1), this.commandSelectedIndex + 1);
         return;
       }
@@ -365,19 +362,19 @@ export class KeyboardManager {
 
   /**
    * Executes the exact CommandSpec at the selected palette index, applying the
-   * same query filter the palette rendered against so a filtered selection can
-   * never resolve to a different command than the one on screen. Both the
-   * rendered list (app.ts) and this dispatch now read from one @aether/tui-core
-   * registry, which structurally kills the old index-drift bug.
+   * same query filter the palette rendered against (filterCommandsByQuery)
+   * so a filtered selection can never resolve to a different command than
+   * the one on screen. Args typed after the command name (e.g. "busy queue")
+   * are parsed via splitCommandQuery and passed through -- previously the
+   * palette path always dispatched with empty args, silently dropping
+   * anything typed after the command name.
    */
   private executePaletteCommand(index: number, query: string): void {
-    const q = query.toLowerCase();
-    const filtered = listCommands().filter(
-      (c) => c.name.toLowerCase().includes(q) || c.aliases.some((a) => a.toLowerCase().includes(q))
-    );
+    const filtered = filterCommandsByQuery(query);
     const cmd = filtered[index];
     if (!cmd) return;
+    const { args } = splitCommandQuery(query);
     const ctx = this.store.buildCommandContext(this.client, this.onExit);
-    cmd.run(ctx, "");
+    cmd.run(ctx, args);
   }
 }

@@ -87,6 +87,31 @@ test("command palette selection dispatches the command shown at that index, not 
   assert.equal(store.get().activeModal, "select-workflow");
 });
 
+test("typing a full command with args at the palette (e.g. '/busy queue') dispatches with the typed args, not empty ones", () => {
+  // Regression: pressing "/" opens the palette, and everything typed after
+  // it went into a filter query that was matched with a plain substring
+  // check against the *whole* typed string (including args) -- so typing
+  // "busy queue" matched nothing (no command name contains "busy queue"),
+  // and even when a match survived, Enter dispatched with args="" always,
+  // silently dropping anything typed after the command name.
+  const store = new TuiStore();
+  const keyboard = new KeyboardManager(store);
+
+  const type = (text: string) => {
+    for (const ch of text) {
+      keyboard.handleKey({ name: ch, ctrl: false, meta: false, shift: false, sequence: ch });
+    }
+  };
+
+  keyboard.handleKey({ name: "/", ctrl: false, meta: false, shift: false, sequence: "/" });
+  assert.equal(store.get().activeModal, "command-palette");
+
+  type("busy queue");
+  keyboard.handleKey({ name: "return", ctrl: false, meta: false, shift: false, sequence: "\r" });
+
+  assert.equal(store.get().busyMode, "queue");
+});
+
 test("newly added SOTA slash commands: /status, /context, /cost, /compact, /doctor, /diff, /undo, /init, /title", () => {
   const dir = mkdtempSync(join(tmpdir(), "aether-tui-init-"));
   try {

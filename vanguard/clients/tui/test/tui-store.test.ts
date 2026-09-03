@@ -2,6 +2,7 @@ import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
 import { TuiStore, createSignal } from "../src/store.js";
 import type { EventEnvelope } from "@aether/contracts";
+import { FakeRuntimeClient } from "@aether/client";
 
 const SAMPLE_EVENT: EventEnvelope = {
   schemaVersion: "vg.4",
@@ -86,5 +87,57 @@ describe("@aether/tui — Reactive Store & Ingestion", () => {
     assert.equal(store.get().focus, "approval");
     assert.ok(store.get().pendingApproval);
     assert.equal(store.get().pendingApproval?.approvalId, "app-tui-01");
+  });
+
+  it("busy mode 'queue' defers a new message while a run is active and flushes it on completion", async () => {
+    const store = new TuiStore();
+    const client = new FakeRuntimeClient();
+
+    store.executeSlashCommand("/busy queue");
+    assert.equal(store.get().busyMode, "queue");
+
+    // Simulate an active run.
+    store.ingestEnvelope(SAMPLE_EVENT);
+    assert.equal(store.get().snapshot.status, "running");
+
+    store.setComposerText("second message while busy", 26);
+    store.submitComposer(client);
+
+    assert.equal(store.get().queuedPrompt, "second message while busy");
+    assert.equal(store.get().composerText, "");
+    assert.equal(client.commandsReceived.some((c) => c.method === "startRun"), false);
+
+    // Completing the run should flush the queued prompt automatically.
+    const completed: EventEnvelope = {
+      ...SAMPLE_EVENT,
+      eventId: "018f3a2b-7c4d-7e1f-9a2b-000000000099",
+      seq: "3",
+      payload: { kind: "EpisodeCompleted", verdict: "satisfied" },
+    };
+    store.ingestEnvelope(completed);
+
+    assert.equal(store.get().queuedPrompt, null);
+    assert.equal(client.commandsReceived.some((c) => c.method === "startRun"), true);
+  });
+
+  it("busy mode 'steer' falls back to 'interrupt' rather than faking an unsupported redirect", () => {
+    const store = new TuiStore();
+    store.executeSlashCommand("/busy steer");
+    assert.equal(store.get().busyMode, "interrupt");
+    assert.match(store.get().statusMessage, /not yet supported/);
+  });
+
+  it("busy mode 'interrupt' (default) sends a new message immediately even while a run is active", () => {
+    const store = new TuiStore();
+    const client = new FakeRuntimeClient();
+
+    store.ingestEnvelope(SAMPLE_EVENT);
+    assert.equal(store.get().snapshot.status, "running");
+
+    store.setComposerText("go now", 7);
+    store.submitComposer(client);
+
+    assert.equal(store.get().queuedPrompt, null);
+    assert.equal(client.commandsReceived.some((c) => c.method === "startRun"), true);
   });
 });

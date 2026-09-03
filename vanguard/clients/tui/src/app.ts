@@ -14,7 +14,7 @@ import { renderHelpOverlay } from "./components/help-overlay.js";
 import { renderDiffViewer } from "./components/diff-viewer.js";
 import { renderSelectModal } from "./components/select-modal.js";
 import type { RuntimeClient } from "@aether/client";
-import { listCommands } from "@aether/tui-core";
+import { filterCommandsByQuery } from "@aether/tui-core";
 
 export type TuiAppOptions = {
   client?: RuntimeClient;
@@ -130,12 +130,13 @@ export class TuiApplication {
 
     // 7. Modals / Overlays if active
     if (state.activeModal === "command-palette") {
-      // Rendered straight from @aether/tui-core's command registry — the same
-      // list keyboard.ts dispatches against, so there is one source of truth
-      // for what the palette shows and what Enter actually runs.
-      const commands = listCommands().map((c) => ({
+      // Filtered straight from @aether/tui-core's command registry using the
+      // exact same filterCommandsByQuery() keyboard.ts dispatches against, so
+      // there is one source of truth for what the palette shows and what
+      // Enter actually runs -- including the args typed after the name.
+      const commands = filterCommandsByQuery(state.activeCommandQuery).map((c) => ({
         id: c.name,
-        name: `/${c.name}`,
+        name: `/${c.name}${c.argHint ? " " + c.argHint : ""}`,
         description: c.description,
         action: () => {},
       }));

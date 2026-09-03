@@ -3,12 +3,13 @@ import { describe, it } from "node:test";
 import { PassThrough } from "node:stream";
 import { TerminalScreen } from "../src/terminal/screen.js";
 import { TuiStore } from "../src/store.js";
-import { renderHeader } from "../src/components/header.js";
+import { renderHeader, shortenPath } from "../src/components/header.js";
 import { renderComposer } from "../src/components/composer.js";
 import { renderStatusFooter } from "../src/components/status-footer.js";
 import { renderApprovalDeck } from "../src/components/approval-deck.js";
 import { renderDiffViewer } from "../src/components/diff-viewer.js";
 import { renderDiffCard } from "../src/components/cards/diff-card.js";
+import { renderTranscript } from "../src/components/transcript.js";
 
 describe("@aether/tui — Presentation Components", () => {
   it("renders header with session metadata and status tag", () => {
@@ -32,6 +33,52 @@ describe("@aether/tui — Presentation Components", () => {
     assert.ok(written.includes("AETHER"));
     assert.ok(written.includes("coding-agent"));
     assert.ok(written.includes("openrouter/free"));
+  });
+
+  it("header truncates a long workspace path instead of overflowing into the status tag", () => {
+    const stream = new PassThrough();
+    let written = "";
+    stream.on("data", (chunk) => (written += chunk.toString("utf-8")));
+
+    const screen = new TerminalScreen({ stdout: stream as any, colorMode: "plain" });
+    screen.resize(80, 24);
+    const store = new TuiStore({
+      agentId: "coding-agent",
+      model: "openrouter/free",
+      workspacePath: "/home/rock-dev/Coding/cognitive-framework/vanguard/clients/cli",
+    });
+
+    renderHeader(screen, store.get(), 0);
+    screen.render();
+
+    assert.ok(written.includes("AETHER"));
+    // The full absolute path must not appear verbatim -- it would overflow
+    // past the right-aligned status tag on an 80-column terminal.
+    assert.equal(written.includes("/home/rock-dev/Coding/cognitive-framework/vanguard/clients/cli"), false);
+  });
+
+  it("shortenPath keeps the last N segments and leaves short paths untouched", () => {
+    assert.equal(shortenPath("/a/b/c/d/e", 2), "…/d/e");
+    assert.equal(shortenPath("/repo", 2), "/repo");
+    assert.equal(shortenPath("/a/b", 2), "/a/b");
+  });
+
+  it("transcript empty state renders a welcome panel with quick-start tips, not a bare one-liner", () => {
+    const stream = new PassThrough();
+    let written = "";
+    stream.on("data", (chunk) => (written += chunk.toString("utf-8")));
+
+    const screen = new TerminalScreen({ stdout: stream as any, colorMode: "plain" });
+    screen.resize(100, 30);
+    const store = new TuiStore({ agentId: "coding-agent" });
+
+    renderTranscript(screen, store.get(), 2, 20);
+    screen.render();
+
+    assert.ok(written.includes("coding-agent"));
+    assert.ok(written.includes("@path"));
+    assert.ok(written.includes("!cmd"));
+    assert.ok(written.includes("/plan"));
   });
 
   it("renders composer with placeholder and prompt text", () => {

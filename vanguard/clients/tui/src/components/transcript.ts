@@ -2,6 +2,49 @@ import type { TerminalScreen } from "../terminal/screen.js";
 import { DEFAULT_THEME, type ThemeTokens } from "../theme.js";
 import type { TuiStoreState } from "../store.js";
 import { renderTurn } from "./turn.js";
+import { truncateToWidth } from "../terminal/cell.js";
+
+const TIPS: readonly [string, string][] = [
+  ["/", "open the command palette"],
+  ["@path", "inline a file's content into your prompt"],
+  ["!cmd", "run a shell command locally, no model call"],
+  ["/plan", "toggle read-only plan mode before a risky change"],
+  ["?", "show all keyboard shortcuts"],
+];
+
+function renderEmptyState(
+  screen: TerminalScreen,
+  startRow: number,
+  height: number,
+  width: number,
+  agentId: string,
+  theme: ThemeTokens
+): void {
+  const boxWidth = Math.min(64, width - 8);
+  const boxHeight = 4 + TIPS.length;
+  const boxRow = startRow + Math.max(0, Math.floor((height - boxHeight) / 2));
+  const boxCol = Math.max(2, Math.floor((width - boxWidth) / 2));
+
+  screen.writeString(boxRow, boxCol, "╭" + "─".repeat(boxWidth - 2) + "╮", theme.border);
+  const title = ` AETHER · ${agentId} `;
+  screen.writeString(boxRow, boxCol + Math.max(1, Math.floor((boxWidth - title.length) / 2)), title, theme.accent);
+
+  screen.writeString(boxRow + 1, boxCol, "│" + " ".repeat(boxWidth - 2) + "│", theme.surface);
+  const subtitle = "Type a prompt below to start, or try:";
+  screen.writeString(boxRow + 1, boxCol + 2, truncateToWidth(subtitle, boxWidth - 4), theme.textMuted);
+
+  for (let i = 0; i < TIPS.length; i++) {
+    const [key, desc] = TIPS[i]!;
+    const row = boxRow + 2 + i;
+    screen.writeString(row, boxCol, "│" + " ".repeat(boxWidth - 2) + "│", theme.surface);
+    screen.writeString(row, boxCol + 2, key.padEnd(8), theme.textBright);
+    screen.writeString(row, boxCol + 10, truncateToWidth(desc, boxWidth - 12), theme.textMuted);
+  }
+
+  const lastRow = boxRow + 2 + TIPS.length;
+  screen.writeString(lastRow, boxCol, "│" + " ".repeat(boxWidth - 2) + "│", theme.surface);
+  screen.writeString(lastRow + 1, boxCol, "╰" + "─".repeat(boxWidth - 2) + "╯", theme.border);
+}
 
 export function renderTranscript(
   screen: TerminalScreen,
@@ -19,8 +62,7 @@ export function renderTranscript(
   }
 
   if (state.turns.length === 0) {
-    const emptyMsg = "No active turns yet. Type a prompt in the composer below to begin.";
-    screen.writeString(startRow + 2, 2, emptyMsg, theme.textMuted);
+    renderEmptyState(screen, startRow, height, width, state.agentId, theme);
     return;
   }
 

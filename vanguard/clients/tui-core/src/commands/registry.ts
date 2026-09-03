@@ -233,6 +233,14 @@ export const COMMAND_REGISTRY: readonly CommandSpec[] = [
     availableInPlanMode: false,
     run: (ctx) => ctx.undo(),
   }),
+  command({
+    name: "busy",
+    aliases: [],
+    description: "Set what a new message does while a run is active: queue, steer, or interrupt",
+    argHint: "<queue|steer|interrupt>",
+    availableInPlanMode: true,
+    run: (ctx, args) => args && ctx.setBusyMode(args),
+  }),
 ];
 
 export function listCommands(): readonly CommandSpec[] {
@@ -244,6 +252,30 @@ export function findCommand(nameOrAlias: string): CommandSpec | undefined {
   return COMMAND_REGISTRY.find(
     (c) => c.name === needle || c.aliases.includes(needle)
   );
+}
+
+/**
+ * Filters the registry by a palette query's first whitespace-delimited
+ * token (the command name being typed), ignoring anything after it (the
+ * command's args). This is the single filter both the palette's rendering
+ * and its dispatch must use -- using two separately maintained filters (one
+ * for what's shown, one for what Enter runs) is exactly the class of bug
+ * the registry itself was built to structurally rule out.
+ */
+export function filterCommandsByQuery(query: string): readonly CommandSpec[] {
+  const firstToken = query.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
+  if (!firstToken) return COMMAND_REGISTRY;
+  return COMMAND_REGISTRY.filter(
+    (c) => c.name.toLowerCase().startsWith(firstToken) || c.aliases.some((a) => a.toLowerCase().startsWith(firstToken))
+  );
+}
+
+/** Splits "name rest of args" into its two parts, trimmed. */
+export function splitCommandQuery(query: string): { name: string; args: string } {
+  const trimmed = query.trim();
+  const spaceIdx = trimmed.indexOf(" ");
+  if (spaceIdx === -1) return { name: trimmed, args: "" };
+  return { name: trimmed.slice(0, spaceIdx), args: trimmed.slice(spaceIdx + 1).trim() };
 }
 
 export type CommandExecutionResult =

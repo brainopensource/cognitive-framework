@@ -5,9 +5,15 @@ authority: non-canonical
 truth_plane: PROPOSED
 status: draft
 owner: repository-governance
-version: "1.0.0"
+version: "1.1.0"
 created: 2026-09-03
 last_verified: 2026-09-03
+observed_at: "2026-09-03T04:58:36-03:00"
+observed_head: "614b7800f09978c62c6cc91a709bac490b0d65bb"
+observed_branch: "main"
+observed_worktree: clean
+lda_index_head: "7e08462c2cbb"
+lda_freshness: STALE
 supersedes:
   - draft.development-final-plan
   - draft.development-final-plan-b
@@ -18,17 +24,79 @@ does_not_modify:
   - docs/
   - vanguard/
   - test/
+  - .generated/knowledge/
+  - .generated/diagrams/
+  - .draft/DEVELOPMENT_FINAL_PLAN_v2.md
 authorizes_nothing: true
 navigation_mode: degraded-locator-plus-source
 ---
 
 # AETHER SOTA Software-Engineering Agent Development Program
 
+## Table of contents
+
+- [How to use this file as reference](#how-to-use-this-file-as-reference)
+1. [Epistemic legend and executive decision](#0-legend--executive-decision)
+2. [Current implementation inventory and contradictions](#1-inventory--contradictions)
+3. [Product thesis, units, and non-goals](#2-thesis-units-and-non-goals)
+4. [Competency profiles](#3-competency)
+5. [Formal model](#4-formal-model)
+6. [Target lattice and module placement](#5-lattice--placement)
+7. [Unified W0–W10 execution program](#6-waves-w0w10-and-operator-execution)
+8. [Evaluation and qualification protocol](#7-evaluation-protocol)
+9. [File routing and Tickets 01–35](#8-file-routing-and-ticket-dag)
+10. [Decisions, risks, security, controls, go/no-go, and definitions of done](#9-decisions-risks-stoprollback-and-governance-deltas)
+11. [Appendices](#10-appendices-implementer-algorithms-and-operator-order)
+    - [Operator one-pager](#operator-sequence)
+    - [Dated session validation](#dated-session-validation--2026-09-03)
+    - [Heading coverage](#heading-coverage-appendix)
+
+The table follows the implementation dependency direction while §8 supports reverse navigation from any ticket to its owning wave.
+
+## How to use this file as reference
+
+This file is the draft of record for the backend-first program. Plans A, B, and v2 are provenance; they are not competing authorities.
+
+| If you need | Go here |
+|---|---|
+| Product thesis (framework + first-party agents) | §0 dual mission, then §2 |
+| What exists vs what is lying | §1 inventory and contradictions |
+| What to implement next | Tickets [01–08](#ticket-01--enumerator-membership-digest), then Wave 0–1 in §6 |
+| Where code should land | §5 lattice, then [file routing](#file-by-file-routing) immediately above the tickets |
+| How a wave is gated | that wave’s **Operational card** in §6 (tickets, falsifiers, rollback, exit) |
+| How not to launder a score | §0 score bands + §7 evaluation protocol |
+| Prompt/policy for product agents | [Agent prompt and policy architecture](#agent-prompt-and-policy-architecture) |
+| Whether a heading from A or B survived | [Heading coverage appendix](#heading-coverage-appendix) |
+
+Do not promote anything here into `docs/execution/` until an explicit later acceptance step. Do not treat mechanism tests, Forge/Chimera, or dated DeepSWE/Pro leaderboard rows as AETHER results.
+
 ## 0. Legend + executive decision
 
-This is the single proposed implementation plan assembled from the committed strategic and forensic drafts. It is one execution lineage: one substrate, one product run path, one evidence schema, and one control-first evaluation protocol. The strategic model, equations, competency profiles, security rules, and W0–W10 narrative are retained alongside the current-tree inventory, contradiction audit, file/symbol routing, operator order, and 35-ticket DAG. Treatments may be enabled or disabled, but they are not competing architectures.
+This is the single proposed implementation plan assembled from the strategic and forensic drafts. It is one execution lineage: one substrate, one product run path, one evidence schema, and one control-first evaluation protocol. The strategic model, equations, competency profiles, security rules, and W0–W10 narrative are retained alongside the current-tree inventory, contradiction audit, file/symbol routing, operator order, and 35-ticket DAG. Treatments may be enabled or disabled, but they are not competing architectures.
+
+**Dual mission on one production lattice.** Vanguard/AETHER is simultaneously (1) a framework for creating agents through manifests, packs, capabilities, typed budgets, admission policies, event-sourced state, evaluation contracts, topology treatments, and campaign graphs, and (2) a family of first-party product agents built from that framework. The only production lattice is:
+
+```text
+domain ← ports ← kernel ← agency ← runtime → adapters
+```
+
+An agent is a compiled phenotype over this substrate, not a new runtime class or independent execution engine. Coding Max is the first product agent, the qualification control, and the only default. Reviewer, localizer, test-investigator, and campaign director are named, switchable treatments that use the same `run_composed` path and remain gated on successful Wave 5 single-agent qualification. Forge and Chimera remain quarantined experiments that emit the common result schema and contribute nothing to Coding Max qualification scores. `CampaignDirector` is a runtime client of `run_composed`, never a second kernel or inner loop.
 
 This file proposes work and authorizes nothing. Current source, accepted canonical specifications, executable tests, and durable runtime evidence outrank it. A future acceptance step must explicitly promote any required delta into canonical execution documents; this merge does not edit those documents.
+
+### Definition of this plan's quality bar
+
+Here, a **SOTA implementation plan** means a plan that is architecturally lawful; bound to an inspected repository subject; explicit about facts, mechanisms, proposals, and aspirations; executable through files, symbols, contracts, tickets, and dependencies; falsifiable through tests, metrics, and acceptance gates; honest about missingness, scaffolds, model effects, and uncertainty; reversible through rollback or treatment-disable paths; and navigable in both Wave→Ticket and Ticket→Wave directions. It is not a claim that the implementation or any benchmark result is SOTA today.
+
+### Evidence ordering law
+
+```text
+canonical documents constrain;
+current source implements;
+tests falsify;
+durable exact-subject evidence demonstrates observed behavior;
+draft plans authorize nothing.
+```
 
 ### Epistemic legend
 
@@ -59,13 +127,45 @@ The immediate critical path is tickets 01–08. Ticket 09 may be specified early
 
 - Truth and admission precede semantic-state wiring; tickets 01–08 precede the session/ledger fold.
 - The live T2-first board is a future delta to propose, not a reason to edit tasks.md here.
-- Multi-file safety means **Preflighted Recoverable Multi-File Patch Transaction**: preflight, staged/recoverable writes, and explicit rollback; no crash-atomicity claim without a journal, staged tree, or worktree swap.
+- **Multi-file safety** means a preflighted, recoverable write: validate the complete change set, stage or preserve recoverable preimages, apply the write, verify the result, and provide explicit rollback. This document thereafter calls it a **recoverable multi-file write** or `transaction.py`. “2PC,” where retained in source-derived wording, is shorthand for this local protocol—not distributed or crash-safe two-phase commit. Crash atomicity may be claimed only with a journal, staged tree, or worktree swap.
 - Admission is a necessary predicate over epoch, subject identity, frozen verification-plan membership, task relevance, executed count, coverage/truncation, tamper class, pack completion, and result validity; it is never equivalent to process exit code alone.
 - Brownfield reproducers and oracles are locked; feature, migration, and greenfield test edits require isolated deltas and independent review.
 - Weights w, alpha, theta, and lambda remain unidentified until calibration; formulas stay, arbitrary constants do not.
 - One substrate hosts many treatments. Control is gated minimal single-agent; the first bake-off is control plus at most two factors. mini-SWE-agent or an equivalent solve-to-patch baseline is mentioned for the same judge, not run or claimed here.
 - Forge and Chimera remain quarantined experiments with the same result schema; CampaignDirector is a client of run_composed, never a second kernel or inner loop.
 - Three headline metrics are reported together; provider and harness failures remain in R_system; dataset-invalid cases are excluded only when preregistered.
+
+### Immediate critical path and authorization boundary
+
+Tickets 01–08 are the immediate truth, benchmark-integrity, and admission path. Ticket 09 may be designed concurrently, but its projection cannot become authoritative task state until Tickets 04–08 close admission truth. Repository subject and verification-plan identity must be frozen before qualification. Waves 0–4 prepare the control; Wave 5 qualifies a minimal single-agent Coding Max control; the first bake-off may vary at most two preregistered factors. Memory, skills, multi-agent defaults, Waves 6–10, official external runs, and paid DeepSWE work are not authorized by this rewrite. Mechanism presence never implies product acceptance or measured lift.
+
+### Score-band interpretation
+
+All score bands in this document are **ASPIRATION**, never forecast. Internal qualification requires a frozen task set, exact subject, complete result envelopes, Wilson bounds, cost per signed pass, and explicit system missingness. External numbers are dated model-plus-scaffold bounds; they are not AETHER measurements and cannot be compared across scaffolds without a cross-harness study.
+
+| Band | Internal meaning | External meaning | Premature if claimed today |
+|---|---|---|---|
+| Qualification | Frozen internal multi-class suite, exact-subject, Wilson lower bound \(\ge 0.40\) on \(n \ge 30\), zero synthetic success | Instrument-valid harness; not an official score | Yes |
+| Credible competitive | Same protocol on official DeepSWE v1.1 public tasks, lower bound overlapping the mid-pack (currently roughly 50–63% on mini-swe-agent) | Comparable to `deepseek-v4-flash [max]` 53%±4% and `glm-5.3-flash [max]` 63%±4% on DeepSWE v1.1 as of 2026-09-02 | Yes |
+| Frontier parity | Official DeepSWE v1.1 pass@1 whose CI overlaps the 2026-09-02 leaders (gemini-3.8-flash / claude-opus-5 at 74%) **and** Scale SWE-bench Pro public standardized scores in the current 55–62% band | Harness + model jointly competitive | Yes |
+| Stretch | DeepSWE \(\ge 80\%\) or Scale Pro public \(\ge 70\%\) under the **same** official scaffold | Would require model generation plus harness; not a near-term exit | Yes |
+| Unsupported | “90/100”, “replaces staff engineers”, “beats all vendor scaffolds” | Professional replacement is not a benchmark outcome | Always |
+
+The 60–90 band is a **mixture**: 60 is a plausible later qualification/competitive threshold on DeepSWE-class tasks; 90 is a stretch that current public leaderboards do not support as a near-term AETHER claim. SWE-bench Verified saturating near 95%+ under vendor scaffolds is the wrong trophy. SWE-bench Pro standardized scores remain far lower than vendor-scaffold scores; mixing those numbers is a methodology error.
+
+### What this plan is not
+
+- It is not a new runtime, second kernel, HYDRA architecture, Octopus implementation, or catalog of “16 primitives.”
+- It is not authorization for a production change, canonical-document edit, treatment enablement, model purchase, benchmark submission, memory wiring, or campaign run.
+- It does not merge Forge, Chimera, and Coding Max into one product; the first two remain quarantined experiments.
+- It does not infer professional replacement from a benchmark score or mechanism test.
+- It does not permit a dry run, cassette, invalid task set, provider failure, or harness failure to become a task pass or fail.
+
+### Evidence boundary and dated snapshot
+
+The inspected subject for current-tree statements is clean branch `main` at `614b7800f09978c62c6cc91a709bac490b0d65bb`, observed 2026-09-03T04:58:36-03:00 before this file was edited. `uv run lda identity --json` reported the populated index bound to `7e08462c2cbb` and `freshness_vs_head=STALE`; `uv run lda doctor --json` reported `index_healthy=true` and `status=HEALTHY`. Health therefore means that the old graph is internally usable, not that it represents current HEAD. `.generated/knowledge/report.json` reported `VALIDATED`, 136 documents, and non-zero mappings/symbols, but is dated 2026-08-30. `dev_context_logs/context_summary.md` names branch `feat/beta-release_electroweak-v091` at `7d46c7f…` and is historical.
+
+Navigation mode is consequently `degraded-locator-plus-source`: stale artifacts may route inspection, but current canonical files, targeted current source, and current tests decide every claim. Snapshot-bound line numbers from Plans A or B are not durable anchors; file-and-symbol names below are the implementation handles. Historical artifacts retain their own recorded SHAs and are never relabeled as evidence for `614b780…`.
 
 ## 1. Inventory + contradictions
 
@@ -110,7 +210,7 @@ Legend for **Disposition**: `keep` = preserve and harden; `repair` = present but
 | code-default pack | `packs/code-default/` | harness.yaml, presets, plugin SPI, toolkits | pack tests exist | keyword `classify_task`; greenfield bypasses multi-file completeness | repair classifier; keep greenfield explicit |
 | Change surface | `domain/transforms/repository/change_surface.py` `ChangeSurfaceEstimator` | traceback/brief regex + optional edges; `truncated` flag | mechanism | coverage_ratio can be 1.0 when primary empty; Python-path regex | repair estimator; do not treat ratio as proof |
 | Implicated files | pack `implicated_files.py` | depth 1 / 128 file caps | mechanism | truncated sets must fail admission (already a reason code) except greenfield bypass | keep fail-closed; remove silent bypass |
-| Git environment | `adapters/environment/git.py` `GitEnvironment.apply` | sequential writes; syntax is observation-only `ast.parse` | mechanism | **no** `transaction.py` Preflighted Recoverable Multi-File Patch Transaction | implement adapter Preflighted Recoverable Multi-File Patch Transaction; keep kernel blind |
+| Git environment | `adapters/environment/git.py` `GitEnvironment.apply` | sequential writes; syntax is observation-only `ast.parse` | mechanism | **no** `transaction.py` recoverable multi-file write | implement adapter transaction; keep kernel blind |
 | IndexPort | `ports/index.py` | observation-only repo map; `truncated` | port comment forbids ranking | no HEAD/mtime epoch protocol; pack IndexToolkit is regex, comment says no tree-sitter | add epoch; keep port policy-free |
 | Exterior evaluator | `adapters/evaluators/`, `runtime/evaluator_gateway.py` | signed binding required to ledger a verdict | daemon/signing tests exist | product coding loop still uses local test output as admission evidence | keep gateway; bind local verify ≠ exterior verdict |
 
@@ -126,7 +226,7 @@ Legend for **Disposition**: `keep` = preserve and harden; `repair` = present but
 | Child runtime | `runtime/child_runtime.py` | sole public recursion via `run_composed`; drops meta-controller | RF-101 tests | correct lattice | keep |
 | Meta-controller | `runtime/meta_controller.py` | guarded consult; fail-closed on budget enlargement | M-6.5 falsifiers | opt-in; published study undeterminable | defer as default |
 | Memory / skills | `runtime/memory.py`, `skill_lifecycle.py`, `skill_evaluation.py`, `governance/learning.py` | ports, unsigned registry refuses promote, held-out evaluator | M-8 lifecycle tests OK | no product wiring; MEM-02 blocked; presence≠use already encoded | defer productization |
-| Tamper shield / Preflighted Recoverable Multi-File Patch Transaction / progressive compiler | FEATURE_SPEC §4–7 | **files absent** in `vanguard/` | claimed tests absent | T3–T5 of current sprint are unimplemented | implement on lattice, not as copies of review-tree code |
+| Tamper shield / recoverable multi-file write / progressive compiler | FEATURE_SPEC §4–7 | **files absent** in `vanguard/` | claimed tests absent | T3–T5 of current sprint are unimplemented | implement on lattice, not as copies of review-tree code |
 
 ### Models
 
@@ -138,11 +238,7 @@ Legend for **Disposition**: `keep` = preserve and harden; `repair` = present but
 
 ### What VISION already forbids (FACT)
 
-From [`VISION.md`](../VISION.md): event sourcing is the ontology; agents are projections not objects; memory/topology/learning are derived families not new cores; promotion requires separated generator/evaluator/promoter; mechanism ≠ acceptance. the merged plan does not reopen those decisions.
-
----
-
----
+From [`VISION.md`](../VISION.md): event sourcing is the ontology; agents are projections not objects; memory/topology/learning are derived families not new cores; promotion requires separated generator/evaluator/promoter; mechanism ≠ acceptance. This plan does not reopen those decisions.
 
 Each gap answers: what exists, where, what is missing, why it blocks long-horizon work, smallest next change, dependents, falsifier, promotion evidence, rollback.
 
@@ -242,11 +338,11 @@ Each gap answers: what exists, where, what is missing, why it blocks long-horizo
 
 ### Orchestration proposals not implemented
 
-Octopus mailbox, CoordinationPlan DAG, outer-loop director, Hydra emergent agency, Chimera as default: **research**. FEATURE_SPEC T2–T5 files: **absent**. the merged plan will not copy review-tree file paths that violate the lattice (for example, putting coding oracles in `kernel/`).
+Octopus mailbox and CoordinationPlan ideas remain research residue; Hydra emergent agency and Chimera-as-default are explicitly rejected. FEATURE_SPEC T2–T5 files are **absent**. This plan will not copy review-tree file paths that violate the lattice (for example, putting coding oracles in `kernel/`).
 
 ### FEATURE_SPEC vs source (CONTRADICTION table)
 
-| FEATURE_SPEC path | Source on HEAD `ebad36e` |
+| FEATURE_SPEC path | Source on HEAD `614b780` |
 |---|---|
 | `vanguard/packages/domain/task_state.py` | missing |
 | `vanguard/packages/adapters/environment/transaction.py` | missing |
@@ -259,7 +355,7 @@ Octopus mailbox, CoordinationPlan DAG, outer-loop director, Hydra emergent agenc
 | `test/contracts/test_dialect_recovery.py` | missing |
 | `adapters/models/dialect.py` | **exists**, narrower than FEATURE_SPEC taxonomy |
 
-Sprint `tasks.md` still lists T2–T6 as the active DAG. the merged plan **agrees with the dependency order** (state → atomic writes → tamper → progressive context → dialect) and **disagrees with any reading that those modules already exist**.
+Sprint `tasks.md` still lists T2–T6 as the active DAG. This plan **agrees with the dependency order** (state → recoverable write → tamper → progressive context → dialect) and **disagrees with any reading that those modules already exist**.
 
 ### Draft reconciliation (do not copy blindly)
 
@@ -271,10 +367,9 @@ Sprint `tasks.md` still lists T2–T6 as the active DAG. the merged plan **agree
 | [`.draft/HYDRA_MULTI_AGENT_TOPOLOGY_AND_EMERGENT_AGENCY.md`](HYDRA_MULTI_AGENT_TOPOLOGY_AND_EMERGENT_AGENCY.md) | Mailbox metaphor | Default swarm; competing runtime authority |
 | [`.draft/SONNET_SUPER_AGENT.md`](SONNET_SUPER_AGENT.md) | Competency rhetoric | Model folklore as architecture |
 | Octopus `long-horizon-context-engine.md` / `outer-loop-orchestrator.md` | Progressive packets; campaign director **above** EpisodeEngine | Not implemented; must not become a second engine |
-| `docs/research/coding_harness/VANGUARD_VS_LIM_INSIGHTS_SOTS_TECHNIQUES.md` | LIM as **skunkworks**; prefix-cache hypothesis | Empirical 83% turn reduction / $0.00033 claims are **not** exact-subject for HEAD `ebad36e`; LIM is not runtime authority ([`README.md`](../README.md)) |
+| `docs/research/coding_harness/VANGUARD_VS_LIM_INSIGHTS_SOTS_TECHNIQUES.md` | LIM as **skunkworks**; prefix-cache hypothesis | Empirical 83% turn reduction / $0.00033 claims are **not** exact-subject for current HEAD `614b780…` (Plan B recorded the same non-binding on historical SHA `ebad36e`); LIM is not runtime authority ([`README.md`](../README.md)) |
 | FEATURE_SPEC synthetic oracle protocol | Greenfield TDD stages | Tamper shield hashing via `Path.glob("test/**")` is incomplete on real trees; implement with explicit test-file enumeration from IndexPort |
 
----
 
 ## 2. Thesis, units, and non-goals
 
@@ -345,7 +440,6 @@ The following are explicitly deferred:
 - unbounded parallel agents;
 - 90% leaderboard marketing before exact reproducible evidence.
 
----
 
 ## 3. Competency
 
@@ -438,13 +532,10 @@ The Tech Lead should not be a privileged bypass.
 
 It is a policy-constrained consumer of the same runtime.
 
----
-
----
 
 These are **measurable product profiles**, not job-title claims about replacing humans. Benchmark scores do not equal professional replacement ([OpenAI, separating signal from noise](https://openai.com/index/separating-signal-from-noise-coding-evaluations/)).
 
-METR’s 50% time-horizon is a different construct (human-expert duration at 50% success on METR’s suite) and is saturating at long durations; METR warns measurements above 16 hours are unreliable with the current suite ([METR time horizons](https://metr.org/time-horizons/)). the merged plan uses METR only as a **qualitative horizon language**, not as a pass criterion.
+METR’s 50% time-horizon is a different construct (human-expert duration at 50% success on METR’s suite) and is saturating at long durations; METR warns measurements above 16 hours are unreliable with the current suite ([METR time horizons](https://metr.org/time-horizons/)). This plan uses METR only as a **qualitative horizon language**, not as a pass criterion.
 
 ### Senior Developer
 
@@ -507,7 +598,6 @@ METR’s 50% time-horizon is a different construct (human-expert duration at 50%
 | Principal / long-horizon | Greenfield + original tasks | DeepSWE v1.1 (113 tasks, 91 repos); leaders 74%±1–4% on mini-swe-agent |
 | Tech lead | Campaign DAG | None; do not fake one |
 
----
 
 ## 4. Formal model
 
@@ -770,210 +860,8 @@ $$
 
 An iterative campaign fails quality qualification if $E_j$ exhibits a sustained positive trend despite passing local tests.
 
----
-
----
 
 Assumptions are stated. Constants that are not estimated from this repository are marked **unidentified**.
-
-### Constrained POMDP
-
-Let an episode be a constrained POMDP
-
-\[
-\mathcal{M} = \langle \mathcal{S}, \mathcal{A}, \mathcal{O}, T, Z, R, \gamma, \mathcal{C} \rangle
-\]
-
-- \(\mathcal{S}\): workspace tree, test oracle, hidden bug/feature semantics, budget remaining, epoch.
-- \(\mathcal{A}\): mediated effects (`fs.read`, `patch.apply`, `test.run`, `spawn`, `finish`, …) plus `abstain`.
-- \(\mathcal{O}\): receipts, compiler packet, admission feedback — **not** the true tree.
-- \(T(s'|s,a)\): deterministic for filesystem effects if the adapter is honest; stochastic for models and flaky tests.
-- \(Z(o|s',a)\): observation channel; compaction and stale indexes corrupt \(Z\).
-- \(R\): 1 iff exterior (or bound local) verifier accepts **and** admission is admissible; 0 if fail; **undefined** if missing — missing is not 0.
-- \(\gamma \in (0,1]\): not identified; do not pick 0.99 for rhetoric.
-- \(\mathcal{C}\): capability + budget constraints. Kernel enforces \(\mathcal{C}\) independently of \(R\).
-
-Policy \(\pi\) is **not** inside the kernel. \(\pi\) is the composition of model, compiler, pack completion policy, and optional meta-controller.
-
-**Constraint.** For all \(a\) not authorized by the current grant, \(T\) is not invoked; a denial event is appended. This is already MECHANISM.
-
-### Event-sourced semantic task state
-
-Let \(E_{1:n}\) be the ledger. A projection \(\Phi\) yields task state:
-
-\[
-\sigma_n = \Phi(E_{1:n}) \in \Sigma
-\]
-
-Today \(\Phi\) is `fold_task_state` producing `CodingTaskState` (runtime). FEATURE_SPEC wants \(\Sigma =\) `SemanticTaskState` (domain) with monotonic `revision`.
-
-**Required properties (PROPOSAL, testable):**
-
-1. **Immutability of prefixes:** \(\Phi(E_{1:k})\) depends only on \(E_{1:k}\).
-2. **Monotone revision:** \(k < n \Rightarrow \sigma_n.\mathrm{revision} \ge \sigma_k.\mathrm{revision}\).
-3. **JCS digest stability:** `digest_of(canonical(\(\sigma\)))` is RFC 8785 stable ([RFC 8785](https://www.rfc-editor.org/rfc/rfc8785)).
-4. **No I/O in \(\Phi\)** if \(\sigma\) lives in domain.
-
-**INFERENCE.** Dumping \(\sigma\) into L3 violates (1) for the *prompt* even if the ledger fold remains correct: the prompt is a second, stale projection.
-
-### Progress potential
-
-Define a Lyapunov-like potential on \(\sigma\):
-
-\[
-V(\sigma) = \alpha_1 U_{\text{unverified}} + \alpha_2 |\mathrm{open\ todos}| + \alpha_3 |\mathrm{uninspected\ modified}| + \alpha_4 \mathbf{1}[\neg \mathrm{epoch\ fresh}]
-\]
-
-with \(\alpha_i > 0\) **unidentified**. Admission of `finish` requires \(V(\sigma)=0\) on the **gated** coordinates (modified files inspected, verification bound, epoch fresh). Do not optimize \(V\) inside the kernel.
-
-A turn is *honest progress* if \(V(\sigma_{t}) < V(\sigma_{t-1})\) or a new dead-end is recorded that strictly reduces the remaining hypothesis set. Repeating a semantically equal failed patch is not progress (`protocol_recovery` already fingerprints attempts — MECHANISM).
-
-### Context optimization
-
-Let token budget \(B\). Layers \(L_1,\ldots,L_5\) with freeze prefix \(L_1{\parallel}L_2{\parallel}L_3\).
-
-\[
-\max_{C \subseteq \mathcal{U}} \; F(C) \quad \text{s.t.} \quad \sum_{c \in C} \hat{\tau}(c) \le B - \tau_{\text{prefix}}
-\]
-
-where \(\mathcal{U}\) is the universe of candidate snippets (AST slices, stubs, receipts). \(F\) should be submodular if greedy packing is used (LDA’s compiler already uses submodular packing for **docs**; coding packets currently use truncation + recency).
-
-**Token estimator.** Current \(\hat{\tau}(s) \approx |s|/4\). Error \(\varepsilon_\tau\) biases packing. PROPOSAL: calibrate \(\hat{\tau}\) per dialect on held-out traces; until then treat \(\hat{\tau}\) as biased and keep a reserve (session already reserves 1000 tokens in packet build — MECHANISM).
-
-**Non-theorem.** More tokens \(\not\Rightarrow\) higher \(\Pr(\text{pass})\). DeepSWE prompts are ~half of SWE-bench Pro length with harder tasks ([DeepSWE paper](https://arxiv.org/abs/2607.07946)). the merged plan therefore optimizes *relevant* \(F(C)\), not \(|C|\).
-
-### Retrieval value of information
-
-For a candidate snippet \(c\):
-
-\[
-\mathrm{VoI}(c) = \mathbb{E}[R \mid C \cup \{c\}] - \mathbb{E}[R \mid C]
-\]
-
-This expectation is **unidentified** at planning time. Practical surrogate (PROPOSAL):
-
-\[
-\widetilde{\mathrm{VoI}}(c) = \mathbb{1}[c \in \mathrm{implicated}(\sigma)] \cdot w_{\text{kind}}(c) \cdot \mathbb{1}[\mathrm{epoch}(c)=\mathrm{epoch}(\sigma)]
-\]
-
-Zero VoI if epoch mismatch. IndexPort must not compute \(\pi\) (port comment already forbids ranking “on the agent’s behalf”). Ranking belongs in the **pack compiler policy**, which is a replaceable \(\pi\) component, not in the indexer.
-
-### Blast-radius closure
-
-Let \(G=(V,E)\) be the file/symbol dependence graph from IndexPort. For a patch \(P\) touching \(V_P\):
-
-\[
-\mathrm{Blast}(P) = \mathrm{Reach}_{E}^{k}(V_P) \cup \mathrm{Tests}(V_P)
-\]
-
-Admission for brownfield write tasks requires:
-
-\[
-V_P \subseteq \mathrm{Inspected}(\sigma) \quad \text{and} \quad \mathrm{Tests}(V_P) \subseteq \mathrm{VerifiedSubject}(\sigma) \quad \text{or truncated} \Rightarrow \text{fail closed}
-\]
-
-Current estimator is not \(G\); it is regex. Until IndexPort edges are epoch-bound, treat \(\mathrm{Blast}\) as an **upper bound with `truncated` bit**, never as complete.
-
-### Verification confidence lattice
-
-Define a lattice (bottom = least confidence):
-
-\[
-\bot \prec \text{parsed-output} \prec \text{bound-local-receipt} \prec \text{tamper-checked-local} \prec \text{signed-exterior-verdict}
-\]
-
-- `parsed-output`: regex on stdout. Current session path.
-- `bound-local-receipt`: `VerificationReceipt` fields already on AdmissionGate (MECHANISM) **if** populated.
-- `tamper-checked-local`: FEATURE_SPEC T4 (absent).
-- `signed-exterior`: `evaluator_gateway` (MECHANISM) — product coding admission does not require this today.
-
-**Law.** A higher node may imply a lower node; never the reverse. Model self-review is **not on this lattice**. Boolean `verification_passed=True` without a receipt is already rejected (`admission_gate.py` ).
-
-Forge’s `test_count=1` is an illegal jump from \(\bot\) to `parsed-output`.
-
-### Strategy selection
-
-Let treatments \(u \in U = \{\text{single}, \text{localize-then-patch}, \text{test-first}, \ldots\}\). Choose
-
-\[
-u^\star = \arg\max_{u \in U} \left( \hat{p}_u - \lambda \hat{c}_u - \rho \widehat{\mathrm{Var}}(p_u) \right)
-\]
-
-subject to: \(u=\text{single}\) remains the **control**; any other \(u\) requires a paired study. \(\lambda\) is cost aversion (preregistration already has `lambda_usd_per_success: 1.0` — protocol constant, not a physical law). Meta-controller today is a consult with value-in/value-out guards, not this optimizer.
-
-### Multi-agent bifurcation
-
-A bifurcation of a parent lineage into children \(i=1..m\) with merge \(\mu\):
-
-\[
-R_{\mu} = \Pr(\mu(\{P_i\}) \text{ passes}) \le \sum_i \Pr(P_i \text{ passes}) \quad \text{(union bound; usually much worse)}
-\]
-
-For isolated patches with exterior selection, a tighter model is:
-
-\[
-R_{\text{sel}} = \Pr(\exists i: P_i \text{ passes} \land \mathrm{selector} \text{ picks a passing } i)
-\]
-
-If the selector is the same model, \(\mathrm{selector}\) is correlated with generators (not independent). the merged plan requires the selector to be **exterior tests**, not a reviewer LLM, for any treatment that claims lift.
-
-### Campaign reliability
-
-For \(K\) tasks i.i.d. Bernoulli(\(p\)):
-
-\[
-\hat{p} = \frac{S}{K_{\text{evaluated}}}, \quad K_{\text{evaluated}} = K - K_{\text{missing}}
-\]
-
-Missing (harness error, provider 5xx, invalid membership) **must not** enter the denominator as failures or the numerator as successes. Wilson interval:
-
-\[
-\hat{p}_W = \frac{\hat{p} + \frac{z^2}{2n}}{1+\frac{z^2}{n}} \pm \frac{z}{1+\frac{z^2}{n}}\sqrt{\frac{\hat{p}(1-\hat{p})}{n}+\frac{z^2}{4n^2}}
-\]
-
-with \(z=1.96\) as in `sota_preregistration.json`. Protocol tests for Wilson/McNemar **exist** (`test_sota_protocols` OK) and are not a substitute for a valid \(n\).
-
-### Cost per signed pass
-
-\[
-\kappa = \frac{\sum \mathrm{USD} + \lambda_h \sum \mathrm{harness\_hours}}{\#\{\text{signed exterior or bound-local passes}\}}
-\]
-
-Report \(\kappa\) with the same missingness rules. Do not minimize \(\kappa\) by skipping verification.
-
-### Iterative architectural erosion
-
-Let quality \(Q_t\) be a hidden attribute (type-check cleanliness, invariant preservation). A naive loop that patches until tests pass can decrease \(Q\):
-
-\[
-Q_{t+1} = Q_t - \eta \mathbb{1}[\text{tests pass} \land \text{no review of } \mathrm{Blast}(P)]
-\]
-
-\(\eta\) unidentified. Mitigations that **are** lattice-legal: blast-radius tests, tamper shield, reviewer treatment **without** admission authority (already true of `reviewer.py`).
-
-### Budget attenuation
-
-Kernel already implements monotonic attenuation: child budgets \(\le\) parent remainder. Formally a residual vector \(b \in \mathbb{N}^d\):
-
-\[
-b_{\text{child}} \le b_{\text{parent}} - b_{\text{reserved}}, \quad b \ge 0
-\]
-
-Do not add a second governor in Forge. Children must not inherit meta-controller authority (`child_runtime.py` already drops it — MECHANISM).
-
-### Skill promotion lift
-
-Let \(p_0, p_1\) be held-out pass rates without/with skill composition. Promote only if:
-
-\[
-\hat{p}_1 - \hat{p}_0 \ge \delta, \quad \delta = 0.05 \text{ (M-8 backlog constant)}
-\]
-
-and generator \(\neq\) evaluator \(\neq\) promoter (already refused in tests). A single successful trajectory is \(\delta\)-inadmissible almost surely for any interesting \(n\).
-
----
-
-All weights and thresholds in the equations above are unidentified parameters until a preregistered calibration study estimates them. No fixed weight or threshold is an implementation default.
 
 ## 5. Lattice + placement
 
@@ -1177,9 +1065,6 @@ Every merge is a new effect with its own verification obligation.
 
 This avoids shared-worktree races and invisible conflict resolution.
 
----
-
----
 
 Preserve:
 
@@ -1294,7 +1179,6 @@ Approvals remain Ed25519-gated (`runtime/governance/approvals.py`). TUI/CLI is a
 | Progressive compiler | `agency/context/` as strategy of existing compiler | do not fork a second ContextCompiler class hierarchy if a strategy suffices |
 | Dialect taxonomy | `adapters/models/dialect.py` | already the owner |
 
----
 
 Placement rule: preserve the domain-blind kernel and existing hexagonal flow. New semantic state belongs in domain; folds and orchestration belong in runtime/agency; concrete transactions, models, evaluators, and stores belong in adapters. No Forge, Chimera, or campaign feature may bypass the composed runtime path or import upward across the lattice.
 
@@ -1321,13 +1205,23 @@ W6 through W9 are treatments, not assumed improvements.
 
 W10 continuously evaluates exact frozen subjects but grants release only after its prerequisites.
 
----
 
----
+### Wave 0 — Truth baseline and benchmark integrity
 
-### Objective
+#### Objective
 
 Create one uncontested baseline from the current source subject.
+
+#### Operational card
+
+- **Dependency and authorization state:** no wave dependency; proposed only. The evaluation lane may prepare zero-cost fixtures, but a new preregistration and paid/live attempt require later explicit authorization.
+- **Framework capability produced:** exact-subject benchmark envelopes, schema-valid task discovery, membership digest, and four-way outcome/missingness semantics.
+- **First-party product behavior affected:** makes later Coding Max qualification interpretable; does not change the product runtime.
+- **Contracts and schemas:** task-set digest equals preregistered membership; every empirical JSON binds subject SHA, model registry digest, harness/scaffold, evaluator, dataset, patch, usage, and terminal classification; `dry_run` leaves empirical pass/cost fields null.
+- **Tickets:** [01](#ticket-01--enumerator-membership-digest), [02](#ticket-02--subject-sha-on-every-empirical-json), [03](#ticket-03--dry-run-empirical-field-ban), [24](#ticket-24--patch-identity-on-results), [25](#ticket-25--missingness-taxonomy-in-runners).
+- **Falsifiers added from the forensic layer:** inject `__pycache__`, `.pytest_cache`, duplicate IDs, changed ordering, dirty subject, or missing oracle; each must stop or classify invalid rather than alter a score. A cassette may not populate empirical fields.
+- **Metrics:** enumerated count, membership digest stability, invalid/missing by class, replay report-digest equality; no Wilson interval until membership is valid.
+- **Rollback or disable path:** invalidate the run and restore the previous runner; never “fix” a result by silently shrinking membership or rebinding its SHA.
 
 ### Work packages
 
@@ -1425,15 +1319,24 @@ Use at least three languages before claiming generality.
 
 One frozen zero-cost or cassette run and one minimal live run must produce schema-valid, exact-subject, independently readable artifacts.
 
----
 
----
+### Wave 1 — Truthful task-aware completion
 
-### Objective
+#### Objective
 
 Make false completion structurally harder than continued work.
 
-### Required changes
+#### Operational card
+
+- **Dependency and authorization state:** requires Wave 0 instrument validity; proposed only.
+- **Framework capability produced:** typed, task-aware completion admission with one gating decision source and fail-closed runner evidence.
+- **First-party product behavior affected:** all Coding Max write-capable manifests, including the current default path, must not complete from a bare `finish`; Forge remains quarantined but loses its invented-count behavior.
+- **Contracts and schemas:** `VerificationReceipt.passed` requires zero exit, executed count greater than zero, matching task/composition/workspace/verification-plan identities, applicable coverage, and current epoch; task class comes from declared pack policy.
+- **Tickets:** [04](#ticket-04--remove-default-admission-exemption), [05](#ticket-05--delete-unused-admission_gated_harnesses-or-make-it-the-only-source), [06](#ticket-06--remove-forge-test_count--1), [07](#ticket-07--typed-verification-command-subject), [08](#ticket-08--parse-pytest-n-passed-without-inventing-counts), [21](#ticket-21--dialect-typed-failure-classes), [22](#ticket-22--fail-closed-model-resolve), [23](#ticket-23--quarantine-forgechimera-from-coding-max-reports).
+- **Metrics:** false-complete rate on frozen adversarial negatives, unknown-runner rate, admission-rejection reasons, protocol-recovery rate, and zero synthetic positive counts.
+- **Rollback or disable path:** revert the affected manifest/policy while preserving the new falsifiers; if compatibility depends on an exemption, name and govern that read-only compatibility path rather than silently restoring a broad set.
+
+### Work packages and required changes
 
 Remove every `exit_code == 0 -> test_count = 1` fallback.
 
@@ -1549,15 +1452,32 @@ All supported task classes have positive and adversarial completion vectors.
 
 No completion path infers positive test count from exit code alone.
 
----
 
----
+### Wave 2 — Durable semantic task state and restart parity
 
-### Objective
+#### Objective
 
 Make a process restart a performance event, not a cognitive amputation.
 
-### Extend the existing projection
+#### Operational card
+
+- **Dependency and authorization state:** requires Wave 1 admission truth; Ticket 09 design may precede closure, but its state cannot become authoritative before Tickets 04–08.
+- **Framework capability produced:** one domain-pure semantic task phenotype projected from events, exact resume identity, and fresh-process continuation without duplicate effects.
+- **First-party product behavior affected:** Coding Max resumes original episode identity and receives current semantic state in mutable L4/L5 rather than a stale L3 dump.
+- **Contracts and schemas:** FEATURE_SPEC §3 plus existing `CodingTaskState` provenance; one authority, monotone revision, RFC 8785/JCS-stable digest, original episode ID, explicit unknowns, and checkpoint proof obligations.
+- **Tickets:** [09](#ticket-09--domain-semantictaskstate), [10](#ticket-10--runtime-fold-of-semantictaskstate), [11](#ticket-11--preserve-episode_id-on-resume), [12](#ticket-12--stop-dumping-resume_state-into-l3), [13](#ticket-13--populate-contextpacket-resume-identity).
+- **Metrics:** semantic-state digest parity at every cut, resume-divergence rate, duplicate-effect count, corrupt-checkpoint disposition, and preserved prefix-byte identity.
+- **Rollback or disable path:** retain ledger as truth, reject incompatible checkpoints, and disable the product resume claim; never introduce a mutable side database or domain-to-kernel import.
+
+#### Acceptance predicates
+
+- one semantic-state authority reconstructs from ledger events;
+- original episode identity survives fresh-process resume;
+- five deterministic 40-plus-turn trajectories preserve semantic digests across at least three restart cuts each;
+- settled idempotent effects execute once, while unresolved effects become occurred, not occurred, or undeterminable;
+- dynamic state changes L4/L5 without changing the L1–L3 prefix.
+
+### Work packages: extend the existing projection
 
 Build on `runtime/task_state.py` rather than inventing a new mutable store.
 
@@ -1651,15 +1571,24 @@ Unsettled effects must reconcile to occurred, not occurred, or undeterminable.
 
 At least five 40-plus-turn deterministic trajectories must retain semantic parity over repeated fresh-process restarts with zero duplicate effects.
 
----
 
----
+### Wave 3 — Progressive context and repository intelligence
 
-### Objective
+#### Objective
 
 Deliver the smallest context that preserves the evidence needed for the next correct action.
 
-### Preserve current context strengths
+#### Operational card
+
+- **Dependency and authorization state:** requires Wave 2 semantic state; proposed only.
+- **Framework capability produced:** epoch-bound progressive L4/L5 selection, omission ledger, post-write refresh, and deterministic no-index fallback.
+- **First-party product behavior affected:** Coding Max retains immutable L1–L3 prefix caching while task state, dead ends, active symbols, receipts, and verification identity refresh per turn.
+- **Contracts and schemas:** `WorkspaceEpoch={tree_hash,index_digest,source_revision}`; every `ContextPacket` binds repository and selection-policy identities, candidate/selected/omitted IDs, token estimate, truncation, and strategy version.
+- **Tickets:** [14](#ticket-14--workspaceepoch), [15](#ticket-15--progressive-l4l5-strategy), [16](#ticket-16--index-refresh-after-patchapply).
+- **Metrics:** mandatory-item recall, non-cache tokens, prefix-cache identity, omission rate, stale-packet rejection, affected-symbol/test recall, and pass rate versus the prior compiler.
+- **Rollback or disable path:** disable progressive strategy and use the existing compiler plus targeted file listing/search/source/tests; stale or empty indexes fail over explicitly.
+
+### Work packages: preserve strengths and add progressive selection
 
 Keep:
 
@@ -1788,15 +1717,24 @@ targeted file listing
 
 On a frozen long-context corpus, progressive context must improve or preserve pass rate while reducing non-cache tokens, with no increase in false completion.
 
----
 
----
+### Wave 4 — Greenfield and brownfield change-surface closure
 
-### Objective
+#### Objective
 
 Turn multi-file work from prompt hope into explicit graph closure.
 
-### Unified change graph
+#### Operational card
+
+- **Dependency and authorization state:** requires Waves 1–3; proposed only.
+- **Framework capability produced:** recoverable multi-file write, test-tamper classification, greenfield oracle-vacuity gate, and brownfield implicated-set closure.
+- **First-party product behavior affected:** Coding Max can safely attempt coherent 2–20-file work; test changes are classified and justified rather than universally forbidden.
+- **Contracts and schemas:** FEATURE_SPEC INV-DELTA-3/4 and §5; validate whole change set, preserve preimages, apply, verify, and expose rollback. No crash-atomicity claim absent journal/staged-tree/worktree swap.
+- **Tickets:** [17](#ticket-17--atomic-multi-file-transaction-manager), [18](#ticket-18--testtampershield-with-indexport-enumeration), [19](#ticket-19--greenfield-oracle-vacuity), [20](#ticket-20--brownfield-implicated-set-fail-closed).
+- **Metrics:** partial-write incidents, rollback fidelity, tamper detections, vacuous-oracle rejects, implicated coverage/truncation, affected-test recall, files touched, and regression rate.
+- **Rollback or disable path:** restore preimages through an explicit effect; restrict `GitEnvironment.apply` to single-file if transaction verification is unavailable; disable the new path without weakening admission.
+
+### Work packages: unified change graph and write safety
 
 Represent a planned change as:
 
@@ -1901,13 +1839,51 @@ Qualify on repository-scale tasks touching 2-20 files before claiming Staff-leve
 
 Qualify at least one 20-plus-file migration before claiming Principal-level change planning.
 
----
 
----
+### Wave 5 — Strong single-agent Coding Max qualification
 
-### Objective
+#### Objective
 
 Establish the baseline that every advanced treatment must beat.
+
+#### Operational card
+
+- **Dependency and authorization state:** requires accepted Waves 0–4 and a clean frozen subject; running the qualification needs separate evaluation authorization.
+- **Framework capability produced:** a numbered, reproducible single-lineage control receipt and failure taxonomy against which every optional phenotype is causally compared.
+- **First-party product behavior affected:** Coding Max is the sole control and only default; Forge/Chimera and specialist roles are excluded from its score.
+- **Contracts and schemas:** preregister task membership, subject, model registry ID, scaffold, effort/turn/token limits, USD ceiling, stop rule, seeds, evaluator, and analysis before outcomes.
+- **Tickets:** [24](#ticket-24--patch-identity-on-results), [25](#ticket-25--missingness-taxonomy-in-runners), [26](#ticket-26--frozen-wave-5-preregistration), [27](#ticket-27--single-agent-canary-execution-eval-lane), [35](#ticket-35--tcb-and-boundary-freeze).
+- **Metrics:** pass@1, Wilson 95% interval, cost per signed pass, task/system/missing counts, latency, tokens, turns, tool calls, patch size, false completion, restart success, and erosion indicators.
+- **Rollback or disable path:** invalidate or supersede the receipt if subject, membership, scaffold, or verifier identity is wrong; never weaken Wave 1 to improve the score.
+
+#### Work packages
+
+- freeze Coding Max manifests, budgets, model route, corpus, subject, evaluator, and analysis;
+- run deterministic Rung A, then separately authorized internal Rung B/C, stopping on instrument invalidity;
+- reconcile every attempt, cost, patch, verification receipt, and missingness class;
+- publish a numbered control disposition—positive, negative, undeterminable, or invalid—without importing Forge/Chimera rows.
+
+#### Files and symbols
+
+- `vanguard/packages/apps/coding_max/facade.py::CodingMaxFacade` remains thin and normally unchanged;
+- `vanguard/packages/agency/manifests/vg-code-{fast,balanced,max}/manifest.json` freeze product phenotype inputs;
+- `benchmarks/protocols.py`, `benchmarks/statistics.py`, preregistration/result writers, and evaluation-lane runners own measurement;
+- `Runtime.run_composed`, `ApplicationService`, and `HarnessSession` remain the only product execution lineage.
+
+#### Falsifiers
+
+- provider 5xx is `provider_error`, not task failure;
+- harness traceback before any model turn is `harness_error`, not `NO_PATCH`;
+- foreign patch/subject/model/scaffold/verifier digests invalidate the attempt;
+- mixed Forge/Chimera arms are rejected;
+- dry-run and cassette records cannot enter empirical denominators.
+
+#### Acceptance predicates
+
+- the exact preregistration predates outcomes and every row reconciles to it;
+- one numbered control receipt reports pass rate, Wilson bounds, cost per signed pass, and missingness together;
+- zero unresolved high-severity false-positive completion defects remain;
+- a negative or undeterminable result may close the study honestly but cannot authorize later default treatments.
 
 ### Why single-agent first
 
@@ -1985,13 +1961,35 @@ Rung D:
 
 No advanced topology enters default presets until the single-agent control has a valid confidence interval, cost profile, and failure taxonomy.
 
----
 
----
+### Wave 6 — Adaptive strategy and metacognition treatment
 
-### Objective
+#### Objective
 
 Change tactics when evidence warrants it without changing history, authority, or truth criteria.
+
+#### Operational card
+
+- **Dependency and authorization state:** gated by a valid Wave 5 control; not authorized by this plan.
+- **Framework capability produced:** bounded meta-controller treatment over grounded task-state and failure features.
+- **First-party product behavior affected:** optional Coding Max treatment only; default stays off until positive preregistered utility.
+- **Contracts and schemas:** directives cannot enlarge capability/budget, admit completion, rewrite intent, erase failures, or propagate controller authority to children.
+- **Tickets:** [28](#ticket-28--meta-controller-paired-study-harness).
+- **Metrics:** paired McNemar table, effect-size interval, cost-per-signed-pass delta, directive acceptance/rejection, false-complete delta, and missing pairs.
+- **Rollback or disable path:** controller feature flag off; the Wave 5 inner loop remains unchanged.
+
+#### Work packages, files, and symbols
+
+- instrument `runtime/meta_controller.py` and `HarnessSession._consult_meta_controller` using only grounded state, progress, failure, budget, and provider features;
+- freeze one directive family at a time and execute through the paired evaluation runner;
+- keep `EpisodeEngine`, admission, kernel dispatch, and evaluator contracts unchanged.
+
+#### Falsifiers
+
+- proposed `finish` without applicable evidence is rejected;
+- controller attempts to widen a grant, total budget, or child authority fail closed;
+- repeated or ineffectual intervention is recorded rather than erased;
+- inconclusive paired evidence remains inconclusive.
 
 ### Controller input
 
@@ -2060,13 +2058,43 @@ Compare each against the Wave 5 control.
 
 Promote only treatments with positive held-out net utility and no safety or false-completion regression.
 
----
 
----
+### Wave 7 — Specialist product treatments
 
-### Objective
+#### Objective
 
 Use additional agents only where decomposition creates independent information or review value.
+
+#### Operational card
+
+- **Dependency and authorization state:** gated by Wave 5; Wave 6 optional; not authorized by this plan. First bake-off uses at most two preregistered factors.
+- **Framework capability produced:** named, switchable role phenotypes over manifests, packs, attenuated grants, topology lowering, CAS handoffs, and the same `run_composed` execution path.
+- **First-party product behavior affected:** localizer, test-investigator, reviewer, architect, and integrator are treatments; Coding Max single-agent remains default.
+- **Contracts and schemas:** read-only investigators cannot patch; reviewer cannot admit; one writer per workspace; isolated candidates merge by exterior verdict, never text concatenation or reviewer preference.
+- **Tickets:** [29](#ticket-29--treatment-t-ti-ablation), [30](#ticket-30--isolated-patch-exterior_select), [34](#ticket-34--workflowscheduler-lease-honesty).
+- **Metrics:** paired solve-rate delta, cost delta, merge-error rate, duplicated exploration, handoff bytes, and policy violations.
+- **Rollback or disable path:** disable each treatment independently and lower to sequential single-agent topology.
+
+#### Work packages, files, and symbols
+
+- freeze role manifests for localizer, test-investigator, reviewer, architect, implementer, and integrator;
+- lower only through `runtime/topology.py` and `runtime/child_runtime.py::RuntimeChildRunner` to `run_composed`;
+- implement treatment-specific handoffs and merge policies without shared mutable state;
+- add paired ablation and merge-policy falsifiers beside existing M-7/RF-101 coverage.
+
+#### Falsifiers
+
+- a read-only role cannot invoke `patch.apply`;
+- reviewer output cannot admit completion;
+- two conflicting patches are never concatenated;
+- if reviewer preference conflicts with exterior tests, exterior evidence controls;
+- an unmediated parallel write or synthetic lease is denied.
+
+#### Acceptance predicates
+
+- each treatment has an independent preregistration, receipt, effect/cost interval, and missingness table;
+- only treatments with positive held-out utility and no safety/false-completion regression may be candidates for later acceptance;
+- all others remain off without weakening the single-agent default.
 
 ### Candidate roles
 
@@ -2145,13 +2173,36 @@ Reviewer independence requires:
 
 Each role remains opt-in unless its paired treatment beats the Wave 5 control on its preregistered task stratum.
 
----
 
----
+### Wave 8 — Durable outer-loop campaign director
 
-### Objective
+#### Objective
 
 Extend reliable episodes into reliable multi-day, multi-package campaigns.
+
+#### Operational card
+
+- **Dependency and authorization state:** requires Wave 5 and preferably an accepted Wave 7 treatment catalog; not authorized by this plan.
+- **Framework capability produced:** event-sourced campaign graph, CAS handoffs, rolling-horizon policy, operator pauses, and deterministic recovery as a runtime client.
+- **First-party product behavior affected:** CampaignDirector/Tech Lead phenotype invokes `Runtime.run_composed` per node; it is not an `EpisodeEngine` subclass and has no independent completion authority.
+- **Contracts and schemas:** plan/node/edge/handoff/directive values; budget shares sum within the parent grant; every node carries acceptance, retry, risk, role, artifacts, and merge policy.
+- **Tickets:** [31](#ticket-31--campaign-director-fixture), [34](#ticket-34--workflowscheduler-lease-honesty), [35](#ticket-35--tcb-and-boundary-freeze).
+- **Metrics:** node/campaign completion under frozen semantics, missingness, duplicate effects, restarts, revision count, interface drift, operator pauses, cost, and elapsed time.
+- **Rollback or disable path:** disable director and continue to run independent Coding Max episodes through the canonical path.
+
+#### Work packages and files
+
+- place pure campaign plan/node/edge/handoff values with existing domain workflow contracts;
+- add runtime campaign reducer/service/policy collaborators, reusing `WorkflowScheduler`, `Topology`, SQLite event store, blob store, approvals, and budget attenuation;
+- implement rolling-horizon planning, content-addressed handoffs, node leasing, revision, integration, and operator pause;
+- do not add `agency/campaign_engine.py`, direct adapter execution, or kernel coding semantics.
+
+#### Falsifiers
+
+- crash after node three and resume remaining nodes without duplicate effects;
+- force one revision, one failed node, one operator pause, and a corrupt checkpoint;
+- director completion while any required node is ungated is rejected;
+- budget shares exceeding the parent grant and concurrent same-workspace writers are denied.
 
 ### Reuse before invention
 
@@ -2248,13 +2299,35 @@ Ports belong in `vanguard/packages/ports/` under the current lattice.
 
 Complete a frozen 10-node campaign with at least three fresh-process restarts, one forced revision, one failed node, one operator pause, and no duplicated effect.
 
----
 
----
+### Wave 9 — Governed memory, skills, and learning
 
-### Objective
+#### Objective
 
 Convert verified experience into reusable policy without creating self-confirming error loops.
+
+#### Operational card
+
+- **Dependency and authorization state:** requires Wave 5 and the applicable canonical acceptance (including ADR-0100 where required); not authorized by this plan.
+- **Framework capability produced:** authorization-before-retrieval, provenance-bound candidates, held-out skill evaluation, separated promotion authority, and executable rollback.
+- **First-party product behavior affected:** memory/skills remain optional treatments and off by default, including `fast`, until measured positive lift.
+- **Contracts and schemas:** generator ≠ evaluator ≠ promoter; no one-trajectory promotion; source distribution, failures, preconditions, prohibited contexts, version, evidence, promotion status, and rollback target are mandatory.
+- **Tickets:** [32](#ticket-32--memory-grant-on-product-path), [35](#ticket-35--tcb-and-boundary-freeze).
+- **Metrics:** held-out lift and interval, residual failures, false-complete delta, retrieval authorization denials, contamination checks, cost delta, and rollback success.
+- **Rollback or disable path:** unwire product retrieval, revoke/roll back the signed skill version, and leave registry candidates unpromoted.
+
+#### Work packages, files, and symbols
+
+- wire granted retrieval through `runtime/memory.py` only after applicable canonical acceptance;
+- reuse `runtime/skill_lifecycle.py`, `runtime/skill_evaluation.py`, and `runtime/governance/learning.py` for candidate/evaluation/promotion separation;
+- freeze held-out tasks, control/treatment compositions, contamination checks, promotion threshold, and rollback target.
+
+#### Falsifiers
+
+- retrieval before authorization is denied without score/omission leakage;
+- one successful trajectory cannot promote a skill;
+- generator equal to evaluator or promoter is rejected;
+- a regressing promoted version rolls back and leaves an audit trail.
 
 ### Memory classes
 
@@ -2333,36 +2406,37 @@ At least one skill must demonstrate held-out positive lift and successful rollba
 
 A valid negative result closes the experiment but does not promote the skill.
 
----
 
----
+### Wave 10 — External benchmark and release qualification
 
-### Objective
+#### Objective
 
 Measure real capability without turning benchmark quirks into product architecture.
 
+#### Operational card
+
+- **Dependency and authorization state:** requires Waves 0–5; optional Waves 6–9 enter only if separately accepted; M-9/M-10 canonical gates remain controlling. External runs and spend are not authorized here.
+- **Framework capability produced:** thin official-harness wrappers, exact-subject release evidence, scaffold disclosure, and independent-verifier handoff.
+- **First-party product behavior affected:** reports Coding Max only under its frozen configuration; each accepted treatment is a separately named arm.
+- **Contracts and schemas:** local suites never become official; dry runs have no empirical score; committed patch, container/verifier identity, effort level, date, membership, missingness, and cost are mandatory.
+- **Tickets:** [33](#ticket-33--official-deepswe-wrapper-no-score-fishing), [35](#ticket-35--tcb-and-boundary-freeze).
+- **Metrics:** official pass@1 and interval, invalid/provider/harness/undeterminable/not-run counts, cost per signed pass, tokens, steps, wall time, security events, and scaffold identity.
+- **Rollback or disable path:** do not publish or withdraw a claim whose membership, subject, license, isolation, or verifier binding fails; wrapper removal does not affect the product loop.
+
 ### Target calibration
 
-As of the research snapshot:
+These are dated **external model-plus-scaffold bounds**, not AETHER results. The [DeepSWE v1.1 paper](https://arxiv.org/abs/2607.07946) specifies 113 original long-horizon tasks across 91 repositories and five languages. The [DeepSWE leaderboard](https://deepswe.datacurve.ai/), updated 2026-09-02, reports 74%±1% for `gemini-3.8-flash[high]`, 74%±4% for `claude-opus-5[max]`, and 73%±3% for `gpt-5.6-sol[max]` using its disclosed scaffold/configurations. The [Scale SWE-bench Pro public leaderboard](https://labs.scale.com/leaderboard/swe_bench_pro_public), inspected 2026-09-03, reports 61.50±3.10 for `Muse Spark 1.1` and 59.10±3.56 for `gpt-5.4 (xHigh)`; starred entries use mini-swe-agent, and the page discloses different turn/cost regimes. The SWE-bench Pro paper's original below-25% unified-scaffold result is historical and is not interchangeable with this evolving table.
 
-- DeepSWE v1.1 contains 113 original long-horizon tasks across 91 repositories and five languages;
-- its public leaderboard showed approximately 74% at the top;
-- `deepseek-v4-flash` was approximately 53%;
-- `glm-5.3-flash` was approximately 63%;
-- the public SWE-bench Pro leaderboard showed approximately 61.5% at the top;
-- external audits have reported substantial SWE-bench Pro verifier-quality concerns.
+Every band below is **ASPIRATION**, not a forecast, commitment, release predicate, or cross-benchmark conversion:
 
-Therefore use three target bands:
+| ASPIRATION band | Illustrative score region | Permitted interpretation | Required comparability disclosure |
+|---|---:|---|---|
+| internal qualification | protocol-defined; not inherently 60% | A future frozen AETHER internal control met its preregistered lower-bound and safety predicates | internal corpus, subject, model, scaffold, evaluator, n, CI, missingness |
+| external competitive | about 60% on the named corpus | overlaps a dated competitive region only if the official corpus, verifier, effort, and scaffold are the same | benchmark/version/date plus exact scaffold/configuration |
+| external frontier parity | about 70–75% on DeepSWE v1.1 as of 2026-09-02 | confidence interval overlaps the dated public leaders under comparable conditions | cross-harness study if Vanguard replaces the published scaffold |
+| stretch research horizon | 80–90% on DeepSWE-class tasks | an uncommitted research aspiration beyond the dated public frontier | full independent reproduction; never a scheduled output |
 
-| Band | Score | Meaning |
-|---|---:|---|
-| qualification | 60% | credible strong system target |
-| frontier parity | 70-75% | match current public frontier band |
-| stretch | 80-90% | research horizon, never scheduled as guaranteed output |
-
-A score of 90% on DeepSWE v1.1 would exceed the observed frontier by a large margin.
-
-It is not a responsible near-term commitment.
+The numbers do not transfer between DeepSWE and SWE-bench Pro, and none describe current AETHER. A 90% DeepSWE v1.1 target exceeds the dated public frontier materially and is not a responsible near-term promise.
 
 ### Benchmark portfolio
 
@@ -2478,9 +2552,6 @@ A release claim requires:
 - architecture and security gates;
 - budget and spend reconciliation.
 
----
-
----
 
 ### Critical DAG
 
@@ -2585,9 +2656,6 @@ The evaluation lane may prepare frozen tasks while implementation proceeds.
 
 It may not inspect treatment outcomes before preregistration freezes.
 
----
-
----
 
 ### Domain
 
@@ -2708,9 +2776,9 @@ Run `docs_rag_v0.py --file` for every changed production path.
 
 Regenerate knowledge artifacts; never edit them manually.
 
----
+### Agent prompt and policy architecture
 
----
+Product agents are compiled from this policy stack plus a pack/manifest. The stack is versioned and ablatable. It is not a second runtime.
 
 ### Stable system core
 
@@ -2771,9 +2839,6 @@ Require:
 - paired benchmark evidence;
 - rollback path.
 
----
-
----
 
 ### Model-neutral substrate
 
@@ -2824,9 +2889,6 @@ Compare:
 
 Hold task set, tools, context, and verification fixed.
 
----
-
----
 
 ### Least authority
 
@@ -2888,9 +2950,6 @@ The future TUI becomes a projection and command client.
 
 It must not become another runtime authority.
 
----
-
----
 
 ### Shared substrate
 
@@ -2943,167 +3002,6 @@ Verify:
 - quotations respect limits;
 - local repository claims bind to current source revision.
 
----
-
----
-
-WIP=1 in the implementation lane. Evaluation lane is independent and may only **invalidate**, never silently repair product code.
-
-Shared rollback for every wave: revert the wave’s files; do not weaken falsifiers; do not update preregistration SHA to match a bad run.
-
-### Wave 0 — Truth baseline and benchmark integrity
-
-- **Objective.** HEAD-bound identity; enumerator membership digest; dry-run cannot emit pass/cost; no `__pycache__` tasks.
-- **Dependencies.** None.
-- **Source files.** `benchmarks/benchmark_20_suite/runner.py`, `benchmarks/protocols.py`, `test/benchmarks/test_m8_heldout_runner.py`, `benchmarks/sota_preregistration.json` (new subject SHA **after** freeze — evaluation lane).
-- **Contracts.** Task-set digest == preregistration membership; `dry_run ⇒ empirical fields null`.
-- **Packages.** `benchmarks/`, `test/benchmarks/`.
-- **Tests.** Enumerator golden; refuse `__*`, `.pytest_cache`; subject SHA equals `git rev-parse HEAD` of the **frozen** candidate, not of a dirty tree.
-- **Adversarial falsifiers.** Drop a `__pycache__` dir into the suite; runner must not count it. Cassette arm must not write `oracle_passed` into empirical tables.
-- **Metrics.** `wilson_interval_valid` may be false until n is valid; that is OK. Invalid campaigns must self-stop (already happened for B1 — keep that behavior).
-- **Acceptance.** New preregistration bound to a clean tree; W-092-F0 predicate actually true (`lda identity` FRESH or documented degraded mode in the receipt).
-- **Rollback.** If enumerator “fixes” by shrinking the suite without a new prereg, reject.
-- **Exit gate.** Evaluation lane signs “instrument valid, no score claimed”.
-
-### Wave 1 — Truthful task-aware completion
-
-- **Objective.** No `completed` without bound verification; Forge cannot invent counts; default pack gated.
-- **Dependencies.** Wave 0 instrument (so later scores are not compared to B1).
-- **Source files.** `runtime/session.py` (`admission_required`, `_observed_test_count`, `_observe_completion_dispatch`); `agency/episode/admission_gate.py`; `agency/forge/engine.py` ; pack completeness/parser.
-- **Contracts.** `VerificationReceipt.passed ⇔ exit_code==0 ∧ count>0 ∧ identities match`; task class from pack policy, not substring alone.
-- **Packages.** agency, runtime, packs/code-default, forge quarantine.
-- **Tests.** Existing admission tests plus: default harness cannot finish empty; Forge fallback removed; greenfield vs bugfix policies explicit.
-- **Adversarial.** `print("OK")` command; `exit 0` with 0 tests; modify tests to pass (expect fail until Wave 2 shield).
-- **Metrics.** False-complete rate on a frozen negative suite → 0.
-- **Acceptance.** W-092-F2 predicates on mechanism tests; no live score required.
-- **Rollback.** If RF-95 default-harness evidence depends on exemption, successor baseline.
-- **Exit gate.** Coding Max presets and default either gate or are explicitly read-only.
-
-### Wave 2 — Durable semantic task state and restart parity
-
-- **Objective.** Domain `SemanticTaskState` + runtime fold; resume preserves episode_id; state not in L3; 40-turn / crash continuation.
-- **Dependencies.** Wave 1 (do not persist false completes).
-- **Source files.** **Create** `vanguard/packages/domain/task_state.py`; fold in `runtime/task_state.py` or sibling; `app_service.py` resume; `session.py` ; `agency/context/packet.py` identity fields.
-- **Contracts.** FEATURE_SPEC §3 plus provenance fields already on `CodingTaskState` (discoveries, dead_ends) merged, not duplicated forever.
-- **Packages.** domain, runtime, agency (view/compiler consumption), tests/contracts.
-- **Tests.** `test/contracts/test_semantic_task_state.py` as specified; RF-25 still green; new test: L3 prefix stable across resume+write.
-- **Adversarial.** Corrupt checkpoint blob (existing RF-96); mismatched episode_id.
-- **Metrics.** Resume divergence rate 0 on hermetic fixtures.
-- **Acceptance.** W-092-F3 mechanism.
-- **Rollback.** If domain schema forces kernel imports, abort — domain must stay stdlib.
-- **Exit gate.** One coding resume path; `CodingTaskState` becomes a view of `SemanticTaskState` or is formally deprecated in a later ticket (not both as authorities).
-
-### Wave 3 — Progressive context and repository intelligence
-
-- **Objective.** Epoch-bound packets; progressive L4/L5; IndexPort refresh after writes; omissions explicit.
-- **Dependencies.** Wave 2 (\(\sigma\) must exist to place negative memory).
-- **Source files.** `agency/context/compiler.py`, **create** `agency/context/progressive.py` *or* strategy module; `ports/index.py` epoch fields if needed (keep ranking out); `adapters/stores/repo_index.py`; `session.py` repo_map block .
-- **Contracts.** FEATURE_SPEC §7 budgets as policy; INV-DELTA-5 prefix freeze.
-- **Packages.** agency, ports (minimal), adapters, packs context middleware.
-- **Tests.** `test/agency/test_progressive_context_compiler.py`; prefix residency tests remain green; post-write refresh falsifier.
-- **Adversarial.** Index truncated=true presented as complete; force token overflow; ensure L1/L2 untouched.
-- **Metrics.** Prefix-cache byte identity across turns (already a design goal); omission rate reported not hidden.
-- **Acceptance.** W-092-F4 mechanism.
-- **Rollback.** If progressive compiler duplicates ContextCompiler into a second loop, reject.
-- **Exit gate.** Product path uses one compiler.
-
-### Wave 4 — Greenfield and brownfield change-surface closure
-
-- **Objective.** Preflighted Recoverable Multi-File Patch Transaction multi-file writes; tamper shield; implicated-set admission; greenfield oracle protocol.
-- **Dependencies.** Waves 1–3.
-- **Source files.** **Create** `adapters/environment/transaction.py`; **create** `runtime/governance/tamper_shield.py`; `git.py` sequential apply replaced for multi-file product writes; pack `greenfield.py`, `implicated_files.py`, `multi_file_completeness.py`.
-- **Contracts.** INV-DELTA-3, INV-DELTA-4; FEATURE_SPEC §5 oracle fail-on-stub.
-- **Packages.** adapters, runtime, packs, tests.
-- **Tests.** Atomic rollback of 5-file set; tamper on assertion change; greenfield vacuous-oracle reject.
-- **Adversarial.** Syntax error in file 4 of 5; delete a test file; greenfield completeness bypass used on a brownfield brief.
-- **Metrics.** Partial-write incidents 0 on fixtures.
-- **Acceptance.** Internal greenfield+brownfield fixtures pass hermetically with fake model scripts **and** one live canary **after** Wave 0 (evaluation lane).
-- **Rollback.** If Preflighted Recoverable Multi-File Patch Transaction lives in kernel, reject.
-- **Exit gate.** `GitEnvironment.apply` either calls the transaction manager or is restricted to single-file.
-
-
-### Wave 5 — Strong single-agent qualification
-
-- **Objective.** Frozen internal multi-class suite on exact subject; Wilson; missingness; cost \(\kappa\); **single** EpisodeEngine path.
-- **Dependencies.** Waves 0–4.
-- **Source files.** Coding Max manifests only; quarantine Forge/Chimera from the report; `apps/coding_max/facade.py` unchanged.
-- **Contracts.** Preregistration: n, model id from registry, max USD, stop rules.
-- **Packages.** benchmarks, packs, apps (no new intelligence).
-- **Tests.** Protocol tests already green; add subject-binding of patch digest.
-- **Adversarial.** Provider 5xx labeled `provider_error` not `FAIL`; harness traceback not `NO_PATCH` if no model turn occurred.
-- **Metrics.** pass@1, Wilson LB, \(\kappa\), missingness table. **No** DeepSWE claim.
-- **Acceptance.** Evaluation lane disposition: positive / negative / undeterminable. Negative can still close the wave.
-- **Rollback.** If score requires ungated finish, rollback Wave 1 violation.
-- **Exit gate.** Single-agent control exists as a numbered receipt.
-
-### Wave 6 — Adaptive strategy and metacognition
-
-- **Objective.** Meta-controller on only if paired study vs Wave 5 control is valid (M-6.5).
-- **Dependencies.** Wave 5 receipt.
-- **Source files.** `runtime/meta_controller.py`, session `_consult_meta_controller`.
-- **Contracts.** Cannot enlarge budget; cannot admit completion; children do not inherit.
-- **Tests.** Existing M-6.5 falsifiers plus paired-study runner honesty (inconclusive stays inconclusive).
-- **Adversarial.** Controller suggests `finish` without receipt — must not bypass gate.
-- **Metrics.** McNemar on paired tasks; \(\Delta \kappa\).
-- **Acceptance.** Valid positive **or** valid negative. Default remains off on negative.
-- **Rollback.** Controller off.
-- **Exit gate.** Documented disposition.
-
-### Wave 7 — Specialist agents and topology treatments
-
-- **Objective.** Named treatments against control; merge = exterior select.
-- **Dependencies.** Wave 5; Wave 6 optional.
-- **Source files.** manifests localizer/reviewer/test_investigator; `runtime/topology.py`; `child_runtime.py`.
-- **Contracts.** Reviewer cannot admit; parallel reads only; writes single-writer.
-- **Tests.** Ablation harness; merge policy tests.
-- **Adversarial.** Two conflicting patches; LLM reviewer prefers the failing one — exterior must win.
-- **Metrics.** \(\Delta p\), \(\Delta \kappa\), merge-error rate.
-- **Acceptance.** Each treatment independently accepted or deferred. No default swarm.
-- **Rollback.** Default topology sequential single agent.
-- **Exit gate.** Catalog of treatments with receipts.
-
-### Wave 8 — Durable outer-loop campaign director
-
-- **Objective.** M-OCT-1..3 as runtime client; CAS mailboxes; CoordinationPlan.
-- **Dependencies.** Wave 5; preferably Wave 7 catalog.
-- **Source files.** new `runtime/campaign/` (name TBD) **not** `agency/campaign_engine.py` as a second loop; domain plan values.
-- **Contracts.** \(\sum\) budget shares \(\le 1000\) per-mille; no kernel changes.
-- **Tests.** Crash mid-DAG; resume remaining nodes; duplicate effect suppression.
-- **Adversarial.** Director marks campaign complete while a node is ungated.
-- **Metrics.** Node-level missingness; campaign success definition frozen in preregistration.
-- **Acceptance.** Tech-lead profile fixture.
-- **Rollback.** Disable director; inner loop remains product.
-- **Exit gate.** One writer per workspace epoch.
-
-### Wave 9 — Governed memory, skills, and learning
-
-- **Objective.** Product-optional memory behind grants; MEM-02 canary; no self-certification.
-- **Dependencies.** Wave 5; M-8 mechanism already present.
-- **Source files.** `runtime/memory.py` wiring **after** ADR-0100; `skill_*`; `governance/learning.py`.
-- **Contracts.** Authorization precedes retrieval; held-out \(\delta \ge 0.05\); rollback executable (already tested).
-- **Tests.** Reuse M-8 suite; add product-path “no retrieve without grant”.
-- **Adversarial.** Promote from one trajectory; generator=evaluator.
-- **Metrics.** Held-out lift, residual failures recorded.
-- **Acceptance.** M-8 empirical disposition. Negative closes honestly.
-- **Rollback.** Unwire retrieval; registry unsigned.
-- **Exit gate.** Memory off by default in `fast` preset.
-
-### Wave 10 — External benchmark and release qualification
-
-- **Objective.** SWE-P5 official procedures; DeepSWE v1.1 Harbor/Pier separate verifier; Scale Pro only if licensed/eligible.
-- **Dependencies.** Waves 0–5 minimum; 6–9 only if their receipts are positive.
-- **Source files.** Official adapters under `benchmarks/` **wrappers**, not a fork of EpisodeEngine; REL-03 container bridge.
-- **Contracts.** G-3: local suites never official. Receipt subject = HEAD of the **release candidate**.
-- **Tests.** Wrapper dry-run identity; no empirical fields.
-- **Adversarial.** Git-history cheating (DeepSWE v1.1 deleted future history); test deletion (CTRF missing tests = fail).
-- **Metrics.** Official pass@1 + CI + cost; report scaffold (`mini-swe-agent` vs Vanguard harness) **separately**.
-- **Acceptance.** Independent evaluation lane. AETHER-harness scores are not comparable to Datacurve mini-swe-agent leaders without a cross-harness study.
-- **Rollback.** Unpublished / withdrawn if membership or verifier isolation fails.
-- **Exit gate.** M-9/M-10 still require M-8 per milestones; Wave 10 does not override G-2.
-
----
-
----
 
 Implementation lane (WIP=1) and evaluation lane (WIP=1) never share a writer.
 
@@ -3112,7 +3010,7 @@ Sprint S0  (eval+impl): Wave 0 enumerator + identity receipts
 Sprint S1  (impl):      Wave 1 completion truth (session + forge + default pack)
 Sprint S2  (impl):      Wave 2 domain SemanticTaskState + resume identity
 Sprint S3  (impl):      Wave 3 progressive context + epoch
-Sprint S4  (impl):      Wave 4 Preflighted Recoverable Multi-File Patch Transaction + tamper + implicated admission
+Sprint S4  (impl):      Wave 4 recoverable multi-file write + tamper + implicated admission
 Sprint S5  (eval):      Wave 5 single-agent canary (REL-02R successor)
 Sprint S6  (impl):      only if S5 valid: Wave 6 controller study harness
 Sprint S7  (impl):      Wave 7 one treatment (test_investigator→implementer) + ablation
@@ -3121,15 +3019,12 @@ Sprint S9  (eval):      Wave 9 MEM-02 if REL runners honest
 Sprint S10 (eval):      Wave 10 official wrapper, no score fishing
 ```
 
-**Mapping to current board.** `tasks.md` T2–T6 ≈ S2–S4 + dialect slice of S1. the merged plan inserts **S0 and S1 before T2** because completing SemanticTaskState on an ungated default pack would persist false completions. Dialect recovery (T6) can ride with S1 because it is adapter-local.
+**Mapping to current board.** `tasks.md` T2–T6 ≈ S2–S4 + dialect slice of S1. This plan inserts **S0 and S1 before T2** because completing SemanticTaskState on an ungated default pack would persist false completions. Dialect recovery (T6) can ride with S1 because it is adapter-local.
 
 **WIP discipline.** TUI work in the dirty tree is not a third lane occupant for this program. Do not expand CMX-09 to OpenTUI.
 
 **Independent evaluation lane.** Re-runs B1 only after S0. Never uses Forge as the Coding Max arm. Never cites LAM 100% as lift.
 
----
-
----
 
 Target: Principal Architect profile, FEATURE_SPEC §5, pack `GreenfieldPolicy`.
 
@@ -3152,7 +3047,7 @@ Target: Principal Architect profile, FEATURE_SPEC §5, pack `GreenfieldPolicy`.
    - Freeze hashes (tamper shield)
 6. Implementation turns
    - One logical step / bounded files per turn (prompt already says one file/turn on empty src — pack prompt)
-   - Preflighted Recoverable Multi-File Patch Transaction for multi-file
+   - Recoverable multi-file write
 7. Integration
    - Smoke command from policy
 8. Entrypoint + installation
@@ -3165,9 +3060,6 @@ Target: Principal Architect profile, FEATURE_SPEC §5, pack `GreenfieldPolicy`.
 
 **Falsifiers.** Vacuous oracle; tests modified after freeze; partial scaffold left on disk after syntax failure.
 
----
-
----
 
 Target: Senior/Staff profiles; SWE-agent style localize-then-edit ([SWE-agent](https://arxiv.org/abs/2407.01489), [SWE-bench](https://arxiv.org/abs/2310.06770)) without copying their second loop.
 
@@ -3184,7 +3076,7 @@ Target: Senior/Staff profiles; SWE-agent style localize-then-edit ([SWE-agent](h
 5. Hypothesis ranking
    - Record in σ.hypotheses; dead_ends on failure (already types)
 6. Surgical patching
-   - Single writer; Preflighted Recoverable Multi-File Patch Transaction; syntax preflight
+   - Single writer; recoverable multi-file write; syntax preflight
 7. Affected-test closure
    - Tests(Blast(P)) plus smoke
 8. Integration
@@ -3199,9 +3091,6 @@ Target: Senior/Staff profiles; SWE-agent style localize-then-edit ([SWE-agent](h
 
 **CodePlan** ([arxiv 2309.12499](https://arxiv.org/abs/2309.12499)) is a planning DAG — maps to SemanticTaskState steps, not a new runtime.
 
----
-
----
 
 Same substrate, different admission policy (read-only presets already exist in AdmissionGate).
 
@@ -3219,9 +3108,6 @@ Same substrate, different admission policy (read-only presets already exist in A
 
 Both workflows reuse EpisodeEngine. They do not fork Chimera.
 
----
-
----
 
 Registry is the only catalog. Current defaults (FACT):
 
@@ -3246,9 +3132,6 @@ Do not hardcode “Sonnet is better at review”. If a treatment uses a second m
 
 Repair `resolve_route` exception swallowing before any routing study.
 
----
-
----
 
 **Mandatory control.** Wave 5 single-agent receipt.
 
@@ -3267,13 +3150,10 @@ Candidate treatments (each a separate ticket after control):
 
 **Not inherently superior.** Hydra/Octopus/multi-agent papers often improve coverage at quadratic cost. OpenHands ([github.com/All-Hands-AI/OpenHands](https://github.com/All-Hands-AI/OpenHands)) is a reference system, not a second Vanguard runtime.
 
----
-
----
 
 Reuse M-8 laws; productize only in Wave 9.
 
-| Rule | Source in tree | the merged plan |
+| Rule | Source in tree | Unified disposition |
 |---|---|---|
 | Authorization before retrieval | memory falsifiers | product path must call grants |
 | Provenance | Discovery.source already on CodingTaskState | keep |
@@ -3285,7 +3165,6 @@ Reuse M-8 laws; productize only in Wave 9.
 
 Skills are composition units, not prompt seasoning (`test_skills_are_load_bearing_not_decorative` exists). Turning them on without Wave 5 will confound scores.
 
----
 
 ## 7. Evaluation protocol
 
@@ -3352,9 +3231,6 @@ Skills are composition units, not prompt seasoning (`test_skills_are_load_bearin
 - symlink and path escape;
 - secret exfiltration attempt.
 
----
-
----
 
 ### Scope axis
 
@@ -3415,9 +3291,6 @@ Human duration estimates need provenance and uncertainty.
 - policy denial;
 - undeterminable.
 
----
-
----
 
 ### Task taxonomy (internal)
 
@@ -3443,7 +3316,7 @@ Human duration estimates need provenance and uncertainty.
 | SlopCodeBench | quality/erosion | — | — | research only |
 | METR horizons | HCAST/RE-Bench/SWAA | 50%/80% duration | dashboard live; long-horizon CIs wide | competency language only |
 
-Independent audits of DeepSWE v1.1 still report residual transparency issues ([june.kim audit](https://june.kim/auditing-deepswe-v1-1)). the merged plan therefore treats even official boards as **imperfect oracles**.
+Independent audits of DeepSWE v1.1 still report residual transparency issues ([june.kim audit](https://june.kim/auditing-deepswe-v1-1)). This plan therefore treats even official boards as **imperfect oracles**.
 
 ### Statistics (mandatory)
 
@@ -3458,22 +3331,20 @@ Independent audits of DeepSWE v1.1 still report residual transparency issues ([j
 - Contamination: refuse training-split overlap for skills; DeepSWE is original-by-construction but still not a license to overclaim.
 - Scaffold disclosure: mini-swe-agent vs Vanguard vs SWE-agent vs OpenHands.
 
-### What 60–90 means under this methodology
+### ASPIRATION score-language guardrail
 
-| Target | Interpretable as | Not interpretable as |
+| Phrase | May mean only | Must never mean |
 |---|---|---|
-| 60 | Competitive with mid DeepSWE flash/pro pack **if** official DeepSWE + same effort flags | “60/100 staff engineer” |
-| 70 | Overlapping weaker frontier DeepSWE configs (fable/glm-5.3/kimi ~69–70) | Scale Pro vendor 80% |
-| 74–80 | Overlap with 2026-09-02 DeepSWE leaders | Guaranteed Pro public 60% |
-| 90 | Stretch beyond current DeepSWE public leaders (74%) | Near-term plan exit |
+| “60%” | a result on one named, dated corpus under one disclosed model/scaffold/effort protocol | “60/100 Staff Engineer,” or equivalence across DeepSWE, SWE-bench Pro, and an internal suite |
+| “70–75%” | overlap with the dated 2026-09-02 DeepSWE v1.1 frontier after confidence and scaffold comparison | guaranteed parity on SWE-bench Pro or a product release promise |
+| “80–90%” | a stretch research aspiration beyond the dated DeepSWE v1.1 public frontier | forecast, scheduled exit gate, or current AETHER capability |
 
-SWE-bench Pro **standardized** frontier is ~60%, not ~90%. A 90% Pro public claim today would be a vendor-scaffold number or a mistake.
+SWE-bench Pro's 2026-09-03 public table is around 60% at the top under its displayed configurations, while the original paper reports a historical below-25% unified-scaffold study. Both are legitimate dated observations; mixing them, or mixing vendor scaffolds with standardized runs, is a methodology error.
 
-### Why did not buy a data point
+### Why this rewrite did not buy a data point
 
-See §2.6. Additionally, OpenAI’s evaluation note: coding evals mix signal and harness noise. A $0.10 flash call cannot estimate \(p\) with useful CI (\(n=1\) Wilson width is enormous).
+This session recorded identity, linter, and focused-test evidence only (see [dated session validation](#dated-session-validation--2026-09-03)). It did not purchase or run an official DeepSWE/Pro attempt. OpenAI’s evaluation note applies: coding evals mix signal and harness noise. A $0.10 flash call cannot estimate \(p\) with useful CI (\(n=1\) Wilson width is enormous).
 
----
 
 ### Evaluation invariants
 
@@ -3484,7 +3355,9 @@ See §2.6. Additionally, OpenAI’s evaluation note: coding evals mix signal and
 - External scores disclose corpus, verifier, scaffold, model, effort flags, and subject SHA. Local suites never become official scores.
 - First bake-off is control plus at most two factors on one substrate; no 12-arm zoo and no A-vs-B run.
 
-## 8. Ticket DAG
+## 8. File routing and Ticket DAG
+
+### File-by-file routing
 
 | Work | Create / modify | Tests | Canonical docs **after** acceptance (not this draft) |
 |---|---|---|---|
@@ -3496,7 +3369,7 @@ See §2.6. Additionally, OpenAI’s evaluation note: coding evals mix signal and
 | Progressive policy | **C** `vanguard/packages/agency/context/progressive.py` | **C** `test/agency/test_progressive_context_compiler.py` | agency.md |
 | Admission verbs | **M** `runtime/session.py`, `agency/episode/admission_gate.py` | `test/falsifiers/test_completion_gate_scope.py` | FEATURE_SPEC, agency.md |
 | Forge count | **M** `agency/forge/engine.py` | `test/agency/test_forge.py` | note quarantine in backlog |
-| Preflighted Recoverable Multi-File Patch Transaction | **C** `adapters/environment/transaction.py`; **M** `git.py` | **C** `test/runtime/test_atomic_multi_file_transaction.py` | adapters/environment docs |
+| Recoverable multi-file write | **C** `adapters/environment/transaction.py`; **M** `git.py` | **C** `test/runtime/test_atomic_multi_file_transaction.py` | adapters/environment docs |
 | Tamper | **C** `runtime/governance/tamper_shield.py` | **C** `test/runtime/test_tamper_shield.py` | governance |
 | Dialect | **M** `adapters/models/dialect.py` | **C** `test/contracts/test_dialect_recovery.py` | adapters/models |
 | Index epoch | **M** `ports/index.py`, `adapters/stores/repo_index.py` | adapter index tests | ports ICD |
@@ -3512,192 +3385,397 @@ See §2.6. Additionally, OpenAI’s evaluation note: coding evals mix signal and
 
 `docs_rag --file` owners observed: EpisodeEngine/ContextCompiler → `docs/backend/architecture/agency.md`; HarnessSession/CodingTaskState → `docs/backend/architecture/runtime-execution.md`.
 
----
 
----
+### Tickets 01–35
 
-Dependency key: `requires:`. Status: all `PROPOSED` unless noted.
+Dependency key: `requires:`. Status: all `PROPOSED` unless noted. Every ticket links back to its owning wave; every wave's operational card lists its tickets.
 
 ### Ticket 01 — Enumerator membership digest
+- **Owning wave:** [Wave 0](#wave-0--truth-baseline-and-benchmark-integrity)
+- **Purpose:** Make benchmark membership deterministic and preregistration-bound.
 - **Files:** `benchmarks/benchmark_20_suite/runner.py`; `test/benchmarks/test_b20_membership.py` (create)
 - **Requires:** none
 - **Falsifier:** `__pycache__` directory is not a task; digest matches frozen list of 20 names
 - **Done when:** B1-style INVALID cannot recur without stop
 
+- **Contract or behavior changed:** Task discovery accepts only schema-valid manifests and emits an order-independent membership digest.
+- **Rollback or disable path:** Restore the previous enumerator and invalidate affected runs; never reuse their scores.
+
 ### Ticket 02 — Subject SHA on every empirical JSON
+- **Owning wave:** [Wave 0](#wave-0--truth-baseline-and-benchmark-integrity)
+- **Purpose:** Bind every empirical record to the exact repository subject.
 - **Files:** benchmark writers; `benchmarks/protocols.py`
 - **Requires:** 01
 - **Falsifier:** missing `subject_sha` ⇒ receipt refused (`test_sota_protocols` already has binding — extend to B20 writer)
 
+- **Contract or behavior changed:** All empirical envelopes require `subject_sha` and reject absent or mismatched identity.
+- **Done when:** Every writer and reader fail closed on missing/mismatched subject SHA.
+- **Rollback or disable path:** Disable empirical publication and mark affected rows undeterminable until regenerated on a frozen subject.
+
 ### Ticket 03 — Dry-run empirical field ban
+- **Owning wave:** [Wave 0](#wave-0--truth-baseline-and-benchmark-integrity)
+- **Purpose:** Prevent simulations and planning runs from masquerading as measurements.
 - **Files:** runners; `test/benchmarks/test_m8_bundle.py` already has a cousin
 - **Requires:** none
 - **Falsifier:** dry-run JSON has null pass/cost
 
+- **Contract or behavior changed:** Dry-run/cassette mode cannot populate pass, cost, or official-score fields.
+- **Done when:** Schema tests prove all empirical fields are null and labels disclose simulation.
+- **Rollback or disable path:** Disable the dry-run reporter; do not convert simulated fields into observations.
+
 ### Ticket 04 — Remove default admission exemption
+- **Owning wave:** [Wave 1](#wave-1--truthful-task-aware-completion)
+- **Purpose:** Close the bare-finish hole on the default write-capable product path.
 - **Files:** `runtime/session.py` `ADMISSION_GATE_EXEMPT`
 - **Requires:** none
 - **Falsifier:** `vg-code-default` + `finish` + no patch ⇒ not completed
 - **Rollback:** if a named compatibility harness must stay exempt, shrink set with a recorded governance note — do not restore lex+default silently
 
+- **Contract or behavior changed:** Capability-derived admission applies to every write-capable Coding Max/default manifest.
+- **Done when:** A bare `finish` on the default write path is rejected while declared read-only tasks retain their policy.
+
 ### Ticket 05 — Delete unused `ADMISSION_GATED_HARNESSES` or make it the only source
+- **Owning wave:** [Wave 1](#wave-1--truthful-task-aware-completion)
+- **Purpose:** Make one rule the sole authority for completion-gate wiring.
 - **Files:** `session.py`; `test/falsifiers/test_completion_gate_scope.py`
 - **Requires:** 04
 - **Falsifier:** one function decides gating; name set cannot drift
 
+- **Contract or behavior changed:** Exactly one function/data source determines whether admission is required.
+- **Done when:** Mutation tests show no dormant allowlist can drift from the active decision.
+- **Rollback or disable path:** Revert to capability-derived gating and delete the competing set.
+
 ### Ticket 06 — Remove Forge `test_count = 1`
+- **Owning wave:** [Wave 1](#wave-1--truthful-task-aware-completion)
+- **Purpose:** Remove synthetic positive verification evidence from Forge.
 - **Files:** `agency/forge/engine.py` ; `test/agency/test_forge.py`
 - **Requires:** none (can parallel 04)
 - **Falsifier:** exit 0 + empty output ⇒ not passed
 
+- **Contract or behavior changed:** Unknown/unparsed test output remains count zero and cannot yield a passing Forge receipt.
+- **Done when:** Forge adversarial tests prove exit zero plus empty/unrecognized output is non-pass.
+- **Rollback or disable path:** Keep Forge quarantined or disable it; never restore the fallback.
+
 ### Ticket 07 — Typed verification command subject
+- **Owning wave:** [Wave 1](#wave-1--truthful-task-aware-completion)
+- **Purpose:** Bind verification to an explicit approved command subject.
 - **Files:** `session.py` `_observe_completion_dispatch`; admission_gate
 - **Requires:** 04
 - **Falsifier:** `python3 -c 'print("OK")'` is not a verification subject
 
+- **Contract or behavior changed:** A verification receipt binds an approved argv/runner/test-selection digest to task, composition, and workspace.
+- **Done when:** Unrelated successful commands cannot create applicable verification evidence.
+- **Rollback or disable path:** Disable completion for unknown runners; fall back to explicit exterior evaluation.
+
 ### Ticket 08 — Parse pytest `N passed` without inventing counts
+- **Owning wave:** [Wave 1](#wave-1--truthful-task-aware-completion)
+- **Purpose:** Parse known runner counts while preserving unknown as zero/unknown.
 - **Files:** `_observed_test_count`; pack `test_output_parser.py` if present
 - **Requires:** 07
 - **Falsifier:** unittest `Ran 0 tests` ⇒ count 0; pytest `0 passed` ⇒ 0
 
+- **Contract or behavior changed:** Typed parsers report collected/executed/passed/failed/skipped; absent evidence stays unknown/zero.
+- **Done when:** Pytest and unittest vectors, including zero tests and malformed summaries, pass without inferred positives.
+- **Rollback or disable path:** Disable the parser adapter and require structured reports; do not infer a count.
+
 ### Ticket 09 — Domain SemanticTaskState
+- **Owning wave:** [Wave 2](#wave-2--durable-semantic-task-state-and-restart-parity)
+- **Purpose:** Define the domain-pure semantic state of an agent phenotype.
 - **Files:** create `domain/task_state.py`; FEATURE_SPEC §3
 - **Requires:** none technically; **schedule after** 04 so we do not persist false completes
 - **Falsifier:** `test/contracts/test_semantic_task_state.py` as specified
 
+- **Contract or behavior changed:** `SemanticTaskState` is immutable, domain-pure, JCS-stable, and contains goal, plan, hypotheses, obligations, verification, next action, budget, uncertainty, provenance, and revision.
+- **Done when:** Contract vectors prove round trip, digest stability, monotone revision, and fail-closed invalid values after admission truth is closed.
+- **Rollback or disable path:** Do not wire the new value; retain current `CodingTaskState` as the sole projection until an accepted migration.
+
 ### Ticket 10 — Runtime fold of SemanticTaskState
+- **Owning wave:** [Wave 2](#wave-2--durable-semantic-task-state-and-restart-parity)
+- **Purpose:** Project semantic task state deterministically from ledger events.
 - **Files:** `runtime/task_state.py`
 - **Requires:** 09
 - **Falsifier:** fold monotonic revision; unknown events ignored; `"test" in action.lower()` removed or replaced
 
+- **Contract or behavior changed:** Ledger events deterministically fold into the single semantic state authority.
+- **Done when:** Replay, duplicate, unknown-event, and ordering vectors produce the specified digest without keyword verification guesses.
+- **Rollback or disable path:** Revert the fold adapter and continue using the prior projection; never keep two writable authorities.
+
 ### Ticket 11 — Preserve episode_id on resume
+- **Owning wave:** [Wave 2](#wave-2--durable-semantic-task-state-and-restart-parity)
+- **Purpose:** Preserve causal episode identity across fresh-process resume.
 - **Files:** `app_service.py`
 - **Requires:** 10
 - **Falsifier:** resumed events use original episode_id
 
+- **Contract or behavior changed:** Resume resolves the original persisted episode ID rather than synthesizing a replacement.
+- **Done when:** Fresh-process continuation events and receipts retain the original lineage identifier.
+- **Rollback or disable path:** Reject resume as undeterminable when original identity is absent.
+
 ### Ticket 12 — Stop dumping resume_state into L3
+- **Owning wave:** [Wave 2](#wave-2--durable-semantic-task-state-and-restart-parity)
+- **Purpose:** Keep dynamic resume state out of the immutable prefix.
 - **Files:** `session.py` ; compiler
 - **Requires:** 10
 - **Falsifier:** L3 prefix identity; L4 contains σ digest
 
+- **Contract or behavior changed:** L1–L3 remain byte-stable; current semantic state is re-rendered into L4/L5 each turn.
+- **Done when:** Resume-plus-write changes the semantic-state digest while the prefix digest remains identical.
+- **Rollback or disable path:** Disable semantic resume prompting rather than place dynamic state back in L3.
+
 ### Ticket 13 — Populate ContextPacket resume identity
+- **Owning wave:** [Wave 2](#wave-2--durable-semantic-task-state-and-restart-parity)
+- **Purpose:** Make context selection and repository identity resume-verifiable.
 - **Files:** `packet.py`; session orientation block
 - **Requires:** 12
 - **Falsifier:** `validate_resume_identity` fails on policy mismatch
 
+- **Contract or behavior changed:** Every context packet binds repository identity, selection-policy identity, task/composition identity, and omissions.
+- **Done when:** `validate_resume_identity` rejects each independently mutated identity field.
+- **Rollback or disable path:** Discard incompatible packet/checkpoint and rebuild from ledger plus current repository evidence.
+
 ### Ticket 14 — WorkspaceEpoch
+- **Owning wave:** [Wave 3](#wave-3--progressive-context-and-repository-intelligence)
+- **Purpose:** Give repository observations a freshness identity.
 - **Files:** ports/index.py (additive fields); repo_index adapter; session
 - **Requires:** 13
 - **Falsifier:** write ⇒ epoch change ⇒ packet invalid until refresh
 
+- **Contract or behavior changed:** Repository maps and packets carry tree, index, and source-revision identity.
+- **Done when:** Every relevant write changes the epoch and makes prior observations inapplicable.
+- **Rollback or disable path:** Mark index evidence stale and use deterministic targeted-source fallback.
+
 ### Ticket 15 — Progressive L4/L5 strategy
+- **Owning wave:** [Wave 3](#wave-3--progressive-context-and-repository-intelligence)
+- **Purpose:** Select task evidence progressively without forking the compiler.
 - **Files:** create `agency/context/progressive.py` **or** `compaction.py` strategy; `compiler.py`
 - **Requires:** 12, 14
 - **Falsifier:** settled invariants never truncated; FEATURE_SPEC budget caps
 
+- **Contract or behavior changed:** Progressive selection is a strategy of the existing L1–L5 compiler, with mandatory floors and an omission ledger.
+- **Done when:** Goal, obligations, settled invariants, dead ends, and latest failing verification survive distractor/overflow tests.
+- **Rollback or disable path:** Feature-disable the strategy and use the existing bounded compiler.
+
 ### Ticket 16 — Index refresh after patch.apply
+- **Owning wave:** [Wave 3](#wave-3--progressive-context-and-repository-intelligence)
+- **Purpose:** Invalidate and refresh repository intelligence after effects.
 - **Files:** session observe path; pack IndexToolkit
 - **Requires:** 14
 - **Falsifier:** callers after write include new symbol or explicit omission
 
-### Ticket 17 — Atomic multi-file transaction manager
+- **Contract or behavior changed:** A relevant effect invalidates affected repository observations and triggers refresh or explicit stale status.
+- **Done when:** Post-write symbol/caller/test queries reflect the new epoch or disclose omission/staleness.
+- **Rollback or disable path:** Disable index-backed retrieval after writes and use direct source/search/test routing.
+
+### Ticket 17 — Recoverable multi-file write (`transaction.py`)
+- **Owning wave:** [Wave 4](#wave-4--greenfield-and-brownfield-change-surface-closure)
+- **Purpose:** Provide a preflighted and explicitly recoverable multi-file write.
 - **Files:** create `adapters/environment/transaction.py`; `git.py`
 - **Requires:** 08 (verification still honest)
 - **Falsifier:** 5-file syntax fail rolls back all
 
+- **Contract or behavior changed:** `transaction.py` validates the whole mutation set, preserves preimages, applies, verifies, and emits rollback identity.
+- **Done when:** Any preflight/apply/verify failure leaves or restores the exact preimage across a five-file fixture.
+- **Rollback or disable path:** Restrict product writes to one file or restore preserved preimages through an explicit effect.
+
 ### Ticket 18 — TestTamperShield with IndexPort enumeration
+- **Owning wave:** [Wave 4](#wave-4--greenfield-and-brownfield-change-surface-closure)
+- **Purpose:** Detect and govern test-oracle mutation across the complete enumerated test set.
 - **Files:** create `runtime/governance/tamper_shield.py`
 - **Requires:** 17 for greenfield freeze timing; 14 for file list
 - **Falsifier:** assertion edit ⇒ admission reject; `Path.glob("test/**")` is insufficient — use enumerated tests
 
+- **Contract or behavior changed:** Tamper policy compares an IndexPort-enumerated oracle set and classifies authorized test deltas separately.
+- **Done when:** Deletion, assertion weakening, skip insertion, fixture replacement, and incomplete enumeration fail closed.
+- **Rollback or disable path:** Disable autonomous test mutation and require exterior/operator review; do not bypass the check.
+
 ### Ticket 19 — Greenfield oracle vacuity
+- **Owning wave:** [Wave 4](#wave-4--greenfield-and-brownfield-change-surface-closure)
+- **Purpose:** Prove a synthesized greenfield oracle fails before implementation.
 - **Files:** pack greenfield policy
 - **Requires:** 18
 - **Falsifier:** tests that pass on stubs rejected
 
+- **Contract or behavior changed:** Greenfield behavioral tests must fail against the pre-implementation scaffold and pass only after implementation.
+- **Done when:** A vacuous oracle or missing entrypoint/startup check blocks completion.
+- **Rollback or disable path:** Disable the greenfield treatment and preserve the failed scaffold as a recoverable artifact.
+
 ### Ticket 20 — Brownfield implicated-set fail-closed
+- **Owning wave:** [Wave 4](#wave-4--greenfield-and-brownfield-change-surface-closure)
+- **Purpose:** Require complete, non-truncated brownfield impact evidence.
 - **Files:** `multi_file_completeness.py`; change_surface.py
 - **Requires:** 16
 - **Falsifier:** empty primary + coverage_ratio 1.0 cannot admit; greenfield bypass cannot apply to `bugfix` brief
 
+- **Contract or behavior changed:** Brownfield completion requires non-empty, non-truncated implicated files and applicable affected tests.
+- **Done when:** Empty-primary `coverage_ratio=1.0`, truncated graphs, and greenfield-policy misuse are rejected.
+- **Rollback or disable path:** Fall back to broader explicit inspection/verification; do not treat regex coverage as proof.
+
 ### Ticket 21 — Dialect typed failure classes
+- **Owning wave:** [Wave 1](#wave-1--truthful-task-aware-completion)
+- **Purpose:** Classify bounded protocol-recovery failures without false success.
 - **Files:** `dialect.py`; create `test/contracts/test_dialect_recovery.py`
 - **Requires:** none (parallel)
 - **Falsifier:** truncated JSON, DeepSeek fence, XML tool tags classified without false `ok`
 
+- **Contract or behavior changed:** Dialect recovery emits typed bounded failure classes and never executes recovered prose as an effect.
+- **Done when:** Truncated JSON, fenced/DSML/XML variants, patch-as-text, and malformed calls classify without false `ok`.
+- **Rollback or disable path:** Disable the dialect adapter and return a typed protocol failure to the model/runtime.
+
 ### Ticket 22 — Fail-closed model resolve
+- **Owning wave:** [Wave 1](#wave-1--truthful-task-aware-completion)
+- **Purpose:** Resolve model identifiers and aliases without silent fallback.
 - **Files:** `routing.py` ; harness.yaml aliases
 - **Requires:** 21 optional
 - **Falsifier:** `deepseek-v4-flash` without `-0731` either aliases or errors, never silent unknown
 
+- **Contract or behavior changed:** Registry resolution either returns a canonical ID with recorded price/capabilities or fails closed.
+- **Done when:** Unknown aliases and versionless IDs never silently route to an unintended model.
+- **Rollback or disable path:** Pin the last accepted registry digest or stop the run before provider invocation.
+
 ### Ticket 23 — Quarantine Forge/Chimera from Coding Max reports
+- **Owning wave:** [Wave 1](#wave-1--truthful-task-aware-completion)
+- **Purpose:** Make Coding Max qualification arms exclude parallel experimental engines.
 - **Files:** benchmark arm lists; `runtime/root.py` exports remain but labeled experimental
 - **Requires:** 06
 - **Falsifier:** Wave 5 preregistration arms ⊆ `{vg-code-fast,balanced,max}`
 
+- **Contract or behavior changed:** Qualification schema accepts Coding Max control/treatment IDs only; Forge/Chimera use the common schema in separate experimental reports.
+- **Done when:** Wave 5 arm validation rejects every Forge/Chimera identifier and mixed denominator.
+- **Rollback or disable path:** Invalidate a mixed report and restore the frozen Coding Max arm list.
+
 ### Ticket 24 — Patch identity on results
+- **Owning wave:** [Wave 0 / Wave 5](#wave-0--truth-baseline-and-benchmark-integrity)
+- **Purpose:** Bind result rows to the exact candidate patch.
 - **Files:** B20 result schema; session evidence
 - **Requires:** 02
 - **Falsifier:** PASS row without patch digest refused
 
+- **Contract or behavior changed:** Each pass/fail row binds the final patch/tree digest and evaluator subject.
+- **Done when:** A PASS without patch identity or with foreign patch identity is refused.
+- **Rollback or disable path:** Mark the attempt undeterminable and withhold it from solve-rate claims.
+
 ### Ticket 25 — Missingness taxonomy in runners
+- **Owning wave:** [Wave 0 / Wave 5](#wave-0--truth-baseline-and-benchmark-integrity)
+- **Purpose:** Separate task failure from provider, harness, dataset, and unknown outcomes.
 - **Files:** BAAC + B20 diagnosis mapping
 - **Requires:** 01, 02
 - **Falsifier:** traceback-only row is `harness_error` not `FAIL`
 
+- **Contract or behavior changed:** Result schema records passed, failed, provider_error, harness_error, dataset_invalid, undeterminable, and not_run distinctly.
+- **Done when:** Injected failures land in the correct class and headline reports show solve rate, Wilson bounds, cost per signed pass, and system missingness together.
+- **Rollback or disable path:** Invalidate the report if classification cannot be reconstructed; never recode missing as task fail/pass.
+
 ### Ticket 26 — Frozen Wave 5 preregistration
+- **Owning wave:** [Wave 5](#wave-5--strong-single-agent-coding-max-qualification)
+- **Purpose:** Freeze the complete single-agent control protocol before outcomes or spend.
 - **Files:** new prereg JSON bound to candidate SHA after S4
 - **Requires:** 01–25 as applicable
 - **Falsifier:** n, models, λ, stop rule frozen before first paid call
 
+- **Contract or behavior changed:** Preregistration freezes n, membership digest, subject, model ID, scaffold, effort, budgets, stop rules, seeds, evaluator, and analysis.
+- **Done when:** The immutable preregistration predates the first paid/live outcome and every attempt matches it.
+- **Rollback or disable path:** Cancel the run and issue a new preregistration; never edit the old one after outcomes.
+
 ### Ticket 27 — Single-agent canary execution (eval lane)
+- **Owning wave:** [Wave 5](#wave-5--strong-single-agent-coding-max-qualification)
+- **Purpose:** Produce the first honest numbered Coding Max control receipt.
 - **Files:** none in product if wrappers exist
 - **Requires:** 26
 - **Falsifier:** spend ledger disposition in {POSITIVE, NEGATIVE, UNDETERMINABLE, INVALID}; never silent
 
+- **Contract or behavior changed:** The evaluation lane emits one exact-subject single-agent Coding Max control receipt with a terminal disposition.
+- **Done when:** Spend ledger and result envelope reconcile, including negative or undeterminable outcomes and Wilson/missingness reporting.
+- **Rollback or disable path:** Stop spend and invalidate the receipt on any subject, membership, verifier, or scaffold mismatch.
+
 ### Ticket 28 — Meta-controller paired study harness
+- **Owning wave:** [Wave 6](#wave-6--adaptive-strategy-and-metacognition-treatment)
+- **Purpose:** Measure the meta-controller as an optional paired treatment.
 - **Files:** `paired_evaluation.py`; meta_controller
 - **Requires:** 27 control receipt
 - **Falsifier:** inconclusive ≠ negative; budget cannot grow
 
+- **Contract or behavior changed:** Meta-controller directives are bounded treatment inputs and cannot widen grants/budgets or admit completion.
+- **Done when:** Paired study preserves missing pairs, reports exact McNemar/effect/cost, and keeps inconclusive distinct.
+- **Rollback or disable path:** Turn the controller off and retain the Wave 5 control unchanged.
+
 ### Ticket 29 — Treatment T-TI ablation
+- **Owning wave:** [Wave 7](#wave-7--specialist-product-treatments)
+- **Purpose:** Measure test-investigator→implementer as a named treatment.
 - **Files:** manifests; topology
 - **Requires:** 27
 - **Falsifier:** reviewer/investigator cannot call patch.apply; McNemar table includes missingness
 
+- **Contract or behavior changed:** Test-investigator/localizer/reviewer roles are attenuated manifests on `run_composed`, with one writer and no admission authority.
+- **Done when:** Paired treatment report includes missingness and rejects any investigator patch attempt.
+- **Rollback or disable path:** Disable T-TI independently and lower to the single-agent control.
+
 ### Ticket 30 — Isolated patch EXTERIOR_SELECT
+- **Owning wave:** [Wave 7](#wave-7--specialist-product-treatments)
+- **Purpose:** Select isolated candidate patches only by exterior evidence.
 - **Files:** child_runtime; git worktrees
 - **Requires:** 27, 17
 - **Falsifier:** selector is test verdict; LLM preference ignored
 
+- **Contract or behavior changed:** Candidate writes occur in isolated worktrees and selection is made by exterior verifier evidence.
+- **Done when:** When an LLM prefers a failing patch, the passing exterior-verdict candidate wins or the task remains unresolved.
+- **Rollback or disable path:** Delete/retire isolated candidates through the environment policy and return to one writer.
+
 ### Ticket 31 — Campaign director fixture
+- **Owning wave:** [Wave 8](#wave-8--durable-outer-loop-campaign-director)
+- **Purpose:** Falsify campaign durability while preserving the canonical inner loop.
 - **Files:** create `runtime/campaign/` (Wave 8)
 - **Requires:** 27
 - **Falsifier:** crash after node 3; resume nodes 4–8 without duplicate writes
 
+- **Contract or behavior changed:** Campaign state is an event fold; director submits nodes to `run_composed` and cannot mark ungated completion.
+- **Done when:** Crash/restart, failed-node revision, operator pause, and duplicate-effect fixtures pass across at least eight nodes.
+- **Rollback or disable path:** Disable CampaignDirector; preserve node artifacts and execute remaining tasks as independent episodes.
+
 ### Ticket 32 — Memory grant on product path
+- **Owning wave:** [Wave 9](#wave-9--governed-memory-skills-and-learning)
+- **Purpose:** Prove product-path memory retrieval is capability-granted and optional.
 - **Files:** `runtime/memory.py` wiring
 - **Requires:** 27; ADR-0100
 - **Falsifier:** retrieve without grant denied; MEM-02 still independent
 
+- **Contract or behavior changed:** Memory candidates are filtered by grant before ranking and remain off by default until held-out promotion.
+- **Done when:** Unauthorized retrieval and one-trajectory/self-promotion attempts are denied; rollback is executable.
+- **Rollback or disable path:** Unwire retrieval, revoke the promoted version, and retain audit events.
+
 ### Ticket 33 — Official DeepSWE wrapper (no score fishing)
+- **Owning wave:** [Wave 10](#wave-10--external-benchmark-and-release-qualification)
+- **Purpose:** Adapt the official DeepSWE protocol without inventing AETHER scores.
 - **Files:** `benchmarks/` Harbor/Pier adapter
 - **Requires:** 27; REL-03
 - **Falsifier:** wrapper dry-run produces no pass%; committed-patch-only grading
 
+- **Contract or behavior changed:** The wrapper preserves official DeepSWE task/container/verifier/committed-patch semantics and discloses Vanguard scaffold identity.
+- **Done when:** Dry run emits no percentage; identity mismatch/test deletion/history-cheating vectors fail closed.
+- **Rollback or disable path:** Do not publish or withdraw the external result and disable the wrapper.
+
 ### Ticket 34 — WorkflowScheduler lease honesty
+- **Owning wave:** [Wave 7 / Wave 8](#wave-7--specialist-product-treatments)
+- **Purpose:** Make scheduler lease events truthful or keep product execution sequential.
 - **Files:** `workflow_scheduler.py`
 - **Requires:** none (lattice hygiene)
 - **Falsifier:** parallel path either uses kernel leases or is disabled in product profiles
 
+- **Contract or behavior changed:** Parallel scheduler paths use truthful mediated leases or are unavailable to product profiles.
+- **Done when:** A synthetic/unmediated lease cannot authorize a concurrent product write.
+- **Rollback or disable path:** Force sequential scheduling and preserve single-writer semantics.
+
 ### Ticket 35 — TCB and boundary freeze
+- **Owning wave:** [Cross-wave gate](#6-waves-w0w10-and-operator-execution)
+- **Purpose:** Preserve the domain-blind kernel, TCB ceiling, and lattice at every implementation boundary.
 - **Files:** none expected
 - **Requires:** each impl ticket
 - **Falsifier:** `check_tcb_budget.py` still PASS; `check_boundaries.py`; domain-blindness PASS
 
+- **Contract or behavior changed:** Every implementation ticket is gated by TCB, boundary, domain-blindness, isolation, tests, documentation routing, and final verification.
+- **Done when:** The exact required checks run and their actual outcomes are recorded for each accepted change; kernel remains ≤1438 logical LOC.
+- **Rollback or disable path:** Revert the offending implementation ticket, not the invariant or linter.
 Tickets 01–08 are the true critical path for long-horizon **truth**. Tickets 09–20 are the critical path for long-horizon **competence**. 21–25 are hygiene. 26–27 are the first honest score. 28–35 are gated.
 
----
 
 The 35-ticket DAG is the executable index. Tickets 01–08 are the only immediate “this week” route; 09–20 close state and change-surface competence; 21–25 provide hygiene; 26–27 establish the first honest control receipt; 28–35 remain gated by evidence.
 
@@ -3775,9 +3853,6 @@ Risk: rapidly edited documents conflict with source.
 
 Mitigation: reverse-route every production change and regenerate knowledge projections only after canonical updates.
 
----
-
----
 
 Stop a treatment when:
 
@@ -3804,9 +3879,6 @@ Rollback when:
 - new scheduler produces non-deterministic effect ordering;
 - external evaluator reports subject mismatch.
 
----
-
----
 
 ### Senior Developer done
 
@@ -3844,9 +3916,6 @@ Rollback when:
 - produces reconstructible status from ledger alone;
 - never bypasses exterior acceptance.
 
----
-
----
 
 ### Before implementation
 
@@ -3900,9 +3969,6 @@ Rollback when:
 - [ ] benchmark confidence interval is reported;
 - [ ] no score is generalized beyond its task distribution.
 
----
-
----
 
 ### D-01
 
@@ -3964,9 +4030,6 @@ Decision: external benchmark scores are measurements, not architecture requireme
 
 Reason: benchmark defects and contamination change over time.
 
----
-
----
 
 ### Q-01
 
@@ -4028,9 +4091,6 @@ How can research-agent citation correctness be graded automatically?
 
 Which agent-computer interface changes yield more lift than prompt changes?
 
----
-
----
 
 | Risk | Why it is real here | Mitigation | Rollback |
 |---|---|---|---|
@@ -4054,9 +4114,6 @@ Which agent-computer interface changes yield more lift than prompt changes?
 | Parallel writes | WorkflowScheduler thread pool | Ticket 34 | sequential only |
 | Stale Scale page narrative | ~23% GPT-5 story vs 61.5% table | Cite table + date | Re-fetch at Wave 10 |
 
----
-
----
 
 The next release program should be judged by whether it creates an agent that can carry truth across time.
 
@@ -4147,7 +4204,7 @@ function COMPILE(σ, epoch, budget):
     return prefix ∥ pack(inv, neg, slice, stubs, budget)
 ```
 
-### A.3 Preflighted Recoverable Multi-File Patch Transaction write (target)
+### A.3 Recoverable multi-file write (target)
 
 ```text
 function PREFLIGHT_COMMIT(mutations):
@@ -4177,9 +4234,6 @@ function RUN_NODE(plan_node, cas):
 
 Unknown outcomes stay `undeterminable` (`child_runtime.py` already maps instrument_error that way — MECHANISM).
 
----
-
----
 
 ```text
 W0 truth
@@ -4197,9 +4251,6 @@ W0 truth
 
 No edge from W7 to W5 in reverse. No edge that lets Forge define W5.
 
----
-
----
 
 If only one sprint can be staffed after this draft:
 
@@ -4209,11 +4260,477 @@ If only one sprint can be staffed after this draft:
 
 That sequence is the smallest path that can eventually support senior-developer **internal** qualification. Staff/principal/lead profiles and 60–90 public bands remain gated on Waves 5 and 10.
 
----
 
-*End of the merged plan. Non-authoritative. Source and tests win.*
+### Dated session validation — 2026-09-03
 
----
+This appendix contains only evidence collected during this rewrite session. It is volatile validation evidence, not part of the durable architectural argument.
+
+#### Inspected identity and navigation
+
+| Item | Observed result |
+|---|---|
+| Repository subject before editing | `main` at `614b7800f09978c62c6cc91a709bac490b0d65bb`; clean worktree |
+| LDA identity | populated index, `index_head_sha=7e08462c2cbb`, `freshness_vs_head=STALE` |
+| LDA doctor | `index_healthy=true`, `status=HEALTHY`; this validates internal health of the stale graph, not HEAD freshness |
+| Knowledge report | `status=VALIDATED`, 136 documents, non-zero link/mapping/symbol counts, timestamp 2026-08-30 |
+| Tier-1 context | historical branch `feat/beta-release_electroweak-v091`, HEAD `7d46c7f…`; not used as current gate evidence |
+| Navigation mode | degraded locator plus direct canonical/source/test fallback; index not rebuilt |
+| Worktree during final editing | target file modified; unrelated TUI changes appeared and were not edited, reverted, staged, or normalized by this rewrite |
+
+#### Commands actually executed
+
+```text
+sed -n '1,240p' .agents/skills/lda-navigator/SKILL.md
+wc -l .agents/skills/lda-navigator/SKILL.md .draft/DEVELOPMENT_FINAL_PLAN*.md
+git rev-parse HEAD
+git branch --show-current
+git status --short --untracked-files=all
+sed -n '1,240p' dev_context_logs/context_summary.md
+env UV_CACHE_DIR=/tmp/cognitive-framework-uv-cache uv run lda identity --json
+env UV_CACHE_DIR=/tmp/cognitive-framework-uv-cache uv run lda doctor --json
+sed -n '1,220p' .generated/knowledge/report.json
+python3 tools/docs_rag_v0.py "unified implementation plan Coding Max admission benchmark campaign framework product" --budget 8000
+python3 tools/docs_rag_v0.py --file vanguard/packages/runtime/session.py
+python3 tools/docs_rag_v0.py --file vanguard/packages/agency/episode/admission_gate.py
+python3 tools/docs_rag_v0.py --file vanguard/packages/agency/forge/engine.py
+python3 tools/docs_rag_v0.py --file vanguard/packages/runtime/task_state.py
+python3 tools/docs_rag_v0.py --file vanguard/packages/apps/coding_max/facade.py
+rg -n <targeted symbols, paths, headings, and validation patterns> <plans and current source>
+sed -n <targeted ranges> .draft/DEVELOPMENT_FINAL_PLAN{,_B,_MERGED,_v2}.md
+python3 tools/linters/check_tcb_budget.py
+env UV_CACHE_DIR=/tmp/cognitive-framework-uv-cache uv run python -m unittest test.agency.test_episode.Terminals.test_completion_admission_rejection_returns_to_the_model test.agency.test_coding_state test.benchmarks.test_sota_protocols -v
+just check
+just verify
+python3 tools/linters/check_markdown_links.py
+```
+
+The rewrite also fetched the official DeepSWE site/paper and Scale SWE-bench Pro site/paper on 2026-09-03 to verify dated external bounds.
+
+#### Tests and linters actually executed
+
+| Validation | Actual result |
+|---|---|
+| Focused unittest selection | 9 tests ran; all 9 `OK` in 0.001s |
+| TCB budget linter | `PASS`; 1386 logical LOC across 9 files against ceiling 1438; 52 lines of ceiling headroom |
+| `just check` | attempted; could not run because `just` is not installed (`/bin/bash: just: command not found`) |
+| `just verify` | attempted; could not run for the same missing executable |
+| boundary linter | not run in this rewrite session |
+| domain-blindness linter | not run in this rewrite session |
+| Markdown-link linter | executed; failed on pre-existing repository-wide links to absent `docs/SPEC.md`, `docs/execution/FEATURE_SPEC.md`, and `docs/execution/active.md`; no PASS claimed |
+| official DeepSWE / SWE-bench Pro evaluation | not run |
+
+#### Spend and scope
+
+External or paid evaluation spend during this rewrite was **US$0.00**. No model benchmark call, external submission, production change, canonical-document change, test change, or generated-index change was authorized or performed. Only `.draft/DEVELOPMENT_FINAL_PLAN_MERGED.md` was intentionally edited.
+
+### Heading coverage appendix
+
+The following tables are generated from the `##`/`###` inventories of Plans A and B and record the substantive destination for every source heading. “Rejected” means the concept was deliberately not restored; it does not mean its provenance disappeared.
+
+#### Plan A heading disposition
+
+| Source anchor | Source heading | Unified destination or rejection |
+|---|---|---|
+| Plan A:19 | `## Backend-first plan for long-horizon, greenfield, brownfield, research, and explanation agents` | Mapped into the nearest same-named unified section |
+| Plan A:31 | `## 0. Executive decision` | §0 Epistemic legend and executive decision |
+| Plan A:78 | `## 1. Evidence boundary and snapshot` | §0 Evidence boundary + dated session validation |
+| Plan A:80 | `### 1.1 Inspected subject` | §0 Evidence boundary + dated session validation |
+| Plan A:94 | `### 1.2 Navigation health` | §0 Evidence boundary + dated session validation |
+| Plan A:131 | `### 1.3 Commands executed during planning` | §0 Evidence boundary + dated session validation |
+| Plan A:163 | `### 1.4 Authority rule` | §0 Evidence boundary + dated session validation |
+| Plan A:189 | `## 2. What the code already provides` | §1 Current implementation inventory and contradictions |
+| Plan A:191 | `### 2.1 Foundation worth preserving` | §1 Current implementation inventory and contradictions |
+| Plan A:223 | `### 2.2 The current inner loop` | §1 Current implementation inventory and contradictions |
+| Plan A:265 | `### 2.3 Current public product boundary` | §1 Current implementation inventory and contradictions |
+| Plan A:283 | `### 2.4 Current gaps proven by source or artifacts` | §1 Current implementation inventory and contradictions |
+| Plan A:367 | `## 3. Product thesis and non-goals` | §2 Product thesis, units, and non-goals |
+| Plan A:369 | `### 3.1 Product thesis` | §2 Product thesis, units, and non-goals |
+| Plan A:381 | `### 3.2 Definition of a SOTA engineering agent` | §2 Product thesis, units, and non-goals |
+| Plan A:419 | `### 3.3 Non-goals for the backend program` | §2 Product thesis, units, and non-goals |
+| Plan A:438 | `## 4. Competency model: agents as declarative projections` | §3 Competency profiles |
+| Plan A:440 | `### 4.1 Shared competency dimensions` | §3 Competency profiles |
+| Plan A:457 | `### 4.2 Senior Developer profile` | §3 Competency profiles |
+| Plan A:476 | `### 4.3 Staff Engineer profile` | §3 Competency profiles |
+| Plan A:493 | `### 4.4 Principal Architect profile` | §3 Competency profiles |
+| Plan A:510 | `### 4.5 Tech Lead profile` | §3 Competency profiles |
+| Plan A:531 | `## 5. Formal model` | §4 Unified formal model |
+| Plan A:533 | `### 5.1 Partially observable engineering process` | §4 Unified formal model |
+| Plan A:559 | `### 5.2 Semantic task state` | §4 Unified formal model |
+| Plan A:591 | `### 5.3 Progress potential` | §4 Unified formal model |
+| Plan A:616 | `### 5.4 Context allocation` | §4 Unified formal model |
+| Plan A:642 | `### 5.5 Retrieval value of information` | §4 Unified formal model |
+| Plan A:664 | `### 5.6 Blast-radius closure` | §4 Unified formal model |
+| Plan A:684 | `### 5.7 Verification confidence` | §4 Unified formal model |
+| Plan A:702 | `### 5.8 Strategy selection` | §4 Unified formal model |
+| Plan A:721 | `### 5.9 Multi-agent bifurcation rule` | §4 Unified formal model |
+| Plan A:748 | `### 5.10 Campaign reliability` | §4 Unified formal model |
+| Plan A:761 | `### 5.11 Cost per signed pass` | §4 Unified formal model |
+| Plan A:775 | `### 5.12 Long-horizon quality erosion` | §4 Unified formal model |
+| Plan A:794 | `## 6. Target backend architecture` | §5 Target lattice and module placement |
+| Plan A:796 | `### 6.1 Architectural shape` | §5 Target lattice and module placement |
+| Plan A:816 | `### 6.2 Required new domain values` | §5 Target lattice and module placement |
+| Plan A:840 | `### 6.3 Required ports` | §5 Target lattice and module placement |
+| Plan A:857 | `### 6.4 Typed verification receipt` | §5 Target lattice and module placement |
+| Plan A:895 | `### 6.5 Progressive context packet` | §5 Target lattice and module placement |
+| Plan A:921 | `### 6.6 Durable campaign state` | §5 Target lattice and module placement |
+| Plan A:943 | `### 6.7 Content-addressed handoffs` | §5 Target lattice and module placement |
+| Plan A:962 | `### 6.8 Director semantics` | §5 Target lattice and module placement |
+| Plan A:984 | `### 6.9 Single-writer rule` | §5 Target lattice and module placement |
+| Plan A:998 | `## 7. Wave map` | §6 Unified wave map |
+| Plan A:1022 | `## 8. Wave 0 — Truth baseline and benchmark integrity` | §6 Wave 0 |
+| Plan A:1024 | `### 8.1 Objective` | §6 Wave 0 |
+| Plan A:1028 | `### 8.2 Work packages` | §6 Wave 0 |
+| Plan A:1097 | `### 8.3 Likely files` | §6 Wave 0 |
+| Plan A:1109 | `### 8.4 Acceptance predicates` | §6 Wave 0 |
+| Plan A:1120 | `### 8.5 Exit gate` | §6 Wave 0 |
+| Plan A:1126 | `## 9. Wave 1 — Truthful task-aware completion` | §6 Wave 1 |
+| Plan A:1128 | `### 9.1 Objective` | §6 Wave 1 |
+| Plan A:1132 | `### 9.2 Required changes` | §6 Wave 1 |
+| Plan A:1148 | `### 9.3 Task classes` | §6 Wave 1 |
+| Plan A:1165 | `### 9.4 Per-class evidence` | §6 Wave 1 |
+| Plan A:1215 | `### 9.5 Likely files` | §6 Wave 1 |
+| Plan A:1227 | `### 9.6 Falsifiers` | §6 Wave 1 |
+| Plan A:1242 | `### 9.7 Exit gate` | §6 Wave 1 |
+| Plan A:1250 | `## 10. Wave 2 — Durable semantic task state and restart parity` | §6 Wave 2 |
+| Plan A:1252 | `### 10.1 Objective` | §6 Wave 2 |
+| Plan A:1256 | `### 10.2 Extend the existing projection` | §6 Wave 2 |
+| Plan A:1279 | `### 10.3 Resume identity` | §6 Wave 2 |
+| Plan A:1304 | `### 10.4 Restart invariants` | §6 Wave 2 |
+| Plan A:1320 | `### 10.5 Likely files` | §6 Wave 2 |
+| Plan A:1332 | `### 10.6 Falsifiers` | §6 Wave 2 |
+| Plan A:1346 | `### 10.7 Exit gate` | §6 Wave 2 |
+| Plan A:1352 | `## 11. Wave 3 — Progressive context and repository intelligence` | §6 Wave 3 |
+| Plan A:1354 | `### 11.1 Objective` | §6 Wave 3 |
+| Plan A:1358 | `### 11.2 Preserve current context strengths` | §6 Wave 3 |
+| Plan A:1370 | `### 11.3 Add phase-aware retrieval` | §6 Wave 3 |
+| Plan A:1409 | `### 11.4 Repository epoch` | §6 Wave 3 |
+| Plan A:1423 | `### 11.5 Omission ledger` | §6 Wave 3 |
+| Plan A:1438 | `### 11.6 LDA integration` | §6 Wave 3 |
+| Plan A:1456 | `### 11.7 Likely files` | §6 Wave 3 |
+| Plan A:1468 | `### 11.8 Falsifiers` | §6 Wave 3 |
+| Plan A:1483 | `### 11.9 Exit gate` | §6 Wave 3 |
+| Plan A:1489 | `## 12. Wave 4 — Greenfield and brownfield change-surface closure` | §6 Wave 4 |
+| Plan A:1491 | `### 12.1 Objective` | §6 Wave 4 |
+| Plan A:1495 | `### 12.2 Unified change graph` | §6 Wave 4 |
+| Plan A:1517 | `### 12.3 Brownfield workflow` | §6 Wave 4 |
+| Plan A:1534 | `### 12.4 Greenfield workflow` | §6 Wave 4 |
+| Plan A:1550 | `### 12.5 Transaction semantics` | §6 Wave 4 |
+| Plan A:1565 | `### 12.6 Test tamper resistance` | §6 Wave 4 |
+| Plan A:1583 | `### 12.7 Likely files` | §6 Wave 4 |
+| Plan A:1594 | `### 12.8 Exit gate` | §6 Wave 4 |
+| Plan A:1602 | `## 13. Wave 5 — Strong single-agent control` | §6 Wave 5 |
+| Plan A:1604 | `### 13.1 Objective` | §6 Wave 5 |
+| Plan A:1608 | `### 13.2 Why single-agent first` | §6 Wave 5 |
+| Plan A:1622 | `### 13.3 Control policy` | §6 Wave 5 |
+| Plan A:1636 | `### 13.4 Fast, balanced, and max` | §6 Wave 5 |
+| Plan A:1653 | `### 13.5 Qualification ladder` | §6 Wave 5 |
+| Plan A:1680 | `### 13.6 Exit gate` | §6 Wave 5 |
+| Plan A:1686 | `## 14. Wave 6 — Adaptive strategy and metacognition` | §6 Wave 6 |
+| Plan A:1688 | `### 14.1 Objective` | §6 Wave 6 |
+| Plan A:1692 | `### 14.2 Controller input` | §6 Wave 6 |
+| Plan A:1707 | `### 14.3 Allowed directives` | §6 Wave 6 |
+| Plan A:1719 | `### 14.4 Forbidden directives` | §6 Wave 6 |
+| Plan A:1729 | `### 14.5 Failure fingerprint` | §6 Wave 6 |
+| Plan A:1743 | `### 14.6 Experiments` | §6 Wave 6 |
+| Plan A:1755 | `### 14.7 Exit gate` | §6 Wave 6 |
+| Plan A:1761 | `## 15. Wave 7 — Specialist agents and topology treatments` | §6 Wave 7 |
+| Plan A:1763 | `### 15.1 Objective` | §6 Wave 7 |
+| Plan A:1767 | `### 15.2 Candidate roles` | §6 Wave 7 |
+| Plan A:1803 | `### 15.3 Topologies to test` | §6 Wave 7 |
+| Plan A:1817 | `### 15.4 Merge policies` | §6 Wave 7 |
+| Plan A:1829 | `### 15.5 Independence` | §6 Wave 7 |
+| Plan A:1840 | `### 15.6 Exit gate` | §6 Wave 7 |
+| Plan A:1846 | `## 16. Wave 8 — Durable outer-loop campaign director` | §6 Wave 8 |
+| Plan A:1848 | `### 16.1 Objective` | §6 Wave 8 |
+| Plan A:1852 | `### 16.2 Reuse before invention` | §6 Wave 8 |
+| Plan A:1866 | `### 16.3 Campaign plan` | §6 Wave 8 |
+| Plan A:1883 | `### 16.4 Rolling horizon` | §6 Wave 8 |
+| Plan A:1903 | `### 16.5 Director review boundary` | §6 Wave 8 |
+| Plan A:1916 | `### 16.6 Campaign dead ends` | §6 Wave 8 |
+| Plan A:1928 | `### 16.7 Likely module placement` | §6 Wave 8 |
+| Plan A:1943 | `### 16.8 Exit gate` | §6 Wave 8 |
+| Plan A:1949 | `## 17. Wave 9 — Governed memory, skills, and learning` | §6 Wave 9 |
+| Plan A:1951 | `### 17.1 Objective` | §6 Wave 9 |
+| Plan A:1955 | `### 17.2 Memory classes` | §6 Wave 9 |
+| Plan A:1966 | `### 17.3 Authorization-before-retrieval` | §6 Wave 9 |
+| Plan A:1980 | `### 17.4 Skill object` | §6 Wave 9 |
+| Plan A:1998 | `### 17.5 Skill utility` | §6 Wave 9 |
+| Plan A:2017 | `### 17.6 Counterfactual replay` | §6 Wave 9 |
+| Plan A:2025 | `### 17.7 Exit gate` | §6 Wave 9 |
+| Plan A:2033 | `## 18. Wave 10 — External benchmark and release program` | §6 Wave 10 |
+| Plan A:2035 | `### 18.1 Objective` | §6 Wave 10 |
+| Plan A:2039 | `### 18.2 Target calibration` | §6 Wave 10 |
+| Plan A:2062 | `### 18.3 Benchmark portfolio` | §6 Wave 10 |
+| Plan A:2076 | `### 18.4 Metrics` | §6 Wave 10 |
+| Plan A:2099 | `### 18.5 Statistical protocol` | §6 Wave 10 |
+| Plan A:2139 | `### 18.6 Sequential testing` | §6 Wave 10 |
+| Plan A:2150 | `### 18.7 Anti-overfitting controls` | §6 Wave 10 |
+| Plan A:2162 | `### 18.8 Release gate` | §6 Wave 10 |
+| Plan A:2178 | `## 19. Dependency graph and sprint sequencing` | §6 dependency graph, sprint cadence, and WIP |
+| Plan A:2180 | `### 19.1 Critical DAG` | §6 dependency graph, sprint cadence, and WIP |
+| Plan A:2200 | `### 19.2 Proposed sprint cadence` | §6 dependency graph, sprint cadence, and WIP |
+| Plan A:2273 | `### 19.3 WIP policy` | §6 dependency graph, sprint cadence, and WIP |
+| Plan A:2285 | `## 20. File ownership and expected change surface` | §8 file-by-file routing immediately before tickets |
+| Plan A:2287 | `### 20.1 Domain` | §8 file-by-file routing immediately before tickets |
+| Plan A:2303 | `### 20.2 Ports` | §8 file-by-file routing immediately before tickets |
+| Plan A:2316 | `### 20.3 Kernel` | §8 file-by-file routing immediately before tickets |
+| Plan A:2328 | `### 20.4 Agency` | §8 file-by-file routing immediately before tickets |
+| Plan A:2344 | `### 20.5 Runtime` | §8 file-by-file routing immediately before tickets |
+| Plan A:2363 | `### 20.6 Adapters` | §8 file-by-file routing immediately before tickets |
+| Plan A:2378 | `### 20.7 Apps and packs` | §8 file-by-file routing immediately before tickets |
+| Plan A:2388 | `### 20.8 Documentation synchronization after authorization` | §8 file-by-file routing immediately before tickets |
+| Plan A:2408 | `## 21. Agent prompt and policy architecture` | §6 prompt and policy architecture |
+| Plan A:2410 | `### 21.1 Stable system core` | §6 prompt and policy architecture |
+| Plan A:2423 | `### 21.2 Task policy fragments` | §6 prompt and policy architecture |
+| Plan A:2436 | `### 21.3 Dynamic state` | §6 prompt and policy architecture |
+| Plan A:2442 | `### 21.4 Tool ergonomics` | §6 prompt and policy architecture |
+| Plan A:2456 | `### 21.5 Prompt evaluation` | §6 prompt and policy architecture |
+| Plan A:2471 | `## 22. Model strategy` | §6 model strategy |
+| Plan A:2473 | `### 22.1 Model-neutral substrate` | §6 model strategy |
+| Plan A:2479 | `### 22.2 Routing tiers` | §6 model strategy |
+| Plan A:2488 | `### 22.3 Escalation` | §6 model strategy |
+| Plan A:2499 | `### 22.4 Provider failure` | §6 model strategy |
+| Plan A:2510 | `### 22.5 Routing experiments` | §6 model strategy |
+| Plan A:2524 | `## 23. Security, control, and operator semantics` | §9 security and operator semantics |
+| Plan A:2526 | `### 23.1 Least authority` | §9 security and operator semantics |
+| Plan A:2536 | `### 23.2 Budget attenuation` | §9 security and operator semantics |
+| Plan A:2552 | `### 23.3 Human control points` | §9 security and operator semantics |
+| Plan A:2566 | `### 23.4 TUI-ready backend events` | §9 security and operator semantics |
+| Plan A:2588 | `## 24. Verification matrix` | §7 verification matrix |
+| Plan A:2590 | `### 24.1 Unit level` | §7 verification matrix |
+| Plan A:2601 | `### 24.2 Contract level` | §7 verification matrix |
+| Plan A:2611 | `### 24.3 Integration level` | §7 verification matrix |
+| Plan A:2621 | `### 24.4 End-to-end level` | §7 verification matrix |
+| Plan A:2634 | `### 24.5 Adversarial level` | §7 verification matrix |
+| Plan A:2655 | `## 25. Benchmark task taxonomy` | §7 benchmark taxonomy |
+| Plan A:2657 | `### 25.1 Scope axis` | §7 benchmark taxonomy |
+| Plan A:2667 | `### 25.2 Horizon axis` | §7 benchmark taxonomy |
+| Plan A:2678 | `### 25.3 Work-type axis` | §7 benchmark taxonomy |
+| Plan A:2693 | `### 25.4 Environment axis` | §7 benchmark taxonomy |
+| Plan A:2702 | `### 25.5 Failure attribution axis` | §7 benchmark taxonomy |
+| Plan A:2718 | `## 26. Research and explanation agents` | §6 research and explanation workflows |
+| Plan A:2720 | `### 26.1 Shared substrate` | §6 research and explanation workflows |
+| Plan A:2733 | `### 26.2 Research workflow` | §6 research and explanation workflows |
+| Plan A:2747 | `### 26.3 Explanation workflow` | §6 research and explanation workflows |
+| Plan A:2759 | `### 26.4 Research verification` | §6 research and explanation workflows |
+| Plan A:2773 | `## 27. Risks and mitigations` | §9 risks |
+| Plan A:2775 | `### R-01: architecture sprawl` | §9 risks |
+| Plan A:2781 | `### R-02: `HarnessSession` becomes a god object` | §9 risks |
+| Plan A:2787 | `### R-03: benchmark gaming` | §9 risks |
+| Plan A:2793 | `### R-04: false-positive completion` | §9 risks |
+| Plan A:2799 | `### R-05: multi-agent cost explosion` | §9 risks |
+| Plan A:2805 | `### R-06: context compression loss` | §9 risks |
+| Plan A:2811 | `### R-07: stale repository intelligence` | §9 risks |
+| Plan A:2817 | `### R-08: self-reinforcing memory` | §9 risks |
+| Plan A:2823 | `### R-09: resume divergence` | §9 risks |
+| Plan A:2829 | `### R-10: evaluator coupling` | §9 risks |
+| Plan A:2835 | `### R-11: overclaiming professional equivalence` | §9 risks |
+| Plan A:2841 | `### R-12: documentation drift` | §9 risks |
+| Plan A:2849 | `## 28. Stop, simplify, and rollback rules` | §9 stop, simplify, and rollback rules |
+| Plan A:2878 | `## 29. Definition of done by capability level` | §9 definition of done |
+| Plan A:2880 | `### 29.1 Senior Developer done` | §9 definition of done |
+| Plan A:2889 | `### 29.2 Staff Engineer done` | §9 definition of done |
+| Plan A:2898 | `### 29.3 Principal Architect done` | §9 definition of done |
+| Plan A:2907 | `### 29.4 Tech Lead done` | §9 definition of done |
+| Plan A:2918 | `## 30. Go/no-go checklist for each sprint` | §9 go/no-go checklist |
+| Plan A:2920 | `### Before implementation` | §9 go/no-go checklist |
+| Plan A:2933 | `### During implementation` | §9 go/no-go checklist |
+| Plan A:2946 | `### Before review` | §9 go/no-go checklist |
+| Plan A:2959 | `### Before completion claim` | §9 go/no-go checklist |
+| Plan A:2974 | `## 31. Concrete first 30 engineering tickets` | Explicitly rejected: Plan A’s abstract 30-ticket list is superseded by full Tickets 01–35 in §8 |
+| Plan A:3038 | `## 32. Decision register` | §9 decision register |
+| Plan A:3040 | `### D-01` | §9 decision register |
+| Plan A:3046 | `### D-02` | §9 decision register |
+| Plan A:3052 | `### D-03` | §9 decision register |
+| Plan A:3058 | `### D-04` | §9 decision register |
+| Plan A:3064 | `### D-05` | §9 decision register |
+| Plan A:3070 | `### D-06` | §9 decision register |
+| Plan A:3076 | `### D-07` | §9 decision register |
+| Plan A:3082 | `### D-08` | §9 decision register |
+| Plan A:3088 | `### D-09` | §9 decision register |
+| Plan A:3094 | `### D-10` | §9 decision register |
+| Plan A:3102 | `## 33. Open research questions` | §9 open research questions |
+| Plan A:3104 | `### Q-01` | §9 open research questions |
+| Plan A:3108 | `### Q-02` | §9 open research questions |
+| Plan A:3112 | `### Q-03` | §9 open research questions |
+| Plan A:3116 | `### Q-04` | §9 open research questions |
+| Plan A:3120 | `### Q-05` | §9 open research questions |
+| Plan A:3124 | `### Q-06` | §9 open research questions |
+| Plan A:3128 | `### Q-07` | §9 open research questions |
+| Plan A:3132 | `### Q-08` | §9 open research questions |
+| Plan A:3136 | `### Q-09` | §9 open research questions |
+| Plan A:3140 | `### Q-10` | §9 open research questions |
+| Plan A:3144 | `### Q-11` | §9 open research questions |
+| Plan A:3148 | `### Q-12` | §9 open research questions |
+| Plan A:3152 | `### Q-13` | §9 open research questions |
+| Plan A:3156 | `### Q-14` | §9 open research questions |
+| Plan A:3160 | `### Q-15` | §9 open research questions |
+| Plan A:3166 | `## 34. Internal references` | §10 references |
+| Plan A:3170 | `### Constitutional and normative` | §10 references |
+| Plan A:3177 | `### Current architecture and execution` | §10 references |
+| Plan A:3191 | `### Draft and research inputs` | §10 references |
+| Plan A:3206 | `### Direct source anchors` | §10 references |
+| Plan A:3222 | `### Local empirical artifacts` | §10 references |
+| Plan A:3232 | `## 35. External references` | §10 references |
+| Plan A:3234 | `### Benchmarks and measurement` | §10 references |
+| Plan A:3248 | `### Agent and harness architecture` | §10 references |
+| Plan A:3256 | `### Context, memory, and learning` | §10 references |
+| Plan A:3264 | `### Statistical and protocol standards` | §10 references |
+| Plan A:3271 | `## 36. Final recommendation` | §9 final recommendation |
+
+#### Plan B heading disposition
+
+| Source anchor | Source heading | Unified destination or rejection |
+|---|---|---|
+| Plan B:29 | `## Epistemic legend (applies to every later claim)` | §0 epistemic legend |
+| Plan B:43 | `## Table of contents` | Unified table of contents |
+| Plan B:69 | `## 1. Executive decision` | §0 executive decision |
+| Plan B:118 | `## 2. Evidence boundary and snapshot` | §0 evidence boundary + §10 dated session validation |
+| Plan B:120 | `### 2.1 Identity (FACT)` | §0 evidence boundary + §10 dated session validation |
+| Plan B:133 | `### 2.2 Navigation health (FACT, degraded mode)` | §0 evidence boundary + §10 dated session validation |
+| Plan B:151 | `### 2.3 Commands run this session (FACT)` | §0 evidence boundary + §10 dated session validation |
+| Plan B:182 | `### 2.4 Tests run this session (FACT)` | §0 evidence boundary + §10 dated session validation |
+| Plan B:191 | `### 2.5 Benchmark artifacts inspected (FACT)` | §0 evidence boundary + §10 dated session validation |
+| Plan B:205 | `### 2.6 Paid cost this session (FACT)` | §0 evidence boundary + §10 dated session validation |
+| Plan B:218 | `### 2.7 Pre-existing dirty worktree (FACT)` | §0 evidence boundary + §10 dated session validation |
+| Plan B:222 | `### 2.8 How to read the rest of this document` | §0 evidence boundary + §10 dated session validation |
+| Plan B:228 | `## 3. Current implementation inventory` | §1 inventory tables |
+| Plan B:232 | `### 3.1 Substrate and control plane` | §1 inventory tables |
+| Plan B:242 | `### 3.2 Agency inner loop` | §1 inventory tables |
+| Plan B:254 | `### 3.3 Runtime session, state, resume` | §1 inventory tables |
+| Plan B:265 | `### 3.4 Packs, verification, change surface` | §1 inventory tables |
+| Plan B:276 | `### 3.5 Parallel engines, topology, memory` | §1 inventory tables |
+| Plan B:290 | `### 3.6 Models` | §1 inventory tables |
+| Plan B:298 | `### 3.7 What VISION already forbids (FACT)` | §1 inventory tables |
+| Plan B:304 | `## 4. Proven gaps` | §1 contradiction/gap analysis |
+| Plan B:308 | `### 4.1 False-positive completion on the default path` | §1 contradiction/gap analysis |
+| Plan B:322 | `### 4.2 Invented test counts (Forge)` | §1 contradiction/gap analysis |
+| Plan B:334 | `### 4.3 Heuristic verification classification` | §1 contradiction/gap analysis |
+| Plan B:342 | `### 4.4 Incomplete restart identity` | §1 contradiction/gap analysis |
+| Plan B:352 | `### 4.5 Stale repository intelligence` | §1 contradiction/gap analysis |
+| Plan B:362 | `### 4.6 Change-surface incompleteness` | §1 contradiction/gap analysis |
+| Plan B:370 | `### 4.7 Insufficient long-run evidence` | §1 contradiction/gap analysis |
+| Plan B:378 | `### 4.8 Benchmark membership errors` | §1 contradiction/gap analysis |
+| Plan B:386 | `### 4.9 Multi-agent mechanisms without measured lift` | §1 contradiction/gap analysis |
+| Plan B:394 | `### 4.10 Memory without held-out promotion on the product path` | §1 contradiction/gap analysis |
+| Plan B:402 | `### 4.11 Orchestration proposals not implemented` | §1 contradiction/gap analysis |
+| Plan B:406 | `### 4.12 FEATURE_SPEC vs source (CONTRADICTION table)` | §1 contradiction/gap analysis |
+| Plan B:423 | `### 4.13 Draft reconciliation (do not copy blindly)` | §1 contradiction/gap analysis |
+| Plan B:438 | `## 5. Formal agent model` | §4 unified formal model |
+| Plan B:442 | `### 5.1 Constrained POMDP` | §4 unified formal model |
+| Plan B:463 | `### 5.2 Event-sourced semantic task state` | §4 unified formal model |
+| Plan B:482 | `### 5.3 Progress potential` | §4 unified formal model |
+| Plan B:494 | `### 5.4 Context optimization` | §4 unified formal model |
+| Plan B:508 | `### 5.5 Retrieval value of information` | §4 unified formal model |
+| Plan B:524 | `### 5.6 Blast-radius closure` | §4 unified formal model |
+| Plan B:540 | `### 5.7 Verification confidence lattice` | §4 unified formal model |
+| Plan B:557 | `### 5.8 Strategy selection` | §4 unified formal model |
+| Plan B:567 | `### 5.9 Multi-agent bifurcation` | §4 unified formal model |
+| Plan B:583 | `### 5.10 Campaign reliability` | §4 unified formal model |
+| Plan B:599 | `### 5.11 Cost per signed pass` | §4 unified formal model |
+| Plan B:607 | `### 5.12 Iterative architectural erosion` | §4 unified formal model |
+| Plan B:617 | `### 5.13 Budget attenuation` | §4 unified formal model |
+| Plan B:627 | `### 5.14 Skill promotion lift` | §4 unified formal model |
+| Plan B:639 | `## 6. Target backend architecture` | §5 target lattice and placement |
+| Plan B:651 | `### 6.1 Inner loop (canonical)` | §5 target lattice and placement |
+| Plan B:669 | `### 6.2 Outer loop` | §5 target lattice and placement |
+| Plan B:684 | `### 6.3 Campaign projection` | §5 target lattice and placement |
+| Plan B:688 | `### 6.4 Content-addressed handoffs` | §5 target lattice and placement |
+| Plan B:692 | `### 6.5 Director policy` | §5 target lattice and placement |
+| Plan B:696 | `### 6.6 Typed verification` | §5 target lattice and placement |
+| Plan B:705 | `### 6.7 Repository epoch` | §5 target lattice and placement |
+| Plan B:718 | `### 6.8 Progressive context packet` | §5 target lattice and placement |
+| Plan B:731 | `### 6.9 One-writer workspace policy` | §5 target lattice and placement |
+| Plan B:735 | `### 6.10 Exterior evaluation` | §5 target lattice and placement |
+| Plan B:739 | `### 6.11 Operator control` | §5 target lattice and placement |
+| Plan B:743 | `### 6.12 Where FEATURE_SPEC modules belong (corrected)` | §5 target lattice and placement |
+| Plan B:756 | `## 7. Competency profiles` | §3 competency profiles |
+| Plan B:762 | `### 7.1 Senior Developer` | §3 competency profiles |
+| Plan B:775 | `### 7.2 Staff Engineer` | §3 competency profiles |
+| Plan B:788 | `### 7.3 Principal Architect` | §3 competency profiles |
+| Plan B:801 | `### 7.4 Tech Lead` | §3 competency profiles |
+| Plan B:814 | `### 7.5 Mapping to public benches (cautious)` | §3 competency profiles |
+| Plan B:825 | `## 8. Development waves` | §6 unified detailed waves |
+| Plan B:831 | `### Wave 0 — Truth baseline and benchmark integrity` | §6 unified detailed waves |
+| Plan B:845 | `### Wave 1 — Truthful task-aware completion` | §6 unified detailed waves |
+| Plan B:859 | `### Wave 2 — Durable semantic task state and restart parity` | §6 unified detailed waves |
+| Plan B:873 | `### Wave 3 — Progressive context and repository intelligence` | §6 unified detailed waves |
+| Plan B:887 | `### Wave 4 — Greenfield and brownfield change-surface closure` | §6 unified detailed waves |
+| Plan B:901 | `### Wave 5 — Strong single-agent qualification` | §6 unified detailed waves |
+| Plan B:915 | `### Wave 6 — Adaptive strategy and metacognition` | §6 unified detailed waves |
+| Plan B:928 | `### Wave 7 — Specialist agents and topology treatments` | §6 unified detailed waves |
+| Plan B:941 | `### Wave 8 — Durable outer-loop campaign director` | §6 unified detailed waves |
+| Plan B:954 | `### Wave 9 — Governed memory, skills, and learning` | §6 unified detailed waves |
+| Plan B:967 | `### Wave 10 — External benchmark and release qualification` | §6 unified detailed waves |
+| Plan B:982 | `## 9. Sprint sequence` | §6 sprint sequence |
+| Plan B:1008 | `## 10. Greenfield workflow` | §6 greenfield workflow |
+| Plan B:1046 | `## 11. Brownfield workflow` | §6 brownfield workflow |
+| Plan B:1080 | `## 12. Research and explanation workflows` | §6 research/explanation workflows |
+| Plan B:1100 | `## 13. Model routing` | §6 model routing |
+| Plan B:1127 | `## 14. Multi-agent policy` | §6 Wave 7 treatment policy |
+| Plan B:1148 | `## 15. Memory and skills` | §6 Wave 9 governed memory/skills |
+| Plan B:1166 | `## 16. Benchmark methodology` | §7 evaluation protocol |
+| Plan B:1168 | `### 16.1 Task taxonomy (internal)` | §7 evaluation protocol |
+| Plan B:1180 | `### 16.2 Official corpora (external; do not treat as interchangeable)` | §7 evaluation protocol |
+| Plan B:1194 | `### 16.3 Statistics (mandatory)` | §7 evaluation protocol |
+| Plan B:1207 | `### 16.4 What 60–90 means under this methodology` | §7 evaluation protocol |
+| Plan B:1218 | `### 16.5 Why this session did not buy a data point` | §7 evaluation protocol |
+| Plan B:1224 | `## 17. File-by-file routing` | §8 file routing immediately before tickets |
+| Plan B:1254 | `## 18. Initial engineering tickets` | §8 full Tickets 01–35 |
+| Plan B:1258 | `### Ticket 01 — Enumerator membership digest` | §8 full Tickets 01–35 |
+| Plan B:1264 | `### Ticket 02 — Subject SHA on every empirical JSON` | §8 full Tickets 01–35 |
+| Plan B:1269 | `### Ticket 03 — Dry-run empirical field ban` | §8 full Tickets 01–35 |
+| Plan B:1274 | `### Ticket 04 — Remove default admission exemption` | §8 full Tickets 01–35 |
+| Plan B:1280 | `### Ticket 05 — Delete unused `ADMISSION_GATED_HARNESSES` or make it the only source` | §8 full Tickets 01–35 |
+| Plan B:1285 | `### Ticket 06 — Remove Forge `test_count = 1`` | §8 full Tickets 01–35 |
+| Plan B:1290 | `### Ticket 07 — Typed verification command subject` | §8 full Tickets 01–35 |
+| Plan B:1295 | `### Ticket 08 — Parse pytest `N passed` without inventing counts` | §8 full Tickets 01–35 |
+| Plan B:1300 | `### Ticket 09 — Domain SemanticTaskState` | §8 full Tickets 01–35 |
+| Plan B:1305 | `### Ticket 10 — Runtime fold of SemanticTaskState` | §8 full Tickets 01–35 |
+| Plan B:1310 | `### Ticket 11 — Preserve episode_id on resume` | §8 full Tickets 01–35 |
+| Plan B:1315 | `### Ticket 12 — Stop dumping resume_state into L3` | §8 full Tickets 01–35 |
+| Plan B:1320 | `### Ticket 13 — Populate ContextPacket resume identity` | §8 full Tickets 01–35 |
+| Plan B:1325 | `### Ticket 14 — WorkspaceEpoch` | §8 full Tickets 01–35 |
+| Plan B:1330 | `### Ticket 15 — Progressive L4/L5 strategy` | §8 full Tickets 01–35 |
+| Plan B:1335 | `### Ticket 16 — Index refresh after patch.apply` | §8 full Tickets 01–35 |
+| Plan B:1340 | `### Ticket 17 — Atomic multi-file transaction manager` | §8 full Tickets 01–35 |
+| Plan B:1345 | `### Ticket 18 — TestTamperShield with IndexPort enumeration` | §8 full Tickets 01–35 |
+| Plan B:1350 | `### Ticket 19 — Greenfield oracle vacuity` | §8 full Tickets 01–35 |
+| Plan B:1355 | `### Ticket 20 — Brownfield implicated-set fail-closed` | §8 full Tickets 01–35 |
+| Plan B:1360 | `### Ticket 21 — Dialect typed failure classes` | §8 full Tickets 01–35 |
+| Plan B:1365 | `### Ticket 22 — Fail-closed model resolve` | §8 full Tickets 01–35 |
+| Plan B:1370 | `### Ticket 23 — Quarantine Forge/Chimera from Coding Max reports` | §8 full Tickets 01–35 |
+| Plan B:1375 | `### Ticket 24 — Patch identity on results` | §8 full Tickets 01–35 |
+| Plan B:1380 | `### Ticket 25 — Missingness taxonomy in runners` | §8 full Tickets 01–35 |
+| Plan B:1385 | `### Ticket 26 — Frozen Wave 5 preregistration` | §8 full Tickets 01–35 |
+| Plan B:1390 | `### Ticket 27 — Single-agent canary execution (eval lane)` | §8 full Tickets 01–35 |
+| Plan B:1395 | `### Ticket 28 — Meta-controller paired study harness` | §8 full Tickets 01–35 |
+| Plan B:1400 | `### Ticket 29 — Treatment T-TI ablation` | §8 full Tickets 01–35 |
+| Plan B:1405 | `### Ticket 30 — Isolated patch EXTERIOR_SELECT` | §8 full Tickets 01–35 |
+| Plan B:1410 | `### Ticket 31 — Campaign director fixture` | §8 full Tickets 01–35 |
+| Plan B:1415 | `### Ticket 32 — Memory grant on product path` | §8 full Tickets 01–35 |
+| Plan B:1420 | `### Ticket 33 — Official DeepSWE wrapper (no score fishing)` | §8 full Tickets 01–35 |
+| Plan B:1425 | `### Ticket 34 — WorkflowScheduler lease honesty` | §8 full Tickets 01–35 |
+| Plan B:1430 | `### Ticket 35 — TCB and boundary freeze` | §8 full Tickets 01–35 |
+| Plan B:1439 | `## 19. Risks` | §9 risks |
+| Plan B:1466 | `## 20. References` | §10 references |
+| Plan B:1468 | `### 20.1 Repository-relative` | §10 references |
+| Plan B:1514 | `### 20.2 External` | §10 references |
+| Plan B:1538 | `## 21. Session validation appendix` | §10 dated session validation |
+| Plan B:1540 | `### 21.1 Navigation limitations (repeat)` | §10 dated session validation |
+| Plan B:1549 | `### 21.2 Tests actually executed` | §10 dated session validation |
+| Plan B:1553 | `### 21.3 Paid spend` | §10 dated session validation |
+| Plan B:1557 | `### 21.4 Scope confirmation (to be re-checked after write)` | §10 dated session validation |
+| Plan B:1567 | `## Appendix A — Algorithms (normative for implementers, still PROPOSAL)` | §10 implementer algorithms |
+| Plan B:1569 | `### A.1 Completion admission (target)` | §10 implementer algorithms |
+| Plan B:1594 | `### A.2 Turn compile (target)` | §10 implementer algorithms |
+| Plan B:1608 | `### A.3 2PC write (target)` | §10 implementer algorithms |
+| Plan B:1624 | `### A.4 Campaign step (target)` | §10 implementer algorithms |
+| Plan B:1640 | `## Appendix B — Dependency graph (waves)` | §6 dependency graph and §10 dependency appendix |
+| Plan B:1660 | `## Appendix C — Why Plan B is not Plan A copied` | This heading-coverage appendix; provenance retained without A-vs-B competition |
+| Plan B:1666 | `## Appendix D — Operator one-pager` | §10 operator one-pager |
+
+### References
 
 The following sources informed this plan but do not all carry equal authority.
 
@@ -4277,9 +4794,6 @@ The following sources informed this plan but do not all carry equal authority.
 - [`benchmarks/independent_v091/artifacts/report.json`](../benchmarks/independent_v091/artifacts/report.json)
 - [`benchmarks/sota_spend_ledger.json`](../benchmarks/sota_spend_ledger.json)
 
----
-
----
 
 ### Benchmarks and measurement
 
@@ -4316,7 +4830,6 @@ The following sources informed this plan but do not all carry equal authority.
 - RFC 8785, [JSON Canonicalization Scheme](https://www.rfc-editor.org/rfc/rfc8785).
 - NIST, [Engineering Statistics Handbook](https://www.itl.nist.gov/div898/handbook/).
 
----
 
 ### Final merge acceptance checklist
 
@@ -4325,3 +4838,9 @@ The following sources informed this plan but do not all carry equal authority.
 - The document contains one voice, one substrate, common schemas, and switchable treatments.
 - No stale command logs, dirty-tree snapshots, exact line-number claims, unsupported costs/scores, or A-vs-B bake-off remains as authority.
 - Frontmatter remains non-canonical, PROPOSED, and explicitly authorizes nothing.
+- The Plan A coverage table contains 246 heading rows and the Plan B table contains 147 heading rows, matching the `##`/`###` inventories read during this rewrite.
+- Tickets 01–35 each contain exactly one owning-wave link, purpose, files/symbols field, requires field, contract/behavior field, falsifier, done-when predicate, and rollback/disable path.
+- Wave 0 through Wave 10 occur once each as the only wave model; each retains the detailed work packages and an operational card.
+- The file remains within the hard 3,200–5,400-line window and no forbidden file was intentionally edited.
+
+*End of unified plan. Non-authoritative. Source and tests win.*

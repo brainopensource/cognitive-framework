@@ -36,6 +36,37 @@ from .workspace import get_workspace_path
 __all__ = ["RuntimeDependencies", "RuntimeBootstrap"]
 
 
+def _resolve_model_adapter(model: Any, profile_id: str) -> Any:
+    """Turn a caller `model` into a `ModelPort`.
+
+    Product clients send a catalog id such as `openrouter/free` on the
+    StartRun wire. That is a string, not an adapter. Using it as a port
+    makes `propose` explode (`str` has no such method) and the TUI looks
+    like it did nothing. Offline `local`/`ci` still get FakeModel when
+    no model is named.
+    """
+    import os
+
+    from .model_selection import MODEL_PORTS, select_model
+
+    if model is not None and not isinstance(model, str):
+        return model
+
+    name = str(model).strip() if isinstance(model, str) else ""
+    if not name:
+        model_port = os.environ.get("VANGUARD_MODEL_PORT")
+        if model_port:
+            return select_model(model_port).model
+        if profile_id in {"local", "ci"}:
+            return select_model("fake").model
+        return select_model("openrouter").model
+
+    lowered = name.lower()
+    if lowered in MODEL_PORTS:
+        return select_model(lowered).model
+    return select_model("openrouter", model_name=name).model
+
+
 @dataclass(frozen=True)
 class RuntimeDependencies:
     """Every concrete adapter one run needs, resolved once, outside the loop.
@@ -122,18 +153,7 @@ class RuntimeBootstrap:
                         f"hermetic containment qualification failed: {qualified.error.kind}: "
                         f"{qualified.error.message}")
 
-        selected_model = model
-        if selected_model is None:
-            import os
-            from .model_selection import select_model
-            model_port = os.environ.get("VANGUARD_MODEL_PORT")
-            if model_port:
-                selected_model = select_model(model_port).model
-            elif profile.requested.id in {"local", "ci"}:
-                selected_model = select_model("fake").model
-            else:
-                selected_model = select_model("openrouter").model
-
+        selected_model = _resolve_model_adapter(model, profile.requested.id)
         if selected_model is None:
             raise RuntimeError(f"no model adapter could be selected or resolved for profile {profile_id!r}")
 

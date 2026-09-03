@@ -13,6 +13,7 @@ import stat
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Sequence
 import re
 
 from ...ports.event_store import Result
@@ -23,6 +24,7 @@ __all__ = [
     "EnvLoadResult",
     "ProtectedEnvError",
     "inject_into_environ",
+    "ensure_openrouter_key_loaded",
     "load_api_key",
     "load_protected_env",
 ]
@@ -60,6 +62,30 @@ def _is_tracked(path: Path) -> bool:
 def inject_into_environ(secret: str) -> dict[str, str]:
     """Return a minimal environ fragment. Does not mutate ``os.environ``."""
     return {ALLOWED_KEY: secret}
+
+
+def ensure_openrouter_key_loaded(search_roots: Sequence[str | os.PathLike[str]]) -> str:
+    """Product-edge dotenv: put ``OPENROUTER_API_KEY`` on ``os.environ``.
+
+    Returns ``"environ"`` if already set, ``"dotenv"`` if loaded from a
+    protected ``.env``, or ``"missing"``. Never logs or returns the secret.
+    Runtime selection must not call this; tests stay hermetic unless a
+    process entrypoint (standalone daemon) opts in.
+    """
+    existing = os.environ.get(ALLOWED_KEY, "").strip()
+    if existing:
+        return "environ"
+    seen: set[Path] = set()
+    for root in search_roots:
+        resolved = Path(root).resolve()
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        result = load_api_key(resolved)
+        if result.ok and result.value:
+            os.environ[ALLOWED_KEY] = result.value
+            return "dotenv"
+    return "missing"
 
 
 def load_api_key(root: str | os.PathLike[str]) -> Result[str]:

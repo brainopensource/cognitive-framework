@@ -118,6 +118,21 @@ class StandaloneRuntimeDaemon:
         if not self._acquire_lock():
             return 1
 
+        from vanguard.packages.adapters.models.env_loader import ensure_openrouter_key_loaded
+
+        key_source = ensure_openrouter_key_loaded(
+            (
+                os.environ.get("AETHER_HOME") or "",
+                os.environ.get("VANGUARD_ROOT") or "",
+                os.environ.get("AETHER_REPO_ROOT") or "",
+                _lib_root,
+            )
+        )
+        if key_source == "missing":
+            self.log("OPENROUTER_API_KEY is not set; live OpenRouter runs will fail closed")
+        else:
+            self.log("OPENROUTER_API_KEY is present for live model calls")
+
         # Clean existing dead socket file if present
         if self.socket_path.exists():
             try:

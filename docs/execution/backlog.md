@@ -166,79 +166,30 @@ composition/lifecycle authority; infrastructure stays behind generic ports.
 | **CMX-06** | Conditional review and mediated specialist roles | manifests/topology/child runtime | `BLOCKED` (on CMX-07) | CMX-05 and accepted baseline | Reviewer/localizer/test-investigator roles remain disabled until one-role-at-a-time held-out ablations beat the qualified single-worker control. |
 | **CMX-07** | Repository-scale qualification | benchmark program | `BLOCKED` (on REL-01R, CMX-09..11) | CMX-04, CMX-05 | Re-freeze the exact multi-class subject only after canonical completion, long-session resume and progressive-context gates pass. |
 | **CMX-08** | First-party reference-agent portfolio | apps + independent packs/manifests | `TECHNICAL SLICE DONE` | M-10 and stable public composition contract | Coding Max plus two non-coding supported agents install, run, resume, and emit attributable evidence through the same public framework contract |
-| **CMX-09** | Canonical Harness Convergence | runtime, code pack, manifests, thin app | `IN_PROGRESS` | W-092-F1 | Fold accepted later prompt/tool/recovery mechanisms into public presets; use one capability-derived admission/policy binding; keep Forge/Chimera engines off the supported product path. |
+| **CMX-09** | Canonical Harness Convergence | runtime, code pack, manifests, thin app | `IN_PROGRESS` (Active in [`tasks.md`](tasks.md)) | W-092-F1 | Fold accepted later prompt/tool/recovery mechanisms into public presets; use one capability-derived admission/policy binding; exact technical delta governed by [`FEATURE_SPEC.md`](FEATURE_SPEC.md). |
 | **CMX-10A** | Truthful Task-Aware Completion | runtime + code-pack completion policy | `APPROVED` | CMX-09 | Parse real verification counts and fail closed on zero, stale, partial, incomplete or task-inapplicable evidence across bugfix, feature, migration, greenfield and read-only tasks. |
 | **CMX-10B** | Durable Long-Session Continuation | runtime/session/task projection | `APPROVED` | CMX-10A | Persist and restore exact task/composition/policy/budget/phase/next-action identity; prove 40+ turns and repeated fresh-process restarts without duplicate effects. |
 | **CMX-11** | Progressive Repository Context & Change Closure | agency context, `IndexPort`, adapters, code pack | `APPROVED` | CMX-09, CMX-10B | Put `ContextPacket` on the product path, reserve recovery/verification context, refresh by repository epoch, expose omissions, and prove multi-file/affected-test closure with deterministic fallback. |
 
-### 1-Forge and Chimera disposition
+### 2.10 Octopus Meta-Controller & Swarm Topology (VISION.md §12, §16; M-OCT Horizon)
 
-`ForgeEngine`, `ChimeraEngine`, their compilers and patchers are implemented
-experimental mechanisms. They are not a second supported runtime and are not a
-new active product family. The hard reports carrying Forge/Chimera manifest
-names execute those manifests through `ApplicationService`; they do not execute
-the separate engines. CMX-09 may port useful behavior into the canonical
-runtime, after which unused parallel loops should be retired or kept explicitly
-experimental. ToolScript, forks, mutation and self-modification remain deferred.
+The Octopus / Conductor capability family represents the post-1.0 higher-order orchestration layer for long-horizon multi-day campaigns. It is declared as pure data topologies and content-addressed message exchanges; it does not replace the kernel's S0–S12 execution contracts. Detailed pseudocode is deferred to its dedicated implementation milestone.
 
-#### Preset contract
-
-Presets change policy and ceilings, not runtime identity or authority. Numeric
-ceilings are calibrated later; their behavioral meanings are locked now.
-
-| Preset | Required behavior | Excluded by default |
-|---|---|---|
-| `fast` | One primary worker; cheap deterministic discovery; direct inspect/edit/targeted-verify loop; escalate while preserving discoveries and failed attempts | LLM planner, specialist children, branch search, full repository indexing |
-| `balanced` | Explicit plan/TODO, progressive context, dependency/test mapping, targeted then affected verification, durable resume, conditional reviewer for declared risk | Swarm/concurrency, mutation, branch search, self-modification |
-| `max` | All empirically accepted balanced mechanisms with larger bounded context/turn/model ceilings, broad verification, and optional mediated specialist roles when their gate is accepted | Unbounded compute, automatic authority expansion, mandatory swarm/SBFL/mutation |
-
-Escalation is monotonic in compute but never in capability. The
-`fast -> balanced -> max` path may spend a larger pre-authorized budget and add policy components, but it
-cannot widen filesystem, network, command, evaluator, or child authority.
-
-#### Task-specific completion policy
-
-| Task class | Minimum completion evidence |
-|---|---|
-| Existing bug or failing test | Reproducer fails on the baseline when feasible, passes on the postimage, and affected regression checks pass |
-| Multi-file feature/refactor/migration | Every implicated interface is inspected; change-surface closure is recorded; targeted and affected checks pass; migration compatibility is tested when applicable |
-| Greenfield | Scaffold baseline is recorded; build/syntax succeeds; at least one executable smoke or contract test created for the requested behavior passes on the postimage |
-| Repository without tests | The pack declares an explicit acceptance command or creates the smallest executable harness; successful syntax/build alone is insufficient for behavioral completion |
-| Analysis/documentation/read-only | A read-only preset applies an explicit requirements checklist; no fabricated patch or test count is required |
-
-Manual review may supplement these policies but cannot replace an applicable
-automated check or an exterior evaluator verdict.
-
-#### Explicitly deferred experiments
-
-The following are not Coding Max prerequisites: swarm concurrency, beam/branch
-search, ToolScript, SBFL, AST mutation testing, speculative auto-rollback,
-trajectory distillation, capsule promotion, and self-modification. Each requires
-a separate preregistered control/treatment experiment. It advances only when it
-improves task success or cost-adjusted success without exceeding the declared
-reliability regression budget.
-
-#### Definition of Ready
-
-A CMX package may enter `active.md` only when its exact source owner, public
-contract, negative falsifier, migration impact, measurement subject, and rollback
-path are named. A report-tree path or code snippet is never a production owner.
-
-#### Definition of Done
-
-A CMX package is done only when current-source unit and integration tests pass,
-the boundary and TCB gates remain green, cold reconstruction is tested when
-state changes, canonical docs and generated knowledge are synchronized, and any
-capability or performance claim is supported by an exact-subject receipt.
+| ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Description & Acceptance Gate |
+|---|---|---|---|---|---|---|
+| **OCT-01** | Content-Addressed Mailbox Protocol | `domain/topology` | Lane A | `PROPOSED` | M-OCT / W-OCT-1 | Sub-agents communicate strictly by publishing and reading content-addressed immutable message digests (`digest_of(payload)`); zero shared memory; deterministic replayability. |
+| **OCT-02** | Declarative CoordinationPlan DAG & Merge Policies | `domain/topology` | Lane A | `PROPOSED` | M-OCT / W-OCT-2 | Topology declared as data DAG with per-mille budget shares ($\sum \text{budget\_share} \le 1000$); formal merge policies: `CONCAT`, `FIRST_COMPLETE`, `SYNTHESISE`, `UNANIMOUS`. |
+| **OCT-03** | Outer-Loop Multi-Day Roadmap Director | `runtime/outer_loop` | Lane A | `PROPOSED` | M-OCT / W-OCT-3 | Persistent director above `EpisodeEngine`; manages multi-episode roadmaps, survives process restarts, and yields verified milestone handoffs without unbounded context saturation. |
+| **OCT-04** | Meta-Conductor & Swarm Goal Algebra | `runtime/outer_loop` | Lane A | `PROPOSED` | M-OCT / W-OCT-4 | Higher-order pilot framework; formal algebraic separation and reconciliation of individual worker objectives under a shared global campaign objective. |
 
 ---
 
-## 3. Prioritized Next-Up Queue (Staging for active.md)
+## 3. Prioritized Next-Up Queue (Staging for tasks.md)
 
 The dependency-ordered queue is:
 
 1. In parallel under lane WIP=1: **`REL-01R`** exact-subject runner/navigation
-   repair and **`CMX-09`** canonical product convergence.
+   repair and **`CMX-09`** canonical product convergence (governed by [`FEATURE_SPEC.md`](FEATURE_SPEC.md)).
 2. **`REL-02R`** successor canary after REL-01R proves the evidence path.
 3. **`CMX-10A`** truthful task-aware completion.
 4. **`CMX-10B`** durable 40+ turn continuation and fresh-process parity.
@@ -249,10 +200,7 @@ The dependency-ordered queue is:
 8. **`FIN-A1` / `W-092-5`** governed-memory experiment and independent M-8
    disposition; only an accepted positive M-8 result can authorize M-9.
 9. **`CMX-08`** portfolio qualification after M-10 and a stable public contract.
-
-`TLS-03`, `TLS-04`, `TLS-05`, mutation, branch search and swarm work remain
-deferred until CMX-07 identifies a measured bottleneck. `DOC-04` remains
-approved but is not on the critical backend path.
+10. **`OCT-01`–`OCT-04`** Octopus outer-loop orchestration after M-10 release.
 
 ---
 
@@ -260,5 +208,6 @@ approved but is not on the critical backend path.
 
 * **Vision (Constitutional Law Zero)**: [`VISION.md`](../../VISION.md)
 * **Target Milestone Gates**: [`milestones.md`](milestones.md)
-* **Active Execution Board (WIP=1)**: [`active.md`](active.md)
+* **Active Execution Runway (WIP=1)**: [`tasks.md`](tasks.md)
+* **Active Feature Delta Specification**: [`FEATURE_SPEC.md`](FEATURE_SPEC.md)
 * **Normative System Specification**: [`../SPEC.md`](../SPEC.md)

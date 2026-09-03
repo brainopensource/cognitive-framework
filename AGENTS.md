@@ -37,7 +37,7 @@ docs/architecture/ & docs/backend/ & docs/frontend/ & docs/product/
     System & Component Architecture, Reference, Product PRDs
 
 docs/execution/
-    Active Execution State (active.md) & Milestone Ladder
+    Four-File Operational Runway: milestones.md, backlog.md, FEATURE_SPEC.md, tasks.md
 
 docs/theory/ | docs/research/ | docs/reports/
     Durable Theory | Non-Canonical Research | Technical Strategy & Audit Reports
@@ -45,7 +45,7 @@ docs/theory/ | docs/research/ | docs/reports/
 
 - **Vision & Operational Rules**: [`VISION.md`](VISION.md), [`AGENTS.md`](AGENTS.md).
 - **The Law & Decisions**: [`docs/SPEC.md`](docs/SPEC.md) + [`docs/decisions.md`](docs/decisions.md).
-- **The Execution**: [`docs/execution/active.md`](docs/execution/active.md).
+- **The Execution Runway**: [`docs/execution/tasks.md`](docs/execution/tasks.md) & [`docs/execution/FEATURE_SPEC.md`](docs/execution/FEATURE_SPEC.md).
 
 ### Repository-Intelligence Navigation Protocol
 
@@ -242,7 +242,11 @@ When updating documentation, route information to its semantic owner:
 - **`docs/backend/`**: Microkernel, event engine, delegation, memory, and reference schemas/ports/APIs.
 - **`docs/frontend/`**: Frontend client architecture, state management, and design tokens.
 - **`docs/product/`**: Product PRDs, requirements, and user behavior.
-- **`docs/execution/active.md`**: Current sprint status, task ladder, and active authorization.
+- **`docs/execution/`**: Exactly four authoritative operational runway documents:
+  - `milestones.md`: Stable milestone outcomes and release predicates (M-0 to M-10).
+  - `backlog.md`: Stable capability package inventory (SUB-*, MEM-*, CMX-*, OCT-*).
+  - `FEATURE_SPEC.md`: Active feature delta contract (Pydantic/dataclass schemas, API, error matrix).
+  - `tasks.md`: Dynamic execution work DAG, current sub-goal, checkpoints, test falsifiers.
 - **`docs/decisions.md`**: Immutable Architecture Decision Records (ADRs).
 - **`docs/theory/` | `docs/research/` | `docs/reports/`**: Non-canonical conceptual theory, research, and audit reports (`authority: non-canonical`).
 
@@ -257,6 +261,8 @@ When updating documentation, route information to its semantic owner:
 > All documentation updates must strictly edit existing canonical files in the documentation hierarchy:
 > 1. **Modifying Normative Law** $\to$ Edit [`docs/SPEC.md`](docs/SPEC.md).
 > 2. **Recording Architectural Decisions** $\to$ Edit [`docs/decisions.md`](docs/decisions.md).
-> 3. **Updating Tasks, Sprints, or Execution Progress** $\to$ Edit [`docs/execution/active.md`](docs/execution/active.md).
+> 3. **Updating Tasks, Sprints, or Execution Progress** $\to$ Edit [`docs/execution/tasks.md`](docs/execution/tasks.md) and [`docs/execution/FEATURE_SPEC.md`](docs/execution/FEATURE_SPEC.md).
 > 
+> **Invariant on Execution Architecture**: AI agents must never invent parallel architecture documents; all feature extensions must be expressed as delta contracts in `docs/execution/FEATURE_SPEC.md` and promoted to `docs/architecture/` upon milestone gate passage.
+>
 > Any temporary thinking, scratch notes, or intermediate outputs must be kept in model scratchpads or ephemeral artifact directories—never committed as files in the repository tree.

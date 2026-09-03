@@ -13,126 +13,85 @@ purpose: Present stable TARGET milestone outcomes, dependencies, and acceptance 
 audience:
   - contributor
   - release-owner
-analysis_subject_sha: ea152f92fe9c9711035dfc7ff77b0c213380fe1f
-version: 0.9.2a3
-last_verified: 2026-09-02
+version: 0.9.2a4
+last_verified: 2026-09-03
 normative_authority:
-  - docs/03_execution/milestones.md
   - docs/SPEC.md#milestone-compatibility
+  - docs/decisions.md
 relationships:
-  - execution.active
+  - execution.tasks
   - execution.backlog
+  - execution.feature_spec
   - spec.core
-reviewer: delegated-tech-lead-block-e
+reviewer: repository-governance
 confidence: high
 ---
 
 # TARGET Milestone Gates
 
-## Scope
+## 1. Scope & Authority
 
-This page owns stable outcomes and gate predicates. It does not own current package status and does not infer acceptance from source presence, tests, or implementation. Current work is routed to [execution.active](active.md).
+This page defines stable release outcomes and gate predicates. It does not track day-to-day work packages (owned by [`backlog.md`](backlog.md)) or ephemeral session DAGs (owned by [`tasks.md`](tasks.md)). Mechanism presence does not infer milestone closure; closure requires producer-verifiable empirical receipts evaluated under the milestone acceptance boundary.
 
-| Milestone | TARGET outcome | Acceptance boundary | Execution Status |
+| Milestone | TARGET Outcome | Acceptance Boundary | Status |
 |---|---|---|---|
-| M-0–M-3C | Trust foundation and canonical composition | Historical completion anchors remain preserved; successor changes require explicit ADR and falsifier | `DONE` (Verified & Frozen) |
-| M-4 | Useful real-model coding proof with durable causal evidence | Exact immutable RF-95 bundle plus valid acceptance; RF-85 remains optional assurance | `DONE` (RF-95 Base Tagged) |
-| M-5a | Event-derived `AgentView` and accepted successor baseline | Replay evidence and verified `CONVERGENCE-BASE-v1` predicates | `DONE` (Base Reconciled) |
-| M-5b | Independent domain-generality witness | RF-86/RF-98 against the uncontaminated successor baseline | `MECHANISM AS_BUILT` (Awaiting Handoff) |
-| M-6 | Mediated recursive delegation | Depth-three cold reconstruction, attenuation, budget conservation, recovery, signed evidence | `MECHANISM AS_BUILT` (59 tests green) |
-| M-6.5 | Measured adaptive strategy | Valid paired-study disposition; controller remains off unless profile-specific evidence authorizes it | `MECHANISM AS_BUILT` (Controller Off) |
-| M-7 | Declarative multi-role topology through one runtime | Three real-effect topologies, persisted artifact flow, and explicit scheduler disposition | `MECHANISM AS_BUILT` (40 tests, 6 skips) |
-| M-8 | Durable memory and governed learning MVP | Authorization, recovery, retention, held-out lift, separated promotion authority, and executed rollback receipts | `BLOCKED` (Empirical runner repair and held-out lift >=0.05 remain open) |
-| M-9 | Installable operational beta `0.9.0b1` | Qualified M-1–M-8 evidence, unified product surfaces, health, two workflows, restart/resume, offline-after-install | `UNAUTHORIZED` (Blocked on M-8) |
-| M-10 | Final `0.9.0` release | Migration, backup/restore, fault/security/performance qualification, reproducible artifacts, soak, exact-subject signed envelope | `UNAUTHORIZED` (Blocked on M-9) |
+| **M-0–M-3C** | Trust foundation & canonical composition | Historical completion anchors preserved; successor changes require explicit ADR and falsifier. | `DONE` (Verified & Frozen) |
+| **M-4** | Real-model coding proof with durable causal evidence | Immutable RF-95 bundle plus valid acceptance; RF-85 remains optional assurance. | `DONE` (Base Tagged) |
+| **M-5a** | Event-derived `AgentView` & accepted successor baseline | Replay evidence and verified `CONVERGENCE-BASE-v1` predicates. | `DONE` (Base Reconciled) |
+| **M-5b** | Independent domain-generality witness | RF-86/RF-98 against uncontaminated successor baseline. | `MECHANISM AS_BUILT` (Awaiting Handoff) |
+| **M-6** | Mediated recursive delegation | Depth-three cold reconstruction, attenuation, budget conservation, recovery, signed evidence. | `MECHANISM AS_BUILT` (59 tests green) |
+| **M-6.5** | Measured adaptive strategy | Valid paired-study disposition; controller remains off unless profile-specific evidence authorizes it. | `MECHANISM AS_BUILT` (Controller Off) |
+| **M-7** | Declarative multi-role topology through one runtime | Three real-effect topologies, persisted artifact flow, and explicit scheduler disposition. | `MECHANISM AS_BUILT` (40 tests, 6 skips) |
+| **M-8** | Durable memory & governed learning MVP | Authorization, recovery, retention, held-out lift $\ge 0.05$, separated promotion authority, executed rollback receipts. | `BLOCKED` (Empirical runner repair & held-out lift remain open) |
+| **M-9** | Installable operational beta `0.9.0b1` | Qualified M-1–M-8 evidence, unified product surfaces, health, two workflows, restart/resume, offline-after-install. | `UNAUTHORIZED` (Blocked on M-8) |
+| **M-10** | Final `0.9.0` release | Migration, backup/restore, fault/security/performance qualification, reproducible artifacts, soak, exact-subject signed envelope. | `UNAUTHORIZED` (Blocked on M-9) |
 
-## Gate semantics
+---
 
-- Mechanism presence is not integration, experiment, independent attestation, or accepted closure.
-- Unknown, missing, failed, degraded, or `undeterminable` evidence never satisfies a predicate.
-- Negative experiments may close only when the preregistered protocol remains valid.
-- M-9 cannot be authorized before M-8 has an exact producer-verifiable bundle and independent acceptance over its digest.
-- M-10 closes only when `./ci/release_qualify.sh` exits `0` for the exact candidate and emits a subject-matching signed envelope.
+## 2. Gate Semantics & Release Invariants
 
-## Current-status caveat
+- **Invariant G-1 (Evidence Verifiability)**: Unknown, missing, failed, degraded, or `undeterminable` evidence never satisfies a predicate.
+- **Invariant G-2 (Linear Authorization)**: M-9 cannot be authorized before M-8 has an exact producer-verifiable bundle and independent acceptance over its digest. M-10 closes only when `./ci/release_qualify.sh` exits `0` for the exact candidate.
+- **Invariant G-3 (Non-Contamination)**: Local test suites, cassettes, and self-authored oracles never constitute an official SWE-bench result. Official claims require the SWE-P5 protocol.
 
-This page publishes stable gates only. The exact current disposition is owned by
-[execution.active](active.md), which records M-8 and later as unaccepted until
-the required producer-verifiable and independent receipts exist.
+---
 
-## v0.9.2 capability-wave overlay
+## 3. Capability Wave Overlay: Backend Finish (W-092)
 
-Vanguard v0.9.2 is an implementation and qualification overlay, not a replacement milestone
-ladder. Its waves are routed through [execution.active](active.md) and contribute evidence to the
-existing M-4–M-10 gates without silently closing them.
+Vanguard v0.9.2 is an implementation and qualification overlay contributing evidence to existing M-4–M-10 gates. Active implementation details live in [`tasks.md`](tasks.md) and [`FEATURE_SPEC.md`](FEATURE_SPEC.md).
 
-| Capability wave | Stable outcome | Required evidence | Status |
+| Gate | Stable Outcome | Acceptance Predicate | Status |
 |---|---|---|---|
-| W-092-0 | Canonical contracts and navigable implementation map | Cross-linked canonical owners; target/as-built labels; fresh navigation/index checks | `REOPENED` (Current LDA/Tier-1 artifacts are not HEAD-bound) |
-| W-092-1 | Valid benchmark subjects and lossless trajectory/projection evidence | Untouched-fixture preflight, immutable trajectory links, reducer compatibility vectors | `REOPENED` (M-8 executor/canary subject repair required) |
-| W-092-2 | Coding completion admitted only by fresh applicable verification | Deterministic failure scenarios, local challenge receipts, exterior evaluator kept independent | `PARTIAL` (Capability binding and conservative count parsing landed; typed task policies, stale/postimage evidence and complete change-surface checks remain) |
-| W-092-3 | Bounded provider-neutral repository context and durable coding state | Control/treatment trajectories with task, index, context and prompt identities | `PARTIAL` (ContextPacket is now constructed for declared indexes; staged retrieval and rich task-state production remain) |
-| W-092-4 | Tool, patch, recovery, resume, and provider reliability | Patch corpus, injected-failure study, cold-restart parity and provider contract tests | `PARTIAL` (Original ceiling/approval metadata and artifact capture landed; exact 40+ turn cold-restart parity remains open) |
-| W-092-5 | Evidence-qualified release disposition | Exact-subject checks, controlled real-model evidence and explicit SWE claim boundary | `BLOCKED` (Requires W-092-F0 through F5 and empirical execution) |
+| **W-092-F0** | Exact-subject navigation & benchmark truth | LDA/index health is HEAD-bound; runtime-to-patch-to-exterior-verdict evidence resolves; canary subjects content-addressed. | `DONE` (Consolidated & Validated) |
+| **W-092-F1** | One canonical Coding Max product path | Fast/balanced/max invoke `ApplicationService -> Runtime -> HarnessSession -> EpisodeEngine`; no parallel production engine or bypass. | `IN_PROGRESS` (Active in `tasks.md`) |
+| **W-092-F2** | Truthful task-aware completion | Observed test counts; zero-test/stale/partial evidence fails closed; bugfix/feature/migration/greenfield policies explicit. | `APPROVED` (Spec in `FEATURE_SPEC.md`) |
+| **W-092-F3** | Durable long-session continuation | Fresh process restores task/composition/policy/budget identity; never duplicates settled effects across 40+ turns. | `APPROVED` (Spec in `FEATURE_SPEC.md`) |
+| **W-092-F4** | Repository-scale progressive context | `ContextPacket` and `IndexPort` supply bounded, snapshot-bound, omission-bearing staged context with deterministic source fallback. | `APPROVED` (Spec in `FEATURE_SPEC.md`) |
+| **W-092-F5** | Product qualification | Frozen multi-class tasks produce exact patches, fresh verification, exterior verdicts, event evidence, and resume parity. | `BLOCKED` (Requires F1–F4 completion) |
+| **W-092-F6** | Specialist role disposition | Held-out ablations accept or reject reviewer/localizer/planner treatments without weakening verifier authority. | `DEFERRED` (Optional post-baseline) |
 
-No capability wave may close a milestone merely by passing its own component tests. Evidence MUST
-be evaluated under the milestone acceptance boundary to which it is offered.
+---
 
-## Backend finish gates
+## 4. Post-M-10 Horizon: Octopus Outer-Loop Meta-Orchestration (`M-OCT`)
 
-The following gates refine W-092 without creating a shortcut around M-8, M-9,
-or M-10. Current ownership and detailed sprint instructions live in
-[active.md](active.md).
+The following outcomes define the post-1.0 architectural horizon for multi-day, multi-agent campaign orchestration. They do not create active sprint milestones or authorize work that M-8/M-9 currently block.
 
-| Gate | Stable outcome | Acceptance predicate |
+| Wave | Horizon Outcome | Terminal Acceptance Boundary |
 |---|---|---|
-| W-092-F0 | Exact-subject navigation and benchmark truth | LDA/index health is HEAD-bound; runtime-to-patch-to-exterior-verdict evidence resolves; canary subjects are unique, uncontaminated and content-addressed |
-| W-092-F1 | One canonical Coding Max product path | Fast/balanced/max invoke `ApplicationService -> Runtime -> HarnessSession -> EpisodeEngine`; no parallel production engine or name-based admission bypass remains |
-| W-092-F2 | Truthful task-aware completion | Test counts are observed, zero-test/stale/partial/incomplete evidence fails closed, and bugfix/feature/migration/greenfield/read-only policies are explicit |
-| W-092-F3 | Durable long-session continuation | A fresh process restores task/composition/policy/budget/phase/next-action identity and never duplicates a settled effect across 40+ turn tests |
-| W-092-F4 | Repository-scale progressive context | `ContextPacket` and `IndexPort` supply bounded, snapshot-bound, omission-bearing staged context with deterministic source fallback and affected-test/change-surface closure |
-| W-092-F5 | Product qualification | Frozen multi-class tasks produce exact patches, fresh verification, exterior verdicts, event/trajectory evidence, costs and resume parity under preregistered thresholds |
-| W-092-F6 | Optional specialist disposition | One-role-at-a-time held-out ablations accept or reject reviewer/localizer/test-investigator/planner treatments without weakening verifier authority |
+| **W-OCT-1** | **Content-Addressed Mailbox Protocol** | Roles communicate strictly by publishing and reading content-addressed immutable message digests (`digest_of(payload)`); zero shared memory between roles; replayable multi-agent determinism. |
+| **W-OCT-2** | **Declarative CoordinationPlan DAG** | Topology declared as immutable data DAG with strict per-mille budget shares ($\sum \text{budget\_share} \le 1000$); formal merge policies implemented: `CONCAT`, `FIRST_COMPLETE`, `SYNTHESISE`, `UNANIMOUS`. |
+| **W-OCT-3** | **Outer-Loop Multi-Day Roadmap Director** | Higher-order director layer executing above `EpisodeEngine`; decomposes complex roadmaps into independent task DAGs across process boundaries without violating kernel S0–S12 contracts. |
+| **W-OCT-4** | **Meta-Conductor & Swarm Goal Algebra** | Formal algebraic separation and reconciliation of individual swarm agent objectives under a global parent mission; automated topology selection based on task classification. |
 
-F0-F5 are prerequisites for claiming the autonomous coding backend finished.
-F6 is optional: a negative specialist result leaves the accepted single-worker
-product intact. The separate governed-memory experiment is still required to
-accept M-8.
+---
 
-## Post-M-10 1.0 qualification horizon
+## 5. Parallel SWE Benchmark Program (SWE-P0–SWE-P5)
 
-M-9 and M-10 keep their existing beta and `0.9.0` meanings. The following
-outcomes define a non-authorizing 1.0 horizon; they do not create new active
-milestones or permit work that M-8/M-9/M-10 currently block.
-
-| Horizon outcome | Acceptance boundary |
-|---|---|
-| Stable agent framework | Public manifest, port, application-service, event, artifact, resume, and compatibility contracts are documented and tested; a first-party app does not own a second runtime |
-| Useful Coding Max product | Repository-scale bugfix, multi-file, migration, and greenfield tasks produce real patches and fresh verification through mediated effects with exact cost/latency/token evidence |
-| Reference-agent proof | Coding Max and at least two non-coding supported agents install and run through the same composition contract with domain-specific policies outside the kernel |
-| Operational 1.0 candidate | Upgrade/migration, backup/restore, restart/resume, offline-after-install, fault, security, performance, soak, and reproducible-build gates pass on the exact candidate |
-| Honest capability claim | Any SOTA or SWE-bench claim names the official/reproducible protocol, exact model and subject, missingness, cost, evaluator, and harness-vs-model ablation |
-
-Coding Max is delivered using the **thin app, thick declarative composition**
-boundary recorded in [active.md](active.md) and [backlog.md](backlog.md). A new
-kernel primitive, runtime, store, tool broker, or evaluator is a failed horizon
-gate unless independently justified as a general framework contract through the
-normal decision and falsifier process.
-
-## SWE-P0–SWE-P5 parallel program
-
-The SWE program is evidence work, not a milestone shortcut. It does not authorize
-or close M-9 or M-10.
-
-| Program | Outcome | Required gate |
-|---|---|---|
-| SWE-P0 | Instrument-valid harness | Isolated materialization, trajectory linkage, evaluator validity, secret boundary |
-| SWE-P1 | Honest baseline | Preregistered corpus/model/cost policy and explicit missingness |
-| SWE-P2 | Harness experiments | Controlled context/tool/recovery experiments with attributable receipts |
-| SWE-P3 | Model/harness optimization | Predeclared optimization and held-out comparison without contamination |
-| SWE-P4 | Controlled larger run | Budgeted larger sample, independent audit, reproducible subject identity |
-| SWE-P5 | Official evaluation | Official benchmark procedure and receipt; local runs are never official |
-
-Only SWE-P5 may support an official SWE-bench claim, and only for its evaluated
-subject and protocol. A local canary or green test suite is never an official
-SWE-bench result.
+| Program | Outcome | Required Gate | Status |
+|---|---|---|---|
+| **SWE-P0** | Instrument-valid harness | Isolated materialization, trajectory linkage, evaluator validity, secret boundary. | `DONE` |
+| **SWE-P1** | Honest baseline | Preregistered corpus/model/cost policy and explicit missingness reporting. | `APPROVED` |
+| **SWE-P2** | Harness experiments | Controlled context/tool/recovery experiments with attributable receipts. | `APPROVED` |
+| **SWE-P3** | Model/harness optimization | Predeclared optimization and held-out comparison without contamination. | `BLOCKED` (on P1) |
+| **SWE-P4** | Controlled larger run | Budgeted larger sample, independent audit, reproducible subject identity. | `BLOCKED` (on P3) |
+| **SWE-P5** | Official evaluation | Official benchmark procedure and receipt; local runs are never official. | `BLOCKED` (on P4) |

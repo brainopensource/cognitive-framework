@@ -64,4 +64,29 @@ describe("@aether/tui — Keystroke Parser & Keyboard Grammar", () => {
     kb.handleKey({ name: "tab", shift: true, sequence: "\x1b[Z" });
     assert.equal(store.get().focus, "transcript");
   });
+
+  it("modal arrow keys write modalSelectedIndex into the store so the UI can re-render", () => {
+    const store = new TuiStore({
+      availableModels: [
+        { id: "openrouter/free", tier: 0, free: true },
+        { id: "paid-model", tier: 1, free: false },
+      ],
+    });
+    const kb = new KeyboardManager(store);
+    let renders = 0;
+    store.state.subscribe(() => {
+      renders += 1;
+    });
+
+    store.executeSlashCommand("/model");
+    assert.equal(store.get().activeModal, "select-model");
+    const afterOpen = renders;
+
+    kb.handleKey({ name: "down", sequence: "\x1b[B" });
+    assert.equal(store.get().modalSelectedIndex, 1);
+    assert.ok(renders > afterOpen, "arrow navigation must notify store subscribers");
+
+    kb.handleKey({ name: "up", sequence: "\x1b[A" });
+    assert.equal(store.get().modalSelectedIndex, 0);
+  });
 });

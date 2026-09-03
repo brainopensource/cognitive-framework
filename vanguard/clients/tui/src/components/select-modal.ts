@@ -8,6 +8,13 @@ export type SelectOption = {
   description?: string;
 };
 
+/** First visible row so `selectedIndex` stays inside a fixed-height list. */
+export function listWindowStart(selectedIndex: number, count: number, viewHeight: number): number {
+  if (viewHeight <= 0 || count <= viewHeight) return 0;
+  const maxStart = count - viewHeight;
+  return Math.max(0, Math.min(selectedIndex - viewHeight + 1, maxStart));
+}
+
 export function renderSelectModal(
   screen: TerminalScreen,
   title: string,
@@ -28,14 +35,16 @@ export function renderSelectModal(
   screen.writeString(startRow, startCol + 2, ` Select ${title} (Enter to pick, Esc to cancel) `, theme.accent);
 
   const listHeight = modalHeight - 2;
+  const windowStart = listWindowStart(selectedIndex, options.length, listHeight);
   for (let i = 0; i < listHeight; i++) {
     const r = startRow + 1 + i;
     screen.writeString(r, startCol, "│", theme.borderActive);
     screen.writeString(r, startCol + 1, " ".repeat(modalWidth - 2), theme.surface);
 
-    if (i < options.length) {
-      const opt = options[i]!;
-      const isSel = i === selectedIndex;
+    const optionIndex = windowStart + i;
+    if (optionIndex < options.length) {
+      const opt = options[optionIndex]!;
+      const isSel = optionIndex === selectedIndex;
       const text = `${opt.id.padEnd(20)} ${opt.description ?? opt.name}`;
       screen.writeString(
         r,

@@ -6,6 +6,7 @@ import {
   loadAgentCatalog,
   canWrite,
   resolveManifestsDir,
+  resolveHarnessManifestPath,
 } from "../src/catalog/agents.js";
 import {
   loadModelCatalog,
@@ -39,6 +40,12 @@ test("loadAgentCatalog reads real manifests and distinguishes read-only vs write
 test("loadAgentCatalog returns empty (not throw) when no manifests dir resolves", () => {
   const catalog = loadAgentCatalog(null);
   assert.deepEqual(catalog, []);
+});
+
+test("resolveHarnessManifestPath maps product aliases onto real Coding Max manifests", () => {
+  const path = resolveHarnessManifestPath("coding-agent", repoRoot);
+  assert.ok(path);
+  assert.ok(path.endsWith(join("vg-code-default", "manifest.json")));
 });
 
 test("resolveModelsRegistryPath finds the in-repo model registry", () => {

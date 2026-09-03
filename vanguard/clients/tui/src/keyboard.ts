@@ -4,21 +4,14 @@ import type { RuntimeClient } from "@aether/client";
 import { filterCommandsByQuery, splitCommandQuery } from "@aether/tui-core";
 
 export class KeyboardManager {
-  private commandSelectedIndex: number = 0;
-  private selectModalIndex: number = 0;
-
   constructor(
     private readonly store: TuiStore,
     private readonly client?: RuntimeClient,
     private readonly onExit?: () => void
   ) {}
 
-  public getCommandSelectedIndex(): number {
-    return this.commandSelectedIndex;
-  }
-
-  public getSelectModalIndex(): number {
-    return this.selectModalIndex;
+  private setModalIndex(index: number): void {
+    this.store.update((s) => ({ ...s, modalSelectedIndex: index }));
   }
 
   public handleKey(key: KeyEvent): void {
@@ -120,11 +113,11 @@ export class KeyboardManager {
 
     // Slash command trigger
     if (key.name === "/" && state.composerText.length === 0) {
-      this.commandSelectedIndex = 0;
       this.store.update((s) => ({
         ...s,
         activeModal: "command-palette",
         activeCommandQuery: "",
+        modalSelectedIndex: 0,
       }));
       return;
     }
@@ -286,77 +279,75 @@ export class KeyboardManager {
 
   private handleModalKey(key: KeyEvent): void {
     if (key.name === "escape") {
-      this.store.update((s) => ({ ...s, activeModal: "none", focus: "composer" }));
+      this.store.update((s) => ({ ...s, activeModal: "none", modalSelectedIndex: 0, focus: "composer" }));
       return;
     }
 
     const state = this.store.get();
+    const idx = state.modalSelectedIndex;
 
     if (state.activeModal === "command-palette") {
       if (key.name === "up") {
-        this.commandSelectedIndex = Math.max(0, this.commandSelectedIndex - 1);
+        this.setModalIndex(Math.max(0, idx - 1));
         return;
       }
       if (key.name === "down") {
         const filteredCount = filterCommandsByQuery(state.activeCommandQuery).length;
-        this.commandSelectedIndex = Math.min(Math.max(0, filteredCount - 1), this.commandSelectedIndex + 1);
+        this.setModalIndex(Math.min(Math.max(0, filteredCount - 1), idx + 1));
         return;
       }
       if (key.name === "return") {
-        this.executePaletteCommand(this.commandSelectedIndex, state.activeCommandQuery);
+        this.executePaletteCommand(idx, state.activeCommandQuery);
         // Only close back to "none" if the command didn't already switch to a
         // different modal (e.g. /agent opening the agent picker).
-        this.store.update((s) => (s.activeModal === "command-palette" ? { ...s, activeModal: "none" } : s));
+        this.store.update((s) =>
+          s.activeModal === "command-palette"
+            ? { ...s, activeModal: "none", modalSelectedIndex: 0 }
+            : s,
+        );
         return;
       }
       if (key.name === "backspace") {
-        this.commandSelectedIndex = 0;
         this.store.update((s) => ({
           ...s,
           activeCommandQuery: s.activeCommandQuery.slice(0, -1),
+          modalSelectedIndex: 0,
         }));
         return;
       }
       if (key.name.length === 1 && !key.ctrl && !key.meta) {
-        this.commandSelectedIndex = 0;
         this.store.update((s) => ({
           ...s,
           activeCommandQuery: s.activeCommandQuery + key.name,
+          modalSelectedIndex: 0,
         }));
       }
     } else if (state.activeModal === "select-agent") {
-      const agents = state.availableAgents;
-      if (key.name === "up") {
-        this.selectModalIndex = Math.max(0, this.selectModalIndex - 1);
-      } else if (key.name === "down") {
-        this.selectModalIndex = Math.min(agents.length - 1, this.selectModalIndex + 1);
-      } else if (key.name === "return") {
-        const picked = agents[this.selectModalIndex];
-        if (picked) this.store.selectAgent(picked.id);
-        this.store.update((s) => ({ ...s, activeModal: "none", focus: "composer" }));
-      }
+      this.handleSelectListKey(key, state.availableAgents, (picked) => this.store.selectAgent(picked.id));
     } else if (state.activeModal === "select-workflow") {
-      const workflows = state.availableWorkflows;
-      if (key.name === "up") {
-        this.selectModalIndex = Math.max(0, this.selectModalIndex - 1);
-      } else if (key.name === "down") {
-        this.selectModalIndex = Math.min(workflows.length - 1, this.selectModalIndex + 1);
-      } else if (key.name === "return") {
-        const picked = workflows[this.selectModalIndex];
-        if (picked) this.store.selectWorkflow(picked.id);
-        this.store.update((s) => ({ ...s, activeModal: "none", focus: "composer" }));
-      }
+      this.handleSelectListKey(key, state.availableWorkflows, (picked) => this.store.selectWorkflow(picked.id));
+    } else if (state.activeModal === "select-model") {
+      this.handleSelectListKey(key, state.availableModels, (picked) => this.store.setModel(picked.id));
     } else if (state.activeModal === "history") {
       const convs = this.store.controller.getState().conversations;
-      if (key.name === "up") {
-        this.selectModalIndex = Math.max(0, this.selectModalIndex - 1);
-      } else if (key.name === "down") {
-        this.selectModalIndex = Math.min(Math.max(0, convs.length - 1), this.selectModalIndex + 1);
-      } else if (key.name === "return") {
-        const picked = convs[this.selectModalIndex];
-        if (picked) this.store.controller.selectConversation(picked.id);
-        this.store.update((s) => ({ ...s, activeModal: "none", focus: "composer" }));
-      }
+      this.handleSelectListKey(key, convs, (picked) => this.store.controller.selectConversation(picked.id));
+    }
+  }
+
+  private handleSelectListKey<T>(
+    key: KeyEvent,
+    items: readonly T[],
+    pick: (item: T) => void,
+  ): void {
+    const idx = this.store.get().modalSelectedIndex;
+    if (key.name === "up") {
+      this.setModalIndex(Math.max(0, idx - 1));
+    } else if (key.name === "down") {
+      this.setModalIndex(Math.min(Math.max(0, items.length - 1), idx + 1));
+    } else if (key.name === "return") {
+      const picked = items[idx];
+      if (picked) pick(picked);
+      this.store.update((s) => ({ ...s, activeModal: "none", modalSelectedIndex: 0, focus: "composer" }));
     }
   }
 

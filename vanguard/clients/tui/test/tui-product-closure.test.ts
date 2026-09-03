@@ -187,3 +187,22 @@ test("@path references expand to inline file content before a prompt reaches exp
     rmSync(dir, { recursive: true, force: true });
   }
 });
+
+test("/model without arguments opens select-model modal and keyboard selects a model", () => {
+  const store = new TuiStore();
+  const keyboard = new KeyboardManager(store);
+
+  // Execute /model without arguments
+  store.executeSlashCommand("/model");
+  assert.equal(store.get().activeModal, "select-model");
+  assert.ok(store.get().availableModels.length > 0, "availableModels should be populated");
+
+  // Press down arrow, then return
+  keyboard.handleKey({ name: "down", ctrl: false, meta: false, shift: false, sequence: "" });
+  keyboard.handleKey({ name: "return", ctrl: false, meta: false, shift: false, sequence: "\r" });
+
+  assert.equal(store.get().activeModal, "none");
+  assert.equal(store.get().focus, "composer");
+  assert.equal(store.get().model, store.get().availableModels[1]?.id);
+});
+

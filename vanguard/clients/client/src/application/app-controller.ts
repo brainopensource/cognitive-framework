@@ -61,6 +61,11 @@ import {
   type FrontendPersistencePort,
   LocalStoragePersistenceAdapter,
 } from "../persistence/persistence-port.js";
+import {
+  mergeAgentCatalog,
+  resolveHarnessManifestPath,
+  executionProfileFor,
+} from "../product/harness.js";
 
 export type ConversationGroup = {
   label: "Today" | "Yesterday" | "Last 7 Days" | "Older";
@@ -286,7 +291,7 @@ export class FrontendAppController {
       runtimeUrlOrSocket: settings.runtime.socketPath,
       currentWorkspace: initialWorkspace,
       recentWorkspaces: settings.workspace.recentWorkspaces,
-      availableAgents: DEFAULT_AGENTS,
+      availableAgents: mergeAgentCatalog(DEFAULT_AGENTS, initialWorkspace),
       selectedAgentId: initialAgentId,
       recentAgentIds: [initialAgentId],
       availableWorkflows: DEFAULT_WORKFLOWS,
@@ -628,6 +633,7 @@ export class FrontendAppController {
         ...s,
         currentWorkspace: clean,
         recentWorkspaces: updatedRecents,
+        availableAgents: mergeAgentCatalog(DEFAULT_AGENTS, clean),
         statusMessage: `Workspace selected: ${clean}`,
       };
     });
@@ -651,13 +657,14 @@ export class FrontendAppController {
   // 5. AGENT & WORKFLOW SELECTION
   public selectAgent(agentId: string): void {
     const found = this.state.availableAgents.find((a) => a.id === agentId);
-    if (!found) return;
+    const resolved = resolveHarnessManifestPath(agentId, this.state.currentWorkspace);
+    if (!found && !resolved) return;
 
     this.updateState((s) => ({
       ...s,
       selectedAgentId: agentId,
       recentAgentIds: [agentId, ...s.recentAgentIds.filter((id) => id !== agentId)].slice(0, 5),
-      statusMessage: `Agent switched to ${found.name}`,
+      statusMessage: `Agent switched to ${found?.name ?? agentId}`,
     }));
   }
 
@@ -910,12 +917,29 @@ export class FrontendAppController {
 
     const activeProvider = s.providers.find((p) => p.id === s.selectedProviderId) ?? s.providers.find((p) => p.isDefault);
     const model = activeProvider?.selectedModel ?? "openrouter/free";
+    const manifestPath = resolveHarnessManifestPath(s.selectedAgentId, s.currentWorkspace);
+    if (!manifestPath) {
+      const diag = diagnoseFailure({
+        code: "invalid_request",
+        message: `No harness manifest for agent "${s.selectedAgentId}"`,
+      });
+      this.updateState((prev) => ({
+        ...prev,
+        isStreaming: false,
+        lastFailure: diag,
+        statusMessage: diag.cause,
+      }));
+      return null;
+    }
 
     const req: StartRunRequest = {
       repo: s.currentWorkspace,
+      repoPath: s.currentWorkspace,
       prompt,
+      brief: prompt,
       model,
-      profileId: s.selectedAgentId,
+      manifestPath,
+      profileId: executionProfileFor(false),
       ...options,
     };
 

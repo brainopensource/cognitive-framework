@@ -16,7 +16,16 @@ import {
 } from "@aether/projections";
 import type { EventEnvelope, AgentDescriptor, WorkflowDescriptor, SemanticActivityItem, ModelProviderConfig, FrontendSettings } from "@aether/contracts";
 import type { RuntimeClient } from "@aether/client";
-import { FrontendAppController, DEFAULT_AGENTS, DEFAULT_WORKFLOWS, NodeFsPersistenceAdapter, DEFAULT_PROVIDERS } from "@aether/client";
+import {
+  FrontendAppController,
+  DEFAULT_AGENTS,
+  DEFAULT_WORKFLOWS,
+  NodeFsPersistenceAdapter,
+  DEFAULT_PROVIDERS,
+  mergeAgentCatalog,
+  resolveHarnessManifestPath,
+  executionProfileFor,
+} from "@aether/client";
 import { DEFAULT_FRONTEND_SETTINGS } from "@aether/projections";
 import {
   executeCommandLine,
@@ -25,6 +34,7 @@ import {
   resolveModelSelection,
   resolveModelsRegistryPath,
   ModelPolicyError,
+  type ModelCatalogEntry,
   login as mockLogin,
   logout as mockLogout,
   expandFileReferences,
@@ -84,6 +94,7 @@ export type TuiStoreState = {
   // Catalog
   availableAgents: AgentDescriptor[];
   availableWorkflows: WorkflowDescriptor[];
+  availableModels: ModelCatalogEntry[];
   providers: ModelProviderConfig[];
   selectedProviderId: string;
 
@@ -120,6 +131,8 @@ export type TuiStoreState = {
   followStream: boolean;
   expandedCardIds: Set<string>;
   activeModal: "none" | "command-palette" | "help" | "diff-viewer" | "select-agent" | "select-workflow" | "select-model" | "history";
+  /** Highlighted row in the command palette or a select modal. Lives here so arrow keys re-render. */
+  modalSelectedIndex: number;
   diffViewerContent: string;
   statusMessage: string;
   activeCommandQuery: string;
@@ -143,15 +156,17 @@ export class TuiStore {
     });
 
     const ctrlState = this.controller.getState();
+    const wsPath = initial.workspacePath ?? ctrlState.currentWorkspace;
 
     this.state = createSignal<TuiStoreState>({
       agentId: initial.agentId ?? ctrlState.selectedAgentId,
       workflowId: initial.workflowId ?? ctrlState.selectedWorkflowId,
-      workspacePath: initial.workspacePath ?? ctrlState.currentWorkspace,
+      workspacePath: wsPath,
       model: initial.model ?? "openrouter/free",
       runId: initial.runId ?? ctrlState.activeRunId,
-      availableAgents: DEFAULT_AGENTS,
+      availableAgents: initial.availableAgents ?? mergeAgentCatalog(DEFAULT_AGENTS, wsPath),
       availableWorkflows: DEFAULT_WORKFLOWS,
+      availableModels: initial.availableModels ?? this.loadAvailableModels(wsPath),
       providers: ctrlState.providers.length > 0 ? ctrlState.providers : DEFAULT_PROVIDERS,
       selectedProviderId: ctrlState.selectedProviderId,
       connectionState: initial.connectionState ?? "connected",
@@ -178,6 +193,7 @@ export class TuiStore {
       followStream: true,
       expandedCardIds: new Set<string>(),
       activeModal: "none",
+      modalSelectedIndex: 0,
       diffViewerContent: "",
       statusMessage: "Ready",
       activeCommandQuery: "",
@@ -376,11 +392,25 @@ export class TuiStore {
     }));
   }
 
+  public loadAvailableModels(wsPath: string = this.get().workspacePath): ModelCatalogEntry[] {
+    try {
+      const path = resolveModelsRegistryPath(wsPath) ?? resolveModelsRegistryPath(process.cwd());
+      const catalog = loadModelCatalog(path);
+      return [...catalog.entries];
+    } catch {
+      return [];
+    }
+  }
+
   public selectWorkspace(wsPath: string): void {
     this.controller.selectWorkspace(wsPath);
+    const availableModels = this.loadAvailableModels(wsPath);
+    const availableAgents = mergeAgentCatalog(DEFAULT_AGENTS, wsPath);
     this.update((prev) => ({
       ...prev,
       workspacePath: wsPath,
+      availableAgents: availableAgents.length > 0 ? availableAgents : prev.availableAgents,
+      availableModels: availableModels.length > 0 ? availableModels : prev.availableModels,
       statusMessage: `Workspace switched to ${wsPath}`,
     }));
   }
@@ -392,8 +422,15 @@ export class TuiStore {
    */
   public buildCommandContext(client?: RuntimeClient, onExit?: () => void): TuiCommandContext {
     return {
-      openModal: (modal) => this.update((s) => ({ ...s, activeModal: modal as TuiStoreState["activeModal"] })),
-      closeModal: () => this.update((s) => ({ ...s, activeModal: "none", focus: "composer" })),
+      openModal: (modal) => {
+        this.update((s) => ({
+          ...s,
+          activeModal: modal as TuiStoreState["activeModal"],
+          modalSelectedIndex: 0,
+          focus: "modal",
+        }));
+      },
+      closeModal: () => this.update((s) => ({ ...s, activeModal: "none", modalSelectedIndex: 0, focus: "composer" })),
       selectAgent: (agentId) => this.selectAgent(agentId),
       selectWorkflow: (workflowId) => this.selectWorkflow(workflowId),
       selectWorkspace: (path) => this.selectWorkspace(path),
@@ -547,7 +584,8 @@ export class TuiStore {
 
   public setModel(requested: string): void {
     try {
-      const catalog = loadModelCatalog(resolveModelsRegistryPath(this.get().workspacePath));
+      const path = resolveModelsRegistryPath(this.get().workspacePath) ?? resolveModelsRegistryPath(process.cwd());
+      const catalog = loadModelCatalog(path);
       const resolved = resolveModelSelection(requested, catalog);
       this.update((s) => ({ ...s, model: resolved, statusMessage: `Model: ${resolved}` }));
     } catch (err) {
@@ -586,15 +624,26 @@ export class TuiStore {
       statusMessage: "Starting agent run...",
     }));
 
+    const manifestPath = resolveHarnessManifestPath(cur.agentId, cur.workspacePath);
+    if (!manifestPath) {
+      this.update((prev) => ({
+        ...prev,
+        connectionState: "unavailable",
+        statusMessage: `No harness manifest for agent "${cur.agentId}". Use /agent vg-code-balanced (or vg-code-fast / vg-code-max).`,
+      }));
+      return;
+    }
+
     const res = await client.startRun({
       repo: cur.workspacePath,
+      repoPath: cur.workspacePath,
       prompt,
+      brief: prompt,
       model: cur.model,
       runId: cur.runId || undefined,
-      // W3: plan mode is enforced at the runtime composition layer (a
-      // "plan" execution profile that withholds patch.apply/proc.exec),
-      // never by the client choosing not to send a write request.
-      ...(cur.planMode ? { profileId: "plan" } : {}),
+      manifestPath,
+      // Execution profile is local vs plan — never the agent/harness id.
+      profileId: executionProfileFor(cur.planMode),
     });
 
     if (!res.ok) {

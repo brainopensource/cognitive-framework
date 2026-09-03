@@ -85,6 +85,7 @@ export async function handleRun(args: string[], options: ParsedCli): Promise<num
       initialState: {
         workspacePath: options.repo ?? ".",
         runId: options.runId ?? "",
+        agentId: "vg-code-balanced",
       },
       onExit: () => resolve(0),
     });

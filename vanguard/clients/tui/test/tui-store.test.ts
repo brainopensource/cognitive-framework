@@ -140,4 +140,28 @@ describe("@aether/tui — Reactive Store & Ingestion", () => {
     assert.equal(store.get().queuedPrompt, null);
     assert.equal(client.commandsReceived.some((c) => c.method === "startRun"), true);
   });
+
+  it("startRun composes a real agency harness instead of sending the workspace as manifestPath", async () => {
+    const { existsSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const { fileURLToPath } = await import("node:url");
+    const repoRoot = fileURLToPath(new URL("../../../../..", import.meta.url));
+    const client = new FakeRuntimeClient();
+    const store = new TuiStore(
+      { workspacePath: repoRoot, agentId: "vg-code-balanced", model: "openrouter/free" },
+      client,
+    );
+
+    store.setComposerText("implement the feature", 21);
+    store.submitComposer(client);
+    await new Promise((r) => setImmediate(r));
+
+    const start = client.commandsReceived.find((c) => c.method === "startRun");
+    assert.ok(start, "startRun must be issued");
+    const request = start.args[0] as { manifestPath?: string; profileId?: string; model?: string };
+    assert.equal(request.profileId, "local");
+    assert.equal(request.model, "openrouter/free");
+    assert.ok(request.manifestPath && existsSync(request.manifestPath));
+    assert.ok(request.manifestPath.endsWith(join("vg-code-balanced", "manifest.json")));
+  });
 });

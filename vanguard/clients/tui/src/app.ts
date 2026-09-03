@@ -42,7 +42,7 @@ export class TuiApplication {
   constructor(options: TuiAppOptions = {}) {
     this.theme = options.theme ?? DEFAULT_THEME;
     this.screen = new TerminalScreen(options.screenOptions);
-    this.store = new TuiStore(options.initialState);
+    this.store = new TuiStore(options.initialState, options.client);
     this.parser = new KeyParser();
     this.onExitCallback = options.onExit;
     this.keyboard = new KeyboardManager(this.store, options.client, () => this.stop());
@@ -143,7 +143,7 @@ export class TuiApplication {
       renderCommandPalette(
         this.screen,
         commands,
-        this.keyboard.getCommandSelectedIndex(),
+        state.modalSelectedIndex,
         state.activeCommandQuery,
         this.theme
       );
@@ -156,7 +156,7 @@ export class TuiApplication {
         this.screen,
         "Agent",
         state.availableAgents.map((a) => ({ id: a.id, name: a.name, description: a.description })),
-        this.keyboard.getSelectModalIndex(),
+        state.modalSelectedIndex,
         this.theme
       );
     } else if (state.activeModal === "select-workflow") {
@@ -164,7 +164,19 @@ export class TuiApplication {
         this.screen,
         "Workflow",
         state.availableWorkflows.map((w) => ({ id: w.id, name: w.name, description: w.description })),
-        this.keyboard.getSelectModalIndex(),
+        state.modalSelectedIndex,
+        this.theme
+      );
+    } else if (state.activeModal === "select-model") {
+      renderSelectModal(
+        this.screen,
+        "Model",
+        state.availableModels.map((m) => ({
+          id: m.id,
+          name: m.id,
+          description: `Tier ${m.tier}${m.free ? " • free" : ""}`,
+        })),
+        state.modalSelectedIndex,
         this.theme
       );
     } else if (state.activeModal === "history") {
@@ -173,7 +185,7 @@ export class TuiApplication {
         this.screen,
         "Conversation History",
         convs.map((c: any) => ({ id: c.id.slice(0, 8), name: c.title, description: `${c.turnCount} turns • ${c.workspacePath}` })),
-        this.keyboard.getSelectModalIndex(),
+        state.modalSelectedIndex,
         this.theme
       );
     }

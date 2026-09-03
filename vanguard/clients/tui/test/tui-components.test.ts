@@ -10,6 +10,7 @@ import { renderApprovalDeck } from "../src/components/approval-deck.js";
 import { renderDiffViewer } from "../src/components/diff-viewer.js";
 import { renderDiffCard } from "../src/components/cards/diff-card.js";
 import { renderTranscript } from "../src/components/transcript.js";
+import { listWindowStart } from "../src/components/select-modal.js";
 
 describe("@aether/tui — Presentation Components", () => {
   it("renders header with session metadata and status tag", () => {
@@ -154,5 +155,15 @@ describe("@aether/tui — Presentation Components", () => {
 
     const lines = renderDiffCard(screen, 0, "Modified dispatch.py", diff, true);
     assert.ok(lines > 1);
+  });
+});
+
+describe("@aether/tui — Select modal windowing", () => {
+  it("listWindowStart keeps a high selected index inside a short viewport", () => {
+    assert.equal(listWindowStart(0, 25, 10), 0);
+    assert.equal(listWindowStart(9, 25, 10), 0);
+    assert.equal(listWindowStart(10, 25, 10), 1);
+    assert.equal(listWindowStart(24, 25, 10), 15);
+    assert.equal(listWindowStart(3, 5, 10), 0);
   });
 });

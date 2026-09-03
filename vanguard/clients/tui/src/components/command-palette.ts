@@ -1,6 +1,7 @@
 import type { TerminalScreen } from "../terminal/screen.js";
 import { DEFAULT_THEME, type ThemeTokens } from "../theme.js";
 import { truncateToWidth } from "../terminal/cell.js";
+import { listWindowStart } from "./select-modal.js";
 
 export type PaletteCommand = {
   id: string;
@@ -42,14 +43,16 @@ export function renderCommandPalette(
   const filtered = commands;
 
   const listHeight = modalHeight - 4;
+  const windowStart = listWindowStart(selectedIndex, filtered.length, listHeight);
   for (let i = 0; i < listHeight; i++) {
     const r = startRow + 3 + i;
     screen.writeString(r, startCol, "│", theme.borderActive);
     screen.writeString(r, startCol + 1, " ".repeat(modalWidth - 2), theme.surface);
 
-    if (i < filtered.length) {
-      const cmd = filtered[i]!;
-      const isSel = i === selectedIndex;
+    const optionIndex = windowStart + i;
+    if (optionIndex < filtered.length) {
+      const cmd = filtered[optionIndex]!;
+      const isSel = optionIndex === selectedIndex;
       const text = `${cmd.name.padEnd(20)} ${cmd.description}`;
       screen.writeString(
         r,

@@ -27,6 +27,7 @@ export * from "./persistence/persistence-port.js";
 export * from "./product/paths.js";
 export * from "./product/compatibility.js";
 export * from "./product/configuration.js";
+export * from "./product/harness.js";
 export * from "./runtime/managed-runtime.js";
 
 import type { RuntimeClient } from "./client.js";

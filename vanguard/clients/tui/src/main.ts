@@ -1,5 +1,10 @@
 #!/usr/bin/env node
-import { createRuntimeClient } from "@aether/client";
+import {
+  ManagedRuntimeHost,
+  OperatorSigner,
+  ProductPaths,
+  SocketRuntimeClient,
+} from "@aether/client";
 import { TuiApplication } from "./app.js";
 
 function parseArgs(args: string[]) {
@@ -14,20 +19,34 @@ function parseArgs(args: string[]) {
   return options;
 }
 
-const args = parseArgs(process.argv.slice(2));
-const client = createRuntimeClient({
-  socketOptions: {
-    socketPath: args["socket-path"] ?? "/tmp/vanguard-runtime.sock",
-  },
-});
+async function main(): Promise<void> {
+  const args = parseArgs(process.argv.slice(2));
+  const layout = ProductPaths.resolveLayout();
+  if (args["socket-path"]) layout.socketPath = args["socket-path"];
 
-const app = new TuiApplication({
-  client,
-  initialState: {
-    workspacePath: args["repo"] ?? ".",
-    agentId: args["agent"] ?? "coding-agent",
-    model: args["model"] ?? "openrouter/free",
-  },
-});
+  const host = new ManagedRuntimeHost({ layout });
+  await host.ensureRunning();
+  const client = new SocketRuntimeClient({
+    socketPath: layout.socketPath,
+    signer: OperatorSigner.loadOrCreate(),
+  });
 
-app.start();
+  const app = new TuiApplication({
+    client,
+    initialState: {
+      workspacePath: args["repo"] ?? ".",
+      agentId: args["agent"] ?? "vg-code-balanced",
+      model: args["model"] ?? "openrouter/free",
+    },
+    onExit: () => {
+      process.exit(0);
+    },
+  });
+
+  app.start();
+}
+
+main().catch((err) => {
+  console.error(err instanceof Error ? err.message : err);
+  process.exit(1);
+});

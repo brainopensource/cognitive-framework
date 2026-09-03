@@ -1,3 +1,0 @@
-inReplyTo is an outbound-only correlation field on receipt/event/error frames.
-The Python mirror accepted it on inbound command frames although CommandFrame
-forbids it and no reader consumed it; B-O2-01 closed that ingress.

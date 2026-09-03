@@ -1,1 +1,0 @@
-24:00 is a second spelling of midnight; CT-08 wants one (ADR candidate D1-001).

@@ -1,1 +1,0 @@
-A generic pattern that spells a path is still a different kind.

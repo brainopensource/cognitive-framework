@@ -1,6 +1,0 @@
-runtime-service.schema.json inlined a near-copy of ApprovalDecision whose
-`signature` was `minLength: 1`, while approval-decision.schema.json -- the
-standalone authority -- has always required `^[0-9a-fA-F]{128}$`. The weaker
-of the two copies is the one that guarded ResolveApproval ingress, so any
-non-empty string passed as a signature. B-O2-01 retired the copy for a $ref
-and tightened the Python mirror to match.

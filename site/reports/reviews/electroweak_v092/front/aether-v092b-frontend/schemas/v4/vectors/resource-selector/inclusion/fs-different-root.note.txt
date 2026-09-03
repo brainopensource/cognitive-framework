@@ -1,1 +1,0 @@
-Same root is required before any path comparison.

@@ -1,1 +1,0 @@
-04 §5.3.1: no globs in a grant — expand at issuance.

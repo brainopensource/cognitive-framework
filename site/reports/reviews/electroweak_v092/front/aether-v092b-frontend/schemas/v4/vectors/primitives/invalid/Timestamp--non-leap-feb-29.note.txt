@@ -1,1 +1,0 @@
-2026 is not a leap year (ADR candidate D1-001).

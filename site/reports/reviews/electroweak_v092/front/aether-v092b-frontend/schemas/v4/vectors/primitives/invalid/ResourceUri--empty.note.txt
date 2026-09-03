@@ -1,1 +1,0 @@
-An empty resource URI selects nothing and everything.

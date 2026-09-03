@@ -1,1 +1,0 @@
-A digest is a string.

@@ -1,1 +1,0 @@
-CT-16: an empty principal is not an anonymous principal.

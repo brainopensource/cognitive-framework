@@ -1,1 +1,0 @@
-A frame that is not vg.4 is a version failure, never a validation failure.

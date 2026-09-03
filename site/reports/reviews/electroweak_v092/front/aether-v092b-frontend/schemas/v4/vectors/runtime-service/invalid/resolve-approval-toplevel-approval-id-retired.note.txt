@@ -1,3 +1,0 @@
-The mirror accepted approvalId/resolution beside the signed decision. Two
-sources for one authority-bearing value is a confused-deputy shape: an
-unsigned outer approvalId could disagree with the signed inner one. Refused.

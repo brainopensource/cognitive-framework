@@ -1,4 +1,0 @@
-{
-  "strategy": "recency-window",
-  "recency_window_k": 8
-}

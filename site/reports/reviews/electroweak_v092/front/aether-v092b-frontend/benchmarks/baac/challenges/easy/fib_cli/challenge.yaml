@@ -1,9 +1,0 @@
-id: fib_cli
-tier: easy
-name: Fibonacci CLI and Pure Function
-timeout_seconds: 25
-entrypoint: src/fib.py
-tags:
-  - math
-  - cli
-  - basics

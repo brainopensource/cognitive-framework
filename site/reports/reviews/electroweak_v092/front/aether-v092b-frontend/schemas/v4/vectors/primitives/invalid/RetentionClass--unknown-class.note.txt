@@ -1,1 +1,0 @@
-Retention drives deletion; an unknown class is a leak.

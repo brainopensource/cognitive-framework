@@ -1,1 +1,0 @@
-RFC 3339 permits a space separator; CT-08 does not.

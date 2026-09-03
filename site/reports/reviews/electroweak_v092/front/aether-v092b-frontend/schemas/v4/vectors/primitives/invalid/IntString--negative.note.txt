@@ -1,1 +1,0 @@
-IntString is non-negative.

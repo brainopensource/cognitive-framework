@@ -1,1 +1,0 @@
-CT-15: a provider-assigned identifier is echoed verbatim, never coerced.

@@ -1,2 +1,0 @@
-A free route costs zero at any volume. `pricing_known` is true and the source
-is `free_tier`: zero here is a known price, not an unknown one.

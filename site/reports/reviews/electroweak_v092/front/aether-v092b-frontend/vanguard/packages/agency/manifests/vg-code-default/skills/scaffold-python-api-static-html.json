@@ -1,6 +1,0 @@
-{
-  "id": "scaffold-python-api-static-html",
-  "name": "Scaffold Python API and static HTML",
-  "description": "Scaffold a clean Python HTTP API with static HTML frontend assets and unit test coverage.",
-  "bodyPath": "skills/scaffold-python-api-static-html.md"
-}

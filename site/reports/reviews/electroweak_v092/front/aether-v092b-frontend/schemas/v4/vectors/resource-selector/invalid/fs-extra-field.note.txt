@@ -1,1 +1,0 @@
-CT-11: writers emit only known schema.

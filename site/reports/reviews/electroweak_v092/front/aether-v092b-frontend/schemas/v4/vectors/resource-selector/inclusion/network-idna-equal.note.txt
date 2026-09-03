@@ -1,1 +1,0 @@
-IDNA normalisation: one host, two spellings.

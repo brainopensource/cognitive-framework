@@ -1,1 +1,0 @@
-{ "seq": "42", "kind": "ProposalProduced", "schemaVersion": "vg.4", "at": "2026-08-15T09:41:07.250Z", "tenantId": "t-1", "ownerId": "o-1", "principalId": "p-1", "roleAtAction": "operator", "payload": { "proposalId": "pr-1", "branchId": 0 } }

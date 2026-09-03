@@ -1,7 +1,0 @@
-{
-  "read": "fs.read",
-  "search": "fs.search",
-  "Read": "fs.read",
-  "Grep": "fs.search",
-  "view_file": "fs.read"
-}

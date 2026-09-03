@@ -1,5 +1,0 @@
-{
-  "mode": "assisted",
-  "threshold": "standard",
-  "escalate_on": ["proc.exec"]
-}

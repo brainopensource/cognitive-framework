@@ -1,1 +1,0 @@
-Fix the repository. Tools: read, search, patch, test. Minimal diffs. One tool per turn. Stop when tests pass.

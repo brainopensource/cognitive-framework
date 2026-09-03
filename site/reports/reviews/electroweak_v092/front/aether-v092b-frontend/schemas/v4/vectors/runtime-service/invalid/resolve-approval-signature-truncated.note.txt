@@ -1,2 +1,0 @@
-A truncated Ed25519 signature is hex and non-empty, so every length-blind
-check accepts it. Only the exact 128-character pattern rejects it at ingress.

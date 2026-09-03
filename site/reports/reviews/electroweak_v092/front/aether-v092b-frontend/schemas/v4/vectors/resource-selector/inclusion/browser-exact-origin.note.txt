@@ -1,1 +1,0 @@
-Exact origin equality.

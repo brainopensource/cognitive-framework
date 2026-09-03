@@ -1,7 +1,0 @@
-{
-  "kind": "table",
-  "table": "table://t",
-  "ranges": [
-    "10..5"
-  ]
-}

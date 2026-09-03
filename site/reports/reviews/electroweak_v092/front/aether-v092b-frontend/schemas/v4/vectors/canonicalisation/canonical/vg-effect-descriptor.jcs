@@ -1,1 +1,0 @@
-{"args":{"bytes":"2048","path":"/workspace/src/a.ts"},"cwd":"/workspace","idempotencyKey":"k-1","risk":"medium","sinkClass":"workspace","verb":"fs.write"}

@@ -1,1 +1,0 @@
-A resource URI is a string.

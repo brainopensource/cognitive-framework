@@ -1,1 +1,0 @@
-Lowercasing and the root dot are normalisation, not authority.

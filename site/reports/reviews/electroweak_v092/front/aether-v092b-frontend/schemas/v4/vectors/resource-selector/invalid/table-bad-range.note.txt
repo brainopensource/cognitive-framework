@@ -1,1 +1,0 @@
-No coordinate grammar is defined for this spelling (ADR candidate D1-003).

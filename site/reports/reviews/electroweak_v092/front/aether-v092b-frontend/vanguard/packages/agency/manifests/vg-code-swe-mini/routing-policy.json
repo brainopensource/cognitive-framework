@@ -1,5 +1,0 @@
-{
-  "strategy": "fallback",
-  "primary_model": "deepseek-coder",
-  "fallback_model": "qwen-2.5-coder"
-}

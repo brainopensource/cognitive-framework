@@ -1,1 +1,0 @@
-expectedSeq as a JSON integer -- the form test/runtime/test_runtime_service.py sends.

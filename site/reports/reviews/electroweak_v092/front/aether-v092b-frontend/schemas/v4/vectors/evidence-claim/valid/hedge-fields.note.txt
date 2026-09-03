@@ -1,1 +1,0 @@
-S8-J-01: optional supportCount / lastCorroboratedAt / protectionClass. Old readers survive (reader profile additionalProperties true). Staleness still ignores these fields.

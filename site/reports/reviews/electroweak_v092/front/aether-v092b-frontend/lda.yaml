@@ -1,8 +1,0 @@
-# LDA — LLM Docs Atlas: explicit repository profile selection.
-# Profiles are pure data (see tools/007_LLM_DOCS_ATLAS/profiles/). Selection is
-# EXPLICIT ONLY — via this key or $LDA_PROFILE — never inferred from repository
-# artifacts (no side-channel detection).
-profile: aether
-
-project:
-  name: AETHER

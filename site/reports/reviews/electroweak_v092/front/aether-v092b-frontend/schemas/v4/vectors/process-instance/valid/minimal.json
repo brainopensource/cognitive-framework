@@ -1,1 +1,0 @@
-{"processId":"process-1","definitionDigest":"sha256:c188bf036cdac32e1322650a7952210043888bc5fcdad17688fc5d885adf034b","currentState":"pending","allowedTransitions":["ApprovalResolved"],"pendingApprovals":["approval-1"],"boundEffectVerbs":["fs.patch"],"history":[]}

@@ -1,1 +1,0 @@
-CT-08: UTC only. An offset makes two events unorderable across languages.

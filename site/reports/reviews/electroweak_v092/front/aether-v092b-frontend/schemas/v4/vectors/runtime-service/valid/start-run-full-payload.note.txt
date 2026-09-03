@@ -1,4 +1,0 @@
-Every optional StartRun field the served implementation reads: profileId, model
-and episodeId (service.py _cmd_StartRun) and the expectedSeq CAS guard.
-model and episodeId were accepted by the Python mirror but absent from the
-schema before B-O2-01; this vector freezes them into both readers.

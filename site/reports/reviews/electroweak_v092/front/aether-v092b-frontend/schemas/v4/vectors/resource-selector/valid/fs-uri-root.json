@@ -1,7 +1,0 @@
-{
-  "kind": "fs",
-  "root": "file:///workspace",
-  "paths": [
-    "src/main.ts"
-  ]
-}

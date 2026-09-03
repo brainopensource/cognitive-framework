@@ -1,6 +1,0 @@
-{
-  "id": "read-receipt-before-repatch",
-  "name": "Read syntax receipts before repatch",
-  "description": "Check syntax observations and test execution receipts before applying follow-up patches.",
-  "bodyPath": "skills/read-receipt-before-repatch.md"
-}

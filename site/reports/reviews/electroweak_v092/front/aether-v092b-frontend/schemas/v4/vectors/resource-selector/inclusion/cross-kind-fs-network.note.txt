@@ -1,1 +1,0 @@
-CT-52: any cross-kind comparison is denied, never intersected.

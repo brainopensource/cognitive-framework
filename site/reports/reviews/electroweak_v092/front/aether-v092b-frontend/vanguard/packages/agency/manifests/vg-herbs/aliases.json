@@ -1,8 +1,0 @@
-{
-  "read": "fs.read",
-  "search": "fs.search",
-  "surgical_patch": "patch.apply",
-  "patch": "patch.apply",
-  "test": "proc.exec",
-  "web_distill": "web.distill"
-}

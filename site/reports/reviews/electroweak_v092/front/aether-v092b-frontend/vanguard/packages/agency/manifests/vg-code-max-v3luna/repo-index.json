@@ -1,1 +1,0 @@
-{"mode":"complete-map","include":["paths","symbols","imports","callers","tests","build_commands"],"exclude":[".git",".vanguard/blobs","node_modules","__pycache__"],"refresh_after_patch":true}

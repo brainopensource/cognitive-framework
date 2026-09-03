@@ -1,7 +1,0 @@
-{
-  "kind": "network",
-  "hosts": [
-    "example.com"
-  ],
-  "ports": []
-}

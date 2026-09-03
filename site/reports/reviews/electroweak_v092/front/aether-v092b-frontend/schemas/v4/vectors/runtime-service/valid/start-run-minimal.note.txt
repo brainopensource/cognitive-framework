@@ -1,1 +1,0 @@
-Smallest accepted StartRun: only the three schema-required payload fields.

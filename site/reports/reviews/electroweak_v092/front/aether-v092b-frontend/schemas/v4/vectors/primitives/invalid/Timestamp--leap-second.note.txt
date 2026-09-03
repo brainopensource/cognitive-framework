@@ -1,1 +1,0 @@
-RFC 3339 permits :60; no two arithmetic libraries agree on it (ADR candidate D1-001).

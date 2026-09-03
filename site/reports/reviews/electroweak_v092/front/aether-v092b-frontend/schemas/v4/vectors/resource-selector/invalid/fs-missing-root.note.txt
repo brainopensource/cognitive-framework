@@ -1,1 +1,0 @@
-The root is what makes the paths mean anything.

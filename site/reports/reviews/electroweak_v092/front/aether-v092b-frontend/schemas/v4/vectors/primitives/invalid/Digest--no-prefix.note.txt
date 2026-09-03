@@ -1,1 +1,0 @@
-CT-09: the algorithm prefix is part of the value.

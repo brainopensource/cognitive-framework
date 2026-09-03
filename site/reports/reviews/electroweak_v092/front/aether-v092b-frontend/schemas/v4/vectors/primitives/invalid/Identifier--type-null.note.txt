@@ -1,1 +1,0 @@
-CT-05: null is not an identifier.

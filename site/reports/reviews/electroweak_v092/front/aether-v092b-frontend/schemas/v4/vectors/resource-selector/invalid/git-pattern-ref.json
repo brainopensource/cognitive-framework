@@ -1,7 +1,0 @@
-{
-  "kind": "git",
-  "repo": "git://h/r.git",
-  "refs": [
-    "refs/heads/release/*"
-  ]
-}

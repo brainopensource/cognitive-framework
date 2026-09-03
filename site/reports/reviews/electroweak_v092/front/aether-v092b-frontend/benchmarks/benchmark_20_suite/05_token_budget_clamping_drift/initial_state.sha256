@@ -1,4 +1,0 @@
-78ced47e71ccb8e9ac3bd4c7103b148a33feb35aae8e61bc787591d5f76e077e  docs/SPEC.md
-7e13e888c827cc3007a8ca9a1b5539d9937314af37416b84aef2ff63c1e7221d  src/budget.py
-75a61a5ccfdbc8b3a8192ff6f04a0f80ef34002663404f184f157f1c7a220a62  src/pricing.py
-18e8de5108f5f1eaa4cbc1b4f1451c58177fd809f81370baebc3d940ac5cb685  test/test_budget_falsifier.py

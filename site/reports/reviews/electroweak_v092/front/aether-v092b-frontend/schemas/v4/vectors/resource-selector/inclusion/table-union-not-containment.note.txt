@@ -1,1 +1,0 @@
-Containment is per parent range; a union is an approximation and would widen.

@@ -1,1 +1,0 @@
-An origin is not a host-and-port grant.

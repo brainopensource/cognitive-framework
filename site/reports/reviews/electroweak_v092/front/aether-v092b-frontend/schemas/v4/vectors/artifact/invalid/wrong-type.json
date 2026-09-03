@@ -1,1 +1,0 @@
-{"artifactId":"artifact-1","kind":"playbook","class":"enforcement","hypothesis":"reduces regressions","evidenceRefs":[],"invalidationConditions":[{"condition":"suite fails","checkKind":"automatic","checkRef":"eval-suite"}],"riskDelta":"low","contentDigest":"sha256:1111111111111111111111111111111111111111111111111111111111111111"}

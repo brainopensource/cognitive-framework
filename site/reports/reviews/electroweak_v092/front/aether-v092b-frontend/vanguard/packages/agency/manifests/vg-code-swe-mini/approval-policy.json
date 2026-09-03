@@ -1,4 +1,0 @@
-{
-  "threshold": "strict",
-  "escalate_on": ["patch.apply", "proc.exec"]
-}

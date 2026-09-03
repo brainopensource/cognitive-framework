@@ -1,1 +1,0 @@
-RFC 4122 variant bits must be 8, 9, a or b.

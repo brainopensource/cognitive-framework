@@ -1,1 +1,0 @@
-A short ref expands to a branch. A tag is a different ref.

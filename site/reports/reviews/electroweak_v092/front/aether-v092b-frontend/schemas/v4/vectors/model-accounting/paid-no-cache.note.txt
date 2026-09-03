@@ -1,2 +1,0 @@
-Cached tokens are billed at the cached rate and excluded from the uncached
-prompt count. With no cache hits the two paths must agree.

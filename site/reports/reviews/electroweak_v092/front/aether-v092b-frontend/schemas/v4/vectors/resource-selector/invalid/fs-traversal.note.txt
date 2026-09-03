@@ -1,2 +1,0 @@
-D-2 collapses relative segments; an ascent past the start of the path cannot be
-resolved and is a widening, so it fails to parse rather than being clamped.

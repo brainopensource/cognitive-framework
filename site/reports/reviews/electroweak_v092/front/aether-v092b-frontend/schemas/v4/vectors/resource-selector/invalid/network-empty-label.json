@@ -1,9 +1,0 @@
-{
-  "kind": "network",
-  "hosts": [
-    "api..example.com"
-  ],
-  "ports": [
-    443
-  ]
-}

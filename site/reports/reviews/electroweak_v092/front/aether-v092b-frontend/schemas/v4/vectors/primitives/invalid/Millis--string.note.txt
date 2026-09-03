@@ -1,1 +1,0 @@
-Millis is a JSON integer, not an IntString.

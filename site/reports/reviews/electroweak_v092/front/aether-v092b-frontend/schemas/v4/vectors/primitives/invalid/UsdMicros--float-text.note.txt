@@ -1,1 +1,0 @@
-CT-06: currency is integer micro-units.

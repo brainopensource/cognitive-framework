@@ -181,7 +181,34 @@ class ApplicationService:
         store_path = resolved_state / "events.sqlite3"
         blobs = FileBlobStore(resolved_state / "blobs")
 
-        if model is None:
+        if isinstance(model, str):
+            model_id = model.strip()
+            model = None
+            if model_id:
+                selected_model = select_model(
+                    model_port or "openrouter",
+                    model_name=model_id,
+                    allow_paid=allow_paid,
+                ).model
+            else:
+                selected_model = None
+            if selected_model is not None:
+                pass
+            elif model_port:
+                if isinstance(model_port, str):
+                    selected_model = select_model(
+                        model_port,
+                        model_name=planner_model,
+                        allow_paid=allow_paid,
+                    ).model
+                else:
+                    selected_model = model_port
+            elif profile_id in {"local", "ci", "fast"}:
+                from ..adapters.models.fake import FakeModel
+                selected_model = FakeModel([{"kind": "finish", "note": "local preview"}])
+            else:
+                selected_model = select_model("openrouter", model_name=planner_model, allow_paid=allow_paid).model
+        elif model is None:
             if model_port:
                 if isinstance(model_port, str):
                     selected_model = select_model(

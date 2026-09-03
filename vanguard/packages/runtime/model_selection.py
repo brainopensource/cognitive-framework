@@ -42,6 +42,8 @@ DEFAULT_OLLAMA_MODEL = "deepseek-r1"
 #: a 60s ceiling turned that into `instrument_error: timed out` on the larger
 #: briefs -- an instrument failure that reads like a model scoring zero.
 DEFAULT_LOCAL_TIMEOUT_SECONDS = 300.0
+#: OpenRouter free routes are capacity-queued; 30s made the TUI look idle.
+DEFAULT_OPENROUTER_TIMEOUT_SECONDS = 120.0
 #: `D-13` / `S7-C-06`: `top` is empty until the Project Lead names ids.
 FREE_BAND = "free"
 
@@ -187,6 +189,8 @@ def select_model(
         key = _find_env_key("OPENROUTER_API_KEY", environ)
         if not key:
             raise ModelUnavailable(choice, "OPENROUTER_API_KEY is not set")
+        openrouter_timeout = timeout_seconds or DEFAULT_OPENROUTER_TIMEOUT_SECONDS
+        openrouter_environ = dict(environ) if environ is not None else None
         if paid_allowed or models:
             if not model_name:
                 allowed = list(free_models() if free_models is not None else _free_band())
@@ -201,7 +205,13 @@ def select_model(
             return SelectedModel(
                 port=choice,
                 model=OpenRouterModel(
-                    model=name, models=models, stream=stream_choice, reasoning_effort=effort_choice),
+                    model=name,
+                    models=models,
+                    stream=stream_choice,
+                    reasoning_effort=effort_choice,
+                    request_timeout=openrouter_timeout,
+                    environ=openrouter_environ,
+                ),
                 label=f"{choice}:{name}",
             )
 
@@ -232,7 +242,13 @@ def select_model(
         return SelectedModel(
             port=choice,
             model=OpenRouterModel(
-                model=name, models=models, stream=stream_choice, reasoning_effort=effort_choice),
+                model=name,
+                models=models,
+                stream=stream_choice,
+                reasoning_effort=effort_choice,
+                request_timeout=openrouter_timeout,
+                environ=openrouter_environ,
+            ),
             label=f"{choice}:{name}",
         )
 
@@ -242,6 +258,8 @@ def select_model(
         key = environ.get("OPENROUTER_API_KEY")
         if not key:
             raise ModelUnavailable(choice, "OPENROUTER_API_KEY is not set")
+        openrouter_timeout = timeout_seconds or DEFAULT_OPENROUTER_TIMEOUT_SECONDS
+        openrouter_environ = dict(environ) if environ is not None else None
         if paid_allowed:
             if not model_name:
                 allowed = list(free_models() if free_models is not None else _free_band())
@@ -252,8 +270,14 @@ def select_model(
                 except (ModelPolicyError, ValueError) as exc:
                     raise ModelUnavailable(choice, f"model {model_name!r} is not authorized in models_registry.json: {exc}") from exc
             return SelectedModel(
-                port="router", model=OpenRouterModel(
-                    model=name, stream=False, reasoning_effort="none"),
+                port="router",
+                model=OpenRouterModel(
+                    model=name,
+                    stream=False,
+                    reasoning_effort="none",
+                    request_timeout=openrouter_timeout,
+                    environ=openrouter_environ,
+                ),
                 label=f"router:{name}",
             )
 
@@ -264,8 +288,14 @@ def select_model(
         if name not in allowed:
             raise ModelUnavailable(choice, f"{name!r} is not in the free band; refusing to spend")
         return SelectedModel(
-            port="router", model=OpenRouterModel(
-                model=name, stream=False, reasoning_effort="none"),
+            port="router",
+            model=OpenRouterModel(
+                model=name,
+                stream=False,
+                reasoning_effort="none",
+                request_timeout=openrouter_timeout,
+                environ=openrouter_environ,
+            ),
             label=f"router:{name}",
         )
 

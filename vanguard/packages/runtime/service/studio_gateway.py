@@ -35,7 +35,7 @@ _AGENCY_MANIFESTS = Path("vanguard") / "packages" / "agency" / "manifests"
 #: Execution profiles the runtime actually presets. Anything else is an
 #: agent name that reached the wrong field.
 _EXECUTION_PROFILES = frozenset({"product", "local", "sandboxed", "hermetic",
-                                 "standard", "ci", "fast", "code-default"})
+                                 "standard", "ci", "fast", "plan"})
 
 #: Manifests ship with the runtime, so a workspace that is not this repository
 #: still resolves `vg-code-default` instead of failing to find a harness.
@@ -374,12 +374,11 @@ class StudioGatewayHandler(BaseHTTPRequestHandler):
             if value:
                 run_payload[key] = str(value)
 
-        # `_run_worker_thread` defaults this to "code-default", which is an
-        # agent name and not a member of PRESETS, so every run died on
-        # "unknown execution profile". `local` is the preset that runs on the
-        # operator's own host, which is what a desktop session is.
+        # `_run_worker_thread` used to default this to "code-default", an
+        # agent name, which is not a PRESET. Interactive product sessions
+        # use `product` so OpenRouter is selected instead of FakeModel.
         profile_id = str(payload.get("profileId") or "").strip()
-        run_payload["profileId"] = profile_id if profile_id in _EXECUTION_PROFILES else "local"
+        run_payload["profileId"] = profile_id if profile_id in _EXECUTION_PROFILES else "product"
 
         cmd_frame = {
             "version": "vg.4",

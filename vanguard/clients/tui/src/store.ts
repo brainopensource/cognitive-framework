@@ -146,6 +146,7 @@ export class TuiStore {
   private abortController: AbortController | null = null;
   private lastClient?: RuntimeClient;
   private readonly pinnedAgentId?: string;
+  private readonly pinnedWorkspacePath?: string;
 
   constructor(initial: Partial<TuiStoreState> = {}, client?: RuntimeClient) {
     this.persistence = new NodeFsPersistenceAdapter();
@@ -156,6 +157,7 @@ export class TuiStore {
       initialAgentId: initial.agentId ?? "vg-code-balanced",
     });
     this.pinnedAgentId = initial.agentId;
+    this.pinnedWorkspacePath = initial.workspacePath;
 
     const ctrlState = this.controller.getState();
     const wsPath = initial.workspacePath ?? ctrlState.currentWorkspace;
@@ -211,6 +213,7 @@ export class TuiStore {
 
   private async initPersistence(): Promise<void> {
     await this.controller.restoreFromPersistence();
+    if (this.pinnedWorkspacePath) this.selectWorkspace(this.pinnedWorkspacePath);
     if (this.pinnedAgentId) this.selectAgent(this.pinnedAgentId);
   }
 
@@ -645,7 +648,7 @@ export class TuiStore {
       model: cur.model,
       runId: cur.runId || undefined,
       manifestPath,
-      // Execution profile is local vs plan — never the agent/harness id.
+      // Execution profile is product vs plan — never the agent/harness id.
       profileId: executionProfileFor(cur.planMode),
     });
 

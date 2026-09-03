@@ -1084,8 +1084,10 @@ class RuntimeService:
 
                 manifest_path = ctx.manifest_path
                 repo_path = ctx.repo_path
-                profile_id = str(payload.get("profileId", "code-default"))
+                profile_id = str(payload.get("profileId") or "product")
                 model = payload.get("model")
+                if isinstance(model, str) and not model.strip():
+                    model = None
 
                 task_context = TaskContext(
                     brief=ctx.brief,

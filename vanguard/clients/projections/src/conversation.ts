@@ -105,6 +105,26 @@ export function toConversationTurns(envelopes: readonly EventEnvelope[]): Conver
     if (kind === "EpisodeCompleted" || kind === "RunCompleted" || kind === "VerdictProduced") {
       currentAgentTurn.verdict = String(env.payload.verdict ?? env.payload.outcome ?? "satisfied");
     }
+
+    if (kind === "RunFailed") {
+      const err = String(env.payload.error ?? env.payload.message ?? env.payload.reason ?? "Run failed");
+      if (currentAgentTurn.text) {
+        currentAgentTurn.text += "\n\n[Error: " + err + "]";
+      } else {
+        currentAgentTurn.text = "[Error: " + err + "]";
+      }
+      currentAgentTurn.verdict = "failed";
+    }
+
+    if (kind === "RunCancelled") {
+      const reason = String(env.payload.reason ?? "User cancelled");
+      if (currentAgentTurn.text) {
+        currentAgentTurn.text += "\n\n[Cancelled: " + reason + "]";
+      } else {
+        currentAgentTurn.text = "[Cancelled: " + reason + "]";
+      }
+      currentAgentTurn.verdict = "cancelled";
+    }
   }
 
   return turns.filter((t) => t.text.trim().length > 0 || t.activityCards.length > 0 || t.verdict);

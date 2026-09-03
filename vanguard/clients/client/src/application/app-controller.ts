@@ -243,6 +243,8 @@ export class FrontendAppController {
   private persistence: FrontendPersistencePort;
   private state: AppControllerState;
   private listeners = new Set<(state: AppControllerState) => void>();
+  private readonly pinnedWorkspace?: string;
+  private readonly pinnedAgentId?: string;
 
   constructor(options?: {
     client?: RuntimeClient;
@@ -252,6 +254,8 @@ export class FrontendAppController {
     initialAgentId?: string;
     initialProviders?: ModelProviderConfig[];
   }) {
+    this.pinnedWorkspace = options?.initialWorkspace;
+    this.pinnedAgentId = options?.initialAgentId;
     this.persistence = options?.persistence ?? new LocalStoragePersistenceAdapter();
     const settings = mergeSettings(DEFAULT_FRONTEND_SETTINGS, options?.initialSettings);
     const initialWorkspace = options?.initialWorkspace ?? settings.general.defaultWorkspace;
@@ -394,8 +398,8 @@ export class FrontendAppController {
           conversations: nextConversations,
           recentWorkspaces: nextRecents,
           activeConversationId: activeConv?.id ?? s.activeConversationId,
-          currentWorkspace: nextRecents[0] || (activeConv?.workspacePath !== "." ? activeConv?.workspacePath : undefined) || nextSettings.general?.defaultWorkspace || s.currentWorkspace,
-          selectedAgentId: activeConv?.agentId || nextSettings.general?.defaultAgent || s.selectedAgentId,
+          currentWorkspace: this.pinnedWorkspace ?? nextRecents[0] ?? (activeConv?.workspacePath !== "." ? activeConv?.workspacePath : undefined) ?? nextSettings.general?.defaultWorkspace ?? s.currentWorkspace,
+          selectedAgentId: this.pinnedAgentId ?? activeConv?.agentId ?? nextSettings.general?.defaultAgent ?? s.selectedAgentId,
         };
       });
 

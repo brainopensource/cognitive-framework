@@ -41,8 +41,8 @@ export function canonicalHarnessId(agentId: string): string {
   return HARNESS_ALIASES[trimmed] ?? trimmed;
 }
 
-export function executionProfileFor(planMode: boolean): "plan" | "local" {
-  return planMode ? "plan" : "local";
+export function executionProfileFor(planMode: boolean): "plan" | "product" {
+  return planMode ? "plan" : "product";
 }
 
 /**

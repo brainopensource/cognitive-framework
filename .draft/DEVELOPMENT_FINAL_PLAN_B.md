@@ -6,17 +6,25 @@ truth_plane: PROPOSED
 status: draft
 owner: repository-governance
 version: "1.0.0"
-observed_head: "ebad36e675f0eab6c4635851a91423f5a6541290"
+triad_role: ground-truth
+triad_complements: [A, v2]
+observed_head: "66aa7a3c0c31cb68a2c0387a1ddf237c80084253"
 observed_branch: "main"
 observed_worktree: dirty
-lda_index_head: "7e08462c2cbb"
-lda_freshness_vs_head: STALE
+lda_index_head: "66aa7a3c0c31"
+lda_freshness_vs_head: FRESH
+lock_head: "66aa7a3c0c31"
+lock_date: 2026-09-03
 created: 2026-09-03
 last_verified: 2026-09-03
 supersedes: []
 superseded_by: null
-does_not_modify: ".draft/DEVELOPMENT_FINAL_PLAN.md"
+historical_does_not_modify: ".draft/DEVELOPMENT_FINAL_PLAN.md"
+historical_observed_head: "ebad36e675f0eab6c4635851a91423f5a6541290"
+historical_lda_index_head: "7e08462c2cbb"
+historical_lda_freshness_vs_head: STALE
 navigation_mode: degraded-locator-plus-source
+lock_navigation_mode: lda-fresh-plus-source
 paid_usd_this_session: 0.00
 ---
 
@@ -26,7 +34,43 @@ paid_usd_this_session: 0.00
 > Current source and executable tests outrank this file, outrank [`.draft/DEVELOPMENT_FINAL_PLAN.md`](DEVELOPMENT_FINAL_PLAN.md), and outrank every research treatise cited below.
 > Canonical synchronization belongs in the ordinary execution workflow after a proposal is accepted.
 
+## Locked triad roles (lock 2026-09-03)
+
+This file is **Plan B (ground truth)** in a three-document lock. Shared lock preamble is duplicated so each document stands alone. This triad **does not authorize** implementation, kernel AST, a second `EpisodeEngine`, or default HYDRA.
+
+```text
+A  = Program law: reliability identity, wave order, competency profiles,
+     formal model, per-class evidence, non-goals, D-01–D-10
+B  = Ground truth: live inventory, proven gaps, lattice placement,
+     tickets 01–35, operator one-pager (01–13 first)
+v2 = Architecture catalog: 16 primitives (map, not new cores),
+     context economics, 2PC/tamper/dialect mechanics, later phenotypes
+     (director / HYDRA / mutation) as [PROPOSAL]
+```
+
+Build order (locked, from B, aligned with the SOTA suggestion):
+
+```text
+cannot-lie → can-resume → can-see → can-change-many-files
+  → qualify one EpisodeEngine coding agent
+  → then meta / specialists / campaign / skills-memory
+```
+
+**Lock identity.** `lock_head: 66aa7a3c0c31`, `lock_date: 2026-09-03`, `lda_freshness: FRESH` (index matches HEAD). Planning-session snapshot HEAD `ebad36e675f0eab6c4635851a91423f5a6541290` / LDA `7e08462c2cbb` `STALE` is retained in §2 and is **not** the lock subject.
+
+**Dual mission** (from v2 §1.1 + SOTA suggestion). Vanguard/AETHER is simultaneously (1) a closed-loop coding harness (`Coding Max` / `EpisodeEngine` product path) and (2) a composable agent framework (hexagonal substrate, packs, ports). The CLI (`vg`) is an operator surface — a client of `ApplicationService` — not the brain. CLI must not patch, grade, or enlarge budget.
+
+**Reliability identity** (same law as §1):
+
+\[
+R = \prod_{t} \Pr(\text{honest progress}_t \mid \text{honest state}_{t-1})
+\]
+
+**Complements.** Plan A = law/profiles/done-definitions. Plan v2 = architecture catalog and later phenotypes as `[PROPOSAL]`. Critical-path numbering remains tickets **01–35** in this file. YAML `does_not_modify` A is **retired**; this file complements A and v2 rather than promising not to mention them.
+
 ## Epistemic legend (applies to every later claim)
+
+This legend is **shared law** for A, B, and v2. Do not delete this copy.
 
 | Tag | Meaning | Promotion rule |
 |---|---|---|
@@ -36,12 +80,15 @@ paid_usd_this_session: 0.00
 | **PROPOSAL** | Recommended next work | Requires a later ticket, falsifier, and WIP slot |
 | **ASPIRATION** | Desired competitive position | Forbidden as a forecast of a specific score |
 | **CONTRADICTION** | Two authorities disagree; source wins | Record both sides; do not silently pick the nicer one |
-| **SUPERSEDED** | Attractive draft idea that current lattice or source rejects | Keep the insight, drop the proposed location or second runtime |
+| **SUPERSEDED** | Attractive draft idea that current lattice or source rejects | Keep the text in place, mark `[PROPOSAL]`, and cite the better location. Do not drop the paragraph. |
+
+**Historical SUPERSEDED rule (pre-lock, 2026-09-03 planning session).** The original cell read: “Keep the insight, drop the proposed location or second runtime.” That “drop the text” reading is **rejected** by this lock. Insights stay in full; only the proposed location or second runtime may be marked `[PROPOSAL]` with a pointer to the lattice-correct write-up.
 
 ---
 
 ## Table of contents
 
+0. [Locked triad roles](#locked-triad-roles-lock-2026-09-03)
 1. [Executive decision](#1-executive-decision)
 2. [Evidence boundary and snapshot](#2-evidence-boundary-and-snapshot)
 3. [Current implementation inventory](#3-current-implementation-inventory)
@@ -63,6 +110,9 @@ paid_usd_this_session: 0.00
 19. [Risks](#19-risks)
 20. [References](#20-references)
 21. [Session validation appendix](#21-session-validation-appendix)
+22. [Live tool/verb inventory](#22-live-toolverb-inventory-lock-head-66aa7a3c)
+23. [Product target loop](#23-product-target-loop)
+24. [Cross-link matrix](#appendix-e--cross-link-matrix-locked-triad)
 
 ---
 
@@ -119,6 +169,22 @@ The user-requested 60–90 band is therefore a **mixture**: 60 is a plausible la
 
 ### 2.1 Identity (FACT)
 
+**Lock identity (2026-09-03, HEAD `66aa7a3c0c31`).** LDA index matches this HEAD (`FRESH`). This is the lock subject.
+
+| Field | Value |
+|---|---|
+| Repository | `/home/rock-dev/Coding/cognitive-framework` |
+| Branch | `main` |
+| Lock HEAD | `66aa7a3c0c31cb68a2c0387a1ddf237c80084253` |
+| LDA index HEAD | `66aa7a3c0c31` |
+| LDA freshness vs HEAD | `FRESH` |
+| Lock date | 2026-09-03 |
+| Package version string | `0.9.0b1` in `pyproject.toml` (not M-9 acceptance) |
+| Kernel TCB | **1386 / 1438** logical LOC (lock-time reconfirm not required for this draft-lock) |
+| Domain-blindness | Invariant I-7 still law; kernel remains domain-blind |
+
+**Planning-session snapshot (historical, HEAD `ebad36e`).** The following table is the original inspection identity from the 2026-09-03 planning session that produced this draft. It is **not** the lock subject. Kept in full:
+
 | Field | Value |
 |---|---|
 | Repository | `/home/rock-dev/Coding/cognitive-framework` |
@@ -132,6 +198,10 @@ The user-requested 60–90 band is therefore a **mixture**: 60 is a plausible la
 
 ### 2.2 Navigation health (FACT, degraded mode)
 
+**Lock-time FACT (HEAD `66aa7a3c0c31`, 2026-09-03).** `uv run lda identity --json` reports `index_head_sha=66aa7a3c0c31`, `freshness_vs_head=FRESH`, `dirty=true`. `uv run lda doctor --json` reports `index_healthy=true`, `status=HEALTHY`. [`docs/execution/active.md`](../docs/execution/active.md) is **absent**. Execution runway files present: [`docs/execution/tasks.md`](../docs/execution/tasks.md), [`docs/execution/spec.md`](../docs/execution/spec.md), [`docs/execution/milestones.md`](../docs/execution/milestones.md), [`docs/execution/backlog.md`](../docs/execution/backlog.md). W-092-F0 HEAD-bound LDA is satisfied for this lock worktree. `FEATURE_SPEC.md` remains a historical name in this draft; the current delta file is `spec.md`.
+
+**Historical CONTRADICTION (ebad36e).** The following table and two CONTRADICTION paragraphs were true at planning-session HEAD `ebad36e` with LDA `STALE` vs index `7e08462c2cbb`. They are retained as the forensic snapshot. They are **not** current at lock HEAD `66aa7a3c`.
+
 | Artifact | Recorded subject | Current HEAD | Usable as |
 |---|---|---|---|
 | `uv run lda identity --json` | `index_head_sha=7e08462c2cbb`, `freshness_vs_head=STALE`, `dirty=true`, `local_changes=58` | `ebad36e…` | Locator only |
@@ -144,9 +214,9 @@ The user-requested 60–90 band is therefore a **mixture**: 60 is a plausible la
 
 **Degraded mode declared.** LDA was **not** rebuilt (would have mutated `.lda/index.db` without being requested). Indexes were used only to pin symbols. All architectural claims below were checked against current source, current tests, or official URLs.
 
-**CONTRADICTION.** [`docs/execution/milestones.md`](../docs/execution/milestones.md) marks **W-092-F0** as `DONE` with predicate “LDA/index health is HEAD-bound”. Current `lda identity` reports `STALE` versus HEAD `ebad36e`. Plan B treats W-092-F0 as **not currently satisfied** for this worktree, regardless of the milestone table.
+**Historical CONTRADICTION (ebad36e).** [`docs/execution/milestones.md`](../docs/execution/milestones.md) marks **W-092-F0** as `DONE` with predicate “LDA/index health is HEAD-bound”. Current `lda identity` reports `STALE` versus HEAD `ebad36e`. Plan B treats W-092-F0 as **not currently satisfied** for this worktree, regardless of the milestone table.
 
-**CONTRADICTION.** [`README.md`](../README.md) says [`docs/execution/active.md`](../docs/execution/active.md) is the sole current-state source. The file currently contains the same `id: execution.tasks` body as [`docs/execution/tasks.md`](../docs/execution/tasks.md). Plan B treats `tasks.md` + `FEATURE_SPEC.md` as the in-flight delta contract and treats `active.md` as a duplicate, not a second authority.
+**Historical CONTRADICTION (ebad36e).** [`README.md`](../README.md) says [`docs/execution/active.md`](../docs/execution/active.md) is the sole current-state source. The file currently contains the same `id: execution.tasks` body as [`docs/execution/tasks.md`](../docs/execution/tasks.md). Plan B treats `tasks.md` + `FEATURE_SPEC.md` as the in-flight delta contract and treats `active.md` as a duplicate, not a second authority.
 
 ### 2.3 Commands run this session (FACT)
 
@@ -229,6 +299,8 @@ Sections 3–4 are FACT/MECHANISM. Section 5 is mathematics with stated assumpti
 
 Legend for **Disposition**: `keep` = preserve and harden; `repair` = present but untruthful; `promote` = move to the correct layer; `defer` = do not productize yet; `reject-as-default` = keep as experiment, never the production loop.
 
+Lock-time verb inventory matching pack YAML is appended as **§22** (does not replace this section). Product target loop is **§23**. Edit/2PC mechanics live in v2; law/profiles live in A.
+
 ### 3.1 Substrate and control plane
 
 | Capability | Owner | Actual implementation | Current evidence | Gap | Disposition |
@@ -257,7 +329,7 @@ Legend for **Disposition**: `keep` = preserve and harden; `repair` = present but
 |---|---|---|---|---|---|
 | HarnessSession | `runtime/session.py` L465–1443 | constructs one kernel; injects meta-controller; observes completion; exterior evaluate | session tests exist | test-count regex fail-closed (good) but coarse; resume dumps state into L3 | repair |
 | CodingTaskState | `runtime/task_state.py` L84–234, `fold_task_state` L237+ | discoveries, dead ends, todos, routes, implicated files | `test_coding_state` OK | lives in **runtime**, not domain; not consumed by ContextCompiler; `ProposalProduced` verification inference uses `"test" in action.lower()` | promote schema to domain; keep fold in runtime |
-| SemanticTaskState | `docs/execution/FEATURE_SPEC.md` §3 | **absent** (`vanguard/packages/domain/task_state.py` does not exist) | claimed falsifier `test/contracts/test_semantic_task_state.py` absent | CMX-09 T2 not implemented | implement as domain value, fold from events |
+| SemanticTaskState | `docs/execution/FEATURE_SPEC.md` §3 | **absent** / **MISSING** (`vanguard/packages/domain/task_state.py` does not exist) | claimed falsifier `test/contracts/test_semantic_task_state.py` absent | CMX-09 T2 not implemented | implement as domain value, fold from events |
 | Checkpoints | `runtime/checkpoints.py` | blob-verified reconstruct; warm/cold parity | RF-96 tests exist | optional (needs blobs) | keep |
 | ApplicationService.resume | `runtime/app_service.py` L385–389 | `episode_id=f"episode-{resolved_run_id}"` | RF-25 proves **event fold** continuation | synthesized episode id may not match original ledger episode | repair |
 | CodingMaxFacade | `apps/coding_max/facade.py` L23–71 | thin client of `ApplicationService`; presets `fast|balanced|max` → `agency/manifests/vg-code-{preset}/manifest.json` | mechanism | no intelligence in apps; correct lattice | keep thin |
@@ -407,7 +479,7 @@ Octopus mailbox, CoordinationPlan DAG, outer-loop director, Hydra emergent agenc
 
 | FEATURE_SPEC path | Source on HEAD `ebad36e` |
 |---|---|
-| `vanguard/packages/domain/task_state.py` | missing |
+| `vanguard/packages/domain/task_state.py` | missing / **MISSING** |
 | `vanguard/packages/adapters/environment/transaction.py` | missing |
 | `vanguard/packages/runtime/governance/tamper_shield.py` | missing |
 | `vanguard/packages/agency/context/progressive.py` | missing |
@@ -860,7 +932,7 @@ Shared rollback for every wave: revert the wave’s files; do not weaken falsifi
 
 - **Objective.** Domain `SemanticTaskState` + runtime fold; resume preserves episode_id; state not in L3; 40-turn / crash continuation.
 - **Dependencies.** Wave 1 (do not persist false completes).
-- **Source files.** **Create** `vanguard/packages/domain/task_state.py`; fold in `runtime/task_state.py` or sibling; `app_service.py` resume; `session.py` L619–622; `agency/context/packet.py` identity fields.
+- **Source files.** **Create** `vanguard/packages/domain/task_state.py` (**MISSING** in HEAD); fold in `runtime/task_state.py` or sibling; `app_service.py` resume; `session.py` L619–622; `agency/context/packet.py` identity fields.
 - **Contracts.** FEATURE_SPEC §3 plus provenance fields already on `CodingTaskState` (discoveries, dead_ends) merged, not duplicated forever.
 - **Packages.** domain, runtime, agency (view/compiler consumption), tests/contracts.
 - **Tests.** `test/contracts/test_semantic_task_state.py` as specified; RF-25 still green; new test: L3 prefix stable across resume+write.
@@ -912,7 +984,7 @@ Shared rollback for every wave: revert the wave’s files; do not weaken falsifi
 - **Rollback.** If score requires ungated finish, rollback Wave 1 violation.
 - **Exit gate.** Single-agent control exists as a numbered receipt.
 
-### Wave 6 — Adaptive strategy and metacognition
+### Wave 6 — Adaptive strategy and metacognition `[PROPOSAL]`
 
 - **Objective.** Meta-controller on only if paired study vs Wave 5 control is valid (M-6.5).
 - **Dependencies.** Wave 5 receipt.
@@ -925,7 +997,7 @@ Shared rollback for every wave: revert the wave’s files; do not weaken falsifi
 - **Rollback.** Controller off.
 - **Exit gate.** Documented disposition.
 
-### Wave 7 — Specialist agents and topology treatments
+### Wave 7 — Specialist agents and topology treatments `[PROPOSAL]`
 
 - **Objective.** Named treatments against control; merge = exterior select.
 - **Dependencies.** Wave 5; Wave 6 optional.
@@ -938,7 +1010,7 @@ Shared rollback for every wave: revert the wave’s files; do not weaken falsifi
 - **Rollback.** Default topology sequential single agent.
 - **Exit gate.** Catalog of treatments with receipts.
 
-### Wave 8 — Durable outer-loop campaign director
+### Wave 8 — Durable outer-loop campaign director `[PROPOSAL]`
 
 - **Objective.** M-OCT-1..3 as runtime client; CAS mailboxes; CoordinationPlan.
 - **Dependencies.** Wave 5; preferably Wave 7 catalog.
@@ -951,7 +1023,7 @@ Shared rollback for every wave: revert the wave’s files; do not weaken falsifi
 - **Rollback.** Disable director; inner loop remains product.
 - **Exit gate.** One writer per workspace epoch.
 
-### Wave 9 — Governed memory, skills, and learning
+### Wave 9 — Governed memory, skills, and learning `[PROPOSAL]`
 
 - **Objective.** Product-optional memory behind grants; MEM-02 canary; no self-certification.
 - **Dependencies.** Wave 5; M-8 mechanism already present.
@@ -964,7 +1036,7 @@ Shared rollback for every wave: revert the wave’s files; do not weaken falsifi
 - **Rollback.** Unwire retrieval; registry unsigned.
 - **Exit gate.** Memory off by default in `fast` preset.
 
-### Wave 10 — External benchmark and release qualification
+### Wave 10 — External benchmark and release qualification `[PROPOSAL]`
 
 - **Objective.** SWE-P5 official procedures; DeepSWE v1.1 Harbor/Pier separate verifier; Scale Pro only if licensed/eligible.
 - **Dependencies.** Waves 0–5 minimum; 6–9 only if their receipts are positive.
@@ -1225,7 +1297,7 @@ See §2.6. Additionally, OpenAI’s evaluation note: coding evals mix signal and
 
 | Work | Create / modify | Tests | Canonical docs **after** acceptance (not this draft) |
 |---|---|---|---|
-| SemanticTaskState | **C** `vanguard/packages/domain/task_state.py` | **C** `test/contracts/test_semantic_task_state.py` | `docs/backend/architecture/runtime-execution.md`, FEATURE_SPEC promote |
+| SemanticTaskState | **C** `vanguard/packages/domain/task_state.py` (**MISSING**) | **C** `test/contracts/test_semantic_task_state.py` | `docs/backend/architecture/runtime-execution.md`, FEATURE_SPEC promote |
 | Fold | **M** `vanguard/packages/runtime/task_state.py` | `test/agency/test_coding_state.py` | same |
 | Resume identity | **M** `vanguard/packages/runtime/app_service.py` | `test/runtime/test_resume_from_ledger.py`, RF-25 | runtime-execution |
 | Stop L3 dump | **M** `vanguard/packages/runtime/session.py` | `test/runtime/test_context_layer_residency.py` + new | agency.md |
@@ -1276,6 +1348,7 @@ Dependency key: `requires:`. Status: all `PROPOSED` unless noted.
 - **Requires:** none
 - **Falsifier:** `vg-code-default` + `finish` + no patch ⇒ not completed
 - **Rollback:** if a named compatibility harness must stay exempt, shrink set with a recorded governance note — do not restore lex+default silently
+- **FACT (lock HEAD `66aa7a3c`).** The exemption is pinned, not accidental. [`test/falsifiers/test_completion_gate_scope.py`](../test/falsifiers/test_completion_gate_scope.py) asserts `vg-code-default` ∉ `ADMISSION_GATED_HARNESSES` and documents that frozen M-2 falsifiers compose bare finishes through the default harness. Live `admission_required` (`runtime/session.py` L127–138) exempts `vg-code-default` / `vg-code-lex` via `ADMISSION_GATE_EXEMPT`; RF-25 cold-continuation evidence is on that product path. **Implementation of this ticket remains `[PROPOSAL]`** and requires a **successor baseline** for RF-25 / M-2 / `test_completion_gate_scope.py` before the exemption is removed — do not silently retarget those tests.
 
 ### Ticket 05 — Delete unused `ADMISSION_GATED_HARNESSES` or make it the only source
 - **Files:** `session.py`; `test/falsifiers/test_completion_gate_scope.py`
@@ -1298,9 +1371,10 @@ Dependency key: `requires:`. Status: all `PROPOSED` unless noted.
 - **Falsifier:** unittest `Ran 0 tests` ⇒ count 0; pytest `0 passed` ⇒ 0
 
 ### Ticket 09 — Domain SemanticTaskState
-- **Files:** create `domain/task_state.py`; FEATURE_SPEC §3
+- **Files:** create `domain/task_state.py` (**MISSING** in HEAD); FEATURE_SPEC §3
 - **Requires:** none technically; **schedule after** 04 so we do not persist false completes
 - **Falsifier:** `test/contracts/test_semantic_task_state.py` as specified
+- **FACT (lock HEAD `66aa7a3c`).** `vanguard/packages/domain/task_state.py` is **MISSING**. Live fold is [`runtime/task_state.py`](../vanguard/packages/runtime/task_state.py) `CodingTaskState` + `fold_task_state`. This ticket remains **`[PROPOSAL]`**: merge FEATURE_SPEC `SemanticTaskState` with `CodingTaskState` per B §6.12 (this lattice **wins** over Plan A §6.2’s 17 domain types, which stay as a competing `[PROPOSAL]` in A). Do not invent a second task-state authority.
 
 ### Ticket 10 — Runtime fold of SemanticTaskState
 - **Files:** `runtime/task_state.py`
@@ -1432,7 +1506,7 @@ Dependency key: `requires:`. Status: all `PROPOSED` unless noted.
 - **Requires:** each impl ticket
 - **Falsifier:** `check_tcb_budget.py` still PASS; `check_boundaries.py`; domain-blindness PASS
 
-Tickets 01–08 are the true critical path for long-horizon **truth**. Tickets 09–20 are the critical path for long-horizon **competence**. 21–25 are hygiene. 26–27 are the first honest score. 28–35 are gated.
+Tickets 01–08 are the true critical path for long-horizon **truth**. Tickets 09–20 are the critical path for long-horizon **competence**. 21–25 are hygiene. 26–27 are the first honest score. 28–35 are gated. Waves 6–10 and tickets 28–35 are **`[PROPOSAL]`**; this lock does not authorize them.
 
 ---
 
@@ -1538,6 +1612,13 @@ Tickets 01–08 are the true critical path for long-horizon **truth**. Tickets 0
 ## 21. Session validation appendix
 
 ### 21.1 Navigation limitations (repeat)
+
+| When | LDA index SHA | Subject HEAD | Freshness |
+|---|---|---|---|
+| **Lock-time row (2026-09-03)** | `66aa7a3c0c31` | `66aa7a3c0c31cb68a2c0387a1ddf237c80084253` | `FRESH` |
+| Planning-session snapshot | `7e08462c2cbb` | `ebad36e675f0eab6c4635851a91423f5a6541290` | `STALE` |
+
+**Lock-time FACT.** `uv run lda identity --json` / `lda doctor --json` report `freshness_vs_head=FRESH`, `index_healthy=true`, `status=HEALTHY` at HEAD `66aa7a3c0c31`. The original bullets below are the **planning-session snapshot** and remain as forensic text.
 
 - LDA index SHA `7e08462c2cbb` ≠ HEAD `ebad36e675f0eab6c4635851a91423f5a6541290` (`STALE`).
 - Doctor `HEALTHY` describes the stale populated index, not HEAD-binding.
@@ -1661,6 +1742,10 @@ No edge from W7 to W5 in reverse. No edge that lets Forge define W5.
 
 [`.draft/DEVELOPMENT_FINAL_PLAN.md`](DEVELOPMENT_FINAL_PLAN.md) is bound to `7e08462c2cbb…`. This file is bound to `ebad36e675f0…` plus this session’s 68 tests, TCB 1386, official DeepSWE/Scale fetches on 2026-09-03, and the observation that FEATURE_SPEC modules are **still missing**. Plan A’s reliability-first thesis is retained because **current source still supports it**, not because the earlier draft is authority.
 
+**Lock-time addendum (2026-09-03, HEAD `66aa7a3c0c31`).** A, B, and v2 are now a locked triad: A = law, B = ground truth (this file, tickets 01–35), v2 = architecture catalog. YAML no longer says `does_not_modify` A; complements are A and v2. The `ebad36e` / LDA `STALE` binding above remains the planning-session snapshot. FEATURE_SPEC modules remain **MISSING** at lock HEAD.
+
+**Lock-time addendum (HEAD `66aa7a3c0c31`).** This file is now also bound to lock HEAD `66aa7a3c0c31` / LDA `FRESH`. The `ebad36e` binding above is the planning-session snapshot, kept. Complements are A (law) and v2 (architecture), not a merged fourth plan. FEATURE_SPEC-named modules remain **MISSING** at lock HEAD.
+
 ---
 
 ## Appendix D — Operator one-pager
@@ -1675,4 +1760,61 @@ That sequence is the smallest path that can eventually support senior-developer 
 
 ---
 
-*End of Plan B. Non-authoritative. Source and tests win.*
+## 22. Live tool/verb inventory (lock HEAD `66aa7a3c`)
+
+Appended at lock; does **not** replace §3. **FACT** from pack YAML and toolkit source on HEAD `66aa7a3c`.
+
+Harness [`packs/code-default/harness.yaml`](../packs/code-default/harness.yaml) declares:
+
+| Verb | Pack source | Notes (FACT) |
+|---|---|---|
+| `fs.read` | `harness.yaml` capabilities; `plugins/fs.yaml`; `toolkits/fs_toolkit.py` | Windowed: optional `start_line` / `end_line` in schema; full-file digest if omitted |
+| `fs.search` | `harness.yaml`; `plugins/fs.yaml`; `FsToolkit` | Pattern search over workspace files |
+| `fs.list` | `plugins/fs.yaml` + `FsToolkit` (not listed on the harness.yaml capability block) | Glob list; kernel classifier treats `fs.list` as observation |
+| `patch.apply` | `harness.yaml`; `plugins/ast-patch.yaml`; `toolkits/ast_patch.py` | Sequential `GitEnvironment.apply`; post-write `ast.parse` is observation-only |
+| `proc.exec` | `harness.yaml`; `plugins/terminal.yaml`; `toolkits/terminal_runner.py` | Allowlisted `git,pytest,ruff,python3` |
+
+**Index toolkit.** [`packs/code-default/plugins/index.yaml`](../packs/code-default/plugins/index.yaml) still declares capability verb **`fs.read`**. `IndexToolkit` in `toolkits/repo_map.py` also exposes `index.refresh`. Ranking stays out of `IndexPort` (observation-only). Pack also has `multi_file_completeness.py` and `GreenfieldPolicy` (MECHANISM; see §3.4).
+
+**Facade (MECHANISM).** `CodingMaxFacade`: `run` / `status` / `resume` / `evidence` / `cost`; presets `fast|balanced|max`.
+
+**Still MISSING in HEAD `66aa7a3c` (keep as `[PROPOSAL]`).** `transaction.py` 2PC, `tamper_shield.py`, `progressive.py`, `WorkspaceEpoch`, `agency/prediction/`, `runtime/event_store.py`, `adapters/index/`. Event store owner is `adapters/stores/event_store.py`; index owner is `adapters/stores/repo_index.py`. Edit/2PC mechanics live in **v2**; law/profiles live in **A**.
+
+---
+
+## 23. Product target loop
+
+Appended at lock; does **not** replace §3.2 / §6.1. Product stages (SOTA suggestion):
+
+```text
+INGEST → DISCOVER → PLAN → EDIT → VERIFY_TARGETED → RECOVER → VERIFY_BROAD → COMPLETE
+```
+
+**FACT.** Stage transitions follow receipts, not conversational `finish`. Live inner loop is `ContextCompiler` freeze of L1–L3 at construction, then `EpisodeEngine`: observe → propose → `recover_proposal` → `Kernel.dispatch` → ingest (`agency/episode/engine.py`). Compile is **not** a step inside `EpisodeEngine`.
+
+**FACT.** `admission_required` exempts `vg-code-default` / `vg-code-lex`, else `"patch.apply" in verbs`. `ADMISSION_GATED_HARNESSES` is unused in runtime. `VerificationReceipt.passed` ⇔ `exit_code == 0 and executed_test_count > 0`. Session `_observed_test_count` returns 0 if unparseable. Forge still sets `test_count = 1` on green-empty.
+
+**Pointer.** Reliability order and competency profiles: A. Tickets 01–35 and lattice: this file. 2PC / AST / later phenotypes: v2 as `[PROPOSAL]` except sequential git apply + post-write `ast.parse` (MECHANISM).
+
+---
+
+## Appendix E — Cross-link matrix (locked triad)
+
+Identical appendix in A, B, and v2. Duplication is required so no file is a stub.
+
+| Concern | Canonical write-up | Competing variants kept as `[PROPOSAL]` |
+|---|---|---|
+| Reliability order | A §0, B §8 | v2 HYDRA-first topologies |
+| Live gaps / tickets | B §4, §18 | A §31 (less precise on exemption); v2 §8 IDs |
+| Lattice placement | B §6.12 | A §6.2–6.3 port explosion; v2 new packages |
+| L1–L5 + σ | v2 §3 + B §4.4 | dumping σ into L3 (current code, not target) |
+| 2PC / AST | v2 §4.2 adapter | v2 §4.3 kernel hook (rejected) |
+| Completion policy | A §9.4 per class | v2 I-1 universal signed finish |
+| Forge/Chimera | B §3.5 quarantine | v2 Head 3 Chimera as product |
+| Director / HYDRA | v2 §7, A waves 7–8, B waves 7–8 | default swarm |
+| Mutation 0.80 | v2 §5.4 | as admission law |
+| CLI | A appended operator surface | TUI visual design (A non-goal) |
+
+---
+
+*End of Plan B. Non-authoritative. Source and tests win. Locked triad 2026-09-03 / HEAD `66aa7a3c0c31` / LDA `FRESH`.*

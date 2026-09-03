@@ -10,6 +10,13 @@ observed_head: "7e08462c2cbbf10e37c75f2d3f34d0beaa4ceef5"
 observed_worktree: dirty
 created: 2026-09-03
 last_verified: 2026-09-03
+triad_role: law
+complements:
+  - .draft/DEVELOPMENT_FINAL_PLAN_B.md
+  - .draft/DEVELOPMENT_FINAL_PLAN_v2.md
+lock_head: "66aa7a3c0c31"
+lock_date: "2026-09-03"
+lda_freshness: FRESH
 supersedes: []
 superseded_by: null
 ---
@@ -25,6 +32,80 @@ superseded_by: null
 > Current source and executable evidence outrank this file.
 >
 > Canonical synchronization belongs in the normal execution workflow after each proposal is accepted.
+
+---
+
+## Lock identity and triad law (2026-09-03)
+
+This file is **Plan A** in the locked A / B / v2 triad. It stands alone: the preamble below is duplicated in B and v2 so no draft is a stub.
+
+### Locked triad roles
+
+```text
+A  = Program law: reliability identity, wave order, competency profiles,
+     formal model, per-class evidence, non-goals, D-01–D-10
+B  = Ground truth: live inventory, proven gaps, lattice placement,
+     tickets 01–35, operator one-pager (01–13 first)
+v2 = Architecture catalog: 16 primitives (map, not new cores),
+     context economics, 2PC/tamper/dialect mechanics, later phenotypes
+     (director / HYDRA / mutation) as [PROPOSAL]
+```
+
+Build order (locked, from B, aligned with the SOTA harness-loop suggestion):
+
+```text
+cannot-lie → can-resume → can-see → can-change-many-files
+  → qualify one EpisodeEngine coding agent
+  → then meta / specialists / campaign / skills-memory
+```
+
+### Lock identity
+
+| Field | Value |
+|---|---|
+| `lock_head` | `66aa7a3c0c31` |
+| `lock_date` | 2026-09-03 |
+| `lda_freshness` | `FRESH` |
+| Original planning subject (`observed_head`) | `7e08462c2cbbf10e37c75f2d3f34d0beaa4ceef5` |
+
+Source at `lock_head` outranks this draft. Kernel remains domain-blind (I-7). Coding semantics stay in `packs/code-default/`. The CLI is a client of `ApplicationService`, not a second intelligence.
+
+This triad **does not authorize** kernel AST, a second `EpisodeEngine`, or default HYDRA.
+
+### Dual mission
+
+Vanguard / AETHER is simultaneously two tightly integrated systems:
+
+1. **Closed-loop coding harness (`Coding Max`).** A software-engineering agent that executes multi-hour, multi-turn brownfield, greenfield, multi-file, and resume-safe campaigns with bound verification. The product loop is a controller, not a chatbot with files.
+2. **Composable agent framework.** The same substrate (episode loop, kernel dispatch, ledger, budgets, ports, packs) must be able to compile other agents (review, planning, later campaign direction) without a second runtime.
+
+The CLI (`vg` / `aether`) is the operator surface. It is **not** the brain: it must not assemble prompts, patch files, or grade success.
+
+### Reliability identity
+
+$$
+R = \prod_{t}\Pr(\text{honest progress}_{t}\mid\text{honest state}_{t-1})
+$$
+
+Long-horizon SOTA is the product of honest turns. A leaky completion gate, a brittle patcher, or a context dump that forgets \(\sigma\) compounds across \(T\). Swarm, memory, and skills multiply whatever \(R\) already is.
+
+Section 0 keeps the campaign-gate product \(P(G_i\mid G_{<i})\) as program law for milestone sequencing. The identity here is the per-turn harness law that those gates rest on.
+
+### Epistemic legend (applies to every later claim)
+
+Copied from Plan B as shared triad law. **SUPERSEDED** is redefined: keep the text; do not drop it.
+
+| Tag | Meaning | Promotion rule |
+|---|---|---|
+| **FACT** | Observed in current source, tests executed this session, or an official primary source fetched on 2026-09-03 | May be treated as current truth for planning |
+| **MECHANISM** | Code exists and unit/contract tests exist | Not a product or benchmark claim |
+| **INFERENCE** | Reasonable engineering conclusion from FACT + MECHANISM | Must not be restated as evidence |
+| **PROPOSAL** | Recommended next work | Requires a later ticket, falsifier, and WIP slot |
+| **ASPIRATION** | Desired competitive position | Forbidden as a forecast of a specific score |
+| **CONTRADICTION** | Two authorities disagree; source wins | Record both sides; do not silently pick the nicer one |
+| **SUPERSEDED** | Attractive draft idea that current lattice or source rejects | Keep the text; mark `[PROPOSAL]`; cite the better location. Do not drop the insight. |
+
+Body text uses `[PROPOSAL]` for the PROPOSAL tag. Competing designs across A, B, and v2 stay in full.
 
 ---
 
@@ -91,6 +172,8 @@ This plan does not presume that any dirty document is final.
 
 This plan does not overwrite or normalize those changes.
 
+**Lock identity (2026-09-03).** This file is now locked against Git HEAD `66aa7a3c0c31` (LDA `FRESH`). The SHA `7e08462c2cbbf10e37c75f2d3f34d0beaa4ceef5` remains the original planning subject for the dirty-worktree inventory above and for the §1.2 navigation-health numbers. Do not restamp those historical counts as if they were lock-time doctor output.
+
 ### 1.2 Navigation health
 
 `.generated/knowledge/report.json` reported:
@@ -119,6 +202,8 @@ However, `uv run lda identity --json` reported the LDA index bound to `6136b653e
 The Tier-1 `dev_context_logs/context_summary.md` reported HEAD `7d46c7f...`, also not current HEAD.
 
 The freshness disagreement requires degraded navigation mode.
+
+**FACT at lock HEAD `66aa7a3c`.** LDA is `FRESH` versus current HEAD. The counts in this subsection (`VALIDATED` knowledge report; doctor `index_healthy: true`; index bound to `6136b653e9e5`; Tier-1 summary at `7d46c7f...`) remain a **historical snapshot** of the `7e08462c` planning session. They are not the lock-time doctor output.
 
 Consequently:
 
@@ -195,6 +280,7 @@ The current code already contains the difficult substrate primitives needed for 
 | Capability | Current owner | Observed implementation | Planning disposition |
 |---|---|---|---|
 | Causal execution | `kernel`, `runtime` | S0-S12 dispatch and receipts | preserve |
+| Kernel collaborator typing (`KernelPort`) | `ports/` | **FACT (HEAD `66aa7a3c`):** no symbol `KernelPort`; kernel collaborators are `Clock` / `EffectAdapter` / `Ledger` (B hexagonal-ports row) | keep the name as `[PROPOSAL]` documentation repair only; do not invent a second kernel |
 | Typed budgets | `kernel/budget.py` | monotonic reservations and settlement | preserve |
 | Capability attenuation | `kernel/attenuation.py` | child scope cannot exceed parent | preserve |
 | Durable ledger | `adapters/stores/event_store.py` | SQLite WAL event store | preserve |
@@ -220,6 +306,8 @@ The current code already contains the difficult substrate primitives needed for 
 | Exterior evaluation | evaluator port and adapters | signed verdict path | use for every claim |
 | Workflow execution | `runtime/workflow_scheduler.py` | replayable node scheduling | reuse in outer loop |
 
+**`KernelPort` (law vs source).** This foundation table historically needed a hexagonal `KernelPort` row for dispatch-as-port. **FACT (HEAD `66aa7a3c`):** `vanguard/packages/ports/` has no such symbol. **Historical claim (planning subject `7e08462c`):** treating kernel dispatch as a named `KernelPort` collaborator in the port set. Keep that wording as `[PROPOSAL]` if later docs want a typed kernel façade; B already recorded the absence. Do not add a second kernel.
+
 ### 2.2 The current inner loop
 
 The operational loop is already structurally sound:
@@ -236,6 +324,10 @@ observe
   -> decide continue / suspend / terminate
   -> evaluate outside cognition
 ```
+
+**FACT (HEAD `66aa7a3c`).** Compile is **not** a per-turn stage inside `EpisodeEngine`. `ContextCompiler` freezes L1–L3 at construction (`vanguard/packages/agency/context/compiler.py`). Session owns compiler construction. `EpisodeEngine` is observe → propose → `recover_proposal` → `Kernel.dispatch` → ingest (`vanguard/packages/agency/episode/engine.py`). The engine consumes an already-constructed compiler; it does not recompile the frozen prefix each turn.
+
+**Historical claim (planning subject `7e08462c`).** The operational-loop diagram above lists `compile bounded context` between observe and propose as if it were an `EpisodeEngine` step. Keep that wording as the product-shape sketch (bounded context still happens). The live split is compiler/session vs engine. See B for the L3 `resume_state` dump gap; target σ placement is v2 §3 + B §4.4, not a second compiler.
 
 The `EpisodeEngine` is approximately 1,102 lines.
 
@@ -279,6 +371,8 @@ It selects only `fast`, `balanced`, or `max` presets.
 The facade delegates execution to `ApplicationService`.
 
 That boundary should remain stable while cognition evolves behind declarative manifests and code-pack policy.
+
+**MECHANISM (HEAD `66aa7a3c`).** The live facade methods are `run` / `status` / `resume` / `evidence` / `cost` with presets `fast|balanced|max`. Extra operator commands (`cancel`, `doctor`, `checkpoint`) are `[PROPOSAL]`. Full operator/CLI surface: §37.
 
 ### 2.4 Current gaps proven by source or artifacts
 
@@ -809,13 +903,27 @@ Campaign Service
   -> campaign reducer
 ```
 
+**[PROPOSAL]** Campaign Service as an extra layer above runtime execution. Keep the diagram. Director as a runtime client: see B §6.2 `[PROPOSAL]`.
+
+**FACT (HEAD `66aa7a3c`).** The canonical live path is `ApplicationService → Runtime → HarnessSession → EpisodeEngine → Kernel`. There is no live `CampaignService` type on that path.
+
+**Historical claim.** The stack above treats Campaign Service as the top of the product. That remains the long-horizon outer-loop target (Wave 8). It is not present as a live type and is not a second `EpisodeEngine`.
+
 The outer loop is above runtime execution.
 
 It must not bypass `ApplicationService`, `Runtime`, `HarnessSession`, or the kernel.
 
+**Lock note.** The next three sentences restate the Campaign Service FACT above. Keep both wordings; they are not two layers.
+
+**[PROPOSAL]** Campaign Service as an extra layer above the live stack. Keep the diagram; it is the long-horizon outer-loop target, not a live type.
+
+**FACT (HEAD `66aa7a3c`).** The canonical live path is `ApplicationService → Runtime → HarnessSession → EpisodeEngine → Kernel`. Director as a runtime client: see B §6.2 `[PROPOSAL]`.
+
+**Historical claim.** The diagram treats Campaign Service as the top of the stack. That wording remains the wave-8 target shape.
+
 ### 6.2 Required new domain values
 
-The eventual implementation should define domain-pure values for:
+**[PROPOSAL]** The eventual implementation should define domain-pure values for:
 
 - `GoalContract`;
 - `AcceptancePredicate`;
@@ -837,9 +945,13 @@ The eventual implementation should define domain-pure values for:
 
 These values contain no model provider, filesystem I/O, or runtime authority.
 
+**FACT (HEAD `66aa7a3c`).** The current fold is `CodingTaskState` in `runtime/task_state.py` (`fold_task_state`). `vanguard/packages/domain/task_state.py` is **MISSING**. Preferred merge is B §6.12: promote schema to domain, keep the fold in runtime, do not run two authorities forever. Do not delete `GoalContract` / `CampaignPlan` / the rest of this 17-value list; they remain law-side targets.
+
+**Historical claim.** This section read as if the 17 values were required next-code. They are `[PROPOSAL]` relative to the live fold.
+
 ### 6.3 Required ports
 
-Prefer small ports that express stable capabilities:
+**[PROPOSAL]** Prefer small ports that express stable capabilities:
 
 - `TaskStatePort` for reading durable task projection;
 - `RepositoryIntelligencePort` by extending or composing `IndexPort`;
@@ -853,6 +965,8 @@ Prefer small ports that express stable capabilities:
 Avoid provider-shaped interfaces.
 
 Avoid a `SeniorDeveloperAgent` class hierarchy.
+
+**FACT.** Live ports that already cover adjacent jobs include `IndexPort`, evaluator, event-store, and memory SPI. This eight-port list is a competing design versus B §6.12 lattice placement. Keep both; do not explode ports before composing existing ones.
 
 ### 6.4 Typed verification receipt
 
@@ -1211,6 +1325,8 @@ Research requires:
 - date and version boundaries;
 - contradiction handling;
 - no fabricated citations.
+
+This per-class evidence matrix **wins** as program law over v2 §5.3 / I-1 “no finish without signed `VerificationReceipt`”. That universal signed-finish rule remains `[PROPOSAL]` and is too strong versus this matrix and versus the local vs exterior evaluator split (B §3.4). Fail-to-pass is required for **bugfix**; it is not a universal finish law for explanation or research.
 
 ### 9.5 Likely files
 
@@ -1976,6 +2092,8 @@ $$
 then rank only $M_A$.
 
 Post-ranking filtering leaks information through scores and omissions.
+
+**MECHANISM (HEAD `66aa7a3c`).** Authorize-then-recall already exists (`vanguard/packages/runtime/prompt_assembler.py`). Product wiring of the four-tier table is `[PROPOSAL]`; see §39. This subsection remains the law: filter before rank.
 
 ### 17.4 Skill object
 
@@ -3178,9 +3296,11 @@ The following sources informed this plan but do not all carry equal authority.
 
 - [`README.md`](../README.md)
 - [`docs/execution/active.md`](../docs/execution/active.md)
+  - **FACT (lock `66aa7a3c`):** this path is **missing**. Current execution files are `tasks.md`, `spec.md`, `milestones.md`, and `backlog.md`. Keep the link as the historical execution-board name from the `7e08462c` planning subject.
 - [`docs/execution/milestones.md`](../docs/execution/milestones.md)
 - [`docs/execution/backlog.md`](../docs/execution/backlog.md)
 - [`docs/execution/FEATURE_SPEC.md`](../docs/execution/FEATURE_SPEC.md)
+  - **FACT (lock `66aa7a3c`):** the current delta-contract file is [`docs/execution/spec.md`](../docs/execution/spec.md). Keep the `FEATURE_SPEC.md` link; it is the historical name used throughout this draft and in B/v2. Do not treat the missing filename as authorization to invent a parallel spec.
 - [`docs/execution/tasks.md`](../docs/execution/tasks.md)
 - [`docs/backend/architecture/agency.md`](../docs/backend/architecture/agency.md)
 - [`docs/backend/architecture/runtime-execution.md`](../docs/backend/architecture/runtime-execution.md)
@@ -3302,3 +3422,215 @@ If AETHER follows this order, its distinctive advantage will not be a fashionabl
 Its advantage will be a small trusted substrate beneath agents that can work for hours or days, lose a process, recover their exact obligations, change strategy from evidence, coordinate specialists without sharing mutable hidden state, and stop only on independently bound proof.
 
 That is the path from a capable coding harness to a credible Senior Developer, Staff Engineer, Principal Architect, and Tech Lead substrate.
+
+---
+
+## 37. Operator / CLI surface (lock append)
+
+This section is program law for the operator surface. It does not replace §2.3 (facade) or §23 (security and TUI-ready events). TUI visual design remains a non-goal (§3.3).
+
+A SOTA coding CLI needs two modes:
+
+| Mode | Job |
+|---|---|
+| **Interactive TTY** | Streaming turns, diffs, cost, interrupt, resume, approvals |
+| **Headless / CI** | `run` / `resume` / `cancel`, NDJSON events, stable exit codes, `--non-interactive` |
+
+Minimum command surface:
+
+- `run` / `resume` / `cancel` / `status` / `evidence` / `cost`
+- `doctor` (index + sandbox + model route)
+- `checkpoint` (crash-safe)
+- flags for budget, model, profile (`fast` / `balanced` / `max`), workspace, worktree isolation
+
+**MECHANISM (HEAD `66aa7a3c`).** `CodingMaxFacade` already exposes `run` / `status` / `resume` / `evidence` / `cost` and selects only `fast|balanced|max`. It delegates to `ApplicationService` (§2.3).
+
+**[PROPOSAL]** `cancel`, `doctor`, `checkpoint`, NDJSON headless events, and `--non-interactive` as first-class commands. These extend the facade; they do not become a second runtime.
+
+The CLI **must not** assemble prompts, patch files, or grade success. It streams ledger events. Intelligence stays in agency + pack. Approvals for destructive git, network, and secret files remain Ed25519 / TTY confirm; headless fails closed (§23.3).
+
+Backend events already required for a future TUI (§23.4) are the same event stream the CLI consumes. The TUI is a projection and command client, not another authority.
+
+See B for ticket numbering of operator work; see v2 for 2PC/edit mechanics behind the stream. Competing TUI visual design stays deferred (A non-goal; cross-link matrix).
+
+---
+
+## 38. Loop engineering vs harness engineering (lock append)
+
+Suggestion §9, kept as law-side split. It does not replace Waves 0–10 or the formal model in §5.
+
+**Loop engineering** is control policy around the model:
+
+- One vs parallel tool calls (parallel reads OK; parallel writes on one tree are not).
+- Protocol recovery: bad JSON / unknown tool / missing field → schema nudge, bounded retries (`protocol_recovery.py` as MECHANISM where present).
+- Failure taxonomy with different recoveries: `PATCH_PREIMAGE_MISMATCH`, `TEST_COLLECTION_EMPTY`, `NO_PROGRESS`, `PREMATURE_FINISH`, `CONTEXT_STALE`, and siblings.
+- Circuit breakers: same action+args+digest; cyclic workspace hash; same normalized traceback \(k\) times → strategy shift or escalate model.
+- **Stop gate:** `finish` is a proposal the harness may reject with a nudge (“run tests; receipt stale”).
+- Typed budgets (usd, tokens, turns, bytes). Exhaustion is a terminal state, not a vibe.
+- Meta-cognition remains a bounded advisor: it **must not** admit `completed`, enlarge budget, be inherited by children, or grade its own work (Wave 6; live `meta_controller` FACT in B). `conclude` becomes an ordinary `finish` proposal, still gated.
+
+**Harness engineering** is everything that makes the loop cheap, replayable, and honest:
+
+- Prefix-stable compiler (not string concat). **MECHANISM:** `ContextCompiler` freezes L1–L3 at construction.
+- Model dialect adapters (tool-call JSON vs XML vs markdown fences).
+- Sandbox (bwrap) + path-escape.
+- Single-writer ledger, crash resume (RF-25 style).
+- Cassettes / LAM so harness iteration can be $0.
+- Cost and model fingerprint on every turn.
+- Isolation: git worktrees for speculative patches; one writer per tree.
+
+The product \((1-\epsilon)^{T}\) means a 5% patch-apply fail rate over 40 turns is catastrophic. Harness quality is the multiplier on the same weights. This is the operational reading of the reliability identity in the lock preamble.
+
+Edit/2PC mechanics live in v2 `[PROPOSAL]` except sequential `GitEnvironment.apply` + post-write `ast.parse` as MECHANISM (B). Kernel AST remains unauthorized.
+
+---
+
+## 39. Four-tier memory (lock append)
+
+Do not put “memory” in one bucket. This table is the industry four-tier model from the SOTA suggestion §7. It does not replace §17.2 memory classes or §17.3 authorization-before-retrieval; it maps them.
+
+| Tier | Lives | Goes into the prompt? |
+|---|---|---|
+| **Working** | Current turn scratch | Yes, ephemeral |
+| **Episodic (short)** | This run’s receipts, plan, dead ends | As **folded state** + last \(N\) turns, not raw history |
+| **Semantic (long, workspace)** | Facts: “auth lives in X”, “tests are pytest under test/” | Retrieved hits only, with provenance |
+| **Procedural (skills)** | Promoted playbooks | Catalog always; body on demand |
+
+Rules that separate SOTA from a sticky-note bot:
+
+- **Authorize before retrieve** (`INV-B-010`). Child agents do not inherit parent memory grants.
+- Every hit carries `event_id` / `run_id` / digest. No anonymous “the agent remembers.”
+- Recall is **query + budget**, not “inject last 50 sessions.”
+- Short-term durability is the **ledger + resume**, not a bigger window. Crash mid-episode must restore `episode_id`, prefix identity, and \(\sigma\), not a frozen L3 dump of old files.
+
+**MECHANISM (HEAD `66aa7a3c`).** Authorize-then-recall is already implemented (`vanguard/packages/runtime/prompt_assembler.py`). Skills lifecycle exists (`vanguard/packages/runtime/skill_lifecycle.py`). Progressive disclosure (catalog in L2/L3; body on invoke) is the SOTA pattern for skills.
+
+**[PROPOSAL]** Product wiring that actually folds episodic \(\sigma\) into L4/L5, retrieves semantic hits under grant, and promotes skills only through held-out exterior eval (Wave 9). Current session dumping `resume_state` into env/L3 is a product bug, not the target (B §4.4; v2 §3).
+
+Long sessions are **many compacted turns over one durable \(\sigma\)**, optionally **many episodes in a campaign DAG**. One 400-turn transcript is how you get attention collapse. Campaign direction remains Wave 8 `[PROPOSAL]`; it is not a second `EpisodeEngine`.
+
+---
+
+## Appendix L: Cross-link matrix (locked triad)
+
+This appendix is duplicated in Plan A, Plan B, and Plan v2 so no file is a stub. Source at lock HEAD `66aa7a3c0c31` outranks all three.
+
+| Concern | Canonical write-up | Competing variants kept as `[PROPOSAL]` |
+|---|---|---|
+| Reliability order | A §0, B §8 | v2 HYDRA-first topologies |
+| Live gaps / tickets | B §4, §18 | A §31 (less precise on exemption); v2 §8 IDs |
+| Lattice placement | B §6.12 | A §6.2–6.3 port explosion; v2 new packages |
+| L1–L5 + σ | v2 §3 + B §4.4 | dumping σ into L3 (current code, not target) |
+| 2PC / AST | v2 §4.2 adapter | v2 §4.3 kernel hook (rejected) |
+| Completion policy | A §9.4 per class | v2 I-1 universal signed finish |
+| Forge/Chimera | B §3.5 quarantine | v2 Head 3 Chimera as product |
+| Director / HYDRA | v2 §7, A waves 7–8, B waves 7–8 | default swarm |
+| Mutation 0.80 | v2 §5.4 | as admission law |
+| CLI | A appended operator surface | TUI visual design (A non-goal) |
+
+---
+
+## Lock-append alternate wording (keep; do not drop)
+
+The following restates §37–39 and Appendix L with independent phrasing from a parallel lock pass. It is not a second operator surface, second loop split, or second matrix. Canonical headings remain §37–39 and Appendix L above.
+
+## 37. Operator / CLI surface (lock append)
+
+The CLI is the operator surface, not the brain. Intelligence stays in agency + pack + kernel. The CLI streams ledger events and operator commands into `ApplicationService`. It must **not** assemble prompts, patch files, or grade success. TUI visual design remains a non-goal (§3.3); backend events stay TUI-ready (§23.4).
+
+A SOTA coding CLI needs two modes:
+
+| Mode | Job |
+|---|---|
+| **Interactive TTY** | Streaming turns, diffs, cost, interrupt, resume, approvals |
+| **Headless / CI** | `run` / `resume` / `cancel`, NDJSON events, stable exit codes, `--non-interactive` |
+
+Minimum command surface:
+
+- `run` / `resume` / `cancel` / `status` / `evidence` / `cost`
+- `doctor` (index + sandbox + model route)
+- `checkpoint` (crash-safe)
+- flags for budget, model, profile (`fast` / `balanced` / `max`), workspace, worktree isolation
+
+**MECHANISM (HEAD `66aa7a3c`).** `CodingMaxFacade` already exposes `run` / `status` / `resume` / `evidence` / `cost` and selects only `fast|balanced|max` (§2.3). The facade delegates to `ApplicationService`. That boundary stays.
+
+**[PROPOSAL]** Extra commands: `cancel`, `doctor`, `checkpoint`, headless NDJSON, `--non-interactive`. These are operator-surface growth, not a second runtime.
+
+Edit/2PC mechanics live in v2. Tickets and lattice live in B. This section is law for *what the operator may do* without becoming the agent.
+
+---
+
+## 38. Loop engineering vs harness engineering (lock append)
+
+Suggestion §9, recorded here as program law so later specs can split work without collapsing both into “prompt tweaks.”
+
+**Loop engineering** = control policy around the model.
+
+- One vs parallel tool calls (parallel reads OK; parallel writes on one tree are not).
+- Protocol recovery: bad JSON / unknown tool / missing field → schema nudge, bounded retries (`protocol_recovery.py`).
+- Failure taxonomy with different recoveries: `PATCH_PREIMAGE_MISMATCH`, `TEST_COLLECTION_EMPTY`, `NO_PROGRESS`, `PREMATURE_FINISH`, `CONTEXT_STALE`, …
+- Circuit breakers: same action+args+digest; cyclic workspace hash; same normalized traceback *k* times → strategy shift or escalate model.
+- **Stop gate:** `finish` is a proposal the harness may reject with a nudge (“run tests; receipt stale”).
+- Typed budgets (usd, tokens, turns, bytes). Exhaustion is a terminal state, not a vibe.
+
+**Harness engineering** = everything that makes the loop cheap, replayable, and honest.
+
+- Prefix-stable compiler (not string concat). **FACT:** `ContextCompiler` freezes L1–L3 at construction; see §2.2.
+- Model **dialect** adapters (tool-call JSON vs XML vs markdown fences)
+- Sandbox (bwrap) + path-escape
+- Single-writer ledger, crash resume (`RF-25` style)
+- Cassettes / LAM so harness iteration can run at $0
+- Cost and model fingerprint on every turn (otherwise you cannot train or compare)
+- Isolation: git worktrees for speculative patches; one writer per tree
+
+The product of \((1-\epsilon)^T\) means a 5% patch-apply fail rate over 40 turns is catastrophic. Harness quality is the multiplier on the same weights. Reliability identity: preamble \(R\).
+
+**MECHANISM.** EpisodeEngine observe → propose → `recover_proposal` → `Kernel.dispatch` → ingest already is the loop. Meta-controller cannot enlarge budget; `conclude` becomes an ordinary `finish` proposal, still gated.
+
+**[PROPOSAL]** Richer failure taxonomy, circuit breakers, and 2PC/tamper as default product path — mechanics in v2, tickets in B. Do not authorize kernel AST or a second EpisodeEngine.
+
+---
+
+## 39. Four-tier memory (lock append)
+
+Suggestion §7. Do not put “memory” in one bucket. Wave 9 (§17) remains the promotion law. This table is the product wiring target.
+
+| Tier | Lives | Goes into the prompt? |
+|---|---|---|
+| **Working** | Current turn scratch | Yes, ephemeral |
+| **Episodic (short)** | This run’s receipts, plan, dead ends | As **folded state** + last N turns, not raw history |
+| **Semantic (long, workspace)** | Facts: “auth lives in X”, “tests are pytest under test/” | Retrieved hits only, with provenance |
+| **Procedural (skills)** | Promoted playbooks | Catalog always; body on demand |
+
+Rules that separate SOTA from a sticky-note bot:
+
+- **Authorize before retrieve** (`INV-B-010`). Child agents do not inherit parent memory grants.
+- Every hit carries `event_id` / `run_id` / digest. No anonymous “the agent remembers.”
+- Recall is **query + budget**, not “inject last 50 sessions.”
+- Short-term durability is the **ledger + resume**, not a bigger window. Crash mid-episode must restore `episode_id`, prefix identity, and \(\sigma\), not a frozen L3 dump of old files.
+
+Long sessions are **many compacted turns over one durable \(\sigma\)**, optionally **many episodes in a campaign DAG**. One 400-turn transcript is how you get attention collapse.
+
+**MECHANISM (HEAD `66aa7a3c`).** Authorize-then-recall already exists (`runtime/prompt_assembler.py`). Skills lifecycle exists (`runtime/skill_lifecycle.py`). §17.3 authorization-before-retrieval remains law.
+
+**[PROPOSAL]** Product wiring of the four tiers into compiler packets (σ in L4, not dumped into L3). Current session puts `resume_state` into env/L3 — that is a product bug, not the target (B §4.4; v2 §3). Do not delete §17 memory classes; this table is the same idea under industry names.
+
+---
+
+## Appendix L: Cross-link matrix (locked triad)
+
+This appendix is duplicated in Plan A, Plan B, and Plan v2 so no file is a stub. Source at lock HEAD `66aa7a3c0c31` outranks all three.
+
+| Concern | Canonical write-up | Competing variants kept as `[PROPOSAL]` |
+|---|---|---|
+| Reliability order | A §0, B §8 | v2 HYDRA-first topologies |
+| Live gaps / tickets | B §4, §18 | A §31 (less precise on exemption); v2 §8 IDs |
+| Lattice placement | B §6.12 | A §6.2–6.3 port explosion; v2 new packages |
+| L1–L5 + σ | v2 §3 + B §4.4 | dumping σ into L3 (current code, not target) |
+| 2PC / AST | v2 §4.2 adapter | v2 §4.3 kernel hook (rejected) |
+| Completion policy | A §9.4 per class | v2 I-1 universal signed finish |
+| Forge/Chimera | B §3.5 quarantine | v2 Head 3 Chimera as product |
+| Director / HYDRA | v2 §7, A waves 7–8, B waves 7–8 | default swarm |
+| Mutation 0.80 | v2 §5.4 | as admission law |
+| CLI | A appended operator surface | TUI visual design (A non-goal) |
+

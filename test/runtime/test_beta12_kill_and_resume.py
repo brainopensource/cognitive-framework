@@ -17,6 +17,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -82,7 +83,7 @@ res = app.run(
 print("P1 Outcome:", res.outcome, "Turns:", res.turns)
 """
         proc1 = subprocess.run(
-            ["python3", "-c", p1_script],
+            [sys.executable, "-c", p1_script],
             cwd=str(self.workspace),
             env=self.env,
             capture_output=True,
@@ -123,7 +124,7 @@ res = app.resume(
 print("P2 Outcome:", res.outcome, "Turns:", res.turns)
 """
         proc2 = subprocess.run(
-            ["python3", "-c", p2_script],
+            [sys.executable, "-c", p2_script],
             cwd=str(self.workspace),
             env=self.env,
             capture_output=True,
@@ -134,7 +135,7 @@ print("P2 Outcome:", res.outcome, "Turns:", res.turns)
 
         # Query events from the resumed run
         proc_events = subprocess.run(
-            ["python3", "-m", "vanguard.packages.runtime.cli", "events", run_id_interrupted, "--json"],
+            [sys.executable, "-m", "vanguard.packages.runtime.cli", "events", run_id_interrupted, "--json"],
             cwd=str(self.workspace),
             env=self.env,
             capture_output=True,
@@ -226,7 +227,7 @@ print("UNREACHABLE: watchdog should have killed this process first")
 """, encoding="utf-8")
 
         proc = subprocess.run(
-            ["python3", str(worker_script)],
+            [sys.executable, str(worker_script)],
             cwd=str(self.workspace),
             env=self.env,
             capture_output=True,
@@ -274,7 +275,7 @@ res = app.resume(run_id={json.dumps(run_id)}, profile_id="local", model=model, s
 print("RESUME Outcome:", res.outcome, "Turns:", res.turns)
 """, encoding="utf-8")
         proc2 = subprocess.run(
-            ["python3", str(resume_script)],
+            [sys.executable, str(resume_script)],
             cwd=str(self.workspace),
             env=self.env,
             capture_output=True,

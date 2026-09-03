@@ -53,9 +53,14 @@ describe("@aether/client — ManagedRuntimeHost (real daemon spawn)", () => {
     assert.ok(existsSync(layout.runtimeEntrypoint), `runtimeEntrypoint does not exist: ${layout.runtimeEntrypoint}`);
 
     const events: ManagedRuntimeEvent[] = [];
+    const pythonExecutable =
+      process.env.PYTHON_BIN ??
+      (existsSync(join(REPO_ROOT, ".venv", "bin", "python"))
+        ? join(REPO_ROOT, ".venv", "bin", "python")
+        : "python3");
     const host = new ManagedRuntimeHost({
       layout,
-      pythonExecutable: "python3",
+      pythonExecutable,
       autoRestart: false,
       startupTimeoutMs: 8_000,
       onEvent: (e) => events.push(e),

@@ -111,7 +111,7 @@ ADMISSION_GATED_HARNESSES = frozenset(
      "vg-code-max-v2b", "vg-code-max-v3", "vg-herbs", "vg-chimera-v1", "vg-code-chimera"})
 
 #: Presets deliberately exempt from capability-derived gating. Only shrinks.
-ADMISSION_GATE_EXEMPT = frozenset({"vg-code-default"})
+ADMISSION_GATE_EXEMPT = frozenset({"vg-code-default", "vg-code-lex"})
 
 
 def admission_required(harness: Any) -> bool:
@@ -1301,9 +1301,10 @@ class HarnessSession:
             path = request.args.get("path")
             if isinstance(path, str) and path and not path.startswith(("/", "\\")):
                 self._completion_changed_files.add(path.replace("\\", "/"))
-            if (self.artifacts is not None
+            artifacts = getattr(self, "artifacts", None)
+            if (artifacts is not None
                     and "reused durable settled effect" not in str(outcome.detail or "")):
-                self.artifacts.capture(
+                artifacts.capture(
                     "patch",
                     {"action": request.action, "args": dict(request.args),
                      "resultDigest": outcome.result_digest},
@@ -1335,9 +1336,10 @@ class HarnessSession:
             verification_command=verification_command,
             verification_subject_digest=digest_of({"command": verification_command}),
         )
-        if (self.artifacts is not None
+        artifacts = getattr(self, "artifacts", None)
+        if (artifacts is not None
                 and "reused durable settled effect" not in str(outcome.detail or "")):
-            self.artifacts.capture(
+            artifacts.capture(
                 "verification_report",
                 {"command": list(argv) if isinstance(argv, Sequence) else [],
                  "exitCode": exit_code,

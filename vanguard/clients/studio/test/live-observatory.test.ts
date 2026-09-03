@@ -2,6 +2,7 @@ import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { createInterface } from "node:readline";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -29,7 +30,13 @@ const GATEWAY_SCRIPT = path.join(REPO_ROOT, "test", "runtime", "fixtures", "run_
 
 function startGateway(): Promise<{ proc: ChildProcessWithoutNullStreams; port: number }> {
   return new Promise((resolve, reject) => {
-    const proc = spawn("python3", [GATEWAY_SCRIPT], {
+    const pythonBin =
+      process.env.VANGUARD_PYTHON ??
+      process.env.PYTHON_BIN ??
+      (existsSync(path.join(REPO_ROOT, ".venv", "bin", "python"))
+        ? path.join(REPO_ROOT, ".venv", "bin", "python")
+        : "python3");
+    const proc = spawn(pythonBin, [GATEWAY_SCRIPT], {
       cwd: REPO_ROOT,
       env: { ...process.env, PYTHONPATH: REPO_ROOT },
     });

@@ -210,7 +210,8 @@ class TheDriverRunsRatherThanReports(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             # This is an unavailable-provider falsifier even when a developer
             # runs the suite from a shell that has live credentials exported.
-            with patch.dict(os.environ, {}, clear=True):
+            ws_root = os.environ.get("AETHER_WORKSPACE_ROOT") or str(Path(tmp) / ".aether_ws")
+            with patch.dict(os.environ, {"AETHER_WORKSPACE_ROOT": ws_root}, clear=True):
                 result = lab_run.run_lab_task(
                     "vg-code-default", tmp, model_port="openrouter")
             # `S21-A-01`: the category is no longer the whole answer.

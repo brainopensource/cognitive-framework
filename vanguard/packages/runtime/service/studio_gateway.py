@@ -35,7 +35,7 @@ _AGENCY_MANIFESTS = Path("vanguard") / "packages" / "agency" / "manifests"
 #: Execution profiles the runtime actually presets. Anything else is an
 #: agent name that reached the wrong field.
 _EXECUTION_PROFILES = frozenset({"product", "local", "sandboxed", "hermetic",
-                                 "standard", "ci", "fast"})
+                                 "standard", "ci", "fast", "code-default"})
 
 #: Manifests ship with the runtime, so a workspace that is not this repository
 #: still resolves `vg-code-default` instead of failing to find a harness.

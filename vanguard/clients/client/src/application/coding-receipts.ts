@@ -59,6 +59,8 @@ export function formatHumanReceipt(projection: CodingProjection): string {
       }
       return `[route] ${projection.model ?? projection.text ?? "unknown"}`;
     }
+    case "note":
+      return `[assistant] ${projection.text ?? ""}`;
     case "error":
       return `[error] ${projection.detail ?? projection.text ?? "error"}`;
     default:

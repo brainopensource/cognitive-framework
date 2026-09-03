@@ -25,6 +25,8 @@ import {
   mergeAgentCatalog,
   resolveHarnessManifestPath,
   executionProfileFor,
+  type FrontendPersistencePort,
+  InMemoryPersistenceAdapter,
 } from "@aether/client";
 import { DEFAULT_FRONTEND_SETTINGS } from "@aether/projections";
 import {
@@ -40,7 +42,7 @@ import {
   expandFileReferences,
   runShellCommand,
 } from "@aether/tui-core";
-import { writeFileSync, existsSync } from "node:fs";
+import { writeFileSync, existsSync, realpathSync } from "node:fs";
 import { join } from "node:path";
 
 // Fine-grained Signal primitive
@@ -141,26 +143,48 @@ export type TuiStoreState = {
 
 export class TuiStore {
   public readonly controller: FrontendAppController;
-  public readonly persistence: NodeFsPersistenceAdapter;
+  public readonly persistence: FrontendPersistencePort;
   public readonly state: Signal<TuiStoreState>;
   private abortController: AbortController | null = null;
   private lastClient?: RuntimeClient;
-  private readonly pinnedAgentId?: string;
-  private readonly pinnedWorkspacePath?: string;
+  private pinnedAgentId?: string;
+  private pinnedWorkspacePath?: string;
 
-  constructor(initial: Partial<TuiStoreState> = {}, client?: RuntimeClient) {
-    this.persistence = new NodeFsPersistenceAdapter();
+  constructor(
+    initial: Partial<TuiStoreState> = {},
+    client?: RuntimeClient,
+    persistence?: FrontendPersistencePort,
+  ) {
+    this.persistence =
+      persistence ??
+      (process.env.AETHER_IN_MEMORY_PERSISTENCE === "1" || process.env.NODE_ENV === "test"
+        ? new InMemoryPersistenceAdapter()
+        : new NodeFsPersistenceAdapter());
+
+    let initialWs = initial.workspacePath ?? process.cwd();
+    if (initialWs === ".") {
+      initialWs = process.cwd();
+    }
+    try {
+      if (existsSync(initialWs)) {
+        initialWs = realpathSync(initialWs);
+      }
+    } catch {
+      /* keep initialWs */
+    }
+
+    this.pinnedAgentId = initial.agentId;
+    this.pinnedWorkspacePath = initialWs;
+
     this.controller = new FrontendAppController({
       client,
       persistence: this.persistence,
-      initialWorkspace: initial.workspacePath ?? ".",
+      initialWorkspace: initialWs,
       initialAgentId: initial.agentId ?? "vg-code-balanced",
     });
-    this.pinnedAgentId = initial.agentId;
-    this.pinnedWorkspacePath = initial.workspacePath;
 
     const ctrlState = this.controller.getState();
-    const wsPath = initial.workspacePath ?? ctrlState.currentWorkspace;
+    const wsPath = initialWs;
 
     this.state = createSignal<TuiStoreState>({
       agentId: initial.agentId ?? ctrlState.selectedAgentId,
@@ -218,22 +242,28 @@ export class TuiStore {
   }
 
   private syncFromController(cState: any): void {
-    this.update((prev) => ({
-      ...prev,
-      workspacePath: cState.currentWorkspace,
-      agentId: cState.selectedAgentId,
-      workflowId: cState.selectedWorkflowId,
-      runId: cState.activeRunId,
-      turns: cState.turns,
-      events: cState.events,
-      snapshot: cState.snapshot,
-      activities: cState.activities,
-      approvalState: cState.approvalState,
-      pendingApproval: cState.pendingApproval,
-      providers: cState.providers,
-      selectedProviderId: cState.selectedProviderId,
-      settings: cState.settings,
-    }));
+    this.update((prev) => {
+      let effectiveTurns = cState.turns;
+      if ((!effectiveTurns || effectiveTurns.length === 0) && prev.turns.length > 0) {
+        effectiveTurns = prev.turns;
+      }
+      return {
+        ...prev,
+        workspacePath: this.pinnedWorkspacePath ?? cState.currentWorkspace,
+        agentId: this.pinnedAgentId ?? cState.selectedAgentId,
+        workflowId: cState.selectedWorkflowId,
+        runId: cState.activeRunId,
+        turns: effectiveTurns,
+        events: cState.events,
+        snapshot: cState.snapshot,
+        activities: cState.activities,
+        approvalState: cState.approvalState,
+        pendingApproval: cState.pendingApproval,
+        providers: cState.providers,
+        selectedProviderId: cState.selectedProviderId,
+        settings: cState.settings,
+      };
+    });
   }
 
   public get(): TuiStoreState {
@@ -339,17 +369,28 @@ export class TuiStore {
       return text;
     }
 
+    const optimisticTurn: ConversationTurn = {
+      id: `optimistic-user-${Date.now()}`,
+      speaker: "user",
+      timestamp: new Date().toISOString(),
+      text,
+      activityCards: [],
+    };
+
+    const hadExistingTurns = this.get().turns.length > 0;
+
     this.update((prev) => ({
       ...prev,
       composerText: "",
       composerCursor: 0,
       composerHistory: [...prev.composerHistory, raw],
       historyIndex: -1,
+      turns: prev.turns.some((t) => t.text === text) ? prev.turns : [...prev.turns, optimisticTurn],
       statusMessage: "Dispatched prompt...",
     }));
 
     if (client) {
-      if (this.get().turns.length > 0) {
+      if (hadExistingTurns) {
         this.submitFollowUp(client, text);
       } else {
         this.startRun(client, text);
@@ -409,6 +450,7 @@ export class TuiStore {
   }
 
   public selectWorkspace(wsPath: string): void {
+    this.pinnedWorkspacePath = wsPath;
     this.controller.selectWorkspace(wsPath);
     const availableModels = this.loadAvailableModels(wsPath);
     const availableAgents = mergeAgentCatalog(DEFAULT_AGENTS, wsPath);
@@ -624,6 +666,27 @@ export class TuiStore {
 
   public async startRun(client: RuntimeClient, prompt: string): Promise<void> {
     const cur = this.get();
+    if (!existsSync(cur.workspacePath)) {
+      const errorMsg = `Workspace directory does not exist: "${cur.workspacePath}". Use /workspace <path> to switch.`;
+      this.update((prev) => ({
+        ...prev,
+        connectionState: "unavailable",
+        statusMessage: errorMsg,
+        turns: [
+          ...prev.turns,
+          {
+            id: `system-error-${Date.now()}`,
+            speaker: "system",
+            timestamp: new Date().toISOString(),
+            text: `[Error: ${errorMsg}]`,
+            activityCards: [],
+            verdict: "failed",
+          },
+        ],
+      }));
+      return;
+    }
+
     this.update((prev) => ({
       ...prev,
       connectionState: "connecting",
@@ -632,10 +695,22 @@ export class TuiStore {
 
     const manifestPath = resolveHarnessManifestPath(cur.agentId, cur.workspacePath);
     if (!manifestPath) {
+      const msg = `No harness manifest for agent "${cur.agentId}". Use /agent vg-code-balanced (or vg-code-fast / vg-code-max).`;
       this.update((prev) => ({
         ...prev,
         connectionState: "unavailable",
-        statusMessage: `No harness manifest for agent "${cur.agentId}". Use /agent vg-code-balanced (or vg-code-fast / vg-code-max).`,
+        statusMessage: msg,
+        turns: [
+          ...prev.turns,
+          {
+            id: `system-error-${Date.now()}`,
+            speaker: "system",
+            timestamp: new Date().toISOString(),
+            text: `[Error: ${msg}]`,
+            activityCards: [],
+            verdict: "failed",
+          },
+        ],
       }));
       return;
     }
@@ -659,6 +734,17 @@ export class TuiStore {
         connectionState: "unavailable",
         lastFailure: diag,
         statusMessage: `Failed to start run: ${diag.cause}`,
+        turns: [
+          ...prev.turns,
+          {
+            id: `system-error-${Date.now()}`,
+            speaker: "system",
+            timestamp: new Date().toISOString(),
+            text: `[Error: Failed to start run: ${diag.cause}]`,
+            activityCards: [],
+            verdict: "failed",
+          },
+        ],
       }));
       return;
     }

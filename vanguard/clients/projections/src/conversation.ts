@@ -64,6 +64,34 @@ export function toConversationTurns(envelopes: readonly EventEnvelope[]): Conver
       }
     }
 
+    if (kind === "ProposalProduced") {
+      const note = typeof env.payload.note === "string" ? env.payload.note.trim() : "";
+      if (note) {
+        if (currentAgentTurn.text) {
+          currentAgentTurn.text += "\n\n" + note;
+        } else {
+          currentAgentTurn.text = note;
+        }
+      }
+      const action = typeof env.payload.action === "string" ? env.payload.action : "";
+      if (action && action !== "finish" && action !== "abstain") {
+        const alreadyHasCard = currentAgentTurn.activityCards.some((c) =>
+          c.title.includes(action)
+        );
+        if (!alreadyHasCard) {
+          currentAgentTurn.activityCards.push({
+            id: `proposal-${env.eventId}`,
+            kind: "tool",
+            title: `Execute ${action}`,
+            details: typeof env.payload.proposalDescriptor === "string"
+              ? `descriptor: ${env.payload.proposalDescriptor.slice(0, 16)}...`
+              : undefined,
+            status: "running",
+          });
+        }
+      }
+    }
+
     if (kind === "OperatorInvoked" || kind === "EffectStarted") {
       const toolName = String(env.payload.tool ?? env.payload.verb ?? env.payload.action ?? "tool");
       currentAgentTurn.activityCards.push({
@@ -103,7 +131,19 @@ export function toConversationTurns(envelopes: readonly EventEnvelope[]): Conver
     }
 
     if (kind === "EpisodeCompleted" || kind === "RunCompleted" || kind === "VerdictProduced") {
-      currentAgentTurn.verdict = String(env.payload.verdict ?? env.payload.outcome ?? "satisfied");
+      const outcome = String(env.payload.verdict ?? env.payload.outcome ?? "satisfied");
+      currentAgentTurn.verdict = outcome;
+      if (
+        (outcome === "instrument_error" || outcome === "runtime_error" || outcome === "failed") &&
+        env.payload.detail
+      ) {
+        const detailStr = String(env.payload.detail);
+        if (!currentAgentTurn.text.includes(detailStr)) {
+          currentAgentTurn.text = currentAgentTurn.text
+            ? `${currentAgentTurn.text}\n\n[Failure: ${detailStr}]`
+            : `[Failure: ${detailStr}]`;
+        }
+      }
     }
 
     if (kind === "RunFailed") {

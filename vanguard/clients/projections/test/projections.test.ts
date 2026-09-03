@@ -201,6 +201,89 @@ describe("@aether/projections — ConversationTurns", () => {
     assert.equal(turns[1]?.text, "Analyzing kernel dispatch pipeline");
     assert.equal(turns[1]?.verdict, "satisfied");
   });
+
+  it("folds ProposalProduced note directly into agent turn without requiring ObservationProduced", () => {
+    const makeEnv = (id: string, seq: string, principal: string, payload: any): EventEnvelope => ({
+      schemaVersion: "vg.4",
+      eventId: id,
+      scope: "episode",
+      runId: "run-p-2",
+      traceId: "t-1",
+      spanId: `s-${seq}`,
+      seq,
+      occurredAt: "2026-08-29T20:00:00.000Z",
+      recordedAt: "2026-08-29T20:00:00.001Z",
+      principal,
+      tenantId: "t",
+      ownerId: "o",
+      confidentiality: "internal",
+      retentionClass: "standard",
+      trainability: "prohibited",
+      redactionStatus: "none",
+      payload,
+    });
+
+    const events: EventEnvelope[] = [
+      makeEnv("018f-u1", "1", "user", { kind: "GoalDeclared", goal: "Compute sqrt(1333)" }),
+      makeEnv("018f-a1", "2", "agent", {
+        kind: "ProposalProduced",
+        action: "finish",
+        note: "The square root of 1333 is approximately 36.510.",
+        proposalDescriptor: "sha256:abc",
+      }),
+      makeEnv("018f-c1", "3", "runtime", { kind: "RunCompleted", verdict: "completed" }),
+    ];
+
+    const turns = toConversationTurns(events);
+    assert.equal(turns.length, 2);
+    assert.equal(turns[0]?.speaker, "user");
+    assert.equal(turns[0]?.text, "Compute sqrt(1333)");
+    assert.equal(turns[1]?.speaker, "agent");
+    assert.equal(turns[1]?.text, "The square root of 1333 is approximately 36.510.");
+    assert.equal(turns[1]?.verdict, "completed");
+  });
+
+  it("folds EpisodeCompleted instrument_error detail and RunFailed error into visible failure notes", () => {
+    const makeEnv = (id: string, seq: string, payload: any): EventEnvelope => ({
+      schemaVersion: "vg.4",
+      eventId: id,
+      scope: "episode",
+      runId: "run-p-3",
+      traceId: "t-1",
+      spanId: `s-${seq}`,
+      seq,
+      occurredAt: "2026-08-29T20:00:00.000Z",
+      recordedAt: "2026-08-29T20:00:00.001Z",
+      principal: "runtime",
+      tenantId: "t",
+      ownerId: "o",
+      confidentiality: "internal",
+      retentionClass: "standard",
+      trainability: "prohibited",
+      redactionStatus: "none",
+      payload,
+    });
+
+    const events: EventEnvelope[] = [
+      makeEnv("018f-u2", "1", { kind: "GoalDeclared", goal: "Fail gracefully" }),
+      makeEnv("018f-e1", "2", {
+        kind: "EpisodeCompleted",
+        outcome: "instrument_error",
+        detail: "OpenRouter rate limit reached",
+      }),
+      makeEnv("018f-f1", "3", {
+        kind: "RunFailed",
+        error: "Process terminated with non-zero exit code",
+      }),
+    ];
+
+    const turns = toConversationTurns(events);
+    assert.equal(turns.length, 2);
+    assert.equal(turns[1]?.speaker, "agent");
+    assert.match(turns[1]?.text ?? "", /OpenRouter rate limit reached/);
+    assert.match(turns[1]?.text ?? "", /Process terminated with non-zero exit code/);
+    assert.equal(turns[1]?.verdict, "failed");
+  });
 });
 
 describe("@aether/projections — ApprovalState", () => {

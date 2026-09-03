@@ -50,6 +50,7 @@ export type CodingProjectionKind =
   | "complete"
   | "budget"
   | "route"
+  | "note"
   | "error";
 
 export type CodingProjection = {

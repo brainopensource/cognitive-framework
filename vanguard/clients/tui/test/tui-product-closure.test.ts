@@ -1,5 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { mkdtempSync, writeFileSync, rmSync, existsSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { TuiStore } from "../src/store.js";
 import { KeyboardManager } from "../src/keyboard.js";
 import { InMemoryPersistenceAdapter, FrontendAppController } from "@aether/client";
@@ -82,4 +85,80 @@ test("command palette selection dispatches the command shown at that index, not 
   keyboard.handleKey({ name: "return", ctrl: false, meta: false, shift: false, sequence: "\r" });
 
   assert.equal(store.get().activeModal, "select-workflow");
+});
+
+test("newly added SOTA slash commands: /status, /context, /cost, /compact, /doctor, /diff, /undo, /init, /title", () => {
+  const dir = mkdtempSync(join(tmpdir(), "aether-tui-init-"));
+  try {
+    const store = new TuiStore({ workspacePath: dir });
+
+    store.executeSlashCommand("/status");
+    assert.match(store.get().statusMessage, /agent:.*workspace:/);
+
+    store.executeSlashCommand("/context");
+    assert.match(store.get().statusMessage, /context: \d+ tokens/);
+
+    store.executeSlashCommand("/cost");
+    assert.match(store.get().statusMessage, /cost: \$/);
+
+    store.executeSlashCommand("/doctor");
+    assert.match(store.get().statusMessage, /doctor: connection=/);
+
+    store.executeSlashCommand("/diff");
+    assert.equal(store.get().statusMessage, "No pending diff.");
+
+    store.executeSlashCommand("/undo");
+    assert.match(store.get().statusMessage, /not yet implemented/);
+
+    store.executeSlashCommand("/title my session");
+    // No active conversation in this fixture, so it should not throw and should
+    // still report the attempted title.
+    assert.match(store.get().statusMessage, /Title: my session/);
+
+    store.executeSlashCommand("/init");
+    assert.match(store.get().statusMessage, /Wrote /);
+    assert.equal(existsSync(join(dir, "AETHER.md")), true);
+
+    // Re-running /init must not clobber the existing file
+    store.executeSlashCommand("/init");
+    assert.match(store.get().statusMessage, /already exists/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("/compact trims the local transcript view without touching run state", () => {
+  const store = new TuiStore();
+  store.update((s) => ({
+    ...s,
+    turns: Array.from({ length: 10 }, (_, i) => ({ id: `t${i}` } as any)),
+  }));
+  store.executeSlashCommand("/compact");
+  assert.equal(store.get().turns.length, 5);
+});
+
+test("!cmd runs a local shell command and shows its output without invoking the model", () => {
+  const store = new TuiStore();
+  const keyboard = new KeyboardManager(store);
+
+  store.setComposerText("!echo hello-from-tui", 21);
+  keyboard.handleKey({ name: "return", ctrl: false, meta: false, shift: false, sequence: "\r" });
+
+  assert.equal(store.get().composerText, "");
+  assert.equal(store.get().activeModal, "diff-viewer");
+  assert.match(store.get().diffViewerContent, /hello-from-tui/);
+  // No run was started: no model/client was ever provided to the keyboard manager.
+  assert.equal(store.get().runId, "");
+});
+
+test("@path references expand to inline file content before a prompt reaches expandComposerReferences", () => {
+  const dir = mkdtempSync(join(tmpdir(), "aether-tui-refs-"));
+  try {
+    writeFileSync(join(dir, "notes.txt"), "important context here");
+    const store = new TuiStore({ workspacePath: dir });
+    const expanded = store.expandComposerReferences("please read @notes.txt");
+    assert.match(expanded, /important context here/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

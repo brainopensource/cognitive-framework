@@ -31,6 +31,7 @@ export interface TuiCommandContext {
   showDiff(): void;
   undo(): void;
   initWorkspace(): void;
+  setBusyMode(mode: string): void;
 }
 
 export interface CommandSpec {

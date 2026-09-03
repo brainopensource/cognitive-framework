@@ -102,6 +102,14 @@ export type TuiStoreState = {
   planMode: boolean;
   accountLabel: string | null;
 
+  // Status footer telemetry
+  contextWindowTokens: number;
+  lastEventAtMs: number | null;
+
+  // Busy-input mode (Hermes): what a new message does while a run is active
+  busyMode: "interrupt" | "queue" | "steer";
+  queuedPrompt: string | null;
+
   // UI state
   focus: FocusRegion;
   composerText: string;
@@ -123,6 +131,7 @@ export class TuiStore {
   public readonly persistence: NodeFsPersistenceAdapter;
   public readonly state: Signal<TuiStoreState>;
   private abortController: AbortController | null = null;
+  private lastClient?: RuntimeClient;
 
   constructor(initial: Partial<TuiStoreState> = {}, client?: RuntimeClient) {
     this.persistence = new NodeFsPersistenceAdapter();
@@ -156,6 +165,10 @@ export class TuiStore {
       pendingApproval: initial.pendingApproval,
       planMode: initial.planMode ?? false,
       accountLabel: initial.accountLabel ?? null,
+      contextWindowTokens: initial.contextWindowTokens ?? 128_000,
+      lastEventAtMs: initial.lastEventAtMs ?? null,
+      busyMode: initial.busyMode ?? "interrupt",
+      queuedPrompt: initial.queuedPrompt ?? null,
       focus: initial.focus ?? "composer",
       composerText: initial.composerText ?? "",
       composerCursor: initial.composerCursor ?? 0,
@@ -234,9 +247,19 @@ export class TuiStore {
         approvalState: nextApprovalState,
         pendingApproval,
         focus,
+        lastEventAtMs: Date.now(),
         runId: envelope.runId ?? prev.runId,
       };
     });
+
+    const TERMINAL_STATUSES = new Set(["satisfied", "failed", "cancelled"]);
+    const cur = this.get();
+    if (TERMINAL_STATUSES.has(cur.snapshot.status) && cur.queuedPrompt && this.lastClient) {
+      const prompt = cur.queuedPrompt;
+      const client = this.lastClient;
+      this.update((s) => ({ ...s, queuedPrompt: null, statusMessage: "Sending queued prompt..." }));
+      this.submitFollowUp(client, prompt);
+    }
   }
 
   public toggleCardExpansion(cardId: string): void {
@@ -263,9 +286,36 @@ export class TuiStore {
     }));
   }
 
+  private isRunActive(): boolean {
+    const status = this.get().snapshot.status;
+    return status === "pending" || status === "running" || status === "awaiting_approval";
+  }
+
   public submitComposer(client?: RuntimeClient): string {
     const raw = this.get().composerText.trim();
     if (!raw) return "";
+
+    if (client) this.lastClient = client;
+
+    const text = this.expandComposerReferences(raw);
+
+    // Busy-input modes (Hermes): what a new message does while a run is
+    // already active. "queue" defers the prompt until the current run
+    // reaches a terminal state (see ingestEnvelope's auto-flush); "steer"
+    // has no backend redirect primitive to steer an in-flight run onto, so
+    // it explicitly falls back to "interrupt" rather than faking one.
+    if (client && this.isRunActive() && this.get().busyMode === "queue") {
+      this.update((prev) => ({
+        ...prev,
+        composerText: "",
+        composerCursor: 0,
+        composerHistory: [...prev.composerHistory, raw],
+        historyIndex: -1,
+        queuedPrompt: text,
+        statusMessage: "Queued — will send once the current run finishes.",
+      }));
+      return text;
+    }
 
     this.update((prev) => ({
       ...prev,
@@ -275,8 +325,6 @@ export class TuiStore {
       historyIndex: -1,
       statusMessage: "Dispatched prompt...",
     }));
-
-    const text = this.expandComposerReferences(raw);
 
     if (client) {
       if (this.get().turns.length > 0) {
@@ -289,8 +337,25 @@ export class TuiStore {
   }
 
   public async submitFollowUp(client: RuntimeClient, prompt: string): Promise<void> {
+    this.lastClient = client;
     this.controller.setClient(client);
     await this.controller.submitFollowUp(prompt);
+  }
+
+  public setBusyMode(mode: string): void {
+    if (mode !== "interrupt" && mode !== "queue" && mode !== "steer") {
+      this.update((s) => ({ ...s, statusMessage: `Unknown busy mode "${mode}"; use queue, steer, or interrupt.` }));
+      return;
+    }
+    if (mode === "steer") {
+      this.update((s) => ({
+        ...s,
+        busyMode: "interrupt",
+        statusMessage: "steer is not yet supported (no in-flight redirect primitive) — falling back to interrupt.",
+      }));
+      return;
+    }
+    this.update((s) => ({ ...s, busyMode: mode, statusMessage: `Busy mode: ${mode}` }));
   }
 
   public selectAgent(agentId: string): void {

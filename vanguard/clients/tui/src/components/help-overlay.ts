@@ -10,6 +10,8 @@ const SHORTCUTS = [
   ["Ctrl+U / Ctrl+D", "Scroll transcript half page"],
   ["Space / Enter", "Toggle expand/collapse selected activity card"],
   ["/", "Open command palette"],
+  ["@path", "Inline a file's content into the prompt on submit"],
+  ["!cmd", "Run a shell command locally, show output (no model call)"],
   ["y / n", "Approve / Reject governance challenge"],
   ["d", "Open dedicated full-screen diff viewer"],
   ["Ctrl+C", "Cancel active run / Interrupt turn"],

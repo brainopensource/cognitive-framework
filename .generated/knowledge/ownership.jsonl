@@ -44,6 +44,7 @@
 {"canonical_id": "execution.milestones", "canonical_owner_path": "docs/execution/milestones.md", "owner": "repository-governance"}
 {"canonical_id": "execution.tasks", "canonical_owner_path": "docs/execution/tasks.md", "owner": "repository-governance"}
 {"canonical_id": "nav.frontend", "canonical_owner_path": "docs/frontend/README.md", "owner": "frontend-architecture"}
+{"canonical_id": "skill-lda-docs-atlas", "canonical_owner_path": "docs/onboarding/SKILL_LDA_Docs_atlas.md", "owner": "repository-governance"}
 {"canonical_id": "frontend-prd-placement-manifest", "canonical_owner_path": "docs/product/frontend/FRONTEND_PRD_PLACEMENT_MANIFEST.md", "owner": "product-architecture"}
 {"canonical_id": "product.frontend.cli", "canonical_owner_path": "docs/product/frontend/PRD_AETHER_CLI.md", "owner": "product-architecture"}
 {"canonical_id": "product.frontend.desktop", "canonical_owner_path": "docs/product/frontend/PRD_AETHER_DESKTOP.md", "owner": "product-architecture"}
@@ -130,6 +131,6 @@
 {"canonical_id": "research.frontend-prototype", "canonical_owner_path": "docs/research/frontend/frontend_prototype.md", "owner": "repository-governance"}
 {"canonical_id": "research.frontend-prototype-beta-gem", "canonical_owner_path": "docs/research/frontend/frontend_prototype_beta_gem.md", "owner": "repository-governance"}
 {"canonical_id": "research.frontend-integration-plan", "canonical_owner_path": "docs/research/frontend/integration_plan.md", "owner": "repository-governance"}
-{"canonical_id": "SOTA_AGENTIC_CODING_HARNESS_ENGINEERING_TREATISE", "canonical_owner_path": "docs/research/theory/SOTA_AGENTIC_CODING_HARNESS_ENGINEERING_TREATISE.md", "owner": "repository-governance"}
+{"canonical_id": "theory.sota-agentic-coding-harness", "canonical_owner_path": "docs/research/theory/SOTA_AGENTIC_CODING_HARNESS_ENGINEERING_TREATISE.md", "owner": "principal-ai-systems-architect"}
 {"canonical_id": "theory.agent-substrate", "canonical_owner_path": "docs/research/theory/agent-substrate.md", "owner": "principal-systems-architect"}
-{"canonical_id": "optimizations_advanced_phd_LDA_techniques_tutorial", "canonical_owner_path": "docs/research/theory/optimizations_advanced_phd_LDA_techniques_tutorial.md", "owner": "repository-governance"}
+{"canonical_id": "theory.optimizations-advanced-phd-lda", "canonical_owner_path": "docs/research/theory/optimizations_advanced_phd_LDA_techniques_tutorial.md", "owner": "principal-ai-systems-architect"}

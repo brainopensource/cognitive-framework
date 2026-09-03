@@ -5,9 +5,21 @@ import type {
   CredentialState,
 } from "@aether/contracts";
 
+export type FrontendSessionRecord = {
+  account: string;
+  displayName: string;
+  issuedAt: string;
+  expiresAt: string;
+  token: string;
+};
+
 export interface FrontendPersistencePort {
   loadSettings(): Promise<Partial<FrontendSettings> | null>;
   saveSettings(settings: FrontendSettings): Promise<void>;
+
+  loadSession(): Promise<FrontendSessionRecord | null>;
+  saveSession(session: FrontendSessionRecord): Promise<void>;
+  clearSession(): Promise<void>;
 
   loadProviders(): Promise<ModelProviderConfig[] | null>;
   saveProviders(providers: ModelProviderConfig[]): Promise<void>;
@@ -33,12 +45,23 @@ export class InMemoryPersistenceAdapter implements FrontendPersistencePort {
   private drafts = new Map<string, string>();
   private recents: string[] | null = null;
   private credentials = new Map<string, string>();
+  private session: FrontendSessionRecord | null = null;
 
   async loadSettings(): Promise<Partial<FrontendSettings> | null> {
     return this.settings;
   }
   async saveSettings(settings: FrontendSettings): Promise<void> {
     this.settings = JSON.parse(JSON.stringify(settings));
+  }
+
+  async loadSession(): Promise<FrontendSessionRecord | null> {
+    return this.session ? JSON.parse(JSON.stringify(this.session)) : null;
+  }
+  async saveSession(session: FrontendSessionRecord): Promise<void> {
+    this.session = JSON.parse(JSON.stringify(session));
+  }
+  async clearSession(): Promise<void> {
+    this.session = null;
   }
 
   async loadProviders(): Promise<ModelProviderConfig[] | null> {
@@ -105,6 +128,34 @@ export class LocalStoragePersistenceAdapter implements FrontendPersistencePort {
       localStorage.setItem("aether:settings", JSON.stringify(settings));
     } catch {
       await this.memoryFallback.saveSettings(settings);
+    }
+  }
+
+  async loadSession(): Promise<FrontendSessionRecord | null> {
+    if (!this.isAvailable()) return this.memoryFallback.loadSession();
+    try {
+      const raw = localStorage.getItem("aether:session");
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return this.memoryFallback.loadSession();
+    }
+  }
+
+  async saveSession(session: FrontendSessionRecord): Promise<void> {
+    if (!this.isAvailable()) return this.memoryFallback.saveSession(session);
+    try {
+      localStorage.setItem("aether:session", JSON.stringify(session));
+    } catch {
+      await this.memoryFallback.saveSession(session);
+    }
+  }
+
+  async clearSession(): Promise<void> {
+    if (!this.isAvailable()) return this.memoryFallback.clearSession();
+    try {
+      localStorage.removeItem("aether:session");
+    } catch {
+      await this.memoryFallback.clearSession();
     }
   }
 
@@ -269,6 +320,30 @@ export class NodeFsPersistenceAdapter implements FrontendPersistencePort {
   async saveSettings(settings: FrontendSettings): Promise<void> {
     await this.writeJson("settings.json", settings);
     await this.memoryFallback.saveSettings(settings);
+  }
+
+  async loadSession(): Promise<FrontendSessionRecord | null> {
+    const data = await this.readJson<FrontendSessionRecord>("session.json");
+    return data ?? this.memoryFallback.loadSession();
+  }
+
+  async saveSession(session: FrontendSessionRecord): Promise<void> {
+    await this.writeJson("session.json", session, 0o600);
+    await this.memoryFallback.saveSession(session);
+  }
+
+  async clearSession(): Promise<void> {
+    if (this.isNode()) {
+      try {
+        await this.ensureDir();
+        const fs = await import("node:fs");
+        const filePath = `${this.baseDir}/session.json`;
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      } catch {
+        /* ignore */
+      }
+    }
+    await this.memoryFallback.clearSession();
   }
 
   async loadProviders(): Promise<ModelProviderConfig[] | null> {

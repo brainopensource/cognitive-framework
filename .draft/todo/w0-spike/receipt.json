@@ -1,0 +1,50 @@
+{
+  "env": {
+    "TERM": "tmux-256color",
+    "COLORTERM": "truecolor",
+    "isTTY": true,
+    "bunVersion": "1.4.0",
+    "cols": 220,
+    "rows": 50
+  },
+  "measured": {
+    "firstFrameMs": 8.491532999999997,
+    "eventToRenderP95Ms": 33.95902300000034,
+    "eventToRenderSamples": 200,
+    "resizeReflowMs": null,
+    "rssMb": 69.2109375
+  },
+  "budgets": {
+    "firstFrameMs": 40,
+    "keystrokeToCellP95Ms": 12,
+    "eventToRenderP95Ms": 50,
+    "resizeReflowMs": 16,
+    "rssMb": 45
+  },
+  "bunBaselineRssMb": 13.6171875,
+  "verdict": "NOT QUALIFIED (this pass)",
+  "results": {
+    "firstFrameMs": "PASS (8.5ms vs 40ms budget)",
+    "eventToRenderP95Ms": "PASS (34.0ms vs 50ms budget, 200 samples over a 10k-token stream)",
+    "resizeReflowMs": "UNMEASURED (see notes)",
+    "keystrokeToCellP95Ms": "UNMEASURED (see notes)",
+    "rssMb": "FAIL (69.2MB vs 45MB budget; ~55.6MB attributable to @opentui/core's native Zig core + 200 renderables over a 13.6MB Bun baseline, not to this harness)"
+  },
+  "terminalsQualified": {
+    "tmux": "measured this pass (see above); RSS over budget",
+    "localEmulator": "not run separately from tmux in this sandbox -- the coding harness's Bash tool has no attached TTY, so tmux was the only way to get a real pty here",
+    "ssh": "unqualified -- no SSH endpoint available in this sandbox",
+    "macOS/Windows Terminal": "explicitly out of scope per the plan"
+  },
+  "colorModesQualified": {
+    "24bit": "not separately isolated this pass (COLORTERM=truecolor was the ambient mode)",
+    "256color": "unmeasured",
+    "16color": "unmeasured"
+  },
+  "notes": [
+    "keystroke->cell P95 not measured: this harness has no attached TTY to inject synthetic keypresses through the real input path; a human-in-the-loop or a pty-injection tool (e.g. node-pty writing raw bytes) is needed for a faithful measurement.",
+    "resizeReflowMs: a synthetic process.stdout 'resize' emit did not reach the renderer's real SIGWINCH listener (attached to `process`, not `process.stdout`, per chunk-bun-bb3k0yt8.js:8848); a real tmux resize-window mid-run was not attempted in this pass. Left unmeasured rather than fabricated.",
+    "Visual artifact observed: long single-line TextRenderable content overlapped/garbled at the right edge of the transcript pane instead of wrapping or truncating cleanly (see tmux capture during the run) -- worth a follow-up before committing to this stack for the real transcript view, independent of the timing budgets.",
+    "Per the plan's own exit criterion ('all three terminals green on all three color modes, or we fall back and record the failure'), this pass does not qualify: one terminal (tmux) tested, RSS over budget on it, two terminals and all but one color-mode ambient setting unmeasured. This is a partial, honest receipt, not a certification -- W2 (the Solid/OpenTUI rewrite) should not proceed on the strength of this pass alone without either (a) a human running the missing measurements on a real interactive session, or (b) accepting the RSS finding and re-scoping the transcript's node count / renderable strategy to fit budget, then re-running."
+  ]
+}

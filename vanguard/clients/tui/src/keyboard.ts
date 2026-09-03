@@ -1,6 +1,7 @@
 import type { KeyEvent } from "./terminal/input.js";
 import type { TuiStore } from "./store.js";
 import type { RuntimeClient } from "@aether/client";
+import { listCommands } from "@aether/tui-core";
 
 export class KeyboardManager {
   private commandSelectedIndex: number = 0;
@@ -90,12 +91,18 @@ export class KeyboardManager {
       return;
     }
 
-    // Submit prompt or execute slash command
+    // Submit prompt, execute slash command, or run a local "!cmd" shell command
     if (key.name === "return" && !key.shift && !key.meta) {
       if (state.composerText.startsWith("/")) {
         const fullCmd = state.composerText;
         this.store.setComposerText("", 0);
-        this.store.executeSlashCommand(fullCmd, this.client);
+        this.store.executeSlashCommand(fullCmd, this.client, this.onExit);
+        return;
+      }
+      if (state.composerText.startsWith("!")) {
+        const cmd = state.composerText.slice(1).trim();
+        this.store.setComposerText("", 0);
+        if (cmd) this.store.runLocalShellCommand(cmd);
         return;
       }
       this.store.submitComposer(this.client);
@@ -291,15 +298,22 @@ export class KeyboardManager {
         return;
       }
       if (key.name === "down") {
-        this.commandSelectedIndex++;
+        const q = state.activeCommandQuery.toLowerCase();
+        const filteredCount = listCommands().filter(
+          (c) => c.name.toLowerCase().includes(q) || c.aliases.some((a) => a.toLowerCase().includes(q))
+        ).length;
+        this.commandSelectedIndex = Math.min(Math.max(0, filteredCount - 1), this.commandSelectedIndex + 1);
         return;
       }
       if (key.name === "return") {
-        this.executePaletteCommand(this.commandSelectedIndex);
-        this.store.update((s) => ({ ...s, activeModal: "none" }));
+        this.executePaletteCommand(this.commandSelectedIndex, state.activeCommandQuery);
+        // Only close back to "none" if the command didn't already switch to a
+        // different modal (e.g. /agent opening the agent picker).
+        this.store.update((s) => (s.activeModal === "command-palette" ? { ...s, activeModal: "none" } : s));
         return;
       }
       if (key.name === "backspace") {
+        this.commandSelectedIndex = 0;
         this.store.update((s) => ({
           ...s,
           activeCommandQuery: s.activeCommandQuery.slice(0, -1),
@@ -307,6 +321,7 @@ export class KeyboardManager {
         return;
       }
       if (key.name.length === 1 && !key.ctrl && !key.meta) {
+        this.commandSelectedIndex = 0;
         this.store.update((s) => ({
           ...s,
           activeCommandQuery: s.activeCommandQuery + key.name,
@@ -348,16 +363,21 @@ export class KeyboardManager {
     }
   }
 
-  private executePaletteCommand(index: number): void {
-    const commands = [
-      { id: "agent", action: () => this.store.update((s) => ({ ...s, activeModal: "select-agent" })) },
-      { id: "workflow", action: () => this.store.update((s) => ({ ...s, activeModal: "select-workflow" })) },
-      { id: "history", action: () => this.store.update((s) => ({ ...s, activeModal: "history" })) },
-      { id: "cancel", action: () => this.client && this.client.requestCancel(this.store.get().runId) },
-      { id: "help", action: () => this.store.update((s) => ({ ...s, activeModal: "help" })) },
-      { id: "quit", action: () => this.onExit && this.onExit() },
-    ];
-    const cmd = commands[index];
-    if (cmd) cmd.action();
+  /**
+   * Executes the exact CommandSpec at the selected palette index, applying the
+   * same query filter the palette rendered against so a filtered selection can
+   * never resolve to a different command than the one on screen. Both the
+   * rendered list (app.ts) and this dispatch now read from one @aether/tui-core
+   * registry, which structurally kills the old index-drift bug.
+   */
+  private executePaletteCommand(index: number, query: string): void {
+    const q = query.toLowerCase();
+    const filtered = listCommands().filter(
+      (c) => c.name.toLowerCase().includes(q) || c.aliases.some((a) => a.toLowerCase().includes(q))
+    );
+    const cmd = filtered[index];
+    if (!cmd) return;
+    const ctx = this.store.buildCommandContext(this.client, this.onExit);
+    cmd.run(ctx, "");
   }
 }

@@ -98,6 +98,16 @@ from .wiring import (
 )
 
 
+def _workspace_access_of(run_plan: Any) -> str:
+    """Duck-typed read of the profile's workspace access, mirroring
+    `artifacts.resolve_capture_policy`'s `getattr(profile, "requested", profile)`
+    so this stays agnostic to whether `run_plan.profile` is an
+    `EffectiveExecutionProfile` or a bare `ExecutionProfile` (`W3`).
+    """
+    requested = getattr(getattr(run_plan, "profile", None), "requested", getattr(run_plan, "profile", None))
+    return getattr(requested, "workspace_access", None) or "workspace-write"
+
+
 #: Harnesses whose terminal ``finish`` must pass the pack completion policy
 #: (W-092-2: completion admitted only by fresh applicable verification).
 #: ``vg-code-default`` is deliberately NOT gated: closed M-2 acceptance
@@ -396,6 +406,13 @@ class SessionPorts:
     #: resolves from `profile` at composition, or to the conservative default
     #: (`standard` retention, optional capture, redaction on).
     capture_policy: CapturePolicy | None = None
+    #: `W3`. "read-only" | "workspace-write". `None` resolves from
+    #: `run_plan.profile` at composition (same seam `capture_policy` uses,
+    #: `resolve_capture_policy` above), falling back to "workspace-write" if
+    #: no profile carries one. Explicit here rather than only threaded through
+    #: `_scope_for` so a caller can inspect what a session's scope was
+    #: attenuated for without re-deriving it from the profile.
+    workspace_access: str | None = None
     #: `A-M65`. Disabled by default. The controller receives projections and
     #: confidence values only; the runtime retains every authority-bearing
     #: collaborator.
@@ -506,7 +523,16 @@ class HarnessSession:
             role="session",
         )
 
-        self.scope = task.scope_override or _scope_for(harness)
+        self.workspace_access = ports.workspace_access or _workspace_access_of(run_plan)
+        self.scope = task.scope_override or _scope_for(harness, workspace_access=self.workspace_access)
+        # `W3`. `self.scope.actions` is the manifest ceiling attenuated for
+        # this session (e.g. plan mode drops `patch.apply`/`proc.exec` --
+        # `wiring._scope_for`). Binding adapters only for held verbs, rather
+        # than every verb the harness declares, is what makes attenuation
+        # real: a withheld verb has no adapter, so `Kernel` (built from
+        # `self.adapters` below) rejects it at S2 RESOLVE with
+        # `UNKNOWN_ACTION` before any lease or effect is possible -- the
+        # session is never issued the authority, not merely asked not to use it.
         self.adapters = {
             verb: harness.bindings[verb].factory(
                 BindingContext(
@@ -529,6 +555,7 @@ class HarnessSession:
                 )
             )
             for verb in harness.verbs
+            if verb in self.scope.actions
         }
         # `W11-A`. The index is bound only when the pack declares it. A
         # harness that did not ask for one must not silently acquire it: an

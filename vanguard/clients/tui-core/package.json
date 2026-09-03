@@ -1,27 +1,16 @@
 {
-  "name": "@aether/tui",
+  "name": "@aether/tui-core",
   "version": "0.1.0",
   "private": true,
-  "description": "AETHER interactive terminal cockpit and progressive disclosure UI",
+  "description": "Headless command/catalog/auth/keymap core for the AETHER TUI, zero-dependency and unit-testable without a terminal",
   "license": "Apache-2.0",
   "type": "module",
-  "bin": {
-    "aether-tui": "dist/src/main.js"
-  },
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/src/index.d.ts",
       "default": "./dist/src/index.js"
-    },
-    "./theme.js": {
-      "types": "./dist/src/theme.d.ts",
-      "default": "./dist/src/theme.js"
-    },
-    "./store.js": {
-      "types": "./dist/src/store.d.ts",
-      "default": "./dist/src/store.js"
     }
   },
   "files": [
@@ -35,14 +24,11 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "npm run build --silent && node --test dist/test/*.test.js",
-    "tui": "node dist/src/main.js"
+    "test": "npm run build --silent && node --test dist/test/*.test.js"
   },
   "dependencies": {
-    "@aether/contracts": "*",
     "@aether/client": "*",
-    "@aether/projections": "*",
-    "@aether/tui-core": "*"
+    "@aether/contracts": "*"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

@@ -107,6 +107,7 @@ graph TD
 
 - **Blocker B-1**: None currently blocking Lane A. All T0 prerequisites green.
 - **Blocker B-2**: Lane B canary runs (`REL-02R`) blocked until `REL-01R` runner repair finishes.
+- **Blocker B-3**: `TUI-01` (`aether` terminal, [`backlog.md` §2.7](backlog.md)) is not a WIP=1 lane occupant — both lanes above are full — and its milestone (`M-9`/`TC-E-047`) stays `BLOCKED` on `M-8`. Its command-registry (`clients/tui-core`) and plan-mode-enforcement (`runtime/profiles.py`/`wiring.py`/`session.py`) slices landed opportunistically as self-contained, independently falsifiable units that do not contend for either occupied lane, per `backlog.md`'s scope note that it tracks "work outside the active sprint WIP=1 constraint." The OpenTUI qualification spike (`PRD_AETHER_TUI.md` §8.1) is only partially run (RSS over budget; see `backlog.md` `TUI-01`) — the render-layer rewrite and packaging remain unauthorized and unstarted pending a full spike pass and explicit lane authorization.
 
 ---
 

@@ -1,5 +1,3 @@
-import React from "react";
-import { render } from "ink";
 import {
   approveDecision,
   explain,
@@ -11,7 +9,6 @@ import {
 import { runCodingCommand, type CodingRequest } from "@vanguard/client-core";
 import { clientFor } from "../composition/client-for.js";
 import { parseCliOptions, usage, type ParsedCli } from "../composition/parse-cli.js";
-import { RunTui } from "../tui/screens/run-tui.js";
 
 function codingRequestFromParsed(
   parsed: ParsedCli,
@@ -47,27 +44,6 @@ function codingRequestFromParsed(
     headless: Boolean(parsed.headless || parsed.json),
     ...overrides,
   };
-}
-
-export async function handleRun(args: string[], parsed: ParsedCli): Promise<number> {
-  const runtime = await clientFor(parsed);
-  if (parsed.headless) {
-    return await streamRun(runtime, parsed, console.log);
-  } else {
-    return new Promise<number>((resolve) => {
-      const { waitUntilExit } = render(
-        <RunTui
-          runtime={runtime}
-          repo={parsed.repo}
-          runId={parsed.runId}
-          resumeFrom={parsed.resumeFrom}
-          autostart={parsed.promptExplicit || Boolean(parsed.resumeFrom)}
-          initialBrief={parsed.promptExplicit ? (parsed.prompt ?? "") : ""}
-        />
-      );
-      waitUntilExit().then(() => resolve(0)).catch(() => resolve(1));
-    });
-  }
 }
 
 export async function handleCode(args: string[], parsed: ParsedCli): Promise<number> {

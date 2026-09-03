@@ -14,12 +14,17 @@ import { renderHelpOverlay } from "./components/help-overlay.js";
 import { renderDiffViewer } from "./components/diff-viewer.js";
 import { renderSelectModal } from "./components/select-modal.js";
 import type { RuntimeClient } from "@aether/client";
+import { listCommands } from "@aether/tui-core";
 
 export type TuiAppOptions = {
   client?: RuntimeClient;
   initialState?: Partial<TuiStoreState>;
   screenOptions?: ScreenOptions;
   theme?: ThemeTokens;
+  /** Called after stop(), once raw mode and listeners are torn down. Lets an
+   * embedding host (e.g. `vg run`'s interactive path) resolve its own
+   * lifecycle instead of the TUI owning process.exit(). */
+  onExit?: () => void;
 };
 
 export class TuiApplication {
@@ -28,15 +33,18 @@ export class TuiApplication {
   public readonly keyboard: KeyboardManager;
   private readonly parser: KeyParser;
   private readonly theme: ThemeTokens;
+  private readonly onExitCallback?: () => void;
   private isRunning: boolean = false;
   private unsubscribeStore?: () => void;
   private resizeHandler?: () => void;
+  private stdinHandler?: (chunk: Buffer) => void;
 
   constructor(options: TuiAppOptions = {}) {
     this.theme = options.theme ?? DEFAULT_THEME;
     this.screen = new TerminalScreen(options.screenOptions);
     this.store = new TuiStore(options.initialState);
     this.parser = new KeyParser();
+    this.onExitCallback = options.onExit;
     this.keyboard = new KeyboardManager(this.store, options.client, () => this.stop());
   }
 
@@ -47,12 +55,13 @@ export class TuiApplication {
     this.screen.enterRawMode();
 
     // Key input listener
-    process.stdin.on("data", (chunk: Buffer) => {
+    this.stdinHandler = (chunk: Buffer) => {
       const keys = this.parser.parse(chunk);
       for (const key of keys) {
         this.keyboard.handleKey(key);
       }
-    });
+    };
+    process.stdin.on("data", this.stdinHandler);
 
     // Resize listener (SIGWINCH)
     this.resizeHandler = () => {
@@ -77,8 +86,10 @@ export class TuiApplication {
 
     if (this.unsubscribeStore) this.unsubscribeStore();
     if (this.resizeHandler) process.stdout.off("resize", this.resizeHandler);
+    if (this.stdinHandler) process.stdin.off("data", this.stdinHandler);
 
     this.screen.exitRawMode();
+    this.onExitCallback?.();
   }
 
   public renderFrame(): void {
@@ -119,13 +130,15 @@ export class TuiApplication {
 
     // 7. Modals / Overlays if active
     if (state.activeModal === "command-palette") {
-      const commands = [
-        { id: "agent", name: "/agent", description: "Switch active agent manifest", action: () => {} },
-        { id: "workflow", name: "/workflow", description: "Switch workflow definition", action: () => {} },
-        { id: "cancel", name: "/cancel", description: "Cancel current active agent run", action: () => {} },
-        { id: "help", name: "/help", description: "Show keyboard shortcuts and help", action: () => {} },
-        { id: "quit", name: "/quit", description: "Exit AETHER terminal cockpit", action: () => {} },
-      ];
+      // Rendered straight from @aether/tui-core's command registry — the same
+      // list keyboard.ts dispatches against, so there is one source of truth
+      // for what the palette shows and what Enter actually runs.
+      const commands = listCommands().map((c) => ({
+        id: c.name,
+        name: `/${c.name}`,
+        description: c.description,
+        action: () => {},
+      }));
       renderCommandPalette(
         this.screen,
         commands,

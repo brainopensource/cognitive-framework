@@ -5,6 +5,7 @@
 {"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "decision.index", "target_path": "docs/decisions.md", "relationship_type": "markdown_link"}
 {"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "execution.tasks", "target_path": "docs/execution/tasks.md", "relationship_type": "markdown_link"}
 {"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "execution.feature_spec", "target_path": "docs/execution/FEATURE_SPEC.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "SKILL", "target_path": ".agents/skills/lda-navigator/SKILL.md", "relationship_type": "markdown_link"}
 {"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "nav.home", "target_path": "docs/README.md", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "repo-root-vision", "target_path": "VISION.md", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "spec.core", "target_path": "docs/SPEC.md", "relationship_type": "markdown_link"}
@@ -20,8 +21,13 @@
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "research", "target_path": "docs/research", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "reports", "target_path": "docs/reports", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "arch.system.overview", "target_path": "docs/architecture/overview.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "SKILL", "target_path": ".agents/skills/lda-navigator/SKILL.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "skill-lda-docs-atlas", "target_path": "docs/onboarding/SKILL_LDA_Docs_atlas.md", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "repo-agents-contract", "target_path": "AGENTS.md", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "README", "target_path": "test/README.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "arch.trust.kernel", "target_path": "docs/backend/architecture/kernel.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "arch.system.boundaries", "target_path": "docs/architecture/boundaries.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "arch.assurance.evaluation", "target_path": "docs/backend/architecture/assurance-evaluation.md", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "0095-vision-as-law-zero-and-roadmap-reconciliation", "target_path": "docs/02_decisions/0095-vision-as-law-zero-and-roadmap-reconciliation.md", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "spec.core", "target_path": "docs/SPEC.md", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "decision.index", "target_path": "docs/decisions.md", "relationship_type": "markdown_link"}
@@ -194,6 +200,7 @@
 {"source_id": "decision.index", "source_path": "docs/decisions.md", "target_id": "arch.memory.learning", "target_path": "docs/backend/architecture/memory-learning.md", "relationship_type": "markdown_link"}
 {"source_id": "decision.index", "source_path": "docs/decisions.md", "target_id": "ref.artifacts", "target_path": "docs/backend/reference/artifacts-memory.md", "relationship_type": "markdown_link"}
 {"source_id": "execution.tasks", "source_path": "docs/execution/active.md", "target_id": "execution.feature_spec", "target_path": "docs/execution/FEATURE_SPEC.md", "relationship_type": "markdown_link"}
+{"source_id": "execution.tasks", "source_path": "docs/execution/active.md", "target_id": "execution.backlog", "target_path": "docs/execution/backlog.md", "relationship_type": "markdown_link"}
 {"source_id": "execution.backlog", "source_path": "docs/execution/backlog.md", "target_id": "execution.tasks", "target_path": "docs/execution/tasks.md", "relationship_type": "markdown_link"}
 {"source_id": "execution.backlog", "source_path": "docs/execution/backlog.md", "target_id": "execution.feature_spec", "target_path": "docs/execution/FEATURE_SPEC.md", "relationship_type": "markdown_link"}
 {"source_id": "execution.backlog", "source_path": "docs/execution/backlog.md", "target_id": "repo-root-vision", "target_path": "VISION.md", "relationship_type": "markdown_link"}
@@ -203,8 +210,10 @@
 {"source_id": "execution.milestones", "source_path": "docs/execution/milestones.md", "target_id": "execution.tasks", "target_path": "docs/execution/tasks.md", "relationship_type": "markdown_link"}
 {"source_id": "execution.milestones", "source_path": "docs/execution/milestones.md", "target_id": "execution.feature_spec", "target_path": "docs/execution/FEATURE_SPEC.md", "relationship_type": "markdown_link"}
 {"source_id": "execution.tasks", "source_path": "docs/execution/tasks.md", "target_id": "execution.feature_spec", "target_path": "docs/execution/FEATURE_SPEC.md", "relationship_type": "markdown_link"}
+{"source_id": "execution.tasks", "source_path": "docs/execution/tasks.md", "target_id": "execution.backlog", "target_path": "docs/execution/backlog.md", "relationship_type": "markdown_link"}
 {"source_id": "nav.frontend", "source_path": "docs/frontend/README.md", "target_id": "frontend-prd-placement-manifest", "target_path": "docs/product/frontend/FRONTEND_PRD_PLACEMENT_MANIFEST.md", "relationship_type": "markdown_link"}
 {"source_id": "nav.frontend", "source_path": "docs/frontend/README.md", "target_id": "guide.getting-started", "target_path": "docs/backend/guides/getting-started.md", "relationship_type": "markdown_link"}
+{"source_id": "skill-lda-docs-atlas", "source_path": "docs/onboarding/SKILL_LDA_Docs_atlas.md", "target_id": "SKILL", "target_path": ".agents/skills/lda-navigator/SKILL.md", "relationship_type": "markdown_link"}
 {"source_id": "report.electroweak.3_body.solution_a.full_code_manifest_wave-10-final-integration-release", "source_path": "docs/reports/reviews/electroweak_v091/3_body/solution_a/full_code_manifest_wave-10-final-integration-release.md", "target_id": "ports", "target_path": "docs/reports/reviews/electroweak_v091/3_body/solution_a/ports.workspace", "relationship_type": "markdown_link"}
 {"source_id": "report.electroweak.3_body.solution_a.full_code_manifest_wave-10-final-integration-release", "source_path": "docs/reports/reviews/electroweak_v091/3_body/solution_a/full_code_manifest_wave-10-final-integration-release.md", "target_id": "native, enriched", "target_path": "docs/reports/reviews/electroweak_v091/3_body/solution_a/native, enriched", "relationship_type": "markdown_link"}
 {"source_id": "report.electroweak.3_body.solution_a.full_code_manifest_wave-10-final-integration-release", "source_path": "docs/reports/reviews/electroweak_v091/3_body/solution_a/full_code_manifest_wave-10-final-integration-release.md", "target_id": "ports.artifacts, ports", "target_path": "docs/reports/reviews/electroweak_v091/3_body/solution_a/ports.artifacts, ports.blobs", "relationship_type": "markdown_link"}
@@ -246,7 +255,7 @@
 {"source_id": "research.frontend-prototype-beta-gem", "source_path": "docs/research/frontend/frontend_prototype_beta_gem.md", "target_id": "service", "target_path": "vanguard/packages/runtime/service", "relationship_type": "markdown_link"}
 {"source_id": "research.frontend-prototype-beta-gem", "source_path": "docs/research/frontend/frontend_prototype_beta_gem.md", "target_id": "bench", "target_path": "lab/bench.py", "relationship_type": "markdown_link"}
 {"source_id": "research.frontend-prototype-beta-gem", "source_path": "docs/research/frontend/frontend_prototype_beta_gem.md", "target_id": "substrate_visualizer", "target_path": "tools/substrate_visualizer", "relationship_type": "markdown_link"}
-{"source_id": "SOTA_AGENTIC_CODING_HARNESS_ENGINEERING_TREATISE", "source_path": "docs/research/theory/SOTA_AGENTIC_CODING_HARNESS_ENGINEERING_TREATISE.md", "target_id": "002_LLM_API_MOCK", "target_path": "docs/research/theory/file:/home/rocha/Coding/Aether-D-System/tools/002_LLM_API_MOCK", "relationship_type": "markdown_link"}
+{"source_id": "theory.sota-agentic-coding-harness", "source_path": "docs/research/theory/SOTA_AGENTIC_CODING_HARNESS_ENGINEERING_TREATISE.md", "target_id": "002_LLM_API_MOCK", "target_path": "docs/research/theory/file:/home/rocha/Coding/Aether-D-System/tools/002_LLM_API_MOCK", "relationship_type": "markdown_link"}
 {"source_id": "theory.agent-substrate", "source_path": "docs/research/theory/agent-substrate.md", "target_id": "agency", "target_path": "docs/research/backend/architecture/agency.md", "relationship_type": "markdown_link"}
 {"source_id": "theory.agent-substrate", "source_path": "docs/research/theory/agent-substrate.md", "target_id": "delegation-topology", "target_path": "docs/research/backend/architecture/delegation-topology.md", "relationship_type": "markdown_link"}
 {"source_id": "theory.agent-substrate", "source_path": "docs/research/theory/agent-substrate.md", "target_id": "memory-learning", "target_path": "docs/research/backend/architecture/memory-learning.md", "relationship_type": "markdown_link"}

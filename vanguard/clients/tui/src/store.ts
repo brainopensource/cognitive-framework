@@ -18,6 +18,20 @@ import type { EventEnvelope, AgentDescriptor, WorkflowDescriptor, SemanticActivi
 import type { RuntimeClient } from "@aether/client";
 import { FrontendAppController, DEFAULT_AGENTS, DEFAULT_WORKFLOWS, NodeFsPersistenceAdapter, DEFAULT_PROVIDERS } from "@aether/client";
 import { DEFAULT_FRONTEND_SETTINGS } from "@aether/projections";
+import {
+  executeCommandLine,
+  type TuiCommandContext,
+  loadModelCatalog,
+  resolveModelSelection,
+  resolveModelsRegistryPath,
+  ModelPolicyError,
+  login as mockLogin,
+  logout as mockLogout,
+  expandFileReferences,
+  runShellCommand,
+} from "@aether/tui-core";
+import { writeFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
 
 // Fine-grained Signal primitive
 export type Signal<T> = {
@@ -84,6 +98,10 @@ export type TuiStoreState = {
   approvalState: ApprovalState;
   pendingApproval?: PendingApproval;
 
+  // Governance
+  planMode: boolean;
+  accountLabel: string | null;
+
   // UI state
   focus: FocusRegion;
   composerText: string;
@@ -93,7 +111,7 @@ export type TuiStoreState = {
   scrollOffset: number;
   followStream: boolean;
   expandedCardIds: Set<string>;
-  activeModal: "none" | "command-palette" | "help" | "diff-viewer" | "select-agent" | "select-workflow" | "history";
+  activeModal: "none" | "command-palette" | "help" | "diff-viewer" | "select-agent" | "select-workflow" | "select-model" | "history";
   diffViewerContent: string;
   statusMessage: string;
   activeCommandQuery: string;
@@ -136,6 +154,8 @@ export class TuiStore {
       activities: [],
       approvalState: initial.approvalState ?? emptyApprovalState(),
       pendingApproval: initial.pendingApproval,
+      planMode: initial.planMode ?? false,
+      accountLabel: initial.accountLabel ?? null,
       focus: initial.focus ?? "composer",
       composerText: initial.composerText ?? "",
       composerCursor: initial.composerCursor ?? 0,
@@ -244,17 +264,19 @@ export class TuiStore {
   }
 
   public submitComposer(client?: RuntimeClient): string {
-    const text = this.get().composerText.trim();
-    if (!text) return "";
+    const raw = this.get().composerText.trim();
+    if (!raw) return "";
 
     this.update((prev) => ({
       ...prev,
       composerText: "",
       composerCursor: 0,
-      composerHistory: [...prev.composerHistory, text],
+      composerHistory: [...prev.composerHistory, raw],
       historyIndex: -1,
       statusMessage: "Dispatched prompt...",
     }));
+
+    const text = this.expandComposerReferences(raw);
 
     if (client) {
       if (this.get().turns.length > 0) {
@@ -298,60 +320,39 @@ export class TuiStore {
     }));
   }
 
-  public executeSlashCommand(input: string, client?: RuntimeClient): void {
-    const parts = input.slice(1).trim().split(/\s+/);
-    const cmd = parts[0]?.toLowerCase() ?? "";
-    const arg = parts.slice(1).join(" ");
-
-    switch (cmd) {
-      case "agent":
-        if (arg) {
-          this.selectAgent(arg);
-        } else {
-          this.update((s) => ({ ...s, activeModal: "select-agent" }));
+  /**
+   * The single dispatch target for slash commands, driven by @aether/tui-core's
+   * command registry so the palette and the composer's "/name" parsing can never
+   * disagree about what a given command does.
+   */
+  public buildCommandContext(client?: RuntimeClient, onExit?: () => void): TuiCommandContext {
+    return {
+      openModal: (modal) => this.update((s) => ({ ...s, activeModal: modal as TuiStoreState["activeModal"] })),
+      closeModal: () => this.update((s) => ({ ...s, activeModal: "none", focus: "composer" })),
+      selectAgent: (agentId) => this.selectAgent(agentId),
+      selectWorkflow: (workflowId) => this.selectWorkflow(workflowId),
+      selectWorkspace: (path) => this.selectWorkspace(path),
+      setProvider: (providerId) => {
+        this.controller.setDefaultProvider(providerId);
+        this.update((s) => ({ ...s, selectedProviderId: providerId, statusMessage: `Default provider: ${providerId}` }));
+      },
+      setModel: (modelId) => this.setModel(modelId),
+      togglePlanMode: () => this.togglePlanMode(),
+      showStatus: (message) => this.update((s) => ({ ...s, statusMessage: message })),
+      resume: (runIdOrLatest) => {
+        if (client) this.controller.resumeRun(runIdOrLatest);
+      },
+      attach: (runId) => {
+        if (client) this.attachStream(client, runId);
+      },
+      cancelRun: () => {
+        const cur = this.get();
+        if (cur.runId && client) {
+          client.requestCancel(cur.runId, { reason: "Cancelled via /cancel" });
+          this.update((s) => ({ ...s, statusMessage: "Cancellation requested..." }));
         }
-        break;
-      case "workflow":
-        if (arg) {
-          this.selectWorkflow(arg);
-        } else {
-          this.update((s) => ({ ...s, activeModal: "select-workflow" }));
-        }
-        break;
-      case "workspace":
-        if (arg) {
-          this.selectWorkspace(arg);
-        } else {
-          this.update((s) => ({ ...s, statusMessage: `Workspace: ${s.workspacePath}` }));
-        }
-        break;
-      case "provider":
-        if (arg) {
-          this.controller.setDefaultProvider(arg);
-          this.update((s) => ({ ...s, selectedProviderId: arg, statusMessage: `Default provider: ${arg}` }));
-        } else {
-          const cur = this.get();
-          this.update((s) => ({ ...s, statusMessage: `Provider: ${cur.selectedProviderId}` }));
-        }
-        break;
-      case "model":
-        if (arg) {
-          this.update((s) => ({ ...s, model: arg, statusMessage: `Model: ${arg}` }));
-        } else {
-          const cur = this.get();
-          this.update((s) => ({ ...s, statusMessage: `Model: ${cur.model}` }));
-        }
-        break;
-      case "runtime":
-        this.update((s) => ({
-          ...s,
-          statusMessage: `Runtime: ${s.settings.runtime?.socketPath ?? "/tmp/vanguard-runtime.sock"} [${s.connectionState}]`,
-        }));
-        break;
-      case "history":
-        this.update((s) => ({ ...s, activeModal: "history" }));
-        break;
-      case "new":
+      },
+      newChat: () => {
         this.controller.newChat();
         this.update((s) => ({
           ...s,
@@ -360,26 +361,155 @@ export class TuiStore {
           snapshot: emptyRunSnapshot(),
           statusMessage: "New conversation started.",
         }));
-        break;
-      case "clear":
-        this.update((s) => ({ ...s, turns: [], statusMessage: "Transcript view cleared." }));
-        break;
-      case "help":
-        this.update((s) => ({ ...s, activeModal: "help" }));
-        break;
-      case "attach":
-        if (arg && client) {
-          this.attachStream(client, arg);
+      },
+      clearTranscript: () => this.update((s) => ({ ...s, turns: [], statusMessage: "Transcript view cleared." })),
+      exit: () => {
+        if (onExit) onExit();
+      },
+      login: () => this.login(),
+      logout: () => this.logout(),
+      setTitle: (title) => {
+        const activeId = this.controller.getState().activeConversationId;
+        if (activeId) {
+          this.controller.renameConversation(activeId, title);
         }
-        break;
-      case "resume":
-        if (client) {
-          this.controller.resumeRun(arg || undefined);
+        this.update((s) => ({ ...s, statusMessage: `Title: ${title}` }));
+      },
+      showRunStatus: () => {
+        const s = this.get();
+        this.update((prev) => ({
+          ...prev,
+          statusMessage: `agent:${s.agentId} workflow:${s.workflowId} model:${s.model} workspace:${s.workspacePath} run:${s.runId || "none"} connection:${s.connectionState}${s.planMode ? " [PLAN]" : ""}`,
+        }));
+      },
+      showContext: () => {
+        const t = this.get().snapshot.tokens;
+        this.update((s) => ({
+          ...s,
+          statusMessage: `context: ${t.totalTokens} tokens (in:${t.inTokens} out:${t.outTokens})`,
+        }));
+      },
+      showCost: () => {
+        const micros = Number(this.get().snapshot.costMicros || "0");
+        const usd = (micros / 1_000_000).toFixed(4);
+        this.update((s) => ({ ...s, statusMessage: `cost: $${usd}` }));
+      },
+      compactTranscript: () => {
+        const KEEP = 5;
+        this.update((s) => ({
+          ...s,
+          turns: s.turns.slice(-KEEP),
+          statusMessage: `Transcript view compacted to the last ${KEEP} turns (local view only; run state is unaffected).`,
+        }));
+      },
+      showDoctor: () => {
+        const s = this.get();
+        const daemon = this.controller.getState().daemonStatus;
+        this.update((prev) => ({
+          ...prev,
+          statusMessage: `doctor: connection=${s.connectionState} daemon=${daemon ? JSON.stringify(daemon) : "unknown"} workspace=${s.workspacePath}`,
+        }));
+      },
+      showDiff: () => {
+        const pending = this.get().pendingApproval;
+        if (pending?.unifiedDiff) {
+          this.update((s) => ({ ...s, activeModal: "diff-viewer", diffViewerContent: pending.unifiedDiff }));
+        } else {
+          this.update((s) => ({ ...s, statusMessage: "No pending diff." }));
         }
-        break;
-      default:
-        this.update((s) => ({ ...s, statusMessage: `Unknown slash command: /${cmd}` }));
+      },
+      undo: () => {
+        this.update((s) => ({
+          ...s,
+          statusMessage: "/undo is not yet implemented — no git-backed rollback is wired up. Revert manually with git.",
+        }));
+      },
+      initWorkspace: () => this.initWorkspace(),
+    };
+  }
+
+  /** Seeds a minimal AETHER.md context file for the current workspace, if one does not already exist. */
+  public initWorkspace(): void {
+    const cur = this.get();
+    const target = join(cur.workspacePath, "AETHER.md");
+    if (existsSync(target)) {
+      this.update((s) => ({ ...s, statusMessage: `AETHER.md already exists at ${target}` }));
+      return;
     }
+    const content = `# AETHER.md\n\nContext for AETHER coding agents working in this repository.\n\nGenerated by /init on ${new Date().toISOString()}.\n`;
+    try {
+      writeFileSync(target, content, { encoding: "utf-8" });
+      this.update((s) => ({ ...s, statusMessage: `Wrote ${target}` }));
+    } catch (err) {
+      this.update((s) => ({ ...s, statusMessage: `/init failed: ${(err as Error).message}` }));
+    }
+  }
+
+  /** Expands "@path" references in a composer prompt into inline file content before it is sent to the model. */
+  public expandComposerReferences(text: string): string {
+    return expandFileReferences(text, this.get().workspacePath).text;
+  }
+
+  /**
+   * Hermes's zero-cost "!cmd" trick: runs a command locally and shows its
+   * output, without invoking the model or touching the run/turn state.
+   */
+  public runLocalShellCommand(cmdText: string): void {
+    const cur = this.get();
+    const result = runShellCommand(cmdText, cur.workspacePath);
+    const body = [
+      `$ ${result.command}`,
+      result.stdout.trim(),
+      result.stderr.trim() ? `[stderr]\n${result.stderr.trim()}` : "",
+      `[exit ${result.exitCode}]${result.truncated ? " (output truncated)" : ""}`,
+    ].filter(Boolean).join("\n\n");
+    this.update((s) => ({
+      ...s,
+      activeModal: "diff-viewer",
+      diffViewerContent: body,
+      statusMessage: `Ran locally: ${result.command} (exit ${result.exitCode})`,
+    }));
+  }
+
+  public executeSlashCommand(input: string, client?: RuntimeClient, onExit?: () => void): void {
+    const ctx = this.buildCommandContext(client, onExit);
+    const result = executeCommandLine(input, ctx, { planMode: this.get().planMode });
+    if (!result.ok) {
+      this.update((s) => ({ ...s, statusMessage: result.error }));
+    }
+  }
+
+  public setModel(requested: string): void {
+    try {
+      const catalog = loadModelCatalog(resolveModelsRegistryPath(this.get().workspacePath));
+      const resolved = resolveModelSelection(requested, catalog);
+      this.update((s) => ({ ...s, model: resolved, statusMessage: `Model: ${resolved}` }));
+    } catch (err) {
+      const message = err instanceof ModelPolicyError ? err.message : String(err);
+      this.update((s) => ({ ...s, statusMessage: message }));
+    }
+  }
+
+  public togglePlanMode(): void {
+    this.update((s) => ({
+      ...s,
+      planMode: !s.planMode,
+      statusMessage: !s.planMode ? "Plan mode ON — writes withheld for the next turn" : "Plan mode OFF",
+    }));
+  }
+
+  public async login(): Promise<void> {
+    const result = await mockLogin(this.persistence);
+    this.update((s) => ({
+      ...s,
+      accountLabel: result.session.account,
+      statusMessage: `Open ${result.deviceUrl} in your browser to finish signing in.`,
+    }));
+  }
+
+  public async logout(): Promise<void> {
+    await mockLogout(this.persistence);
+    this.update((s) => ({ ...s, accountLabel: null, statusMessage: "Signed out." }));
   }
 
   public async startRun(client: RuntimeClient, prompt: string): Promise<void> {
@@ -395,6 +525,10 @@ export class TuiStore {
       prompt,
       model: cur.model,
       runId: cur.runId || undefined,
+      // W3: plan mode is enforced at the runtime composition layer (a
+      // "plan" execution profile that withholds patch.apply/proc.exec),
+      // never by the client choosing not to send a write request.
+      ...(cur.planMode ? { profileId: "plan" } : {}),
     });
 
     if (!res.ok) {

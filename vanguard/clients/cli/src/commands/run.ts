@@ -1,5 +1,3 @@
-import React from "react";
-import { render } from "ink";
 import { readFileSync, existsSync } from "node:fs";
 import {
   foldEvents,
@@ -18,7 +16,7 @@ import {
 import { streamRun } from "@aether/client";
 import type { ParsedCli } from "../composition/parse-cli.js";
 import { clientFor } from "../composition/client-for.js";
-import { RunTui } from "../tui/screens/run-tui.js";
+import { TuiApplication } from "@aether/tui";
 import {
   CLI_EXIT_CODES,
   exitCodeForErrorCode,
@@ -82,17 +80,21 @@ export async function handleRun(args: string[], options: ParsedCli): Promise<num
 
   const runtime = await clientFor(options);
   return new Promise<number>((resolve) => {
-    const { waitUntilExit } = render(
-      React.createElement(RunTui, {
-        runtime,
-        repo: options.repo,
-        runId: options.runId,
-        resumeFrom: options.resumeFrom,
-        autostart: options.promptExplicit || Boolean(options.resumeFrom),
-        initialBrief: options.promptExplicit ? (options.prompt ?? "") : "",
-      })
-    );
-    waitUntilExit().then(() => resolve(0)).catch(() => resolve(1));
+    const app = new TuiApplication({
+      client: runtime,
+      initialState: {
+        workspacePath: options.repo ?? ".",
+        runId: options.runId ?? "",
+      },
+      onExit: () => resolve(0),
+    });
+    app.start();
+    if (options.resumeFrom) {
+      app.store.controller.resumeRun(options.resumeFrom);
+    } else if (options.promptExplicit && options.prompt) {
+      app.store.setComposerText(options.prompt);
+      app.store.submitComposer(runtime);
+    }
   });
 }
 

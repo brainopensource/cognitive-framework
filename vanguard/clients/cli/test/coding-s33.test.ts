@@ -142,7 +142,7 @@ test("TypeScript coding path has no model-routing or effect-dispatch loop", asyn
   const packageRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
   const srcRoot = join(packageRoot, "src");
   const files = [
-    join(srcRoot, "main.tsx"),
+    join(srcRoot, "main.ts"),
     join(srcRoot, "composition", "parse-cli.ts"),
     join(srcRoot, "application", "commands.ts"),
   ];

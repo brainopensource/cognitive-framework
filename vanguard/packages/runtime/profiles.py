@@ -254,6 +254,23 @@ PRESETS: Mapping[str, ExecutionProfile] = {
         capture_required=True,
         api_version="mhf.execution-profile/2",
     ),
+    "plan": ExecutionProfile(
+        id="plan",
+        workspace_mode="in-place",
+        workspace_access="read-only",
+        process_backend="host",
+        approval_default="ask",
+        persistence_mode="sqlite-wal",
+        persistence_durable=True,
+        evaluation_mode="none",
+        evaluation_absence_reason="plan-mode run: read-only, no mutating effect to evaluate",
+        assurance_level="recorded",
+        attestation_required=False,
+        promotion_eligible=False,
+        retention="standard",
+        capture_required=True,
+        api_version="mhf.execution-profile/2",
+    ),
 }
 
 _ALIASES: Mapping[str, str] = {

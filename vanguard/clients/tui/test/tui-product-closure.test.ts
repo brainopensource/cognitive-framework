@@ -25,9 +25,16 @@ test("TUI daily-use: slash commands execution (/workspace, /agent, /workflow, /p
   store.executeSlashCommand("/provider provider-openrouter");
   assert.equal(store.get().selectedProviderId, "provider-openrouter");
 
-  // /model
+  // /model — validated against the model registry, fails closed on paid
+  // models unless VANGUARD_ALLOW_PAID is set (a free-tier model succeeds)
   store.executeSlashCommand("/model deepseek/deepseek-v4-flash-0731");
-  assert.equal(store.get().model, "deepseek/deepseek-v4-flash-0731");
+  assert.equal(store.get().model, "openrouter/free", "paid model without VANGUARD_ALLOW_PAID should be rejected, leaving the model unchanged");
+
+  store.executeSlashCommand("/model free");
+  assert.equal(store.get().model, "openrouter/free");
+
+  store.executeSlashCommand("/model not-a-real-model");
+  assert.equal(store.get().model, "openrouter/free", "unknown model id should be rejected");
 
   // /history
   store.executeSlashCommand("/history");
@@ -52,4 +59,27 @@ test("TUI keyboard grammar: slash command trigger and execution", () => {
 
   assert.equal(store.get().agentId, "coding-agent");
   assert.equal(store.get().composerText, "");
+});
+
+test("command palette selection dispatches the command shown at that index, not a shifted one", () => {
+  // Regression test for the historical bug: app.ts's rendered palette and
+  // keyboard.ts's execution list were two independently maintained arrays
+  // whose positions disagreed, so picking "cancel" fired "history" instead.
+  // Both now render from and dispatch against @aether/tui-core's single
+  // registry, so selecting an index always runs the command shown there.
+  const store = new TuiStore();
+  const keyboard = new KeyboardManager(store);
+
+  // Open the palette
+  store.setComposerText("", 0);
+  keyboard.handleKey({ name: "/", ctrl: false, meta: false, shift: false, sequence: "/" });
+  assert.equal(store.get().activeModal, "command-palette");
+
+  // The registry's 3rd entry (index 2) is "workflow" — select it and confirm
+  // the workflow modal opens, not some unrelated command.
+  keyboard.handleKey({ name: "down", ctrl: false, meta: false, shift: false, sequence: "" });
+  keyboard.handleKey({ name: "down", ctrl: false, meta: false, shift: false, sequence: "" });
+  keyboard.handleKey({ name: "return", ctrl: false, meta: false, shift: false, sequence: "\r" });
+
+  assert.equal(store.get().activeModal, "select-workflow");
 });

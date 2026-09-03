@@ -434,7 +434,19 @@ def _reservation_for(budget: Mapping[str, int], effects: int) -> Reservation:
 
 
 
-def _ceiling_resources(harness: Harness) -> tuple[Mapping[str, Any], ...]:
+#: Verbs plan mode withholds. A write path in either direction -- editing the
+#: workspace directly (`patch.apply`) or shelling out to one that could
+#: (`proc.exec`) -- is denied by never granting the authority, not by asking
+#: the caller to behave (`W3`). `agent.spawn` is retained: attenuation is
+#: monotonic (`K-15`), so a spawned child cannot recover authority its parent
+#: was never granted, and read verbs (`fs.read`, `fs.search`, `fs.list`)
+#: remain fully available.
+_PLAN_MODE_WITHHELD_VERBS = frozenset({"patch.apply", "proc.exec"})
+
+
+def _ceiling_resources(
+    harness: Harness, *, withheld_verbs: frozenset[str] = frozenset()
+) -> tuple[Mapping[str, Any], ...]:
     """The capability ceiling, as held resources (ADR-0074 §4 / 1.3-B).
 
     One resource per declared capability's *own* selector -- the manifest is
@@ -445,15 +457,31 @@ def _ceiling_resources(harness: Harness) -> tuple[Mapping[str, Any], ...]:
     must not be silently covered by a blanket filesystem grant, or the
     classifier's `decide()` check (`domain/selectors/`) is comparing the
     request against authority the manifest never declared.
+
+    `harness.risk_of` and `harness.capability_ceiling` are both built from
+    `canonical.capabilities` in the same iteration order (`compose.py`), and
+    a manifest's ceiling is validated 1:1 against its capability list at
+    parse time (`domain/artifacts/manifest.py`), so zipping the two by
+    position recovers each selector's owning verb without re-deriving it.
     """
     seen: dict[str, Mapping[str, Any]] = {}
-    for selector_text in harness.capability_ceiling:
+    for verb, selector_text in zip(harness.risk_of.keys(), harness.capability_ceiling):
+        if verb in withheld_verbs:
+            continue
         seen.setdefault(selector_text, json.loads(selector_text))
     return tuple(seen.values())
 
 
-def _scope_for(harness: Harness) -> Scope:
-    """The authority surface, entirely from the manifest's declared ceiling."""
+def _scope_for(harness: Harness, *, workspace_access: str = "workspace-write") -> Scope:
+    """The authority surface, entirely from the manifest's declared ceiling.
+
+    `workspace_access="read-only"` (plan mode, `runtime/profiles.py`'s
+    `"plan"` preset) attenuates the granted scope at the source: mutating
+    verbs are subtracted from `actions` and their selectors dropped from
+    `resources`, so the declared ceiling and the granted scope stay
+    consistent -- there is no separate "plan mode" concept for the kernel to
+    know about (`I-7` domain-blindness; the kernel never sees this function).
+    """
     if not harness.capability_ceiling:
         # F-07: empty ceiling authorizes nothing.
         return Scope(
@@ -470,11 +498,13 @@ def _scope_for(harness: Harness) -> Scope:
             ),
             depth=0,
         )
-    risks = tuple(harness.risk_of.values())
-    ceiling = "critical" if "critical" in risks else ("high" if "high" in risks else "medium")
+    withheld = _PLAN_MODE_WITHHELD_VERBS if workspace_access == "read-only" else frozenset()
+    actions = frozenset(v for v in harness.verbs if v not in withheld)
+    risks = tuple(risk for verb, risk in harness.risk_of.items() if verb not in withheld)
+    ceiling = "critical" if "critical" in risks else ("high" if "high" in risks else "medium") if risks else "low"
     return Scope(
-        actions=frozenset(harness.verbs),
-        resources=_ceiling_resources(harness),
+        actions=actions,
+        resources=_ceiling_resources(harness, withheld_verbs=withheld),
         constraints=Constraints(
             expires_at=_FAR_FUTURE,
             max_uses=64,

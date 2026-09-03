@@ -246,12 +246,11 @@ test("TUI presentation consumes @aether/client", () => {
   let dir = dirname(fileURLToPath(import.meta.url));
   while (!existsSync(join(dir, "package.json"))) dir = dirname(dir);
   const files = [
-    "src/main.tsx",
+    "src/main.ts",
     "src/composition/client-for.ts",
     "src/composition/parse-cli.ts",
     "src/composition/operator-approval.ts",
-    "src/tui/hooks/use-vanguard-run.ts",
-    "src/tui/screens/run-tui.tsx",
+    "src/commands/run.ts",
     "src/tui/status-bar.ts",
     "src/composition/resume-session.ts",
   ];

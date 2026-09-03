@@ -52,9 +52,15 @@ export function renderHeader(
   }
 
   // Right: Run ID & Status Tag
-  const rightPart = `${state.runId ? "run:" + state.runId.slice(0, 8) + " " : ""}${statusTag} `;
+  const planBadge = state.planMode ? "[PLAN] " : "";
+  const rightPart = `${planBadge}${state.runId ? "run:" + state.runId.slice(0, 8) + " " : ""}${statusTag} `;
   const rightCol = Math.max(leftOffset, width - rightPart.length);
-  screen.writeString(row, rightCol, rightPart, statusStyle);
+  if (planBadge) {
+    screen.writeString(row, rightCol, planBadge, theme.warning);
+    screen.writeString(row, rightCol + planBadge.length, rightPart.slice(planBadge.length), statusStyle);
+  } else {
+    screen.writeString(row, rightCol, rightPart, statusStyle);
+  }
 
   // Bottom border line
   const borderLine = "─".repeat(width);

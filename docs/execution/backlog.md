@@ -8,9 +8,9 @@ owner: repository-governance
 canonical_for:
   - repository-backlog
   - feature-lifecycle-tracking
-version: 0.9.3
-last_verified: 2026-09-03
-lock_head: "66aa7a3c0c31"
+version: "0.9.3"
+last_verified: 2026-09-04
+lock_head: "3daa487c0be8"
 audience:
   - contributor
   - maintainer
@@ -98,7 +98,7 @@ graph LR
 | **TLS-01** | AdmissionGate Closed-Loop Validation | `agency` | Lane A | `DONE` | W-092-2 | Fail-closed patch requirement and fresh workspace verification enforcement. |
 | **TLS-02** | DeepSeek DSML / JSON Normalization | `agency` | Lane A | `DONE` | W-092-4 | Protocol recovery for malformed markdown tool calls and stream truncations. |
 | **TLS-03** | Tree-Sitter & SBFL Fault Localization | `ports` / `adapters`| Lane B | `DEFERRED` | Post-CMX-07 | Optional treatment; may enter WIP only after the canonical single-worker baseline is qualified and a preregistered ablation exists. |
-| **TLS-04** | AST Syntax Pre-Flight Gate (<0.2ms) | `adapters` | Lane A | `DEFERRED` | Post-CMX-07 | Optional treatment; current finish work must first make verification counts and subject binding truthful. |
+| **TLS-04** | AST Syntax Pre-Flight Gate (<0.2ms) | `adapters` | Lane A | `DONE` (mechanism) | MS-CHANGE | `adapters/environment/transaction.py` performs `ast.parse` preflight and aborts before durable flush. |
 | **TLS-05** | Speculative Git Checkpoint Engine | `adapters` | Lane A | `APPROVED` | W-092-4 | In-memory CoW git checkpoints with automatic rollback on test regression. |
 | **TLS-06** | AST Mutation Verification (Anti-Collusion)| `adapters` | Lane B | `PROPOSED` | M-8+ | Injects AST mutants to falsify ungrounded or no-op candidate test suites. |
 | **TLS-07** | Composable Web Research Port (SSRF-Safe)| `ports` / `adapters`| Lane A | `PROPOSED` | M-9 | Egress-controlled web search and fetch tools with domain allowlists. |
@@ -162,8 +162,8 @@ composition/lifecycle authority; infrastructure stays behind generic ports.
 
 | ID | Capability package | Primary owner | Status | Dependency | Acceptance gate |
 |---|---|---|---|---|---|
-| **CMX-01** | Current-mechanism delta and three presets | `packs/code-default`, manifests | `REOPENED` (product divergence) | EWK-Q disposition | Public fast/balanced/max still need accepted later harness behavior folded into one data-selected catalog; experimental manifest names are not product presets. |
-| **CMX-02** | Port-backed repository intelligence | `ports/index.py`, adapters, code-pack bindings | `PARTIAL` | CMX-09 | Public Coding Max presets now declare the shared index and the runtime constructs bounded `ContextPacket` context; staged task-ranked retrieval, epoch refresh and fallback evidence remain. |
+| **CMX-01** | Current-mechanism delta and three presets | `packs/code-default`, manifests | `APPROVED` | EWK-Q disposition | Absorbs draft `PRF-01`: unify two disjoint preset catalogs: `apps/coding_max/facade.py` routes to alias manifests and never reaches `packs/code-default/presets.json`. |
+| **CMX-02** | Port-backed repository intelligence | `ports/index.py`, adapters, code-pack bindings | `PARTIAL` | IDX-01 | Public Coding Max presets now declare the shared index and the runtime constructs bounded `ContextPacket` context; staged task-ranked retrieval, epoch refresh and fallback evidence remain. |
 | **CMX-03** | Durable plan/context/recovery loop | code-pack policies + existing projections | `PARTIAL` | CMX-09 | Resume restores the original turn ceiling and approval mode, but rich task-state production, exact policy/profile/budget identity and 40+ turn cold parity remain. |
 | **CMX-04** | Multi-file and greenfield correctness | code-pack policies and fixtures | `REVIEWING` | CMX-10A, CMX-11 | Hermetic policies/fixtures and conservative verification observation exist; task-specific completion and repository-scale change-surface qualification remain. |
 | **CMX-05** | Coding Max application facade | `apps/coding_max`, shared application service, `vg` | `DONE (hermetic)` | CMX-03 | CLI and API invoke the same composition; run/status/resume/evidence/cost results agree; app owns no execution loop or provider HTTP |
@@ -183,8 +183,21 @@ The Octopus / Conductor capability family represents the post-1.0 higher-order o
 |---|---|---|---|---|---|---|
 | **OCT-01** | Content-Addressed Mailbox Protocol | `domain/topology` | Lane A | `PROPOSED` | M-OCT / W-OCT-1 | Sub-agents communicate strictly by publishing and reading content-addressed immutable message digests (`digest_of(payload)`); zero shared memory; deterministic replayability. |
 | **OCT-02** | Declarative CoordinationPlan DAG & Merge Policies | `domain/topology` | Lane A | `PROPOSED` | M-OCT / W-OCT-2 | Topology declared as data DAG with per-mille budget shares ($\sum \text{budget\_share} \le 1000$); formal merge policies: `CONCAT`, `FIRST_COMPLETE`, `SYNTHESISE`, `UNANIMOUS`. |
-| **OCT-03** | Outer-Loop Multi-Day Roadmap Director | `runtime/outer_loop` | Lane A | `PROPOSED` | M-OCT / W-OCT-3 | Persistent director above `EpisodeEngine`; manages multi-episode roadmaps, survives process restarts, and yields verified milestone handoffs without unbounded context saturation. |
+| **OCT-03** | Outer-Loop Multi-Day Roadmap Director (≡ draft `DIR-01`) | `runtime/outer_loop` | Lane A | `PROPOSED` | M-OCT / W-OCT-3 | **Dependency:** `MS-CONTROL` closed. Persistent director above `EpisodeEngine`; manages multi-episode roadmaps, survives process restarts, and yields verified milestone handoffs without unbounded context saturation. |
 | **OCT-04** | Meta-Conductor & Swarm Goal Algebra | `runtime/outer_loop` | Lane A | `PROPOSED` | M-OCT / W-OCT-4 | Higher-order pilot framework; formal algebraic separation and reconciliation of individual worker objectives under a shared global campaign objective. |
+
+### 2.11 Electroweak Convergence: Harness Preconditions & Settlement Truth
+
+Accepted disposition of the Electroweak v0.9.2 review dossiers (Synthesis of
+Record, 2026-09-04). This section adds **two** capability packages. The other
+four IDs proposed in the draft synthesis resolved to live rows and are recorded
+as aliases in §3 rather than as new packages, per **R-01 (architecture sprawl)**:
+a synthesis that names sprawl as a risk does not open six rows where two are new.
+
+| ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Reconciliation | Description & Acceptance Gate |
+|---|---|---|---|---|---|---|---|
+| **HAR-01** | Harness Precondition Repair (deaf-mute agent) | `domain` / `agency` / `runtime` / `adapters` | Lane A | `APPROVED` | MS-TRUTH (precondition) | **New.** No existing T-id covers native tool-call style, approval-policy passthrough, or `finish` declaration. Extends DIALECT (T-21, T-22). Precondition of **CMX-09**; does not subsume it. Adds T-69–T-74. | **Precondition.** No settlement gate is reachable until the agent can call tools, write, and finish. (1) Populate `domain/models/profile.py::_PROFILES` with `ToolCallStyle.NATIVE` for every production model (today: two entries, both non-NATIVE, everything else falls through to `FENCED_JSON`). (2) `runtime/session.py:656` reads `components.approval_policy` instead of the literal `"low"`. (3) Declare `finish-tool.json` in `vg-code-{default,fast,balanced,max}`. (4) Two-axis settlement contract (**T-72**, see spec §3). (5) Purge the `provider: ollama` tier-1 route and resolve `$FRONTIER` in `packs/code-default/harness.yaml`. <br/>*Falsifier*: a `Mode.BENCHMARK` run dispatches native `patch.apply` and `finish` with no `denied_ask_fail_closed`; `grep -rn "ollama" packs/` is empty; a run with `terminal_status=abandoned` and `disposition=passed` round-trips through the ledger without contradiction. |
+| **IDX-01** | LDA-Backed Repository Intelligence | `adapters` / `agency` | Lane B | `APPROVED` | MS-SEE | **New adapter only.** `IndexPort` already exists (`ports/index.py`) and is **not modified**. Third implementation beside `FileRepoIndex` / `InMemoryRepoIndex`. Closes the CMX-02 `PARTIAL` retrieval half; **supersedes T-46** (`[PROPOSAL]` ranking) — ranking stays out of the port. Adds T-75–T-77. | **Intelligence.** `LdaRepoIndex` in `adapters/stores/lda_index.py` reading `.lda/index.db` (**80,618** relations, 10,580 symbols, 3,372 files). Expose `repo.{search_symbols,get_callers,get_dependencies,get_tests}` as bounded observations into **L5 only**. L1–L3 stay byte-identical (`harness.yaml` already declares `prefix_freeze: true`). Emit provider cache breakpoints at the L3 boundary; record `cache_read_tokens` / `cache_write_tokens`. <br/>*Falsifier*: `repo.get_callers` over a 40-file blast radius leaves the L1–L3 digest **bit-identical** across 10 turns; ranking logic in `adapters/stores/lda_index.py` fails review by inspection (`ports/index.py`, `A-05`). |
 
 ---
 
@@ -195,15 +208,15 @@ Team capacity is chosen later. `requires:` edges live on tasks. This index maps 
 | Package | Aliases | Related T-ids | MS-* | Notes |
 |---|---|---|---|---|
 | **INSTRUMENT** | REL-01R | T-01–T-03, T-24–T-25, T-40–T-41 | MS-INSTRUMENT | `DONE` at `63b77116` |
-| **TRUTH** | CMX-10A, W-092-F2 | T-04–T-08, T-42, T-38, T-23 | MS-TRUTH | Partial: T-23/T-38/T-42 `DONE`; T-04/T-05/T-07 open; T-08 landed `8637db55` |
+| **TRUTH** | CMX-10A, W-092-F2, HAR-01, *SET-01* | T-04–T-08, T-42, T-38, T-23, T-69–T-74 | MS-TRUTH | T-23/T-38/T-42 `DONE`; T-08 landed `8637db55`; T-04/T-05/T-07 open; **T-18 REOPENED** (shield unwired) |
 | **STATE** | CMX-10B, W-092-F3 | T-09–T-13, T-43–T-44 | MS-RESUME | `DONE` at `8637db55` (closer receipt 2026-09-03). |
-| **SEE** | CMX-11, PRG-01, W-092-F4 | T-14–T-16, T-36–T-37, T-45–T-46 | MS-SEE | T-14–T-16, T-36, T-37, T-45 `DONE`. T-46 `[PROPOSAL]`. Gate stays `OPEN`. |
-| **CHANGE** | TXN-01, SHD-01, TLS-04/05 | T-17–T-20, T-47–T-49 | MS-CHANGE | T-17–T-20 `DONE`. T-47–T-49 `[PROPOSAL]`. Gate stays `OPEN`. |
+| **SEE** | CMX-11, PRG-01, W-092-F4, IDX-01 | T-14–T-16, T-36–T-37, T-45, T-75–T-77 | MS-SEE | T-46 **superseded by IDX-01**: ranking stays out of `IndexPort` |
+| **CHANGE** | TXN-01, SHD-01, TLS-04/05, *EDT-01* | T-17–T-20, T-47–T-49 | MS-CHANGE | T-17 `DONE`; TLS-04 mechanism present in `transaction.py`; **T-18 REOPENED**; `str_replace` folds into T-47 |
 | **DIALECT** | WRN-01, TLS-02 | T-21–T-22, T-50 | — | T-21–T-22 `DONE`. T-50 `[PROPOSAL]`. Does not close MS-CHANGE. |
-| **CONTROL** | CMX-07, W-092-F5 | T-26–T-27, T-51–T-52 | MS-CONTROL | Frozen preregistration + canary |
+| **CONTROL** | CMX-07, W-092-F5, CMX-01, *PRF-01* | T-26–T-27, T-51–T-52, T-79 | MS-CONTROL | Preset catalog unification is CMX-01, not a new package |
 | **META** | MEM-03 | T-28 | MS-META | `[PROPOSAL]` |
 | **SPECIALIST** | CMX-06, W-092-F6 | T-29–T-30, T-53 | MS-SPECIALIST | `[PROPOSAL]` |
-| **CAMPAIGN** | OCT-01…04, HYD-01/02 | T-31, T-54–T-55, T-34 | MS-CAMPAIGN / MS-HYDRA | `[PROPOSAL]`; director is runtime client |
+| **CAMPAIGN** | OCT-01…04, HYD-01/02, *DIR-01* | T-31, T-54–T-55, T-34 | MS-CAMPAIGN / MS-HYDRA | `DIR-01` ≡ **OCT-03**; director is a runtime client with zero mutating tools |
 | **MEMORY** | MEM-01, MEM-04 | T-32, T-56–T-57 | MS-MEMORY | `[PROPOSAL]` product wiring; ADR-0100 |
 | **OFFICIAL** | REL-03, SWE-P5 | T-33, T-58 | MS-OFFICIAL | G-3; local ≠ official |
 | **LATTICE** | SUB-01 (live kernel) | T-35, T-64 | — | TCB / boundaries / I-7 AST ban |
@@ -231,6 +244,12 @@ Team capacity is chosen later. `requires:` edges live on tasks. This index maps 
 | `CMX-11` | T-14–T-20 cluster | |
 | `W-092-F2` | MS-TRUTH | See milestones appendix |
 | `OCT-01` / `OCT-02` | T-54 | Keep existing OCT rows above |
+| Draft `SET-01` | T-04/T-05/T-07 + T-18/T-19/T-20 | Not a package. TRUTH + CHANGE settlement half. |
+| Draft `EDT-01` | T-47 (+ T-17 `DONE`, TLS-04/05) | Not a package. `str_replace` is a T-47 strategy. |
+| Draft `PRF-01` | **CMX-01** | Not a package. Same product divergence, already `REOPENED`. |
+| Draft `DIR-01` | **OCT-03** + T-31/T-54 | Not a package. Keep the OCT-* rows in §2.10 authoritative. |
+| Draft `HAR-01` | T-69–T-74 | **New package.** Precondition of CMX-09. |
+| Draft `IDX-01` | T-75–T-77 | **New package.** Supersedes T-46. |
 
 Existing CMX-01…CMX-11, REL-*, OCT-*, TLS-*, MEM-*, TUI-01, SUB-* rows in §2 remain authoritative for lifecycle state. Do not restamp **SUB-01**.
 

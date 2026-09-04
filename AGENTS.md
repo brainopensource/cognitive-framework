@@ -247,7 +247,6 @@ When updating documentation, route information to its semantic owner:
   - `spec.md`: Feature delta contract (typed schemas, invariants, error matrix).
   - `technical.md`: Self-explaining engineering handbook for remaining work (FACT vs `[PROPOSAL]`).
   - `tasks.md`: Flat tasks and subtasks by context. `requires:` edges only; no waves or WIP calendar.
-- **`docs/decisions.md`**: Immutable Architecture Decision Records (ADRs).
 - **`docs/theory/` | `docs/research/` | `docs/reports/`**: Non-canonical conceptual theory, research, and audit reports (`authority: non-canonical`).
 
 ---
@@ -260,7 +259,7 @@ When updating documentation, route information to its semantic owner:
 > 
 > All documentation updates must strictly edit existing canonical files in the documentation hierarchy:
 > 1. **Modifying Normative Law** $\to$ Edit [`docs/SPEC.md`](docs/SPEC.md).
-> 2. **Recording Architectural Decisions** $\to$ Edit [`docs/decisions.md`](docs/decisions.md).
+> 2. **Recording Architectural Rationale & Trade-offs** $\to$ Edit corresponding subsystem architecture docs in [`docs/backend/architecture/`](docs/backend/architecture/) or [`docs/architecture/`](docs/architecture/).
 > 3. **Updating Tasks or Execution Progress** $\to$ Edit [`docs/execution/tasks.md`](docs/execution/tasks.md) and [`docs/execution/spec.md`](docs/execution/spec.md). Engineering recipes go in [`docs/execution/technical.md`](docs/execution/technical.md).
 > 
 > **Invariant on Execution Architecture**: AI agents must never invent parallel architecture documents; all feature extensions must be expressed as delta contracts in `docs/execution/spec.md` and promoted to `docs/architecture/` upon milestone gate passage. The fifth execution file `technical.md` is the authorized handbook, not a second architecture plane.

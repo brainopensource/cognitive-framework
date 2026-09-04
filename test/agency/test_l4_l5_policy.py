@@ -85,7 +85,11 @@ class ProgressivePolicyOnExistingCompiler(unittest.TestCase):
             notes=(invariant,),
             dialogue=dialogue(20, size=400),
         )
-        self.assertEqual(compiled.layer_blocks(Layer.DIALOGUE), ())
+        self.assertEqual(compiled.layer_blocks(Layer.DIALOGUE)[-1].source, "goal-echo")
+        self.assertEqual(
+            [block.source for block in compiled.layer_blocks(Layer.DIALOGUE) if block.source != "goal-echo"],
+            [],
+        )
         self.assertIn("inv-checksum", [block.label for block in compiled.layer_blocks(Layer.TASK)])
         self.assertTrue(compiled.dropped)
         self.assertNotIn("inv-checksum", compiled.dropped)

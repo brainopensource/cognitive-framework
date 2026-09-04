@@ -74,9 +74,10 @@ class LayerOrder(unittest.TestCase):
         compiled = build().compile(brief="fix the parser")
 
         self.assertEqual([block.layer for block in compiled.blocks],
-                         [Layer.SYSTEM, Layer.TOOLS, Layer.ENVIRONMENT, Layer.TASK])
+                         [Layer.SYSTEM, Layer.TOOLS, Layer.ENVIRONMENT, Layer.TASK, Layer.DIALOGUE])
         self.assertEqual([message["layer"] for message in compiled.messages()],
-                         ["L1", "L2", "L3", "L4"])
+                         ["L1", "L2", "L3", "L4", "L5"])
+        self.assertEqual(compiled.blocks[-1].source, "goal-echo")
 
     def test_dialogue_appends_as_the_last_layer(self) -> None:
         compiled = build().compile(brief="fix the parser", dialogue=dialogue(2))
@@ -214,7 +215,8 @@ class Budget(unittest.TestCase):
 
         self.assertEqual(compiled.elided, ())
         self.assertEqual(compiled.dropped, ())
-        self.assertEqual(len(compiled.layer_blocks(Layer.DIALOGUE)), 3)
+        self.assertEqual(len(compiled.layer_blocks(Layer.DIALOGUE)), 4)
+        self.assertEqual(compiled.layer_blocks(Layer.DIALOGUE)[-1].source, "goal-echo")
 
     def test_result_eviction_takes_the_oldest_body_first(self) -> None:
         """`VG-03 §10.3` `result_eviction`: keep *that* a file was read, drop
@@ -228,7 +230,8 @@ class Budget(unittest.TestCase):
 
         self.assertEqual(compiled.elided[0], "result-0")
         self.assertLessEqual(compiled.total_tokens, ceiling)
-        self.assertEqual(len(compiled.layer_blocks(Layer.DIALOGUE)), 4)
+        self.assertEqual(len(compiled.layer_blocks(Layer.DIALOGUE)), 5)
+        self.assertEqual(compiled.layer_blocks(Layer.DIALOGUE)[-1].source, "goal-echo")
         self.assertIn("result-0", compiled.layer_blocks(Layer.DIALOGUE)[0].text)
         self.assertNotIn("x" * 400, compiled.layer_blocks(Layer.DIALOGUE)[0].text)
 
@@ -252,7 +255,10 @@ class Budget(unittest.TestCase):
         compiled = build(token_ceiling=ceiling).compile(
             brief="fix the parser", notes=(note,), dialogue=dialogue(2, size=400))
 
-        self.assertEqual(compiled.layer_blocks(Layer.DIALOGUE), ())
+        self.assertEqual(
+            [block.source for block in compiled.layer_blocks(Layer.DIALOGUE)],
+            ["goal-echo"],
+        )
         self.assertIn("note-0", [block.label for block in compiled.layer_blocks(Layer.TASK)])
         self.assertIn("result-0", compiled.dropped)
 
@@ -386,7 +392,7 @@ class Reach(unittest.TestCase):
         bundle = compiled.bundle()
 
         self.assertEqual([message["layer"] for message in bundle["layers"]],
-                         ["L1", "L2", "L3", "L4"])
+                         ["L1", "L2", "L3", "L4", "L5"])
         self.assertEqual(bundle["promptDigest"], compiled.digest)
 
     def test_the_wire_messages_carry_only_role_and_content(self) -> None:

@@ -41,6 +41,7 @@ from ...kernel import Event
 from .compaction import CompactionStrategy, resolve_compaction_strategy
 from .layers import (
     BREAKPOINT_LAYERS,
+    GOAL_ECHO_SOURCE,
     PINNED_L4_SOURCES,
     Block,
     CompiledContext,
@@ -167,6 +168,15 @@ class ContextCompiler:
         pinned_blocks = list(blocks_of(Layer.TASK, pinned_notes))
         notes_blocks = list(blocks_of(Layer.TASK, flexible_notes))
         dialogue_blocks = list(blocks_of(Layer.DIALOGUE, dialogue))
+        if brief:
+            echo_text = brief if len(brief) <= 240 else brief[:237] + "..."
+            dialogue_blocks.append(Block(
+                layer=Layer.DIALOGUE,
+                source=GOAL_ECHO_SOURCE,
+                label="goal-echo",
+                text=f"Goal: {echo_text}",
+                evictable=False,
+            ))
 
         breakpoints = self._breakpoints(task_present=bool(task or pinned_blocks or notes_blocks))
         if len(breakpoints) > self._breakpoint_ceiling:

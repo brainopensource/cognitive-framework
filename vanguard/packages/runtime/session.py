@@ -29,6 +29,7 @@ from ..agency.context import (
     validate_completion_epoch,
     validate_resume_identity,
 )
+from ..agency.context.distiller import distill_tool_output
 from ..agency.context.compiler import CONTEXT_POLICY_VERSION
 from ..agency.manifests.discovery import WorkspaceDiscovery
 from ..agency.provenance import NullProvenanceSink, ProvenanceSink
@@ -1648,7 +1649,10 @@ def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any,
     digest = getattr(outcome, "result_digest", None) or ""
     text = f"tool result turn={turn} digest={digest}"
     if detail:
-        text += f"\n{detail}"
+        distilled = distill_tool_output(str(detail))
+        text += f"\n{distilled.compact_text}"
+        if distilled.truncated:
+            text += f"\nfullArtifactDigest={distilled.full_artifact_digest}"
     operator.note(label=f"tool-result-{turn}", source="tool_result", text=text)
     return _span_for(f"tool-result-{turn}", "tool_result")
 

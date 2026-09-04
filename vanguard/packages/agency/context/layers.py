@@ -26,6 +26,7 @@ __all__ = [
     "Block",
     "CompiledContext",
     "Fragment",
+    "GOAL_ECHO_SOURCE",
     "Layer",
     "PINNED_L4_SOURCES",
     "PREFIX_LAYERS",
@@ -76,6 +77,9 @@ PINNED_L4_SOURCES: frozenset[str] = frozenset({
     "falsified-hypothesis",
     "dead-end",
 })
+
+#: Short restatement of the brief at the tail of L5 (v2 §15 / T-36).
+GOAL_ECHO_SOURCE = "goal-echo"
 
 
 def estimate_tokens(text: str) -> int:

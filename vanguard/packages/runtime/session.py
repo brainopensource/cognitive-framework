@@ -27,6 +27,7 @@ from ..agency.context import (
     Fragment,
     build_context_packet,
     validate_completion_epoch,
+    validate_completion_omissions,
     validate_resume_identity,
 )
 from ..agency.context.distiller import distill_tool_output
@@ -1400,6 +1401,7 @@ class HarnessSession:
             selection_policy_identity=selection_policy_identity,
             workspace_epoch=epoch,
             require_epoch=True,
+            map_truncated=bool(repo_map.truncated),
         )
         prior = self.task.resume_state if isinstance(self.task.resume_state, Mapping) else {}
         prior_repo = prior.get("repositoryIdentity")
@@ -1578,6 +1580,18 @@ class HarnessSession:
                     "PACKET_EPOCH_STALE",
                     "ADMISSION GATE REJECTION: Context packet WorkspaceEpoch is missing or stale. "
                     "Refresh the packet after the write before issuing completion.",
+                )
+            try:
+                validate_completion_omissions(
+                    packet,
+                    required=tuple(sorted(self._completion_changed_files)),
+                )
+            except ContextPacketError as exc:
+                return AdmissionVerdict(
+                    False,
+                    "PACKET_OMISSIONS_INCOMPLETE",
+                    "ADMISSION GATE REJECTION: Context packet is truncated or omitted a "
+                    f"required file. {exc}",
                 )
         verdict = policy.evaluate(
             preset_name=self.harness.harness,

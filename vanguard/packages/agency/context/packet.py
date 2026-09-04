@@ -9,7 +9,8 @@ from ...domain.canonicalisation.digest import digest_of
 from ...domain.workspace_epoch import WorkspaceEpoch
 
 __all__ = ["ContextPacket", "ContextPacketError", "build_context_packet",
-           "validate_resume_identity", "validate_completion_epoch", "SectionAddress"]
+           "validate_resume_identity", "validate_completion_epoch",
+           "validate_completion_omissions", "SectionAddress"]
 
 
 class ContextPacketError(ValueError):
@@ -31,6 +32,7 @@ class ContextPacket:
     tests: tuple[str, ...] = ()
     estimated_tokens: int = 0
     omissions: tuple[str, ...] = ()
+    truncated: bool = False
     # Optional W2 identity fields preserve replay of legacy packets while
     # preventing them from being used for new capability claims.
     selection_policy_identity: Mapping[str, Any] | None = None
@@ -59,6 +61,7 @@ class ContextPacket:
             "tests": list(self.tests),
             "estimatedTokens": self.estimated_tokens,
             "omissions": list(self.omissions),
+            "truncated": self.truncated,
         }
         if self.selection_policy_identity is not None:
             value["selectionPolicyIdentity"] = dict(self.selection_policy_identity)
@@ -70,6 +73,10 @@ class ContextPacket:
 
     def digest(self) -> str:
         return digest_of(self.to_canonical_dict())
+
+    def omission_report(self) -> tuple[str, ...]:
+        """Explicit omitted-items ledger. Truncated is not an empty omission list."""
+        return self.omissions
 
 
 def build_context_packet(
@@ -87,6 +94,7 @@ def build_context_packet(
     repository_identity: str | None = None,
     workspace_epoch: WorkspaceEpoch | None = None,
     require_epoch: bool = False,
+    map_truncated: bool = False,
 ) -> ContextPacket:
     """Build a bounded packet, retaining explicit omissions and reserve."""
     if budget_tokens < 0 or reserve_tokens < 0 or reserve_tokens > budget_tokens:
@@ -121,6 +129,7 @@ def build_context_packet(
         tests=tuple(str(v["path"]) for v in kept if v.get("kind") == "test" and "path" in v),
         estimated_tokens=used,
         omissions=tuple(omissions),
+        truncated=bool(omissions) or map_truncated,
         selection_policy_identity=(dict(selection_policy_identity)
                                    if selection_policy_identity is not None else None),
         repository_identity=repository_identity,
@@ -174,3 +183,23 @@ def validate_completion_epoch(packet: ContextPacket, current: WorkspaceEpoch) ->
         raise ContextPacketError("legacy packet cannot admit completed")
     if packet.workspace_epoch != current:
         raise ContextPacketError("stale WorkspaceEpoch; refresh required")
+
+
+def validate_completion_omissions(
+    packet: ContextPacket,
+    *,
+    required: Sequence[str] = (),
+) -> None:
+    """Truncated ≠ complete. Completing with an omitted required set is refused."""
+    omitted = set(packet.omissions)
+    required_omitted = tuple(
+        item for item in required
+        if item in omitted or (packet.truncated and item not in packet.files)
+    )
+    if required_omitted:
+        raise ContextPacketError(
+            "truncated packet cannot admit completed; omitted required set: "
+            + ", ".join(required_omitted)
+        )
+    if packet.truncated and required:
+        raise ContextPacketError("truncated packet cannot admit completed")

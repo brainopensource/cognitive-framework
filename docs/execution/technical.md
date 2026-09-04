@@ -16,7 +16,7 @@ derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN_v2.md
   - .draft/PHASE-0_DEVELOPMENT_FINAL_PLAN.md
 lock_head: "66aa7a3c0c31"
-last_verified: 2026-09-03
+last_verified: 2026-09-04
 relationships:
   - execution.milestones
   - execution.feature_spec
@@ -70,6 +70,160 @@ Present docs to open while coding:
 | Eval | `docs/backend/architecture/assurance-evaluation.md` |
 
 Wave-titled sections copied below are **capability recipes**, not a calendar.
+
+## Electroweak v0.9.3 Wave 1–2 FACT overlay
+
+**FACT overlay scope.** This is the current implementation handbook for the
+authorized Electroweak Wave 1–2 contracts in [`spec.md`](spec.md) §9.
+`FACT` here means that the recipe and its source defect are fixed execution
+facts; it does not claim that uncommitted runtime work has landed. The older
+Wave 0–10 sections below remain historical capability recipes with their
+existing titles. Do not renumber, retitle, or infer current scheduling from
+them.
+
+This overlay stops at the frozen control. It does not schedule or provide
+next-code recipes for Prompts 05, 06, or 09; T-75–T-78, T-83b, T-77, T-80,
+OCT-03, or ARM-01. DLG-01's live alias/provenance work is likewise post-control,
+not part of the Wave 1 package set.
+
+### FACT W1 — HAR-01 harness preconditions
+
+No settlement result is useful until the product agent can call declared tools,
+write through the mediated path, and explicitly finish. Apply these repairs in
+the order below and keep their falsifiers executable:
+
+| Work item | Recipe | Required falsifier |
+|---|---|---|
+| Capability-bound native profiles (T-69) | In `domain/models/profile.py`, add an explicit `ToolCallStyle.NATIVE` profile only for a production route whose provider-shape vector has verified native dispatch. Preserve `NATIVE -> JSON_SCHEMA -> FENCED_JSON -> TEXT_GRAMMAR` for unknown/unverified routes. Never stamp the registry globally. | Every native-declared route dispatches `patch.apply` and `finish` without degradation; an unverified route is never promoted. |
+| Approval passthrough (T-70) | Replace the hardcoded unsealed threshold in `runtime/session.py` with the manifest's existing `components.approval_policy`; do not author a second policy artifact. | The product default honors `mode=assisted`, `threshold=standard`, and `escalate_on=[proc.exec]`; a missing/malformed component fails closed. |
+| Finish declaration (T-71) | Add the flat `vg-code-default/finish-tool.json` component and register it for the default/fast/balanced/max product manifests. Use the already supported `ProposalKind.FINISH`; do not add another verb or execution path. | All four manifests resolve the component and can propose `finish`; undeclared or malformed finish remains rejected. |
+| Streaming abort (T-70a) | First capture the OpenRouter SSE abort at the two non-retryable malformed/empty proposal call sites. Only after the regression fails may the retryable boundary be changed. | A malformed streamed chunk after completed effects enters bounded protocol recovery instead of discarding the episode. T-70a MUST NOT close as `no_defect` from the earlier hedge. |
+| Orientation selectors | Extend the existing `proc://exec/allow/...` set only with the minimum read-only orientation verbs required to locate the workspace and inspect files; keep selector grammar and mediation unchanged. | A fresh agent can orient, while an undeclared executable remains denied. |
+| `EffectStarted` singleton | Replay a ledger containing adjacent equal `descriptorDigest` and `leaseId` values before choosing the owner-side fix. The kernel is the sole authorized originator; do not spend TCB headroom speculatively. | One accepted effect produces exactly one `EffectStarted`. |
+| Effect-budget binding | Reproduce the known reservation shape before choosing the runtime/kernel boundary. Additive resources and structural ceilings remain distinct. | A known reservation never emits `{}` or an unexplained `-1` settlement. |
+| Completion-tool restriction | Re-verify autonomous no-approval re-entry, then bind `_completion_allowed_tools` inside the actual turn loop rather than only at outer engine construction if the defect remains. | The restriction applies on every autonomous iteration. |
+| Workspace initialization | Re-verify the advertised `kind=git` environment, then make `vanguard init` establish resolvable workspace state and initialize Git when absent. | Fresh `vanguard init` reaches mediated `proc.exec` without ambient `AETHER_WORKSPACE_ROOT`. |
+| Provider configuration | Remove the retired `ollama` route and resolve the literal `$FRONTIER` in the supported pack configuration. llama.cpp / llama-server remains the local inference standard. | Native-only route scan finds no retired alias or unresolved provider placeholder. |
+| Workspace hygiene (T-74) | Route `PYTHONPYCACHEPREFIX` outside the workspace tree. Keep index exclusions separate from workspace-digest truth. | A Python effect creates no agent-authored `.pyc` path in the workspace digest. |
+| Fenced-action recovery (T-82) | In the existing dialect/invocation pipeline, unwrap markdown-fenced JSON action blocks found in note payloads into candidate proposals. Do not execute raw text. Reject unsolicited `finish` when an invocation remains unparsed or no mutation occurred. | Fenced `patch.apply` recovers through validation; ambiguous or mutation-free finish fails closed. |
+| Greenfield prompt and vacuity (T-81/T-83a) | Remove the product prompt conflict that says not to read/search and to write one file per turn. State the scaffold -> red oracle -> atomic 2PC sequence. Keep structural and behavioral evidence distinct; reject `pass` and `NotImplementedError` stubs with `VACUOUS_ORACLE_REJECTED`. | A stub may not produce a green settlement; the same fixture must be red before implementation and green after it. |
+
+The kernel TCB remains **1386 logical LOC** for this overlay. A reproduced defect
+that truly requires kernel work needs separate authorization, its complete
+architecture package, and a fresh budget check; Wave 1 documentation does not
+spend the headroom.
+
+### FACT W1 — TRUTH two-axis settlement and admission
+
+Implement the domain value by following the exact contract in the Synthesis of
+Record §3.2; do not duplicate that module body here. The integration recipe is:
+
+1. Add the pure `TaskDisposition` enum and immutable `SettlementReceipt` under
+   `domain/evidence`, exporting the six named settlement symbols through the
+   package surface. The wire schema is `aether.settlement/1`.
+2. Enforce construction refusals for `passed` at zero executed tests, `passed`
+   without bound oracle and verification subject, reasonless
+   `undeterminable`, and evidence-bearing `not_run`. Make
+   `disposition_to_outcome(not_run)` raise `DispositionError`.
+3. Emit run termination only on existing `EpisodeCompleted` and emit the
+   settlement receipt only on existing `VerdictRecorded`. Allocate no new
+   ledger event kind. Keep `terminal_status` a plain string in the domain value
+   so `domain` does not import `agency`.
+4. Derive the benchmark disposition vocabulary from `TaskDisposition` and
+   preserve missingness-marker precedence. Gate only through
+   `satisfies_predicate`; never use `!= failed` as a positive test.
+5. Record the RF-25 successor baseline before removing
+   `ADMISSION_GATE_EXEMPT` (T-04), then update its frozen assertion. Do not use
+   the baseline precondition to retain a permanent product-default bypass.
+6. In `_admit_completion`, join mutation receipt, current postimage/epoch,
+   relevant tests collected and executed, zero exit code, the existing
+   IndexPort-enumerated tamper shield, and zero unresolved omissions/stale-index
+   markers. Test implication/caller evidence is required only through the
+   currently authorized Wave 1 surface; T-83b remains outside this overlay.
+
+The axes are independent throughout. Oracle `PASS` never rewrites
+`RunTermination` to `completed`, and `abandoned + passed` is a valid settlement.
+The decisive contract tests are: `passed@0-tests` raises; reasonless
+`undeterminable` raises; `not_run` with an envelope digest raises; outcome
+projection of `not_run` raises; `EpisodeCompleted` contains no disposition; and
+ledger replay preserves `terminal_status=abandoned` with
+`disposition=passed`.
+
+### FACT W1 — INS-01 and BRG-01 instrument integrity
+
+INS-01 is an additive product-path repair. It does **not** reopen
+`spec.md` §1 or `MS-INSTRUMENT`.
+
+- Replace the literal CLI run identity with a generated UUID/ULID per new run.
+  Only `--resume <id>` may continue an existing identity. Two invocations in
+  one workspace must produce different ledgers.
+- Carry actual `modelRoutes`, non-null token accounting, `verifiedStepIds`, and
+  cost provenance from composition/application service into the product
+  receipt. Do not fill missing telemetry with synthetic zeroes.
+- Make benchmark execution call `runtime.entrypoint.execute`; a direct call to
+  `Runtime.execute_profiled` is useful only when explicitly labeled as a
+  different subject.
+- In `tools/llama_cpp/cli.py`, use the accepted flash-attention flag; declare
+  readiness only while the child is live, its PID matches, and `/props` binds
+  the expected model identity. Stop only that verified child, never blanket
+  `pkill`. In the MCP server, turn empty and max-token outputs into typed
+  fail-closed errors.
+
+Falsify with unique-run-identity, receipt-telemetry, product-path-subject,
+bridge-lifecycle, and bridge-empty-output tests. Provider outage, HTTP failure,
+or zero model calls settles as `not_run`, not task failure.
+
+### FACT W2 — CMX-01 preset unification (T-79)
+
+Unify the product path around the existing `packs/code-default/presets.json`
+catalog; do not author replacement budget numbers:
+
+| Preset | `usd_micros` | `millis` | `tokens` | `turns` |
+|---|---:|---:|---:|---:|
+| fast | 50,000 | 300,000 | 16,000 | 8 |
+| balanced | 150,000 | 900,000 | 40,000 | 20 |
+| max | 400,000 | 2,400,000 | 96,000 | 40 |
+
+Make `CodingMaxFacade` select that catalog, expose the overlay from the pack
+loader, give each product manifest its declared budget policy, and remove the
+facade's universal `max_turns=40` default. Trace the selected ceiling through
+`runtime/wiring.py` to `Governor` and assert it on `EpisodeStarted.budgetCeiling`.
+`usd_micros`, `millis`, `tokens`, and `bytes` are additive reservation
+dimensions; `turns` and `depth` are structural ceilings and are never summed.
+
+### FACT W2 — EXP-01 evidence ladder and frozen control
+
+Build the instrument in increasing-cost rungs:
+
+1. **L0 (T-92):** run `P0-FIB`, `P0-CSV`, and `P0-BUG` in fresh workspaces via
+   the public CLI. This licenses only the Wave 1 smoke statement.
+2. **L1 (T-93):** freeze four greenfield, four single-file bug, and four
+   data/CLI tasks. Use them to find fixture/oracle defects; publish no pass rate
+   and never reuse tuned L1 tasks as L2 evaluation.
+3. **L2:** freeze the exact candidate SHA and a multi-class suite of at least 30
+   tasks. Execute single-worker `vg-code-balanced` through the product path.
+   Close `MS-CONTROL` only with Wilson LB >= 0.40 and false-completion rate 0.
+4. **L3:** after `MS-CONTROL`, compare immutable manifest x model x preset arms
+   with at least 30 tasks per arm and one declared dimension changed. License
+   relative task-class claims only.
+
+Freeze prompts, tools, fixtures, oracle, model, server flags, sampling, and
+budgets on the first measured attempt; any change resets the rung. The harness
+writes one append-only row per run with every field group from `spec.md` §9.4,
+including `n`, `suite_digest`, and the oracle/tamper digests, and refuses blanks. It also refuses
+`pass_rate_pct` when observed rows are fewer than the frozen suite size.
+
+Partition `LIVE-LOCAL`, `LIVE-HOSTED`, `LIVE-HISTORICAL`, `REPLAY`, `STATIC`,
+and `UNDETERMINABLE`. Only current `LIVE-*` rows enter capability rates;
+undeterminable rows require reasons and leave the denominator. Bind every
+non-control run to the T-95 hypothesis registry with a control digest and one
+varied dimension.
+
+Publish false-completion rate, Wilson live oracle pass rate, valid first-call
+rate, malformed/recovery rate, no-op rate, time to first valid action, turn
+waste `W`, and token efficiency `kappa`. **False-completion rate must equal
+zero.** It vetoes every pass-rate, lift, latency, token, and cost claim. Publish
+the frozen control disposition even when it is negative or undeterminable.
 
 ---
 
@@ -5572,4 +5726,3 @@ Unrelated user work exists under `vanguard/clients/tui*`, `vanguard/clients/cli`
 Sections 3–4 are FACT/MECHANISM. Section 5 is mathematics with stated assumptions. Sections 6–18 are PROPOSAL constrained by the lattice. Section 16 states what would be required before any ASPIRATION score is speakable.
 
 ---
-

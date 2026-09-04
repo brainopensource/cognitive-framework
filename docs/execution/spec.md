@@ -8,8 +8,8 @@ owner: repository-governance
 canonical_for:
   - active-feature-delta-specification
 version: "2.0.0"
-date: "2026-09-03"
-last_verified: 2026-09-03
+date: "2026-09-04"
+last_verified: 2026-09-04
 lock_head: "66aa7a3c0c31"
 derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN.md
@@ -998,6 +998,172 @@ Living rule: T-17–T-20 MECHANISM — 2PC, IndexPort tamper freeze, greenfield 
 ## 8. Dialect
 
 Wire recovery: `adapters/models/dialect.py` T-21 MECHANISM. Truncated JSON, DeepSeek fence, and XML tool tags are classified; malformed never reports `ok`. Proposal recovery remains `agency/episode/protocol_recovery.py`.
+
+## 9. Electroweak v0.9.3 Wave 1–2 settlement and control delta
+
+This section is the typed TARGET contract for the Electroweak Wave 1–2 package
+set. It points to the product definition in §3.2 and does not replace the
+historical Wave 0–10 capability recipes in [`technical.md`](technical.md).
+Wave 1 is Settlement & Signal Truth; Wave 2 is Frozen Control, Honest
+Instrument & Presets. Edit/retrieval, context/reliability, and outer-director
+treatments remain outside this delta and MUST NOT be presented as Wave 1–2
+next-code.
+
+### 9.1 Two-axis settlement wire contract (TRUTH / T-72)
+
+The settlement model SHALL preserve two orthogonal questions:
+
+| Axis | Domain | Values | Existing ledger representation |
+|---|---|---|---|
+| run termination | `RunTermination` in `agency` | `completed`, `abstained`, `escalated`, `cancelled`, `budget_exhausted`, `instrument_error`, `runtime_error`, `abandoned` | `EpisodeCompleted` with `terminal_status` only |
+| task evaluation | `TaskDisposition` in `domain/evidence` | `passed`, `failed`, `undeterminable`, `not_run` | `VerdictRecorded` with `schema: aether.settlement/1` |
+
+`TaskDisposition` is the shared four-state vocabulary. Only `passed` satisfies
+an acceptance predicate. `undeterminable` and `not_run` are missingness, not a
+negative task result. `disposition_to_outcome()` SHALL refuse `not_run` because
+an evidence envelope binds a claim about an executed subject and therefore has
+only `passed | failed | undeterminable` outcomes.
+
+`SettlementReceipt` SHALL be a domain-pure, immutable value with this logical
+shape; §3.2 of the Synthesis of Record owns the future module body and MUST NOT
+be pasted into this specification:
+
+```text
+aether.settlement/1 := {
+  taskId: non-empty string,
+  disposition: TaskDisposition,
+  terminalStatus?: string,
+  oracleDigest?: digest,
+  verificationSubjectDigest?: digest,
+  executedTestCount: integer >= 0,
+  envelopeDigest?: digest,
+  undeterminableReason?: non-empty string
+}
+```
+
+The value SHALL refuse all of the following:
+
+- `passed` when `executedTestCount == 0`;
+- `passed` without both `oracleDigest` and `verificationSubjectDigest`;
+- `undeterminable` without `undeterminableReason`;
+- `not_run` with any execution count, oracle digest, verification-subject
+  digest, or envelope digest;
+- an empty `taskId`, a negative test count, or an unknown disposition.
+
+`terminalStatus` remains a plain string in the domain value: `domain` SHALL NOT
+import `agency`, and neither axis SHALL be computed from the other. In
+particular, oracle `passed` MUST NOT rewrite a run to `completed`.
+`terminal_status=abandoned` with `disposition=passed` is legal and MUST replay
+without contradiction. Conversely, `EpisodeCompleted` MUST NOT gain a
+`disposition` field.
+
+No new ledger event kind is allocated. The existing `EpisodeCompleted` and
+`VerdictRecorded` owners SHALL carry the axes above. Adding an event kind still
+requires its complete allocation package; this delta does not authorize one.
+The benchmark vocabulary SHALL derive from `TaskDisposition`, and readers MUST
+use its positive predicate rather than `disposition != failed`.
+
+### 9.2 Wave 1 — Settlement & Signal Truth
+
+Wave 1 is Route R repair work across **HAR-01**, **TRUTH**, **INS-01**, and
+**BRG-01**. Its acceptance contract is:
+
+| Package | Binding contract |
+|---|---|
+| HAR-01 | `NATIVE` tool calling is capability-bound. A production route may declare `ToolCallStyle.NATIVE` only after a provider-shape vector verifies native dispatch of both `patch.apply` and `finish`. Unknown or unverified routes retain the fail-closed degradation chain `NATIVE -> JSON_SCHEMA -> FENCED_JSON -> TEXT_GRAMMAR`; no registry-wide promotion is permitted. Manifest approval policy, the declared `finish` tool, minimum orientation commands, effect budgets, workspace initialization, and completion-tool restrictions SHALL reach the product path without hardcoded replacement. Fenced action notes MAY recover into candidate proposals, but unparsed invocations or a mutation-free unsolicited `finish` SHALL be rejected. |
+| TRUTH | Record both settlement axes per §9.1. Before T-04 removes the product-default admission exemption, preserve the named RF-25 successor baseline. Mutating completion SHALL bind the mutation receipt, current postimage/epoch, relevant tests collected and executed, zero test exit, tamper evaluation against the frozen test set, and no unresolved omission or stale-index marker. Greenfield evidence SHALL distinguish structural from behavioral success and reject `pass` / `NotImplementedError` vacuity. The greenfield prompt SHALL not prohibit the scaffold -> red oracle -> atomic 2PC workflow. |
+| INS-01 | Generate a unique run identity for each invocation; continuation is explicit `--resume <id>`. Product receipts SHALL carry actual model routes, token counts, verified step identities, and cost provenance. This package extends product-path integrity and MUST NOT reopen §1 or `MS-INSTRUMENT`. |
+| BRG-01 | Local inference lifecycle is fail-closed: valid flash-attention flag, live child process, matching PID and `/props` identity before `ONLINE`, identity-scoped stop rather than blanket process killing, typed empty/max-token failures, and no retired provider alias on the supported route. |
+
+HAR-01 additionally requires reproduce-first handling for uncertain boundaries.
+The streaming abort at T-70a MUST be captured by a failing regression before a
+fix is selected and MUST NOT be closed as `no_defect` from an earlier hedge.
+Duplicate `EffectStarted`, unpopulated effect budgets, autonomous-loop tool
+restriction, and Git initialization SHALL likewise be re-verified at current
+HEAD before their repair boundary is chosen. Any resulting kernel change would
+require separate authorization and TCB accounting; this documentation delta
+does not change the 1386-line TCB baseline.
+
+Wave 1 acceptance requires the L0 public-CLI smoke triad to produce honest
+end-to-end evidence. L0 may license only “Wave 1 landed”; it MUST NOT license a
+capability or pass-rate claim.
+
+### 9.3 Wave 2 — Frozen Control, Honest Instrument & Presets
+
+Wave 2 establishes the content-addressed control used by later treatments. It
+contains **CMX-01 (T-79)**, the Wave 2 portions of **INS-01**, and **EXP-01**:
+
+- The product path SHALL select the existing `aether.code-preset/1` catalog.
+  It SHALL preserve the declared `fast`, `balanced`, and `max` budgets rather
+  than inventing new values: respectively `(usd_micros, millis, tokens, turns)`
+  are `(50000, 300000, 16000, 8)`, `(150000, 900000, 40000, 20)`, and
+  `(400000, 2400000, 96000, 40)`. The facade SHALL NOT impose a universal
+  `max_turns=40` default. Additive reservation dimensions remain
+  `usd_micros | millis | tokens | bytes`; `turns` and `depth` remain structural
+  ceilings and MUST NOT be summed as reservations.
+- The frozen subject SHALL execute through the public product path, including
+  `runtime.entrypoint.execute`; a direct `Runtime.execute_profiled` benchmark
+  is a different subject and cannot qualify what ships.
+- The candidate SHA, dirty flag, suite membership/digest, task and oracle
+  digests, manifest/preset/model identities, provider/server identities,
+  sampling/prompt/tool-schema digests, and cost provenance SHALL be frozen.
+- `MS-CONTROL` closes only for single-worker `vg-code-balanced` on the exact
+  candidate SHA at L2 with `n >= 30`, Wilson lower bound `>= 0.40`, and
+  false-completion rate exactly zero. The result SHALL be published when
+  positive, negative, or undeterminable.
+
+### 9.4 Measurement ladder and evidence row (EXP-01)
+
+Rungs answer different questions and SHALL NOT be collapsed:
+
+| Rung | Frozen subject | License |
+|---|---|---|
+| L0 | `P0-FIB`, `P0-CSV`, `P0-BUG`; three fresh workspaces through the public CLI | Wave 1 smoke only; no pass rate |
+| L1 | 4 greenfield + 4 single-file bug + 4 data/CLI tasks | fixture/oracle/instrument readiness only; tasks tuned here MUST NOT be scored |
+| L2 | exact-subject product-path multi-class suite, `n >= 30` | control qualification and preregistered single-variable Route L verdicts |
+| L3 | immutable `(manifest x model x preset)` bundle, `n >= 30` per arm | relative, task-class-specific arm claims only |
+
+After the first measured attempt at a rung, changing a prompt, tool, fixture,
+oracle, model, server flag, sampling policy, or budget resets that rung. Each
+rung opens only after the lower rung is green on the current subject SHA; L2
+also requires INS-01 and BRG-01, and L3 requires closed `MS-CONTROL`.
+
+The harness SHALL append one immutable evidence row per run and refuse a row
+with absent required data. Missingness is an explicit value, never a blank:
+
+```text
+identity:     subject_sha, dirty_flag, suite_digest, n, task_id, task_digest,
+              oracle_digest, run_id
+arm:          manifest_digest, preset, model_id, provider, server_build,
+              gguf_digest, quantization, context_size, sampling_digest,
+              prompt_digest, tool_schema_digest
+execution:    evidence_label, raw_response_digest, valid_tool_calls,
+              malformed_tool_calls, recovery_attempts, turns,
+              time_to_first_valid_action_s, latency_s
+change:       patch_digest, postimage_digest, files_changed, no_op
+verification: tests_discovered, tests_executed, tests_passed, tests_failed,
+              tamper_digest, tamper_verdict
+settlement:   terminal_status, disposition, undeterminable_reason
+economics:    prompt_tokens, completion_tokens, cache_read_tokens,
+              cache_write_tokens, cost_usd_micros | local_time_proxy_s
+provenance:   hypothesis_id | "control", control_digest, varied_dimension
+```
+
+`REPLAY`, `LIVE-HISTORICAL`, `STATIC`, `UNDETERMINABLE`, `LIVE-LOCAL`, and
+`LIVE-HOSTED` evidence SHALL be labeled. Replay or historical evidence MUST NOT
+share a published capability table with current live evidence. Zero model calls
+settle as `not_run`, never as model failure. Undeterminable rows require a
+reason and are excluded from capability denominators. A result writer SHALL
+refuse `pass_rate_pct` when the observed result count is smaller than the frozen
+suite size. Every non-control mechanism SHALL bind to a preregistered hypothesis
+and one varied dimension.
+
+Every control and treatment report SHALL publish false-completion rate, live
+oracle pass rate with Wilson lower bound, valid first-tool-call rate,
+malformed-tool/recovery rate, no-op rate, time to first valid action, turn waste
+`W`, and token efficiency `kappa`. False-completion rate `= 0` is a hard veto:
+no pass rate, lift, latency, token, or cost advantage can override it. Only
+`LIVE-*` current rows enter capability rates.
 
 ## 13. Stop-rollback / research-explanation remainder
 

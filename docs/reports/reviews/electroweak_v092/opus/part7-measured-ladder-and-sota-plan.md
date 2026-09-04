@@ -58,14 +58,20 @@ artifact.
 | 7 | `01_rate_limiter_lease_recovery` | **BF** | deepseek-v4-flash | **PASS** | abandoned | 15/15 | 3,640 | 86.1 | 6/15 |
 | 8 | `10_graph_ppr_dangling_node_sink` | **BF** | deepseek-v4-flash | **PASS** | abandoned | 15/15 | 2,827 | 65.8 | 5/15 |
 | 9 | `13_semver_dependency_resolver` | GF hard | **glm-5.3-flash** | **FAIL** | `instrument_error` | 3/15 | 1,236 | 286.3 | 0/3 |
+| 10 | `17_json_canonicalizer_jcs` | GF hard | **glm-5.3-flash** | **FAIL** | `instrument_error` | 3/15 | 368 | — | 0/2 |
 
-*(A tenth cell, glm × `17_json_canonicalizer_jcs`, was still executing at report time and is
-excluded rather than estimated.)*
+Row 10 landed after the first draft of this part and **reproduces row 9 exactly**: same terminal
+reason, same turn index, no implementation file written. Its runner row was reconstructed from the
+ledger because the forensics step raised `sqlite3.OperationalError: disk I/O error` after the
+episode had already ended — a fault in *this report's* harness under concurrent tmpfs access, not
+in Vanguard. The ledger itself opens cleanly read-only and is the source for that row.
 
 ```
-Greenfield  6/7 PASS       Brownfield  2/2 PASS       Overall  8/9 PASS
-deepseek-v4-flash  4/4     openrouter/free  4/4       glm-5.3-flash  0/1
+Greenfield  6/8 PASS       Brownfield  2/2 PASS       Overall  8/10 PASS
+deepseek-v4-flash  4/4     openrouter/free  4/4       glm-5.3-flash  0/2  (both instrument_error)
 ```
+
+**Every failure in this ladder — 2 of 2 — is the same harness defect (§3.1), not a model result.**
 
 ### 2.1 The baseline this replaces
 
@@ -95,10 +101,11 @@ algorithmic defects. Nothing about the model, the architecture, or the task set 
   name`), which §3.1 shows is not a coincidence.
 - **`openrouter/free` is a genuine CI tier.** 4/4 medium greenfield at **$0.00**. Use it for smoke
   tests, protocol regression, and pre-merge gating — not for hard tasks or latency-sensitive work.
-- **`glm-5.3-flash` cannot be scored yet.** Its single failure is an *instrument* error, not a
-  capability result (§3.1). Re-run after the streaming fix before drawing any conclusion. Recording
-  it as a model failure would be exactly the `undeterminable`-vs-`fail` confusion
-  [`part6`](part6-antipatterns-and-framework-feedback.md) §N13 warns about.
+- **`glm-5.3-flash` cannot be scored at all, and this is now proven rather than suspected.** Both
+  runs died at turn 3 from the identical non-retryable stream error (§3.1) having written no
+  implementation file. Its capability is `undeterminable`, not `fail` — recording 0/2 as a model
+  result would be exactly the confusion [`part6`](part6-antipatterns-and-framework-feedback.md)
+  §N13 warns about. **A streaming model currently cannot complete a task on this harness.**
 
 ### 2.3 Proof the passes are real
 
@@ -143,7 +150,8 @@ were invisible until real multi-turn runs were executed.
 
 ### 3.1 Defect K — a malformed SSE chunk destroys the whole episode, non-retryably
 
-**The only failure in the ladder**, and it is the harness, not the model.
+**Both failures in the ladder**, and it is the harness, not the model. Reproduced twice, on two
+different tasks, at the same turn index, with the same message.
 
 ```json
 { "kind": "EpisodeCompleted", "reason": "instrument_error", "turn": 3,
@@ -182,6 +190,15 @@ silently biased toward its own default model and against every streaming provide
 deepseek and a streaming model today measures the stream parser, not the models.
 
 **Fix:** add `retryable=True`, use the constant, and re-run GLM. ~3 lines.
+
+**Reproduction (2/2 GLM runs):**
+
+```
+task 13  turn 3  EpisodeCompleted  instrument_error  "provider streaming response was malformed…"
+task 17  turn 3  EpisodeCompleted  instrument_error  "provider streaming response was malformed…"
+```
+
+Both had completed 2–3 successful observation effects first. All of it was discarded.
 
 ### 3.2 Defect L — every effect emits `EffectStarted` twice
 
@@ -225,7 +242,23 @@ episode declaring completion into a protocol with no completion verb. This is si
 cheapest fix in the review (add an existing JSON file to three manifests) and the largest single
 source of wasted spend and latency — it fully explains why free-tier runs *appear* slow at 210 s.
 
-### 3.5 Defect O — the enforced budget ceiling does not match the manifest
+### 3.5 Defect G, now quantified — 178× workspace amplification
+
+`PYTHONPYCACHEPREFIX` points inside the workspace. Measured on `13_semver_dependency_resolver`:
+
+```
+workspace/cache/   5.7 MB   248 .pyc files
+workspace/src/      20 KB
+workspace/test/      8 KB
+```
+
+**5.7 MB of build artifacts around 32 KB of actual content.** This is not a housekeeping issue:
+`changed_files` and `workspace_digest` are the inputs `AdmissionGate` and every diff-based oracle
+depend on. While 248 spurious files land in the tree on every run, `before_digest != after_digest`
+carries no information, and the greenfield admission rule proposed in §4 (`changed_files ≠ ∅`)
+would pass on `.pyc` churn alone. **Fix this before implementing that rule.**
+
+### 3.6 Defect O — the enforced budget ceiling does not match the manifest
 
 `EpisodeStarted` records `budgetCeiling: {usd_micros: 1000000, millis: 1800000, tokens: 64000}`.
 `packs/code-default/harness.yaml` declares `usd_micros: 250000`. The enforced ceiling is **4× the
@@ -343,10 +376,10 @@ to the `hermetic` profile ([`part3`](part3-sota-agent-engineering.md) §4.2).
 
 Stated plainly, because the project's best property is not overclaiming:
 
-1. **n = 9, one attempt per cell.** No variance estimate, no paired statistics. This establishes
+1. **n = 10, one attempt per cell.** No variance estimate, no paired statistics. This establishes
    *the harness can pass real tasks*, not a pass rate. `bench compare` needs the full 20 × k design.
 2. **9 of 20 suite tasks.** Tasks 02–09, 14–16, 18 were not run.
-3. **GLM has one data point and it is an instrument error** — not a capability result.
+3. **GLM has zero usable data points.** Both runs died on Defect K; its capability is untested.
 4. **The fixes were applied in-process**, not landed. A real implementation must reproduce this
    through the manifest and composition path, with falsifiers.
 5. **No local-model evidence.** The only `llama-server` here is ollama's bundled copy, which
@@ -362,7 +395,8 @@ Stated plainly, because the project's best property is not overclaiming:
 The measurement inverts the project's working assumption. The substrate was never the problem and
 the models were never the problem: a **free** model solved four medium greenfield tasks and
 `deepseek-v4-flash` solved RFC-8785 canonicalization, semver constraint resolution, and two seeded
-algorithmic defects — 8 of 9 oracle-verified, zero test tampering, for 1.5 cents.
+algorithmic defects — 8 of 10 oracle-verified, zero test tampering, for 1.5 cents. **Both
+failures were the same harness defect.**
 
 What stood in the way was a two-key dictionary, a hardcoded `"low"`, a missing TOML file, an absent
 `finish` verb, a parser speaking a different dialect than the prompt it ships with, and a

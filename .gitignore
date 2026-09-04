@@ -31,3 +31,4 @@ vanguard/clients/desktop/dist-browser/
 .cursor/
 .opencode/mcp.json
 vanguard/packages/adapters/models/ollama.py
+*.bundle

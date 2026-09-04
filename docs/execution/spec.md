@@ -17,7 +17,6 @@ derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN_v2.md
   - .draft/PHASE-0_DEVELOPMENT_FINAL_PLAN.md
 normative_authority:
-  - docs/SPEC.md
   - docs/architecture/boundaries.md
 relationships:
   - execution.milestones
@@ -26,12 +25,75 @@ relationships:
   - execution.technical
 ---
 
-# Feature Delta Specification (execution)
+# Feature & Target Specification (execution)
 
-SHALL-contract for remaining backend work. Promote into `docs/architecture/` / `docs/backend/` / `docs/SPEC.md` only after merge (T-67).
+This document is the authoritative specification and typed delta contract for the active execution runway and TARGET release predicates.
 Lock SHA `66aa7a3c` is the forensic baseline. Implementation head for closed instrument work: `63b77116`. Resume closed at `8637db55` (MS-RESUME `CLOSED`).
 
 Companion handbook: [`technical.md`](technical.md). Task IDs: [`tasks.md`](tasks.md).
+
+## 0. Normative System Clauses (TARGET Law)
+
+### 0.1 Identity and causal truth
+- **`TC-E-001`** AETHER **MUST** remain a general event-sourced agentic-computation substrate, not a domain-specific harness, workflow engine, or certification system.
+- **`TC-E-002`** The fundamental execution unit **MUST** be a typed causal operation within an execution lineage.
+- **`TC-E-003`** Durable causal events **MUST** be authoritative facts; large content **MUST** be content-addressed artifacts; projections, indexes, caches, and telemetry **MUST NOT** become a second truth.
+- **`TC-E-004`** Replay of persisted facts and probabilistic re-execution **MUST** remain distinct.
+- **`TC-E-005`** An agent **MUST** be represented as identity, policy, event-derived projection, and execution boundary. No persistent in-memory Agent object may be required for semantic continuation.
+
+### 0.2 Trusted execution
+- **`TC-E-022`** The S0–S12 microkernel **MUST** remain a bounded, domain-blind reference monitor for admissibility, authority, generic budgets, and effect settlement.
+- **`TC-E-023`** Capability grants constrain agents; isolation policy constrains plugin code. Neither authority system may substitute for the other.
+- **`TC-E-029`** All privileged effects **MUST** preserve declared-versus-emitted identity, merge controls at the call site, persist intent before dispatch, and fail closed on forged or widened authority.
+- **`TC-E-030`** Production replay parity **MUST** reconstruct durable storage in a fresh process.
+- **`TC-E-031`** Evaluation authority **MUST** remain exterior, identity-separated, and cryptographically bound.
+- **`TC-E-032`** Plugins **MUST** be untrusted by default and isolation claims **MUST** be measured rather than asserted.
+- **`TC-E-033`** The kernel and domain **MUST** remain domain-blind and within the ratified Trusted Core budget.
+
+### 0.3 Composition, turns, and extensibility
+- **`TC-E-008`** Static composition declares available capabilities; the durable trajectory records what actually occurred. Neither graph may impersonate the other.
+- **`TC-E-038`** The sole production chain **MUST** remain `mhf.manifest/2 -> CanonicalManifest -> FrozenComposition -> ActivationPlan -> RunPlan -> EpisodeEngine`.
+- **`TC-E-039`** The canonical turn loop **MUST** remain unary and sequential except where a separately ratified, measured disposition explicitly authorizes a bounded case.
+- **`TC-E-040`** Runtime profiles **MUST** be explicit and identity-bearing in `D_R`; unavailable requested containment **MUST** fail closed.
+- **`TC-E-041`** Plugin activation **MUST** materialize a usable service or handle, or fail. Lifecycle metadata alone is not activation.
+- **`TC-E-027`** JSON Schema, JCS, and golden vectors are the wire source of truth; generated readers SHOULD replace handwritten mirrors.
+- **`TC-E-053`** Pure deterministic transforms, bounded protocol recovery with no silent execution, state-dependent tool policy, deterministic failure attribution, and fail-closed preflight are the accepted `ADR-0106` evolution seam.
+
+### 0.4 Delegation, topology, and budgets
+- **`TC-E-013`** `agent.spawn` **MUST** be the sole recursive-delegation primitive and re-enter the ordinary runtime through an attenuated child lineage.
+- **`TC-E-014`** Child action, resource, constraint, depth, turn, and budget authority **MUST NOT** exceed the parent.
+- **`TC-E-042`** Additive resources are exactly `usd_micros`, `millis`, `tokens`, and `bytes`; depth and turns are structural ceilings.
+- **`TC-E-017`** Topology declarations carry no authority. Ready roles **MUST** execute as ordinary mediated children and exchange dependency context through authorized artifact references.
+- **`TC-E-049`** The required direct, planner/executor/reviewer, and fork/read/merge topologies **MUST** demonstrate real effects and persisted artifact flow before acceptance.
+- **`TC-E-052`** `mhf.topology/2` is an accepted workflow seam, not authority for a second runtime or unrestricted concurrent execution.
+
+### 0.5 State, memory, learning, and evidence
+- **`TC-E-018`** Memory retrieval **MUST** verify scoped, revocation-aware authorization before ranking and artifact dereference; retention never authorizes capture.
+- **`TC-E-019`** Learned compositions **MUST** be immutable, content-addressed, evaluated on held-out workloads, promoted by authority distinct from generator/evaluator, and reversibly rolled back.
+- **`TC-E-026`** `D_H`, `D_R`, and `D_X` **MUST** remain distinct identities and bind every behavior-affecting input at their respective planes.
+- **`TC-E-035`** A completed trajectory **MUST** preserve invoked-turn attribution, explicit missingness, conserved cost, and the verified pre-crash prefix.
+- **`TC-E-043`** New production event envelopes **MUST** use `mhf.event/2`; compatibility readers may accept frozen predecessors without rewriting historical identities.
+- **`TC-E-046`** Facts, artifacts, projections, telemetry, and attestations **MUST** remain distinct. Only exact-subject, digest-addressed, independently verified receipts may close mandatory gates.
+
+### 0.6 Context, completion, recovery, and coding-harness evidence
+- **`TC-E-054`** Repository intelligence **MUST** remain an optional, authority-free projection above the substrate. A provider **MUST NOT** grant capabilities, propose or dispatch effects, replace canonical documentation or durable causal facts, or become a required dependency of the domain or kernel. Domain packs and adapters **SHOULD** consume it through the existing context and index seams and **MUST** preserve a deterministic source-level fallback.
+- **`TC-E-055`** A bounded repository-context packet **MUST** identify the task, repository snapshot, provider and provider version, query, selected references, estimated token cost, and material omissions by stable identities or digests. It **MUST NOT** imply completeness, freshness, or authority merely because retrieval succeeded.
+- **`TC-E-056`** Context selection **MUST** satisfy an explicit token budget. For selected items $S$ and context budget $B_C$, $\sum_{i \in S}\operatorname{tokens}(i) \le B_C$. Composition **MUST** reserve sufficient capacity for at least one bounded recovery or verification cycle; a non-compactable prefix and task state **MUST NOT** consume the entire usable context window.
+- **`TC-E-057`** Compaction **MUST** retain the task identity and constraints, current plan or next action, modified resources, last material failure, latest applicable verification, settled effects, and remaining budgets. It **MUST** be identity-bearing and observable; it **MUST NOT** silently erase information required to determine whether completion or another effect is admissible.
+- **`TC-E-058`** Model-requested finish **MUST NOT** by itself establish successful completion. Where task policy requires verification, completion **MUST** be admitted only by an applicable successful verification receipt bound to the current task and current post-effect subject. A receipt invalidated by a later relevant effect, a zero-test collection, or a mismatched subject **MUST NOT** admit completion.
+- **`TC-E-059`** Harness-local verification and exterior evaluation **MUST** remain distinct. Local verification MAY govern operational completion; it **MUST NOT** self-certify benchmark success, assurance, promotion, or release evidence. Exterior evaluators remain subject to `TC-E-031` and `TC-E-046`.
+- **`TC-E-060`** Recovery decisions **MUST** be typed, bounded by failure class, budget-aware, and durably attributable. A retry **MUST NOT** repeat an identical action with identical arguments against materially unchanged state unless the classified failure is transient and the policy explicitly admits another bounded attempt. Exhaustion **MUST** terminate or replan explicitly rather than loop silently.
+- **`TC-E-061`** A successful patch effect **MUST** bind its input subject, verify the required preimage or anchors, apply every declared hunk within the authorized workspace, and record the resulting postimage identity. Ambiguous anchors, partial application, workspace escape, or a postimage mismatch **MUST** fail closed and **MUST NOT** be represented as patch success.
+- **`TC-E-062`** A benchmark-qualifying run record **MUST** bind at minimum the run and task identities, repository snapshot, harness/configuration identity, provider/model identity, trajectory or event-log identity, terminal state and reason, produced patch identity when applicable, verification and evaluator receipt identities, and explicit token, cost, latency, turn, tool-call, and retry values or missingness. Repeated attempts **MUST NOT** be represented as independent task coverage, and a record lacking its immutable trajectory linkage **MUST NOT** support a capability claim.
+
+### 0.7 Product and release boundary
+- **`TC-E-047`** M-9 remains a TARGET operational beta: unified configuration and clients, packaged CLI/API/TUI/Studio, real plugin lifecycle, health/readiness, two real workflows, restart/resume, and offline-after-install behavior.
+- **`TC-E-048`** M-10 remains a TARGET final release: supported migrations, backup/restore, deployment profiles, fault injection, security/performance qualification, reproducible artifacts, soak evidence, and an exact-subject signed release envelope.
+- **`TC-E-050`** Every client start-run path **MUST** select a valid runtime profile consistently with the identity-bearing profile contract.
+- **`TC-E-051`** Client surfaces SHOULD converge on a coherent command and configuration model without moving runtime authority into the clients.
+
+### 0.8 Inviolable Architectural Refusals
+AETHER does not authorize a second runtime, a domain-aware kernel, authoritative in-memory agent state, a workflow DAG with independent authority, self-certified promotion, silent containment downgrade, or evidence backfill. Any reversal requires current normative amendment and the required falsifiers; implementation convenience is not authority.
 
 ## 0. Invariants
 

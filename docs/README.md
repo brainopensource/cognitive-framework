@@ -22,7 +22,7 @@ version: 0.9.3
 last_verified: 2026-09-03
 normative_authority:
   - VISION.md
-  - docs/SPEC.md
+  - docs/execution/spec.md
   - docs/execution/tasks.md
 relationships:
   - arch.system.overview
@@ -45,7 +45,7 @@ AETHER documentation strictly separates constitutional vision, normative law, ar
 | **0. Constitutional** | [`VISION.md`](../VISION.md) | Foundational vision, identity, ontology, and high-level direction. |
 | **1. Operational Law** | [`AGENTS.md`](../AGENTS.md) | Operational guidelines and mandatory execution rules for AI agents and human contributors. |
 | **2. Human Entry Point** | [`README.md`](../README.md) | High-level repository entry point, setup guide, and validation summary table. |
-| **3. Normative Spec** | [`docs/SPEC.md`](SPEC.md) | RFC 2119 normative requirements, invariants, and architectural refusals. |
+| **3. Normative Law & Delta Spec** | [`docs/execution/spec.md`](execution/spec.md) | RFC 2119 normative requirements, system invariants, and active sprint delta contract. |
 | **4. Architecture & Reference** | [`docs/architecture/`](architecture/overview.md), [`docs/backend/`](backend/architecture/runtime-execution.md), [`docs/frontend/`](frontend/README.md) | System workflows, subsystem architectures, integrated architectural decisions (DEC-01–DEC-11), wire contracts, and API references. |
 | **5. Execution Runway** | [`docs/execution/tasks.md`](execution/tasks.md), [`docs/execution/spec.md`](execution/spec.md), [`docs/execution/technical.md`](execution/technical.md), [`docs/execution/milestones.md`](execution/milestones.md), [`docs/execution/backlog.md`](execution/backlog.md) | The 5 operational runway documents: flat task tree, delta spec, handbook, TARGET gates, and capability inventory. |
 | **6. Product PRDs** | [`docs/product/`](product/frontend/PRD_FRONTEND_PLATFORM.md) | Client application PRDs and product requirements. |
@@ -91,7 +91,7 @@ To optimize LLM context usage (e.g. 16K and 32K context windows) and prevent pro
 
 | Task Category | Primary Canonical Owner | Secondary Reference / Evidence | Typical Docs Packet (Est Tokens) |
 |---|---|---|---|
-| **Kernel / TCB** | [`docs/backend/architecture/kernel.md`](backend/architecture/kernel.md) | [`docs/SPEC.md`](SPEC.md), [`backend/reference/ports.md`](backend/reference/ports.md) | ~3,500 – 5,500 tokens |
+| **Kernel / TCB** | [`docs/backend/architecture/kernel.md`](backend/architecture/kernel.md) | [`docs/execution/spec.md`](execution/spec.md), [`backend/reference/ports.md`](backend/reference/ports.md) | ~3,500 – 5,500 tokens |
 | **Runtime Service** | [`docs/backend/architecture/runtime-execution.md`](backend/architecture/runtime-execution.md) | [`backend/reference/runtime-service.md`](backend/reference/runtime-service.md), `symbols.jsonl` | ~3,800 – 6,000 tokens |
 | **Events & Ledgers** | [`docs/backend/architecture/causal-state.md`](backend/architecture/causal-state.md) | [`docs/backend/reference/events.md`](backend/reference/events.md), [`backend/reference/schemas.md`](backend/reference/schemas.md) | ~3,500 – 5,200 tokens |
 | **Agency & Turns** | [`docs/backend/architecture/agency.md`](backend/architecture/agency.md) | [`backend/architecture/workflows/agent-lifecycle.md`](backend/architecture/workflows/agent-lifecycle.md) | ~3,000 – 5,000 tokens |
@@ -138,7 +138,7 @@ Task: *"Add a new typed budget class for sandbox wall-clock limits."*
 | 1. Route | `python3 tools/docs_rag_v0.py "typed budget wall clock limit" --budget 6000` | Subsystem = Kernel Core; canonical owner = `docs/backend/architecture/kernel.md`; secondary = `docs/backend/reference/ports.md` | ~800 |
 | 2. Reverse route | `python3 tools/docs_rag_v0.py --file vanguard/packages/kernel/budget.py` | Documentation debt: `kernel.md` must be updated; existing symbols in the target file | ~200 |
 | 3. Pin symbols | `grep "Budget" .generated/knowledge/symbols.jsonl` | Existing algebra to extend (`BudgetDenied`, attenuation classes) and where they live | ~200 |
-| 4. Read owners | `docs/backend/architecture/kernel.md` + `docs/SPEC.md` budget clauses | The contract/invariants the change must respect | ~2,500–5,000 |
+| 4. Read owners | `docs/backend/architecture/kernel.md` + `docs/execution/spec.md` budget clauses | The contract/invariants the change must respect | ~2,500–5,000 |
 | 5. Validate | `python3 -m unittest discover -s test/kernel -t .` + `just check` | Executable falsifiers for the change | — |
 
 Total targeted reading: **~5–8K tokens** instead of the 50–150K+ a full-corpus scan costs — and the map told us our documentation obligations *before* the first commit, which is what keeps this knowledge base truthful.

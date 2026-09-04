@@ -22,7 +22,7 @@ derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN_v2.md
   - .draft/PHASE-0_DEVELOPMENT_FINAL_PLAN.md
 normative_authority:
-  - docs/SPEC.md#milestone-compatibility
+  - spec.md#milestone-compatibility
 relationships:
   - execution.tasks
   - execution.backlog

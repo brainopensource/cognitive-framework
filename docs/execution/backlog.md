@@ -485,4 +485,4 @@ Mitigation: reverse-route every production change and regenerate knowledge proje
 * **Flat task tree**: [`tasks.md`](tasks.md)
 * **Feature delta specification**: [`spec.md`](spec.md)
 * **Technical handbook**: [`technical.md`](technical.md)
-* **Normative System Specification**: [`../SPEC.md`](../SPEC.md)
+* **Normative System Specification & Delta**: [`spec.md`](spec.md)

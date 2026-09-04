@@ -30,7 +30,7 @@ evidence:
   - E-B-025
   - E-B-044
 normative_authority:
-  - ../SPEC.md
+  - ../execution/spec.md
 relationships:
   - arch.system.overview
   - arch.system.data-flow

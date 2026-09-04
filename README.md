@@ -46,14 +46,14 @@ observe → propose → authorize → effect → receipt → evaluate
 | Dimension | Details |
 |---|---|
 | **Architectural authority** | [`VISION.md`](VISION.md) — constitutional; law and roadmap are subordinate to it |
-| **Normative law** | [`docs/SPEC.md`](docs/SPEC.md) (invariants & TCB ceilings; rationale in [`docs/backend/architecture/`](docs/backend/architecture/)) |
+| **Normative law** | [`docs/execution/spec.md`](docs/execution/spec.md) (normative clauses, invariants & TCB ceilings; rationale in [`docs/backend/architecture/`](docs/backend/architecture/)) |
 | **Development package** | `vanguard-runtime` **0.9.3** (`pyproject.toml` is the version source). That string is not M-9 acceptance. Python `>=3.10` (tested on Python 3.12 in CI) |
-| **Current status** | Execution runway: [`docs/execution/tasks.md`](docs/execution/tasks.md) (work tree), [`docs/execution/milestones.md`](docs/execution/milestones.md) (TARGET gates). Present HEAD architecture is `docs/SPEC.md` + `docs/architecture/` + `docs/backend/`. |
+| **Current status** | Execution runway: [`docs/execution/tasks.md`](docs/execution/tasks.md) (work tree), [`docs/execution/milestones.md`](docs/execution/milestones.md) (TARGET gates). Present HEAD architecture is in `docs/execution/spec.md` + `docs/architecture/` + `docs/backend/`. |
 | **Roadmap** | `0.9.3` Strongforce line → M-8 evidence integrity → Coding Max vertical slice → M-9 installable beta (gate) → M-10 `0.9.0` → non-authorizing 1.0 qualification horizon |
 | **Production truth** | `vanguard/packages/` (`domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`; `apps` is a runtime client) |
 
 [![Vision](https://img.shields.io/badge/Law_Zero-VISION.md-purple.svg)](VISION.md)
-[![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/SPEC.md)
+[![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/execution/spec.md)
 [![Execution](https://img.shields.io/badge/Status-tasks.md-orange.svg)](docs/execution/tasks.md)
 
 ## 1. What exists today vs the locked target
@@ -120,7 +120,7 @@ All model access across runtime, benchmarks, CLI, and apps is **strictly governe
 | # | Layer | Documents |
 |---|---|---|
 | 0 | **Vision (constitutional)** | [`VISION.md`](VISION.md) — identity, ontology, direction |
-| 1 | **Law (normative)** | [`docs/SPEC.md`](docs/SPEC.md) — normative requirements, TCB ceilings, invariants |
+| 1 | **Law & Delta Spec (normative)** | [`docs/execution/spec.md`](docs/execution/spec.md) — normative requirements, TCB ceilings, invariants, and sprint delta |
 | 2 | **Architecture & Reference** | [`docs/architecture/`](docs/architecture/), [`docs/backend/`](docs/backend/), [`docs/frontend/`](docs/frontend/) — system workflows, subsystem design, DEC-01–DEC-11 rationale, wire contracts |
 | 3 | **Product PRDs** | [`docs/product/`](docs/product/) |
 | 4 | **Execution runway** | [`docs/execution/tasks.md`](docs/execution/tasks.md), [`docs/execution/milestones.md`](docs/execution/milestones.md), [`docs/execution/spec.md`](docs/execution/spec.md), [`docs/execution/technical.md`](docs/execution/technical.md), [`docs/execution/backlog.md`](docs/execution/backlog.md) |
@@ -132,7 +132,7 @@ of its own.
 ### Reading order
 
 1. [`VISION.md`](VISION.md) — what AETHER is and where it is going.
-2. [`docs/SPEC.md`](docs/SPEC.md) — normative requirements and invariants.
+2. [`docs/execution/spec.md`](docs/execution/spec.md) — normative requirements, invariants, and delta contracts.
 3. [`docs/architecture/overview.md`](docs/architecture/overview.md) & [`docs/backend/`](docs/backend/) — as-built architecture and rationale.
 4. [`docs/execution/tasks.md`](docs/execution/tasks.md) & [`docs/execution/milestones.md`](docs/execution/milestones.md) (future work vs TARGET gates).
 
@@ -372,7 +372,7 @@ Model providers are strictly abstracted behind `ModelPort` (`vanguard/packages/p
 
 `AGENTS.md` is the single tool-neutral contributor contract for humans and AI agents. There are no
 model-specific instruction files. Future work lives in the five-file execution runway
-([`tasks.md`](docs/execution/tasks.md) and companions). Present HEAD architecture lives in `docs/SPEC.md` and `docs/architecture/`.
+([`tasks.md`](docs/execution/tasks.md) and companions). Present HEAD architecture lives in `docs/execution/spec.md` and `docs/architecture/`.
 
 
 ## 10. Mental models worth internalising
@@ -380,7 +380,7 @@ model-specific instruction files. Future work lives in the five-file execution r
 - **The episode is the program.** There is no workflow engine, no topology language, no graph
   validator — there is a loop that observes, proposes, gets authorised, acts, and reduces. If you find
   yourself declaring a shape for the work *before* the work runs, you are building the thing
-  `docs/SPEC.md` §1.1 (loop-over-DAG inversion) rejects.
+  [`docs/execution/spec.md`](docs/execution/spec.md) (loop-over-DAG inversion) rejects.
 - **The broker grants; the sandbox contains.** Two distinct boundaries. The kernel decides *whether* an
   effect is permitted. The perimeter decides *what an attacker can reach when the kernel was wrong*. A
   logical mediator in the host language is not containment — see [`docs/backend/architecture/kernel.md`](docs/backend/architecture/kernel.md)
@@ -395,7 +395,7 @@ model-specific instruction files. Future work lives in the five-file execution r
   actually deny. A green suite over unwired code is worse than no control — it manufactures false
   assurance.
 - **One document is normative per contract.** If you're about to write a second source of truth for
-  something `docs/SPEC.md` already owns, stop — extend the section, don't fork it.
+  something [`docs/execution/spec.md`](docs/execution/spec.md) already owns, stop — extend the section, don't fork it.
 - **Minimise what must be simultaneously correct.** The kernel has a strict <=1438 LOC target for exactly this reason —
   correctness argument size, not code golf.
 - **Polyglot plugins live outside the trusted computing base.** The wire schema (JSON Schema + JCS) *is*
@@ -421,7 +421,7 @@ shipped with a green suite.
 
 ## Where things live
 
-Read [`docs/SPEC.md`](docs/SPEC.md) for normative requirements and the as-built seven-package lattice
+Read [`docs/execution/spec.md`](docs/execution/spec.md) for normative requirements and the as-built seven-package lattice
 (`domain, ports, kernel, agency, runtime, adapters, apps`) enforced by `tools/linters/check_boundaries.py`.
 Evaluation and measurement rules (paired designs, McNemar, empirical evidence) are specified in
 [`docs/backend/architecture/assurance-evaluation.md`](docs/backend/architecture/assurance-evaluation.md) —

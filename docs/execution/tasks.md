@@ -17,7 +17,6 @@ version: 0.9.3
 last_verified: 2026-09-03
 lock_head: "66aa7a3c0c31"
 normative_authority:
-  - docs/SPEC.md
   - docs/execution/spec.md
   - docs/execution/technical.md
 relationships:

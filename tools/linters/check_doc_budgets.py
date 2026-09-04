@@ -13,7 +13,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 LIMITS = {
-    "docs/SPEC.md": 250,
     "docs/execution": 200,
     "docs/architecture": 200,
     "docs/backend": 200,

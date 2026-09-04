@@ -27,8 +27,8 @@ Vanguard / AETHER is a Python-first recursive-agency substrate (`requires-python
 All documentation is partitioned into distinct authority tiers:
 
 ```text
-VISION.md / AGENTS.md / docs/SPEC.md
-    Vision, Operational Rules, Compact Normative Law
+VISION.md / AGENTS.md / docs/execution/spec.md
+    Vision, Operational Rules, Compact Normative Law & Delta Spec
 
 docs/architecture/ & docs/backend/ & docs/frontend/ & docs/product/
     System & Component Architecture (including DEC-01–DEC-11), Reference, Product PRDs
@@ -41,7 +41,7 @@ docs/theory/ | docs/research/ | docs/reports/
 ```
 
 - **Vision & Operational Rules**: [`VISION.md`](VISION.md), [`AGENTS.md`](AGENTS.md).
-- **The Law & Invariants**: [`docs/SPEC.md`](docs/SPEC.md).
+- **The Law & Invariants**: [`docs/execution/spec.md`](docs/execution/spec.md).
 - **The Execution Runway**: [`docs/execution/tasks.md`](docs/execution/tasks.md), [`docs/execution/spec.md`](docs/execution/spec.md), [`docs/execution/technical.md`](docs/execution/technical.md), [`docs/execution/milestones.md`](docs/execution/milestones.md), [`docs/execution/backlog.md`](docs/execution/backlog.md).
 
 ### Repository-Intelligence Navigation Protocol
@@ -258,7 +258,7 @@ When updating documentation, route information to its semantic owner:
 > AI Agents **MUST NOT** create new Markdown files under `docs/`, `docs/plans/`, or anywhere across the workspace to leave scratch notes, plans, reviews, or summaries.  
 > 
 > All documentation updates must strictly edit existing canonical files in the documentation hierarchy:
-> 1. **Modifying Normative Law** $\to$ Edit [`docs/SPEC.md`](docs/SPEC.md).
+> 1. **Modifying Normative Law & System Spec** $\to$ Edit [`docs/execution/spec.md`](docs/execution/spec.md).
 > 2. **Recording Architectural Rationale & Trade-offs** $\to$ Edit corresponding subsystem architecture docs in [`docs/backend/architecture/`](docs/backend/architecture/) or [`docs/architecture/`](docs/architecture/).
 > 3. **Updating Tasks or Execution Progress** $\to$ Edit [`docs/execution/tasks.md`](docs/execution/tasks.md) and [`docs/execution/spec.md`](docs/execution/spec.md). Engineering recipes go in [`docs/execution/technical.md`](docs/execution/technical.md).
 > 

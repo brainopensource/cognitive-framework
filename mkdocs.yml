@@ -65,8 +65,6 @@ docs_dir: docs
 
 nav:
   - Home: README.md
-  - Law & Norms:
-      - Specification (SPEC): SPEC.md
   - Architecture:
       - System Overview: architecture/overview.md
       - System Boundaries: architecture/boundaries.md

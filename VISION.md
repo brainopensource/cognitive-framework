@@ -39,7 +39,7 @@ measure, or schedule this Vision.
 | # | Layer | Documents | Owns |
 |---|---|---|---|
 | 0 | **Vision (constitutional)** | `VISION.md` | Architectural identity, ontology, product principles, non-negotiable direction |
-| 1 | **Law (normative)** | [`docs/SPEC.md`](docs/SPEC.md) | Current system requirements, invariants, RFC-2119 obligations that realize the Vision |
+| 1 | **Law (normative)** | [`docs/execution/spec.md`](docs/execution/spec.md) | Current system requirements, invariants, RFC-2119 obligations that realize the Vision |
 | 2 | **Architecture & product** | [`docs/architecture/`](docs/architecture/), [`docs/backend/`](docs/backend/), [`docs/frontend/`](docs/frontend/), [`docs/product/`](docs/product/), `schemas/` | Wire-level and component realization of the law, including architectural rationale (DEC-01–DEC-11) |
 | 3 | **Sequencing** | [`docs/execution/milestones.md`](docs/execution/milestones.md), [`backlog.md`](docs/execution/backlog.md) | Delivery gates and stable work packages |
 | 4 | **Authorization** | [`docs/execution/tasks.md`](docs/execution/tasks.md) | Flat work tree that authorizes remaining implementation (`active.md` is a historical name; the file is absent) |

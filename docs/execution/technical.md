@@ -28,7 +28,7 @@ relationships:
 
 Developers SHALL use this file plus [`spec.md`](spec.md), [`tasks.md`](tasks.md), [`milestones.md`](milestones.md), and [`backlog.md`](backlog.md). Drafts under `.draft/DEVELOPMENT_FINAL_PLAN*.md` are unused reference.
 
-**Present vs future.** `docs/architecture/`, `docs/backend/`, and `docs/SPEC.md` describe HEAD. This file describes how to implement remaining work and keeps `[PROPOSAL]` variants in full.
+**Present vs future.** `docs/architecture/`, `docs/backend/`, and `docs/execution/spec.md` describe HEAD. This file describes how to implement remaining work and keeps `[PROPOSAL]` variants in full.
 
 **Navigation before coding.** `uv run lda identity --json` then `uv run lda doctor --json`. Then `python3 tools/docs_rag_v0.py --file <path>` for the file you will edit. Kernel stays domain-blind (I-7). AST preflight belongs in `adapters/environment/`, never `kernel/dispatch.py` S7/S8.
 
@@ -2198,7 +2198,7 @@ See §2.6. Additionally, OpenAI’s evaluation note: coding evals mix signal and
 - [`VISION.md`](../../VISION.md)
 - [`AGENTS.md`](../../AGENTS.md)
 - [`README.md`](../../README.md)
-- [`docs/SPEC.md`](../SPEC.md)
+- [`docs/execution/spec.md`](spec.md)
 - [`docs/execution/active.md`](tasks.md)
 - [`docs/execution/milestones.md`](../execution/milestones.md)
 - [`docs/execution/backlog.md`](../execution/backlog.md)
@@ -5011,7 +5011,7 @@ The following sources informed this plan but do not all carry equal authority.
 
 - [`VISION.md`](../../VISION.md)
 - [`AGENTS.md`](../../AGENTS.md)
-- [`docs/SPEC.md`](../SPEC.md)
+- [`docs/execution/spec.md`](spec.md)
 
 ### Current architecture and execution
 

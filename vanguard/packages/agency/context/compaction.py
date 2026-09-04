@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Mapping, Protocol, Sequence, runtime_checkable
 
-from .layers import Block, Layer
+from .layers import Block, Layer, PINNED_L4_SOURCES
 
 
 def _receipt_for(block: Block) -> Block:
@@ -24,6 +24,15 @@ def _receipt_for(block: Block) -> Block:
         text=f"[{block.label} from {block.source}: {block.byte_length} bytes elided after use]",
         evictable=False,
     )
+
+
+def _drop_flexible_notes(notes: list[Block], dropped: list[str], total, ceiling: int) -> None:
+    """T-15: drop flexible L4 notes under pressure; never FEATURE_SPEC pinned sources."""
+    while total() > ceiling and notes:
+        index = next((i for i, block in enumerate(notes) if block.source not in PINNED_L4_SOURCES), None)
+        if index is None:
+            break
+        dropped.append(notes.pop(index).label)
 
 
 @runtime_checkable
@@ -81,8 +90,7 @@ class ResultEvictionStrategy:
             if removed.label in elided:
                 elided.remove(removed.label)
 
-        while total() > ceiling and notes:
-            dropped.append(notes.pop(0).label)
+        _drop_flexible_notes(notes, dropped, total, ceiling)
 
         return elided, dropped
 
@@ -138,9 +146,8 @@ class RecencyWindowStrategy:
             if removed.label in elided:
                 elided.remove(removed.label)
 
-        # 4. If still exceeding ceiling, drop oldest notes
-        while total() > ceiling and notes:
-            dropped.append(notes.pop(0).label)
+        # 4. If still exceeding ceiling, drop oldest flexible notes
+        _drop_flexible_notes(notes, dropped, total, ceiling)
 
         return elided, dropped
 
@@ -223,8 +230,7 @@ class StructuredConsolidateStrategy:
                 b = dialogue.pop(1)
                 dropped.append(b.label)
 
-        while total() > ceiling and notes:
-            dropped.append(notes.pop(0).label)
+        _drop_flexible_notes(notes, dropped, total, ceiling)
 
         return elided, dropped
 

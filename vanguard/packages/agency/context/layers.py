@@ -27,6 +27,7 @@ __all__ = [
     "CompiledContext",
     "Fragment",
     "Layer",
+    "PINNED_L4_SOURCES",
     "PREFIX_LAYERS",
     "ROLE_FOR_LAYER",
     "estimate_tokens",
@@ -68,6 +69,13 @@ ROLE_FOR_LAYER: Mapping[Layer, str] = {
     Layer.TASK: "user",
     Layer.DIALOGUE: "user",
 }
+
+#: FEATURE_SPEC tiers 0–1 on L4. Compaction must not evict these sources.
+PINNED_L4_SOURCES: frozenset[str] = frozenset({
+    "settled-invariant",
+    "falsified-hypothesis",
+    "dead-end",
+})
 
 
 def estimate_tokens(text: str) -> int:

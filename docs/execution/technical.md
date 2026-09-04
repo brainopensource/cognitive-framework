@@ -476,7 +476,7 @@ class TestTamperShield:
 ```
 **Rule**: Modifying frozen test files triggers immediate fail-closed termination with `TAMPER_VIOLATION`.
 
-**FACT.** `tamper_shield.py` is **MISSING** in HEAD `66aa7a3c`. The shield is `[PROPOSAL]` (see also B FEATURE_SPEC-module routing). Keep the design.
+**MECHANISM (this branch, T-18).** `runtime/governance/tamper_shield.py` freezes IndexPort-enumerated test digests. Assertion or test-body edit fails admission (`TAMPER_VIOLATION`). `Path.glob("test/**")` is not the enumeration source. Session `_tamper_shield.evaluate(...)` is deferred until T-16. Lock `66aa7a3c` still MISSING.
 
 ### 5.3 Gated Dual-Loop Reproducer Protocol (Fail-to-Pass Enforcement)
 To guarantee bug fixes are real and not coincidental passes:
@@ -728,7 +728,7 @@ No `KernelPort` symbol exists in `vanguard/packages/ports/` (FACT; keep A's `Ker
 | **`I-TCB`** | **TCB Line Budget** | Production kernel LOC must strictly remain $\le 1438$ LOC. Enforced in CI via `check_tcb_budget.py`. |
 | **`I-STATE`**| **Zero Context Amnesia** | Settled invariants and falsified dead-ends are strictly non-evictable. They remain permanently pinned in prompt headers. |
 | **`I-TXN`** | **Preflighted Recoverability**| Multi-file edits must pass 0.2ms AST syntax checks before touching disk. Any failure triggers total in-memory rollback. **`[PROPOSAL]`**; live MECHANISM is sequential apply + post-write `ast.parse` observation. |
-| **`I-SHD`** | **Test Oracle Immutability** | Baseline test fixtures are hashed at Turn 0. Any write mutation to test fixtures triggers immediate fail-closed termination. **`[PROPOSAL]`** (`tamper_shield.py` MISSING). |
+| **`I-SHD`** | **Test Oracle Immutability** | Baseline test fixtures are hashed at Turn 0 via IndexPort. Any write mutation to frozen tests triggers fail-closed admission (`TAMPER_VIOLATION`). **MECHANISM** T-18 (`tamper_shield.py` LIVE this branch; lock `66aa7a3c` MISSING). |
 | **`I-MAIL`**| **Content-Addressed Handoff**| Inter-agent coordination occurs strictly via 64-character SHA-256 CAS digests ($O(1)$ token overhead). No raw transcript leakage. **`[PROPOSAL]`** (`domain/topology/` MISSING). |
 
 ---

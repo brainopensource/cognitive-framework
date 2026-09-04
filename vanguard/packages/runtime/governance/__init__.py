@@ -13,6 +13,7 @@ from .approvals import (
 )
 from .engine import ProcessEngine, ProcessError
 from .definitions import ProcessDefinition, ProcessHistory, ProcessInstance, Transition
+from .tamper_shield import TamperVerdict, TestTamperShield
 from .learning import (
     CompositionCandidate,
     DurableCompositionRegistry,
@@ -47,6 +48,8 @@ __all__ = [
     "ProcessHistory",
     "ProcessInstance",
     "PromoterProtocol",
+    "TamperVerdict",
+    "TestTamperShield",
     "PromotionEvidence",
     "RollbackEvidence",
     "Transition",

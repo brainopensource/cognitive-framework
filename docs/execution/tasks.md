@@ -196,8 +196,8 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - Requires: T-08 (honest verify)  
 
 **T-18 TestTamperShield** (B, spec §6)  
-- [ ] Enumerate tests via IndexPort, not only `Path.glob("test/**")`  
-- [ ] Assertion edit ⇒ admission reject  
+- [x] Enumerate tests via IndexPort, not only `Path.glob("test/**")`  
+- [x] Assertion edit ⇒ admission reject  
 - Requires: T-17, T-14  
 
 **T-19 Greenfield oracle vacuity** (B, A §12.4, v2 §21.3)  

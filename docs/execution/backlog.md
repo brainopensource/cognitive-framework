@@ -198,7 +198,7 @@ Team capacity is chosen later. `requires:` edges live on tasks. This index maps 
 | **TRUTH** | CMX-10A, W-092-F2 | T-04–T-08, T-42, T-38, T-23 | MS-TRUTH | Partial: T-23/T-38/T-42 `DONE`; T-04/T-05/T-07 open; T-08 landed `8637db55` |
 | **STATE** | CMX-10B, W-092-F3 | T-09–T-13, T-43–T-44 | MS-RESUME | `DONE` at `8637db55` (closer receipt 2026-09-03). |
 | **SEE** | CMX-11, PRG-01, W-092-F4 | T-14–T-16, T-36–T-37, T-45–T-46 | MS-SEE | T-14 `DONE` `587db91a`. T-15/T-16/T-36/T-37 open. Next: T-16. |
-| **CHANGE** | TXN-01, SHD-01, TLS-04/05 | T-17–T-20, T-47–T-49 | MS-CHANGE | T-17 `DONE` `5c9870f0`. T-18–T-20 open. Next: T-18. |
+| **CHANGE** | TXN-01, SHD-01, TLS-04/05 | T-17–T-20, T-47–T-49 | MS-CHANGE | T-17 `DONE` `5c9870f0`. T-18 `DONE` (IndexPort freeze). T-19–T-20 open. Next: T-19. |
 | **DIALECT** | WRN-01, TLS-02 | T-21–T-22, T-50 | — | Typed failure classes; fail-closed resolve |
 | **CONTROL** | CMX-07, W-092-F5 | T-26–T-27, T-51–T-52 | MS-CONTROL | Frozen preregistration + canary |
 | **META** | MEM-03 | T-28 | MS-META | `[PROPOSAL]` |

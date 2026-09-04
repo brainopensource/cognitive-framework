@@ -12,14 +12,28 @@
 
 ## 0. Disposition of this pass
 
-The Steering Group's four resolutions are **upheld without modification**:
+The Steering Group's four resolutions are **upheld without modification**, augmented by the **Gem Technical Evaluation Additions**:
 
 1. REJECT 9-strategy fuzzy matching → exact `str_replace` + 2PC + AST preflight in adapters.
 2. REJECT L2 PPR auto-injection → L5 on-demand `IndexPort` query tools.
 3. REJECT rigid `derive_phase` ladders → outcome postconditions in the admission gate.
 4. STAGE the Octopus outer director into Wave 5, strictly after `MS-CONTROL`.
+5. **INTEGRATE Gem SOTA Cognitive & Context Mechanics:**
+   - (a) L5 Trailing Goal Echo (Lost-in-the-Middle mitigation at prompt tail for 40–120 turn runs).
+   - (b) CTRF test log distillation (strip pass traces, cap assertion diff $\le 1500$ chars) & tool body eviction.
+   - (c) Algebraic stuck-loop circuit breaker ($d_t = d_{t-2}$ workspace tree hash oscillation) for `ALG-03`.
+   - (d) Greenfield vacuity rejection check (empty stubs must fail before implementation is admitted) for T-19.
+   - (e) Test-time compute scaling (ephemeral worktree branching + Recursive Tournament Voting) for Wave 5 director.
+6. **INTEGRATE Grok Live-Trial Forensics & Execution Truth:**
+   - (a) Fenced-action dialect recovery: unpack markdown-fenced JSON action blocks within `note` payloads into candidate tool proposals instead of decaying into null actions.
+   - (b) Anti-premature finish gate: strictly reject unsolicited `finish` proposals when notes contain unparsed tool invocations or when zero mutating effects have executed on an unverified trajectory (`gf-orders-001` post-mortem).
+   - (c) Greenfield prompt law deconfliction: purge legacy heuristics (*"Write ONE file per turn... Do not read or search first"*) from `system-prompt.txt`, establishing the 3-phase greenfield protocol (scaffold stubs $\to$ red tests $\to$ atomic 2PC commit).
+   - (d) Cross-file signature caller admission: wire `IndexPort.get_callers` into `session._admit_completion` and pass `callers_by_symbol` to `multi_file_completeness.py`.
+7. **PRESERVE Opus's viable experimental programme without preserving architectural forks:** benchmark
+   protocol, tool, editing, retrieval, context, memory, composition, and supervision treatments against
+   one frozen control; reject only the unsafe implementation form. §2.1 is the preservation register.
 
-The hardening pass did **not** change a single resolution. It changed the *packaging, the paths, the numbers, and one falsifier* — because ten of the draft's load-bearing claims do not survive contact with the source tree. Those ten are listed in §1 and are the reason this document is not the draft with a new date on it.
+The hardening pass did **not** change a single resolution. It changed the *packaging, the paths, the numbers, and one falsifier* — because thirteen of the draft's load-bearing claims and unverified edge cases do not survive contact with the source tree. Those are listed in §1 and are the reason this document is not the draft with a new date on it.
 
 **The single most consequential correction (C-2):** the draft's `MS-TRUTH` falsifier — *"oracle-PASS runs record `completed`"* — is architecturally wrong and must not be committed. It would re-collapse the two axes this codebase deliberately separates, and it is the exact conflation that produced the 8/8 defect in the first place. The honest repair is the opposite of relabelling terminations. See §3.
 
@@ -41,6 +55,9 @@ Every row was verified against source in this working tree. `[C-n]` tags are ref
 | **C-8** | Files at `vanguard/packages/packs/code-default/...` | **`vanguard/packages/packs/` does not exist.** The pack layer is at **repository root**: `packs/code-default/{harness.yaml,presets.json,load.py,plugins/,toolkits/,oracles/,middleware/}`. Likewise `runtime/ledger/emitter.py` does not exist (`runtime/ledger_emitter.py`, flat, does); `adapters/environment/pycache.py`, `adapters/stores/lda_index.py`, `packs/code-default/policies/greenfield.py`, `domain/topology/coordination.py` and `runtime/campaign/director.py` are all absent. | **Six of twenty-one draft Wave paths are unresolvable.** Corrected inventory in §6. |
 | **C-9** | `.lda/index.db` holds 77k relations | Actual: **`relations` 80,618**; also `symbols` 10,580, `entities` 14,033, `files` 3,372, `documents` 262, `doc_sections` 5,244, FTS5 corpus 90,028. 39 index runs. | Cite 80,618. A board document that rounds an auditable count down by 5% invites the reader to check the rest. |
 | **C-10** | (not raised) | `packs/code-default/harness.yaml` `model_routes` tier 1 is **`provider: ollama, model: qwen2.5:1.5b`** — forbidden and deprecated repository-wide per the `llama-cpp` operational standard, and directly contradicted by commit `ffc3dc92` ("wiped ollama from the project"). Tier 3 is the unresolved literal `"$FRONTIER"`. | Folded into HAR-01 as a named falsifier. A live pack config still routes tier 1 at a banned provider. |
+| **C-11** | Dialect degradation to premature `finish` on fenced action notes | In live trial `gf-orders-001` (`deepseek-v4-flash`, SHA `ffc3dc92`), agent abandoned at turn 3 with **zero effects**. Model emitted structured JSON tool call inside the free-text `note` field (`` ````json {"action": "read", "path": "orders/__init__.py"} ```` ``). Dialect parser saw `action: null`, treated it as an empty proposal, and fell through to an unprompted `finish` proposal. | Dialect parser must unpack and promote markdown-fenced JSON action blocks in notes/text to candidate proposals. Admission gate must reject `finish` proposals when notes contain unparsed tool shapes or when zero mutations have occurred on an unverified trajectory. Ships as **T-82**. |
+| **C-12** | Greenfield policy vs. legacy prompt law contradiction | `packs/code-default/system-prompt.txt` states: *"Write ONE file per turn... Do not read or search first"*. This toy heuristic directly sabotages greenfield directory/stub scaffolding and multi-file refactoring (Invariant I-8). Models are instructed to bypass inspection and write blind. | Purge *"Do not read or search first"* and single-file restrictions from agent system prompts. Replace with normative 3-phase greenfield protocol (scaffold stubs $\to$ red test falsifier $\to$ atomic 2PC commit). Ships as **T-83a**. |
+| **C-13** | Omission of `callers_by_symbol` in `session._admit_completion` | `agency/multi_file_completeness.py` accepts `callers_by_symbol` to prevent premature exit when public API signatures are modified across files. However, `runtime/session.py::_admit_completion` never queries `IndexPort` or passes callers, leaving multi-file signature refactoring unguarded. | Wire `IndexPort.get_callers` into `session._admit_completion` and pass reverse call graph to `multi_file_completeness.py`. Ships as **T-83b**. |
 
 ### Mandate 4 — kernel LOC guardrail: **PASS, with 52 lines of headroom**
 
@@ -67,7 +84,7 @@ Verdicts unchanged from the draft where the draft was right. Rationales correcte
 
 | Mechanism | Source | Subsystem | Verdict | Hardened rationale |
 |---|---|---|---|---|
-| Native tool-call profiles (`ToolCallStyle.NATIVE`) | Opus (Defect A) | `domain` | **ADOPT** | `domain/models/profile.py` defaults `tool_call_style=FENCED_JSON` and `_PROFILES` holds exactly **two** entries (`fake`, `openrouter/free`). Every production model resolves through the fallthrough `ModelCapabilityProfile(key)` → `FENCED_JSON` → `dialect.py:124` dumps schemas as prose. Confirmed. |
+| Native tool-call profiles (`ToolCallStyle.NATIVE`) | Opus (Defect A) | `domain` | **ADOPT, capability-bound** | `domain/models/profile.py` defaults `tool_call_style=FENCED_JSON` and `_PROFILES` holds exactly **two** entries (`fake`, `openrouter/free`). Production routes with verified native-tool support need explicit profiles; unverified registry entries must retain the honest degradation chain rather than being globally stamped `NATIVE`. Opus measured DeepSeek, GLM, and `openrouter/free`, not every model now present in the registry. |
 | Approval threshold decoupling | Opus (Defect C) | `runtime` | **ADOPT** | **C-7.** Not a new artifact — a declared `approval_policy` component the composition root never reads. Wiring only. |
 | Explicit `finish` verb declaration | Opus (Defect E/N) | `agency/manifests` | **ADOPT** | Confirmed and localized: `finish-tool.json` exists in `vg-chimera-v1`, `vg-code-chimera`, `vg-code-max-v3`, `vg-code-max-v3luna` — and in **none** of the four product presets (`vg-code-{default,fast,balanced,max}`). The domain accepts it (`ProposalKind.FINISH`, `invocation.py:94`); only the declaration is missing. |
 | **Two-axis settlement contract** (`TaskDisposition` ⟂ `RunTermination`) | **This pass**, replacing "terminal-state inversion repair" | `domain/evidence` | **ADOPT** | **C-2.** The draft's framing would relabel terminations to match oracles. The correct repair adds the missing *disposition* axis as a typed domain contract and forbids either axis from being published in the other's column. Full contract in §3. |
@@ -77,23 +94,56 @@ Verdicts unchanged from the draft where the draft was right. Rationales correcte
 | Remove `ADMISSION_GATE_EXEMPT` (T-04) | Grok §A.1, Opus | `runtime` | **ADOPT** | Confirmed live at `session.py:134`: `frozenset({"vg-code-default", "vg-code-lex"})`. `admission_required()` correctly gates every *other* preset by declared `patch.apply` capability — the name allowlist is the last remaining bypass, and it exempts the **product default**. |
 | Wire `TestTamperShield` on admit | Grok §A.1, GPT | `runtime` | **ADOPT — and REOPEN T-18** | **C-4.** Zero production callers. `_admit_completion` (`session.py:1655`) checks epoch, omissions, and policy — never tamper. |
 | Implicated tests as verification subject | Grok §A.2 | `runtime` | **ADOPT** | T-20 exists and is `[x]`; the `IndexPort` reverse-dependency feed is the open half. |
-| Greenfield stub-fail / impl-pass oracle | Grok §A.3 | `packs` | **ADOPT** | T-19. `adapters/evaluators/suites/oracle_greenfield_webapp.py` exists; the red-then-green *ordering* obligation does not. |
-| Read-before-edit at effect boundary | Grok §A.5 | `agency` | **ADOPT** | T-47 `[PROPOSAL]`. `_completion_inspected_files` is already tracked in session — it is consulted at finish, not at dispatch. Moving the check is a small, well-supported change. |
+| Greenfield stub-fail / impl-pass oracle (Vacuity-Gated) | Grok §A.3, Gem | `packs` | **ADOPT** | T-19. `adapters/evaluators/suites/oracle_greenfield_webapp.py` exists; add red-then-green ordering AND vacuity rejection (suite passing on empty stubs containing only `pass`/`NotImplementedError` is rejected). |
+| Fenced-action dialect recovery & anti-premature finish | Grok §A.1, trial `gf-orders-001` | `adapters`, `agency` | **ADOPT** | **C-11.** Unpack markdown-fenced JSON action blocks in `note` or free-text payloads into candidate proposals; reject unsolicited `finish` proposals when notes contain unparsed tool invocations or when zero mutating effects have executed on an unverified trajectory (T-82). |
+| Greenfield prompt law modernization | Grok §A.4, Plan B | `packs` | **ADOPT** | **C-12.** Purge *"Write ONE file per turn... Do not read or search first"* from `system-prompt.txt`. Replace with normative 3-phase greenfield protocol: scaffold baseline stubs $\to$ red test falsifier $\to$ atomic 2PC commit (T-83a). |
+| Cross-file caller admission (`callers_by_symbol`) | Grok §A.2, Runtime | `runtime`, `agency` | **ADOPT** | **C-13.** Wire `IndexPort.get_callers` into `session._admit_completion` and pass `callers_by_symbol` to `multi_file_completeness.py`, preventing completion when public API signatures change without inspecting dependent call sites (T-83b). |
+| Read-before-edit | Grok §A.5, Opus | `agency`, `packs` | **EXPERIMENT — profile/pack policy** | `_completion_inspected_files` is already tracked. Preserve read-before-edit as prompt guidance and an A/B-able strict policy, not universal prior restraint: a hard dispatch prohibition would repeat the `derive_phase` error by controlling the path instead of the outcome. Security-sensitive profiles may require it explicitly. |
 | Exact-match `str_replace` + AST preflight | Opus (Part 3 §5) | `adapters` | **ADOPT** | AST preflight **already exists** (`transaction.py`). Only the `str_replace` primitive is new. Fold into T-47; **close TLS-04 as mechanism-present**. |
 | Wire `.lda/index.db` behind `IndexPort` | Opus (Part 3 §6) | `adapters` | **ADOPT** | **C-9**: 80,618 relations. Port exists; two adapters exist (`FileRepoIndex`, `InMemoryRepoIndex`); `LdaRepoIndex` is a third implementation of an unchanged protocol. |
-| Prefix-cache breakpoints & telemetry | Opus, Octopus | `agency`, `adapters` | **ADOPT** | `packs/code-default/harness.yaml` already declares `context.config.prefix_freeze: true`; the breakpoint emission and `cache_{read,write}_tokens` ledger fields are the delta. |
-| Sequential / campaign director | Octopus, Grok §B.1 | `runtime` | **STAGE (Wave 5)** | ≡ **OCT-03** + T-31/T-54. Not a new ID. Zero mutating tools; merge by `ExternalVerifier` only. |
+| Context economics, breakpoints & Trailing Goal Echo | Opus, Octopus, Gem | `agency`, `adapters` | **ADOPT** | `packs/code-default/harness.yaml` declares `prefix_freeze: true`; add L3 breakpoint emission, `cache_{read,write}_tokens`, CTRF test distillation (failure-only diffs $\le 1500$ chars), and L5 Trailing Goal Echo for Lost-in-the-Middle mitigation. |
+| Campaign director & Test-Time Compute (TTC) | Octopus, Grok §B.1, Gem | `runtime` | **STAGE (Wave 5)** | ≡ **OCT-03** + T-31/T-54. Zero mutating tools; speculative parallel candidate generation in isolated git worktrees. RTV may allocate tests or rank candidates, but the bound `ExternalVerifier` remains the **sole** merge authority. |
 | CAS mailbox & `CoordinationPlan` | Octopus OCT-01/02 | `domain/topology` | **STAGE (Wave 5)** | ≡ **OCT-01/OCT-02** ≡ T-54. Already `PROPOSED` in `backlog.md §2.10` with the `Σ budget_share ≤ 1000` predicate. |
 | Read-only investigator subagent | Grok §B.2, Octopus | `agency` | **STAGE (Wave 5)** | ≡ T-29/T-53, CMX-06 (`BLOCKED` on CMX-07). Ablation against a qualified control is the gate. |
-| Anti-thrashing FSM | Backlog | `agency` | **STAGE (Wave 4)** | ≡ **ALG-03**, already `PROPOSED` at W-092-4. |
+| Anti-thrashing FSM (Oscillation Circuit Breaker) | Backlog, Gem | `agency` | **STAGE (Wave 4)** | ≡ **ALG-03**, already `PROPOSED` at W-092-4. Operationalized by algebraic trigger: workspace tree digest oscillation $d_t = d_{t-2}$ halts repeating loops and forces an alternative hypothesis. |
 | Native llama.cpp local inference | GPT, Opus | `adapters`, `packs` | **ADOPT** | **C-10**: `harness.yaml` tier 1 still routes `provider: ollama`. This is a live config contradicting a shipped ban. |
 | 9-strategy fuzzy matching cascade | Treatise | `adapters` | **REJECT** | Indentation is syntax in Python/YAML. Silent nesting-level relocation. Loud failure + forced section re-read is strictly superior. |
-| PPR auto-injection into L2 | Treatise | `agency` | **REJECT** | Breaks the frozen L1–L3 prefix (`prefix_freeze: true`) and violates `ports/index.py`'s stated contract: *"a retrieval component that decided what the agent should look at next would be a second policy wearing the word 'index'"* (`A-05`, `AT-01`). |
+| PPR auto-injection into L2 | Treatise | `agency` | **REJECT FORM; RETAIN QUERY-RANKING EXPERIMENT** | Automatic injection breaks the frozen L1–L3 prefix and makes retrieval a second policy. Preserve the useful part as an A/B-able pack/query policy: an agent explicitly calls a `repo.*` tool, optional PPR ranks results *within that request*, and the bounded observation lands in L5. No ranking enters `IndexPort` or the store adapter. |
 | Phased ladder (`derive_phase`) | `vg-code-max-v3` | `agency` | **REJECT** | Forbidding `proc.exec` during inspection breaks fail-to-pass reproduction (T-38). Note: `vg-code-max-v3` is an **experimental** manifest, not a product preset — rejecting it costs nothing on the product path. |
-| Second runtime engines (Chimera / Forge) | historical | `agency` | **REJECT** | **D-02**. T-23 quarantine already `DONE`. |
-| LLM-quorum / evolutionary merge | Octopus ORCH-10 | `runtime` | **REJECT** | Merge verdicts come from compilers and tests, never from votes. |
+| Second runtime engines (Chimera / Forge) | historical, Opus | `agency` | **REJECT ENGINE FORKS; RETAIN STRATEGIES** | **D-02.** T-23 quarantine already `DONE`. Preserve useful mechanisms—failure fingerprints, test-output parsing, trajectory distillation, and search policies—as composable treatments over the one `EpisodeEngine`, then benchmark them. Do not preserve duplicate execution engines. |
+| LLM quorum as merge authority | Octopus ORCH-10 | `runtime` | **REJECT** | Merge verdicts come from compilers and bound exterior tests, never model votes. |
+| Evolutionary / tournament candidate search | Opus, Octopus, Gem | `runtime` | **STAGE (Wave 5)** | Retain opt-in candidate generation for packages with numeric exterior evaluators. Votes or RTV may schedule evaluation and rank candidates; they never authorize merge or substitute for `ExternalVerifier`. |
 | Tree-sitter / SBFL localization | Backlog | `adapters` | **PARK** | ≡ TLS-03 / ALG-02, already `DEFERRED` to Post-CMX-07. `ports/index.py` states tree-sitter can replace the scan body later **without the port moving** — parking costs no future rework. |
 | AST mutation verification | Backlog | `adapters` | **PARK** | ≡ TLS-06 / VER-02 / T-39, already `[PROPOSAL]`. |
+
+### 2.1 Opus preservation register — retain hypotheses without retaining sprawl
+
+The matrix above decides immediate architecture; it must not silently erase viable treatments that
+have not yet received a fair comparison. **Preserve the idea, not necessarily its current fork:**
+experimental variants belong in small declarative overlays or replaceable adapters over the one
+runtime, never in duplicate engines or copied manifests. `PRESERVE` below is not implementation
+authorization and creates no new package ID; runway reconciliation MUST map each item to an existing
+owner before work begins.
+
+Parallel agents may build independent treatments, but empirical attribution stays serial: freeze one
+control subject and suite first, vary one treatment at a time, and publish positive, negative, or
+undeterminable results. A losing treatment may be retired only after its configuration digest,
+trajectory evidence, and falsifier remain reproducible.
+
+| Viable Opus idea family | Disposition | Preservation boundary and decision gate |
+|---|---|---|
+| Proposal-protocol convergence | **PRESERVE — P0 verify/fix** | Unify `dialect.normalize_response` and `ProposalTranslator`; either declare `payloadArgument` or remove the dead recovery branch; add native/fenced/text must-fail vectors and an alert when correct tool-shaped text degrades to `finish` with no action. |
+| Workspace bootstrap and greenfield completion | **PRESERVE — P0 verify/fix** | `vanguard init` must leave workspace discovery and Git state usable without an ambient environment variable. Preserve a declared no-test greenfield admission shape, but only after `.pyc`/cache churn and vacuous stub passes are excluded. |
+| Effect-budget and evidence accounting | **PRESERVE — P0 verify/fix** | Reproduce Opus Defect M: `BudgetReserved` must not be empty and `BudgetCommitted` must not settle with an unknown sentinel when a dimension is knowable. Keep effect settlement distinct from preset-ceiling passthrough. Live cost provenance must be explicit. |
+| Honest comparison instrument | **PRESERVE — prerequisite to optimization claims** | One frozen content-addressed suite, append-only result rows, separate `terminal` and `disposition`, mandatory provenance/model reality/cost provenance, oracle-tamper digest, and paired comparison using the existing statistics. No rate from `n=1`; mocks and dry runs never become capability evidence. |
+| Broader tool surface and concurrency | **PRESERVE — benchmark treatments** | Bounded `glob`/list/windowed read/ripgrep/diff/lint/typecheck, sandboxed shell and background-process tools, `todo_write`, and parallel disjoint observations. Keep the argv allowlist as a restrictive profile. Each verb needs a selector, output bound, and must-fail perimeter test. |
+| Editing alternatives | **PRESERVE — benchmark treatments** | Exact `str_replace` is the preferred treatment; also preserve atomic `multi_edit`, current-region feedback after rejection, unified diff as compatibility input, greenfield-only whole-file write, and narrow structural `ast_patch`. Unsafe fuzzy strategies remain rejected. |
+| Retrieval alternatives | **PRESERVE — benchmark treatments** | Keep incremental changed-path/reverse-closure indexing, epoch-bound index identity, and optional PPR ranking behind agent-issued L5 queries. Code-vector retrieval stays rejected; FTS/semantic retrieval may still be tested for natural-language memory. |
+| Context economy and long-horizon state | **PRESERVE — post-control treatments** | Digest-addressable result distillation with `expand`, prefix-stability test before cache controls, salience-ordered L5, pinned working set including `falsified`, ledger-derived summarize-on-compact, `ContextCompacted` receipts, tool-result cache, and rolling handoff with the original brief verbatim. Gem's CTRF and Trailing Goal Echo are compatible treatments within this family. |
+| Memory, skills, and subagents | **PRESERVE — post-control treatments** | Load repository instructions as stated constraints; retain a progressive-disclosure skill catalogue, ledger-derived `EpisodeMemory`, and `spawn` primarily for context isolation. Learning promotion remains gated on held-out evaluation and rollback. |
+| Composition and supervision | **PRESERVE — post-control treatments** | Preserve manifest delta/inheritance semantics and shared declarations, evidence-gated fixed topologies, and a restartable ledger-tailing supervisor. Useful Forge/Chimera mechanisms migrate behind canonical interfaces; their engines do not. |
+| Model and local-inference experiments | **PRESERVE — capability-bound** | Report frontier-model capability ceiling separately from cheap-model economy; retain free-tier smoke testing; qualify native profiles per route. Native local inference means standalone llama.cpp with the required chat/tool template and hardware backend—not an Ollama compatibility route. |
+| Replay research and product smoke | **PRESERVE — instrument-dependent** | Retain replay-with-substitution as an ablation method and a real end-to-end coding smoke test. Neither a cassette nor a single live task authorizes a product rate. |
 
 ---
 
@@ -371,8 +421,8 @@ a synthesis that names sprawl as a risk does not open six rows where two are new
 
 | ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Reconciliation | Description & Acceptance Gate |
 |---|---|---|---|---|---|---|---|
-| **HAR-01** | Harness Precondition Repair (deaf-mute agent) | `domain` / `agency` / `runtime` / `adapters` | Lane A | `APPROVED` | MS-TRUTH (precondition) | **New.** No existing T-id covers native tool-call style, approval-policy passthrough, or `finish` declaration. Extends DIALECT (T-21, T-22). Precondition of **CMX-09**; does not subsume it. Adds T-69–T-74. | **Precondition.** No settlement gate is reachable until the agent can call tools, write, and finish. (1) Populate `domain/models/profile.py::_PROFILES` with `ToolCallStyle.NATIVE` for every production model (today: two entries, both non-NATIVE, everything else falls through to `FENCED_JSON`). (2) `runtime/session.py:656` reads `components.approval_policy` instead of the literal `"low"`. (3) Declare `finish-tool.json` in `vg-code-{default,fast,balanced,max}`. (4) Two-axis settlement contract (**T-72**, see spec §3). (5) Purge the `provider: ollama` tier-1 route and resolve `$FRONTIER` in `packs/code-default/harness.yaml`. <br/>*Falsifier*: a `Mode.BENCHMARK` run dispatches native `patch.apply` and `finish` with no `denied_ask_fail_closed`; `grep -rn "ollama" packs/` is empty; a run with `terminal_status=abandoned` and `disposition=passed` round-trips through the ledger without contradiction. |
-| **IDX-01** | LDA-Backed Repository Intelligence | `adapters` / `agency` | Lane B | `APPROVED` | MS-SEE | **New adapter only.** `IndexPort` already exists (`ports/index.py`) and is **not modified**. Third implementation beside `FileRepoIndex` / `InMemoryRepoIndex`. Closes the CMX-02 `PARTIAL` retrieval half; **supersedes T-46** (`[PROPOSAL]` ranking) — ranking stays out of the port. Adds T-75–T-77. | **Intelligence.** `LdaRepoIndex` in `adapters/stores/lda_index.py` reading `.lda/index.db` (**80,618** relations, 10,580 symbols, 3,372 files). Expose `repo.{search_symbols,get_callers,get_dependencies,get_tests}` as bounded observations into **L5 only**. L1–L3 stay byte-identical (`harness.yaml` already declares `prefix_freeze: true`). Emit provider cache breakpoints at the L3 boundary; record `cache_read_tokens` / `cache_write_tokens`. <br/>*Falsifier*: `repo.get_callers` over a 40-file blast radius leaves the L1–L3 digest **bit-identical** across 10 turns; ranking logic in `adapters/stores/lda_index.py` fails review by inspection (`ports/index.py`, `A-05`). |
+| **HAR-01** | Harness Precondition Repair (deaf-mute agent) | `domain` / `agency` / `runtime` / `adapters` | Lane A | `APPROVED` | MS-TRUTH (precondition) | **New.** No existing T-id covers native tool-call style, approval-policy passthrough, or `finish` declaration. Extends DIALECT (T-21, T-22). Precondition of **CMX-09**; does not subsume it. Adds T-69–T-74. | **Precondition.** No settlement gate is reachable until the agent can call tools, write, and finish. (1) Add explicit `ToolCallStyle.NATIVE` profiles only for production routes whose native-tool support is verified; unverified routes preserve the degradation chain. (2) `runtime/session.py:656` reads `components.approval_policy` instead of the literal `"low"`. (3) Declare `finish-tool.json` in `vg-code-{default,fast,balanced,max}`. (4) Two-axis settlement contract (**T-72**, see spec §3). (5) Purge the `provider: ollama` tier-1 route and resolve `$FRONTIER` in `packs/code-default/harness.yaml`. <br/>*Falsifier*: each native-declared route dispatches `patch.apply` and `finish` in `Mode.BENCHMARK` with no protocol degradation or `denied_ask_fail_closed`; an unverified route is never silently promoted to `NATIVE`; `grep -rn "ollama" packs/` is empty; `terminal_status=abandoned` plus `disposition=passed` round-trips without contradiction. |
+| **IDX-01** | LDA-Backed Repository Intelligence | `adapters` / `agency` | Lane B | `APPROVED` | MS-SEE | **New adapter only.** `IndexPort` already exists (`ports/index.py`) and is **not modified**. Third implementation beside `FileRepoIndex` / `InMemoryRepoIndex`. Closes the CMX-02 `PARTIAL` retrieval half; **narrows T-46** to optional query-local ranking in pack policy. Adds T-75–T-77. | **Intelligence.** `LdaRepoIndex` in `adapters/stores/lda_index.py` reads `.lda/index.db` (**80,618** relations, 10,580 symbols, 3,372 files) and returns unranked value objects. Expose `repo.{search_symbols,get_callers,get_dependencies,get_tests}` as bounded observations into **L5 only**. An A/B-able pack policy may PPR-rank results inside an explicit request; no ranking enters `IndexPort`, the adapter, or L1–L3. Emit provider cache breakpoints at the L3 boundary and record cache tokens. |
 ```
 
 ### 4.2 Lifecycle amendments to existing rows — apply in place
@@ -389,9 +439,9 @@ a synthesis that names sprawl as a risk does not open six rows where two are new
 ### 4.3 Package index — replace §3 rows
 
 ```markdown
-| **TRUTH** | CMX-10A, W-092-F2, HAR-01, *SET-01* | T-04–T-08, T-42, T-38, T-23, T-69–T-74 | MS-TRUTH | T-23/T-38/T-42 `DONE`; T-08 landed `8637db55`; T-04/T-05/T-07 open; **T-18 REOPENED** (shield unwired) |
-| **SEE** | CMX-11, PRG-01, W-092-F4, IDX-01 | T-14–T-16, T-36–T-37, T-45, T-75–T-77 | MS-SEE | T-46 **superseded by IDX-01**: ranking stays out of `IndexPort` |
-| **CHANGE** | TXN-01, SHD-01, TLS-04/05, *EDT-01* | T-17–T-20, T-47–T-49 | MS-CHANGE | T-17 `DONE`; TLS-04 mechanism present in `transaction.py`; **T-18 REOPENED**; `str_replace` folds into T-47 |
+| **TRUTH** | CMX-10A, W-092-F2, HAR-01, *SET-01* | T-04–T-08, T-42, T-38, T-23, T-69–T-74, T-81, T-82 | MS-TRUTH | T-23/T-38/T-42 `DONE`; T-08 landed `8637db55`; T-04/T-05/T-07 open; **T-18 REOPENED** (shield unwired); T-82 dialect recovery |
+| **SEE** | CMX-11, PRG-01, W-092-F4, IDX-01 | T-14–T-16, T-36–T-37, T-45, T-75–T-77 | MS-SEE | T-46 **narrowed**: optional query-local ranking stays in pack policy, never `IndexPort` or the adapter |
+| **CHANGE** | TXN-01, SHD-01, TLS-04/05, *EDT-01* | T-17–T-20, T-47–T-49, T-78, T-83 | MS-CHANGE | T-17 `DONE`; TLS-04 mechanism present in `transaction.py`; **T-18 REOPENED**; `str_replace` folds into T-47; T-83 callers admission |
 | **CONTROL** | CMX-07, W-092-F5, CMX-01, *PRF-01* | T-26–T-27, T-51–T-52, T-79 | MS-CONTROL | Preset catalog unification is CMX-01, not a new package |
 | **CAMPAIGN** | OCT-01…04, HYD-01/02, *DIR-01* | T-31, T-54–T-55, T-34 | MS-CAMPAIGN / MS-HYDRA | `DIR-01` ≡ **OCT-03**; director is a runtime client with zero mutating tools |
 ```
@@ -413,7 +463,7 @@ Every path verified present in this tree. `depends_on` edges live here, per §3'
 
 | T-id | Title | Package | `depends_on` | Exact target | Executable falsifier |
 |---|---|---|---|---|---|
-| **T-69** | Native tool-call profiles for production models | HAR-01 | — | `domain/models/profile.py::_PROFILES` | `test/contracts/test_model_profiles.py`: every registered production id resolves `tool_call_style is ToolCallStyle.NATIVE`; unknown ids still degrade `NATIVE→JSON_SCHEMA→FENCED_JSON→TEXT_GRAMMAR` via `degraded()`. |
+| **T-69** | Capability-bound native tool-call profiles | HAR-01 | — | `domain/models/profile.py::_PROFILES`; model registry capability declarations | `test/contracts/test_model_profiles.py`: every route declared native resolves `ToolCallStyle.NATIVE` and passes a provider-shape vector; unverified and unknown ids are not silently promoted and still degrade `NATIVE→JSON_SCHEMA→FENCED_JSON→TEXT_GRAMMAR` via `degraded()`. |
 | **T-70** | Approval threshold from declared `approval_policy` | HAR-01 | T-69 | `runtime/session.py:656` | `test/runtime/test_approval_passthrough.py`: with `{"threshold":"standard"}` declared, `patch.apply` (medium) and `proc.exec` (high) dispatch in `Mode.BENCHMARK` with zero `denied_ask_fail_closed`; the literal `"low"` is absent from `session.py`. |
 | **T-70a** | Reproduce mid-stream SSE abort before flag change | HAR-01 | — | `adapters/models/openrouter.py::_execute_stream_transport` | `test/adapters/test_openrouter_stream_abort.py`: a truncated SSE chunk after ≥1 delta yields a **reproducing** failure first. Flag changes only after red. Closes as `no_defect` if it will not reproduce. |
 | **T-71** | Declare `finish-tool.json` in the four product presets | HAR-01 | — | `agency/manifests/vg-code-{default,fast,balanced,max}/` | `test/contracts/test_manifest_components.py`: each product preset's `components.tools` contains a `finish` schema; every declared path resolves; every `kind` key is in `kinds.json`. |
@@ -422,9 +472,13 @@ Every path verified present in this tree. `depends_on` edges live here, per §3'
 | **T-74** | Workspace `.pyc` hygiene | HAR-01 | — | `adapters/environment/sandboxed.py` (`PYTHONPYCACHEPREFIX` → tmpfs) | `test/adapters/test_workspace_pycache.py`: after a `pytest` run under a sandboxed env, `find <ws> -name "*.pyc"` is empty and the workspace digest is unchanged from pre-run. |
 | **T-75** | `LdaRepoIndex` adapter | IDX-01 | — | **new** `adapters/stores/lda_index.py` | `test/contracts/test_lda_repo_index.py`: satisfies `IndexPort` structurally (`runtime_checkable`); returns value-only `Symbol`/`DependencyEdge`/`TestAssociation`; a missing/stale `.lda/index.db` returns a deterministic `Result.fail`, never a partial map (**T-45** fallback preserved). |
 | **T-76** | `repo.*` observation tools bound into L5 | IDX-01 | T-75 | `packs/code-default/toolkits/repo_map.py`; `packs/code-default/plugins/index.yaml`; `adapters/bindings/code.py` | `test/agency/test_l5_only_observations.py`: calling all four `repo.*` verbs leaves the L1–L3 digest bit-identical across 10 turns; observations appear only in L5. |
-| **T-77** | Prefix-cache breakpoints + cache-token telemetry | IDX-01 | T-76 | `agency/context/compiler.py`; `runtime/ledger_emitter.py` | `test/agency/test_cache_breakpoints.py`: a breakpoint is emitted at the L3 boundary; `cache_read_tokens`/`cache_write_tokens` are recorded per turn; turn ≥ 2 cache-hit rate exceeds 85% on the fixture. |
+| **T-77** | Context economics: cache breakpoints, CTRF distillation & Trailing Goal Echo | IDX-01 | T-76 | `agency/context/compiler.py`; `agency/context/compaction.py`; `runtime/ledger_emitter.py` | `test/agency/test_cache_breakpoints.py`: a breakpoint is emitted at the L3 boundary; `cache_read_tokens`/`cache_write_tokens` are recorded per turn; turn ≥ 2 cache-hit rate exceeds 85% on the fixture; test output is distilled into CTRF format (passing runs omitted, failure diffs capped at 1,500 chars); compiler injects a compact Trailing Goal Echo at the tail of L5 to mitigate Lost-in-the-Middle attention decay on 40–120 turn runs. |
 | **T-78** | Exact-match `str_replace` primitive | CHANGE (amends **T-47**) | T-17 `DONE` | `adapters/environment/git.py`; routed through `transaction.py::AtomicMultiFileTransactionManager` | `test/adapters/test_str_replace_exact.py`: a non-unique preimage fails closed with typed `PATCH_PREIMAGE_MISMATCH`; a syntax error in file 4 of 5 leaves all 5 byte-identical (`tree_hash_before == tree_hash_after`); no fuzzy/indentation relaxation path exists. |
 | **T-79** | Unify the preset catalog on `presets.json` | CMX-01 | T-71 | `apps/coding_max/facade.py::_manifest`; `packs/code-default/load.py`; `agency/manifests/vg-code-{fast,balanced,max}/manifest.json` | `test/apps/test_preset_budgets.py`: `fast/balanced/max` yield **distinct** `EpisodeStarted.budgetCeiling` values matching `presets.json` exactly (`50000/150000/400000` µUSD; `8/20/40` turns); `max_turns` is never a Python default in the facade; `vg-code-fast` halts at turn 8 with `BUDGET_EXHAUSTED`. |
+| **T-80** | Anti-thrashing workspace oscillation circuit breaker | CONTROL (ALG-03) | T-78 | `agency/episode/engine.py`; `packs/code-default/middleware/` | `test/agency/test_anti_thrashing_circuit_breaker.py`: if workspace file-tree digest $d_t == d_{t-2}$, engine trips circuit breaker before dispatching proposal, returning typed `OSCILLATION_CIRCUIT_BREAKER` diagnostic forcing hypothesis change. |
+| **T-81** | Greenfield oracle vacuity rejection check | TRUTH (amends **T-19**) | T-19 | `packs/code-default/oracles/gate.py` | `test/packs/test_greenfield_vacuity_rejection.py`: greenfield test suite executed against empty stubs (containing only `pass` or `raise NotImplementedError`) that returns 0 failures is rejected with typed `VACUOUS_ORACLE_REJECTED`. |
+| **T-82** | Fenced JSON action unwrapping & anti-premature finish | HAR-01 / TRUTH | T-71 | `adapters/models/invocation.py`; `adapters/models/dialect.py`; `agency/admission.py` | `test/adapters/test_dialect_fenced_action_recovery.py`: when model output carries `action: null` but `note` contains a markdown-fenced tool call (e.g. ````json {"action": "read", "path": "foo.py"} ````), dialect parser unpacks and promotes it to a typed candidate proposal; an unsolicited `finish` proposal when no mutations/verifications occurred or when notes contain unparsed tool invocations is rejected with typed `PREMATURE_FINISH_REJECTED`. |
+| **T-83** | Greenfield prompt modernization & `callers_by_symbol` completion admission | CHANGE / TRUTH | T-75, T-78 | `packs/code-default/system-prompt.txt`; `runtime/session.py::_admit_completion`; `agency/multi_file_completeness.py` | `test/runtime/test_multi_file_callers_admission.py`: `grep -rn "Do not read or search first" packs/` is empty; modifying a public symbol in `file_a.py` without inspecting/updating callers in `file_b.py` causes `_admit_completion` (fed by `IndexPort.get_callers`) to reject completion with typed `UNINSPECTED_CALLERS_REMAINING`. |
 
 ---
 
@@ -481,11 +535,11 @@ vanguard/packages/agency/manifests/
 
 | ID | TARGET | Acceptance | Status | Evidence |
 |---|---|---|---|---|
-| **MS-TRUTH** | No `completed` without bound verification; no invented counts; one gate; **both settlement axes recorded, neither derived from the other** | T-42/T-38/T-23 landed; T-08 landed `8637db55`. Open: **T-04** (remove `ADMISSION_GATE_EXEMPT`, live at `session.py:134`, under RF-25 successor baseline), **T-05**, **T-07** (typed verification subject), **T-18 REOPENED** (`TestTamperShield` has zero production callers → wire into `session._admit_completion`), **T-72** (two-axis settlement contract). Gated on **HAR-01** preconditions T-69–T-71. **Falsifier:** a run with zero patches or tampered tests cannot earn `passed`; greenfield passing on `pass`/`NotImplementedError` is rejected; **a run may legitimately record `terminal_status=abandoned` with `disposition=passed`, and the ledger replays it without contradiction** — the disposition axis is never derived from the termination axis, nor the reverse (`ICD §3`, `VG-03 §6.2`). | `OPEN` | No-session slice `63b77116`; session parser + `ParsedTestOutput.runner` `8637db55`. **T-18 reopened 2026-09-04: mechanism present at `runtime/governance/tamper_shield.py`, unreferenced outside its own test.** |
-| **MS-SEE** | Epoch-bound packets; omissions explicit; one `ContextCompiler`; cache-stable prefix; port-backed intelligence | T-14–T-16, T-36, T-37, T-45 MECHANISM. Adds: `LdaRepoIndex` backs the **unchanged** `IndexPort` over `.lda/index.db` (**80,618** relations); `repo.*` tools return bounded observations into **L5 only**; provider cache breakpoints at the L3 boundary with `cache_read_tokens` recorded. **T-46 superseded by IDX-01** — ranking is pack policy, never the index (`ports/index.py`, `A-05`). **Falsifier:** `repo.get_callers` leaves the L1–L3 digest bit-identical across 10 turns; turn ≥ 2 cache-hit rate > 85%; no ranking logic in `adapters/stores/lda_index.py`. | `OPEN` (gated on **IDX-01**) | `587db91a`, `33dc7c33`, `2a4cdaad`, `179f5616`, `81b7b572`, `c7995195`. One `ContextCompiler`; omissions are a ledger; no-index fallback documented. |
-| **MS-CHANGE** | Multi-file change closure; 2PC in adapters; exact edit primitive; **zero kernel AST** | T-17 `DONE`; T-19/T-20 MECHANISM; **T-18 REOPENED**. T-47 amended by **T-78** (exact `str_replace`, unique preimage, trimmed-EOL only — **no fuzzy cascade**). **TLS-04 closes as mechanism-present**: `ast.parse` preflight already lives in `adapters/environment/transaction.py` and aborts before durable flush. Read-before-edit moves from finish to `patch.apply` dispatch. **Falsifier:** a syntax error in file N of M leaves all M byte-identical (`tree_hash_before == tree_hash_after`); a patch to an uninspected file is rejected at dispatch; `grep -c "import ast" vanguard/packages/kernel/*.py` is **0**; `check_tcb_budget.py` reports **1386 unchanged**. | `OPEN` | `5c9870f0`, `094fa899`, `db935138`. Dialect tickets do not close this gate. |
-| **MS-CONTROL** | One `EpisodeEngine` coding path; **one preset catalog**; true budget enforcement; Forge/Chimera excluded from product scores | T-23 `DONE` (≠ qualification). Open: T-26/T-27, T-51/T-52, **T-79**. `apps/coding_max/facade.py` must select from **`packs/code-default/presets.json`** (`aether.code-preset/1`: fast `$0.05`/8t/16k, balanced `$0.15`/20t/40k, max `$0.40`/40t/96k) rather than routing to three byte-identical alias manifests that share `vg-code-default/budget-policy.json` — a policy carrying **no cost and no turn dimension**. Qualify `vg-code-balanced` on the frozen multi-class canary (n ≥ 30, Wilson LB ≥ 0.40). **Falsifier:** the three presets emit **distinct** `EpisodeStarted.budgetCeiling` values matching `presets.json` exactly; `vg-code-fast` halts at turn 8 with `BUDGET_EXHAUSTED`; `max_turns` is not a Python default in the facade; canary runs execute on the exact frozen candidate SHA. **No specialist or director lift claim is authorized before this gate closes.** | `OPEN` (gated on **CMX-01**/T-79, T-26/T-27) | Two disjoint preset catalogs confirmed 2026-09-04; the product path reads the undifferentiated one. |
-| **MS-CAMPAIGN** | Outer-loop director as a runtime client; isolated worktrees; CAS mailbox; merge by exterior tests | T-31, T-54, T-34. **`OCT-03` is the canonical row** (draft `DIR-01` is an alias). Director holds **zero** mutating verbs; child episodes run in isolated git worktrees under attenuated budgets; roles exchange only content-addressed digests (OCT-01); merge is decided by `ExternalVerifier` test verdict, **never** LLM quorum. **Hard dependency: `MS-CONTROL` closed.** **Falsifier:** a crash at node K resumes at K+1 with no duplicate effects; a failing child cannot mutate the parent tree. | `OPEN` `[PROPOSAL]` (gated on **MS-CONTROL**) | Staged to Wave 5 per **D-03**: a director dispatching unqualified inner episodes multiplies false completions across an expensive DAG. |
+| **MS-TRUTH** | No `completed` without bound verification; no invented counts; one gate; **both settlement axes recorded, neither derived from the other**; greenfield vacuity rejection; anti-premature exit | T-42/T-38/T-23 landed; T-08 landed `8637db55`. Open: **T-04** (remove `ADMISSION_GATE_EXEMPT`, live at `session.py:134`, under RF-25 successor baseline), **T-05**, **T-07** (typed verification subject), **T-18 REOPENED** (`TestTamperShield` has zero production callers → wire into `session._admit_completion`), **T-72** (two-axis settlement contract), **T-81** (greenfield vacuity rejection), **T-82** (dialect fenced-action recovery & anti-premature finish). Gated on **HAR-01** preconditions T-69–T-71. **Falsifier:** a run with zero patches or tampered tests cannot earn `passed`; greenfield passing on `pass`/`NotImplementedError` is rejected via **T-81**; unsolicited `finish` proposals with 0 mutations or unparsed note actions are rejected via **T-82**; **a run may legitimately record `terminal_status=abandoned` with `disposition=passed`, and the ledger replays it without contradiction** — the disposition axis is never derived from the termination axis, nor the reverse (`ICD §3`, `VG-03 §6.2`). | `OPEN` | No-session slice `63b77116`; session parser + `ParsedTestOutput.runner` `8637db55`. **T-18 reopened 2026-09-04: mechanism present at `runtime/governance/tamper_shield.py`, unreferenced outside its own test.** |
+| **MS-SEE** | Epoch-bound packets; omissions explicit; one `ContextCompiler`; cache-stable prefix; CTRF distillation; Trailing Goal Echo; port-backed intelligence | T-14–T-16, T-36, T-37, T-45 MECHANISM. Adds: `LdaRepoIndex` backs the **unchanged** `IndexPort` over `.lda/index.db` (**80,618** relations); `repo.*` tools return bounded observations into **L5 only**; provider cache breakpoints at the L3 boundary with `cache_read_tokens` recorded; test tool receipts parsed into CTRF (passing runs omitted, failure traces capped $\le 1500$ chars); `ContextCompiler` emits Trailing Goal Echo at tail of L5 (**T-77**). **T-46 is narrowed, not erased:** optional PPR ranking may be A/B-tested inside an agent-issued query in pack policy, never in `IndexPort`, the adapter, or L1–L3. **Falsifier:** `repo.get_callers` leaves the L1–L3 digest bit-identical across 10 turns; turn ≥ 2 cache-hit rate > 85%; compiler includes trailing goal echo; no ranking logic exists in `adapters/stores/lda_index.py`. | `OPEN` (gated on **IDX-01**) | `587db91a`, `33dc7c33`, `2a4cdaad`, `179f5616`, `81b7b572`, `c7995195`. One `ContextCompiler`; omissions are a ledger; no-index fallback documented. |
+| **MS-CHANGE** | Multi-file change closure; 2PC in adapters; exact edit primitive; reverse-caller admission; **zero kernel AST** | T-17 `DONE`; T-19/T-20 MECHANISM; **T-18 REOPENED**; **T-83** (greenfield prompt modernization & caller admission). T-47 amended by **T-78** (exact `str_replace`, unique preimage, trimmed-EOL only — **no fuzzy cascade**). **TLS-04 closes as mechanism-present**: `ast.parse` preflight already lives in `adapters/environment/transaction.py` and aborts before durable flush. Read-before-edit remains prompt guidance plus an A/B-able strict profile, not a universal dispatch ladder. **Falsifier:** a syntax error in file N of M leaves all M byte-identical (`tree_hash_before == tree_hash_after`); public API signature changes reject completion if dependent call sites remain uninspected (**T-83b**); greenfield prompts contain zero *"Do not read or search first"* bans (**T-83a**); strict-policy and control runs differ only by the declared read-before-edit policy; `grep -c "import ast" vanguard/packages/kernel/*.py` is **0**; `check_tcb_budget.py` reports **1386 unchanged**. | `OPEN` | `5c9870f0`, `094fa899`, `db935138`. Dialect tickets do not close this gate. |
+| **MS-CONTROL** | One `EpisodeEngine` coding path; **one preset catalog**; true budget enforcement; Forge/Chimera excluded from product scores | T-23 `DONE` (≠ qualification). Open: T-26/T-27, T-51/T-52, **T-79**. `apps/coding_max/facade.py` must select from **`packs/code-default/presets.json`** (`aether.code-preset/1`: fast `$0.05`/8t/16k, balanced `$0.15`/20t/40k, max `$0.40`/40t/96k) rather than routing to three byte-identical alias manifests that share `vg-code-default/budget-policy.json` — a policy carrying **no cost and no turn dimension**. Qualify `vg-code-balanced` on the frozen multi-class canary (n ≥ 30, Wilson LB ≥ 0.40). **Falsifier:** the three presets emit **distinct** `EpisodeStarted.budgetCeiling` values matching `presets.json` exactly; `vg-code-fast` halts at turn 8 with `BUDGET_EXHAUSTED`; `max_turns` is not a Python default in the facade; canary runs execute on the exact frozen candidate SHA. **T-80 is a post-control treatment and does not gate this baseline. No specialist or director lift claim is authorized before this gate closes.** | `OPEN` (gated on **CMX-01**/T-79, T-26/T-27) | Two disjoint preset catalogs confirmed 2026-09-04; the product path reads the undifferentiated one. |
+| **MS-CAMPAIGN** | Outer-loop director as a runtime client; isolated worktrees; CAS mailbox; test-time compute & Recursive Tournament Voting; merge by exterior tests | T-31, T-54, T-34. **`OCT-03` is the canonical row** (draft `DIR-01` is an alias). Director holds **zero** mutating verbs; child episodes run in isolated git worktrees under attenuated budgets; RTV may allocate evaluation and rank speculative candidates; roles exchange only content-addressed digests (OCT-01). Merge is decided solely by the bound `ExternalVerifier` test verdict, **never** LLM quorum or tournament votes. **Hard dependency: `MS-CONTROL` closed.** **Falsifier:** a crash at node K resumes at K+1 with no duplicate effects; a failing child cannot mutate the parent tree; changing an RTV score cannot admit a candidate whose exterior verdict failed. | `OPEN` `[PROPOSAL]` (gated on **MS-CONTROL**) | Staged to Wave 5 per **D-03**: a director dispatching unqualified inner episodes multiplies false completions across an expensive DAG. |
 
 ---
 
@@ -495,76 +549,95 @@ Every path below exists in this tree unless marked **`[NEW]`**. Lane A and Lane 
 
 ```mermaid
 graph TD
-    W1["Wave 1 — Settlement & Signal Truth<br/>HAR-01 · T-04/05/07 · T-18 REOPENED"] --> W2["Wave 2 — Edit Primitive & Retrieval<br/>T-78 · IDX-01"]
-    W1 --> W3["Wave 3 — Cache Integrity & Greenfield<br/>T-74 · T-77 · T-19"]
-    W2 --> W4["Wave 4 — Control Baseline & Presets<br/>CMX-01/T-79 · MS-CONTROL canary"]
-    W3 --> W4
-    W4 --> W5["Wave 5 — Outer Director<br/>OCT-01..04 · post-MS-CONTROL"]
+    W1["Wave 1 — Settlement & Signal Truth<br/>HAR-01 · T-04/05/07 · T-18 REOPENED"] --> W2["Wave 2 — Frozen Control & Presets<br/>CMX-01/T-79 · honest instrument"]
+    W2 --> W3["Wave 3 — Edit & Retrieval Treatments<br/>T-78 · IDX-01"]
+    W3 --> W4["Wave 4 — Context & Reliability Treatments<br/>T-77 · T-80"]
+    W2 --> W5["Wave 5 — Outer Director & TTC<br/>OCT-01..04 · post-MS-CONTROL"]
 ```
 
 ### Wave 1 — Settlement & Signal Truth (P0)
 
 *Mission:* make the agent able to call tools, write, and finish — then hold it to the truth on **both** axes.
-*Packages:* HAR-01 (T-69–T-74); TRUTH (T-04, T-05, T-07, T-18 `REOPENED`).
+*Packages:* HAR-01 (T-69–T-74, T-82); TRUTH (T-04, T-05, T-07, T-18 `REOPENED`, T-81, T-83).
 
 | Lane A (build) | Lane B (audit & falsifiers) |
 |---|---|
 | `domain/models/profile.py` — populate `_PROFILES` NATIVE (T-69) | **`[NEW]`** `test/contracts/test_model_profiles.py` |
 | **`[NEW]`** `domain/evidence/disposition.py` (T-72) | **`[NEW]`** `test/contracts/test_settlement_disposition.py` |
 | `domain/evidence/__init__.py` — export surface | **`[NEW]`** `test/runtime/test_approval_passthrough.py` |
-| `runtime/session.py` — `:134` exempt set (T-04); `:656` approval (T-70); `:1655` `_admit_completion` tamper wiring (T-18) | `test/runtime/test_observed_test_counts.py` — update the frozen `ADMISSION_GATE_EXEMPT` assertion at `:50` |
+| `runtime/session.py` — `:134` exempt set (T-04); `:656` approval (T-70); `:1655` `_admit_completion` tamper wiring (T-18); caller admission (T-83b) | `test/runtime/test_observed_test_counts.py` — update the frozen `ADMISSION_GATE_EXEMPT` assertion at `:50` |
 | `agency/manifests/vg-code-{default,fast,balanced,max}/` + **`[NEW]`** `vg-code-default/finish-tool.json` (T-71) | **`[NEW]`** `test/contracts/test_manifest_components.py` (§5.3) |
 | `packs/code-default/harness.yaml` — purge `ollama`, resolve `$FRONTIER` | **`[NEW]`** `test/runtime/test_effect_started_singleton.py` (T-73) |
 | `runtime/ledger_emitter.py` — `VerdictRecorded` settlement payload | `benchmarks/protocols.py` — `RESULT_DISPOSITIONS` → `TaskDisposition` |
+| `adapters/models/invocation.py` + `dialect.py` — converge protocols & recover fenced JSON notes (T-82) | **`[NEW]`** `test/adapters/test_dialect_fenced_action_recovery.py` (T-82) |
+| `packs/code-default/system-prompt.txt` — deconflict greenfield prompt (T-83a) | **`[NEW]`** `test/runtime/test_multi_file_callers_admission.py` (T-83) |
 | | **`[NEW]`** `test/adapters/test_openrouter_stream_abort.py` (T-70a, reproduce-first) |
+| `runtime/cli.py::cmd_init` — write resolvable workspace state and initialize Git when absent | fresh `vanguard init` reaches `proc.exec` without ambient `AETHER_WORKSPACE_ROOT` |
+| `adapters/environment/sandboxed.py` — move `.pyc` output outside workspace (T-74) | **`[NEW]`** `test/adapters/test_workspace_pycache.py` |
+| `packs/code-default/oracles/gate.py` — red/green and vacuity checks (T-19/T-81) | **`[NEW]`** `test/packs/test_greenfield_vacuity_rejection.py` |
+| effect-budget binding — reproduce before choosing a fix boundary | a known reservation never emits `{}` or an unexplained `-1` settlement |
 
-**Collision note:** `runtime/session.py` carries four Wave 1 edits at four distinct sites (134, 656, 1655, verification-subject binding). Lane A serializes them; Lane B touches the file only through `test/`.
+**Collision note:** `runtime/session.py` carries four Wave 1 edits at four distinct sites (134, 656, 1655, verification-subject binding). Lane A serializes them; Lane B touches the file only through `test/`. The three added Opus precondition checks MUST be reconciled to existing runway owners before promotion; they do not silently mint another package.
 
-### Wave 2 — Edit Primitive & Retrieval (P1)
+### Wave 2 — Frozen Control, Honest Instrument & Preset Unification (P0)
+
+*Mission:* establish the shared subject against which all optional treatments are evaluated. This
+precedes edit, retrieval, context, topology, and TTC claims. Independent agents may build those
+treatments in parallel, but their qualification waits for this control.
+
+| Lane A (product control) | Lane B (measurement contract) |
+|---|---|
+| `apps/coding_max/facade.py` — select from `presets.json`; drop the `max_turns=40` default (T-79) | `benchmarks/` — freeze the ≥30-task multi-class canary (T-51) with `suite_digest` |
+| `packs/code-default/load.py` — expose the preset overlay on the product path | `benchmarks/protocols.py` — separate `terminal`/`disposition`; require provenance, `model_real`, cost provenance, and explicit missingness |
+| `agency/manifests/vg-code-{fast,balanced,max}/manifest.json` — distinct declared budget policies | append-only result rows; oracle-tamper digest; reject rates computed from `n < suite_size` |
+| `runtime/wiring.py` — declared budget → `Governor` without loss | existing `benchmarks/statistics.py` / `runtime/paired_evaluation.py` — paired comparison over the frozen subject |
+| product end-to-end smoke on a live-capable route | falsifier: cassette/LAM/dry-run rows cannot authorize a capability rate |
+
+**Wave 2 gate:** close `MS-CONTROL` on the exact candidate SHA and publish the result even if it is
+negative or undeterminable. This is the ordering correction from Opus Part 7: small-task evidence
+demoted `str_replace` and LDA from product blockers to treatments whose value must be measured at
+repository scale.
+
+### Wave 3 — Edit Primitive & Retrieval Treatments (P1, post-control)
 
 | Lane A (edit engine) | Lane B (index & retrieval) |
 |---|---|
 | `adapters/environment/git.py` — exact `str_replace` (T-78) | **`[NEW]`** `adapters/stores/lda_index.py` (T-75) |
 | `adapters/environment/transaction.py` — route `str_replace` through 2PC; AST preflight already present | `packs/code-default/toolkits/repo_map.py` — `repo.*` verbs (T-76) |
-| `agency/episode/engine.py` — read-before-edit at dispatch; typed `PATCH_PREIMAGE_MISMATCH` | `packs/code-default/plugins/index.yaml` — activate |
+| pack policy — prompt-default and strict-profile read-before-edit treatments; typed `PATCH_PREIMAGE_MISMATCH` | `packs/code-default/plugins/index.yaml` — activate; optional query-local PPR treatment |
 | **`[NEW]`** `test/adapters/test_str_replace_exact.py` | `adapters/bindings/code.py` — bind observations to L5 |
 | | **`[NEW]`** `test/contracts/test_lda_repo_index.py`, **`[NEW]`** `test/agency/test_l5_only_observations.py` |
 
 `ports/index.py` is **not modified** — `IndexPort` already declares what `LdaRepoIndex` implements. Adapters may import only `{domain, ports}`; the L5 binding therefore lives in the pack and `adapters/bindings/`, never inside the store.
 
-### Wave 3 — Cache Integrity & Greenfield Oracle (P1)
+### Wave 4 — Context Economy & Reliability Treatments (P1, post-control)
 
 | Lane A | Lane B |
 |---|---|
-| `agency/context/compiler.py` — L3 breakpoint emission (T-77) | `adapters/environment/sandboxed.py` — `PYTHONPYCACHEPREFIX` → tmpfs (T-74) |
-| `agency/context/compaction.py` — omission ledger, output caps | `runtime/ledger_emitter.py` — `cache_{read,write}_tokens` |
-| `packs/code-default/oracles/gate.py` — red-then-green ordering (T-19) | **`[NEW]`** `test/adapters/test_workspace_pycache.py` |
-| `adapters/evaluators/suites/oracle_greenfield_webapp.py` | **`[NEW]`** `test/agency/test_cache_breakpoints.py`, **`[NEW]`** `test/packs/test_greenfield_oracle.py` |
+| prefix-stability test, then L3 breakpoint emission and L5 Trailing Goal Echo (T-77) | `runtime/ledger_emitter.py` — prefix/cache/volatile token telemetry |
+| digest-addressable CTRF/result distillation and tool-body eviction | falsifier: full evidence remains retrievable by digest after distillation |
+| pinned working set (`goal`, `changed`, `verified`, `falsified`, `next`, budget) | summarize-on-compact + `ContextCompacted` receipt; rolling-handoff treatment |
+| `agency/episode/engine.py` — anti-thrashing oscillation treatment $d_t == d_{t-2}$ (T-80) | **`[NEW]`** `test/agency/test_anti_thrashing_circuit_breaker.py` |
+| repository instruction/skill/subagent-isolation treatments | paired long-horizon and greenfield comparisons against Wave 2 control |
 
-### Wave 4 — Control Baseline & Preset Unification (P2)
-
-| Lane A | Lane B |
-|---|---|
-| `apps/coding_max/facade.py` — select from `presets.json`; drop the `max_turns=40` default (T-79) | `benchmarks/` — freeze the 30-task multi-class canary (T-51) |
-| `packs/code-default/load.py` — expose the preset overlay on the product path | `benchmarks/protocols.py` — preregistered canary, Wilson LB, cost κ (T-52) |
-| `agency/manifests/vg-code-{fast,balanced,max}/manifest.json` — per-preset `budgetPolicy`, stop aliasing `vg-code-default` wholesale | **`[NEW]`** `test/apps/test_preset_budgets.py` |
-| `runtime/wiring.py` — declared budget → `Governor` without loss | |
-
-### Wave 5 — Outer Director & Campaign Orchestration (post-`MS-CONTROL`)
+### Wave 5 — Outer Director & Test-Time Compute (post-`MS-CONTROL`)
 
 Unblocked **only** by a closed `MS-CONTROL`. Packages OCT-01…04, T-31, T-54.
-**`[NEW]`** `domain/topology/coordination.py` · **`[NEW]`** `runtime/campaign/{director,worktree,verifier}.py` · **`[NEW]`** `test/runtime/test_campaign_director.py`.
-No file in Waves 1–4 is reopened.
+**`[NEW]`** `domain/topology/coordination.py` · **`[NEW]`** `runtime/campaign/{director,worktree,verifier}.py` (speculative worktree candidate generation, mutation scoring, RTV scheduling/ranking, exterior-verdict-only merge) · **`[NEW]`** `test/runtime/test_campaign_director.py`.
+Wave 5 owns a distinct primary file set; any shared policy edit requires an explicit collision review.
 
 ---
 
 ## 8. Commit checklist
 
-1. **Runway edits only.** `backlog.md` §2.11 + §2.9/§2.4 amendments + §3 index + alias table; `milestones.md` §3 five rows; `tasks.md` T-69–T-79; `spec.md` delta for `domain/evidence/disposition.py`. **Zero new files under `docs/reports/` or `docs/architecture/`** — this document stays in `.draft/` and is not itself a runway file.
+1. **Runway edits only.** `backlog.md` §2.11 + §2.9/§2.4 amendments + §3 index + alias table; `milestones.md` §3 five rows; `tasks.md` T-69–T-83; `spec.md` delta for `domain/evidence/disposition.py`. Reconcile §2.1's preserved ideas to existing owners before allocating any further ID. **Zero new files under `docs/reports/` or `docs/architecture/`** — this document stays in `.draft/` and is not itself a runway file.
 2. **Reopen T-18 in the same commit that records its receipt.** Reopening it silently later reads as drift; reopening it here, with the zero-caller grep as the falsifier, is the honest record.
 3. **Do not commit the draft's `MS-TRUTH` falsifier.** §6 replaces it. Committing "oracle-PASS ⇒ `completed`" would encode the 8/8 conflation as a requirement.
 4. **Kernel guardrail on every wave's PR:** `python3 tools/linters/check_tcb_budget.py` must report `1386` **unchanged**, not merely under 1438. Pair with `check_boundaries.py` and `check_domain_blindness.py`.
 5. **Numbers to carry forward verbatim:** kernel 1386/1438 · LDA relations 80,618 · presets `$0.05`/8t, `$0.15`/20t, `$0.40`/40t · `harness.yaml` `usd_micros: 250000`, `turns: 40`, `depth: 2`. Every one is re-derivable from this tree; none is rounded.
+6. **Benchmark before promotion.** Wave 2 freezes the common control before Wave 3/4 treatments can
+   claim lift. Parallel implementation is allowed; bundled qualification is not. Each treatment must
+   be independently switchable and evaluated against the exact control digest.
 
 ### Residual uncertainties — stated, not buried
 

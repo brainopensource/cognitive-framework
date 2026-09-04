@@ -116,7 +116,7 @@ Forge/Chimera SHALL NOT be the product path. Coding Max report arms SHALL be ⊆
 
 **VerificationReceipt.passed (FACT).** `exit_code == 0 and executed_test_count > 0`. Unknown → 0. Forge SHALL NOT set `test_count = 1` (T-06). Chimera SHALL NOT invent `executed = 1` on non-zero exit without a runner summary (`63b77116`).
 
-**I-1** (v2) universal signed finish: `[PROPOSAL]` too strong. A §9.4 wins. Fail-to-pass = **bugfix** only (T-38).
+**I-1** (v2) universal signed finish: `[PROPOSAL]` too strong. A §9.4 "Per-class evidence" wins. Fail-to-pass = **bugfix** only (T-38).
 **Mutation ≥ 0.80:** T-39 `[PROPOSAL]`.
 
 ## 1. Instrument (CLOSED — `63b77116` + T-01–T-03)
@@ -266,6 +266,11 @@ These values contain no model provider, filesystem I/O, or runtime authority.
 **FACT.** Schema is `vanguard/packages/domain/task_state.py` (`SemanticTaskState` / `CodingTaskState` alias). The only fold remains `runtime/task_state.py` `fold_task_state`. A's 17 extra domain types stay `[PROPOSAL]` law-side targets; do not implement them here.
 
 **Historical claim.** This section read as if the 17 values were required next-code. They are `[PROPOSAL]` relative to the live fold.
+
+**AUTHORIZED (Wave 1).** Two further domain-pure values are *not* `[PROPOSAL]`:
+`TaskDisposition` and `SettlementReceipt`, specified in §EW-9.1 and landing in
+`domain/evidence/disposition.py` (T-72). They are Wave 1 law and are deliberately
+absent from the 17-value `[PROPOSAL]` list above; do not re-derive them here.
 
 ### 6.3 Required ports
 
@@ -999,17 +1004,18 @@ Living rule: T-17–T-20 MECHANISM — 2PC, IndexPort tamper freeze, greenfield 
 
 Wire recovery: `adapters/models/dialect.py` T-21 MECHANISM. Truncated JSON, DeepSeek fence, and XML tool tags are classified; malformed never reports `ok`. Proposal recovery remains `agency/episode/protocol_recovery.py`.
 
-## 9. Electroweak v0.9.3 Wave 1–2 settlement and control delta
+## EW-9. Electroweak v0.9.3 Wave 1–2 settlement and control delta
 
 This section is the typed TARGET contract for the Electroweak Wave 1–2 package
-set. It points to the product definition in §3.2 and does not replace the
+set. It points to the product definition in §3.2 of this
+specification and does not replace the
 historical Wave 0–10 capability recipes in [`technical.md`](technical.md).
 Wave 1 is Settlement & Signal Truth; Wave 2 is Frozen Control, Honest
 Instrument & Presets. Edit/retrieval, context/reliability, and outer-director
 treatments remain outside this delta and MUST NOT be presented as Wave 1–2
 next-code.
 
-### 9.1 Two-axis settlement wire contract (TRUTH / T-72)
+### EW-9.1 Two-axis settlement wire contract (TRUTH / T-72)
 
 The settlement model SHALL preserve two orthogonal questions:
 
@@ -1063,7 +1069,7 @@ requires its complete allocation package; this delta does not authorize one.
 The benchmark vocabulary SHALL derive from `TaskDisposition`, and readers MUST
 use its positive predicate rather than `disposition != failed`.
 
-### 9.2 Wave 1 — Settlement & Signal Truth
+### EW-9.2 Wave 1 — Settlement & Signal Truth
 
 Wave 1 is Route R repair work across **HAR-01**, **TRUTH**, **INS-01**, and
 **BRG-01**. Its acceptance contract is:
@@ -1071,7 +1077,7 @@ Wave 1 is Route R repair work across **HAR-01**, **TRUTH**, **INS-01**, and
 | Package | Binding contract |
 |---|---|
 | HAR-01 | `NATIVE` tool calling is capability-bound. A production route may declare `ToolCallStyle.NATIVE` only after a provider-shape vector verifies native dispatch of both `patch.apply` and `finish`. Unknown or unverified routes retain the fail-closed degradation chain `NATIVE -> JSON_SCHEMA -> FENCED_JSON -> TEXT_GRAMMAR`; no registry-wide promotion is permitted. Manifest approval policy, the declared `finish` tool, minimum orientation commands, effect budgets, workspace initialization, and completion-tool restrictions SHALL reach the product path without hardcoded replacement. Fenced action notes MAY recover into candidate proposals, but unparsed invocations or a mutation-free unsolicited `finish` SHALL be rejected. |
-| TRUTH | Record both settlement axes per §9.1. Before T-04 removes the product-default admission exemption, preserve the named RF-25 successor baseline. Mutating completion SHALL bind the mutation receipt, current postimage/epoch, relevant tests collected and executed, zero test exit, tamper evaluation against the frozen test set, and no unresolved omission or stale-index marker. Greenfield evidence SHALL distinguish structural from behavioral success and reject `pass` / `NotImplementedError` vacuity. The greenfield prompt SHALL not prohibit the scaffold -> red oracle -> atomic 2PC workflow. |
+| TRUTH | Record both settlement axes per §EW-9.1. Before T-04 removes the product-default admission exemption, preserve the named RF-25 successor baseline. Mutating completion SHALL bind the mutation receipt, current postimage/epoch, relevant tests collected and executed, zero test exit, tamper evaluation against the frozen test set, and no unresolved omission or stale-index marker. Greenfield evidence SHALL distinguish structural from behavioral success and reject `pass` / `NotImplementedError` vacuity. The greenfield prompt SHALL not prohibit the scaffold -> red oracle -> atomic 2PC workflow. |
 | INS-01 | Generate a unique run identity for each invocation; continuation is explicit `--resume <id>`. Product receipts SHALL carry actual model routes, token counts, verified step identities, and cost provenance. This package extends product-path integrity and MUST NOT reopen §1 or `MS-INSTRUMENT`. |
 | BRG-01 | Local inference lifecycle is fail-closed: valid flash-attention flag, live child process, matching PID and `/props` identity before `ONLINE`, identity-scoped stop rather than blanket process killing, typed empty/max-token failures, and no retired provider alias on the supported route. |
 
@@ -1088,7 +1094,7 @@ Wave 1 acceptance requires the L0 public-CLI smoke triad to produce honest
 end-to-end evidence. L0 may license only “Wave 1 landed”; it MUST NOT license a
 capability or pass-rate claim.
 
-### 9.3 Wave 2 — Frozen Control, Honest Instrument & Presets
+### EW-9.3 Wave 2 — Frozen Control, Honest Instrument & Presets
 
 Wave 2 establishes the content-addressed control used by later treatments. It
 contains **CMX-01 (T-79)**, the Wave 2 portions of **INS-01**, and **EXP-01**:
@@ -1112,7 +1118,7 @@ contains **CMX-01 (T-79)**, the Wave 2 portions of **INS-01**, and **EXP-01**:
   false-completion rate exactly zero. The result SHALL be published when
   positive, negative, or undeterminable.
 
-### 9.4 Measurement ladder and evidence row (EXP-01)
+### EW-9.4 Measurement ladder and evidence row (EXP-01)
 
 Rungs answer different questions and SHALL NOT be collapsed:
 

@@ -71,22 +71,25 @@ Present docs to open while coding:
 
 Wave-titled sections copied below are **capability recipes**, not a calendar.
 
-## Electroweak v0.9.3 Wave 1–2 FACT overlay
+## Electroweak v0.9.3 Wave 1–2 contract overlay `[PROPOSAL]`
 
-**FACT overlay scope.** This is the current implementation handbook for the
-authorized Electroweak Wave 1–2 contracts in [`spec.md`](spec.md) §9.
-`FACT` here means that the recipe and its source defect are fixed execution
-facts; it does not claim that uncommitted runtime work has landed. The older
-Wave 0–10 sections below remain historical capability recipes with their
+**Overlay scope and epistemic status.** This is the implementation handbook for
+the authorized Electroweak Wave 1–2 contracts in [`spec.md`](spec.md) §EW-9.
+Per §0, every recipe below is **`[PROPOSAL]`**: the code it prescribes is not
+observed in current source and MUST NOT be read as HEAD. What is `FACT` is the
+*defect each recipe repairs*, observed at the file and line the recipe cites.
+Authorization comes from `spec.md` §EW-9; this file carries only the recipe. The
+older Wave 0–10 sections below remain historical capability recipes with their
 existing titles. Do not renumber, retitle, or infer current scheduling from
 them.
 
 This overlay stops at the frozen control. It does not schedule or provide
-next-code recipes for Prompts 05, 06, or 09; T-75–T-78, T-83b, T-77, T-80,
-OCT-03, or ARM-01. DLG-01's live alias/provenance work is likewise post-control,
-not part of the Wave 1 package set.
+next-code recipes for Prompts 05, 06, 07, or 09; T-75–T-78, T-83b, T-77, T-80,
+OCT-03, or ARM-01. DLG-01's live alias/provenance work (T-86, T-90) is likewise
+post-control — Wave 3, alongside IDX-01 — and not part of the Wave 1 package
+set.
 
-### FACT W1 — HAR-01 harness preconditions
+### `[PROPOSAL]` W1 — HAR-01 harness preconditions
 
 No settlement result is useful until the product agent can call declared tools,
 write through the mediated path, and explicitly finish. Apply these repairs in
@@ -113,7 +116,7 @@ that truly requires kernel work needs separate authorization, its complete
 architecture package, and a fresh budget check; Wave 1 documentation does not
 spend the headroom.
 
-### FACT W1 — TRUTH two-axis settlement and admission
+### `[PROPOSAL]` W1 — TRUTH two-axis settlement and admission
 
 Implement the domain value by following the exact contract in the Synthesis of
 Record §3.2; do not duplicate that module body here. The integration recipe is:
@@ -139,7 +142,11 @@ Record §3.2; do not duplicate that module body here. The integration recipe is:
    relevant tests collected and executed, zero exit code, the existing
    IndexPort-enumerated tamper shield, and zero unresolved omissions/stale-index
    markers. Test implication/caller evidence is required only through the
-   currently authorized Wave 1 surface; T-83b remains outside this overlay.
+   currently authorized Wave 1 surface. **T-83b is out of scope here by
+   dependency, not by preference:** it wires `IndexPort.get_callers`, which has
+   no adapter until `LdaRepoIndex` lands in T-75 (Wave 3). Where the Synthesis
+   of Record §7 lists T-83b in the Wave 1 `session.py` cell it contradicts its
+   own dependency graph; the dependency governs. Do not re-litigate this.
 
 The axes are independent throughout. Oracle `PASS` never rewrites
 `RunTermination` to `completed`, and `abandoned + passed` is a valid settlement.
@@ -149,7 +156,7 @@ projection of `not_run` raises; `EpisodeCompleted` contains no disposition; and
 ledger replay preserves `terminal_status=abandoned` with
 `disposition=passed`.
 
-### FACT W1 — INS-01 and BRG-01 instrument integrity
+### `[PROPOSAL]` W1 — INS-01 and BRG-01 instrument integrity
 
 INS-01 is an additive product-path repair. It does **not** reopen
 `spec.md` §1 or `MS-INSTRUMENT`.
@@ -173,7 +180,7 @@ Falsify with unique-run-identity, receipt-telemetry, product-path-subject,
 bridge-lifecycle, and bridge-empty-output tests. Provider outage, HTTP failure,
 or zero model calls settles as `not_run`, not task failure.
 
-### FACT W2 — CMX-01 preset unification (T-79)
+### `[PROPOSAL]` W2 — CMX-01 preset unification (T-79)
 
 Unify the product path around the existing `packs/code-default/presets.json`
 catalog; do not author replacement budget numbers:
@@ -191,7 +198,7 @@ facade's universal `max_turns=40` default. Trace the selected ceiling through
 `usd_micros`, `millis`, `tokens`, and `bytes` are additive reservation
 dimensions; `turns` and `depth` are structural ceilings and are never summed.
 
-### FACT W2 — EXP-01 evidence ladder and frozen control
+### `[PROPOSAL]` W2 — EXP-01 evidence ladder and frozen control
 
 Build the instrument in increasing-cost rungs:
 
@@ -209,7 +216,7 @@ Build the instrument in increasing-cost rungs:
 
 Freeze prompts, tools, fixtures, oracle, model, server flags, sampling, and
 budgets on the first measured attempt; any change resets the rung. The harness
-writes one append-only row per run with every field group from `spec.md` §9.4,
+writes one append-only row per run with every field group from `spec.md` §EW-9.4,
 including `n`, `suite_digest`, and the oracle/tamper digests, and refuses blanks. It also refuses
 `pass_rate_pct` when observed rows are fewer than the frozen suite size.
 

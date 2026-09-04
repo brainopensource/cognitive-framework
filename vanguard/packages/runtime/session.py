@@ -19,6 +19,7 @@ from ..agency import EpisodeEngine, RunTermination
 from ..agency.episode import ProtocolRecoveryState
 from ..agency.episode.admission_gate import AdmissionGate, AdmissionVerdict, VerificationReceipt
 from ..agency.context import (
+    INDEX_PORT_UNBOUND,
     CompetencePriorRecorder,
     CompiledContext,
     ContextCompiler,
@@ -679,18 +680,19 @@ class HarnessSession:
                     for ref in task.artifact_refs))
         if discovered_env:
             env_parts.append(discovered_env)
-        if self.index is not None:
-            # Repository intelligence is dynamic, bounded context. Never put a
-            # complete flat index into the immutable environment prefix: large
-            # workspaces would consume the compaction budget before the first
-            # edit. The packet retains explicit omissions and provenance while
-            # the compiler receives only a compact orientation summary.
-            orientation = self._bind_context_packet()
-            if orientation is not None:
-                env_parts.append(
-                    "=== Workspace Repository Map ===\n"
-                    "=== Bounded Repository Context Packet ===\n"
-                    + json.dumps(orientation, sort_keys=True, default=str))
+        # Repository intelligence is dynamic, bounded context. Never put a
+        # complete flat index into the immutable environment prefix: large
+        # workspaces would consume the compaction budget before the first
+        # edit. The packet retains explicit omissions and provenance while
+        # the compiler receives only a compact orientation summary.
+        # IndexPort unbound/down still compiles: documented fallback, not a
+        # silent empty map (T-45).
+        orientation = self._bind_context_packet()
+        if orientation is not None:
+            env_parts.append(
+                "=== Workspace Repository Map ===\n"
+                "=== Bounded Repository Context Packet ===\n"
+                + json.dumps(orientation, sort_keys=True, default=str))
         env_text = "\n\n".join(part for part in env_parts if part)
         compiler = ContextCompiler(
             system_core=harness.system_core,
@@ -1337,30 +1339,129 @@ class HarnessSession:
         except ValueError as exc:
             raise ContextPacketError(str(exc)) from exc
 
-    def current_workspace_epoch(self) -> WorkspaceEpoch:
-        """Live WorkspaceEpoch. Fail closed if tree hash or index digest cannot bind."""
-        if self.index is None:
-            raise ContextPacketError("IndexPort snapshot unbound; cannot bind WorkspaceEpoch")
-        mapped = self.index.repo_map(token_budget=4000)
-        if not mapped.ok or mapped.value is None:
-            raise ContextPacketError("IndexPort snapshot unbound; cannot bind WorkspaceEpoch")
-        turn = 0
+    def _compiled_at_turn(self) -> int:
         packet = self.context_packet
         if packet is not None and packet.workspace_epoch is not None:
-            turn = packet.workspace_epoch.compiled_at_turn
-        return self._epoch_from_repo_map(mapped.value, compiled_at_turn=turn)
+            return packet.workspace_epoch.compiled_at_turn
+        return 0
+
+    def _epoch_from_environment_snapshot(self, *, compiled_at_turn: int) -> WorkspaceEpoch:
+        """Bind epoch from the environment snapshot. Never invents index symbols."""
+        snapshot_fn = getattr(self.ports.environment, "snapshot", None)
+        if snapshot_fn is None:
+            raise ContextPacketError(
+                "INDEX_UNBOUND: environment snapshot unbound; cannot bind WorkspaceEpoch")
+        try:
+            snapshot = snapshot_fn()
+        except (AttributeError, TypeError, OSError) as exc:
+            raise ContextPacketError(
+                "INDEX_UNBOUND: environment snapshot unbound; cannot bind WorkspaceEpoch"
+            ) from exc
+        digest = ""
+        if getattr(snapshot, "ok", False) and snapshot.value is not None:
+            digest = str(getattr(snapshot.value, "digest", "") or "")
+        if not digest:
+            raise ContextPacketError(
+                "INDEX_UNBOUND: environment snapshot unbound; cannot bind WorkspaceEpoch")
+        try:
+            return WorkspaceEpoch(
+                tree_hash=digest,
+                index_digest=digest_of({"fallback": INDEX_PORT_UNBOUND, "treeHash": digest}),
+                source_revision=digest,
+                compiled_at_turn=compiled_at_turn,
+            )
+        except ValueError as exc:
+            raise ContextPacketError(
+                "INDEX_UNBOUND: environment snapshot unbound; cannot bind WorkspaceEpoch"
+            ) from exc
+
+    def current_workspace_epoch(self) -> WorkspaceEpoch:
+        """Live WorkspaceEpoch. IndexPort down falls back; snapshot unbound fails closed."""
+        turn = self._compiled_at_turn()
+        if self.index is not None:
+            mapped = self.index.repo_map(token_budget=4000)
+            if mapped.ok and mapped.value is not None:
+                return self._epoch_from_repo_map(mapped.value, compiled_at_turn=turn)
+        return self._epoch_from_environment_snapshot(compiled_at_turn=turn)
+
+    def _orientation_view(
+        self,
+        packet: ContextPacket | None,
+        *,
+        fallback_reason: str | None = None,
+    ) -> dict[str, Any]:
+        view: dict[str, Any] = {
+            "packetDigest": packet.digest() if packet is not None else None,
+            "repositorySnapshot": packet.repository_snapshot if packet is not None else "",
+            "files": list(packet.files)[:80] if packet is not None else [],
+            "symbols": [dict(item) for item in packet.symbols[:80]] if packet is not None else [],
+            "symbolSummary": [
+                f"{item.get('symbolKind', item.get('kind', 'symbol'))} {item.get('name', '')}:{item.get('line', '')}"
+                for item in (packet.symbols[:80] if packet is not None else ())
+            ],
+            "dependencies": (
+                [dict(item) for item in packet.dependencies[:80]] if packet is not None else []
+            ),
+            "tests": list(packet.tests)[:80] if packet is not None else [],
+            "omissions": (
+                list(packet.omissions) if packet is not None else [INDEX_PORT_UNBOUND]
+            ),
+            "truncated": bool(packet.truncated) if packet is not None else True,
+            "workspaceEpoch": (
+                packet.workspace_epoch.to_canonical_dict()
+                if packet is not None and packet.workspace_epoch is not None else None
+            ),
+        }
+        if fallback_reason is not None:
+            view["fallbackReason"] = fallback_reason
+        return view
+
+    def _bind_no_index_fallback(self, cause: str) -> Mapping[str, Any]:
+        """Documented no-index packet: empty symbols, explicit omission, epoch or fail-closed."""
+        reason = f"INDEX_UNBOUND: {cause}"
+        try:
+            epoch = self._epoch_from_environment_snapshot(
+                compiled_at_turn=self.turns_consumed())
+        except ContextPacketError:
+            self.context_packet = None
+            return self._orientation_view(None, fallback_reason=reason)
+        selection_policy_identity = {
+            "policyId": "agency.context-compiler/default",
+            "policyVersion": CONTEXT_POLICY_VERSION,
+        }
+        packet = build_context_packet(
+            task_digest=digest_of({"runId": self.task.run_id, "brief": self.task.brief}),
+            repository_snapshot=epoch.source_revision,
+            provider="index-unbound-fallback",
+            provider_version="1",
+            query_digest=digest_of({"brief": self.task.brief}),
+            budget_tokens=4000,
+            selected=(),
+            index_snapshot_digest=epoch.index_digest,
+            reserve_tokens=1000,
+            repository_identity=epoch.source_revision,
+            selection_policy_identity=selection_policy_identity,
+            workspace_epoch=epoch,
+            require_epoch=True,
+            map_truncated=True,
+            extra_omissions=(INDEX_PORT_UNBOUND,),
+        )
+        self.context_packet = packet
+        return self._orientation_view(packet, fallback_reason=reason)
 
     def _bind_context_packet(self) -> Mapping[str, Any] | None:
-        """Compile a product packet bound to WorkspaceEpoch. None if the map is unbound."""
+        """Compile a product packet bound to WorkspaceEpoch. Fallback if the map is unbound."""
         if self.index is None:
-            self.context_packet = None
-            return None
+            return self._bind_no_index_fallback("IndexPort unbound")
         mapped = self.index.repo_map(token_budget=4000)
         if not mapped.ok or mapped.value is None:
-            self.context_packet = None
-            return None
+            cause = mapped.error.message if mapped.error is not None else "IndexPort snapshot unbound"
+            return self._bind_no_index_fallback(cause)
         repo_map = mapped.value
-        epoch = self._epoch_from_repo_map(repo_map, compiled_at_turn=self.turns_consumed())
+        try:
+            epoch = self._epoch_from_repo_map(repo_map, compiled_at_turn=self.turns_consumed())
+        except ContextPacketError as exc:
+            return self._bind_no_index_fallback(str(exc))
         selected: list[Mapping[str, Any]] = [
             {"kind": "file", "path": path, "estimated_tokens": 4}
             for path in repo_map.files
@@ -1427,36 +1528,20 @@ class HarnessSession:
                 workspace_epoch=prior_epoch,
             )
         self.context_packet = packet
-        return {
-            "packetDigest": packet.digest(),
-            "repositorySnapshot": packet.repository_snapshot,
-            "files": list(packet.files)[:80],
-            "symbols": [dict(item) for item in packet.symbols[:80]],
-            "symbolSummary": [
-                f"{item.get('symbolKind', item.get('kind', 'symbol'))} {item.get('name', '')}:{item.get('line', '')}"
-                for item in packet.symbols[:80]
-            ],
-            "dependencies": [dict(item) for item in packet.dependencies[:80]],
-            "tests": list(packet.tests)[:80],
-            "omissions": list(packet.omissions),
-            "truncated": bool(repo_map.truncated or packet.omissions),
-            "workspaceEpoch": packet.workspace_epoch.to_canonical_dict()
-            if packet.workspace_epoch is not None else None,
-        }
+        return self._orientation_view(packet)
 
     def _refresh_index_after_write(self) -> bool:
         """Mediated IndexPort rebuild after a write. Next compile must not see a pre-write map."""
-        if self.index is None:
-            return False
-        result = self.index.index(str(self.repo))
-        if not result.ok:
-            return False
-        return self._bind_context_packet() is not None
+        if self.index is not None:
+            self.index.index(str(self.repo))
+        self._bind_context_packet()
+        return self.context_packet is not None
 
     def refresh_context_packet(self) -> ContextPacket:
         """Recompile after a write. The previous packet cannot admit completed."""
         if not self._refresh_index_after_write() or self.context_packet is None:
-            raise ContextPacketError("cannot refresh WorkspaceEpoch; IndexPort snapshot unbound")
+            raise ContextPacketError(
+                "INDEX_UNBOUND: cannot refresh WorkspaceEpoch; IndexPort snapshot unbound")
         return self.context_packet
 
     def _observe_completion_dispatch(self, request: EffectRequest, result: Any) -> None:
@@ -1571,28 +1656,33 @@ class HarnessSession:
         """Apply the coding completion contract before reducing ``finish``."""
         policy = self.ports.completion_policy or self._completion_gate
         packet = self.context_packet
-        if packet is not None:
-            try:
-                validate_completion_epoch(packet, self.current_workspace_epoch())
-            except ContextPacketError:
-                return AdmissionVerdict(
-                    False,
-                    "PACKET_EPOCH_STALE",
-                    "ADMISSION GATE REJECTION: Context packet WorkspaceEpoch is missing or stale. "
-                    "Refresh the packet after the write before issuing completion.",
-                )
-            try:
-                validate_completion_omissions(
-                    packet,
-                    required=tuple(sorted(self._completion_changed_files)),
-                )
-            except ContextPacketError as exc:
-                return AdmissionVerdict(
-                    False,
-                    "PACKET_OMISSIONS_INCOMPLETE",
-                    "ADMISSION GATE REJECTION: Context packet is truncated or omitted a "
-                    f"required file. {exc}",
-                )
+        if packet is None:
+            return AdmissionVerdict(
+                False,
+                "INDEX_UNBOUND",
+                "ADMISSION GATE REJECTION: IndexPort unbound and WorkspaceEpoch could not bind.",
+            )
+        try:
+            validate_completion_epoch(packet, self.current_workspace_epoch())
+        except ContextPacketError:
+            return AdmissionVerdict(
+                False,
+                "PACKET_EPOCH_STALE",
+                "ADMISSION GATE REJECTION: Context packet WorkspaceEpoch is missing or stale. "
+                "Refresh the packet after the write before issuing completion.",
+            )
+        try:
+            validate_completion_omissions(
+                packet,
+                required=tuple(sorted(self._completion_changed_files)),
+            )
+        except ContextPacketError as exc:
+            return AdmissionVerdict(
+                False,
+                "PACKET_OMISSIONS_INCOMPLETE",
+                "ADMISSION GATE REJECTION: Context packet is truncated or omitted a "
+                f"required file. {exc}",
+            )
         verdict = policy.evaluate(
             preset_name=self.harness.harness,
             changed_files=tuple(sorted(self._completion_changed_files)),

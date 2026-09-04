@@ -10,7 +10,11 @@ from ...domain.workspace_epoch import WorkspaceEpoch
 
 __all__ = ["ContextPacket", "ContextPacketError", "build_context_packet",
            "validate_resume_identity", "validate_completion_epoch",
-           "validate_completion_omissions", "SectionAddress"]
+           "validate_completion_omissions", "SectionAddress",
+           "INDEX_PORT_UNBOUND"]
+
+#: Documented omission identity when IndexPort is unbound or down (T-45).
+INDEX_PORT_UNBOUND = "index.port.unbound"
 
 
 class ContextPacketError(ValueError):
@@ -95,6 +99,7 @@ def build_context_packet(
     workspace_epoch: WorkspaceEpoch | None = None,
     require_epoch: bool = False,
     map_truncated: bool = False,
+    extra_omissions: Sequence[str] = (),
 ) -> ContextPacket:
     """Build a bounded packet, retaining explicit omissions and reserve."""
     if budget_tokens < 0 or reserve_tokens < 0 or reserve_tokens > budget_tokens:
@@ -115,6 +120,7 @@ def build_context_packet(
             continue
         kept.append(dict(item))
         used += cost
+    omissions.extend(str(item) for item in extra_omissions if item)
     return ContextPacket(
         task_digest=task_digest,
         repository_snapshot=repository_snapshot,

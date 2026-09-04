@@ -17,6 +17,7 @@ from .compiler import (
     ContextCompiler,
 )
 from .packet import (
+    INDEX_PORT_UNBOUND,
     ContextPacket,
     ContextPacketError,
     SectionAddress,
@@ -46,6 +47,7 @@ __all__ = [
     "ContextBudgetExceeded",
     "ContextCompiler",
     "ContextPacket", "ContextPacketError", "SectionAddress",
+    "INDEX_PORT_UNBOUND",
     "build_context_packet", "validate_completion_epoch", "validate_completion_omissions",
     "validate_resume_identity",
     "Fragment",

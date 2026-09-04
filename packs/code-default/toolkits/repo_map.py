@@ -55,23 +55,25 @@ class IndexToolkit:
             if symbols.ok else []
         )
 
-    def scan(self) -> str:
-        result = self._index.index(self._workspace)
-        if not result.ok:
-            return ""
-        mapped = self._index.repo_map(token_budget=1)
-        self._capture_symbols()
-        self._dirty.clear()
-        return mapped.value.source_revision if mapped.ok and mapped.value else ""
-
     def render(self, token_budget: int) -> str:
         mapped = self._index.repo_map(token_budget=max(0, token_budget))
         if not mapped.ok or mapped.value is None:
-            return ""
+            return "index.port.unbound"
         summary = mapped.value
         lines = [path for path in summary.files]
         lines.extend(f"{symbol.kind} {symbol.name} {symbol.path}:{symbol.line}" for symbol in summary.symbols)
         return "\n".join(lines)
+
+    def scan(self) -> str:
+        result = self._index.index(self._workspace)
+        if not result.ok:
+            return "index.port.unbound"
+        mapped = self._index.repo_map(token_budget=1)
+        self._capture_symbols()
+        self._dirty.clear()
+        if mapped.ok and mapped.value:
+            return mapped.value.source_revision
+        return "index.port.unbound"
 
 
 class RepoMapContext:

@@ -194,9 +194,11 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - Files: create `adapters/environment/transaction.py`; `git.py`  
 - Requires: T-08 (honest verify)  
 
-**T-18 TestTamperShield** (B, spec §6)  
+**T-18 TestTamperShield** `REOPENED` (B, spec §6)  
 - [x] Enumerate tests via IndexPort, not only `Path.glob("test/**")`  
 - [x] Assertion edit ⇒ admission reject  
+- [ ] Wire `runtime/governance/tamper_shield.py` into `session._admit_completion`  
+- Reopened 2026-09-04: mechanism present, **zero production callers** — imported only by `test/runtime/test_tamper_shield.py`. The earlier receipt stands for its own subject; it does not carry forward to a shield nothing calls.  
 - Requires: T-17, T-14  
 
 **T-19 Greenfield oracle vacuity** (B, A §12.4, v2 §21.3)  

@@ -94,6 +94,16 @@ Reliability order (B §1; A §0 is the same sequence without the official-bench 
 | **MS-SENIOR…LEAD** | Profiles | obligations (A §4) + measurement (B §7) + A §29 done-defs | `OPEN` | Tables below; one copy. |
 | **MS-HYDRA** | Bifurcation + living horizon | T-55; implementer = EpisodeEngine+pack | `OPEN` `[PROPOSAL]` | |
 
+**Subject boundary — why `MS-INSTRUMENT` is not reopened.** `MS-INSTRUMENT` is
+`CLOSED` over the *benchmark harness* subject (`63b77116` + T-01–T-03, falsifier
+`test.benchmarks.test_instrument_ms`), and that closure stands for its subject. The
+product CLI path — `runtime/entrypoint.py` — was never that subject, which is why the
+run-identity, receipt-telemetry and measured-subject findings do **not** meet the
+`REOPENED` predicate (backlog §1) and open **INS-01** in the `INSTRUMENT (product)`
+package instead. The consequence is the point: the moment the canary is required to
+run through the product path (**T-89**), `MS-INSTRUMENT`'s guarantees stop
+transferring and INS-01 becomes a precondition of `MS-CONTROL`, not a nicety.
+
 Score-band ASPIRATION (not a forecast). Backlog points here.
 
 | Band | Internal meaning | External meaning | Premature if claimed today |

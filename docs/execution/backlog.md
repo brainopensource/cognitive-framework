@@ -189,10 +189,12 @@ The Octopus / Conductor capability family represents the post-1.0 higher-order o
 ### 2.11 Electroweak Convergence: Harness Preconditions & Settlement Truth
 
 Accepted disposition of the Electroweak v0.9.2 review dossiers (Synthesis of
-Record, 2026-09-04). This section adds **seven** capability packages. The other
-four IDs proposed in the draft synthesis resolved to live rows and are recorded
-as aliases in §3 rather than as new packages, per **R-01 (architecture sprawl)**:
-a synthesis that names sprawl as a risk does not open six rows where two are new.
+Record, 2026-09-04). Eleven IDs were proposed across the two sources — six in the
+draft synthesis, five in the GPT (SOL + Terra) dossier. **Seven** open as capability
+packages here; the other four, all from the draft synthesis, resolved to live rows
+and are recorded as aliases in §3 rather than as new packages, per **R-01
+(architecture sprawl)**: a synthesis that names sprawl as a risk does not open a
+new row where a live one already carries the work.
 
 Five of the seven (`INS-01`, `DLG-01`, `BRG-01`, `EXP-01`, `ARM-01`) come from the
 GPT (SOL + Terra) dossier and the procedural evidence standard in §9. Each declares
@@ -216,6 +218,15 @@ lift and therefore stays `PROPOSED` until a preregistered ablation says otherwis
 
 Team capacity is chosen later. `requires:` edges live on tasks. This index maps packages to T-ids.
 
+**T-69–T-97 are reserved, not yet filed.** The rows below cite them as the forward
+index established by the Synthesis of Record §4.5; [`tasks.md`](tasks.md) currently
+ends at **T-68**. Until that pass lands, an unresolved T-id in the range T-69–T-97
+is a recorded reservation, not drift. The typed contracts for this range already
+exist — [`spec.md`](spec.md) §9 carries the two-axis settlement delta (T-72) and the
+evidence row (EXP-01), and [`technical.md`](technical.md) carries the Wave 1–2 FACT
+overlay — so what is outstanding is the task filing alone. Nothing in this range may
+be marked `IN_PROGRESS` before it has a row in `tasks.md`.
+
 | Package | Aliases | Related T-ids | MS-* | Notes |
 |---|---|---|---|---|
 | **INSTRUMENT** | REL-01R | T-01–T-03, T-24–T-25, T-40–T-41 | MS-INSTRUMENT | `DONE` at `63b77116` |
@@ -224,7 +235,7 @@ Team capacity is chosen later. `requires:` edges live on tasks. This index maps 
 | **SEE** | CMX-11, PRG-01, W-092-F4, IDX-01 | T-14–T-16, T-36–T-37, T-45, T-75–T-77 | MS-SEE | T-46 **narrowed**: optional query-local ranking stays in pack policy, never `IndexPort` or the adapter |
 | **CHANGE** | TXN-01, SHD-01, TLS-04/05, *EDT-01* | T-17–T-20, T-47–T-49, T-78, T-83 | MS-CHANGE | T-17 `DONE`; TLS-04 mechanism present in `transaction.py`; **T-18 REOPENED**; `str_replace` folds into T-47; T-83 callers admission |
 | **DIALECT** | WRN-01, TLS-02 | T-21–T-22, T-50 | — | T-21–T-22 `DONE`. T-50 `[PROPOSAL]`. Does not close MS-CHANGE. |
-| **CONTROL** | CMX-07, W-092-F5, CMX-01, EXP-01, *PRF-01* | T-26–T-27, T-51–T-52, T-79, T-89, T-92–T-95 | MS-CONTROL | Preset catalog unification is CMX-01, not a new package; EXP-01 supplies the ladder and the veto, and consumes T-51/T-52 |
+| **CONTROL** | CMX-07, W-092-F5, CMX-01, EXP-01, *PRF-01*, ALG-03 | T-26–T-27, T-51–T-52, T-79, T-80, T-89, T-92–T-95 | MS-CONTROL | Preset catalog unification is CMX-01, not a new package; EXP-01 supplies the ladder and the veto, and consumes T-51/T-52. **T-80** (anti-thrashing oscillation breaker, ALG-03) is a post-control **treatment**: it is measured against the frozen control and does not gate the MS-CONTROL baseline |
 | **INSTRUMENT (product)** | INS-01, BRG-01, DLG-01 | T-84–T-88, T-90, T-91, T-97 | MS-TRUTH → MS-CONTROL | Distinct subject from the `CLOSED` MS-INSTRUMENT (benchmark harness). Precondition of every `LIVE-*` row |
 | **COMPARISON** | ARM-01 | T-96 | MS-CONTROL → MS-SENIOR | `PROPOSED` (Route L). No arm claim is authorized before MS-CONTROL closes |
 | **META** | MEM-03 | T-28 | MS-META | `[PROPOSAL]` |

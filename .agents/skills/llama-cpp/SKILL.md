@@ -15,9 +15,9 @@ This repository standardizes strictly on **`llama.cpp` (`llama-server`)** for al
 ## 1. Hardware & Environment Facts
 
 - **GPU Acceleration**: Vulkan backend via AMD Radeon RX 9060 XT (16 GB VRAM).
-- **Binary Location**: `/home/rock-dev/.local/bin/llama-server` (in user PATH).
-- **Shared Libraries**: `/home/rock-dev/.local/lib/llama.cpp/`.
-- **GGUF Models Directory**: `/home/rock-dev/Models/`
+- **Binary Location**: `~/.local/bin/llama-server` (in user PATH).
+- **Shared Libraries**: `~/.local/lib/llama.cpp/`.
+- **GGUF Models Directory**: `~/Models/`
   - `Qwen3.8-27B-UD-Q2_K_XL.gguf` (9.2 GB - recommended 27B local model)
   - `Qwen3.8-27B-UD-IQ1_M.gguf` (6.3 GB)
   - `Qwen3.8-27B-UD-Q4_K_S.gguf` (15 GB)
@@ -30,7 +30,7 @@ To start local inference on the AMD GPU:
 
 ```bash
 llama-server \
-  -m /home/rock-dev/Models/Qwen3.8-27B-UD-Q2_K_XL.gguf \
+  -m ~/Models/Qwen3.8-27B-UD-Q2_K_XL.gguf \
   -c 8192 \
   -ngl 99 \
   --host 127.0.0.1 \
@@ -65,5 +65,5 @@ The CLI connects directly to `http://127.0.0.1:8080/v1/chat/completions` using t
 ## 4. Invariant Rules for Autonomous Agents
 
 1. **NEVER execute `ollama` or check for `ollama`**: The daemon is removed and will fail.
-2. **NEVER try to run `/usr/local/lib/ollama/llama-server`**: That binary is an internal artifact and will fail to link GPU drivers. Use `/home/rock-dev/.local/bin/llama-server` instead.
+2. **NEVER try to run `/usr/local/lib/ollama/llama-server`**: That binary is an internal artifact and will fail to link GPU drivers. Use `~/.local/bin/llama-server` instead.
 3. **NEVER invent new local provider adapters**: Use `vanguard/packages/adapters/models/llama_cpp.py` which reuses the standard OpenAI specification.

@@ -6,8 +6,8 @@ status: draft
 owner: engineering-architecture-council
 version: "0.9.3"
 date: "2026-09-04"
-supersedes: [".draft/todo/SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md"]
-companion: [".draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md", ".draft/todo/development_plan_guidelines_0209.md"]
+supersedes: ["vanguard-sota-coding-harness-engineering-roadmap v1.0.0"]
+companion: [".draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md", ".draft/todo/ELECTROWEAK_SYNTHESIS_DEVELOPMENT_PLAN_GUIDELINES_0209.md"]
 verification_basis: "working tree at feat/strongforce_beta_release_v093, HEAD 537bdb66"
 ---
 
@@ -43,7 +43,7 @@ Through systematic review of `vanguard/packages/` across `domain`, `kernel`, `ag
 |  3. Brownfield Blast-Radius Blindness     |  4. In-Flight State & Identity Collision              |
 |     - Whole-file dumping context penalty  |     - Hardcoded "run-cli" identity shares ledger      |
 |     - Session lacks caller admission      |     - Dual preset catalogs break budget passthrough   |
-|     - Tasks T-75 (LDA) & T-83b (callers)  |     - Tasks T-84 (UUID run-id) & T-79 (presets.json)  |
+|     - Wave 3: T-75 (LDA) & T-83b (callers)|     - Tasks T-84 (UUID run-id) & T-79 (presets.json)  |
 +-------------------------------------------+-------------------------------------------------------+
 |  5. Model Dialect Degeneration            |  6. Verification Livelocks & Test Tampering           |
 |     - Fenced-JSON tool calls in `note`    |     - TestTamperShield unreferenced (0 callers)       |
@@ -54,18 +54,18 @@ Through systematic review of `vanguard/packages/` across `domain`, `kernel`, `ag
 
 ### 1.1 Bottleneck 1: Context-Attention Dissipation in Long Runs
 * **Phenomenon**: In tasks exceeding 30 turns, the LLM context window fills with large command outputs, diff hunks, and historical tool results. Standard sliding-window or naive text compacters truncate early invariant constraints and falsified hypothesis memory, leading to repetitive thrashing.
-* **Audit Reality**: `agency/episode/compactor.py` and `context/compiler.py` compact text linearly. `runtime/task_state.py` defines `CodingTaskState`, but operational state was decoupled from turn compilation.
+* **Audit Reality**: `agency/context/compaction.py` and `context/compiler.py` compact text linearly. `runtime/task_state.py` defines `CodingTaskState`, but operational state was decoupled from turn compilation.
 * **Hardened Fix (T-77, T-80)**: Enforce a stable byte-identical L1–L3 prompt prefix (with cache breakpoints), compact test logs into CTRF format (stripping passing traces and capping failure assertion diffs at $\le 1500$ chars), inject a **Trailing Goal Echo** at the tail of L5 to counter Lost-in-the-Middle degradation, and trip an anti-thrashing circuit breaker when workspace tree hash oscillates ($d_t == d_{t-2}$).
 
 ### 1.2 Bottleneck 2: Greenfield Blindness & Vacuous Passes
 * **Phenomenon**: In greenfield development, an agent frequently creates empty stubs (containing only `pass` or `raise NotImplementedError`) and declares victory when `pytest` exits 0 with zero tests collected. Furthermore, legacy prompt heuristics (*"Write ONE file per turn... Do not read or search first"*) actively sabotaged topological multi-file authoring.
 * **Audit Reality**: Greenfield oracle existed in `adapters/evaluators/suites/oracle_greenfield_webapp.py`, but lacked vacuity rejection. `system-prompt.txt` contained toy single-file instructions (**C-12**).
-* **Hardened Fix (T-81, T-83a)**: Purge legacy prompt heuristics. Establish the 3-phase greenfield protocol (scaffold stubs $\to$ red tests $\to$ atomic 2PC commit). Enforce a **Vacuity Admission Gate**: suites passing on empty stubs are rejected fail-closed.
+* **Hardened Fix (T-81, T-83a)**: Purge legacy prompt heuristics in Wave 1 (**T-83a**). Establish the 3-phase greenfield protocol (scaffold stubs $\to$ red tests $\to$ atomic 2PC commit). Enforce a **Vacuity Admission Gate** (**T-81**): suites passing on empty stubs are rejected fail-closed.
 
 ### 1.3 Bottleneck 3: Brownfield Blast-Radius Containment & Context Economics
 * **Phenomenon**: In large repositories, modifying a core interface breaks downstream callers. Agents unaware of caller graphs enter an unstructured patching frenzy when regression suites fail.
 * **Audit Reality**: `.lda/index.db` holds **80,618 relations** and 10,580 symbols, and `multi_file_completeness.py` accepts `callers_by_symbol`. However, `runtime/session.py::_admit_completion` never queried `IndexPort` or passed callers (**C-13**).
-* **Hardened Fix (T-75, T-76, T-83b)**: Implement `LdaRepoIndex` behind `IndexPort`. Bind `repo.*` observation verbs strictly into L5 (preserving L1–L3 cache stability). Wire `IndexPort.get_callers` into `session._admit_completion` to reject completion if public API signatures change without inspecting dependent call sites.
+* **Hardened Fix (T-75, T-76, T-83b)**: Implement `LdaRepoIndex` behind `IndexPort` in Wave 3 (**T-75**). Bind `repo.*` observation verbs strictly into L5 (**T-76**, preserving L1–L3 cache stability). Wire `IndexPort.get_callers` into `session._admit_completion` (**T-83b** in Wave 3, following T-75) to reject completion if public API signatures change without inspecting dependent call sites.
 
 ### 1.4 Bottleneck 4: In-Flight State Severance & Identity Collisions
 * **Phenomenon**: Session restarts or approvals must seamlessly reconstruct cognitive state from SQLite WAL ledgers without re-executing settled effects.
@@ -121,44 +121,28 @@ To eliminate these bottlenecks permanently while respecting the **Trusted Comput
 
 Instead of relying on LLM memory or raw message histories, long-running agents maintain a **Durable Semantic State Vector** committed to the ledger.
 
-#### Domain Wire Contract: `vanguard/packages/domain/task_state.py`
+#### Existing Domain Wire Contract: `vanguard/packages/domain/task_state.py` (396 LOC, T-09)
+> [!IMPORTANT]
+> `SemanticTaskState`, `TaskStep`, and `StepState` **already exist** in `vanguard/packages/domain/task_state.py` (lines 24 and 155), are folded by `runtime/task_state.py` (352 lines), and are consumed by `runtime/app_service.py`. Agents must NOT re-author or invent competing step-status enums.
+
 ```python
-from __future__ import annotations
-from dataclasses import dataclass
-from enum import Enum
-
-class StepStatus(str, Enum):
-    PENDING = "pending"
-    IN_PROGRESS = "in_progress"
-    VERIFIED = "verified"
-    BLOCKED = "blocked"
-
-@dataclass(frozen=True, slots=True)
-class TaskStep:
-    step_id: str                      # Monotonic: "step-001"
-    title: str                        # Concise objective
-    target_files: tuple[str, ...]     # Scope: ("ports/storage.py",)
-    dependencies: tuple[str, ...]     # Pre-requisites: ()
-    status: StepStatus
-    falsification_evidence: str | None = None
-    verification_hash: str | None = None
-
-@dataclass(frozen=True, slots=True)
-class SemanticTaskState:
-    run_id: str
-    revision: int
-    overarching_goal: str
-    active_step_id: str | None
-    backlog: tuple[TaskStep, ...]
-    falsified_hypotheses: tuple[str, ...]
-    settled_invariants: tuple[str, ...]
-    changed_files_tree_hash: str
+# Canonical types exported from vanguard.packages.domain.task_state:
+from vanguard.packages.domain.task_state import (
+    CodingTaskState,
+    DeadEnd,
+    Discovery,
+    RouteDecision,
+    SemanticTaskState,
+    StepState,          # PENDING = "pending", READY = "ready", ACTIVE = "active", VERIFIED = "verified", FAILED = "failed"
+    TaskStep,           # (step_id, title, target_files, dependencies, state: StepState, ...)
+    TodoItem,
+)
 ```
 
 #### Invariants:
 * **I-STATE-1 (Monotonic Revision)**: Every update increments `revision` and emits `TaskStateCheckpoint` with a canonical SHA-256 state digest.
 * **I-STATE-2 (Zero Context Amnesia)**: Compaction algorithms are strictly forbidden from altering or omitting `settled_invariants` and `falsified_hypotheses`. They are injected as the immutable cognitive prefix of every turn.
-* **I-STATE-3 (TCB Boundary)**: Semantic task state management resides in `domain/` and `agency/`. It adds **zero lines to `kernel/`**.
+* **I-STATE-3 (TCB Boundary)**: Semantic task state management resides in `domain/` and `runtime/`. It adds **zero lines to `kernel/`**.
 
 ---
 
@@ -239,45 +223,34 @@ Raw Model Stream / Completion Chunk
 ## 3. Concrete Module Implementation Specifications
 
 ### 3.1 Module 1: `vanguard/packages/agency/episode/task_dag.py`
-**Responsibility**: Manages multi-step plans as a topological DAG without adding domain concepts to the kernel.
+**Responsibility**: Manages topological dependency ordering of `TaskStep` nodes during multi-step campaigns. Reuses canonical types from `domain.task_state`.
 
 ```python
 """Topological Task Step DAG for Complex Software Engineering Campaigns."""
 
 from __future__ import annotations
-from dataclasses import dataclass
-from enum import Enum
 import graphlib
 from typing import Sequence
 
-class StepState(str, Enum):
-    PENDING = "pending"
-    READY = "ready"
-    ACTIVE = "active"
-    VERIFIED = "verified"
-    FAILED = "failed"
+# Reuse canonical domain types from T-09:
+from vanguard.packages.domain.task_state import StepState, TaskStep
 
-@dataclass(frozen=True, slots=True)
-class PlanStep:
-    id: str
-    objective: str
-    target_paths: tuple[str, ...]
-    dependencies: tuple[str, ...] = ()
-    state: StepState = StepState.PENDING
-    failure_log: str | None = None
 
 class TaskExecutionGraph:
-    def __init__(self, steps: Sequence[PlanStep]):
-        self._steps: dict[str, PlanStep] = {s.id: s for s in steps}
+    """Manages DAG execution order over canonical TaskStep records."""
+
+    def __init__(self, steps: Sequence[TaskStep]):
+        self._steps: dict[str, TaskStep] = {s.step_id: s for s in steps}
         self._validate_acyclic()
 
     def _validate_acyclic(self) -> None:
-        graph = {s.id: set(s.dependencies) for s in self._steps.values()}
+        graph = {s.step_id: set(s.dependencies) for s in self._steps.values()}
         sorter = graphlib.TopologicalSorter(graph)
         sorter.prepare()
 
-    def get_executable_steps(self) -> tuple[PlanStep, ...]:
-        ready: list[PlanStep] = []
+    def get_executable_steps(self) -> tuple[TaskStep, ...]:
+        """Returns pending steps whose dependencies are strictly VERIFIED."""
+        ready: list[TaskStep] = []
         for step in self._steps.values():
             if step.state != StepState.PENDING:
                 continue
@@ -286,14 +259,17 @@ class TaskExecutionGraph:
         return tuple(ready)
 
     def mark_step_verified(self, step_id: str) -> TaskExecutionGraph:
+        """Returns updated immutable graph with step marked VERIFIED."""
         updated = dict(self._steps)
         curr = updated[step_id]
-        updated[step_id] = PlanStep(
-            id=curr.id,
-            objective=curr.objective,
-            target_paths=curr.target_paths,
+        updated[step_id] = TaskStep(
+            step_id=curr.step_id,
+            title=curr.title,
+            target_files=curr.target_files,
             dependencies=curr.dependencies,
-            state=StepState.VERIFIED
+            state=StepState.VERIFIED,
+            falsification_evidence=curr.falsification_evidence,
+            verification_digest=curr.verification_digest,
         )
         return TaskExecutionGraph(tuple(updated.values()))
 ```
@@ -308,7 +284,7 @@ class TaskExecutionGraph:
 from vanguard.packages.runtime.governance.tamper_shield import TestTamperShield
 
 def _admit_completion(self, proposal: Proposal) -> AdmissionResult:
-    # 1. Verify tamper shield before accepting claim
+    # 1. Wave 1: Verify tamper shield before accepting claim (T-18 REOPENED)
     if self._tamper_shield is not None:
         integrity_ok, reason = self._tamper_shield.verify_no_test_tampering()
         if not integrity_ok:
@@ -317,7 +293,7 @@ def _admit_completion(self, proposal: Proposal) -> AdmissionResult:
                 detail=reason
             )
             
-    # 2. Check callers of modified public symbols (T-83b)
+    # 2. Wave 3: Check callers of modified public symbols (T-83b, enabled once LdaRepoIndex lands in T-75)
     if self._index_port is not None:
         callers = self._index_port.get_callers(self._completion_changed_symbols)
         uninspected = set(callers) - self._completion_inspected_files
@@ -413,11 +389,19 @@ graph TD
 
 | Wave | Primary Packages | Key Deliverables & Targets | Executable Falsifier |
 |---|---|---|---|
-| **Wave 1** | **HAR-01**, **TRUTH**, **INS-01**, **BRG-01** | • Capability-bound native profiles (`T-69`)<br/>• Approval threshold passthrough (`T-70`)<br/>• Declare `finish-tool.json` (`T-71`)<br/>• Two-Axis Settlement (`domain/evidence/disposition.py`, `T-72`)<br/>• Remove `ADMISSION_GATE_EXEMPT` (`T-04`)<br/>• Wire `TestTamperShield` into `session` (`T-18`)<br/>• Greenfield vacuity rejection check (`T-81`)<br/>• Fenced JSON action unwrapping (`T-82`)<br/>• Greenfield prompt deconfliction (`T-83a`)<br/>• Caller admission (`T-83b`)<br/>• UUID run identity (`T-84`)<br/>• Fail-closed llama.cpp bridge (`T-87`, `T-88`) | `test_settlement_disposition.py`<br/>`test_approval_passthrough.py`<br/>`test_manifest_components.py`<br/>`test_dialect_fenced_action_recovery.py`<br/>`test_multi_file_callers_admission.py`<br/>`test_run_identity.py`<br/>`test_llama_bridge_lifecycle.py` |
-| **Wave 2** | **CMX-01**, **EXP-01**, **INS-01** | • Unify presets on `presets.json` (`T-79`)<br/>• Receipt telemetry passthrough (`T-85`)<br/>• Route benchmarks through `entrypoint.execute` (`T-89`)<br/>• L0 smoke triad (`T-92`) & L1 twelve-task pre-canary (`T-93`)<br/>• False-completion rate = 0 hard veto (`T-94`)<br/>• Qualify `MS-CONTROL` on frozen candidate SHA ($N \ge 30$) | `test_preset_budgets.py`<br/>`test_receipt_telemetry.py`<br/>`test_product_path_subject.py`<br/>`test_l0_triad.py`<br/>`test_metric_veto.py` |
-| **Wave 3** | **CHANGE**, **IDX-01**, **DLG-01** | • Exact `str_replace` 2PC primitive (`T-78`)<br/>• `LdaRepoIndex` adapter over `.lda/index.db` (`T-75`)<br/>• `repo.*` observation tools bound into L5 (`T-76`)<br/>• Live manifest alias validation (`T-86`)<br/>• Raw-response CAS digest provenance (`T-90`) | `test_str_replace_exact.py`<br/>`test_lda_repo_index.py`<br/>`test_l5_only_observations.py`<br/>`test_live_alias_validation.py`<br/>`test_dialect_provenance.py` |
-| **Wave 4** | **CONTROL**, **SEE** | • L3 cache breakpoints & Trailing Goal Echo (`T-77`)<br/>• CTRF test log distillation ($\le 1500$ chars)<br/>• Anti-thrashing oscillation breaker ($d_t == d_{t-2}$, `T-80`) | `test_cache_breakpoints.py`<br/>`test_anti_thrashing_circuit_breaker.py` |
-| **Wave 5** | **OCT-01..04**, **ARM-01** | • Outer-loop campaign director (`OCT-03`)<br/>• Isolated git worktrees & CAS mailbox (`OCT-01`)<br/>• Test-Time Compute (TTC) scaling & RTV<br/>• Multi-agent comparison arm program (`T-96`) | `test_campaign_director.py`<br/>`test_arm_matrix.py` |
+| **Wave 1**<br/>*(Route R)* | **HAR-01**, **TRUTH**, **INS-01**, **BRG-01** | • Capability-bound native profiles (`T-69`)<br/>• Approval threshold passthrough (`T-70`)<br/>• Declare `finish-tool.json` (`T-71`)<br/>• Two-Axis Settlement (`domain/evidence/disposition.py`, `T-72`)<br/>• Remove `ADMISSION_GATE_EXEMPT` (`T-04`)<br/>• Wire `TestTamperShield` into `session` (`T-18`)<br/>• Greenfield vacuity rejection check (`T-81`)<br/>• Fenced JSON action unwrapping (`T-82`)<br/>• Greenfield prompt deconfliction (`T-83a` — 0 deps)<br/>• UUID run identity (`T-84`)<br/>• Fail-closed llama.cpp bridge (`T-87`, `T-88`) | `test_settlement_disposition.py`<br/>`test_approval_passthrough.py`<br/>`test_manifest_components.py`<br/>`test_dialect_fenced_action_recovery.py`<br/>`test_run_identity.py`<br/>`test_llama_bridge_lifecycle.py` |
+| **Wave 2**<br/>*(Control)* | **CMX-01**, **EXP-01**, **INS-01** | • Unify presets on `presets.json` (`T-79`)<br/>• Receipt telemetry passthrough (`T-85`)<br/>• Route benchmarks through `entrypoint.execute` (`T-89`)<br/>• L0 smoke triad (`T-92`) & L1 twelve-task pre-canary (`T-93`)<br/>• False-completion rate = 0 hard veto (`T-94`)<br/>• Qualify `MS-CONTROL` on frozen candidate SHA ($N \ge 30$) | `test_preset_budgets.py`<br/>`test_receipt_telemetry.py`<br/>`test_product_path_subject.py`<br/>`test_l0_triad.py`<br/>`test_metric_veto.py` |
+| **Wave 3**<br/>*(Route L)* | **CHANGE**, **IDX-01**, **DLG-01** | • Exact `str_replace` 2PC primitive (`T-78`, Route L)<br/>• `LdaRepoIndex` adapter over `.lda/index.db` (`T-75`, Route L)<br/>• `repo.*` observation tools bound into L5 (`T-76`, Route L)<br/>• Cross-file caller admission (`T-83b`, requires T-75)<br/>• Live manifest alias validation (`T-86`)<br/>• Raw-response CAS digest provenance (`T-90`) | `test_str_replace_exact.py`<br/>`test_lda_repo_index.py`<br/>`test_l5_only_observations.py`<br/>`test_multi_file_callers_admission.py`<br/>`test_live_alias_validation.py`<br/>`test_dialect_provenance.py` |
+| **Wave 4**<br/>*(Route L)* | **CONTROL**, **SEE** | • L3 cache breakpoints & Trailing Goal Echo (`T-77`, Route L)<br/>• CTRF test log distillation ($\le 1500$ chars)<br/>• Anti-thrashing oscillation breaker ($d_t == d_{t-2}$, `T-80`, Route L) | `test_cache_breakpoints.py`<br/>`test_anti_thrashing_circuit_breaker.py` |
+| **Wave 5**<br/>*(Route L)* | **OCT-01..04**, **ARM-01** | • Outer-loop campaign director (`OCT-03`)<br/>• Isolated git worktrees & CAS mailbox (`OCT-01`)<br/>• Test-Time Compute (TTC) scaling & RTV<br/>• Multi-agent comparison arm program (`T-96`, Route L) | `test_campaign_director.py`<br/>`test_arm_matrix.py` |
+
+### 5.1 Procedural Evidence Standard: Route R vs. Route L
+Per Synthesis of Record §9, mechanisms enter `APPROVED` through two distinct routes:
+* **Route R (Repair)**: Applies to defects verified in current source at a named file and line (`HAR-01`, `INS-01`, `DLG-01`, `BRG-01`, `EXP-01`, `T-04`, `T-18`, `T-72`, `T-79`). The falsifier is a deterministic regression test.
+* **Route L (Lift)**: Applies to speculative optimizations (`T-75` LDA index, `T-78` exact `str_replace`, `T-80` oscillation breaker, query-local PPR ranking, `ARM-01`). Route L items require a preregistered single-variable ablation in `benchmarks/hypotheses.json` against the frozen Wave 2 control. A losing treatment is retired to `DEFERRED` with its configuration digest retained—never deleted.
+
+### 5.2 Opus Preservation Register
+The 12 viable Opus idea families (proposal convergence, workspace bootstrap, effect-budget accounting, honest comparison instrument, broader tool surface, exact editing, LDA retrieval, context distillation, progressive skills, model profiles, replay research) are preserved in the experiment queue under §2.1 of the Synthesis of Record. They are tested as modular treatments over the control rather than engine forks.
 
 ---
 

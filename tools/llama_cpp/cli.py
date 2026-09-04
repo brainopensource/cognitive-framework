@@ -25,7 +25,6 @@ PID_FILE = Path("/tmp/llama_server.pid")
 DEFAULT_MODEL_DIRS = [
     Path.home() / "Models",
     Path.home() / "models",
-    Path("/home/rock-dev/Models"),
     Path("./models"),
     Path.cwd(),
 ]

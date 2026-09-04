@@ -75,7 +75,7 @@ Wave-titled sections copied below are **capability recipes**, not a calendar.
 
 ## From v2 — architecture catalog and SOTA harness mechanics
 
-Copied from [`.draft/DEVELOPMENT_FINAL_PLAN_v2.md`](../../.draft/DEVELOPMENT_FINAL_PLAN_v2.md) (locked triad). FACT / `[PROPOSAL]` tags remain binding.
+Copied from [`.draft/DEVELOPMENT_FINAL_PLAN_v2.md`](../reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN_v2.md) (locked triad). FACT / `[PROPOSAL]` tags remain binding.
 
 ## Locked triad roles
 
@@ -1156,7 +1156,7 @@ Duplicated in A, B, and v2 so no file is a stub.
 
 ## From B — live inventory, gaps, formal model, lattice, workflows, file routing
 
-Copied from [`.draft/DEVELOPMENT_FINAL_PLAN_B.md`](../../.draft/DEVELOPMENT_FINAL_PLAN_B.md).
+Copied from [`.draft/DEVELOPMENT_FINAL_PLAN_B.md`](../reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN_B.md).
 
 ## 3. Current implementation inventory
 
@@ -1357,9 +1357,9 @@ Sprint `tasks.md` still lists T2–T6 as the active DAG. Plan B **agrees with th
 
 | Draft / research | Useful residue | Rejected or corrected |
 |---|---|---|
-| [`.draft/DEVELOPMENT_FINAL_PLAN.md`](../../.draft/DEVELOPMENT_FINAL_PLAN.md) | Same reliability-first ordering | Bound to SHA `7e08462c2cbb…`, not this HEAD; do not copy its evidence snapshot |
-| [`.draft/todo/SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md`](../../.draft/todo/SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md) | Five systems challenges; pre-mutation impact | Overclaims “undisputed SOTA”; some file targets ignore packs vs kernel |
-| [`.draft/todo/development_plan_guidelines_0209.md`](../../.draft/todo/development_plan_guidelines_0209.md) | Lattice, no second runtime, WIP | Forbids git; this planning task required git identity — planning ≠ that implementation prompt |
+| [`.draft/DEVELOPMENT_FINAL_PLAN.md`](../reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN.md) | Same reliability-first ordering | Bound to SHA `7e08462c2cbb…`, not this HEAD; do not copy its evidence snapshot |
+| [`.draft/todo/ELECTROWEAK_SYNTHESIS_SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md`](../../.draft/todo/ELECTROWEAK_SYNTHESIS_SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md) | Five systems challenges; pre-mutation impact | Overclaims “undisputed SOTA”; some file targets ignore packs vs kernel |
+| [`.draft/todo/ELECTROWEAK_SYNTHESIS_DEVELOPMENT_PLAN_GUIDELINES_0209.md`](../../.draft/todo/ELECTROWEAK_SYNTHESIS_DEVELOPMENT_PLAN_GUIDELINES_0209.md) | Lattice, no second runtime, WIP | Forbids git; this planning task required git identity — planning ≠ that implementation prompt |
 | [`.draft/HYDRA_MULTI_AGENT_TOPOLOGY_AND_EMERGENT_AGENCY.md`](../research/features/HYDRA_MULTI_AGENT_TOPOLOGY_AND_EMERGENT_AGENCY.md) | Mailbox metaphor | Default swarm; competing runtime authority |
 | [`.draft/SONNET_SUPER_AGENT.md`](../research/features/SONNET_SUPER_AGENT.md) | Competency rhetoric | Model folklore as architecture |
 | Octopus `long-horizon-context-engine.md` / `outer-loop-orchestrator.md` | Progressive packets; campaign director **above** EpisodeEngine | Not implemented; must not become a second engine |
@@ -2224,9 +2224,9 @@ See §2.6. Additionally, OpenAI’s evaluation note: coding evals mix signal and
 - [`benchmarks/protocols.py`](../../benchmarks/protocols.py)
 - [`benchmarks/sota_preregistration.json`](../../benchmarks/sota_preregistration.json)
 - [`benchmarks/sota_spend_ledger.json`](../../benchmarks/sota_spend_ledger.json)
-- [`.draft/DEVELOPMENT_FINAL_PLAN.md`](../../.draft/DEVELOPMENT_FINAL_PLAN.md) (non-authority; different SHA)
-- [`.draft/todo/SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md`](../../.draft/todo/SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md)
-- [`.draft/todo/development_plan_guidelines_0209.md`](../../.draft/todo/development_plan_guidelines_0209.md)
+- [`.draft/DEVELOPMENT_FINAL_PLAN.md`](../reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN.md) (non-authority; different SHA)
+- [`.draft/todo/ELECTROWEAK_SYNTHESIS_SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md`](../../.draft/todo/ELECTROWEAK_SYNTHESIS_SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md)
+- [`.draft/todo/ELECTROWEAK_SYNTHESIS_DEVELOPMENT_PLAN_GUIDELINES_0209.md`](../../.draft/todo/ELECTROWEAK_SYNTHESIS_DEVELOPMENT_PLAN_GUIDELINES_0209.md)
 - [`.draft/HYDRA_MULTI_AGENT_TOPOLOGY_AND_EMERGENT_AGENCY.md`](../research/features/HYDRA_MULTI_AGENT_TOPOLOGY_AND_EMERGENT_AGENCY.md)
 - [`.draft/SONNET_SUPER_AGENT.md`](../research/features/SONNET_SUPER_AGENT.md)
 - [`docs/research/theory/SOTA_AGENTIC_CODING_HARNESS_ENGINEERING_TREATISE.md`](../research/theory/SOTA_AGENTIC_CODING_HARNESS_ENGINEERING_TREATISE.md)
@@ -2393,7 +2393,7 @@ No edge from W7 to W5 in reverse. No edge that lets Forge define W5.
 
 ## Appendix C — Why Plan B is not Plan A copied
 
-[`.draft/DEVELOPMENT_FINAL_PLAN.md`](../../.draft/DEVELOPMENT_FINAL_PLAN.md) is bound to `7e08462c2cbb…`. This file is bound to `ebad36e675f0…` plus this session’s 68 tests, TCB 1386, official DeepSWE/Scale fetches on 2026-09-03, and the observation that FEATURE_SPEC modules are **still missing**. Plan A’s reliability-first thesis is retained because **current source still supports it**, not because the earlier draft is authority.
+[`.draft/DEVELOPMENT_FINAL_PLAN.md`](../reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN.md) is bound to `7e08462c2cbb…`. This file is bound to `ebad36e675f0…` plus this session’s 68 tests, TCB 1386, official DeepSWE/Scale fetches on 2026-09-03, and the observation that FEATURE_SPEC modules are **still missing**. Plan A’s reliability-first thesis is retained because **current source still supports it**, not because the earlier draft is authority.
 
 **Lock-time addendum (2026-09-03, HEAD `66aa7a3c0c31`).** A, B, and v2 are now a locked triad: A = law, B = ground truth (this file, tickets 01–35), v2 = architecture catalog. YAML no longer says `does_not_modify` A; complements are A and v2. The `ebad36e` / LDA `STALE` binding above remains the planning-session snapshot. FEATURE_SPEC modules remain **MISSING** at lock HEAD.
 
@@ -2477,7 +2477,7 @@ Identical appendix in A, B, and v2. Duplication is required so no file is a stub
 
 ## From A — what the code already provides (G-01…G-12)
 
-Copied from [`.draft/DEVELOPMENT_FINAL_PLAN.md`](../../.draft/DEVELOPMENT_FINAL_PLAN.md).
+Copied from [`.draft/DEVELOPMENT_FINAL_PLAN.md`](../reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN.md).
 
 ## 2. What the code already provides
 
@@ -5033,8 +5033,8 @@ The following sources informed this plan but do not all carry equal authority.
 
 - [`HYDRA_MULTI_AGENT_TOPOLOGY_AND_EMERGENT_AGENCY.md`](../research/features/HYDRA_MULTI_AGENT_TOPOLOGY_AND_EMERGENT_AGENCY.md)
 - [`SONNET_SUPER_AGENT.md`](../research/features/SONNET_SUPER_AGENT.md)
-- [`todo/SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md`](../../.draft/todo/SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md)
-- [`todo/development_plan_guidelines_0209.md`](../../.draft/todo/development_plan_guidelines_0209.md)
+- [`todo/ELECTROWEAK_SYNTHESIS_SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md`](../../.draft/todo/ELECTROWEAK_SYNTHESIS_SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md)
+- [`todo/ELECTROWEAK_SYNTHESIS_DEVELOPMENT_PLAN_GUIDELINES_0209.md`](../../.draft/todo/ELECTROWEAK_SYNTHESIS_DEVELOPMENT_PLAN_GUIDELINES_0209.md)
 - [`docs/research/theory/SOTA_AGENTIC_CODING_HARNESS_ENGINEERING_TREATISE.md`](../research/theory/SOTA_AGENTIC_CODING_HARNESS_ENGINEERING_TREATISE.md)
 - [`docs/research/theory/optimizations_advanced_phd_LDA_techniques_tutorial.md`](../research/theory/optimizations_advanced_phd_LDA_techniques_tutorial.md)
 - [`docs/research/theory/agent-substrate.md`](../research/theory/agent-substrate.md)

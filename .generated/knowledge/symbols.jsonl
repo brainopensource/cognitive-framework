@@ -160,6 +160,7 @@
 {"symbol": "DiscoveredInstruction", "kind": "class", "defined_in": "vanguard/packages/agency/manifests/discovery.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "Discovery", "kind": "class", "defined_in": "vanguard/packages/domain/task_state.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "DispatchResult", "kind": "class", "defined_in": "vanguard/packages/kernel/dispatch.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
+{"symbol": "DistilledResult", "kind": "class", "defined_in": "vanguard/packages/agency/context/distiller.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "DogfoodReport", "kind": "class", "defined_in": "vanguard/packages/runtime/dogfood.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "DomainBindingRegistry", "kind": "class", "defined_in": "vanguard/packages/adapters/bindings/base.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "DurableCompositionRegistry", "kind": "class", "defined_in": "vanguard/packages/runtime/governance/learning.py", "canonical_owner": "docs/backend/architecture/memory-learning.md"}
@@ -332,6 +333,7 @@
 {"symbol": "LexSurgicalEditor", "kind": "class", "defined_in": "vanguard/packages/adapters/bindings/lex_surgical_editor.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "LexicalRetrievalProvider", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/retrieval.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "LineageRef", "kind": "class", "defined_in": "vanguard/packages/domain/execution/lineage.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "LlamaCppModel", "kind": "class", "defined_in": "vanguard/packages/adapters/models/llama_cpp.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "LoadedManifestPack", "kind": "class", "defined_in": "vanguard/packages/agency/manifests/loader.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "LocalFileMemoryAdapter", "kind": "class", "defined_in": "vanguard/packages/adapters/stores/memory_engine.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "LocalizationNodeRunner", "kind": "class", "defined_in": "vanguard/packages/runtime/staged_workflow.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -382,7 +384,6 @@
 {"symbol": "ObservedTestCounts", "kind": "class", "defined_in": "vanguard/packages/runtime/session.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "Occurrence", "kind": "class", "defined_in": "vanguard/packages/kernel/model.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "Ok", "kind": "class", "defined_in": "vanguard/packages/domain/wire/result.py", "canonical_owner": "docs/backend/reference/schemas.md"}
-{"symbol": "OllamaModel", "kind": "class", "defined_in": "vanguard/packages/adapters/models/ollama.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "OpenRouterModel", "kind": "class", "defined_in": "vanguard/packages/adapters/models/openrouter.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "OperationRecord", "kind": "class", "defined_in": "vanguard/packages/domain/execution/operation.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "OperationStatus", "kind": "class", "defined_in": "vanguard/packages/domain/execution/operation.py", "canonical_owner": "docs/backend/reference/schemas.md"}
@@ -601,6 +602,7 @@
 {"symbol": "TableState", "kind": "class", "defined_in": "vanguard/packages/adapters/environment/tableworld.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "TableWorldEnvironment", "kind": "class", "defined_in": "vanguard/packages/adapters/environment/tableworld.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "TableWorldEvaluator", "kind": "class", "defined_in": "vanguard/packages/adapters/environment/tableworld.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "TamperVerdict", "kind": "class", "defined_in": "vanguard/packages/runtime/governance/tamper_shield.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "TaskContext", "kind": "class", "defined_in": "vanguard/packages/runtime/compose.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "TaskFeatures", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/blackboard.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "TaskReport", "kind": "class", "defined_in": "vanguard/packages/runtime/dogfood.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}

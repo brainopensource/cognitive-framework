@@ -2,14 +2,17 @@
 
 **Authority**: Planning & Staging Resource (`.draft/`) — not law, not a board
 **Target Runway**: [`docs/execution/`](../docs/execution/) (`milestones.md`, `backlog.md`, `spec.md`, `technical.md`, `tasks.md`)
-**Source Corpus**: `docs/reports/reviews/electroweak_v092/` — `grok/`, `opus/`, `octopus/`, `gpt/`, **`plans/`** (`gem/` is empty)
+**Source Corpus**: `docs/reports/reviews/electroweak_v092/` — `grok/`, `opus/`, `octopus/`, `gpt/`, `gem/`, **`plans/`**
 **Companion**: `.draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md` (Synthesis of Record, 2026-09-04)
-**Revision**: v3 — fully aligned with `.draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md` (7 packages, T-69..T-97)
+**Revision**: v4 — re-aligned 2026-09-04 against the 900-line `.draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md`
+(7 packages, T-69..T-97, §9 evidence standard). Nine drifts corrected: wave mapping, `gem/` status,
+capability-bound native profiles, read-before-edit as experiment, T-46 narrowed (not superseded),
+MS-TRUTH instrument gating, MS-CONTROL product-path qualification, T-83 split, Defect K precedence.
 **Verification basis**: working tree `feat/strongforce_beta_release_v093`, HEAD `537bdb66`
 
 ---
 
-## 0. What changed in v2, and why you must not use v1
+## 0. What changed since v1, and why you must not use it
 
 v1 of this blueprint was written from the Gemini draft synthesis, before anyone
 diffed the review corpus against the source tree. That audit is now done, and it
@@ -43,8 +46,32 @@ smoothed over.
 | Octopus audit subject | `a8775c3f` (`integration/consolidated-v092`) | **Different tree.** Octopus findings need re-verification before use |
 | Grok live trial `gf-orders-001` | run later at `ffc3dc926e80` | `abandoned`, **0 effects** — the only dogfood datum in the corpus |
 | Current HEAD | `537bdb66` | Three commits of doc restructuring since |
-| `gem/` | **empty directory** | The Gemini draft synthesis was never filed into the corpus. Do not cite `gem/`. |
+| `gem/` | **2 files** (`README.md`, `gem_sota_harness_evolution_report.md`) | **Changed since v3.** `gem/` was empty when this blueprint was first written; the Gem technical evaluation has since been filed. Synthesis of Record §0 resolution 5 **integrates** it: Trailing Goal Echo, CTRF distillation, the $d_t = d_{t-2}$ oscillation breaker, greenfield vacuity rejection, and TTC/RTV. Cite `gem/` for those five mechanisms. |
 | `plans/` | 6 files, 7,945 lines | **v1 omitted this entirely.** It holds `DEVELOPMENT_FINAL_PLAN{,_B,_v2}.md` and `PHASE-0_...` — the documents `milestones.md` names in its own `derived_from:` frontmatter. Any prompt touching `milestones.md` must read them. |
+
+**Precedence note on Defect K (v4).** Where this blueprint and the Synthesis of
+Record disagree, the Synthesis normally wins — it is the authority of record. This
+row is the one deliberate exception, because it is the more recent and deeper read
+and it was re-verified at HEAD while writing v4:
+
+```
+$ sed -n '1090,1112p' vanguard/packages/adapters/models/openrouter.py
+    return Result.fail(kind="instrument_error",
+        message="provider streaming response was malformed, truncated, or empty")   # :1093
+    ...
+        return Result.fail(kind="instrument_error",
+            message="provider streaming response was malformed, truncated, or empty")  # :1110
+```
+
+Neither call site passes `retryable=`. The Synthesis of Record §2 lists
+`retryable=True` at `:830, :862, :881, :917, :933` and concludes "verify-first,
+may close as `no_defect`" — but those five are the TRANSPORT paths; the two
+malformed-stream sites are a different code path and carry no flag at all.
+`_MALFORMED_STREAM_MESSAGE` (`:943`) and `_EMPTY_PROPOSAL_RETRIES` (`:946`) exist
+and are used at `:972-987`, not here. **T-70a stays reproduce-first as a matter of
+discipline, but it is expected to reproduce.** Update the Synthesis of Record §2
+row and its §8 residual-uncertainty entry to match; until that edit lands, this
+row is the current finding.
 
 **Drift rule for every prompt below:** a corpus claim is a *hypothesis about a
 past tree*. Before writing it into the runway, re-run its stated reproduction
@@ -118,7 +145,7 @@ Recorded because a prompt suite that repeats a stale claim manufactures work.
 |---|---|---|---|
 | *"`ProgressVector` should be built"* → corrected in-corpus to *"it already exists (`domain/ledger/progress.py`, 237 LOC); it should be **wired**, not built."* | `opus_solution.md` §3.2 | `progress.py` is 237 lines **and is now imported by `runtime/session.py`** | **CLOSED.** Wiring landed. Do not re-open. |
 | *"Prompt caching: the free half skipped"* (D3) — walked back in-corpus: DeepSeek returns `cached_tokens: 2048/2304`, so the prefix-stable compiler *already earns its design there*; **"§D3 overstated the severity."** | `opus/part2` §D3 vs `opus_solution.md` §3.1 | `prefix_freeze: true` declared in `harness.yaml` | **DOWNGRADE.** Explicit `cache_control` still matters for Anthropic-style providers. Do not budget it as a headline defect. |
-| Defect K — malformed SSE chunk is non-retryable, killing the whole episode | `opus/part7` §3.1, naming `openrouter.py:1095` and `:1112` | **Still unfixed, and confirmed at those exact lines.** Neither call site passes `retryable=True`; `_MALFORMED_STREAM_MESSAGE` (`:943`) and `_EMPTY_PROPOSAL_RETRIES` (`:946`) exist and are unused there. | **UPGRADE.** The Synthesis of Record hedged this as "verify-first, may be `no_defect`" from a shallower read; that hedge was wrong. It is a live 3-line fix, and it **biases every A/B** — DeepSeek is routed non-streaming and so is structurally immune. |
+| Defect K — malformed SSE chunk is non-retryable, killing the whole episode **(this row OVERRIDES the Synthesis of Record — see note below)** | `opus/part7` §3.1, naming `openrouter.py:1095` and `:1112` | **Still unfixed, and confirmed at those exact lines.** Neither call site passes `retryable=True`; `_MALFORMED_STREAM_MESSAGE` (`:943`) and `_EMPTY_PROPOSAL_RETRIES` (`:946`) exist and are unused there. | **UPGRADE.** The Synthesis of Record hedged this as "verify-first, may be `no_defect`" from a shallower read; that hedge was wrong. It is a live 3-line fix, and it **biases every A/B** — DeepSeek is routed non-streaming and so is structurally immune. |
 
 ---
 
@@ -141,8 +168,21 @@ Recorded because a prompt suite that repeats a stale claim manufactures work.
   13. Kill List & Non-Goals Register                      (backlog.md §Risks)
 ```
 
-**Wave mapping.** Prompts 03, 04 and **10** are Wave 1. 05–06 are Wave 2. 07 is
-Wave 3. 08 is Wave 4. 09 is Wave 5 and is blocked on `MS-CONTROL`.
+**Wave mapping** (Synthesis of Record §7 — note this CHANGED in v4; the v3 mapping
+had the pre-correction order):
+
+| Wave | Prompts | Rationale |
+|---|---|---|
+| **1 — Settlement & Signal Truth** | 03, 04, **10** (INS-01/BRG-01 halves) | The agent must be able to call tools, write, finish — and the instrument must not lie |
+| **2 — Frozen Control, Honest Instrument & Presets** | **08**, 10 (EXP-01 half) | `MS-CONTROL` closes here. Presets are a *control* problem, not a late optimisation |
+| **3 — Edit & Retrieval Treatments** | **05**, **06** | Post-control. Opus Part 7 demoted `str_replace` and LDA from product blockers to **treatments whose lift must be measured** |
+| **4 — Context Economy & Reliability** | 07 | Post-control. T-77, T-80 |
+| **5 — Outer Director & Arms** | 09 | Blocked on a closed `MS-CONTROL` |
+
+**Do not restore the v3 mapping** (05–06 in Wave 2, 08 in Wave 4). It inverts the
+ordering correction: it would qualify the control *after* the treatments it is
+supposed to measure them against. Prompt 11's own WAVES block already carries the
+corrected order — v3 contradicted itself between §5 and Prompt 11.
 
 ---
 
@@ -169,8 +209,13 @@ HEAD is `537bdb66`. Every corpus claim is a hypothesis about a past tree.
 3. Treat octopus findings with extra care: they were verified against
    `integration/consolidated-v092` (`a8775c3f`), a DIFFERENT tree from the one
    grok and opus reviewed. Re-verify before use.
-4. `gem/` is empty. Do not cite it. The Gemini draft synthesis is superseded by
-   `.draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md`.
+4. `gem/` now holds two files (it was empty when this suite was first drafted).
+   The Gemini *draft synthesis* remains superseded by
+   `.draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md`, but the Gem *technical
+   evaluation* is INTEGRATED by §0 resolution 5 and is citable for exactly five
+   mechanisms: Trailing Goal Echo, CTRF distillation, the $d_t = d_{t-2}$
+   oscillation breaker, greenfield vacuity rejection, and TTC/RTV. Cite it for
+   those and nothing else.
 
 OUTPUT: a table of {claim, corpus anchor, reproduction command, verdict at HEAD}.
 Any claim that is FIXED or NOT REPRODUCIBLE is struck from its downstream prompt.
@@ -225,6 +270,17 @@ AMEND IN PLACE:
 REQUIREMENTS:
 - Every row carries ID, Title, Subsystem, Lane, Status, Target Milestone, an
   explicit Reconciliation field, and an executable acceptance falsifier.
+- Every row DECLARES ITS ADMISSION ROUTE (Synthesis of Record §9.1). This is the
+  anti-sprawl mechanism and it is not optional:
+    * `Route R` (Repair) — a defect verified at a named source line; the falsifier
+      is a regression test; NO experiment is required. Measuring whether a broken
+      instrument beats a broken instrument is not science.
+    * `Route L` (Lift) — a mechanism claimed to improve an outcome the control
+      already produces; requires a PREREGISTERED single-variable ablation against
+      the Wave 2 control before it may leave `PROPOSED`.
+  A row that can state neither route stays `PROPOSED`. A Route L row that loses
+  its ablation moves to `DEFERRED` WITH ITS CONFIGURATION DIGEST RETAINED —
+  retired, not deleted (§9.1).
 - Update §3's package index rows (TRUTH, SEE, CHANGE, CONTROL, INSTRUMENT, COMPARISON, CAMPAIGN).
 - Append the alias-table rows matching Synthesis of Record §4.4.
 - Do NOT restamp `SUB-01` (§2.9's own standing instruction) or any DONE row not
@@ -276,6 +332,13 @@ MS-TRUTH gate condition (correct form):
   - Bind a typed verification subject (T-07).
   - Greenfield oracle observed red-on-stub before green-on-impl (T-19).
   - Record BOTH settlement axes (T-72), neither derived from the other.
+  - Greenfield vacuity rejection (T-81): a suite passing on empty stubs
+    (`pass` / `NotImplementedError`) is rejected `VACUOUS_ORACLE_REJECTED`.
+  - GATED ALSO ON THE INSTRUMENT (added in v4, matching §6 of the Synthesis of
+    Record): INS-01 (**T-84**, **T-85**) and BRG-01 (**T-87**, **T-88**). A
+    settlement claim recorded by an instrument that reuses a fixed run id,
+    publishes an empty receipt, or may have addressed a different model than the
+    one launched is not evidence.
   - FALSIFIER: a run may legitimately record `terminal_status=abandoned` AND
     `disposition=passed`, and the ledger replays it without contradiction.
 
@@ -312,8 +375,16 @@ finish. Document the exact recipe, signatures, error types and falsifiers.
    production model hits the fallthrough `ModelCapabilityProfile(key)` and gets
    `FENCED_JSON`, so `dialect.py:124` dumps schemas as prose into the system
    prompt and the model's function-calling head never engages.
-   FIX: populate `_PROFILES` with `ToolCallStyle.NATIVE` per production model.
-   Preserve the `degraded()` ladder NATIVE→JSON_SCHEMA→FENCED_JSON→TEXT_GRAMMAR.
+   FIX — CAPABILITY-BOUND, not blanket (narrowed in the Synthesis of Record §2;
+   an earlier revision of this prompt said "per production model" and that is now
+   wrong): add an explicit `ToolCallStyle.NATIVE` profile ONLY for production
+   routes whose native-tool support is VERIFIED by a provider-shape vector.
+   Unverified and unknown registry entries MUST retain the honest degradation
+   chain NATIVE→JSON_SCHEMA→FENCED_JSON→TEXT_GRAMMAR via `degraded()`. Opus
+   measured DeepSeek, GLM and `openrouter/free` — not every model now in the
+   registry, so a global stamp would assert capability nobody tested.
+   FALSIFIER: every native-declared route dispatches `patch.apply` and `finish`
+   with no protocol degradation; an unverified route is never silently promoted.
 
 2. Approval threshold — `runtime/session.py:656`
    TREE: `approval_required_above=(None if self.scope.sealed else "low")`.
@@ -485,10 +556,20 @@ NOTE: this is NOT a package named "EDT-01". It amends T-47 in the CHANGE package
    forcing a targeted `fs.read` re-anchor. No fuzzy relocation, no full-file
    overwrite fallback.
 
-3. Read-before-edit at the EFFECT BOUNDARY, not at finish. TREE:
-   `_completion_inspected_files` is already tracked in session and consulted at
-   completion. Move the check to `patch.apply` dispatch →
-   `MODIFIED_FILE_NOT_INSPECTED`.
+3. Read-before-edit — AN EXPERIMENT, NOT A UNIVERSAL PROHIBITION. This changed
+   in the Synthesis of Record §2 and an earlier revision of this prompt has the
+   old form ("move the check to `patch.apply` dispatch"). DO NOT WRITE THAT as an
+   unconditional gate: a hard dispatch prohibition repeats the `derive_phase`
+   error — controlling the PATH instead of the OUTCOME — which §0 resolution 3
+   rejects.
+   TREE: `_completion_inspected_files` is already tracked in session and consulted
+   at completion.
+   SPECIFY INSTEAD: (a) read-before-edit as prompt guidance in the default pack,
+   and (b) a declared STRICT PROFILE that enforces it at `patch.apply` dispatch
+   with typed `MODIFIED_FILE_NOT_INSPECTED`, switchable independently so it can be
+   A/B-ablated against the Wave 2 control. Security-sensitive profiles may require
+   it explicitly. This is a Route L row (§9.1): it claims lift, so it needs a
+   preregistered ablation, not an argument.
 
 4. 2PC — DO NOT REBUILD. TREE: `adapters/environment/transaction.py` already
    ships `AtomicMultiFileTransactionManager`, `FileMutation`,
@@ -503,8 +584,10 @@ NOTE: this is NOT a package named "EDT-01". It amends T-47 in the CHANGE package
    than specifying it as new work.
 
 FALSIFIER: a 5-file edit with a syntax error in file 4 leaves all five
-byte-identical (`tree_hash_before == tree_hash_after`); a patch to an uninspected
-file is rejected at dispatch; no fuzzy path exists by inspection.
+byte-identical (`tree_hash_before == tree_hash_after`); no fuzzy path exists by
+inspection; and — for the read-before-edit treatment — a strict-profile run and a
+control run differ ONLY by the declared read-before-edit policy, with the strict
+run rejecting a patch to an uninspected file at dispatch and the control run not.
 ```
 
 ---
@@ -544,7 +627,11 @@ Source: opus part3 §6.2, opus README §Divergences 2, ports/index.py
      hit — forfeiting the ~90% saving the same treatise advocates elsewhere.
    PageRank over the LDA graph IS valuable — as a ranking function BEHIND an
    agent-issued `refs`/`callers` query returning into L5. Ranking is pack policy
-   (`context_ranker`), never the port. This is why T-46 is superseded.
+   (`context_ranker`), never the port. T-46 is therefore NARROWED, NOT ERASED
+   (Synthesis of Record §4.1/§6 — an earlier revision said "superseded", which
+   reads as deletion): optional query-local PPR ranking survives as an A/B-able
+   pack policy inside an agent-issued request. No ranking enters `IndexPort`, the
+   store adapter, or L1-L3.
 
 4. Provider cache breakpoints at the L3 boundary; record `cache_read_tokens` /
    `cache_write_tokens`.
@@ -661,9 +748,20 @@ NOTE on dimensions: `kernel/budget.py` declares
 `Reservation`, because summing sibling depths is wrong. Any spec text must
 respect that split rather than describing "typed budgets" as one flat bag.
 
-MS-CONTROL: frozen 30-task multi-class canary, Wilson lower bound ≥ 0.40 on
-single-worker `vg-code-balanced`. Release law: zero specialist or director lift
-claims authorized before this gate closes (D-03).
+MS-CONTROL: frozen ≥30-task multi-class canary, Wilson lower bound ≥ 0.40 on
+single-worker `vg-code-balanced`, EXECUTED THROUGH `runtime/entrypoint.py`
+(**T-89**, finding **C-18**): `benchmarks/agentic_harness_matrix_benchmark.py:98`
+calls `Runtime.execute_profiled` directly today and therefore qualifies a
+DIFFERENT SUBJECT than the product ships. MS-CONTROL qualifies what ships, or it
+qualifies nothing.
+
+Report under the §9 evidence standard: **false-completion rate = 0 is a HARD
+VETO** that no pass rate, token efficiency, or cost advantage overrides, and
+Wilson LB is computed only over `evidence_label=LIVE-*` rows.
+
+T-80 (anti-thrashing oscillation breaker) is a POST-CONTROL TREATMENT and does
+NOT gate this baseline. Release law: zero specialist or director lift claims
+authorized before this gate closes (D-03).
 ```
 
 ---
@@ -712,7 +810,7 @@ memory/retrieval system (extend LDA); `ORCH-10` is off the critical path.
 
 ---
 
-#### Prompt 10: Instrument Integrity & Measurement Ladder (INS-01, BRG-01, DLG-01, EXP-01)
+### Prompt 10: Instrument Integrity & Measurement Ladder (INS-01, BRG-01, DLG-01, EXP-01)
 
 * **Target Files**: `technical.md` (§ Benchmark Instrument), `spec.md` (§ Results Schema & Evidence Standard)
 * **Corpus anchor**: `octopus/…evidence-audit.md` §1/§3b/§5; `opus/part7…` §6; `gpt/…` §B/§E/§PR-2/§PR-3; Synthesis of Record §4.1, §9
@@ -820,7 +918,21 @@ TASK INVENTORY TO COMMIT (from Synthesis of Record §4.5):
   - T-80: Anti-thrashing workspace oscillation breaker dt == dt-2 (CONTROL, Lane A)
   - T-81: Greenfield oracle vacuity rejection check (TRUTH, Lane B)
   - T-82: Fenced JSON action unwrapping & anti-premature finish (HAR-01 / TRUTH, Lane A)
-  - T-83: Greenfield prompt modernization (T-83a) & callers_by_symbol admission (T-83b) (CHANGE / TRUTH, Lane A)
+  - T-83a: Greenfield prompt modernization — purge "Write ONE file per turn /
+      do not read or search first" from `system-prompt.txt` (TRUTH, Lane A).
+      requires: [] — a pure prompt edit with NO dependency. WAVE 1.
+  - T-83b: `callers_by_symbol` completion admission — wire `IndexPort.get_callers`
+      into `session._admit_completion` via `multi_file_completeness.py`
+      (CHANGE, Lane A). requires: [T-75]. WAVE 3.
+      *** SPLIT REQUIRED — DO NOT FILE T-83 AS ONE TASK ***
+      Synthesis of Record §4.5 gives T-83 `depends_on: T-75, T-78` while §7 places
+      it in Wave 1 — but T-75 (`LdaRepoIndex`) and T-78 (`str_replace`) are BOTH
+      Wave 3. Filed as a single task it is unbuildable: the caller-admission half
+      would call `IndexPort.get_callers` two waves before the index adapter that
+      makes it useful exists. The prompt half has no such dependency and belongs
+      in Wave 1 with the rest of the greenfield law. Split it, and record the
+      split back into the Synthesis of Record §4.5/§7 so the three documents do
+      not diverge.
   - T-84: Unique durable run identity; explicit resume (INS-01, Lane A)
   - T-85: Product receipt telemetry passthrough (INS-01, Lane A)
   - T-86: Live-path alias & tool-name validation (DLG-01, Lane A)
@@ -837,9 +949,9 @@ TASK INVENTORY TO COMMIT (from Synthesis of Record §4.5):
   - T-97: CLI product surface — reproduce then repair (INS-01, Lane A)
 
 WAVES (Synthesis of Record §7):
-  Wave 1 — HAR-01 (T-69..T-74, T-82) + TRUTH (T-04, T-05, T-07, T-18 REOPENED, T-81, T-83) + INS-01 (T-84) + BRG-01 (T-87, T-88, T-91)
+  Wave 1 — HAR-01 (T-69..T-74, T-82) + TRUTH (T-04, T-05, T-07, T-18 REOPENED, T-81, T-83a) + INS-01 (T-84) + BRG-01 (T-87, T-88, T-91)
   Wave 2 — CMX-01 (T-79) + INS-01 (T-85, T-89) + EXP-01 (T-92..T-95) + MS-CONTROL canary (N ≥ 30)
-  Wave 3 — CHANGE (T-78 exact str_replace) + IDX-01 (T-75..T-77) + DLG-01 (T-86, T-90)
+  Wave 3 — CHANGE (T-78 exact str_replace, T-83b caller admission) + IDX-01 (T-75..T-77) + DLG-01 (T-86, T-90)
   Wave 4 — Context Economy & Trailing Echo (T-77) + Anti-thrashing breaker (T-80)
   Wave 5 — OCT-01..04 (T-31, T-54) + ARM-01 (T-96), blocked on MS-CONTROL closed
 

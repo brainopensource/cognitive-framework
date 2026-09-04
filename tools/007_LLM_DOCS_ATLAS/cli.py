@@ -10,6 +10,7 @@ from pathlib import Path
 from .atlas import (
     collect,
     compile_task_context,
+    compile_task_plan,
     find_associated_tests,
     generate_repository_map,
     get_callers,
@@ -17,8 +18,10 @@ from .atlas import (
     get_repository_map,
     get_storage,
     get_symbol_details,
+    index_delta,
     index_repository,
     query_repository,
+    resolve_symbol_intent,
 )
 from .core.config import AtlasContext
 from .core.models import Candidate, ContextPacket, serialise
@@ -79,6 +82,7 @@ def main(argv=None):
     idx_p = sub.add_parser("index", help="Index repository into SQLite + FTS5 fact graph")
     idx_p.add_argument("--incremental", action="store_true", help="Perform warm incremental re-index")
     idx_p.add_argument("--rebuild", action="store_true", help="Purge all facts first, then re-index (kills stale/orphan rows)")
+    idx_p.add_argument("--delta", nargs="*", default=None, help="Perform ephemeral delta re-index on dirty files or specified files")
     idx_p.add_argument("--json", action="store_true")
 
     # 2. Status & Scan
@@ -103,6 +107,12 @@ def main(argv=None):
     sym_p.add_argument("--exact", action="store_true", help="Suppress substring matches and match exact symbol name only")
     sym_p.add_argument("--json", action="store_true")
 
+    # 4b. Resolve (Phase 3: Semantic Intent Symbol Resolution)
+    res_p = sub.add_parser("resolve", help="Semantic intent symbol resolution (find symbols by natural language intent)")
+    res_p.add_argument("query", type=str, help="Natural language intent query (e.g. 'budget reservation and commitment')")
+    res_p.add_argument("--top-k", type=int, default=5, help="Number of symbols to return")
+    res_p.add_argument("--json", action="store_true")
+
     # 5. Callers
     call_p = sub.add_parser("callers", help="Find upstream callers of a symbol")
     call_p.add_argument("symbol_id", type=str)
@@ -121,6 +131,15 @@ def main(argv=None):
     ctx_p.add_argument("--no-cache", action="store_true", help="Bypass packet cache")
     ctx_p.add_argument("--json", action="store_true")
     ctx_p.add_argument("--include-research", action="store_true")
+
+    # 7b. Plan (Phase 1: One-Shot Task Bundle)
+    plan_p = sub.add_parser("plan", help="Compile one-shot task bundle: primary symbols, blast radius, falsifiers, obligations, context")
+    plan_p.add_argument("task", type=str, help="Task description or goal")
+    plan_p.add_argument("--budget", type=int, default=8000, help="Token budget for context")
+    plan_p.add_argument("--strategy", type=str, default="ppr_submodular", choices=["ppr_submodular", "hybrid_rrf", "fts5_bm25"], help="Context compilation strategy")
+    plan_p.add_argument("--top-symbols", type=int, default=5, help="Number of primary symbols to pinpoint")
+    plan_p.add_argument("--no-delta", action="store_true", help="Skip automatic delta update of dirty files")
+    plan_p.add_argument("--json", action="store_true")
 
     # 8. Map & RepoMap
     map_p = sub.add_parser("map", help="Display repository architectural topology map")
@@ -177,7 +196,11 @@ def main(argv=None):
     result = None
 
     if args.command == "index":
-        result = index_repository(repo_root, incremental=args.incremental, rebuild=getattr(args, "rebuild", False))
+        if args.delta is not None:
+            delta_files = args.delta if len(args.delta) > 0 else None
+            result = index_delta(repo_root, files=delta_files)
+        else:
+            result = index_repository(repo_root, incremental=args.incremental, rebuild=getattr(args, "rebuild", False))
     elif args.command in {"status", "scan"}:
         result = _snapshot(ctx)
     elif args.command == "query":
@@ -196,6 +219,25 @@ def main(argv=None):
         result = fts_res
     elif args.command == "symbol":
         result = get_symbol_details(repo_root, args.symbol, exact=getattr(args, "exact", False))
+    elif args.command == "resolve":
+        matches = resolve_symbol_intent(repo_root, args.query, top_k=args.top_k)
+        if not args.json:
+            if not matches:
+                print(f"No symbols found matching intent '{args.query}'")
+                return 0
+            print(f"# Resolved Symbols for: '{args.query}'\n")
+            for m in matches:
+                print(f"- **{m['name']}** (`{m['kind']}`) in [`{m['file_path']}:L{m['start_line']}`]({m['file_path']}#L{m['start_line']})")
+                print(f"  Confidence: {m['confidence_score']} | Callers: {m['callers_count']}")
+                if m.get("signature"):
+                    print(f"  Signature: `{m['signature']}`")
+                if m.get("reason"):
+                    print(f"  Reason: {m['reason']}")
+                if m.get("docstring"):
+                    print(f"  Doc: {m['docstring']}")
+                print()
+            return 0
+        result = matches
     elif args.command == "callers":
         result = get_callers(repo_root, args.symbol_id)
     elif args.command == "references":
@@ -209,6 +251,19 @@ def main(argv=None):
             use_cache=not getattr(args, "no_cache", False),
         )
         result = serialise(packet)
+    elif args.command == "plan":
+        plan_bundle = compile_task_plan(
+            repo_root,
+            args.task,
+            budget=args.budget,
+            strategy=getattr(args, "strategy", "ppr_submodular"),
+            top_symbols=getattr(args, "top_symbols", 5),
+            auto_delta=not getattr(args, "no_delta", False),
+        )
+        if not args.json:
+            print(plan_bundle["plan_markdown"])
+            return 0
+        result = plan_bundle
     elif args.command == "map":
         result = get_repository_map(repo_root)
     elif args.command == "repomap":

@@ -71,21 +71,27 @@ sequence before broad exploration. Each step answers a specific development ques
 # Step 0 — Bootstrap state: which gates must stay green? what is already failing?
 cat dev_context_logs/context_summary.md          # refresh first with: make dev-context
 
-# Step 1 — Route the task: which subsystem, which canonical documents, what fits the budget?
+# Step 1 — Primary SOTA Fast Path: One-shot task bundle (symbols, callers, falsifiers, docs)
+#          Replaces multiple manual searches with a single, auto-delta synchronized plan.
+uv run lda plan "<task keywords or intent>" --budget 8000
+
+# Step 1b — Concept / intent lookup (when symbol name is unknown):
+uv run lda resolve "<natural language intent or concept>"
+
+# Step 2 — Post-edit sync (sub-50ms incremental re-index with 0 MB background daemon):
+uv run lda index --delta
+
+# Step 3 — Deterministic Fallback (when LDA index is cold, degraded, or unbuilt):
 python3 tools/docs_rag_v0.py "<task keywords>" --budget 8000
-
-# Step 2 — Reverse routing when starting from a code path you must modify:
-#          which documents am I obliged to read and keep synchronized?
 python3 tools/docs_rag_v0.py --file vanguard/packages/kernel/budget.py
-
-# Step 3 — Pin entry symbols, then read only the canonical owner + targeted ranges
 grep "<Symbol>" .generated/knowledge/symbols.jsonl
 ```
 
 - Step 0 answers: *which gates, headrooms, and failure signatures are already known?*
-- Step 1 answers: *which subsystem owns the task and which canonical owner documents apply?*
-- Step 2 answers: *what is the canonical documentation debt attached to the file I will edit?*
-- Step 3 answers: *which existing classes/protocols must my change extend without breaking?*
+- Step 1 answers: *which subsystem owns the task, what are the exact symbol ranges, who calls them (blast radius), which canonical docs must stay synchronized, and which executable test falsifiers verify the change?*
+- Step 1b answers: *which classes/functions implement a given semantic behavior or concept?*
+- Step 2 answers: *how do I refresh AST ranges and relation facts instantly after editing a file without a full rebuild?*
+- Step 3 answers: *how do I deterministically route documentation debt if the SQLite graph is unavailable?*
 
 **Health check before trust**: `.generated/knowledge/report.json` must report
 `"status": "VALIDATED"` with non-zero row counts. LDA users must additionally confirm

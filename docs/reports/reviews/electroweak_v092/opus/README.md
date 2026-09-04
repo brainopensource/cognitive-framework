@@ -60,6 +60,42 @@ This review was written after reading, and independently corroborates, the follo
 | `falsified` paths are the highest-value memory field | `../octopus/agents/long-horizon-context-engine.md` | **Strongly endorsed** (Part 3 §7.4) |
 | `ProgressVector` + closed pathology vocabulary | `../octopus/agents/meta-conductor.md` | **Endorsed, with sequencing objection** (Part 3 §10, Part 6 §N4) |
 | Authority calculus / proposal-not-program thesis | `../../main/aether_technical_report_part1_foundations.md` | Accepted as the correct reading of the kernel |
+| F2 context bloat → distillation middleware | `docs/research/theory/SOTA_AGENTIC_CODING_HARNESS_ENGINEERING_TREATISE.md` §2, §6 | **Independently reached**; same conclusion (Part 3 §7.1) |
+| F3 premature exit → hard admission gate on workspace digest | same, §2 | **Independently reached**; same conclusion (Part 2 §D4) |
+| Prefix-cache tiering, ~90% cost reduction | same, §6.1 | **Agreed**; and Part 1 §2.4 finds the breakpoints are still never emitted |
+| 9-strategy fuzzy-match patch cascade | same, §5.1 | **Disagreed — see §Divergences below** |
+| LDA Personalized-PageRank auto-injection into `L2` | same, §8.1 | **Disagreed — see §Divergences below** |
+
+### Divergences from the existing treatise
+
+`docs/research/theory/SOTA_AGENTIC_CODING_HARNESS_ENGINEERING_TREATISE.md` (961 lines,
+`authority: non-canonical`) covers overlapping ground and independently reaches several of the same
+conclusions. Two of its recommendations conflict with this review, and the conflicts are
+load-bearing rather than stylistic. Both are argued in full at the cited sections.
+
+**1. Fuzzy patch matching (treatise §5.1) vs. unique-exact-match-or-fail (this review, Part 3 §5).**
+The treatise proposes a nine-strategy cascade that relaxes whitespace, indentation, and line
+endings until a match is found. In indentation-sensitive languages, indentation *is* semantics, so
+"indentation-flexible" matching can apply a syntactically valid edit at the wrong nesting level and
+produce a silent behavioural change with no error. Note also that the treatise's own F1 case study
+records that the actual damage came from the model's *fallback to a whole-file overwrite* after
+rejection — not from the rejection itself. The correct fixes are therefore a clean rejection that
+re-shows current file content, a parse-preflight before commit, and removing whole-file overwrite
+as a recovery path. Strategies 1–2 (exact, line-trimmed-EOL) are safe and worth keeping;
+strategies 3+ trade a loud failure for a quiet one. See Part 3 §5.2–5.3.
+
+**2. PPR auto-injection into `L2` (treatise §8.1) vs. agent-issued queries (this review, Part 3 §6.2).**
+Two objections. *Architecturally*, `ports/index.py` states the rule directly — "a retrieval
+component that decided what the agent should look at next would be a second policy wearing the word
+'index'". *Mechanically*, `agency/context/layers.py` documents that `L2` is inside the cache prefix
+and that mid-run additions to `L1`–`L4` destroy every downstream cache hit. Injecting per-turn
+task-relevant symbols into `L2` would therefore forfeit the ~90% prefix-cache saving the same
+treatise advocates in §6.1. PageRank over the LDA graph is genuinely valuable — as a *ranking
+function behind an agent-issued `refs`/`callers` query*, returning results into `L5`, not as an
+automatic context injector into the prefix.
+
+Neither divergence affects the roadmap's sequencing: both live inside Sprint 1 (edit primitive) and
+Sprint 2 (index wiring) respectively.
 
 Where this review differs from its peers, it says so explicitly and gives the evidence. The main
 divergence is one of **ordering**: the peer corpus proposes building the outer loop, the conductor,

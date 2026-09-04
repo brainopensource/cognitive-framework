@@ -136,19 +136,23 @@ of its own.
 3. [`docs/architecture/overview.md`](docs/architecture/overview.md) & [`docs/backend/`](docs/backend/) — as-built architecture and rationale.
 4. [`docs/execution/tasks.md`](docs/execution/tasks.md) & [`docs/execution/milestones.md`](docs/execution/milestones.md) (future work vs TARGET gates).
 
-### Fast targeted navigation
+### Fast targeted navigation (LDA SOTA Repository Intelligence)
 
-For implementation and review work, use the repository's generated intelligence to route a small,
-task-specific context before opening source broadly:
+For implementation and review work, use the repository's intelligence engine to route a small,
+task-specific context packet instead of opening source broadly or burning context window tokens:
 
 ```bash
-# 0. Bootstrap state (gates, headroom, known failures)
-cat dev_context_logs/context_summary.md
+# 1. One-shot task bundle: primary symbols, blast radius (callers), doc obligations, & test falsifiers
+uv run lda plan "<task keywords or intent>" --budget 8000
 
-# 1. Route a task to its canonical documents, inside a token budget
+# 2. Semantic intent symbol resolution (when symbol name is unknown):
+uv run lda resolve "<natural language intent or concept>"
+
+# 3. Sub-50ms incremental re-index after code edits (0 MB idle RAM, zero background daemon):
+uv run lda index --delta
+
+# 4. Fallback routing via standalone tools (when LDA index is cold or unbuilt):
 python3 tools/docs_rag_v0.py "<task keywords>" --budget 8000
-
-# 2. Reverse route a code path to its canonical owner documentation + symbols
 python3 tools/docs_rag_v0.py --file vanguard/packages/kernel/budget.py
 ```
 

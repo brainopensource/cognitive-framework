@@ -25,8 +25,12 @@ pass through the repository's normal ADR and backlog promotion process before an
 | 4 | [`part4-target-architecture.md`](part4-target-architecture.md) | What I would build from scratch, and the delta from what exists. |
 | 5 | [`part5-roadmap.md`](part5-roadmap.md) | Ordered execution plan with acceptance gates and falsifiers. |
 | 6 | [`part6-antipatterns-and-framework-feedback.md`](part6-antipatterns-and-framework-feedback.md) | What *not* to do, and Vanguard's standing as a framework for building agents. |
+| 7 | [`opus_solution.md`](opus_solution.md) | **Measured.** Live root-cause of the five config defects that broke the agent, with the fix proven end-to-end. |
+| 8 | [`part7-measured-ladder-and-sota-plan.md`](part7-measured-ladder-and-sota-plan.md) | **Measured.** The frozen 20-task suite across 3 models, 5 further defects, and the consolidated SOTA plan. |
 
-If you read only one section, read **Part 2 §D1** and **Part 5 §Sprint 1**.
+If you read only one section, read **Part 7 §2** (the measured results) and **Part 7 §4** (the
+consolidated plan). Parts 2 and 5 were written before measurement; Part 7 §4 records where
+measurement corrected their priority ranking.
 
 ---
 

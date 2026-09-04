@@ -42,10 +42,13 @@ proposals, not HEAD.
 Not a prompt pack. Not Chimera as product.
 
 **Pin:** `5243866bc169c7f60cc7d4f74b9a853f60356381` on
-`feat/strongforce_beta_release_v093` (2026-09-04). LDA index was healthy but
-**STALE vs HEAD**. `dev_context_logs/context_summary.md` was from another
-branch — ignored for TCB/test numbers. **Tests were not re-run for this
-review; nothing below is `PASS`.**
+`feat/strongforce_beta_release_v093` (2026-09-04). Live dogfood trial
+`gf-orders-001` was run later on the same branch at `ffc3dc926e80` (see
+[`05-whitepaper-…`](05-whitepaper-settlement-evolution-and-live-trial.md)).
+LDA index was healthy but **STALE vs HEAD**. `dev_context_logs/context_summary.md`
+was from another branch — ignored for TCB/test numbers. **Full suites were
+not re-run for the original review; nothing below is `PASS` except the
+explicit trial oracle and ledger facts in file 05.**
 
 **Role constraint honored:** no second `EpisodeEngine`; no Chimera as product
 path; no kernel `ast.parse`; no HYDRA-as-default; meta cannot admit `completed`
@@ -62,6 +65,7 @@ or grow budget. Official SWE/DeepSWE is G-3 measurement, not definition of done.
 | [`02-theories-and-control-laws.md`](02-theories-and-control-laws.md) | Consolidated theories from this tree's research + SOTA control laws; FACT vs fiction; why-not/how/when |
 | [`03-evolution-architecture.md`](03-evolution-architecture.md) | Inner loops, outer loops, framework, new capabilities, kill list |
 | [`04-sota-program.md`](04-sota-program.md) | What I would actually do: greenfield, brownfield, long-run, agent-builder, 10-step order |
+| [`05-whitepaper-settlement-evolution-and-live-trial.md`](05-whitepaper-settlement-evolution-and-live-trial.md) | PhD-style white paper: three-audit synthesis, board sequencing, operator dogfood, live trial `gf-orders-001` (abandoned, 0 effects), evolution program. Non-authorizing. |
 
 Every claim about the tree is **FACT** (opened at pin) or **`[PROPOSAL]`**.
 Research-doc claims and internet claims are labeled. Mechanism presence ≠

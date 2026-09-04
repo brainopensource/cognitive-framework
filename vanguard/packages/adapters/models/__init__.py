@@ -16,7 +16,6 @@ _LAZY = {
     "normalize_response": ".dialect",
     "LamModelAdapter": ".lam",
     "LlamaCppModel": ".llama_cpp",
-    "OllamaModel": ".llama_cpp",
     "StochasticModelAdapter": ".stochastic",
     "perturbation_key": ".stochastic",
     "RECOVERABLE_BLOCK_TYPES": ".stochastic",
@@ -52,7 +51,6 @@ if TYPE_CHECKING:                    # keep static analysis and IDEs working
     from .invocation import ModelInvocation, ProposalTranslator
     from .lam import LamModelAdapter
     from .llama_cpp import LlamaCppModel
-    from .ollama import OllamaModel
     from .stochastic import RECOVERABLE_BLOCK_TYPES, StochasticModelAdapter, perturbation_key
     from .factory import ModelResolutionError, create_model
 

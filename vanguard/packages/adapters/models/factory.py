@@ -24,7 +24,6 @@ from .config import (
 )
 from .fake import FakeModel
 from .llama_cpp import LlamaCppModel
-from .ollama import OllamaModel
 from .openrouter import OpenRouterModel
 
 __all__ = [

@@ -4,8 +4,7 @@
   "default_paid_model": "deepseek/deepseek-v4-flash-0731",
   "active_tiers": [1, 2, 3],
   "offline_defaults": {
-    "llama_cpp": "local-model",
-    "ollama": "local-model"
+    "llama_cpp": "local-model"
   },
   "aliases": {
     "default": "deepseek/deepseek-v4-flash-0731",

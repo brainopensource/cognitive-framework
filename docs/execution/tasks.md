@@ -33,7 +33,7 @@ confidence: high
 
 Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technical.md`](technical.md). Packages: [`backlog.md`](backlog.md). TARGET gates: [`milestones.md`](milestones.md).
 
-**No sprints. No waves.** Check boxes as work completes. **Recommended reading order (not a schedule):** T-14–T-16 next (MS-SEE). Skip T-04/T-05/T-07 until an RF-25 successor exists.
+**No sprints. No waves.** Check boxes as work completes. **Recommended reading order (not a schedule):** **T-16** (MS-SEE, needs T-14) and **T-18** (MS-CHANGE, needs T-14+T-17) in parallel. Skip T-04/T-05/T-07. Do not create `progressive.py` (T-15).
 
 B §18 tickets T-01–T-35 are canonical. A §31 maps into those IDs or T-36+ (see merge map appendix). v2 `SUB-*` are aliases. Live backlog `SUB-01` (kernel S0–S12) is a different package.
 

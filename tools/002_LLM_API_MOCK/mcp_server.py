@@ -115,7 +115,16 @@ class LamMCPServer:
                 method = req.get("method")
                 params = req.get("params", {})
 
-                if method == "tools/list":
+                if method == "notifications/initialized":
+                    continue
+
+                if method == "initialize":
+                    res = {
+                        "protocolVersion": "2024-11-05",
+                        "serverInfo": {"name": "lam-engine-mcp", "version": "1.0.0"},
+                        "capabilities": {"tools": {}},
+                    }
+                elif method == "tools/list":
                     res = {
                         "tools": [
                             {

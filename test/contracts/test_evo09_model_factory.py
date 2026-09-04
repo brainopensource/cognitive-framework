@@ -17,7 +17,7 @@ from pathlib import Path
 from vanguard.packages.adapters.models.cassette import Cassette, CassettePlayer, CassetteRecorder
 from vanguard.packages.adapters.models.factory import ModelResolutionError, create_model
 from vanguard.packages.adapters.models.fake import FakeModel
-from vanguard.packages.adapters.models.ollama import OllamaModel
+from vanguard.packages.adapters.models.llama_cpp import LlamaCppModel
 from vanguard.packages.adapters.models.openrouter import OpenRouterModel
 
 
@@ -48,15 +48,15 @@ class TestEvo09ModelFactory(unittest.TestCase):
 
         # local alias
         m_local = create_model("local")
-        self.assertIsInstance(m_local, OllamaModel)
-        self.assertEqual(m_local.model, "deepseek-r1")
+        self.assertIsInstance(m_local, LlamaCppModel)
+        self.assertEqual(m_local.model, "local-model")
 
     def test_explicit_provider_schemes(self) -> None:
         """Verify scheme-prefixed model specifiers resolve properly."""
-        # ollama:<model>
-        m_ollama = create_model("ollama:llama3.1")
-        self.assertIsInstance(m_ollama, OllamaModel)
-        self.assertEqual(m_ollama.model, "llama3.1")
+        # llama_cpp:<model>
+        m_llama = create_model("llama_cpp:llama3.1")
+        self.assertIsInstance(m_llama, LlamaCppModel)
+        self.assertEqual(m_llama.model, "llama3.1")
 
         # openrouter:<model> must be registered in an enabled tier
         m_openrouter = create_model("openrouter:deepseek/deepseek-v4-flash-0731")
@@ -73,9 +73,9 @@ class TestEvo09ModelFactory(unittest.TestCase):
         m_dict_fake = create_model({"provider": "fake", "proposals": [{"kind": "finish"}]})
         self.assertIsInstance(m_dict_fake, FakeModel)
 
-        m_dict_ollama = create_model({"provider": "ollama", "model": "qwen2.5-coder"})
-        self.assertIsInstance(m_dict_ollama, OllamaModel)
-        self.assertEqual(m_dict_ollama.model, "qwen2.5-coder")
+        m_dict_llama = create_model({"provider": "llama_cpp", "model": "qwen2.5-coder"})
+        self.assertIsInstance(m_dict_llama, LlamaCppModel)
+        self.assertEqual(m_dict_llama.model, "qwen2.5-coder")
 
         m_dict_openrouter = create_model({"provider": "openrouter", "model": "openrouter/free"})
         self.assertIsInstance(m_dict_openrouter, OpenRouterModel)

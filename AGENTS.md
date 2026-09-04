@@ -97,6 +97,7 @@ grep "<Symbol>" .generated/knowledge/symbols.jsonl
 `"status": "VALIDATED"` with non-zero row counts. LDA users must additionally confirm
 `uv run lda doctor --json` reports `"index_healthy": true`. Operational workflows, MCP tools,
 and the token-efficient Golden Order are defined in [`.agents/skills/lda-navigator/SKILL.md`](.agents/skills/lda-navigator/SKILL.md).
+Local model inference and anti-hallucination protocols are defined in [`.agents/skills/llama-cpp/SKILL.md`](.agents/skills/llama-cpp/SKILL.md).
 Otherwise, report the degraded navigation mode and fall back deterministically to `rg --files`,
 targeted `rg`, canonical documents, source, and tests. A worked example of the full sequence is in
 [`docs/README.md`](docs/README.md) (§ Worked Example).
@@ -137,7 +138,7 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 | **`kernel/`** | `vanguard/packages/kernel/` | Trusted Computing Base (TCB limit `<=1438` LOC; currently 1386 LOC). 13-stage dispatch pipeline (S0–S12), monotonic capability attenuation, typed budget algebra, descriptor-bound capability grants, fail-closed policy, execution provenance DAG. Strictly domain-blind (Invariant I-7). |
 | **`agency/`** | `vanguard/packages/agency/` | Recursive turn loop engine (`EpisodeEngine`), attenuated child subagent `spawn()`, structured context compactor, admission gates, and prompt composers. |
 | **`runtime/`** | `vanguard/packages/runtime/` | System composition and lifecycle (`compose.py`, `session.py`, `wiring.py`), single-writer `LedgerEmitter`, Ed25519 cryptographic approvals (`governance/`), SQLite WAL event store. |
-| **`adapters/`** | `vanguard/packages/adapters/` | Concrete implementations: Models (OpenRouter, Ollama, Cassette, Fake), Evaluator daemon & RPC client (UID 10002), Rootless Bubblewrap Sandbox (`bwrap` UID 10001), SQLite WAL event store. **Must not** import `kernel` or `agency`. |
+| **`adapters/`** | `vanguard/packages/adapters/` | Concrete implementations: Models (OpenRouter, llama.cpp / llama-server, Cassette, Fake), Evaluator daemon & RPC client (UID 10002), Rootless Bubblewrap Sandbox (`bwrap` UID 10001), SQLite WAL event store. **Must not** import `kernel` or `agency`. |
 | **`apps/`** | `vanguard/packages/apps/` | Thin application entrypoints (e.g., `apps/coding_max/facade.py` exposing `CodingMaxFacade` / `CodingMax`). Coordinates CLI/API requests into `ApplicationService` compositions. |
 | **`clients/`** | `vanguard/clients/` | Client workspaces: TypeScript/React/Ink CLI (`vg`), Desktop UI, TUI, and Studio interfaces. |
 

@@ -23,6 +23,7 @@ from .config import (
     resolve_model,
 )
 from .fake import FakeModel
+from .llama_cpp import LlamaCppModel
 from .ollama import OllamaModel
 from .openrouter import OpenRouterModel
 
@@ -62,13 +63,13 @@ def create_model(
     - 'fake' / 'mock' -> FakeModel(fake_proposals or [])
     - 'cassette:<path>' or cassette_path (record=False) -> CassettePlayer
     - cassette_path (record=True) -> CassetteRecorder wrapping delegate
-    - 'ollama:<model_name>' -> OllamaModel(model=model_name)
+    - 'llama_cpp:<model_name>' / 'llama:<model_name>' -> LlamaCppModel(model=model_name)
     - 'openrouter:<model_name>' or provider alias -> OpenRouterModel(resolved_name)
     - Aliases:
       * 'free' -> OpenRouter free band model
       * 'fast' -> OpenRouter medium band model
       * 'smart' -> OpenRouter high band model
-      * 'local' -> Ollama local model
+      * 'local' -> LlamaCppModel local model
       * 'testing' -> OpenRouter testing band model
     
     Fails closed with typed ModelResolutionError on unknown provider or invalid scheme.
@@ -87,8 +88,8 @@ def create_model(
         if provider in {"fake", "mock"}:
             proposals = model_spec.get("proposals", fake_proposals)
             inner_model: ModelPort = FakeModel(proposals or [])
-        elif provider == "ollama":
-            inner_model = OllamaModel(model=model_name or get_offline_default("ollama"))
+        elif provider in {"llama_cpp", "llama", "ollama", "local"}:
+            inner_model = LlamaCppModel(model=model_name or get_offline_default("llama_cpp"))
         elif provider == "openrouter":
             inner_model = OpenRouterModel(model=resolve_model(model_name or get_default_model()))
         elif provider == "cassette":
@@ -131,11 +132,12 @@ def create_model(
                 base_model = FakeModel(fake_proposals or [])
                 return CassetteRecorder(delegate=base_model, output_path=path_part)
 
-        elif spec.startswith("ollama:"):
-            target_model = spec[len("ollama:"):].strip()
+        elif spec.startswith(("llama_cpp:", "llama:", "ollama:")):
+            scheme, _, target_model = spec.partition(":")
+            target_model = target_model.strip()
             if not target_model:
-                raise ModelResolutionError("ollama: spec requires a model name")
-            inner_model = OllamaModel(model=target_model)
+                raise ModelResolutionError(f"{scheme}: spec requires a model name")
+            inner_model = LlamaCppModel(model=target_model)
 
         elif spec.startswith("openrouter:"):
             target_model = spec[len("openrouter:"):].strip()
@@ -144,7 +146,7 @@ def create_model(
             inner_model = OpenRouterModel(model=resolve_model(target_model))
 
         elif spec == "local":
-            inner_model = OllamaModel(model=get_offline_default("ollama"))
+            inner_model = LlamaCppModel(model=get_offline_default("llama_cpp"))
 
         elif spec == "free":
             inner_model = OpenRouterModel(model=resolve_model("free"))
@@ -160,7 +162,7 @@ def create_model(
 
         elif ":" in spec and not spec.startswith(("http://", "https://")):
             scheme, _, _ = spec.partition(":")
-            if scheme not in {"ollama", "openrouter", "cassette", "fake", "mock"}:
+            if scheme not in {"llama_cpp", "llama", "ollama", "openrouter", "cassette", "fake", "mock"}:
                 raise ModelResolutionError(f"Unsupported provider scheme: {scheme!r} in {spec!r}")
             raise ModelResolutionError(f"Invalid model spec: {spec!r}")
 

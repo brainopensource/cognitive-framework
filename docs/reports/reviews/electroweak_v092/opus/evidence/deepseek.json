@@ -1,0 +1,49 @@
+{
+ "condition": "fixed",
+ "model_port": "openrouter",
+ "model": "deepseek/deepseek-v4-flash-0731",
+ "task": "calc",
+ "terminal": "abandoned",
+ "turns": 10,
+ "detail": "turn bound 10 reached",
+ "usage": {
+  "promptTokens": 33675,
+  "completionTokens": 1004,
+  "totalTokens": 34679
+ },
+ "cost_micros": 1447,
+ "wall_s": 35.6,
+ "files": [
+  ".pytest_cache/.gitignore",
+  ".pytest_cache/CACHEDIR.TAG",
+  ".pytest_cache/README.md",
+  ".pytest_cache/v/cache/nodeids",
+  "src/__init__.py",
+  "src/calculator.py",
+  "test_calculator.py"
+ ],
+ "oracle": "PASS",
+ "error": null,
+ "proposals": [
+  "fs.read/effect",
+  "fs.read/effect",
+  "patch.apply/effect",
+  "proc.exec/effect",
+  "proc.exec/effect",
+  "None/finish",
+  "fs.read/effect",
+  "None/finish",
+  "proc.exec/effect",
+  "None/finish"
+ ],
+ "denials": [],
+ "effects": [
+  "EffectCompleted:fs.read:def calculate_value(A: float, B: float) -> float:\n    result",
+  "EffectCompleted:fs.read:from src.calculator import calculate_value\n\ndef test_formula",
+  "EffectCompleted:patch.apply:",
+  "EffectFailed:proc.exec:[exit 5] \n\n-------------------------------------------------",
+  "EffectCompleted:proc.exec:[exit 0] .                                                  ",
+  "EffectCompleted:fs.read:def calculate_value(A: float, B: float) -> float:\n    result",
+  "EffectCompleted:proc.exec:[exit 0] .                                                  "
+ ]
+}

@@ -171,9 +171,9 @@ These artifacts are navigation aids, not authorities. Confirm their repository r
 non-zero content, and referenced paths before use; an index that merely opens is not necessarily
 current or usable. If LDA or generated knowledge is empty, stale, or inconsistent, fall back to
 `rg --files`, targeted `rg`, canonical documentation, source, and tests. Prefer selected entries and
-sections over loading whole indexes or log directories into an AI context window. The canonical
-skill guide for repository intelligence is [`.agents/skills/lda-navigator/SKILL.md`](.agents/skills/lda-navigator/SKILL.md)
+sections over loading whole indexes or log directories into an AI context window. The canonical skill guide for repository intelligence is [`.agents/skills/lda-navigator/SKILL.md`](.agents/skills/lda-navigator/SKILL.md)
 (with in-depth technical formulation in [`docs/onboarding/SKILL_LDA_Docs_atlas.md`](docs/onboarding/SKILL_LDA_Docs_atlas.md)).
+Local GGUF model operations, server orchestration, and anti-hallucination protocols are defined in [`.agents/skills/llama-cpp/SKILL.md`](.agents/skills/llama-cpp/SKILL.md).
 The mandatory agent procedure and authority rules are defined in [`AGENTS.md`](AGENTS.md#repository-intelligence-navigation-protocol).
 
 ---
@@ -192,7 +192,7 @@ Aether-D-System/
 │   │   ├── kernel/                   # Pure security & attenuation core (TCB <= 1438 LOC: S0–S12 dispatch)
 │   │   ├── agency/                   # Recursive turn machine (EpisodeEngine, context, compaction)
 │   │   ├── runtime/                  # Compose, session, wiring, LedgerEmitter, evaluator gateway
-│   │   ├── adapters/                 # Adapters: models (OpenRouter/Ollama), evaluator, bwrap, SQLite
+│   │   ├── adapters/                 # Adapters: models (OpenRouter/llama.cpp), evaluator, bwrap, SQLite
 │   │   └── apps/                     # Thin application entrypoints (apps/coding_max)
 │   └── clients/                      # TypeScript client workspaces (CLI `vg`, Desktop UI, TUI, Studio, Lab)
 ├── packs/code-default/               # Domain Pack #1 (MHF harness, ast-patch, repo-map, terminal)
@@ -211,7 +211,7 @@ Aether-D-System/
 | **Kernel (TCB)** | `vanguard/packages/kernel/` | Pure security core (`<=1438` LOC limit; currently 1386 LOC). Implements 13-stage effect dispatch (`dispatch.py` S0–S12), monotonic capability attenuation (`attenuation.py`), typed budget algebra (`budget.py`), descriptor-bound capability grants (`grants.py`), action classification (`classifier.py`), fail-closed policy (`policy.py`), and cryptographic provenance DAG (`provenance.py`). Strictly domain-blind (Invariant I-7). |
 | **Agency** | `vanguard/packages/agency/` | Recursive turn engine. Implements `EpisodeEngine` (`episode/engine.py`) with budget enforcement and attenuated child subagent `spawn()`; context compiler & structured token compactor (`context/`). |
 | **Runtime** | `vanguard/packages/runtime/` | System composition and lifecycle. Modularly structured in place into `compose.py`, `session.py`, `wiring.py`, single-writer `ledger_emitter.py`, `evaluator_gateway.py`, governance approvals (`governance/`), and SQLite WAL event store adapters. |
-| **Adapters** | `vanguard/packages/adapters/` | Concrete implementations: Model adapters (`models/openrouter.py`, `ollama.py`, `cassette.py`, `fake.py`), Exterior Evaluator daemon & RPC client (`evaluators/daemon.py`, `gate.py`, `signing.py`), Rootless Bubblewrap Sandbox (`sandbox/rootless.py`), and SQLite WAL event store (`stores/event_store.py`). Must NEVER import kernel or agency. |
+| **Adapters** | `vanguard/packages/adapters/` | Concrete implementations: Model adapters (`models/openrouter.py`, `llama_cpp.py`, `cassette.py`, `fake.py`), Exterior Evaluator daemon & RPC client (`evaluators/daemon.py`, `gate.py`, `signing.py`), Rootless Bubblewrap Sandbox (`sandbox/rootless.py`), and SQLite WAL event store (`stores/event_store.py`). Must NEVER import kernel or agency. |
 | **Apps** | `vanguard/packages/apps/` | Thin application entrypoints (e.g., `vanguard/packages/apps/coding_max/facade.py` exposing `CodingMaxFacade` / `CodingMax`). Coordinates CLI/API requests into `ApplicationService` compositions. |
 | **Plugin Registry** | `vanguard/packages/runtime/registry/` | Canonical M-3 lifecycle FSM, isolation broker, worker wire, and composition compiler; M-3 falsifier closure remains active. |
 | **Code Pack #1** | `packs/code-default/` | First Modular Harness Framework (MHF) domain pack. Contains `harness.yaml`, plugin manifests (`fs`, `ast-patch`, `repo-map`, `terminal`, `evaluation-gate`, `single-planner`), prompt templates, and schema definitions. |
@@ -363,7 +363,7 @@ npm run vg
 ## 8. Model Access & Adapter Architecture
 
 Model providers are strictly abstracted behind `ModelPort` (`vanguard/packages/ports/model.py`):
-- **Adapters on disk**: OpenRouter (`adapters/models/openrouter.py`), Ollama (`adapters/models/ollama.py`), Cassette replay (`adapters/models/cassette.py`), Fake (`adapters/models/fake.py`).
+- **Adapters on disk**: OpenRouter (`adapters/models/openrouter.py`), llama.cpp (`adapters/models/llama_cpp.py`), Cassette replay (`adapters/models/cassette.py`), Fake (`adapters/models/fake.py`).
 - **Provider Routing**: DeepSeek, OpenAI, Anthropic, and open-weights models are addressed via route configurations and environment keys (`OPENROUTER_API_KEY`, `DEEPSEEK_API_KEY`, `OPENAI_API_KEY`), not separate vendor files.
 - **Deterministic Testing**: Keep API keys unset during local test runs to ensure hermetic, deterministic execution against cassettes and fakes.
 

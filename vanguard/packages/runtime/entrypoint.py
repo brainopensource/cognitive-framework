@@ -10,7 +10,7 @@ from typing import Any, Mapping
 
 from ..adapters.models.openrouter import OpenRouterModel
 from ..adapters.models.fake import FakeModel
-from ..adapters.models.ollama import OllamaModel
+from ..adapters.models.llama_cpp import LlamaCppModel
 from ..adapters.stores.event_store import SqliteEventStore
 from ..adapters.stores.blob_store import FileBlobStore
 from ..adapters.sandbox.platform import discover_platform

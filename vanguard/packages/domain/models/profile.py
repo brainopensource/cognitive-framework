@@ -72,7 +72,7 @@ def profile_for(model_id: str | None) -> ModelCapabilityProfile:
     profile = _PROFILES.get(key)
     if profile is not None:
         return profile
-    for prefix in ("openrouter:", "ollama:"):
+    for prefix in ("openrouter:", "llama_cpp:", "llama:", "ollama:"):
         if key.startswith(prefix) and key[len(prefix):] in _PROFILES:
             return _PROFILES[key[len(prefix):]]
     return ModelCapabilityProfile(key or "unknown")

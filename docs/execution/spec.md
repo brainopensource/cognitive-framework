@@ -39,8 +39,8 @@ Companion handbook: [`technical.md`](technical.md). Task IDs: [`tasks.md`](tasks
 - **I-TCB.** Kernel LOC ≤ 1438 (live 1386 at last A linter pass).
 - **INV-DELTA-1.** Domain state schemas: stdlib + JCS only.
 - **INV-DELTA-2.** This program SHALL NOT grow kernel past the TCB ceiling.
-- **INV-DELTA-3.** Multi-file writes are all-or-nothing. Preflight in the adapter. MECHANISM this-branch (T-17). Product MS-CHANGE remains `OPEN` (T-20).
-- **INV-DELTA-4.** Agents SHALL NOT mutate tests during implementation. Tamper shield MECHANISM this-branch (T-18). Enumerate via IndexPort, not `Path.glob("test/**")`. Product MS-CHANGE remains `OPEN` (T-20). Session hook deferred until T-16 (`33dc7c33` landed — hook follows).
+- **INV-DELTA-3.** Multi-file writes are all-or-nothing. Preflight in the adapter. MECHANISM this-branch (T-17). Product MS-CHANGE remains `OPEN` (T-47–T-49 `[PROPOSAL]`). T-18–T-20 are MECHANISM.
+- **INV-DELTA-4.** Agents SHALL NOT mutate tests during implementation. Tamper shield MECHANISM this-branch (T-18). Enumerate via IndexPort, not `Path.glob("test/**")`. Product MS-CHANGE remains `OPEN` (T-47–T-49). Session `_tamper_shield.evaluate(...)` hook still deferred (A has in-flight session edits after T-16 `33dc7c33`).
 - **INV-DELTA-5.** L1–L3 prefix-stable. Compaction SHALL NOT drop settled invariants or falsified hypotheses.
 - **I-STATE.** σ is a ledger fold (`fold_task_state`). One schema: `SemanticTaskState` with alias `CodingTaskState`. Lock: `domain/task_state.py` MISSING. Branch: LIVE `8637db55`. MS-RESUME `CLOSED`.
 - **I-TXN.** 2PC lives in `adapters/environment/transaction.py`. This branch LIVE (T-17 MECHANISM). Lock `66aa7a3c` MISSING. Not kernel.
@@ -914,7 +914,7 @@ Wire recovery: `adapters/models/dialect.py`. Malformed → Proposal: `agency/epi
 
 ## 2PC / tamper placement
 
-- 2PC: `adapters/environment/transaction.py` this-branch LIVE (T-17 MECHANISM). Lock `66aa7a3c` MISSING. Multi-file `GitEnvironment.apply` preflights `ast.parse` then all-or-nothing flush. Single-file sequential observation (S8-B-09) unchanged. Product change-closure still needs T-19–T-20.
+- 2PC: `adapters/environment/transaction.py` this-branch LIVE (T-17 MECHANISM). Lock `66aa7a3c` MISSING. Multi-file `GitEnvironment.apply` preflights `ast.parse` then all-or-nothing flush. Single-file sequential observation (S8-B-09) unchanged. T-18–T-20 MECHANISM; MS-CHANGE stays `OPEN` on T-47–T-49.
 - Tamper: `runtime/governance/tamper_shield.py` this-branch LIVE (T-18 MECHANISM). Lock `66aa7a3c` MISSING. Enumerate via IndexPort; `Path.glob("test/**")` is insufficient. Session `_tamper_shield.evaluate(...)` deferred until T-16.
 
 ---
@@ -931,7 +931,7 @@ Keep `ContextPacket`. FEATURE_SPEC 4-tier budget is L4/L5 **policy** on existing
 
 ## 7. 2PC and tamper
 
-Living rule: T-17–T-19 MECHANISM — 2PC, IndexPort tamper freeze, greenfield vacuous-oracle reject this-branch LIVE; lock `66aa7a3c` MISSING. Product MS-CHANGE remains `OPEN` (T-20; epoch is T-14). Historical CMX-09 schemas remain in Appendix H.
+Living rule: T-17–T-20 MECHANISM — 2PC, IndexPort tamper freeze, greenfield vacuous-oracle reject, brownfield implicated-set fail-closed this-branch LIVE; lock `66aa7a3c` MISSING. Product MS-CHANGE remains `OPEN` (T-47–T-49 `[PROPOSAL]`). Historical CMX-09 schemas remain in Appendix H.
 
 ## 8. Dialect
 

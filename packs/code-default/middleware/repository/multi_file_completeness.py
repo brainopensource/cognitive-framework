@@ -109,6 +109,16 @@ def check_multi_file_completeness(
     if unresolved:
         rejections.append("PUBLIC_INTERFACE_CALLERS_UNRESOLVED")
 
+    txn_files = observations.get("same_transaction_files")
+    if txn_files is not None and changed_public_symbols:
+        txn_set = {str(path) for path in txn_files}
+        if any(
+            str(caller) not in txn_set
+            for symbol in changed_public_symbols
+            for caller in caller_map.get(symbol, ())
+        ):
+            rejections.append("CALL_SITES_NOT_IN_SAME_TRANSACTION")
+
     evidence = dict(migration_evidence or {})
     if compatibility_evidence is not None:
         evidence["compatibility"] = compatibility_evidence
@@ -128,6 +138,10 @@ def check_multi_file_completeness(
     # must be supplied separately by the scaffold gate.
     if not implicated:
         rejections.append("IMPLICATED_SET_EMPTY")
+
+    primary = tuple(str(path) for path in observations.get("primary_files", ()))
+    if observations.get("coverage_ratio") == 1.0 and not primary:
+        rejections.append("EMPTY_PRIMARY_VACUOUS_COVERAGE")
 
     return CompletenessReport(
         is_complete=not rejections,
@@ -164,9 +178,14 @@ class CodeDefaultCompletionPolicy:
         changed = tuple(changed_files)
         if not changed:
             return {"admissible": False, "reason": "MISSING_SOURCE_PATCH"}
+        primary = tuple(str(path) for path in observations.get("primary_files", ()))
+        if observations.get("coverage_ratio") == 1.0 and not primary:
+            return {"admissible": False, "reason": "EMPTY_PRIMARY_VACUOUS_COVERAGE"}
         surface = tuple(implicated_files) or changed
         classification = classify_task(task_text)
-        if classification.kind == "greenfield":
+        bugfix_brief = classification.kind == "bugfix" or "bugfix" in task_text.lower()
+        treat_greenfield = classification.kind == "greenfield" and not bugfix_brief
+        if treat_greenfield:
             greenfield = observations.get("greenfield_evidence")
             if not isinstance(greenfield, Mapping):
                 return {"admissible": False, "reason": "GREENFIELD_EVIDENCE_REQUIRED"}
@@ -209,8 +228,11 @@ class CodeDefaultCompletionPolicy:
             migration_evidence=observations.get("migration_evidence"),
             truncated=bool(observations.get("truncated", False)),
             truncation_metadata=observations.get("truncation_metadata"),
+            primary_files=primary,
+            coverage_ratio=observations.get("coverage_ratio"),
+            same_transaction_files=observations.get("same_transaction_files"),
         )
-        if classification.kind != "greenfield" and not report.is_complete:
+        if (not treat_greenfield) and not report.is_complete:
             return {
                 "admissible": False,
                 "reason": report.rejections[0] if report.rejections else "COMPLETENESS_REJECTED",

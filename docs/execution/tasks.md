@@ -205,9 +205,9 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - Requires: T-18  
 
 **T-20 Brownfield implicated-set fail-closed** (B, A §12.2–12.3)  
-- [ ] Empty primary + coverage_ratio 1.0 cannot admit  
-- [ ] Greenfield bypass cannot apply to `bugfix`  
-- [ ] Public signature change ⇒ call sites in same transaction  
+- [x] Empty primary + coverage_ratio 1.0 cannot admit  
+- [x] Greenfield bypass cannot apply to `bugfix`  
+- [x] Public signature change ⇒ call sites in same transaction  
 - Requires: T-16  
 
 **T-47 Read-before-edit + multi-strategy apply** (v2 §14) `[PROPOSAL]`  

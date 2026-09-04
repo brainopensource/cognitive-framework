@@ -4,7 +4,7 @@
 **Target Runway**: [`docs/execution/`](../docs/execution/) (`milestones.md`, `backlog.md`, `spec.md`, `technical.md`, `tasks.md`)
 **Source Corpus**: `docs/reports/reviews/electroweak_v092/` — `grok/`, `opus/`, `octopus/`, `gpt/`, **`plans/`** (`gem/` is empty)
 **Companion**: `.draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md` (Synthesis of Record, 2026-09-04)
-**Revision**: v2 — rebuilt 2026-09-04 after a line-level corpus-vs-tree audit
+**Revision**: v3 — fully aligned with `.draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md` (7 packages, T-69..T-97)
 **Verification basis**: working tree `feat/strongforce_beta_release_v093`, HEAD `537bdb66`
 
 ---
@@ -191,25 +191,24 @@ Target Document: `docs/execution/backlog.md`
 Authority Tier: Execution Runway (Living Document)
 Source: `.draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md` §4
 
-Register the accepted Electroweak disposition. The draft synthesis proposed six
-new package IDs; a line-level reconciliation found only TWO are new. Registering
-all six would realize risk R-01 (architecture sprawl) in the document that names
-it, so:
+Register the accepted Electroweak disposition. Reconcile packages to prevent R-01 (architecture sprawl), while registering the seven authoritative capability packages established in Synthesis of Record §4.1:
 
-ADD to a new §2.11 — exactly two packages:
-  - `HAR-01` Harness Precondition Repair — new. Nothing in T-01..T-68 covers
-    native tool-call style, approval-policy passthrough, or `finish` declaration.
-    Precondition of CMX-09; does NOT subsume it. Allocates T-69..T-74.
-  - `IDX-01` LDA-Backed Repository Intelligence — new ADAPTER only. `IndexPort`
-    already exists and is NOT modified. Supersedes T-46. Allocates T-75..T-77.
+ADD to a new §2.11 — exactly SEVEN packages:
+  - `HAR-01` Harness Precondition Repair (`domain` / `agency` / `runtime` / `adapters`, Lane A, APPROVED). Precondition of CMX-09. Allocates T-69..T-74, T-82.
+  - `INS-01` Product Instrument Integrity (`runtime` / `benchmarks` / `clients`, Lane A, APPROVED Route R). Allocates T-84, T-85, T-89, T-97.
+  - `DLG-01` Live Dialect Validation & Provenance (`adapters`, Lane A, APPROVED Route R). Allocates T-86, T-90.
+  - `BRG-01` Local Inference Instrument Fail-Closed (`tools/llama_cpp`, Lane B, APPROVED Route R). Allocates T-87, T-88, T-91.
+  - `EXP-01` Measurement Ladder & Preregistration (`benchmarks`, Lane B, APPROVED Route R). Allocates T-92..T-95.
+  - `ARM-01` Comparative Arm Program (`benchmarks` / `agency/manifests`, Lane B, PROPOSED Route L). Allocates T-96. Gated on closed MS-CONTROL.
+  - `IDX-01` LDA-Backed Repository Intelligence (`adapters` / `agency`, Lane B, APPROVED). New adapter only (`IndexPort` unmodified). Allocates T-75..T-77.
 
-RECORD AS ALIASES — do not create rows:
+RECORD AS ALIASES — do not create new package rows:
   - `SET-01` ≡ TRUTH  (T-04/T-05/T-07 + T-18/T-19/T-20, CMX-10A)
   - `EDT-01` ≡ CHANGE (T-47, with T-17 already DONE; TLS-04/TLS-05)
   - `PRF-01` ≡ CMX-01 (already `REOPENED (product divergence)`)
   - `DIR-01` ≡ OCT-03 (+ T-31/T-54). Keep §2.10's OCT-* rows authoritative.
     NOTE: the octopus proposal's IDs are `ORCH-01..11` and `ORCH-M1..M3`, which
-    are NOT the backlog's `OCT-01..04`. v1 of this blueprint conflated them.
+    are NOT the backlog's `OCT-01..04`. Map explicitly.
 
 AMEND IN PLACE:
   - `T-18` → `REOPENED`. `TestTamperShield` (`runtime/governance/tamper_shield.py`)
@@ -217,7 +216,7 @@ AMEND IN PLACE:
     `test/runtime/test_tamper_shield.py`. It is recorded `[x]` MECHANISM today.
     A mechanism with no caller is a test fixture. Reopen it in the SAME commit
     that records the grep as its falsifier.
-  - `CMX-01` → `APPROVED`, absorbing draft PRF-01.
+  - `CMX-01` → `APPROVED`, absorbing draft PRF-01 (unifying preset catalogs).
   - `TLS-04` → `DONE (mechanism)` — `ast.parse` preflight already lives in
     `adapters/environment/transaction.py` and aborts before durable flush.
   - `CMX-02` dependency → IDX-01.
@@ -226,7 +225,8 @@ AMEND IN PLACE:
 REQUIREMENTS:
 - Every row carries ID, Title, Subsystem, Lane, Status, Target Milestone, an
   explicit Reconciliation field, and an executable acceptance falsifier.
-- Update §3's package index rows and append the six alias-table rows.
+- Update §3's package index rows (TRUTH, SEE, CHANGE, CONTROL, INSTRUMENT, COMPARISON, CAMPAIGN).
+- Append the alias-table rows matching Synthesis of Record §4.4.
 - Do NOT restamp `SUB-01` (§2.9's own standing instruction) or any DONE row not
   listed above.
 ```
@@ -712,15 +712,16 @@ memory/retrieval system (extend LDA); `ORCH-10` is off the critical path.
 
 ---
 
-### Prompt 10: Instrument Integrity — **highest ROI, absent from v1**
+#### Prompt 10: Instrument Integrity & Measurement Ladder (INS-01, BRG-01, DLG-01, EXP-01)
 
-* **Target Files**: `technical.md` (§ Benchmark Instrument), `spec.md` (§ Results Schema)
-* **Corpus anchor**: `octopus/…evidence-audit.md` §1/§3b/§5; `opus/part7…` §6; `gpt/…` §B/§E
-* **Wave**: 1 — this gates the interpretation of every other measurement
+* **Target Files**: `technical.md` (§ Benchmark Instrument), `spec.md` (§ Results Schema & Evidence Standard)
+* **Corpus anchor**: `octopus/…evidence-audit.md` §1/§3b/§5; `opus/part7…` §6; `gpt/…` §B/§E/§PR-2/§PR-3; Synthesis of Record §4.1, §9
+* **Packages**: `INS-01` (T-84, T-85, T-89, T-97), `BRG-01` (T-87, T-88, T-91), `DLG-01` (T-86, T-90), `EXP-01` (T-92..T-95)
+* **Wave**: 1 (P0) → Wave 2 (MS-CONTROL) — gates the interpretation of every measurement
 
 ```markdown
-# ASSIGNMENT: technical.md + spec.md for Instrument Integrity
-Source: octopus evidence-audit §1 (F1), §3b, §5 (A1–A3); opus part7 §6; gpt §B, §E
+# ASSIGNMENT: technical.md + spec.md for Instrument Integrity (INS-01, BRG-01, DLG-01, EXP-01)
+Source: Synthesis of Record §4.1, §9; octopus evidence-audit §1, §3b; opus part7 §6; gpt §B, §E, §PR-2/PR-3
 
 WHY THIS IS FIRST. Octopus: these items "are collectively a few hundred lines.
 They are worth more than any new layer, because every new layer is currently
@@ -728,112 +729,125 @@ being evaluated against numbers that do not mean what they appear to mean."
 Opus part7 §5: "no benchmark this project runs can be believed, in either
 direction — and that includes these results."
 
-1. RESULTS SCHEMA REFUSAL (F1). `vg-1-forge`'s "100%" is ONE task
-   (`01_rate_limiter_lease_recovery`, the easiest brownfield item); `vg-code-max`'s
-   "9.5%" is 2/21. The two sit adjacent in `benchmarks/benchmark_20_suite/` with
-   identical-modulo-suffix filenames and an identical `pass_rate_pct` schema —
-   "precisely how a 1-sample result gets read as a 21-sample result six weeks
-   later." Add `n` and `suite_digest`; make `runner.py` REFUSE to write
-   `pass_rate_pct` when `len(results) < suite_size`. ~20 lines.
+Deliver the four instrument packages:
 
-2. ADOPT `opus/evidence/matrix_runner.py` AS THE RESULTS SCHEMA. Three fields
-   earn their place and exist in no current report format:
-     - `disposition`, EXTERNALLY COMPUTED and structurally separate from
-       `terminal`. "Had this existed, the inversion would have been visible on
-       day one." This is the reporting half of Prompt 04's domain contract —
-       they must land together or the type has no consumer.
-     - an oracle-tamper digest — "without it, a tests-pass oracle is unfalsifiable".
-     - `proposals[]` — the None/finish count in this array IS the Defect N metric
-       (31% of all turns spent attempting a prose finish), turning a one-off
-       discovery into a standing measurement.
-   Plus: poison aggregates containing `model_real: false` into `undeterminable`;
-   make a second `*_report.json` under `benchmarks/` a LINT FAILURE.
-   ALIGN with `benchmarks/protocols.py`, which already has `B20_REPORT_SCHEMA`,
-   `task_set_digest()`, `require_clean_subject()` and `DirtySubjectError` — extend
-   these, do not fork them.
+1. RESULTS SCHEMA & EVIDENCE ROW (EXP-01, T-93, T-94).
+   Add `n`, `suite_digest`, and enforce §9.3's append-only evidence row schema.
+   `runner.py` must REFUSE to write `pass_rate_pct` when `len(results) < suite_size`.
+   Adopt §9.4 metric set with **false-completion rate = 0** as a HARD VETO: no pass
+   rate or cost advantage overrides it. Wilson LB is computed only over rows with
+   `evidence_label=LIVE-*`.
 
-3. `routing-policy.json` JSON SCHEMA, `additionalProperties: false`, validated at
-   COMPOSE TIME, fail-closed (F3b). The manifests use mutually incompatible
-   vocabularies and `adapters/models/routing.py` reads only
-   `kind`/`strategy`/`tiers`/`primary`/`fallback`/`model`:
-     - `vg-code-default`: 4 of 5 keys inert
-     - `vg-code-swe-mini`: `primary_model`/`fallback_model` SILENTLY IGNORED —
-       it believes it routes DeepSeek-Coder with a Qwen fallback and actually
-       routes `get_medium_model()`/`get_free_model()`
-     - `vg-code-claude-shaped`: `escalation_model`/`escalate_after_attempts`
-       silently ignored
-   Any benchmark attributing a score to "deepseek-coder via swe-mini" is
-   MISLABELED. Unknown keys must fail closed, not be ignored.
-   ALSO: `failure_escalation` is read by NO code (0 hits outside two drafts and
-   one manifest). Do not build the linter HYDRA §6.1 proposed for it — build this
-   one instead, aimed at the actual defect.
+2. ADOPT TWO-AXIS RESULTS SCHEMA (T-72, T-93).
+   - `disposition` (TaskDisposition: passed, failed, undeterminable, not_run)
+     externally computed and structurally separate from `terminal` (RunTermination).
+   - An oracle-tamper digest — without it, a tests-pass oracle is unfalsifiable.
+   - Separate `REPLAY` and `LIVE-*` rows into disjoint tables. Zero model calls
+     (provider outage, HTTP error) is recorded as `not_run`, never model failure.
+   - Hypothesis registry (T-95): bind every Route L mechanism to a preregistered
+     single-variable ablation against the control.
 
-4. DURABLE RUN IDENTITY (gpt §B). `runtime/entrypoint.py:56` still defaults
-   `run_id` to the fixed literal `"run-cli"`. RE-VERIFIED AT HEAD: the mitigation
-   at `:82` routes only the FAKE-BACKEND PREVIEW to an in-memory store; two real
-   invocations in one workspace still share `run-cli` and the same persistent
-   `.vanguard/events.sqlite3`. A corpus episode was excluded from all
-   model-quality judgments for exactly this — it recovered a prior fake episode's
-   ledger and ended `abandoned` with "max_turns (1) exhausted across approval".
-   Generate UUID/ULID per run; make resume EXPLICIT opt-in (`--resume <id>`);
-   return the generated ID in the initial JSON frame and the receipt.
-   FALSIFIER: two invocations in one workspace produce DIFFERENT ledgers.
+3. LIVE DIALECT VALIDATION & PROVENANCE (DLG-01, T-86, T-90).
+   Pass manifest `aliases.json` into `ProposalTranslator.translate` on the live
+   path (`openrouter.py:1204`). Validate tool name/arguments against declared
+   schema; reject undeclared tools fail-closed (no fuzzy guessing). Record
+   raw-response digest and typed classifier class in the ledger.
 
-5. HONEST LIVE TELEMETRY (gpt §E). The receipt needs actual provider/model route,
-   prompt and completion tokens, local latency, tool actions, patch/postimage
-   digest, test discovery/execution counts, terminal reason, and
-   missingness/cost fields. "null route/token/cost on a live run prevents a
-   useful evaluation." Reuse the existing missingness taxonomy (T-25) and
-   `runtime/trajectory.py`'s per-dimension `{status, reason}` shape rather than
-   inventing a second one.
+4. DURABLE RUN IDENTITY (INS-01, T-84).
+   Replace `entrypoint.py:56` literal `"run-cli"` with generated UUID/ULID per run.
+   Resume is EXPLICIT opt-in (`--resume <id>`).
+   FALSIFIER: two successive invocations in one workspace produce DIFFERENT ledgers.
+
+5. PRODUCT RECEIPT TELEMETRY (INS-01, T-85).
+   `entrypoint.py:218` must pass through real `modelRoutes`, non-null token counts,
+   `verifiedStepIds`, and cost provenance from `compose.py` / `app_service.py`.
+
+6. BENCHMARKS EXECUTE PRODUCT PATH (INS-01, T-89).
+   Change `agentic_harness_matrix_benchmark.py:98` to execute via
+   `runtime.entrypoint.execute` rather than calling `Runtime.execute_profiled`
+   directly. MS-CONTROL qualifies what ships, or it qualifies nothing.
+
+7. LOCAL INFERENCE INSTRUMENT FAIL-CLOSED (BRG-01, T-87, T-88, T-91).
+   In `tools/llama_cpp/cli.py`: fix `--flash-attn` flag; readiness requires
+   `proc.poll() is None`, matching child PID, and `/props` identity match;
+   `stop` never issues blanket `pkill`. In `mcp_server.py`: return typed empty
+   failures. Purge `ollama` from `packs/code-default/harness.yaml`.
 ```
 
 ---
 
-### Prompt 11: Atomic Task Work-Tree Deconstruction
+### Prompt 11: Atomic Task Work-Tree Deconstruction (T-69 through T-97)
 
 * **Target File**: `docs/execution/tasks.md`
+* **Source**: Synthesis of Record §4.5 (T-69..T-97)
 
 ```markdown
-# ASSIGNMENT: Atomic Task Staging in tasks.md
-Source: Synthesis of Record §4.5 (T-69..T-79 are already deconstructed there)
+# ASSIGNMENT: Atomic Task Staging in tasks.md (T-69 through T-97)
+Source: `.draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md` §4.5
 
-Populate `docs/execution/tasks.md` with flat, dependency-ordered tasks.
+Populate `docs/execution/tasks.md` with flat, dependency-ordered tasks covering
+the complete Electroweak v0.9.3 scope (T-69 through T-97).
 
-ID ALLOCATION: current maximum is T-68. Start at T-69. Do not renumber anything.
+ID ALLOCATION: current maximum is T-68. Start at T-69. Allocate through T-97.
+Do not renumber prior tasks.
 
-SUBSYSTEM VOCABULARY — an earlier revision listed `packs` as if it were under
-`vanguard/packages/`. It is NOT. Valid values, matching
-`tools/linters/check_boundaries.py::PACKAGE_NAMES`:
-  domain | ports | kernel | agency | runtime | adapters | apps
-plus two paths outside that lattice:
-  packs/            (repository ROOT — the pack layer)
-  benchmarks/       (the instrument)
+SUBSYSTEM VOCABULARY matching `tools/linters/check_boundaries.py::PACKAGE_NAMES`:
+  domain | ports | kernel | agency | runtime | adapters | apps | packs/ | benchmarks/ | tools/
 
 Schema per task:
   ### T-XX: <Title>
-  - **package**: HAR-01 | IDX-01 | TRUTH | CHANGE | SEE | CONTROL | CAMPAIGN
-  - **subsystem**: <from the vocabulary above>
+  - **package**: HAR-01 | INS-01 | DLG-01 | BRG-01 | EXP-01 | ARM-01 | IDX-01 | TRUTH | CHANGE | CONTROL | CAMPAIGN
+  - **subsystem**: <subsystem>
   - **lane**: Lane A (Build/Core) | Lane B (Audit/Test)
   - **requires**: [T-YY, ...]
   - **file_touches**: [<paths VERIFIED to exist, or marked [NEW]>]
   - **specification**: <2–3 sentences>
   - **acceptance_falsifier**: <exact executable command or test>
 
-WAVES (file-touch boundaries are in Synthesis of Record §7 and were verified
-path by path):
-  Wave 1 — HAR-01 (T-69..T-74) + TRUTH (T-04/05/07, T-18 REOPENED) + Prompt 10
-  Wave 2 — T-78 (str_replace on existing 2PC) + IDX-01 (T-75..T-77)
-  Wave 3 — hygiene, distillation, greenfield oracle
-  Wave 4 — CMX-01/T-79 + MS-CONTROL canary
-  Wave 5 — OCT-01..04, blocked on MS-CONTROL
+TASK INVENTORY TO COMMIT (from Synthesis of Record §4.5):
+  - T-69: Capability-bound native tool-call profiles (HAR-01, Lane A)
+  - T-70: Approval threshold from declared approval_policy (HAR-01, Lane A)
+  - T-70a: Reproduce mid-stream SSE abort before flag change (HAR-01, Lane B)
+  - T-71: Declare finish-tool.json in product presets (HAR-01, Lane A)
+  - T-72: Two-axis settlement contract domain/evidence/disposition.py (HAR-01, Lane A)
+  - T-73: EffectStarted single-emission ledger falsifier (HAR-01, Lane B)
+  - T-74: Workspace .pyc hygiene via tmpfs (HAR-01, Lane A)
+  - T-75: LdaRepoIndex adapter over .lda/index.db (IDX-01, Lane B)
+  - T-76: repo.* observation tools bound into L5 only (IDX-01, Lane B)
+  - T-77: Cache breakpoints, CTRF distillation & Trailing Goal Echo (IDX-01, Lane A)
+  - T-78: Exact-match str_replace primitive in 2PC transaction manager (CHANGE, Lane A)
+  - T-79: Unify preset catalog on presets.json (CMX-01, Lane A)
+  - T-80: Anti-thrashing workspace oscillation breaker dt == dt-2 (CONTROL, Lane A)
+  - T-81: Greenfield oracle vacuity rejection check (TRUTH, Lane B)
+  - T-82: Fenced JSON action unwrapping & anti-premature finish (HAR-01 / TRUTH, Lane A)
+  - T-83: Greenfield prompt modernization (T-83a) & callers_by_symbol admission (T-83b) (CHANGE / TRUTH, Lane A)
+  - T-84: Unique durable run identity; explicit resume (INS-01, Lane A)
+  - T-85: Product receipt telemetry passthrough (INS-01, Lane A)
+  - T-86: Live-path alias & tool-name validation (DLG-01, Lane A)
+  - T-87: Bridge lifecycle fail-closed (BRG-01, Lane B)
+  - T-88: MCP fail-closed completions (BRG-01, Lane B)
+  - T-89: Benchmarks execute product path entrypoint.execute (INS-01 / EXP-01, Lane A)
+  - T-90: Raw-response digest & dialect classifier provenance (DLG-01, Lane B)
+  - T-91: Native-only alias & environment purge (BRG-01 / HAR-01, Lane B)
+  - T-92: L0 smoke triad through public CLI (EXP-01, Lane A)
+  - T-93: L1 frozen pre-canary & evidence row schema (EXP-01, Lane B)
+  - T-94: Metric set & false-completion veto = 0 (EXP-01, Lane B)
+  - T-95: Hypothesis registry & preregistration harness (EXP-01, Lane B)
+  - T-96: Arm matrix & LAM-first comparison protocol (ARM-01, Lane B)
+  - T-97: CLI product surface — reproduce then repair (INS-01, Lane A)
 
-COLLISION NOTE: `runtime/session.py` carries FOUR Wave-1 edits at four distinct
-sites (`:134` exemption, `:656` approval, `:1655` tamper wiring, verification
-subject binding). Lane A serializes them; Lane B touches the file only through
-`test/`.
+WAVES (Synthesis of Record §7):
+  Wave 1 — HAR-01 (T-69..T-74, T-82) + TRUTH (T-04, T-05, T-07, T-18 REOPENED, T-81, T-83) + INS-01 (T-84) + BRG-01 (T-87, T-88, T-91)
+  Wave 2 — CMX-01 (T-79) + INS-01 (T-85, T-89) + EXP-01 (T-92..T-95) + MS-CONTROL canary (N ≥ 30)
+  Wave 3 — CHANGE (T-78 exact str_replace) + IDX-01 (T-75..T-77) + DLG-01 (T-86, T-90)
+  Wave 4 — Context Economy & Trailing Echo (T-77) + Anti-thrashing breaker (T-80)
+  Wave 5 — OCT-01..04 (T-31, T-54) + ARM-01 (T-96), blocked on MS-CONTROL closed
 
-No sprint calendars, no dates, no WIP tags. `requires:` edges only.
+COLLISION NOTE: runtime/session.py carries FOUR Wave-1 edits at four distinct
+sites (:134 exemption, :656 approval, :1655 tamper wiring, caller admission).
+Lane A serializes them; Lane B touches the file only through test/.
+
+No sprint calendars, no dates, no WIP tags. requires: edges only.
 ```
 
 ---

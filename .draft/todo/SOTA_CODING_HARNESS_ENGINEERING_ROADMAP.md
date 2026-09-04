@@ -1,12 +1,14 @@
 ---
-id: vanguard-sota-coding-harness-engineering-roadmap
+id: electroweak-sota-coding-harness-blueprint
 class: architecture-treatise
 authority: principal-architectural-strategy
 status: draft
 owner: engineering-architecture-council
-version: "1.0.0"
-date: "2026-09-02"
-supersedes: []
+version: "0.9.3"
+date: "2026-09-04"
+supersedes: [".draft/todo/SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md"]
+companion: [".draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md", ".draft/todo/development_plan_guidelines_0209.md"]
+verification_basis: "working tree at feat/strongforce_beta_release_v093, HEAD 537bdb66"
 ---
 
 # SOTA Coding Agent Harness: Principal Architectural Blueprint & Production Roadmap
@@ -15,156 +17,131 @@ supersedes: []
 
 Autonomous software engineering agents require significantly more than a prompt loop wrapped around LLM tool calling. While toy benchmarks (such as single-file bugfixes on small functions) can be solved with primitive ReAct loops, **industrial-grade real-world software engineering** demands robust answers to five foundational systems challenges:
 
-1. **Long-Horizon Agency & Horizon Collapse**: Complex tasks require 50 to 200 turns of continuous reasoning, exploration, editing, and debugging. Without structured state retention and hierarchical task decomposition, modern LLMs suffer from context dissipation, catastrophic forgetting, and attention degradation.
+1. **Long-Horizon Agency & Horizon Collapse**: Complex tasks require 40 to 120 turns of continuous reasoning, exploration, editing, and debugging. Without structured state retention and hierarchical task decomposition, modern LLMs suffer from context dissipation, catastrophic forgetting, and Lost-in-the-Middle attention degradation.
 2. **Greenfield Architecture & Multi-File Dependency Graph Synthesis**: Constructing new subsystems, services, or multi-component features requires synthesizing code across dozens of interdependent files in topological order, establishing contracts before implementations, and bootstrapping verification harnesses before runnable tests exist.
-3. **Brownfield Blast-Radius Containment & Context Economics**: Operating in multi-million-line legacy repositories requires progressive symbol-level context compilation rather than full-file dumping. The agent must accurately calculate the blast radius of changes and verify downstream contracts without exceeding token budgets or context limits.
+3. **Brownfield Blast-Radius Containment & Context Economics**: Operating in multi-million-line legacy repositories requires progressive symbol-level context compilation rather than full-file dumping. The agent must accurately calculate the blast radius of changes and verify downstream contracts without exceeding token budgets or bust prompt cache stability.
 4. **Durable State Continuity Across Process Boundaries**: Process restarts, operator interventions, network interruptions, and rate-limit suspensions must not destroy in-flight progress or induce duplicate effect execution. Resumed sessions must seamlessly rebuild cognitive state from durable ledgers.
-5. **Deterministic Verification & Anti-Tampering Trust Spines**: Autonomous agents frequently attempt to declare victory prematurely by running redundant tests, modifying test assertions to pass broken code (test poisoning), or misinterpreting syntax warnings as semantic passes. A fail-closed, external exterior judge must govern completion.
+5. **Deterministic Verification & Anti-Tampering Trust Spines**: Autonomous agents frequently attempt to declare victory prematurely by running redundant tests, modifying test assertions to pass broken code (test poisoning), claiming passes on vacuous stubs, or misinterpreting syntax warnings as semantic passes. A fail-closed, external exterior judge must govern completion, with both **run termination** and **task disposition** settled orthogonally.
 
-This treatise provides the forensic analysis, mathematical/formal protocols, architectural diagrams, concrete pseudocode, and an actionable engineering roadmap to elevate Vanguard / AETHER to the undisputed State of the Art (SOTA) in autonomous coding harnesses.
+This treatise provides the forensic analysis, formal contracts, architectural diagrams, concrete module specifications, and an actionable engineering roadmap aligned with the **Electroweak Synthesis of Record (`ELECTROWEAK_SYNTHESIS_FINAL_v093.md`)**.
 
 ---
 
-## 1. Forensic Audit: The 6 Bottlenecks Blocking SOTA Agency
+## 1. Forensic Audit: The 6 Bottlenecks Reconciled Against Working Tree
 
-Through systematic review of the integrated codebase (`vanguard/packages/` across `domain`, `kernel`, `agency`, `runtime`, and `adapters`), the following concrete bottlenecks have been identified:
+Through systematic review of `vanguard/packages/` across `domain`, `kernel`, `agency`, `runtime`, and `adapters`, the theoretical bottlenecks have been mapped to their exact verified status in the working tree:
 
 ```
 +---------------------------------------------------------------------------------------------------+
-|                                 SOTA HARNESS BOTTLENECK TAXONOMY                                  |
+|                           SOTA HARNESS BOTTLENECK TAXONOMY & AUDIT STATUS                         |
 +---------------------------------------------------------------------------------------------------+
-|  1. Context-Attention Dissipation         |  2. Greenfield Blindness & Unstructured Mutations     |
+|  1. Context-Attention Dissipation         |  2. Greenfield Blindness & Vacuous Passes             |
 |     - Sliding window forgets invariants   |     - Lack of Topological Multi-File Creation DAG     |
-|     - Redundant exploration repeats       |     - Absence of Pre-Implementation Oracle Synthesis  |
+|     - Addressed by CTRF & Trailing Echo   |     - Toy prompt bans ("Do not read or search first") |
+|     - Task T-77 (L3 breaks, L5 echo)      |     - Tasks T-81 (vacuity gate) & T-83a (prompt law)  |
 +-------------------------------------------+-------------------------------------------------------+
-|  3. Brownfield Blast-Radius Blindness     |  4. In-Flight Memory State Severance                  |
-|     - Whole-file dumping context penalty  |     - Subprocess crash loses uncommitted session state|
-|     - Cross-module signature regressions  |     - Ephemeral cache divergence on restart           |
+|  3. Brownfield Blast-Radius Blindness     |  4. In-Flight State & Identity Collision              |
+|     - Whole-file dumping context penalty  |     - Hardcoded "run-cli" identity shares ledger      |
+|     - Session lacks caller admission      |     - Dual preset catalogs break budget passthrough   |
+|     - Tasks T-75 (LDA) & T-83b (callers)  |     - Tasks T-84 (UUID run-id) & T-79 (presets.json)  |
 +-------------------------------------------+-------------------------------------------------------+
 |  5. Model Dialect Degeneration            |  6. Verification Livelocks & Test Tampering           |
-|     - Fenced-JSON vs Native Schema drift  |     - Redundant verification looping                  |
-|     - Silent tool-call syntax truncations |     - Self-grading / test mutation escape             |
+|     - Fenced-JSON tool calls in `note`    |     - TestTamperShield unreferenced (0 callers)       |
+|     - Manifest aliases.json unread in OR  |     - Run termination inverted with task disposition  |
+|     - Tasks T-82 (recovery) & T-86 (alias)|     - Tasks T-18 (wire shield) & T-72 (settlement)    |
 +---------------------------------------------------------------------------------------------------+
 ```
 
 ### 1.1 Bottleneck 1: Context-Attention Dissipation in Long Runs
+* **Phenomenon**: In tasks exceeding 30 turns, the LLM context window fills with large command outputs, diff hunks, and historical tool results. Standard sliding-window or naive text compacters truncate early invariant constraints and falsified hypothesis memory, leading to repetitive thrashing.
+* **Audit Reality**: `agency/episode/compactor.py` and `context/compiler.py` compact text linearly. `runtime/task_state.py` defines `CodingTaskState`, but operational state was decoupled from turn compilation.
+* **Hardened Fix (T-77, T-80)**: Enforce a stable byte-identical L1–L3 prompt prefix (with cache breakpoints), compact test logs into CTRF format (stripping passing traces and capping failure assertion diffs at $\le 1500$ chars), inject a **Trailing Goal Echo** at the tail of L5 to counter Lost-in-the-Middle degradation, and trip an anti-thrashing circuit breaker when workspace tree hash oscillates ($d_t == d_{t-2}$).
 
-#### The Phenomenon
-In tasks exceeding 25 turns, the LLM context window fills with large command outputs, diff hunks, and historical tool results. Standard context compacters (such as sliding windows or naive summarizers) summarize or truncate the middle turns.
-- **Consequence**: The agent forgets:
-  1. Why earlier architectural decisions were made;
-  2. Which candidate hypotheses were already falsified (causing the agent to re-try previously failed patches);
-  3. The exact overarching plan and its completed versus pending sub-tasks.
+### 1.2 Bottleneck 2: Greenfield Blindness & Vacuous Passes
+* **Phenomenon**: In greenfield development, an agent frequently creates empty stubs (containing only `pass` or `raise NotImplementedError`) and declares victory when `pytest` exits 0 with zero tests collected. Furthermore, legacy prompt heuristics (*"Write ONE file per turn... Do not read or search first"*) actively sabotaged topological multi-file authoring.
+* **Audit Reality**: Greenfield oracle existed in `adapters/evaluators/suites/oracle_greenfield_webapp.py`, but lacked vacuity rejection. `system-prompt.txt` contained toy single-file instructions (**C-12**).
+* **Hardened Fix (T-81, T-83a)**: Purge legacy prompt heuristics. Establish the 3-phase greenfield protocol (scaffold stubs $\to$ red tests $\to$ atomic 2PC commit). Enforce a **Vacuity Admission Gate**: suites passing on empty stubs are rejected fail-closed.
 
-#### Root Cause in Code
-In `vanguard/packages/agency/episode/compactor.py` and `context/compiler.py`, compaction operates as an unstructured text truncation or windowed drop. While `vanguard/packages/runtime/task_state.py` defines `SemanticTaskState`, it is currently decoupled from the active prompt compilation pipeline in `EpisodeEngine.step()`:
+### 1.3 Bottleneck 3: Brownfield Blast-Radius Containment & Context Economics
+* **Phenomenon**: In large repositories, modifying a core interface breaks downstream callers. Agents unaware of caller graphs enter an unstructured patching frenzy when regression suites fail.
+* **Audit Reality**: `.lda/index.db` holds **80,618 relations** and 10,580 symbols, and `multi_file_completeness.py` accepts `callers_by_symbol`. However, `runtime/session.py::_admit_completion` never queried `IndexPort` or passed callers (**C-13**).
+* **Hardened Fix (T-75, T-76, T-83b)**: Implement `LdaRepoIndex` behind `IndexPort`. Bind `repo.*` observation verbs strictly into L5 (preserving L1–L3 cache stability). Wire `IndexPort.get_callers` into `session._admit_completion` to reject completion if public API signatures change without inspecting dependent call sites.
 
-```python
-# CURRENT FLAW: vanguard/packages/agency/episode/engine.py
-# The context compiled for turn N is formed by appending raw turns to the system prompt:
-context = self._compiler.compile(
-    system_prompt=self._system_prompt,
-    history=self._history, # Linear growth, loses structured invariants upon truncation
-    budget=self._remaining_tokens
-)
-```
-
-### 1.2 Bottleneck 2: Greenfield Synthesis & Multi-File Dependency Blindness
-
-#### The Phenomenon
-When tasked with creating a new feature requiring 5+ new files (e.g., domain models, port protocols, adapters, wiring, and tests), the agent often:
-1. Writes implementation files before port interfaces are declared;
-2. Writes caller modules before callee types exist;
-3. Suffers from cyclic import errors and incomplete type exports;
-4. Has no mechanism to test early files before the entire feature is written.
-
-#### Root Cause in Code
-`vanguard/packages/agency/episode/episode.py` dispatches single actions atomically (`patch.apply` or `fs.write`). There is no higher-level **Topological Multi-File Transaction DAG** that forces the agent to commit declarations before definitions, and no **Synthetic Test Oracle Bootstrapper** to provide immediate executable feedback on incomplete subsystems.
-
-### 1.3 Bottleneck 3: Brownfield Blast-Radius Miscalculation & Context Economics
-
-#### The Phenomenon
-In large repositories, modifying a utility or core protocol often breaks downstream consumers. If the agent only inspects the immediate target file:
-1. Downstream typecheck and integration suites break unexpectedly at turn 40;
-2. The agent panics and enters an unstructured patching frenzy, attempting local hacks in downstream files rather than preserving interface stability.
-
-#### Root Cause in Code
-While LDA (`tools/007_LLM_DOCS_ATLAS`) and the code map exist, they are invoked as ad-hoc tools rather than being built into the **Pre-Flight Mutation Protocol**. When `patch.apply` is evaluated in `vanguard/packages/adapters/environment/git.py`, it validates unified diff syntax, but does not calculate or surface the static AST caller graph or downstream impact before the write settles.
-
-### 1.4 Bottleneck 4: In-Flight State Severance Across Process Restarts
-
-#### The Phenomenon
-Under RF-25/BETA-12, events are durably persisted to SQLite WAL. However, cognitive metadata—such as:
-- `_completion_changed_files`
-- `_completion_verification`
-- Sub-agent task progress
-- Falsified hypothesis memory
-is retained in Python object memory within `HarnessSession`. If a process is killed by an operating system signal (SIGTERM/SIGKILL) or suspended for human approval, the re-instantiated session must reconstruct this state purely by re-playing and reducing raw events. If the ledger lacks structured semantic checkpoint events, recovery is partial or lossy.
+### 1.4 Bottleneck 4: In-Flight State Severance & Identity Collisions
+* **Phenomenon**: Session restarts or approvals must seamlessly reconstruct cognitive state from SQLite WAL ledgers without re-executing settled effects.
+* **Audit Reality**: `runtime/entrypoint.py:56` hardcoded `run_id = ... or "run-cli"`, causing independent CLI runs in the same workspace to collide on the same ledger (**C-14**). Furthermore, `apps/coding_max/facade.py` routed presets to byte-identical alias manifests with empty budget policies, completely ignoring `packs/code-default/presets.json` (**C-5/C-6**).
+* **Hardened Fix (T-84, T-79)**: Mint unique UUID/ULID run identities on every invocation (reserving `--resume <id>` as the sole continuation path). Unify preset selection on `presets.json` (`$0.05`/8t, `$0.15`/20t, `$0.40`/40t) so distinct ceilings are durably enforced.
 
 ### 1.5 Bottleneck 5: Model Dialect Degeneration & Tool-Calling Syntax Drift
-
-#### The Phenomenon
-Different frontier models employ vastly different tool-calling mechanisms:
-- **Claude 3.5 Sonnet**: Native XML tags / JSON parameter blocks;
-- **DeepSeek V3 / V4**: Markdown fenced JSON code blocks with specific escaping rules;
-- **OpenAI GPT-4o**: Structured Outputs / native function call frames;
-- **Local Small Models (e.g. Qwen 2.5 Coder 7B/14B)**: Inconsistent schema adherence, frequently omitting closing brackets or outputting prose before tool calls.
-
-When a harness relies on a rigid parser, dialect degeneration produces `SyntaxError` or `instrument_error`, consuming turn budget without semantic progress.
+* **Phenomenon**: Frontier and local models frequently emit structured tool calls within markdown-fenced code blocks inside prose notes, or drift from strict JSON schemas.
+* **Audit Reality**: In live trial `gf-orders-001`, the agent abandoned at turn 3 with 0 effects because a tool call embedded in a `note` was parsed as `action: null`, falling through to an unprompted `finish` (**C-11**). Furthermore, `adapters/models/openrouter.py:1204` failed to pass manifest `aliases.json` to `ProposalTranslator` (**C-16**).
+* **Hardened Fix (T-82, T-86, T-90)**: Unpack markdown-fenced JSON action blocks in notes into candidate proposals. Pass `aliases.json` on the live path with strict validation (zero fuzzy tool-name guessing). Record raw-response digests and typed dialect classifier classes into the ledger.
 
 ### 1.6 Bottleneck 6: Verification Livelocks & Test Oracle Tampering
-
-#### The Phenomenon
-1. **Redundant Verification Livelock**: Once a test suite passes, the agent does not recognize completion and re-runs the test suite 5 to 10 times with tiny variations, exhausting the budget.
-2. **Test Poisoning**: When faced with a difficult bug, an unattended agent sometimes alters the test file (e.g., changing `assert result == 42` to `assert True` or commenting out test cases) to manufacture a false pass.
-
-#### Solution Status in Code
-We successfully introduced loop-breaking in `session.py` (`_completion_redundant_verifications`), but test oracle isolation requires a cryptographic fence where test suites are mounted read-only and verified against an immutable hash.
+* **Phenomenon**: Agents alter test assertions to manufacture green exits (test poisoning), or spin indefinitely re-running passing suites.
+* **Audit Reality**: `TestTamperShield` was implemented in `vanguard/packages/runtime/governance/tamper_shield.py`, but had **zero production callers** in the entire codebase (**C-4**). Additionally, benchmark reporting conflated run termination with evaluation outcomes, causing 8 oracle-passing runs to be mislabeled as abandonments (**C-2**).
+* **Hardened Fix (T-18, T-72)**: Reopen and wire `TestTamperShield` into `session._admit_completion`. Establish the **Two-Axis Settlement Contract** (`TaskDisposition` ⟂ `RunTermination`) in `domain/evidence/disposition.py` so termination and evaluation axes are recorded independently without collapsing.
 
 ---
 
-## 2. The Target SOTA Architecture: Formal Protocols & Invariants
+## 2. Target SOTA Architecture: Formal Protocols & Invariants
 
-To eliminate these bottlenecks permanently, Vanguard must implement four architectural pillars:
+To eliminate these bottlenecks permanently while respecting the **Trusted Computing Base budget ($\le 1438$ logical LOC, currently 1,386 LOC)** and hexagonal boundaries (`domain ← ports ← kernel ← agency ← runtime → adapters`), Vanguard implements five architectural pillars across four Interception SPIs:
 
 ```
 +---------------------------------------------------------------------------------------------------+
-|                                 SOTA CODING HARNESS ARCHITECTURE                                  |
+|                                SOTA CODING HARNESS ARCHITECTURE                                   |
 +---------------------------------------------------------------------------------------------------+
 |                                                                                                   |
 |  +---------------------------------+             +---------------------------------------------+  |
-|  |     Cognitive State Spine       |             |         Context Economics Pipeline          |  |
+|  |   Pillar I: Task State Spine    |             |    Pillar II: Context Economics Pipeline    |  |
 |  |  - SemanticTaskState (CAS)      | <---------> |  - Progressive Context Compiler (PCC)       |  |
-|  |  - Hierarchical Task Backlog    |             |  - Hierarchical AST / Symbol Outliner       |  |
-|  |  - Falsified Hypothesis Ledger  |             |  - Structural Compactor (Lossless Invariant)|  |
+|  |  - Topological Task DAG         |             |  - L1–L3 Prefix Cache Breakpoints           |  |
+|  |  - Falsified Hypothesis Memory  |             |  - CTRF Distillation & Trailing Goal Echo   |  |
 |  +---------------------------------+             +---------------------------------------------+  |
 |                  |                                                      |                         |
 |                  v                                                      v                         |
 |  +---------------------------------+             +---------------------------------------------+  |
-|  |    Multi-File Execution Mesh    |             |        Autonomous Verification Spine        |  |
-|  |  - Topological Transaction DAG  | <---------> |  - Tamper-Proof Oracle Perimeter (UID 10002)|  |
-|  |  - Two-Phase Commit (2PC) Patch |             |  - Synthetic Test Generator (Greenfield)    |  |
-|  |  - Blast-Radius Preflight AST   |             |  - Monotonic Completion Gate (No Livelock)  |  |
+|  |  Pillar III: Multi-File 2PC     |             |   Pillar IV: Verification & Trust Spine     |  |
+|  |  - Exact str_replace Primitive  | <---------> |  - TestTamperShield (Admit Wire, T-18)      |  |
+|  |  - 2PC Atomic Rollback          |             |  - Vacuity Admission Gate (T-81)            |  |
+|  |  - AST Syntax Preflight (Adapters)|           |  - Two-Axis Settlement (TaskDisposition)    |  |
 |  +---------------------------------+             +---------------------------------------------+  |
 |                                                                                                   |
+|                      +-----------------------------------------------------+                      |
+|                      |         Pillar V: Resilient Dialect Adapter         |                      |
+|                      |  - Fenced JSON Note Unwrapping (T-82)               |                      |
+|                      |  - Live Manifest Aliases Validation (T-86)          |                      |
+|                      |  - Raw-Response CAS Digest Provenance (T-90)        |                      |
+|                      +-----------------------------------------------------+                      |
 +---------------------------------------------------------------------------------------------------+
 ```
 
 ### 2.1 Pillar I: The Semantic Cognitive State Spine (`SemanticTaskState`)
 
-Instead of relying on LLM memory or raw message histories, long-running agents must maintain a **Durable Semantic State Vector** committed to the ledger after every turn.
+Instead of relying on LLM memory or raw message histories, long-running agents maintain a **Durable Semantic State Vector** committed to the ledger.
 
-#### Formal Contract: `vanguard/packages/domain/task_state.py`
+#### Domain Wire Contract: `vanguard/packages/domain/task_state.py`
 ```python
+from __future__ import annotations
+from dataclasses import dataclass
+from enum import Enum
+
+class StepStatus(str, Enum):
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    VERIFIED = "verified"
+    BLOCKED = "blocked"
+
 @dataclass(frozen=True, slots=True)
 class TaskStep:
-    step_id: str                      # Unique monotonic identifier: "step-001"
-    title: str                        # Concise objective: "Define Domain Port Protocol"
-    target_files: tuple[str, ...]     # Explicit target scope: ("ports/storage.py",)
-    dependencies: tuple[str, ...]     # Pre-requisite step IDs: ()
-    status: StepStatus                # PENDING | IN_PROGRESS | VERIFIED | BLOCKED
-    falsification_evidence: str | None # Error trace if previously failed
-    verification_hash: str | None     # Tree hash when verified
+    step_id: str                      # Monotonic: "step-001"
+    title: str                        # Concise objective
+    target_files: tuple[str, ...]     # Scope: ("ports/storage.py",)
+    dependencies: tuple[str, ...]     # Pre-requisites: ()
+    status: StepStatus
+    falsification_evidence: str | None = None
+    verification_hash: str | None = None
 
 @dataclass(frozen=True, slots=True)
 class SemanticTaskState:
@@ -179,176 +156,99 @@ class SemanticTaskState:
 ```
 
 #### Invariants:
-- **I-STATE-1 (Monotonic Revision)**: Every update increments `revision` and emits `TaskStateCheckpoint` to the event store with a cryptographically signed SHA-256 state digest.
-- **I-STATE-2 (Zero Context Amnesia)**: Compaction algorithms are strictly forbidden from altering or omitting `settled_invariants` and `falsified_hypotheses`. They are injected as the immutable cognitive prefix of every turn.
+* **I-STATE-1 (Monotonic Revision)**: Every update increments `revision` and emits `TaskStateCheckpoint` with a canonical SHA-256 state digest.
+* **I-STATE-2 (Zero Context Amnesia)**: Compaction algorithms are strictly forbidden from altering or omitting `settled_invariants` and `falsified_hypotheses`. They are injected as the immutable cognitive prefix of every turn.
+* **I-STATE-3 (TCB Boundary)**: Semantic task state management resides in `domain/` and `agency/`. It adds **zero lines to `kernel/`**.
 
 ---
 
-### 2.2 Pillar II: Progressive Context Economics & Dynamic Symbol Outlining
+### 2.2 Pillar II: Progressive Context Economics, CTRF Distillation & Trailing Goal Echo
 
-Loading entire files into the prompt window wastes tokens and dilutes attention. SOTA harnesses employ **Progressive Disclosure**:
+Loading entire files wastes tokens, evicts model attention, and busts prompt caching. SOTA harnesses employ **Progressive Disclosure** and cache stabilization:
 
 ```
-Level 0: Repository Code Map & Architecture Invariants (~500 tokens)
-   |
-Level 1: Symbol Signatures & Docstrings of Relevant Subsystems (~2,000 tokens)
-   |
-Level 2: Targeted Function Slices & Direct Callers (~4,000 tokens)
-   |
-Level 3: Full File Body (ONLY for the immediate file being edited, max 1-2 files)
+L1: System Prompt & Immutable Operating Law (Byte-frozen prefix)
+    |
+L2: Tool Contracts & Manifest Capabilities (Byte-frozen prefix)
+    |
+L3: Repository Architecture Orientation & Stable Invariants (Byte-frozen prefix)
+======================================================================== [Cache Breakpoint]
+L4: Dynamic Working State & Progressive Slices (Symbol signatures / active diffs)
+    |
+L5: Bounded Observations (repo.* queries) + CTRF Test Distillation + Trailing Goal Echo
 ```
 
-#### Protocol: `vanguard/packages/agency/context/progressive.py`
-```python
-class ProgressiveContextCompiler:
-    """Compiles token-bounded context with mathematical priority guarantees."""
-    
-    def compile(
-        self,
-        task_state: SemanticTaskState,
-        active_file: Path,
-        token_budget: int
-    ) -> CompiledPromptContext:
-        # 1. Tier 0: Invariant Anchor (Immutable task brief, active step, rules)
-        tier0 = self._render_invariants(task_state)
-        remaining = token_budget - count_tokens(tier0)
-        
-        # 2. Tier 1: Falsification Memory (What NOT to do)
-        tier1 = self._render_falsified_hypotheses(task_state.falsified_hypotheses)
-        remaining -= count_tokens(tier1)
-        
-        # 3. Tier 2: Active Working Slice (AST slice of target function, not entire file)
-        tier2 = self._slice_extractor.get_active_slice(active_file, task_state.active_step_id)
-        remaining -= count_tokens(tier2)
-        
-        # 4. Tier 3: Neighboring Interface Stubs (Signatures only via LDA / tree-sitter)
-        tier3 = self._symbol_outliner.extract_signatures(active_file.parent, budget=remaining)
-        
-        return assemble_context(tier0, tier1, tier2, tier3)
-```
+#### Protocols:
+1. **L3 Cache Breakpoints (T-77)**: Emit provider cache breakpoints at the L3 boundary to achieve $\ge 85\%$ prefix cache hit rates on turns $\ge 2$.
+2. **CTRF Test Distillation (T-77)**: Parse raw test output into compact Common Test Report Format (CTRF). Strip passing test traces completely and cap failure assertion diffs at $\le 1500$ characters. Full verbose traces are stored in CAS by digest (`.aether/blobs/sha256_<digest>`).
+3. **Trailing Goal Echo (T-77)**: In turns $\ge 30$, append a compact Trailing Goal Echo at the tail of L5 to eliminate Lost-in-the-Middle attention decay.
 
 ---
 
 ### 2.3 Pillar III: Greenfield Multi-File Synthesis & Two-Phase Commit (2PC)
 
-To solve greenfield problems without cascading syntax errors, mutations across multiple files must follow a **Two-Phase Commit (2PC) Transaction Protocol**:
+To prevent partial, half-broken multi-file mutations, changes settle through a **Two-Phase Commit (2PC) Transaction Protocol** in the adapter layer (`adapters/environment/transaction.py`):
 
 ```
 Agent Proposes Transaction (File A, File B, File C)
     |
 Phase 1: PRE-FLIGHT (In-Memory Shadow Tree)
-    |---> Syntax Check (ast.parse on all targets)
-    |---> Symbol Export/Import Linkage (all referenced symbols resolve)
-    |---> Type Consistency Verification (mypy / tsc dry run)
+    |---> Syntax Check (ast.parse on all targets in adapters, NEVER in kernel)
+    |---> Exact Preimage Match (Unique match; trimmed-EOL only; NO fuzzy cascade)
+    |---> Symbol Export/Import Linkage
     |
 Phase 2: COMMIT or ROLLBACK
     |---> If all checks PASS: Atomic write to disk, emit TransactionCommitted
-    +---> If any check FAILS: Rollback shadow tree, emit TransactionRejected with exact syntax diagnostics
+    +---> If any check FAILS: Rollback shadow tree, emit TransactionRejected (PATCH_PREIMAGE_MISMATCH)
 ```
 
-#### Protocol: `vanguard/packages/adapters/environment/transaction.py`
-```python
-@dataclass(frozen=True)
-class FileMutation:
-    path: str
-    content: str
-    action: Literal["create", "modify", "delete"]
-
-class AtomicMultiFileTransactionManager:
-    """Guarantees zero half-broken multi-file states."""
-    
-    def __init__(self, workspace_root: Path):
-        self._root = workspace_root
-        
-    def execute_transaction(
-        self,
-        mutations: Sequence[FileMutation]
-    ) -> Result[TransactionReceipt]:
-        shadow_tree: dict[Path, str | None] = {}
-        backups: dict[Path, str | None] = {}
-        
-        try:
-            # Step 1: Pre-flight stage (read existing, stage new)
-            for m in mutations:
-                target = (self._root / m.path).resolve()
-                backups[target] = target.read_text("utf-8") if target.exists() else None
-                shadow_tree[target] = m.content if m.action != "delete" else None
-                
-            # Step 2: AST and Static Link Verification
-            for path, content in shadow_tree.items():
-                if content is not None and path.suffix == ".py":
-                    ast.parse(content, filename=str(path)) # Fails fast on syntax error
-                    
-            # Step 3: Atomic Flush to Disk
-            for path, content in shadow_tree.items():
-                if content is None:
-                    if path.exists(): path.unlink()
-                else:
-                    path.parent.mkdir(parents=True, exist_ok=True)
-                    path.write_text(content, encoding="utf-8")
-                    
-            return Result.success(TransactionReceipt(mutated_files=tuple(m.path for m in mutations)))
-            
-        except Exception as exc:
-            # ROLLBACK to exact pre-transaction state
-            for path, original_content in backups.items():
-                if original_content is None:
-                    if path.exists(): path.unlink()
-                else:
-                    path.write_text(original_content, encoding="utf-8")
-            return Result.fail("transaction_aborted", f"Preflight validation failed: {exc}")
-```
+#### Protocol Guarantees:
+* **Exact `str_replace` (T-78)**: Replaces fuzzy matching cascades with exact string matching. Indentation is syntax in Python and YAML; fuzzy relocation causes silent nesting defects. Loud failure and forced re-read is strictly superior.
+* **Kernel AST Prohibition**: Invariant I-7 and I-TXN mandate that `ast.parse` resides exclusively in `adapters/environment/transaction.py`. Zero AST imports are permitted in `kernel/`.
 
 ---
 
-### 2.4 Pillar IV: Synthetic Test Oracle Engine for Greenfield Development
+### 2.4 Pillar IV: Synthetic Test Oracle Engine & Anti-Tamper Trust Spine
 
-In brownfield codebases, existing tests provide the falsifier. In **greenfield development**, no tests exist. A naive agent writes code and immediately finishes because `pytest` finds 0 tests and exits 0.
-
-#### The SOTA Synthetic Oracle Pattern:
-Before any implementation file is written in a greenfield task, the agent MUST execute the **Oracle Synthesis Contract**:
-1. **Contract Definition**: Define pure port protocols / interfaces.
-2. **Oracle Synthesis**: Author a comprehensive test file (`test_feature.py`) specifying edge cases, failure paths, and expected outputs.
-3. **Falsifier Confirmation**: Run the test suite against empty/stub implementations. **The test suite MUST FAIL with expected `NotImplementedError` or assertion mismatch.** If it passes on stubs, the test is vacuous and rejected.
-4. **Implementation Phase**: Author implementation code until the synthetic oracle passes.
-5. **Freeze Oracle**: Cryptographically freeze the test file hash so the agent cannot mutate the test during the implementation phase.
+In greenfield development, no tests exist upfront. To prevent false completions:
+1. **The 3-Phase Greenfield Protocol (T-83a)**: Scaffold baseline stubs $\to$ Author synthetic red test falsifiers $\to$ Atomic 2PC implementation commit.
+2. **Vacuity Admission Gate (T-81)**: If the test suite executed against empty stubs (containing only `pass` or `raise NotImplementedError`) returns 0 failures, completion is rejected with typed `VACUOUS_ORACLE_REJECTED`.
+3. **TestTamperShield Wiring (T-18)**: Reopen T-18 and wire `tamper_shield.py` into `session._admit_completion`. If an agent modifies or deletes test assertions to force a green exit, completion fails closed with typed `TEST_TAMPERING_DETECTED`.
+4. **Two-Axis Settlement Contract (T-72)**: Run termination (`RunTermination`) and task disposition (`TaskDisposition`) are kept strictly orthogonal in `domain/evidence/disposition.py`. A run that passed tests but burned its final turn saying so settles honestly as `terminal=abandoned` and `disposition=passed`.
 
 ---
 
 ### 2.5 Pillar V: Resilient Model Dialect Adapter (`SelfHealingDialect`)
 
-Modern harnesses must tolerate model non-determinism without crashing. The dialect adapter sits between raw LLM network responses and the kernel dispatch pipeline:
+The dialect layer sits between raw model responses and the kernel dispatch pipeline:
 
 ```
-Raw Model Stream / Chunk
+Raw Model Stream / Completion Chunk
     |
     v
-1. Strict JSON / Function Call Parser
+1. Strict Proposal Translator
     |---> Success -> Dispatch
-    +---> Failure -> Fallback to Multi-Pattern Extractor
-                        |---> Markdown Fenced JSON (```json ... ```)
-                        |---> Embedded Action Blocks (<action>...</action>)
-                        |---> Repaired Truncated JSON (json-repair)
-                        |---> Clean Dispatch or Controlled Guidance Prompt
+    +---> Failure -> Resilient Extraction SPI
+                        |---> Fenced JSON Unwrapping (T-82: extracts tool proposals from note fields)
+                        |---> Manifest Aliases Resolution (T-86: maps aliases.json to canonical verbs)
+                        |---> Raw-Response Digest CAS Recording (T-90: emits typed dialect classifier)
 ```
 
 ---
 
 ## 3. Concrete Module Implementation Specifications
 
-Below are the exact file paths, class designs, and pseudocode implementations for developers to build these capabilities into Vanguard.
-
 ### 3.1 Module 1: `vanguard/packages/agency/episode/task_dag.py`
-**Responsibility**: Manages the multi-step execution plan as a topological directed acyclic graph.
+**Responsibility**: Manages multi-step plans as a topological DAG without adding domain concepts to the kernel.
 
 ```python
 """Topological Task Step DAG for Complex Software Engineering Campaigns."""
 
 from __future__ import annotations
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import Mapping, Sequence, Set
 import graphlib
+from typing import Sequence
 
 class StepState(str, Enum):
     PENDING = "pending"
@@ -374,23 +274,18 @@ class TaskExecutionGraph:
     def _validate_acyclic(self) -> None:
         graph = {s.id: set(s.dependencies) for s in self._steps.values()}
         sorter = graphlib.TopologicalSorter(graph)
-        sorter.prepare() # Raises CycleError if cyclic
+        sorter.prepare()
 
     def get_executable_steps(self) -> tuple[PlanStep, ...]:
-        """Returns all steps whose dependencies are strictly VERIFIED."""
         ready: list[PlanStep] = []
         for step in self._steps.values():
             if step.state != StepState.PENDING:
                 continue
-            deps_met = all(
-                self._steps[d].state == StepState.VERIFIED 
-                for d in step.dependencies
-            )
-            if deps_met:
+            if all(self._steps[d].state == StepState.VERIFIED for d in step.dependencies):
                 ready.append(step)
         return tuple(ready)
 
-    def mark_step_verified(self, step_id: str, verification_hash: str) -> TaskExecutionGraph:
+    def mark_step_verified(self, step_id: str) -> TaskExecutionGraph:
         updated = dict(self._steps)
         curr = updated[step_id]
         updated[step_id] = PlanStep(
@@ -405,172 +300,133 @@ class TaskExecutionGraph:
 
 ---
 
-### 3.2 Module 2: `vanguard/packages/agency/context/blast_radius.py`
-**Responsibility**: Computes downstream caller blast radius before code edits settle.
+### 3.2 Module 2: `vanguard/packages/runtime/governance/tamper_shield.py` (Admit Wiring)
+**Responsibility**: Wire the existing, unreferenced `TestTamperShield` into `runtime/session.py::_admit_completion`.
 
 ```python
-"""Static AST and Dependency Blast Radius Calculator."""
+# In vanguard/packages/runtime/session.py::_admit_completion
+from vanguard.packages.runtime.governance.tamper_shield import TestTamperShield
 
-from __future__ import annotations
-import ast
-from pathlib import Path
-from typing import Set
-
-class BlastRadiusAnalyzer:
-    def __init__(self, workspace_root: Path):
-        self._root = workspace_root
-
-    def calculate_affected_symbols(self, target_file: Path, modified_source: str) -> Set[str]:
-        """Identifies symbols whose signatures or presence changed in the diff."""
-        original_symbols = self._extract_toplevel_signatures(target_file)
-        new_ast = ast.parse(modified_source, filename=str(target_file))
-        new_symbols = {
-            node.name: ast.dump(node.args) 
-            for node in ast.iter_child_nodes(new_ast) 
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
-        }
-        
-        changed: Set[str] = set()
-        for name, sig in original_symbols.items():
-            if name not in new_symbols or new_symbols[name] != sig:
-                changed.add(name)
-        return changed
-
-    def find_downstream_dependents(self, changed_symbols: Set[str]) -> tuple[Path, ...]:
-        """Scans workspace imports for references to modified symbols using fast ripgrep."""
-        # Integrates directly with tools/007_LLM_DOCS_ATLAS symbols index
-        ...
-```
-
----
-
-### 3.3 Module 3: `vanguard/packages/runtime/governance/test_tamper_shield.py`
-**Responsibility**: Enforces test suite read-only integrity during automated runs.
-
-```python
-"""Tamper-Proof Test Suite Isolation & Integrity Shield."""
-
-from __future__ import annotations
-import hashlib
-from pathlib import Path
-from vanguard.packages.domain.canonicalisation.digest import digest_of
-
-class TestTamperShield:
-    def __init__(self, workspace: Path, test_patterns: tuple[str, ...] = ("test/**", "tests/**", "*_test.py")):
-        self._workspace = workspace
-        self._patterns = test_patterns
-        self._baseline_hashes: dict[str, str] = self._snapshot_test_hashes()
-
-    def _snapshot_test_hashes(self) -> dict[str, str]:
-        hashes: dict[str, str] = {}
-        for p in self._workspace.rglob("test*.py"):
-            hashes[str(p.relative_to(self._workspace))] = hashlib.sha256(p.read_bytes()).hexdigest()
-        return hashes
-
-    def verify_no_test_tampering(self) -> tuple[bool, str]:
-        """Fails closed if the agent altered test files to manufacture a green exit."""
-        for rel_path, original_hash in self._baseline_hashes.items():
-            current_file = self._workspace / rel_path
-            if not current_file.exists():
-                return False, f"Test file deleted by agent: {rel_path}"
-            current_hash = hashlib.sha256(current_file.read_bytes()).hexdigest()
-            if current_hash != original_hash:
-                return False, f"Test file tampered with by agent: {rel_path} (original {original_hash[:8]}, current {current_hash[:8]})"
-        return True, "Test integrity verified"
+def _admit_completion(self, proposal: Proposal) -> AdmissionResult:
+    # 1. Verify tamper shield before accepting claim
+    if self._tamper_shield is not None:
+        integrity_ok, reason = self._tamper_shield.verify_no_test_tampering()
+        if not integrity_ok:
+            return AdmissionResult.reject(
+                code="TEST_TAMPERING_DETECTED",
+                detail=reason
+            )
+            
+    # 2. Check callers of modified public symbols (T-83b)
+    if self._index_port is not None:
+        callers = self._index_port.get_callers(self._completion_changed_symbols)
+        uninspected = set(callers) - self._completion_inspected_files
+        if uninspected:
+            return AdmissionResult.reject(
+                code="UNINSPECTED_CALLERS_REMAINING",
+                detail=f"Modified public symbols have uninspected call sites: {sorted(uninspected)}"
+            )
+            
+    # 3. Normal verification checks...
+    return AdmissionResult.admit()
 ```
 
 ---
 
 ## 4. Operational Guidelines: Complex Problem Workflows
 
-### 4.1 Greenfield Campaign Workflow (Creating New Multi-File Subsystems)
-
+### 4.1 Greenfield Campaign Workflow
 ```
 [OPERATOR BRIEF: Create New Subsystem]
        |
        v
-STAGE 1: ARCHITECTURAL DECOMPOSITION (Turn 1-2)
-  - Inspect existing ports and domain types using `fs.search` / `lda_symbol`.
-  - Author `TASK_PLAN.json` declaring step dependencies in topological order.
-  - DO NOT write any implementation code in this stage.
+STAGE 1: ARCHITECTURAL DECOMPOSITION (Turn 1–2)
+  - Inspect existing ports/domain types using `repo.*` L5 tools.
+  - Formulate task backlog in topological order.
        |
        v
-STAGE 2: CONTRACT DEFINITION (Turn 3-5)
-  - Create `domain/` pure types and `ports/` protocols.
-  - Execute AST validation. Ensure stdlib-only boundary compliance.
+STAGE 2: CONTRACT DEFINITION (Turn 3–4)
+  - Create pure types in `domain/` and protocols in `ports/`.
+  - Validate with AST preflight.
        |
        v
-STAGE 3: SYNTHETIC TEST ORACLE CREATION (Turn 6-8)
-  - Author test suite under `test/contracts/` or `test/subsystem/`.
-  - RUN TESTS: Verify tests FAIL with `NotImplementedError` or `ImportError`.
-  - Freeze baseline test SHA-256 in `TestTamperShield`.
+STAGE 3: SYNTHETIC ORACLE CREATION & VACUITY GATE (Turn 5–6)
+  - Author test suite under `test/`.
+  - RUN TESTS: Tests MUST FAIL with `NotImplementedError` or `ImportError`.
+  - Vacuity gate (T-81) rejects suite if passing on empty stubs.
+  - Baseline test hash frozen in `TestTamperShield` (T-18).
        |
        v
-STAGE 4: TOPOLOGICAL IMPLEMENTATION (Turn 9-N)
-  - Implement modules in dependency order using `AtomicMultiFileTransactionManager`.
-  - Re-run synthetic tests after each step until green.
+STAGE 4: TOPOLOGICAL IMPLEMENTATION (Turn 7–N)
+  - Implement modules in dependency order using atomic 2PC `str_replace` (T-78).
+  - Re-run synthetic tests until green.
        |
        v
-STAGE 5: VERIFICATION & ADMISSION (Terminal Turn)
-  - Tamper shield confirms zero test mutations.
-  - Exterior evaluator certifies pass. Emit `agency.finish`.
+STAGE 5: TWO-AXIS ADMISSION & SETTLEMENT
+  - Tamper shield confirms test assertions unmutated.
+  - Bound external verifier certifies pass. Emit `SettlementReceipt`.
 ```
 
-### 4.2 Brownfield Refactoring Campaign Workflow (Deep Complex Bugfixes)
-
+### 4.2 Brownfield Refactoring Campaign Workflow
 ```
 [OPERATOR BRIEF: Bug Report / Refactor]
        |
        v
-STAGE 1: MINIMAL REPRODUCTION (Turn 1-3)
-  - Locate failing site via `fs.search` and symbol graph.
-  - Execute existing test suite via `proc.exec`. Capture exact failure text.
-  - If no regression test exists, write ONE reproduction test case.
+STAGE 1: MINIMAL REPRODUCTION (Turn 1–3)
+  - Locate failing site via `repo.search_symbols` / `repo.get_callers`.
+  - Execute test via `proc.exec`. Capture exact failure text.
        |
        v
-STAGE 2: CAUSAL LOCALIZATION (Turn 4-6)
-  - Formulate competing hypotheses. Record in `SemanticTaskState`.
-  - Extract AST slices of candidate functions.
-  - Identify blast radius: downstream consumers of target symbols.
+STAGE 2: CAUSAL LOCALIZATION & BLAST RADIUS (Turn 4–5)
+  - Identify blast radius: callers of target symbols via `IndexPort.get_callers`.
+  - Formulate competing hypotheses.
        |
        v
-STAGE 3: SURGICAL EDIT (Turn 7-9)
-  - Apply smallest viable patch via `surgical_patch` / `patch.apply`.
+STAGE 3: SURGICAL EDIT (Turn 6–8)
+  - Apply exact `str_replace` patch via 2PC transaction manager (T-78).
   - Run reproduction test first.
        |
        v
-STAGE 4: REGRESSION CLEARANCE (Turn 10-12)
-  - Run full package regression suite.
-  - If regression occurs: record falsified hypothesis in durable state.
-  - DO NOT retry the identical patch. Pivot to next hypothesis.
+STAGE 4: REGRESSION CLEARANCE & ANTI-THRASHING (Turn 9–11)
+  - Run package regression suite.
+  - If workspace tree hash oscillates ($d_t == d_{t-2}$), trip circuit breaker (T-80).
        |
        v
 STAGE 5: ADMISSION
-  - Redundant verification detector prevents spinning.
-  - Verify changed file tree hash against verification receipt.
-  - Emit `agency.finish`.
+  - Multi-file completeness confirms all caller files inspected (T-83b).
+  - Emit two-axis settlement receipt.
 ```
 
 ---
 
-## 5. Phased Engineering Roadmap: Waves 8 to 12
+## 5. Phased Engineering Roadmap: Canonical Waves 1 to 5
 
-| Milestone | Target Capability | Primary Deliverables | Key Test Falsifiers |
+This roadmap replaces abstract wave numbering with the **five verified, file-bounded execution waves** of the Electroweak Synthesis of Record:
+
+```mermaid
+graph TD
+    W1["Wave 1 — Settlement & Signal Truth (P0)<br/>HAR-01 · TRUTH · INS-01 · BRG-01"] --> W2["Wave 2 — Frozen Control & Presets (P0)<br/>CMX-01/T-79 · Honest Instrument · EXP-01"]
+    W2 --> W3["Wave 3 — Edit & Retrieval Treatments (P1)<br/>T-78 (Exact str_replace) · IDX-01 (LdaRepoIndex)"]
+    W3 --> W4["Wave 4 — Context & Reliability Treatments (P1)<br/>T-77 (CTRF & Trailing Echo) · T-80 (Oscillation Breaker)"]
+    W2 --> W5["Wave 5 — Outer Director & TTC (Post-MS-CONTROL)<br/>OCT-01..04 · Recursive Tournament Voting"]
+```
+
+| Wave | Primary Packages | Key Deliverables & Targets | Executable Falsifier |
 |---|---|---|---|
-| **Wave 8** | **Cognitive State Spine** | `task_dag.py`, `SemanticTaskState` persistence in SQLite WAL, checkpoint reducer. | `test_task_dag_topological_execution`, `test_state_restoration_across_sigkill` |
-| **Wave 9** | **Progressive Context Engine** | AST symbol slicer, token-bounded tier compiler, LDA caller graph integration. | `test_context_stays_under_budget_at_turn_100`, `test_invariant_prefix_preserved` |
-| **Wave 10** | **Atomic Multi-File 2PC** | `AtomicMultiFileTransactionManager`, preflight syntax and type linkage validator. | `test_multi_file_rollback_on_syntax_error`, `test_atomic_cross_file_rename` |
-| **Wave 11** | **Synthetic Oracle & Anti-Tamper Shield** | `TestTamperShield`, synthetic test runner, read-only test filesystem mounting. | `test_rejection_of_tampered_test_assertions`, `test_synthetic_oracle_fail_closed` |
-| **Wave 12** | **Full SOTA Benchmark Qualification** | 100-turn marathon agent evaluation, SWE-bench / HumanEval verification arm. | Real-world qualification runs using DeepSeek V4 Flash / Claude 3.5 Sonnet |
+| **Wave 1** | **HAR-01**, **TRUTH**, **INS-01**, **BRG-01** | • Capability-bound native profiles (`T-69`)<br/>• Approval threshold passthrough (`T-70`)<br/>• Declare `finish-tool.json` (`T-71`)<br/>• Two-Axis Settlement (`domain/evidence/disposition.py`, `T-72`)<br/>• Remove `ADMISSION_GATE_EXEMPT` (`T-04`)<br/>• Wire `TestTamperShield` into `session` (`T-18`)<br/>• Greenfield vacuity rejection check (`T-81`)<br/>• Fenced JSON action unwrapping (`T-82`)<br/>• Greenfield prompt deconfliction (`T-83a`)<br/>• Caller admission (`T-83b`)<br/>• UUID run identity (`T-84`)<br/>• Fail-closed llama.cpp bridge (`T-87`, `T-88`) | `test_settlement_disposition.py`<br/>`test_approval_passthrough.py`<br/>`test_manifest_components.py`<br/>`test_dialect_fenced_action_recovery.py`<br/>`test_multi_file_callers_admission.py`<br/>`test_run_identity.py`<br/>`test_llama_bridge_lifecycle.py` |
+| **Wave 2** | **CMX-01**, **EXP-01**, **INS-01** | • Unify presets on `presets.json` (`T-79`)<br/>• Receipt telemetry passthrough (`T-85`)<br/>• Route benchmarks through `entrypoint.execute` (`T-89`)<br/>• L0 smoke triad (`T-92`) & L1 twelve-task pre-canary (`T-93`)<br/>• False-completion rate = 0 hard veto (`T-94`)<br/>• Qualify `MS-CONTROL` on frozen candidate SHA ($N \ge 30$) | `test_preset_budgets.py`<br/>`test_receipt_telemetry.py`<br/>`test_product_path_subject.py`<br/>`test_l0_triad.py`<br/>`test_metric_veto.py` |
+| **Wave 3** | **CHANGE**, **IDX-01**, **DLG-01** | • Exact `str_replace` 2PC primitive (`T-78`)<br/>• `LdaRepoIndex` adapter over `.lda/index.db` (`T-75`)<br/>• `repo.*` observation tools bound into L5 (`T-76`)<br/>• Live manifest alias validation (`T-86`)<br/>• Raw-response CAS digest provenance (`T-90`) | `test_str_replace_exact.py`<br/>`test_lda_repo_index.py`<br/>`test_l5_only_observations.py`<br/>`test_live_alias_validation.py`<br/>`test_dialect_provenance.py` |
+| **Wave 4** | **CONTROL**, **SEE** | • L3 cache breakpoints & Trailing Goal Echo (`T-77`)<br/>• CTRF test log distillation ($\le 1500$ chars)<br/>• Anti-thrashing oscillation breaker ($d_t == d_{t-2}$, `T-80`) | `test_cache_breakpoints.py`<br/>`test_anti_thrashing_circuit_breaker.py` |
+| **Wave 5** | **OCT-01..04**, **ARM-01** | • Outer-loop campaign director (`OCT-03`)<br/>• Isolated git worktrees & CAS mailbox (`OCT-01`)<br/>• Test-Time Compute (TTC) scaling & RTV<br/>• Multi-agent comparison arm program (`T-96`) | `test_campaign_director.py`<br/>`test_arm_matrix.py` |
 
 ---
 
-## 6. Verification Checklist for Developers
+## 6. Verification Checklist & Invariants for Developers
 
-When implementing components from this treatise, contributors and autonomous agents MUST verify:
-- [ ] Hexagonal boundary invariants are preserved (`domain <- ports <- kernel <- agency <- runtime -> adapters`).
-- [ ] Kernel line-of-code budget does not exceed the $\le 1438$ threshold (`python3 tools/linters/check_tcb_budget.py`).
-- [ ] No live Python objects cross serialization boundaries; all state contracts serialize via JCS canonical JSON.
-- [ ] Subprocess executions utilize `sys.executable` and inherit controlled environment variables.
-- [ ] Knowledge base is regenerated after touching packages (`python3 tools/generate_knowledge_base.py`).
-- [ ] All automated tests pass hermetically without live network access (`npm test` and `python3 -m unittest discover`).
+When implementing components from this blueprint, contributors and agents MUST verify:
+- [ ] **TCB LOC Guardrail**: Production kernel LOC does not exceed $\le 1438$ logical lines (`python3 tools/linters/check_tcb_budget.py` reports **1,386 unchanged**).
+- [ ] **Hexagonal Flow**: `domain ← ports ← kernel ← agency ← runtime → adapters`. Adapters never import `kernel` or `agency`.
+- [ ] **Kernel Domain Blindness (I-7)**: Zero AST imports, zero SQLite imports, and zero coding-specific heuristics enter `kernel/`.
+- [ ] **Two-Axis Settlement (T-72)**: `RunTermination` (how run ended) and `TaskDisposition` (what oracle said) are strictly decoupled.
+- [ ] **Hard Veto on Benchmarks**: False-completion rate must equal exactly **0**. No pass rate or token lift overrides this veto.
+- [ ] **Hermetic Testing**: All contract tests pass without live network access or unrecorded ambient environment variables.

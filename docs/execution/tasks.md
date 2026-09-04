@@ -221,7 +221,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 ### Context: Dialect and model routing
 
 **T-21 Dialect typed failure classes** (B, spec §8)  
-- [ ] Truncated JSON, DeepSeek fence, XML tags classified without false `ok`  
+- [x] Truncated JSON, DeepSeek fence, XML tags classified without false `ok`  
 - Files: `adapters/models/dialect.py`; create `test/contracts/test_dialect_recovery.py`  
 
 **T-22 Fail-closed model resolve** (B)  

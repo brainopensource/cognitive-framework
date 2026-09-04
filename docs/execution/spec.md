@@ -910,7 +910,7 @@ Stale epoch ⇒ refresh or fail closed. Do not put `repo_map` or σ into frozen 
 
 ## Dialect FACT split
 
-Wire recovery: `adapters/models/dialect.py`. Malformed → Proposal: `agency/episode/protocol_recovery.py`. Taxonomy in Appendix H §8.
+Wire recovery: `adapters/models/dialect.py` T-21 MECHANISM. Truncated JSON, DeepSeek fence, and XML tool tags are classified; malformed never reports `ok`. Malformed → Proposal: `agency/episode/protocol_recovery.py`. Taxonomy in Appendix H §8.
 
 ## 2PC / tamper placement
 
@@ -935,7 +935,7 @@ Living rule: T-17–T-20 MECHANISM — 2PC, IndexPort tamper freeze, greenfield 
 
 ## 8. Dialect
 
-Wire recovery: `adapters/models/dialect.py`. Malformed → Proposal: `agency/episode/protocol_recovery.py`.
+Wire recovery: `adapters/models/dialect.py` T-21 MECHANISM. Truncated JSON, DeepSeek fence, and XML tool tags are classified; malformed never reports `ok`. Proposal recovery remains `agency/episode/protocol_recovery.py`.
 
 ## 13. Stop-rollback / research-explanation remainder
 

@@ -173,7 +173,7 @@ composition/lifecycle authority; infrastructure stays behind generic ports.
 | **CMX-09** | Canonical Harness Convergence | runtime, code pack, manifests, thin app | `IN_PROGRESS` (Active in [`tasks.md`](tasks.md)) | W-092-F1 | Fold accepted later prompt/tool/recovery mechanisms into public presets; use one capability-derived admission/policy binding; exact technical delta governed by [`spec.md`](spec.md). |
 | **CMX-10A** | Truthful Task-Aware Completion | runtime + code-pack completion policy | `IN_PROGRESS` | CMX-09 | Parse real verification counts and fail closed on zero, stale, partial, incomplete or task-inapplicable evidence across bugfix, feature, migration, greenfield and read-only tasks. |
 | **CMX-10B** | Durable Long-Session Continuation | runtime/session/task projection | `DONE` | CMX-10A | Domain `SemanticTaskState`, fold, episode_id, σ-not-in-L3, 40-turn fold parity. Falsifiers green 2026-09-03. |
-| **CMX-11** | Progressive Repository Context & Change Closure | agency context, `IndexPort`, adapters, code pack | `IN_PROGRESS` | CMX-09, CMX-10B | T-14 epoch LIVE. Remaining: T-15/T-16/T-36/T-37 plus T-18–T-20 change-closure. |
+| **CMX-11** | Progressive Repository Context & Change Closure | agency context, `IndexPort`, adapters, code pack | `IN_PROGRESS` | CMX-09, CMX-10B | SEE A stack T-14–T-16/T-36/T-37/T-45 MECHANISM. Remaining: T-46 `[PROPOSAL]` ranking. Change-closure T-18–T-20 MECHANISM; product MS-CHANGE stays `OPEN` on T-47–T-49. |
 
 ### 2.10 Octopus Meta-Controller & Swarm Topology (VISION.md §12, §16; M-OCT Horizon)
 
@@ -197,7 +197,7 @@ Team capacity is chosen later. `requires:` edges live on tasks. This index maps 
 | **INSTRUMENT** | REL-01R | T-01–T-03, T-24–T-25, T-40–T-41 | MS-INSTRUMENT | `DONE` at `63b77116` |
 | **TRUTH** | CMX-10A, W-092-F2 | T-04–T-08, T-42, T-38, T-23 | MS-TRUTH | Partial: T-23/T-38/T-42 `DONE`; T-04/T-05/T-07 open; T-08 landed `8637db55` |
 | **STATE** | CMX-10B, W-092-F3 | T-09–T-13, T-43–T-44 | MS-RESUME | `DONE` at `8637db55` (closer receipt 2026-09-03). |
-| **SEE** | CMX-11, PRG-01, W-092-F4 | T-14–T-16, T-36–T-37, T-45–T-46 | MS-SEE | T-14 `DONE` `587db91a`. T-15/T-16/T-36/T-37 open. Next: T-16. |
+| **SEE** | CMX-11, PRG-01, W-092-F4 | T-14–T-16, T-36–T-37, T-45–T-46 | MS-SEE | T-14–T-16, T-36, T-37, T-45 `DONE`. T-46 `[PROPOSAL]`. Gate stays `OPEN`. |
 | **CHANGE** | TXN-01, SHD-01, TLS-04/05 | T-17–T-20, T-47–T-49 | MS-CHANGE | T-17–T-20 `DONE`. T-47–T-49 `[PROPOSAL]`. Gate stays `OPEN`. |
 | **DIALECT** | WRN-01, TLS-02 | T-21–T-22, T-50 | — | T-21–T-22 `DONE`. T-50 `[PROPOSAL]`. Does not close MS-CHANGE. |
 | **CONTROL** | CMX-07, W-092-F5 | T-26–T-27, T-51–T-52 | MS-CONTROL | Frozen preregistration + canary |

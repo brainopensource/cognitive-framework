@@ -33,7 +33,7 @@ confidence: high
 
 Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technical.md`](technical.md). Packages: [`backlog.md`](backlog.md). TARGET gates: [`milestones.md`](milestones.md).
 
-**No sprints. No waves.** Check boxes as work completes. **Recommended reading order (not a schedule):** **T-16** (MS-SEE, needs T-14) and **T-18** (MS-CHANGE, needs T-14+T-17) in parallel. Skip T-04/T-05/T-07. Do not create `progressive.py` (T-15).
+**No sprints. No waves.** Check boxes as work completes. **Recommended reading order (not a schedule):** MS-SEE A stack T-16/T-15/T-36/T-37/T-45 is MECHANISM this-branch. Skip T-04/T-05/T-07. Do not create `progressive.py` (T-15). T-46 ranking stays `[PROPOSAL]`.
 
 B §18 tickets T-01–T-35 are canonical. A §31 maps into those IDs or T-36+ (see merge map appendix). v2 `SUB-*` are aliases. Live backlog `SUB-01` (kernel S0–S12) is a different package.
 
@@ -165,24 +165,24 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - Files: `ports/index.py`, `adapters/stores/repo_index.py`, session  
 
 **T-15 Progressive L4/L5 strategy** (B)  
-- [ ] Policy on existing `ContextCompiler`; **not** a second compiler (`PRG-01` alias)  
-- [ ] Settled invariants / dead ends non-evictable  
-- [ ] ResultDistiller at effect boundary (v2 §3.3) → if large, split T-36  
+- [x] Policy on existing `ContextCompiler`; **not** a second compiler (`PRG-01` alias)  
+- [x] Settled invariants / dead ends non-evictable  
+- [x] ResultDistiller at effect boundary (v2 §3.3) → split T-36  
 - Requires: T-12, T-14  
 
 **T-16 Index refresh after patch.apply** (B)  
-- [ ] Callers after write include new symbol or explicit omission  
+- [x] Callers after write include new symbol or explicit omission  
 - Requires: T-14  
 
 **T-36 ResultDistiller + output caps** (v2 §3.3, §13, WRN-02)  
-- [ ] Compact text + full artifact digest; ~1–2k char tool bodies  
-- [ ] Goal echo at tail of L5 (v2 §15)  
+- [x] Compact text + full artifact digest; ~1–2k char tool bodies  
+- [x] Goal echo at tail of L5 (v2 §15)  
 
 **T-37 Omission ledger in packet** (A §11.5, §31.20)  
-- [ ] Explicit omitted-items report; truncated ≠ complete  
+- [x] Explicit omitted-items report; truncated ≠ complete  
 
 **T-45 Deterministic no-index fallback** (A §31.23)  
-- [ ] Evidence when IndexPort unavailable  
+- [x] Evidence when IndexPort unavailable  
 
 **T-46 Phase-aware ranking** (A §31.22) `[PROPOSAL]` keep ranking out of IndexPort (B)  
 

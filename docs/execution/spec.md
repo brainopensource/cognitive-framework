@@ -40,7 +40,7 @@ Companion handbook: [`technical.md`](technical.md). Task IDs: [`tasks.md`](tasks
 - **INV-DELTA-1.** Domain state schemas: stdlib + JCS only.
 - **INV-DELTA-2.** This program SHALL NOT grow kernel past the TCB ceiling.
 - **INV-DELTA-3.** Multi-file writes are all-or-nothing. Preflight in the adapter. MECHANISM this-branch (T-17). Product MS-CHANGE remains `OPEN` (T-47–T-49 `[PROPOSAL]`). T-18–T-20 are MECHANISM.
-- **INV-DELTA-4.** Agents SHALL NOT mutate tests during implementation. Tamper shield MECHANISM this-branch (T-18). Enumerate via IndexPort, not `Path.glob("test/**")`. Product MS-CHANGE remains `OPEN` (T-47–T-49). Session `_tamper_shield.evaluate(...)` hook still deferred (A has in-flight session edits after T-16 `33dc7c33`).
+- **INV-DELTA-4.** Agents SHALL NOT mutate tests during implementation. Tamper shield MECHANISM this-branch (T-18). Enumerate via IndexPort, not `Path.glob("test/**")`. Product MS-CHANGE remains `OPEN` (T-47–T-49). Session `_tamper_shield.evaluate(...)` still unwired (B owns the admission call).
 - **INV-DELTA-5.** L1–L3 prefix-stable. Compaction SHALL NOT drop settled invariants or falsified hypotheses.
 - **I-STATE.** σ is a ledger fold (`fold_task_state`). One schema: `SemanticTaskState` with alias `CodingTaskState`. Lock: `domain/task_state.py` MISSING. Branch: LIVE `8637db55`. MS-RESUME `CLOSED`.
 - **I-TXN.** 2PC lives in `adapters/environment/transaction.py`. This branch LIVE (T-17 MECHANISM). Lock `66aa7a3c` MISSING. Not kernel.
@@ -915,7 +915,7 @@ Wire recovery: `adapters/models/dialect.py` T-21 MECHANISM. Truncated JSON, Deep
 ## 2PC / tamper placement
 
 - 2PC: `adapters/environment/transaction.py` this-branch LIVE (T-17 MECHANISM). Lock `66aa7a3c` MISSING. Multi-file `GitEnvironment.apply` preflights `ast.parse` then all-or-nothing flush. Single-file sequential observation (S8-B-09) unchanged. T-18–T-20 MECHANISM; MS-CHANGE stays `OPEN` on T-47–T-49.
-- Tamper: `runtime/governance/tamper_shield.py` this-branch LIVE (T-18 MECHANISM). Lock `66aa7a3c` MISSING. Enumerate via IndexPort; `Path.glob("test/**")` is insufficient. Session `_tamper_shield.evaluate(...)` deferred until T-16.
+- Tamper: `runtime/governance/tamper_shield.py` this-branch LIVE (T-18 MECHANISM). Lock `66aa7a3c` MISSING. Enumerate via IndexPort; `Path.glob("test/**")` is insufficient. Session `_tamper_shield.evaluate(...)` still unwired (B owns the admission call).
 
 ---
 
@@ -927,7 +927,7 @@ Branch: `vanguard/packages/domain/task_state.py` defines `SemanticTaskState` and
 
 ## 6. Context packet and WorkspaceEpoch
 
-Keep `ContextPacket`. FEATURE_SPEC 4-tier budget is L4/L5 **policy** on existing `ContextCompiler` (not `progressive.py` as a second compiler). `WorkspaceEpoch := {treeHash, indexDigest, sourceRevision, compiledAtTurn}` this branch **LIVE**; lock `66aa7a3c` **MISSING**. T-14. Product compile stamps epoch on the existing packet; write changes `treeHash`; stale or missing epoch MUST NOT admit `completed`. Legacy packets without epoch may still resume via identity fields.
+Keep `ContextPacket`. FEATURE_SPEC 4-tier budget is L4/L5 **policy** on existing `ContextCompiler` (not `progressive.py` as a second compiler) — T-15 this-branch **LIVE**. `WorkspaceEpoch := {treeHash, indexDigest, sourceRevision, compiledAtTurn}` this branch **LIVE**; lock `66aa7a3c` **MISSING**. T-14. Product compile stamps epoch on the existing packet; write refreshes the index then rebinds (T-16); stale or missing epoch MUST NOT admit `completed`. Tool bodies are distilled at the effect boundary with a goal echo at L5 (T-36). Packet `omissions` is a ledger; truncated ≠ complete (T-37). IndexPort unbound/down binds epoch from the environment snapshot with explicit `index.port.unbound` or fail-closed `INDEX_UNBOUND` — never invents symbols (T-45). Legacy packets without epoch may still resume via identity fields. T-46 ranking stays `[PROPOSAL]`.
 
 ## 7. 2PC and tamper
 
@@ -953,6 +953,11 @@ SHALL text for stop/simplify/rollback and research/explanation lives in §§11�
 | `runtime/event_store.py` | MISSING | Owner remains `adapters/stores/event_store.py` |
 | `ADMISSION_GATE_EXEMPT` | FACT | Unchanged. T-04 not started |
 | `domain/workspace_epoch.py` `WorkspaceEpoch` | MISSING | LIVE (T-14). Lock `66aa7a3c` still MISSING |
+| Index refresh after write (T-16) | MISSING | LIVE (`33dc7c33`) |
+| L4/L5 policy on `ContextCompiler` (T-15) | MISSING | LIVE (`2a4cdaad`); no `progressive.py` |
+| ResultDistiller + L5 goal echo (T-36) | MISSING | LIVE (`179f5616`) |
+| Packet omission ledger (T-37) | MISSING | LIVE (`81b7b572`) |
+| No-index fallback (T-45) | MISSING | LIVE (`c7995195`); `INDEX_UNBOUND` typed |
 
 ## 15. Error / verification matrix
 

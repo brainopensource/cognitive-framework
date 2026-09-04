@@ -34,13 +34,13 @@ Developers SHALL use this file plus [`spec.md`](spec.md), [`tasks.md`](tasks.md)
 
 **Canonical task IDs** are `T-01`… in [`tasks.md`](tasks.md). v2 `SUB-*` / `TXN-*` are aliases in [`backlog.md`](backlog.md). Live kernel pipeline package `SUB-01` in the backlog is **not** v2 admission.
 
-**Recommended reading order (not a sprint):** T-16 (MS-SEE) and T-18 (MS-CHANGE) in parallel. T-14 and T-17 are MECHANISM. T-04 stays `[PROPOSAL]`.
+**Recommended reading order (not a sprint):** MS-SEE A stack T-16/T-15/T-36/T-37/T-45 is MECHANISM. T-14 and T-17 are MECHANISM. T-04 stays `[PROPOSAL]`. T-46 ranking stays `[PROPOSAL]`.
 
 **FACT STORE path:** `adapters/stores/event_store.py`.
 **I-STATE.** Lock `66aa7a3c`: `domain/task_state.py` MISSING. Branch: LIVE `8637db55` (`SemanticTaskState`; fold in `runtime/task_state.py`). MS-RESUME `CLOSED`.
 **MS-INSTRUMENT CLOSED** at `63b77116`.
 **MS-RESUME CLOSED** at `8637db55`.
-**T-14 WorkspaceEpoch LIVE** `587db91a`. **T-17 adapter 2PC LIVE** `5c9870f0`.
+**T-14 WorkspaceEpoch LIVE** `587db91a`. **T-16/T-15/T-36/T-37/T-45 LIVE** (`33dc7c33`, `2a4cdaad`, `179f5616`, `81b7b572`, `c7995195`). **T-17 adapter 2PC LIVE** `5c9870f0`.
 **T-04 / `ADMISSION_GATE_EXEMPT`:** unchanged. Do not implement here.
 
 ## 0. Epistemic legend
@@ -476,7 +476,7 @@ class TestTamperShield:
 ```
 **Rule**: Modifying frozen test files triggers immediate fail-closed termination with `TAMPER_VIOLATION`.
 
-**MECHANISM (this branch, T-18).** `runtime/governance/tamper_shield.py` freezes IndexPort-enumerated test digests. Assertion or test-body edit fails admission (`TAMPER_VIOLATION`). `Path.glob("test/**")` is not the enumeration source. Session `_tamper_shield.evaluate(...)` is deferred until T-16. Lock `66aa7a3c` still MISSING.
+**MECHANISM (this branch, T-18).** `runtime/governance/tamper_shield.py` freezes IndexPort-enumerated test digests. Assertion or test-body edit fails admission (`TAMPER_VIOLATION`). `Path.glob("test/**")` is not the enumeration source. Session `_tamper_shield.evaluate(...)` still unwired (B owns the admission call). Lock `66aa7a3c` still MISSING.
 
 ### 5.3 Gated Dual-Loop Reproducer Protocol (Fail-to-Pass Enforcement)
 To guarantee bug fixes are real and not coincidental passes:

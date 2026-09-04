@@ -1441,10 +1441,18 @@ class HarnessSession:
             if packet.workspace_epoch is not None else None,
         }
 
+    def _refresh_index_after_write(self) -> bool:
+        """Mediated IndexPort rebuild after a write. Next compile must not see a pre-write map."""
+        if self.index is None:
+            return False
+        result = self.index.index(str(self.repo))
+        if not result.ok:
+            return False
+        return self._bind_context_packet() is not None
+
     def refresh_context_packet(self) -> ContextPacket:
         """Recompile after a write. The previous packet cannot admit completed."""
-        orientation = self._bind_context_packet()
-        if orientation is None or self.context_packet is None:
+        if not self._refresh_index_after_write() or self.context_packet is None:
             raise ContextPacketError("cannot refresh WorkspaceEpoch; IndexPort snapshot unbound")
         return self.context_packet
 
@@ -1462,6 +1470,7 @@ class HarnessSession:
             if isinstance(path, str) and path and not path.startswith(("/", "\\")):
                 self._completion_changed_files.add(path.replace("\\", "/"))
             self._refresh_sigma()
+            self._refresh_index_after_write()
             artifacts = getattr(self, "artifacts", None)
             if (artifacts is not None
                     and "reused durable settled effect" not in str(outcome.detail or "")):

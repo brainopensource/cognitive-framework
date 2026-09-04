@@ -368,6 +368,24 @@ class EpisodeEngine:
                     f"turn bound {self._max_turns} reached")
                 break
 
+            # The turn is a fact once it is committed to, which is here --
+            # after the cancellation and turn-bound guards, so a turn that
+            # never ran is never recorded as started. Emitting above the
+            # guards would make the ledger's turn count disagree with the
+            # episode's on every cancelled or bounded run.
+            self._events.emit(Event(
+                kind="TurnStarted",
+                reason="turn_opened",
+                at=self._clock.now(),
+                run_id=episode.run_id,
+                principal=principal,
+                payload={
+                    "episodeId": episode.episode_id,
+                    "turn": episode.turn_count,
+                    "maxTurns": self._max_turns,
+                },
+            ))
+
             # -- observe ------------------------------------------------
             # State-dependent phase (`ADR-0106 §4`), only for presets that
             # declared one; the generic engine stays ungated (`ADR-0060`).

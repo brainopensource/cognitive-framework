@@ -226,10 +226,9 @@ UNPRODUCED_ALLOWLIST = frozenset({
     "BudgetExhausted",
     "AuthorizationRequested",
     "ApprovalResolved",
-    # Scheduled producers -- see the plan's Waves 2-4. Each entry is deleted
-    # by the wave that implements it.
-    "GoalDeclared",
-    "TurnStarted",
+    # Scheduled producers -- see the plan's Waves 3-4. Each entry is deleted
+    # by the wave that implements it. `GoalDeclared` and `TurnStarted` left
+    # in Wave 2.
     "ContextCompacted",
     "EffectPreviewed",
     "ObservationProduced",

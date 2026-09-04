@@ -18,8 +18,8 @@ class IndexToolkit:
 
     spi_version: ClassVar[str] = "1.0"
 
-    def __init__(self, workspace: str | Path) -> None:
-        self._index: IndexPort = FileRepoIndex()
+    def __init__(self, workspace: str | Path, index: IndexPort | None = None) -> None:
+        self._index: IndexPort = index or FileRepoIndex()
         self._workspace = str(workspace)
         self._symbols: list[dict[str, object]] = []
         self._dirty: set[str] = set()
@@ -33,6 +33,8 @@ class IndexToolkit:
             result = self._index.index(self._workspace)
             if not result.ok:
                 return Result.fail(result.error.kind, result.error.message) if result.error else Result.fail("unavailable", "index unavailable")
+            self._capture_symbols()
+            self._dirty.clear()
         return Ok(Receipt(request_digest="sha256:" + "0" * 64, outcome="completed", cost=request.reservation))
 
     def compensate(self, receipt: Receipt) -> Result[Receipt]:
@@ -45,14 +47,20 @@ class IndexToolkit:
         for receipt in receipts:
             self._dirty.update(artifact.kind for artifact in receipt.artifacts)
 
+    def _capture_symbols(self) -> None:
+        symbols = self._index.symbols()
+        self._symbols = (
+            [{"name": item.name, "kind": item.kind, "path": item.path, "line": item.line}
+             for item in (symbols.value or ())]
+            if symbols.ok else []
+        )
+
     def scan(self) -> str:
         result = self._index.index(self._workspace)
         if not result.ok:
             return ""
         mapped = self._index.repo_map(token_budget=1)
-        symbols = self._index.symbols()
-        self._symbols = [{"name": item.name, "kind": item.kind, "path": item.path, "line": item.line}
-                         for item in (symbols.value or ())] if symbols.ok else []
+        self._capture_symbols()
         self._dirty.clear()
         return mapped.value.source_revision if mapped.ok and mapped.value else ""
 

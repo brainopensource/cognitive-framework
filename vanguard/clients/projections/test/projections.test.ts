@@ -433,6 +433,34 @@ describe("@aether/projections — ConversationTurns (full ledger vocabulary)", (
     assert.equal(turns[0]?.speaker, "user");
   });
 
+  it("shows the brief once when GoalDeclared follows the optimistic turn", () => {
+    // A live run emits both: the TUI's local UserPromptSubmitted and the
+    // ledger's digest-only GoalDeclared. Rendering both would echo the user
+    // to themselves, the second copy empty.
+    const turns = toConversationTurns([
+      ev(1, { kind: "UserPromptSubmitted", prompt: "Fix the lease leak" }),
+      ev(2, { kind: "EpisodeStarted", objective: "Fix the lease leak" }),
+      ev(3, { kind: "GoalDeclared", goalDigest: "sha256:" + "a".repeat(64) }),
+      ev(4, { kind: "ProposalProduced", action: "finish", note: "done" }),
+    ]);
+    const userTurns = turns.filter((t) => t.speaker === "user");
+    assert.equal(userTurns.length, 1, "the user must not see their prompt twice");
+    assert.equal(userTurns[0]?.text, "Fix the lease leak");
+  });
+
+  it("recovers the brief from EpisodeStarted when GoalDeclared is digest-only", () => {
+    // Without an optimistic turn (replay, resume, headless), the ledger is
+    // the only source. GoalDeclared carries no text by design, so an empty
+    // bubble here means the brief was lost.
+    const turns = toConversationTurns([
+      ev(1, { kind: "EpisodeStarted", objective: "Fix the lease leak" }),
+      ev(2, { kind: "GoalDeclared", goalDigest: "sha256:" + "b".repeat(64) }),
+    ]);
+    const userTurns = turns.filter((t) => t.speaker === "user");
+    assert.equal(userTurns.length, 1);
+    assert.equal(userTurns[0]?.text, "Fix the lease leak");
+  });
+
   it("preserves an unrecognised future kind without throwing (CT-44)", () => {
     const turns = toConversationTurns([
       ev(1, { kind: "GoalDeclared", goal: "g" }),

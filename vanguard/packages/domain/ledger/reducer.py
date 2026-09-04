@@ -177,7 +177,15 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
         )
 
     elif kind == "TurnStarted":
-        turn_val = payload.get("turn") or payload.get("turnNumber") or payload.get("turn_index") or envelope.seq
+        # `or` treats turn 0 as absent and silently relabels the first turn
+        # with the envelope seq, so an episode's transitions read
+        # `TurnStarted:7, TurnStarted:1, TurnStarted:2`. Turn numbering is
+        # 0-based, so presence must be tested explicitly.
+        turn_val = next(
+            (payload[key] for key in ("turn", "turnNumber", "turn_index")
+             if payload.get(key) is not None),
+            envelope.seq,
+        )
         episode = EpisodeState(
             run_id=episode.run_id or envelope.run_id,
             episode_id=episode.episode_id or envelope.episode_id,

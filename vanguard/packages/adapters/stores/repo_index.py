@@ -16,6 +16,7 @@ import ast
 import hashlib
 import json
 import re
+from dataclasses import replace
 from pathlib import Path
 from typing import Mapping, Sequence
 
@@ -209,6 +210,7 @@ class FileRepoIndex:
         self._dependencies: tuple[DependencyEdge, ...] = ()
         self._tests: tuple[TestAssociation, ...] = ()
         self._revision = ""
+        self._indexed_tree_hash = ""
 
     def index(self, root: str) -> Result[int]:
         base = Path(root).resolve()
@@ -258,6 +260,7 @@ class FileRepoIndex:
         self._dependencies = tuple(dependencies[:self.max_edges])
         self._tests = tuple(tests[:self.max_tests])
         self._revision = _source_revision(content_digests)
+        self._indexed_tree_hash = _hashed_tree(content_digests)
         return Result.success(len(files))
 
     def files(self, *, prefix: str = "") -> Result[Sequence[str]]:
@@ -309,9 +312,12 @@ class FileRepoIndex:
             self._files, self._symbols, self._dependencies, self._tests)
         if not tree_hash or not index_digest:
             return Result.fail("invalid_request", "WorkspaceEpoch digest unbound")
-        return Result.success(_bounded_map(self._files, self._symbols, self._dependencies,
-                                           self._tests, "file-repo-index/1", self._revision,
-                                           token_budget, tree_hash, index_digest))
+        mapped = _bounded_map(self._files, self._symbols, self._dependencies,
+                              self._tests, "file-repo-index/1", self._revision,
+                              token_budget, tree_hash, index_digest)
+        if self._indexed_tree_hash and tree_hash != self._indexed_tree_hash:
+            mapped = replace(mapped, truncated=True)
+        return Result.success(mapped)
 
 
 def _live_content_digests(root: Path, *, max_files: int) -> dict[str, str] | None:

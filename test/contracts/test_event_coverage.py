@@ -118,12 +118,16 @@ class WritableKindsHaveProducersOrAreAllowlisted(unittest.TestCase):
         import check_event_coverage as module
 
         original = module.UNPRODUCED_ALLOWLIST
+        # Pick a currently-allowlisted kind rather than naming one: each wave
+        # deletes entries as it implements them, and a hard-coded kind turns
+        # this into a false green the moment that kind gains a producer.
+        victim = sorted(original)[0]
         try:
-            module.UNPRODUCED_ALLOWLIST = original - {"GoalDeclared"}
+            module.UNPRODUCED_ALLOWLIST = original - {victim}
             errors = run_event_coverage_check()
         finally:
             module.UNPRODUCED_ALLOWLIST = original
-        self.assertTrue(any("GoalDeclared" in err for err in errors), errors)
+        self.assertTrue(any(victim in err for err in errors), errors)
 
 
 class ProductionEmittableKindsAreCatalogued(unittest.TestCase):

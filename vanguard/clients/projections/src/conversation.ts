@@ -117,6 +117,8 @@ function closeCard(
 export function toConversationTurns(envelopes: readonly EventEnvelope[]): ConversationTurn[] {
   const turns: ConversationTurn[] = [];
   let currentAgentTurn: ConversationTurn | null = null;
+  // Run-scoped: the brief, recovered from `EpisodeStarted.objective`.
+  let briefText = "";
 
   const openAgentTurn = (env: EventEnvelope): ConversationTurn => {
     const turn: ConversationTurn = {
@@ -134,17 +136,38 @@ export function toConversationTurns(envelopes: readonly EventEnvelope[]): Conver
     const kind = env.payload.kind;
     const p = env.payload as Record<string, unknown>;
 
+    // The brief travels on `EpisodeStarted`, not on `GoalDeclared`: goal text
+    // in an append-only store would be unwithdrawable (ADR-0098 Decision 5),
+    // so the ledger's goal event carries digests only. Capture the objective
+    // here so the user bubble below has something to show.
+    if (kind === "EpisodeStarted") {
+      briefText = briefText || str(p, "objective", "brief", "goal");
+    }
+
     // ---- Turn boundaries -------------------------------------------------
     // `UserPromptSubmitted` is not in WRITABLE_KINDS; it is the optimistic
     // turn the TUI injects locally before the daemon has echoed anything.
     if (kind === "GoalDeclared" || kind === "UserPromptSubmitted") {
-      turns.push({
-        id: `user-${env.eventId}`,
-        speaker: "user",
-        timestamp: env.occurredAt,
-        text: str(p, "goal", "prompt", "brief", "text"),
-        activityCards: [],
-      });
+      const userText = str(p, "goal", "prompt", "brief", "text") || briefText;
+      // A live run produces both the optimistic local turn and the ledger's
+      // `GoalDeclared` for the same prompt. Rendering both shows the user
+      // their own message twice -- and because `GoalDeclared` is digest-only,
+      // the second copy would be an empty bubble. Reconcile onto the turn
+      // that already exists instead of appending beside it.
+      const existingUserTurn = turns.find(
+        (t) => t.speaker === "user" && (t.text === userText || (!t.text && !!userText))
+      );
+      if (existingUserTurn) {
+        if (!existingUserTurn.text) existingUserTurn.text = userText;
+      } else {
+        turns.push({
+          id: `user-${env.eventId}`,
+          speaker: "user",
+          timestamp: env.occurredAt,
+          text: userText,
+          activityCards: [],
+        });
+      }
       currentAgentTurn = openAgentTurn(env);
     }
 

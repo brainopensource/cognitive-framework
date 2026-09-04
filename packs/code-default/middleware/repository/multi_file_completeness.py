@@ -170,7 +170,15 @@ class CodeDefaultCompletionPolicy:
             greenfield = observations.get("greenfield_evidence")
             if not isinstance(greenfield, Mapping):
                 return {"admissible": False, "reason": "GREENFIELD_EVIDENCE_REQUIRED"}
-            required = ("baseline_recorded", "structural_passed", "smoke_test_created", "behavioral_passed")
+            if greenfield.get("oracle_failed_on_stub") is False:
+                return {"admissible": False, "reason": "VACUOUS_ORACLE"}
+            required = (
+                "baseline_recorded",
+                "structural_passed",
+                "smoke_test_created",
+                "behavioral_passed",
+                "oracle_failed_on_stub",
+            )
             if any(not bool(greenfield.get(key)) for key in required):
                 return {"admissible": False, "reason": "GREENFIELD_EVIDENCE_INCOMPLETE"}
         review_required = bool(observations.get("review_required", False))

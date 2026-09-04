@@ -64,10 +64,16 @@ class TestCMX04ChangeSurfaceClosure(unittest.TestCase):
                 smoke_test_created=False, created_files=["app.py"], baseline=baseline,
             )
             self.assertFalse(syntax_only.admissible)
+            (Path(directory) / "app.py").write_text("def add(a, b):\n    return a + b\n", encoding="utf-8")
+            (Path(directory) / "test_app.py").write_text(
+                "from app import add\n\ndef test_add():\n    assert add(1, 1) == 2\n",
+                encoding="utf-8",
+            )
             admitted = policy.evaluate(
                 structural_passed=True, behavioral_passed=True,
                 smoke_test_created=True,
                 created_files=["app.py", "test_app.py"], baseline=baseline,
+                oracle_failed_on_stub=True,
             )
             self.assertTrue(admitted.admissible)
 

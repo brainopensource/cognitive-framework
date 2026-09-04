@@ -201,7 +201,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - Requires: T-17, T-14  
 
 **T-19 Greenfield oracle vacuity** (B, A §12.4, v2 §21.3)  
-- [ ] Tests that pass on stubs rejected  
+- [x] Tests that pass on stubs rejected  
 - Requires: T-18  
 
 **T-20 Brownfield implicated-set fail-closed** (B, A §12.2–12.3)  

@@ -30,11 +30,8 @@ All documentation is partitioned into distinct authority tiers:
 VISION.md / AGENTS.md / docs/SPEC.md
     Vision, Operational Rules, Compact Normative Law
 
-docs/decisions.md
-    Foundational Decision Record Index
-
 docs/architecture/ & docs/backend/ & docs/frontend/ & docs/product/
-    System & Component Architecture, Reference, Product PRDs
+    System & Component Architecture (including DEC-01–DEC-11), Reference, Product PRDs
 
 docs/execution/
     Five-file operational runway: milestones.md, spec.md, technical.md, backlog.md, tasks.md
@@ -44,7 +41,7 @@ docs/theory/ | docs/research/ | docs/reports/
 ```
 
 - **Vision & Operational Rules**: [`VISION.md`](VISION.md), [`AGENTS.md`](AGENTS.md).
-- **The Law & Decisions**: [`docs/SPEC.md`](docs/SPEC.md) + [`docs/decisions.md`](docs/decisions.md).
+- **The Law & Invariants**: [`docs/SPEC.md`](docs/SPEC.md).
 - **The Execution Runway**: [`docs/execution/tasks.md`](docs/execution/tasks.md), [`docs/execution/spec.md`](docs/execution/spec.md), [`docs/execution/technical.md`](docs/execution/technical.md), [`docs/execution/milestones.md`](docs/execution/milestones.md), [`docs/execution/backlog.md`](docs/execution/backlog.md).
 
 ### Repository-Intelligence Navigation Protocol

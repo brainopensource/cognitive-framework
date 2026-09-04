@@ -23,7 +23,6 @@ class RepoPathsTests(unittest.TestCase):
     def test_repo_root_from_this_file(self) -> None:
         root = repo_paths.repo_root()
         self.assertTrue((root / "docs" / "SPEC.md").is_file())
-        self.assertTrue((root / "docs" / "decisions.md").is_file())
         self.assertTrue((root / "docs" / "architecture").is_dir())
         self.assertTrue((root / "docs" / "execution").is_dir())
         self.assertEqual(

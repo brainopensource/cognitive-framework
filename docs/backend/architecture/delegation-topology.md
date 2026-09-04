@@ -125,3 +125,15 @@ The codebase includes advanced staged workflow implementations under `vanguard/p
 - **Topology Lowering**: `vanguard/packages/runtime/topology.py`.
 - **Workflow Engines**: `vanguard/packages/runtime/workflow_scheduler.py`, `vanguard/packages/runtime/staged_workflow.py`.
 - **Tests**: `test/agency/test_episode_spawn.py`, `test/falsifiers/test_rf101_rf112_canonical_recursion.py`, `test/runtime/test_topology_lowering.py`.
+
+---
+
+## Architectural Decisions & Philosophical Rationale
+
+### DEC-06 — Authority Exclusion from Topology Declarations
+
+- **Decision:** Topology graphs and role declarations carry zero intrinsic authority; all child agents and workflows re-enter mediated kernel dispatch.
+- **Rationale:** Workflow definitions and role graphs are untrusted inputs. Treating DAG edges or role names as capability grants creates privilege escalation vulnerabilities.
+- **Rejected alternative:** Direct inter-agent peer invocation bypassing kernel reference monitoring.
+- **Reversal condition:** Hardware-enforced cryptographic capabilities that render software kernel reference monitoring redundant.
+

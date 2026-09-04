@@ -177,3 +177,22 @@ Benchmark evidence should bind `run_id`, task and repository digests, harness/ma
 - **Checkpoints**: `vanguard/packages/runtime/checkpoints.py`.
 - **Event Store Adapter**: `vanguard/packages/adapters/stores/event_store.py` (`SqliteEventStore`).
 - **Recovery Tests**: `test/falsifiers/test_rf25_cold_continuation.py`, `test/falsifiers/test_rf96_checkpoint_reconstruction.py`, `test/contracts/test_b3_wal_recovery.py`.
+
+---
+
+## Architectural Decisions & Philosophical Rationale
+
+### DEC-03 — Authoritative Causal History over Mutable In-Memory State
+
+- **Decision:** Authoritative state is defined strictly by the append-only causal event stream; all in-memory objects, projection graphs, and caches are disposable views.
+- **Rationale:** Mutable in-memory state creates competing truths across crashes, restarts, and distributed processes. Deterministic event folding over an append-only log guarantees crash consistency, provenance auditability, and cold replayability.
+- **Rejected alternative:** Object-oriented persistence where state machines mutate in-place and serialize periodic snapshots.
+- **Reversal condition:** Workload evidence demonstrating that deterministic event folding cannot meet latency budgets even when assisted by discardable checkpoint caches.
+
+### DEC-05 — Static Composition Distinct from Observed Trajectory
+
+- **Decision:** Declarative composition (`mhf.manifest/2`) declares available capabilities; the durable event trajectory records what actually occurred. Neither may impersonate the other.
+- **Rationale:** Conflating declared intent with observed execution prevents truthful post-mortem auditing, hides runtime attenuation, and allows unverified declarations to pass as evidence.
+- **Rejected alternative:** Dynamic manifest mutation during execution to reflect intermediate turn outcomes.
+- **Reversal condition:** None; maintaining declared versus observed separation is an inviolable architectural auditability invariant.
+

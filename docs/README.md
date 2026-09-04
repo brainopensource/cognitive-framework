@@ -23,14 +23,12 @@ last_verified: 2026-09-03
 normative_authority:
   - VISION.md
   - docs/SPEC.md
-  - docs/decisions.md
   - docs/execution/tasks.md
 relationships:
   - arch.system.overview
   - arch.system.boundaries
   - arch.system.data-flow
   - spec.core
-  - decision.index
   - execution.tasks
 reviewer: documentation-specialist
 confidence: high
@@ -47,12 +45,11 @@ AETHER documentation strictly separates constitutional vision, normative law, ar
 | **0. Constitutional** | [`VISION.md`](../VISION.md) | Foundational vision, identity, ontology, and high-level direction. |
 | **1. Operational Law** | [`AGENTS.md`](../AGENTS.md) | Operational guidelines and mandatory execution rules for AI agents and human contributors. |
 | **2. Human Entry Point** | [`README.md`](../README.md) | High-level repository entry point, setup guide, and validation summary table. |
-| **3. Normative Spec** | [`docs/SPEC.md`](SPEC.md) | RFC 2119 normative requirements and architectural refusals. |
-| **4. Decisions Index** | [`docs/decisions.md`](decisions.md) | Compact index of accepted Architecture Decision Records (ADRs). |
-| **5. Architecture & Reference** | [`docs/architecture/`](architecture/overview.md), [`docs/backend/`](backend/architecture/runtime-execution.md), [`docs/frontend/`](frontend/README.md) | System workflows, subsystem architectures, wire contracts, and API references. |
-| **6. Execution Runway** | [`docs/execution/tasks.md`](execution/tasks.md), [`docs/execution/spec.md`](execution/spec.md), [`docs/execution/technical.md`](execution/technical.md), [`docs/execution/milestones.md`](execution/milestones.md), [`docs/execution/backlog.md`](execution/backlog.md) | The 5 operational runway documents: flat task tree, delta spec, handbook, TARGET gates, and capability inventory. |
-| **7. Product PRDs** | [`docs/product/`](product/frontend/PRD_FRONTEND_PLATFORM.md) | Client application PRDs and product requirements. |
-| **8. Non-Canonical** | [`docs/theory/`](theory/agent-substrate.md), [`docs/research/`](research/), [`docs/reports/`](reports/) | Non-canonical theoretical essays, historical harness research, and post-mortem audit reports (`authority: non-canonical`). |
+| **3. Normative Spec** | [`docs/SPEC.md`](SPEC.md) | RFC 2119 normative requirements, invariants, and architectural refusals. |
+| **4. Architecture & Reference** | [`docs/architecture/`](architecture/overview.md), [`docs/backend/`](backend/architecture/runtime-execution.md), [`docs/frontend/`](frontend/README.md) | System workflows, subsystem architectures, integrated architectural decisions (DEC-01–DEC-11), wire contracts, and API references. |
+| **5. Execution Runway** | [`docs/execution/tasks.md`](execution/tasks.md), [`docs/execution/spec.md`](execution/spec.md), [`docs/execution/technical.md`](execution/technical.md), [`docs/execution/milestones.md`](execution/milestones.md), [`docs/execution/backlog.md`](execution/backlog.md) | The 5 operational runway documents: flat task tree, delta spec, handbook, TARGET gates, and capability inventory. |
+| **6. Product PRDs** | [`docs/product/`](product/frontend/PRD_FRONTEND_PLATFORM.md) | Client application PRDs and product requirements. |
+| **7. Non-Canonical** | [`docs/theory/`](theory/agent-substrate.md), [`docs/research/`](research/), [`docs/reports/`](reports/) | Non-canonical theoretical essays, historical harness research, and post-mortem audit reports (`authority: non-canonical`). |
 
 > [!IMPORTANT]
 > **Authority Rule**: Lower-tier documents or non-canonical research/reports (`authority: non-canonical`) must **never** be used to reject a higher-tier requirement or override canonical architecture.

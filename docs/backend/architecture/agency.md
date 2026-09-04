@@ -255,3 +255,22 @@ Each class has a bounded retry limit and a recovery action. A retry is admissibl
 - **Context Compiler**: `vanguard/packages/agency/context/compiler.py`, `compaction.py`, `layers.py`.
 - **Harness Session Integration**: `vanguard/packages/runtime/session.py`.
 - **Tests**: `test/agency/test_episode.py`, `test/agency/test_context_compiler.py`, `test/contracts/test_m5a_agent_view.py`.
+
+---
+
+## Architectural Decisions & Philosophical Rationale
+
+### DEC-04 — Agent as Ephemeral Projection over Persistent Entity
+
+- **Decision:** An agent is an ephemeral identity, policy, and causal projection boundary, not a long-running, stateful in-memory process.
+- **Rationale:** Stateful agent processes leak memory, fail across process boundaries, and complicate multi-agent coordination. Reconstructing agent perspective on demand from event lineage guarantees stateless resumption and recovery.
+- **Rejected alternative:** Persistent thread-per-agent or actor-per-agent daemons retaining in-memory cognitive state.
+- **Reversal condition:** Evidence that cognitive streaming continuation requires low-latency in-memory state that cannot be reconstructed via prefix-cached token buffers.
+
+### DEC-08 — Sequential Turn Simplicity until Concurrency Proves Value
+
+- **Decision:** The canonical turn loop and topology execution remain strictly unary and sequential by default; concurrent dispatch is admitted only when justified by measured wall-time advantage on provably disjoint operations.
+- **Rationale:** Unrestricted concurrency introduces non-determinism, race conditions in budget accounting, replay divergence, and complex recovery semantics without guaranteed performance improvement.
+- **Rejected alternative:** Default asynchronous / multi-threaded turn dispatch across all agent nodes.
+- **Reversal condition:** Preregistered empirical benchmark evidence demonstrating $\ge 20\%$ median wall-time reduction with byte-identical result ordering on disjoint, read-only operations.
+

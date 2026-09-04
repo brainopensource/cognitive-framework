@@ -67,7 +67,6 @@ nav:
   - Home: README.md
   - Law & Norms:
       - Specification (SPEC): SPEC.md
-      - Decisions Index: decisions.md
   - Architecture:
       - System Overview: architecture/overview.md
       - System Boundaries: architecture/boundaries.md

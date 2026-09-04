@@ -2199,7 +2199,6 @@ See §2.6. Additionally, OpenAI’s evaluation note: coding evals mix signal and
 - [`AGENTS.md`](../../AGENTS.md)
 - [`README.md`](../../README.md)
 - [`docs/SPEC.md`](../SPEC.md)
-- [`docs/decisions.md`](../decisions.md)
 - [`docs/execution/active.md`](tasks.md)
 - [`docs/execution/milestones.md`](../execution/milestones.md)
 - [`docs/execution/backlog.md`](../execution/backlog.md)
@@ -4561,7 +4560,6 @@ Do not fork the app facade for every title.
 When implementation begins, route durable changes to:
 
 - `docs/SPEC.md` for normative requirements;
-- `docs/decisions.md` for accepted architectural decisions;
 - `docs/backend/architecture/agency.md` for turn/context mechanics;
 - `docs/backend/architecture/runtime-execution.md` for session and campaign execution;
 - `docs/backend/architecture/delegation-topology.md` for roles and topology;
@@ -5014,7 +5012,6 @@ The following sources informed this plan but do not all carry equal authority.
 - [`VISION.md`](../../VISION.md)
 - [`AGENTS.md`](../../AGENTS.md)
 - [`docs/SPEC.md`](../SPEC.md)
-- [`docs/decisions.md`](../decisions.md)
 
 ### Current architecture and execution
 

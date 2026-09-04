@@ -31,7 +31,6 @@ evidence:
   - E-B-044
 normative_authority:
   - ../SPEC.md
-  - ../decisions.md
 relationships:
   - arch.system.overview
   - arch.system.data-flow

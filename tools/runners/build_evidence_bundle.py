@@ -601,7 +601,7 @@ def build_m7(
             "falsifier_suite": "test/falsifiers/test_m7_topology_and_independence.py",
             "m701_suite": "test/falsifiers/test_m701_recorded_workload.py",
             "pack": "vanguard/packages/agency/manifests/vg-code-default/manifest.json",
-            "adr_0099": "docs/decisions.md",
+            "adr_0099": "docs/backend/architecture/delegation-topology.md",
         },
         report=falsifier_report,
         # Every marker is required, including the ledger-backed artifact-flow
@@ -677,7 +677,7 @@ def build_m8(
             "memory_parity": "test/security/test_m8_memory_fake_parity.py",
             "durable_memory_suite": "test/adapters/test_durable_memory_port.py",
             "governed_learning_suite": "test/runtime/test_governed_learning.py",
-            "adr_0100": "docs/decisions.md",
+            "adr_0100": "docs/backend/architecture/memory-learning.md",
         },
         report=falsifier_report,
         # Every marker is required: M-8's predicate is a conjunction, and a

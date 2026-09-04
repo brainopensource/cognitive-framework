@@ -129,3 +129,15 @@ Upon episode conclusion, `EvidenceCaptureService` compiles an immutable `Traject
 - **Evaluator Gateway**: `vanguard/packages/runtime/evaluator_gateway.py`.
 - **Evaluator Daemon & Client**: `vanguard/packages/adapters/evaluators/daemon.py`, `client.py` (`EvaluatorClient`).
 - **Assurance Tests**: `test/contracts/test_trajectory_v2.py`, `test/adapters/test_evaluator_daemon.py`, `test/runtime/test_evaluation_service.py`.
+
+---
+
+## Architectural Decisions & Philosophical Rationale
+
+### DEC-07 — Exterior Evaluator and Promotion Authority
+
+- **Decision:** Evaluation, grading, and memory promotion authority must remain exterior to the agent cognition loop and bound to independent cryptographic identities.
+- **Rationale:** Systems cannot self-certify. Self-grading agents create self-fulfilling reward loops, conceal alignment failures, and introduce catastrophic bias into persistent memory.
+- **Rejected alternative:** Self-evaluating agent turns where agents score and commit their own learned skills.
+- **Reversal condition:** Theoretical proof that self-referential cognitive systems can prevent reward hacking without external ground truth.
+

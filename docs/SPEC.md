@@ -20,11 +20,8 @@ last_verified: 2026-09-03
 normative_authority:
   - VISION.md
   - docs/SPEC.md
-  - docs/decisions.md
-  - decision.index
 relationships:
   - arch.system.overview
-  - decision.index
   - execution.milestones
   - theory.agent-substrate
 reviewer: delegated-tech-lead-block-e

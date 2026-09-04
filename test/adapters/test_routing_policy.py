@@ -25,7 +25,7 @@ class TestModelRouter(unittest.TestCase):
     def test_tier_escalation_router_escalates_by_attempt(self) -> None:
         policy = {
             "kind": "tier-escalation",
-            "tiers": ["openrouter/free", "deepseek/deepseek-v4-flash", "deepseek/deepseek-v4-flash-0731"],
+            "tiers": ["openrouter/free", "deepseek/deepseek-v4-flash-0731", "openai/gpt-5.6-luna"],
         }
         router = resolve_model_router(policy)
         self.assertIsInstance(router, TierEscalationRouter)
@@ -34,10 +34,10 @@ class TestModelRouter(unittest.TestCase):
         self.assertEqual(route_0.resolved_model, "openrouter/free")
 
         route_1 = router.route(attempt=1)
-        self.assertEqual(route_1.resolved_model, "deepseek/deepseek-v4-flash")
+        self.assertEqual(route_1.resolved_model, "deepseek/deepseek-v4-flash-0731")
 
         route_2 = router.route(attempt=2)
-        self.assertEqual(route_2.resolved_model, "deepseek/deepseek-v4-flash-0731")
+        self.assertEqual(route_2.resolved_model, "openai/gpt-5.6-luna")
 
     def test_fallback_model_router(self) -> None:
         policy = {

@@ -225,7 +225,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - Files: `adapters/models/dialect.py`; create `test/contracts/test_dialect_recovery.py`  
 
 **T-22 Fail-closed model resolve** (B)  
-- [ ] Alias or error; never silent unknown (`deepseek-v4-flash` vs `-0731`)  
+- [x] Alias or error; never silent unknown (`deepseek-v4-flash` vs `-0731`)  
 - Files: `routing.py`  
 
 **T-50 Routing experiments harness** (A §22.5) `[PROPOSAL]`  

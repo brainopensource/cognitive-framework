@@ -18,6 +18,8 @@
     "smart": "deepseek/deepseek-v4-flash-0731",
     "coding": "deepseek/deepseek-v4-flash-0731",
     "research": "deepseek/deepseek-v4-flash-0731",
+    "deepseek/deepseek-v4-flash": "deepseek/deepseek-v4-flash-0731",
+    "deepseek-v4-flash": "deepseek/deepseek-v4-flash-0731",
     "openrouter/free": "openrouter/free"
   },
   "tiers": {

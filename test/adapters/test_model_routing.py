@@ -35,10 +35,21 @@ class TestModelRouting(unittest.TestCase):
         self.assertEqual(route.cached_micros_per_1m, cached)
         self.assertEqual(route.pricing_source, "hardcoded")
 
+    def test_missing_flash_suffix_aliases_or_errors_never_silent_unknown(self) -> None:
+        from vanguard.packages.adapters.models.config import ModelPolicyError
+
+        try:
+            route = resolve_route("deepseek/deepseek-v4-flash")
+        except ModelPolicyError:
+            return
+        self.assertNotEqual(route.pricing_source, "unknown")
+        self.assertEqual(route.resolved_model, "deepseek/deepseek-v4-flash-0731")
+
     def test_unknown_model(self):
-        route = resolve_route("some/unknown-model")
-        self.assertFalse(route.pricing_known)
-        self.assertEqual(route.pricing_source, "unknown")
+        from vanguard.packages.adapters.models.config import ModelPolicyError
+
+        with self.assertRaises(ModelPolicyError):
+            resolve_route("some/unknown-model")
         
     def test_preflight_check(self):
         valid_route = resolve_route("deepseek/deepseek-v4-flash-0731")

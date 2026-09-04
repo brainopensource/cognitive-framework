@@ -38,10 +38,7 @@ MODEL_PRICING_MICROS = get_pricing_micros_table()
 
 def resolve_route(model: str) -> ModelRoute:
     requested = model
-    try:
-        model = resolve_model(model)
-    except Exception:
-        pass
+    model = resolve_model(model)
     if model == "openrouter/free" or model.endswith(":free"):
         return ModelRoute(
             requested_model=requested,

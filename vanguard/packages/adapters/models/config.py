@@ -74,10 +74,10 @@ def load_model_registry(path: Path | None = None) -> ModelRegistry:
     _require(data, "default_paid_model")
     tiers = _require(data, "tiers")
     active = _require(data, "active_tiers")
-    if not isinstance(active, list) or any(t not in (1, 2, 3) for t in active):
-        raise ModelRegistryError("active_tiers must contain only enabled tiers 1, 2, or 3")
-    if not isinstance(tiers.get("4"), list) or tiers["4"]:
-        raise ModelRegistryError("tier 4 must exist and be empty")
+    if not isinstance(active, list) or any(t not in (1, 2, 3, 4) for t in active):
+        raise ModelRegistryError("active_tiers must contain only enabled tiers 1, 2, 3, or 4")
+    if not isinstance(tiers.get("4"), list):
+        raise ModelRegistryError("tier 4 must exist as a list")
 
     if path is None:
         _REGISTRY_CACHE = data

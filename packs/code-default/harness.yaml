@@ -27,17 +27,26 @@ plugins:
     - ref: mhf.toolkit.index@^1
   model_routes:
     - tier: 1
-      provider: ollama
-      model: qwen2.5:1.5b
-    - tier: 2
       provider: openrouter
       model: deepseek/deepseek-v4-flash
       escalate_on:
         - verdict_fail
         - budget_ok
+    - tier: 2
+      provider: openrouter
+      model: z-ai/glm-5.3-flash
+      escalate_on:
+        - verdict_fail
+        - budget_ok
     - tier: 3
       provider: openrouter
-      model: "$FRONTIER"
+      model: deepseek/deepseek-v4-pro
+      escalate_on:
+        - verdict_fail
+        - budget_ok
+    - tier: 4
+      provider: openrouter
+      model: google/gemini-3.8-flash
       escalate_on:
         - verdict_fail
         - budget_ok

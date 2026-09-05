@@ -81,13 +81,29 @@ _PROFILES: dict[str, ModelCapabilityProfile] = {
         "z-ai/glm-5.3-flash",
         tool_call_style=ToolCallStyle.NATIVE,
     ),
+    # Second fallback (Tier 3): DeepSeek V4 Pro
+    "deepseek/deepseek-v4-pro": ModelCapabilityProfile(
+        "deepseek/deepseek-v4-pro",
+        tool_call_style=ToolCallStyle.NATIVE,
+        supports_parallel_tool_calls=True,
+    ),
+    # Third fallback (Tier 4): Google Gemini 3.8 Flash
+    "google/gemini-3.8-flash": ModelCapabilityProfile(
+        "google/gemini-3.8-flash",
+        tool_call_style=ToolCallStyle.NATIVE,
+        supports_parallel_tool_calls=True,
+    ),
 }
 
 _ALIASES: dict[str, str] = {
     "deepseek/deepseek-v4-flash": "deepseek/deepseek-v4-flash-0731",
     "deepseek-v4-flash": "deepseek/deepseek-v4-flash-0731",
     "deepseek/flash": "deepseek/deepseek-v4-flash-0731",
+    "deepseek-v4-pro": "deepseek/deepseek-v4-pro",
+    "deepseek/pro": "deepseek/deepseek-v4-pro",
     "glm-5.3-flash": "z-ai/glm-5.3-flash",
+    "gemini-3.8-flash": "google/gemini-3.8-flash",
+    "gemini-flash": "google/gemini-3.8-flash",
 }
 
 

@@ -7,6 +7,7 @@ compose a harness and it does not write envelopes except through
 
 from __future__ import annotations
 
+import ast
 import json
 import re
 from dataclasses import dataclass, replace
@@ -709,6 +710,8 @@ class HarnessSession:
         self._completion_verification_subject: VerificationSubject | None = None
         self._completion_redundant_verifications = 0
         self._completion_allowed_tools: frozenset[str] | None = None
+        self._active_episode_engine: EpisodeEngine | None = None
+        self._completion_oracle_failed_on_stub = False
         #: `I-SHD` / T-18. Frozen below, once the index this pack declared is
         #: bound; `None` means the pack declared no oracle enumeration source.
         self._tamper_shield: TestTamperShield | None = None
@@ -1172,6 +1175,13 @@ class HarnessSession:
                 "interactive": bool(self.ports.interactive),
             },
         ))
+        self.ledger.emit_kind(
+            "GoalDeclared",
+            run_id=self.task.run_id,
+            principal=self.task.principal,
+            episode_id=self.task.episode_id,
+            payload={"goalDigest": digest_of({"brief": self.task.brief})},
+        )
         self._episode_begun_here = True
 
     def run(self) -> RunResult:
@@ -1270,6 +1280,7 @@ class HarnessSession:
                                      if admission_required(harness)
                                      else None),
                 completion_allowed_tools=self._completion_allowed_tools)
+            self._active_episode_engine = engine
             outcome = engine.run(
                 episode_id=task.episode_id, run_id=task.run_id,
                 principal=task.principal, brief=task.brief,
@@ -1323,7 +1334,11 @@ class HarnessSession:
                 terminal = RunTermination.INSTRUMENT_ERROR
                 detail = f"experience emission failed: {exc}"
 
-        verdict = self._on_terminal(self) if self._on_terminal is not None else self._evaluate()
+        verdict = (
+            self._on_terminal(self)
+            if self._on_terminal is not None
+            else self._evaluate(terminal_status=str(getattr(terminal, "value", terminal)))
+        )
         read_all = ports.store.read(EventRange(episode_id=task.episode_id))
         durable_events = list(read_all.value) if read_all.ok and read_all.value else list(self.ledger.events)
         if delayed.pending is None:
@@ -1450,7 +1465,7 @@ class HarnessSession:
         """
         return _telemetry_instrument_error(self.turns_consumed())
 
-    def _evaluate(self) -> Any:
+    def _evaluate(self, *, terminal_status: str = "") -> Any:
         """`ICD 3` / `M5`: the verdict comes from outside the episode.
 
         `ADR-0076 §5`: a verdict the daemon actually signed and bound is also
@@ -1473,7 +1488,21 @@ class HarnessSession:
         if isinstance(verdict, Verdict):
             record_verdict(
                 self.ledger, run_id=self.task.run_id, principal=self.task.principal,
-                episode_id=self.task.episode_id, verdict=verdict)
+                episode_id=self.task.episode_id, verdict=verdict,
+                task_id=self._current_task_digest(),
+                terminal_status=terminal_status,
+                executed_test_count=(
+                    self._completion_verification.executed_test_count
+                    if self._completion_verification is not None else 0
+                ),
+                oracle_digest=str(
+                    (self.task.preregistration or {}).get("oracle_digest", "")
+                ),
+                verification_subject_digest=(
+                    self._completion_verification.verification_subject_digest
+                    if self._completion_verification is not None else ""
+                ),
+            )
         return verdict
 
     def _current_task_digest(self) -> str:
@@ -1706,9 +1735,14 @@ class HarnessSession:
 
     def _observe_completion_dispatch(self, request: EffectRequest, result: Any) -> None:
         """Capture patch and verification facts at the mediated boundary."""
-        if result.failure is not FailurePath.OK or result.outcome is None:
+        if result.outcome is None:
             return
         outcome = result.outcome
+        is_verification = request.action in {"test", "exec", "proc.exec"}
+        # A test runner's non-zero exit is behavioral evidence, not an
+        # unexecuted effect. Other failed effects cannot establish facts.
+        if result.failure is not FailurePath.OK and not is_verification:
+            return
         if request.action in {"read", "search"} or request.action == "fs.read":
             path = request.args.get("path")
             if isinstance(path, str) and path and not path.startswith(("/", "\\")):
@@ -1728,7 +1762,7 @@ class HarnessSession:
                      "resultDigest": outcome.result_digest},
                     turn=self.turns_consumed(),
                 )
-        if request.action not in {"test", "exec", "proc.exec"}:
+        if not is_verification:
             return
         argv = verification_argv(request.args)
         if argv is None:
@@ -1770,6 +1804,13 @@ class HarnessSession:
                 turn=self.turns_consumed(),
             )
         self._completion_verification_command = verification_command
+        if (
+            getattr(self, "_completion_scaffold_baseline", False)
+            and exit_code != 0
+            and self._completion_verification.executed_test_count > 0
+            and self._changed_implementation_is_stub()
+        ):
+            self._completion_oracle_failed_on_stub = True
         self._refresh_sigma()
         if previous_verification is not None and self._completion_verification.passed:
             self._completion_redundant_verifications += 1
@@ -1789,6 +1830,10 @@ class HarnessSession:
             elif self._completion_redundant_verifications >= 2:
                 self._completion_allowed_tools = frozenset(
                     {"agency.finish", "fs.read", "fs.search"})
+                if getattr(self, "_active_episode_engine", None) is not None:
+                    self._active_episode_engine.restrict_completion_tools(
+                        tuple(sorted(self._completion_allowed_tools))
+                    )
                 note = getattr(self.operator, "note", None)
                 if callable(note):
                     note(
@@ -1804,16 +1849,64 @@ class HarnessSession:
 
     def _refresh_sigma(self) -> None:
         """Recompile L4 from the live fold after a write or verification."""
-        assembler = getattr(self.operator, "set_task_state", None)
+        operator = getattr(self, "operator", None)
+        assembler = getattr(operator, "set_task_state", None)
         if not callable(assembler):
             return
         read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
         events = list(read.value or ()) if getattr(read, "ok", False) else []
         if self.task.resume_state and not events:
-            self.operator.set_task_state(dict(self.task.resume_state))
+            assembler(dict(self.task.resume_state))
             return
         folded = fold_task_state(events, objective=self.task.brief)
-        self.operator.set_task_state(folded.to_canonical_dict())
+        assembler(folded.to_canonical_dict())
+
+    def _changed_implementation_is_stub(self) -> bool:
+        """Whether a changed non-test Python implementation is still a stub."""
+        candidates = [
+            self.repo / relative
+            for relative in self._completion_changed_files
+            if "test" not in Path(relative).name.lower()
+            and Path(relative).suffix == ".py"
+        ]
+        for candidate in candidates:
+            try:
+                tree = ast.parse(candidate.read_text(encoding="utf-8"))
+            except (OSError, SyntaxError, UnicodeError):
+                continue
+            for node in ast.walk(tree):
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    body = list(node.body)
+                    if body and all(
+                        isinstance(item, ast.Pass)
+                        or (
+                            isinstance(item, ast.Raise)
+                            and isinstance(item.exc, (ast.Name, ast.Call))
+                            and (
+                                getattr(item.exc, "id", "") == "NotImplementedError"
+                                or getattr(getattr(item.exc, "func", None), "id", "")
+                                == "NotImplementedError"
+                            )
+                        )
+                        for item in body
+                    ):
+                        return True
+        return False
+
+    def _completion_structure_is_valid(self) -> bool:
+        """Check file presence and Python syntax independently of test results."""
+        if not self._completion_changed_files:
+            return False
+        for relative in self._completion_changed_files:
+            candidate = self.repo / relative
+            if not candidate.is_file():
+                return False
+            if candidate.suffix == ".py":
+                try:
+                    ast.parse(candidate.read_text(encoding="utf-8"))
+                except (OSError, SyntaxError, UnicodeError):
+                    return False
+        return True
 
     def _freeze_tamper_shield(self) -> TestTamperShield | None:
         """Hash the IndexPort-enumerated oracle set for this workspace (T-18).
@@ -1901,9 +1994,10 @@ class HarnessSession:
             task_text=self.task.brief,
             greenfield_evidence={
                 "baseline_recorded": self._completion_scaffold_baseline,
-                "structural_passed": bool(self._completion_verification and self._completion_verification.passed),
+                "structural_passed": self._completion_structure_is_valid(),
                 "smoke_test_created": any("test" in path.lower() for path in self._completion_changed_files),
                 "behavioral_passed": bool(self._completion_verification and self._completion_verification.passed),
+                "oracle_failed_on_stub": self._completion_oracle_failed_on_stub,
             },
         )
         if isinstance(verdict, AdmissionVerdict):

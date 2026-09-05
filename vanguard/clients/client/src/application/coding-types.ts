@@ -25,6 +25,8 @@ export type CodingRequest = {
   maxReplans: number;
   maxPaidCalls: number;
   budgetUsdMicros: number;
+  /** Explicit operator consent for paid routing; budgets alone are ceilings. */
+  allowPaid: boolean;
   interactive: boolean;
   dryPlan: boolean;
   jsonlOut?: string;

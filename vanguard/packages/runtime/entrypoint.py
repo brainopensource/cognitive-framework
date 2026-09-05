@@ -9,10 +9,7 @@ import uuid
 from pathlib import Path
 from typing import Any, Mapping
 
-from ..adapters.models.openrouter import OpenRouterModel
 from ..adapters.models.fake import FakeModel
-from ..adapters.models.llama_cpp import LlamaCppModel
-from ..adapters.stores.event_store import SqliteEventStore
 from ..adapters.stores.blob_store import FileBlobStore
 from ..adapters.sandbox.platform import discover_platform
 from .compose import TaskContext
@@ -27,6 +24,13 @@ def _root() -> Path:
 def _manifest(command: str) -> Path:
     name = "vg-code-explain" if command == "explain" else "vg-code-default"
     return _root() / "vanguard/packages/agency/manifests" / name / "manifest.json"
+
+
+def _completion_policy(manifest_path: Path) -> Any:
+    """Resolve the pack-owned completion policy for the public product path."""
+    from .app_service import ApplicationService
+
+    return ApplicationService._pack_completion_policy(manifest_path)
 
 
 def _doctor(request: Mapping[str, Any]) -> dict[str, Any]:
@@ -83,13 +87,11 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
             model_port,
             model_name=planner_model if planner_model and planner_model not in {"free", "default", "openrouter/free"} else None,
             timeout_seconds=float(request.get("modelTimeoutSeconds") or 300.0) if request.get("modelTimeoutSeconds") else None,
-            allow_paid=bool(request.get("allowPaid", False)) or (int(request.get("budgetUsdMicros") or 0) > 0) or (int(request.get("maxPaidCalls") or 0) > 0),
+            # A ceiling limits already-authorised spend; it is not itself
+            # consent to spend. Product clients set ``allowPaid`` from an
+            # explicit operator action (for the CLI, ``--budget-usd``).
+            allow_paid=bool(request.get("allowPaid", False)),
         ).model
-    # A deterministic preview is a hermetic smoke path, not a durable run.
-    # Keep it out of the product profile's default persistent ledger: a
-    # fixed identity would otherwise resume stale approval
-    # events from a previous invocation and exhaust the episode budget.
-    preview_store = SqliteEventStore(":memory:") if fake_backend else None
     configured_store_path = (
         Path(str(request["storePath"])) if request.get("storePath") else
         task.repo_path / ".vanguard" / "events.sqlite3"
@@ -102,10 +104,10 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
         _manifest(command), task,
         profile_id=str(request.get("profile") or "product"),
         model=selected_model,
-        store=preview_store,
-        store_path=(str(configured_store_path) if not fake_backend else None),
+        store_path=str(configured_store_path),
         interactive=bool(request.get("interactive", True)),
         blobs=FileBlobStore(configured_store_path.parent / "blobs"),
+        completion_policy=_completion_policy(_manifest(command)),
     )
     terminal = str(getattr(result.terminal, "value", result.terminal))
     outcome = "completed" if terminal in {"completed", "abstained"} else terminal

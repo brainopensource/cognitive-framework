@@ -132,9 +132,10 @@ of its own.
 ### Reading order
 
 1. [`VISION.md`](VISION.md) — what AETHER is and where it is going.
-2. [`docs/execution/spec.md`](docs/execution/spec.md) — normative requirements, invariants, and delta contracts.
-3. [`docs/architecture/overview.md`](docs/architecture/overview.md) & [`docs/backend/`](docs/backend/) — as-built architecture and rationale.
-4. [`docs/execution/tasks.md`](docs/execution/tasks.md) & [`docs/execution/milestones.md`](docs/execution/milestones.md) (future work vs TARGET gates).
+2. [`QUICKSTART.md`](QUICKSTART.md) — CLI installation, provider configuration, and practical benchmark tutorial.
+3. [`docs/execution/spec.md`](docs/execution/spec.md) — normative requirements, invariants, and delta contracts.
+4. [`docs/architecture/overview.md`](docs/architecture/overview.md) & [`docs/backend/`](docs/backend/) — as-built architecture and rationale.
+5. [`docs/execution/tasks.md`](docs/execution/tasks.md) & [`docs/execution/milestones.md`](docs/execution/milestones.md) (future work vs TARGET gates).
 
 ### Fast targeted navigation (LDA SOTA Repository Intelligence)
 
@@ -345,17 +346,25 @@ uv run <command>
 | **Sprint / Milestone closure** | `just verify` | Complete repository qualification gate |
 | **Release qualification** | `python3 tools/release_qualification.py` | Signed release envelope and external git receipt verification |
 
-### TypeScript CLI Environment (Node.js 20+)
+### Vanguard CLI (`vg`) Environment (Node.js 20+ & Python 3.10+)
+
+The Vanguard interactive CLI (`vg`) drives autonomous coding and benchmark tasks over the Python runtime lattice. Detailed tutorials, model tiers, and benchmark walkthroughs are documented in [`QUICKSTART.md`](QUICKSTART.md).
+
 ```bash
-# Install dependencies
+# 1. Install dependencies and build CLI wrappers in ~/.local/bin/
+uv sync
 npm ci
+bash vanguard/clients/cli/install.sh
 
-# Typecheck and run CLI test suite
-npm run typecheck
-npm test
+# 2. Configure environment (fail-closed mode 0600)
+echo "OPENROUTER_API_KEY=sk-or-v1-..." > .env && chmod 600 .env
+export OPENROUTER_API_KEY=$(grep '^OPENROUTER_API_KEY=' .env | cut -d= -f2)
 
-# Run interactive CLI
-npm run vg
+# 3. Automated coding execution (Headless Benchmark Mode)
+vg code /path/to/workspace --brief "TASK.md" --planner deepseek/deepseek-v4-flash-0731 --budget-usd 1 --benchmark --headless
+
+# 4. Interactive visual TUI (Human-in-the-Loop)
+cd /path/to/workspace && vg
 ```
 
 ---

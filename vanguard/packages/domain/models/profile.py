@@ -81,15 +81,19 @@ _PROFILES: dict[str, ModelCapabilityProfile] = {
         "z-ai/glm-5.3-flash",
         tool_call_style=ToolCallStyle.NATIVE,
     ),
-    # Second fallback (Tier 3): DeepSeek V4 Pro
+    # Unverified routes remain on the degradation path until a provider-shape
+    # vector proves native patch.apply and finish dispatch.
     "deepseek/deepseek-v4-pro": ModelCapabilityProfile(
         "deepseek/deepseek-v4-pro",
-        tool_call_style=ToolCallStyle.NATIVE,
-        supports_parallel_tool_calls=True,
+        tool_call_style=ToolCallStyle.FENCED_JSON,
     ),
-    # Third fallback (Tier 4): Google Gemini 3.8 Flash
     "google/gemini-3.8-flash": ModelCapabilityProfile(
         "google/gemini-3.8-flash",
+        tool_call_style=ToolCallStyle.FENCED_JSON,
+    ),
+    # Native local inference via llama.cpp / llama-server
+    "local-model": ModelCapabilityProfile(
+        "local-model",
         tool_call_style=ToolCallStyle.NATIVE,
         supports_parallel_tool_calls=True,
     ),
@@ -104,6 +108,8 @@ _ALIASES: dict[str, str] = {
     "glm-5.3-flash": "z-ai/glm-5.3-flash",
     "gemini-3.8-flash": "google/gemini-3.8-flash",
     "gemini-flash": "google/gemini-3.8-flash",
+    "llama_cpp": "local-model",
+    "llama": "local-model",
 }
 
 
@@ -120,5 +126,4 @@ def profile_for(model_id: str | None) -> ModelCapabilityProfile:
             if target in _PROFILES:
                 return _PROFILES[target]
     return ModelCapabilityProfile(key or "unknown")
-
 

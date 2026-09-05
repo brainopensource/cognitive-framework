@@ -253,6 +253,13 @@ class EpisodeEngine:
 
     # ------------------------------------------------------------------
 
+    def restrict_completion_tools(self, allowed: Sequence[str]) -> None:
+        """Narrow the live offer set for subsequent turns of this engine."""
+        narrowed = frozenset(str(item) for item in allowed)
+        if self._completion_allowed_tools is not None:
+            narrowed &= self._completion_allowed_tools
+        self._completion_allowed_tools = narrowed
+
     def run(
         self,
         *,

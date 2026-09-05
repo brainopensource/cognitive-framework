@@ -35,7 +35,10 @@ _DEFINITIONS: tuple[tuple[str, str, re.Pattern[str]], ...] = (
     (".tsx", "function", re.compile(r"^\s*(?:export\s+)?(?:async\s+)?function\s+([A-Za-z_]\w*)")),
 )
 
-_IGNORED = {".git", "__pycache__", "node_modules", ".venv", "dist", "build"}
+_IGNORED = {
+    ".git", ".vanguard", ".pytest_cache", "__pycache__", "node_modules",
+    ".venv", "dist", "build",
+}
 
 
 def _query_path(value: str) -> str:

@@ -183,6 +183,7 @@ class EvaluatorDaemon:
                 "subject_digest": digest_of({"run_id": run_ref.run_id, "episode_id": run_ref.episode_id}),
                 "evaluation_request_id": f"eval-{nonce}",
                 "oracle_id": protocol.name or digest_of(dict(self._config.oracle_digests)),
+                "oracle_digest": digest_of(dict(self._config.oracle_digests)),
                 "nonce": nonce,
                 "key_id": self._signer.key_id if self._signer else "",
                 "signed_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),

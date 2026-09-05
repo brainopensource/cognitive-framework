@@ -30,6 +30,7 @@ function baseRequest(overrides: Partial<CodingRequest> = {}): CodingRequest {
     maxReplans: 2,
     maxPaidCalls: 0,
     budgetUsdMicros: 50_000,
+    allowPaid: true,
     interactive: true,
     dryPlan: false,
     json: true,

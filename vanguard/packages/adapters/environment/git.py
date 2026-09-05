@@ -136,6 +136,7 @@ class GitEnvironment:
         self._owns_worktree = False
         self._disposed = False
         self._snapshot_seq = 0
+        self._python_execution = 0
 
         if shutil.which("git") is None:
             raise GitUnavailableError("git executable not found on PATH")
@@ -1009,10 +1010,16 @@ class GitEnvironment:
                 work_cwd = (self._working_dir / req.working_directory).resolve()
 
             try:
+                process_env = controlled_environment(os.environ)
+                if binary.startswith("python"):
+                    self._python_execution += 1
+                    process_env["PYTHONPYCACHEPREFIX"] = (
+                        f"/tmp/vanguard-pycache/run-{os.getpid()}-{self._python_execution}"
+                    )
                 proc = subprocess.run(
                     list(cmd),
                     cwd=work_cwd,
-                    env=controlled_environment(os.environ),
+                    env=process_env,
                     capture_output=True,
                     text=True,
                     check=False,

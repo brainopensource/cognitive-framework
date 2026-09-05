@@ -357,7 +357,7 @@ npm ci
 bash vanguard/clients/cli/install.sh
 
 # 2. Configure environment (fail-closed mode 0600)
-echo "OPENROUTER_API_KEY=sk-or-v1-..." > .env && chmod 600 .env
+echo "OPENROUTER_API_KEY=<your-key-here>" > .env && chmod 600 .env
 export OPENROUTER_API_KEY=$(grep '^OPENROUTER_API_KEY=' .env | cut -d= -f2)
 
 # 3. Automated coding execution (Headless Benchmark Mode)

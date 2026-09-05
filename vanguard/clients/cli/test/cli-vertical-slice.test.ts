@@ -1,5 +1,8 @@
 import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { parseCliOptions } from "../src/composition/parse-cli.js";
 import { handleRun } from "../src/commands/run.js";
 import { handleAgent } from "../src/commands/agent.js";
@@ -73,15 +76,25 @@ describe("@aether/cli — Vertical Slice & Exit Code Contract", () => {
   });
 
   it("handles daemon status cleanly", async () => {
-    const options = parseCliOptions(["--json"]);
-    const status = await handleDaemon(["status"], options);
-    // Socket is not running during hermetic unit test -> DAEMON_UNAVAILABLE (6)
-    assert.equal(status, CLI_EXIT_CODES.DAEMON_UNAVAILABLE);
+    const root = mkdtempSync(join(tmpdir(), "aether-cli-offline-"));
+    try {
+      const options = parseCliOptions(["--json", "--socket-path", join(root, "runtime.sock")]);
+      const status = await handleDaemon(["status"], options);
+      // A test-owned socket path cannot be satisfied by a stale global daemon.
+      assert.equal(status, CLI_EXIT_CODES.DAEMON_UNAVAILABLE);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 
   it("handles doctor report fail-closed when daemon is offline", async () => {
-    const options = parseCliOptions(["--json"]);
-    const doctorCode = await handleDoctor([], options);
-    assert.equal(doctorCode, CLI_EXIT_CODES.DAEMON_UNAVAILABLE);
+    const root = mkdtempSync(join(tmpdir(), "aether-cli-doctor-offline-"));
+    try {
+      const options = parseCliOptions(["--json", "--socket-path", join(root, "runtime.sock")]);
+      const doctorCode = await handleDoctor([], options);
+      assert.equal(doctorCode, CLI_EXIT_CODES.DAEMON_UNAVAILABLE);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });

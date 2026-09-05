@@ -34,14 +34,14 @@ Developers SHALL use this file plus [`spec.md`](spec.md), [`tasks.md`](tasks.md)
 
 **Canonical task IDs** are `T-01`… in [`tasks.md`](tasks.md). v2 `SUB-*` / `TXN-*` are aliases in [`backlog.md`](backlog.md). Live kernel pipeline package `SUB-01` in the backlog is **not** v2 admission.
 
-**Recommended reading order (not a sprint):** MS-SEE A stack T-16/T-15/T-36/T-37/T-45 is MECHANISM. T-14 and T-17 are MECHANISM. T-04 stays `[PROPOSAL]`. T-46 ranking stays `[PROPOSAL]`.
+**Recommended reading order (not a sprint):** MS-SEE A stack T-16/T-15/T-36/T-37/T-45 is MECHANISM. T-14 and T-17 are MECHANISM. T-04's production gate is landed; its 21-test legacy successor remains open. T-46 ranking stays `[PROPOSAL]`.
 
 **FACT STORE path:** `adapters/stores/event_store.py`.
 **I-STATE.** Lock `66aa7a3c`: `domain/task_state.py` MISSING. Branch: LIVE `8637db55` (`SemanticTaskState`; fold in `runtime/task_state.py`). MS-RESUME `CLOSED`.
 **MS-INSTRUMENT CLOSED** at `63b77116`.
 **MS-RESUME CLOSED** at `8637db55`.
 **T-14 WorkspaceEpoch LIVE** `587db91a`. **T-16/T-15/T-36/T-37/T-45 LIVE** (`33dc7c33`, `2a4cdaad`, `179f5616`, `81b7b572`, `c7995195`). **T-17 adapter 2PC LIVE** `5c9870f0`.
-**T-04 / `ADMISSION_GATE_EXEMPT`:** unchanged. Do not implement here.
+**T-04 / `ADMISSION_GATE_EXEMPT`:** the production exemption is removed. Do not weaken the gate to satisfy legacy bare-finish fixtures; retarget those fixtures as a separate successor.
 
 ## 0. Epistemic legend
 
@@ -116,7 +116,7 @@ that truly requires kernel work needs separate authorization, its complete
 architecture package, and a fresh budget check; Wave 1 documentation does not
 spend the headroom.
 
-### `[PROPOSAL]` W1 — TRUTH two-axis settlement and admission
+### W1 — TRUTH two-axis settlement and admission (landed mechanisms)
 
 Implement the domain value by following the exact contract in the Synthesis of
 Record §3.2; do not duplicate that module body here. The integration recipe is:
@@ -135,9 +135,10 @@ Record §3.2; do not duplicate that module body here. The integration recipe is:
 4. Derive the benchmark disposition vocabulary from `TaskDisposition` and
    preserve missingness-marker precedence. Gate only through
    `satisfies_predicate`; never use `!= failed` as a positive test.
-5. Record the RF-25 successor baseline before removing
-   `ADMISSION_GATE_EXEMPT` (T-04), then update its frozen assertion. Do not use
-   the baseline precondition to retain a permanent product-default bypass.
+5. T-04's production exemption is removed and the RF-25 successor assertions
+   are updated. Do not use legacy bare-finish fixtures as a reason to retain a
+   permanent product-default bypass; those fixtures remain a separate successor
+   obligation.
 6. In `_admit_completion`, join mutation receipt, current postimage/epoch,
    relevant tests collected and executed, zero exit code, the existing
    IndexPort-enumerated tamper shield, and zero unresolved omissions/stale-index
@@ -637,7 +638,7 @@ class TestTamperShield:
 ```
 **Rule**: Modifying frozen test files triggers immediate fail-closed termination with `TAMPER_VIOLATION`.
 
-**MECHANISM (this branch, T-18).** `runtime/governance/tamper_shield.py` freezes IndexPort-enumerated test digests. Assertion or test-body edit fails admission (`TAMPER_VIOLATION`). `Path.glob("test/**")` is not the enumeration source. Session `_tamper_shield.evaluate(...)` still unwired (B owns the admission call). Lock `66aa7a3c` still MISSING.
+**MECHANISM (this branch, T-18).** `runtime/governance/tamper_shield.py` freezes IndexPort-enumerated test digests. Assertion or test-body edit fails admission (`TAMPER_VIOLATION`). `Path.glob("test/**")` is not the enumeration source. `HarnessSession` freezes and evaluates the shield through `_admit_completion`; `vg-code-default` now declares the repository index required to reach that path.
 
 ### 5.3 Gated Dual-Loop Reproducer Protocol (Fail-to-Pass Enforcement)
 To guarantee bug fixes are real and not coincidental passes:
@@ -889,7 +890,7 @@ No `KernelPort` symbol exists in `vanguard/packages/ports/` (FACT; keep A's `Ker
 | **`I-TCB`** | **TCB Line Budget** | Production kernel LOC must strictly remain $\le 1438$ LOC. Enforced in CI via `check_tcb_budget.py`. |
 | **`I-STATE`**| **Zero Context Amnesia** | Settled invariants and falsified dead-ends are strictly non-evictable. They remain permanently pinned in prompt headers. |
 | **`I-TXN`** | **Preflighted Recoverability**| Multi-file edits must pass 0.2ms AST syntax checks before touching disk. Any failure triggers total in-memory rollback. **`[PROPOSAL]`**; live MECHANISM is sequential apply + post-write `ast.parse` observation. |
-| **`I-SHD`** | **Test Oracle Immutability** | Baseline test fixtures are hashed at Turn 0 via IndexPort. Any write mutation to frozen tests triggers fail-closed admission (`TAMPER_VIOLATION`). **MECHANISM** T-18 (`tamper_shield.py` LIVE this branch; lock `66aa7a3c` MISSING). |
+| **`I-SHD`** | **Test Oracle Immutability** | Baseline test fixtures are hashed at Turn 0 via IndexPort. Any write mutation to frozen tests triggers fail-closed admission (`TAMPER_VIOLATION`). **MECHANISM** T-18 (`tamper_shield.py` LIVE and session-wired; default `repo_index` declared). |
 | **`I-MAIL`**| **Content-Addressed Handoff**| Inter-agent coordination occurs strictly via 64-character SHA-256 CAS digests ($O(1)$ token overhead). No raw transcript leakage. **`[PROPOSAL]`** (`domain/topology/` MISSING). |
 
 ---

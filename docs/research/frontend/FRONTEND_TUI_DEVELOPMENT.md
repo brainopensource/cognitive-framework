@@ -152,7 +152,7 @@ Extend FrontendPersistencePort (client/src/persistence/persistence-port.ts) ts o
 Keep it out of credentials.json. That file is the real-secret store, written at mode 0o600 behind a dedicated setCredential/getCredential/deleteCredential API (persistence-port.ts:317-336) and holding live provider keys. A mocked login token has no business in it — mixing a fake credential into the real credential store is how a fake later
 gets treated as real. session.json holds only {account, displayName, issuedAritten at 0o600 for consistency.
 
-Make the mock token unmistakably fake. tools/linters/scan_secrets.py matchesKIA[0-9A-Z]{16}, PEM private-key blocks, and OPENROUTER_API_KEY=sk-…/or-…
+Make the mock token unmistakably fake. tools/linters/scan_secrets.py matches AKIA-style keys, PEM private-key blocks, and provider-key assignments.
 assignments. Runtime state lands in XDG_CONFIG_HOME, outside the scanned treests, and docs examples live in the repo and are scanned. So the mock token is a fixed, obviously-synthetic literal such as aether-mock-session-000000000000 — no sk-/or-/AKIA prefix, no base64-looking entropy, no PEM framing. Assert this in a tui-core unit test so
 a future edit cannot quietly make the fixture look like a real key.
 

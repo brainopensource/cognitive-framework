@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping, Protocol, Sequence
 
-from vanguard.packages.domain.evidence.disposition import TaskDisposition
+from vanguard.packages.runtime.root import TaskDisposition
 
 SUPPORTED_PROTOCOLS = frozenset({"SWE-bench Verified", "SWE-Bench Pro", "DeepSWE v1.1"})
 

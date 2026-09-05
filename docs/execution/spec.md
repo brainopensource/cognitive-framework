@@ -102,7 +102,7 @@ AETHER does not authorize a second runtime, a domain-aware kernel, authoritative
 - **INV-DELTA-1.** Domain state schemas: stdlib + JCS only.
 - **INV-DELTA-2.** This program SHALL NOT grow kernel past the TCB ceiling.
 - **INV-DELTA-3.** Multi-file writes are all-or-nothing. Preflight in the adapter. MECHANISM this-branch (T-17). Product MS-CHANGE remains `OPEN` (T-47–T-49 `[PROPOSAL]`). T-18–T-20 are MECHANISM.
-- **INV-DELTA-4.** Agents SHALL NOT mutate tests during implementation. Tamper shield MECHANISM this-branch (T-18). Enumerate via IndexPort, not `Path.glob("test/**")`. Product MS-CHANGE remains `OPEN` (T-47–T-49). Session `_tamper_shield.evaluate(...)` still unwired (B owns the admission call).
+- **INV-DELTA-4.** Agents SHALL NOT mutate tests during implementation. Tamper shield MECHANISM this-branch (T-18). Enumerate via IndexPort, not `Path.glob("test/**")`. Product MS-CHANGE remains `OPEN` (T-47–T-49). Session `_tamper_shield.evaluate(...)` is wired through `_admit_completion`; the default manifest supplies the declared repository index.
 - **INV-DELTA-5.** L1–L3 prefix-stable. Compaction SHALL NOT drop settled invariants or falsified hypotheses.
 - **I-STATE.** σ is a ledger fold (`fold_task_state`). One schema: `SemanticTaskState` with alias `CodingTaskState`. Lock: `domain/task_state.py` MISSING. Branch: LIVE `8637db55`. MS-RESUME `CLOSED`.
 - **I-TXN.** 2PC lives in `adapters/environment/transaction.py`. This branch LIVE (T-17 MECHANISM). Lock `66aa7a3c` MISSING. Not kernel.
@@ -112,7 +112,7 @@ AETHER does not authorize a second runtime, a domain-aware kernel, authoritative
 **Canonical path (FACT).** `ApplicationService → Runtime → HarnessSession → EpisodeEngine → Kernel.dispatch`.
 Forge/Chimera SHALL NOT be the product path. Coding Max report arms SHALL be ⊆ `{vg-code-fast, vg-code-balanced, vg-code-max}` (T-23).
 
-**Admission (FACT).** `admission_required`: exempt `vg-code-default` / `vg-code-lex`, else `"patch.apply" in verbs`. `ADMISSION_GATED_HARNESSES` unused. T-04 `[PROPOSAL]` until RF-25 successor baseline.
+**Admission (FACT).** `admission_required` is capability-derived: a harness with `patch.apply` is gated; there is no product-default exemption. T-04 retains an open successor obligation for legacy bare-finish fixtures, but the production gate is active.
 
 **VerificationReceipt.passed (FACT).** `exit_code == 0 and executed_test_count > 0`. Unknown → 0. Forge SHALL NOT set `test_count = 1` (T-06). Chimera SHALL NOT invent `executed = 1` on non-zero exit without a runner summary (`63b77116`).
 
@@ -982,7 +982,7 @@ Wire recovery: `adapters/models/dialect.py` T-21 MECHANISM. Truncated JSON, Deep
 ## 2PC / tamper placement
 
 - 2PC: `adapters/environment/transaction.py` this-branch LIVE (T-17 MECHANISM). Lock `66aa7a3c` MISSING. Multi-file `GitEnvironment.apply` preflights `ast.parse` then all-or-nothing flush. Single-file sequential observation (S8-B-09) unchanged. T-18–T-20 MECHANISM; MS-CHANGE stays `OPEN` on T-47–T-49.
-- Tamper: `runtime/governance/tamper_shield.py` this-branch LIVE (T-18 MECHANISM). Lock `66aa7a3c` MISSING. Enumerate via IndexPort; `Path.glob("test/**")` is insufficient. Session `_tamper_shield.evaluate(...)` still unwired (B owns the admission call).
+- Tamper: `runtime/governance/tamper_shield.py` this-branch LIVE (T-18). Enumerate via IndexPort; `Path.glob("test/**")` is insufficient. The session freezes and evaluates it through `_admit_completion`; the default product manifest declares `repo_index`.
 
 ---
 
@@ -1182,10 +1182,10 @@ SHALL text for stop/simplify/rollback and research/explanation lives in §§11�
 | `domain/task_state.py` | MISSING | LIVE (`8637db55`) |
 | `runtime/task_state.py` `fold_task_state` | LIVE (old schema) | Fold of domain type (`8637db55`) |
 | `adapters/environment/transaction.py` | MISSING | LIVE (T-17 MECHANISM). Lock `66aa7a3c` still MISSING |
-| `runtime/governance/tamper_shield.py` | MISSING | LIVE (T-18 MECHANISM). Lock `66aa7a3c` still MISSING |
+| `runtime/governance/tamper_shield.py` | MISSING | LIVE (T-18, session-wired) |
 | `agency/context/progressive.py` | MISSING | Do not add — policy on `ContextCompiler` |
 | `runtime/event_store.py` | MISSING | Owner remains `adapters/stores/event_store.py` |
-| `ADMISSION_GATE_EXEMPT` | FACT | Unchanged. T-04 not started |
+| `ADMISSION_GATE_EXEMPT` | FACT | Removed from the production decision; T-04 successor fixtures remain open |
 | `domain/workspace_epoch.py` `WorkspaceEpoch` | MISSING | LIVE (T-14). Lock `66aa7a3c` still MISSING |
 | Index refresh after write (T-16) | MISSING | LIVE (`33dc7c33`) |
 | L4/L5 policy on `ContextCompiler` (T-15) | MISSING | LIVE (`2a4cdaad`); no `progressive.py` |

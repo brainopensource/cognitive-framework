@@ -221,14 +221,34 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
     if last_note:
         projections.append({"kind": "note", "text": last_note})
     projections.append({"kind": "complete", "outcome": outcome, "turns": int(getattr(result.telemetry, "turns", 0))})
+    trajectory = result.trajectory if isinstance(getattr(result, "trajectory", None), Mapping) else {}
+    routes = [dict(route) for route in trajectory.get("model_routes_used", ())
+              if isinstance(route, Mapping)]
+    verified_step_ids: list[str] = []
+    active_step_id: str | None = None
+    for ev in getattr(result, "events", ()) or ():
+        payload = getattr(ev, "payload", {}) or {}
+        if not isinstance(payload, Mapping):
+            continue
+        if payload.get("activeStepId"):
+            active_step_id = str(payload["activeStepId"])
+        raw_verified = payload.get("verifiedStepIds")
+        if isinstance(raw_verified, (list, tuple)):
+            verified_step_ids = [str(item) for item in raw_verified if str(item)]
+    telemetry = getattr(result, "telemetry", None)
+    cost = trajectory.get("cost") if isinstance(trajectory.get("cost"), Mapping) else {}
+    cost_status = (cost.get("measurement_status") or {}).get("usd_micros", {})
+    observed_cost = cost.get("usd_micros") if cost_status.get("status") == "measured" else None
     return {"type": "result", "runId": run_id, "result": {
         "runId": run_id, "outcome": outcome, "phase": "complete", "attempts": 1,
-        "turns": int(getattr(result.telemetry, "turns", 0)),
-        "planDigest": result.run_digest or None, "activeStepId": None,
-        "verifiedStepIds": [], "modelRoutes": [], "promptTokens": None,
-        "completionTokens": None,
-        "spentUsdMicros": spent_micros or None, "detail": result.detail,
+        "turns": int(getattr(telemetry, "turns", 0)),
+        "planDigest": result.run_digest or None, "activeStepId": active_step_id,
+        "verifiedStepIds": verified_step_ids, "modelRoutes": routes,
+        "promptTokens": getattr(telemetry, "prompt_tokens", None),
+        "completionTokens": getattr(telemetry, "completion_tokens", None),
+        "spentUsdMicros": observed_cost,
         "projections": projections,
+        "detail": result.detail,
     }}
 
 

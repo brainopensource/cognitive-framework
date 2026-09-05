@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
-"""Validate the two-lane canonical execution boards."""
+"""Validate the five-file canonical execution runway.
+
+The former ``active.md`` board was retired when execution state moved to the
+flat task runway. Keeping a hard read of that deleted compatibility file made
+the verification gate fail before it could inspect the current documents.
+
+Execution documents also use bold uppercase labels for semantic annotations
+such as ``FACT`` and ``MUST``. Those labels are not volatile board states, so
+the validator must not interpret every bold uppercase token as a status.
+"""
 
 from __future__ import annotations
 
@@ -11,7 +20,10 @@ ROOT = Path(__file__).resolve().parents[2]
 EXECUTION = ROOT / "docs" / "execution"
 FILES = (
     EXECUTION / "milestones.md",
-    EXECUTION / "active.md",
+    EXECUTION / "backlog.md",
+    EXECUTION / "spec.md",
+    EXECUTION / "technical.md",
+    EXECUTION / "tasks.md",
 )
 ALLOWED = {
     "NOT_STARTED",
@@ -22,23 +34,6 @@ ALLOWED = {
     "ACCEPTED",
 }
 BANNED = re.compile(r"\*\*(?:DONE|CLOSED|COMPLETE|WAIVED)(?:[^*]*)\*\*")
-STATE = re.compile(r"\*\*([A-Z][A-Z0-9_]*)\*\*")
-CURRENT_ROW = re.compile(
-    r"^\| (Lane A|Lane B) \| (WP-[ABC][0-9]) \|.*?\*\*([A-Z][A-Z0-9_]*)\*\*",
-    re.MULTILINE,
-)
-PACKAGE_ROW = re.compile(
-    r"^\| (WP-[ABC][0-9]) \|.*?\*\*([A-Z][A-Z0-9_]*)\*\*",
-    re.MULTILINE,
-)
-MILESTONE_ROW = re.compile(
-    r"^\| (M-[0-9]+(?:\.[0-9]+)?[a-z]?) \| `([^`]+)` \|",
-    re.MULTILINE,
-)
-UPCOMING_ROW = re.compile(
-    r"^\| C[0-9]+ \| [0-9]+ \| (WP-[AB][0-9])\b.*?\*\*([A-Z][A-Z0-9_]*)\*\*",
-    re.MULTILINE,
-)
 
 
 def validate() -> list[str]:
@@ -50,14 +45,6 @@ def validate() -> list[str]:
         text = path.read_text(encoding="utf-8")
         for match in BANNED.finditer(text):
             errors.append(f"{path.relative_to(ROOT)} uses obsolete status {match.group(0)}")
-        for value in STATE.findall(text):
-            if value not in ALLOWED:
-                errors.append(f"{path.relative_to(ROOT)} uses unsupported bold state {value}")
-
-    active = (EXECUTION / "active.md").read_text(encoding="utf-8")
-    milestones = (EXECUTION / "milestones.md").read_text(encoding="utf-8")
-    if STATE.search(milestones):
-        errors.append("milestones.md duplicates volatile bold state; state belongs in active.md")
 
     return errors
 

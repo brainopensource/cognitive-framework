@@ -353,7 +353,12 @@ class DogfoodGate(unittest.TestCase):
         kwargs = {"manifest_path": CODE_DEFAULT, "task_context": task,
                   "model": self.operator, "approver": sign_challenge,
                   "approval_key": OPERATOR_KEY,
-                  "verifier": self.verifier}
+                  "verifier": self.verifier,
+                  # This contract exercises the real GitEnvironment and
+                  # kernel. Rootless containment has its own falsifiers;
+                  # this host-dev escape is explicit for hosts without a
+                  # qualifying worker perimeter.
+                  "sandbox_mode": "host-dev"}
         kwargs.update(overrides)
         return Runtime.execute_harness(**kwargs)
 

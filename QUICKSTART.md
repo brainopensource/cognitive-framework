@@ -77,7 +77,7 @@ In the root of the repository:
 
 ```bash
 # Add your OpenRouter API key
-echo "OPENROUTER_API_KEY=sk-or-v1-your-key-here" > .env
+echo "OPENROUTER_API_KEY=<your-key-here>" > .env
 
 # Lock file permissions (REQUIRED: fail-closed if permissions are loose)
 chmod 600 .env

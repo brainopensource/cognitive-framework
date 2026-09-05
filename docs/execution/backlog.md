@@ -218,22 +218,19 @@ lift and therefore stays `PROPOSED` until a preregistered ablation says otherwis
 
 Team capacity is chosen later. `requires:` edges live on tasks. This index maps packages to T-ids.
 
-**T-69–T-97 are reserved, not yet filed.** The rows below cite them as the forward
-index established by the Synthesis of Record §4.5; [`tasks.md`](tasks.md) currently
-ends at **T-68**. Until that pass lands, an unresolved T-id in the range T-69–T-97
-is a recorded reservation, not drift. The typed contracts for this range already
-exist — [`spec.md`](spec.md) §9 carries the two-axis settlement delta (T-72) and the
-evidence row (EXP-01), and [`technical.md`](technical.md) carries the Wave 1–2 FACT
-overlay — so what is outstanding is the task filing alone. Nothing in this range may
-be marked `IN_PROGRESS` before it has a row in `tasks.md`.
+**T-69–T-97 are filed in [`tasks.md`](tasks.md).** Their rows remain the task-level
+authority; this table is only the package index. A task may be marked complete only
+when its named falsifier and required evidence pass for the exact subject. The
+convergence baseline remains a separate evidence blocker and must not be regenerated
+to fit the current tree.
 
 | Package | Aliases | Related T-ids | MS-* | Notes |
 |---|---|---|---|---|
 | **INSTRUMENT** | REL-01R | T-01–T-03, T-24–T-25, T-40–T-41 | MS-INSTRUMENT | `DONE` at `63b77116` |
-| **TRUTH** | CMX-10A, W-092-F2, HAR-01, *SET-01* | T-04–T-08, T-42, T-38, T-23, T-69–T-74, T-81, T-82 | MS-TRUTH | T-23/T-38/T-42 `DONE`; T-08 landed `8637db55`; T-04/T-05/T-07 open; **T-18 REOPENED** (shield unwired); T-82 dialect recovery |
+| **TRUTH** | CMX-10A, W-092-F2, HAR-01, *SET-01* | T-04–T-08, T-42, T-38, T-23, T-69–T-74, T-81, T-82 | MS-TRUTH | T-69–T-74/T-81/T-82 mechanisms landed; T-18 is wired through the default repo index; T-04 successor obligation remains open pending exact-subject evidence |
 | **STATE** | CMX-10B, W-092-F3 | T-09–T-13, T-43–T-44 | MS-RESUME | `DONE` at `8637db55` (closer receipt 2026-09-03). |
 | **SEE** | CMX-11, PRG-01, W-092-F4, IDX-01 | T-14–T-16, T-36–T-37, T-45, T-75–T-77 | MS-SEE | T-46 **narrowed**: optional query-local ranking stays in pack policy, never `IndexPort` or the adapter |
-| **CHANGE** | TXN-01, SHD-01, TLS-04/05, *EDT-01* | T-17–T-20, T-47–T-49, T-78, T-83a, T-83b | MS-CHANGE | T-17 `DONE`; TLS-04 mechanism present in `transaction.py`; **T-18 REOPENED**; `str_replace` folds into T-47; T-83 callers admission |
+| **CHANGE** | TXN-01, SHD-01, TLS-04/05, *EDT-01* | T-17–T-20, T-47–T-49, T-78, T-83a, T-83b | MS-CHANGE | T-17 `DONE`; TLS-04 mechanism present in `transaction.py`; T-18/T-19/T-20 production mechanisms wired; `str_replace` folds into T-47; T-83 caller admission remains separate |
 | **DIALECT** | WRN-01, TLS-02 | T-21–T-22, T-50 | — | T-21–T-22 `DONE`. T-50 `[PROPOSAL]`. Does not close MS-CHANGE. |
 | **CONTROL** | CMX-07, W-092-F5, CMX-01, EXP-01, *PRF-01*, ALG-03 | T-26–T-27, T-51–T-52, T-79, T-80, T-89, T-92–T-95 | MS-CONTROL | Preset catalog unification is CMX-01, not a new package; EXP-01 supplies the ladder and the veto, and consumes T-51/T-52. **T-80** (anti-thrashing oscillation breaker, ALG-03) is a post-control **treatment**: it is measured against the frozen control and does not gate the MS-CONTROL baseline |
 | **INSTRUMENT (product)** | INS-01, BRG-01, DLG-01 | T-84–T-88, T-90, T-91, T-97 | MS-TRUTH → MS-CONTROL | Distinct subject from the `CLOSED` MS-INSTRUMENT (benchmark harness). Precondition of every `LIVE-*` row |

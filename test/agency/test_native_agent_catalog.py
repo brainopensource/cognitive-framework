@@ -6,6 +6,7 @@ from pathlib import Path
 
 from vanguard.packages.adapters.models.fake import FakeModel
 from vanguard.packages.runtime.compose import TaskContext
+from vanguard.packages.runtime.entrypoint import _completion_policy
 from vanguard.packages.runtime.root import Runtime
 
 
@@ -46,6 +47,7 @@ class TestNativeAgentCatalog(unittest.TestCase):
             task,
             profile_id="ci",
             model=fake_model,
+            completion_policy=_completion_policy(manifest_p),
         )
         self.assertEqual(
             str(getattr(result.terminal, "value", result.terminal)),

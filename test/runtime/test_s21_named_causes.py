@@ -40,6 +40,7 @@ class CausesAreNamed(unittest.TestCase):
             "Ollama request failed: timed out": "instrument_error:provider_timeout",
             "'x' is not pulled; installed: y": "instrument_error:model_tag_absent",
             "no daemon answering at http://h": "instrument_error:provider_unreachable",
+            "no server answering at http://h": "instrument_error:provider_unreachable",
             "OPENROUTER_API_KEY is not set": "instrument_error:provider_key_missing",
             "'m' is not in the free band; refusing to spend":
                 "instrument_error:paid_model_refused",

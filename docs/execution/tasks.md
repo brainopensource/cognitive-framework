@@ -205,8 +205,8 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - [x] Enumerate tests via IndexPort, not only `Path.glob("test/**")`  
 - [x] Assertion edit ⇒ admission reject  
 - [x] Wire `runtime/governance/tamper_shield.py` into `session._admit_completion`  
-- Reopened 2026-09-04: mechanism present, **zero production callers** — imported only by `test/runtime/test_tamper_shield.py`. The earlier receipt stands for its own subject; it does not carry forward to a shield nothing calls.  
-- Closed 2026-09-04: `HarnessSession` freezes the shield at turn 0 (`_freeze_tamper_shield`, after the declared IndexPort binds) and evaluates it in `_admit_completion` before the completion policy runs. A failed enumeration is not read as a clean tree. `TestTamperShieldIsWiredIntoAdmission` in `test/runtime/test_tamper_shield.py` drives the production call, not the mechanism in isolation. **Reach limit:** the shield binds only where the pack declares a `repo_index` component — `vg-code-max` / `-fast` / `-balanced` do; `vg-code-default` declares `retrieval_policy` only and so composes with `index_component=None`. Giving the default preset an enumeration source is a manifest change, not a session change.  
+- Historical audit note (superseded 2026-09-05): mechanism present, **zero production callers** — imported only by `test/runtime/test_tamper_shield.py`. The earlier receipt stood for its own subject; it did not carry forward to a shield nothing called.
+- Closed 2026-09-04: `HarnessSession` freezes the shield at turn 0 (`_freeze_tamper_shield`, after the declared IndexPort binds) and evaluates it in `_admit_completion` before the completion policy runs. A failed enumeration is not read as a clean tree. `TestTamperShieldIsWiredIntoAdmission` in `test/runtime/test_tamper_shield.py` drives the production call, not the mechanism in isolation. **Reach limit resolved 2026-09-05:** the default manifest now declares `vg-code-default/repo-index.json`; all four product presets have a declared repository index for the production tamper path.
 - Requires: T-17, T-14  
 
 **T-19 Greenfield oracle vacuity** (B, A §12.4, v2 §21.3)  
@@ -519,7 +519,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **specification**: Generate a unique UUID/ULID when a code request omits `runId`; successive requests must create distinct ledgers. Only explicit `resumeFrom` recovers a prior ledger, and the generated id appears in both the first JSON frame and receipt.
   - **acceptance_falsifier**: `python3 -m unittest test.runtime.test_run_identity -v` produces two distinct run ids and proves the literal `run-cli` is absent from `runtime/entrypoint.py`.
 
-- [ ] **T-85: Product receipt telemetry passthrough**
+- [x] **T-85: Product receipt telemetry passthrough**
   - **package**: INS-01
   - **subsystem**: runtime
   - **lane**: Lane A (Build/Core)
@@ -527,6 +527,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **file_touches**: [`vanguard/packages/runtime/entrypoint.py`, `vanguard/packages/runtime/compose.py`, `vanguard/packages/runtime/app_service.py`, **[NEW]** `test/runtime/test_receipt_telemetry.py`]
   - **specification**: Populate successful product receipts from live runtime telemetry rather than empty constants. Carry model routes, prompt/completion tokens, the ledger's verified step set, and cost provenance.
   - **acceptance_falsifier**: `python3 -m unittest test.runtime.test_receipt_telemetry -v` finds non-empty routes, non-null tokens, matching verified step ids, and no success-path `[]`/`None` telemetry constant.
+  - **landed 2026-09-05:** `entrypoint.execute` projects trajectory routes, measured trajectory cost, and `RunTelemetry`; session records the verified-step set through durable `EpisodeStateChanged` facts. The falsifier passes with the product projection.
 
 - [ ] **T-86: Live-path alias and tool-name validation**
   - **package**: DLG-01
@@ -544,7 +545,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **requires**: []
   - **file_touches**: [`tools/llama_cpp/cli.py`, **[NEW]** `test/tools/test_llama_bridge_lifecycle.py`]
   - **specification**: Require a live expected child PID and matching `/props` model plus alias before reporting `ONLINE`; an occupied foreign port is never silently adopted. Stop only an identity-verified recorded child, with typed `MODEL_MISMATCH` and `PID_STALE` failures and no process-name kill.
-  - **acceptance_falsifier**: `python3 -m unittest test.tools.test_llama_bridge_lifecycle -v` keeps an invalid `-fa` child `FAILED` and never `ONLINE` while a foreign server holds the port; adopting an occupied port without a matching `/props` model and alias yields typed `MODEL_MISMATCH`; a stale PID file yields typed `PID_STALE`; and stop issues no `pkill` or `pgrep -f`.
+  - **acceptance_falsifier**: `python3 -m unittest test.tools.test_llama_bridge_lifecycle -v` verifies `--flash-attn on|off|auto`, keeps a child with an invalid launch contract `FAILED` and never `ONLINE` while a foreign server holds the port; adopting an occupied port without a matching `/props` model and alias yields typed `MODEL_MISMATCH`; a stale PID file yields typed `PID_STALE`; and stop issues no `pkill` or `pgrep -f`.
 
 - [x] **T-88: MCP fail-closed completions**
   - **package**: BRG-01
@@ -671,12 +672,12 @@ Dependency key: `requires:`. Status: all `PROPOSED` unless noted.
 - **Requires:** none
 - **Falsifier:** dry-run JSON has null pass/cost
 
-### Ticket 04 — Remove default admission exemption
+### Ticket 04 — Remove default admission exemption (landed; successor open)
 - **Files:** `runtime/session.py` `ADMISSION_GATE_EXEMPT`
 - **Requires:** none
 - **Falsifier:** `vg-code-default` + `finish` + no patch ⇒ not completed
 - **Rollback:** if a named compatibility harness must stay exempt, shrink set with a recorded governance note — do not restore lex+default silently
-- **FACT (lock HEAD `66aa7a3c`).** The exemption is pinned, not accidental. [`test/falsifiers/test_completion_gate_scope.py`](../../test/falsifiers/test_completion_gate_scope.py) asserts `vg-code-default` ∉ `ADMISSION_GATED_HARNESSES` and documents that frozen M-2 falsifiers compose bare finishes through the default harness. Live `admission_required` (`runtime/session.py` L127–138) exempts `vg-code-default` / `vg-code-lex` via `ADMISSION_GATE_EXEMPT`; RF-25 cold-continuation evidence is on that product path. **Implementation of this ticket remains `[PROPOSAL]`** and requires a **successor baseline** for RF-25 / M-2 / `test_completion_gate_scope.py` before the exemption is removed — do not silently retarget those tests.
+- **FACT (current product path).** `admission_required` is capability-derived in `runtime/session.py`: a harness declaring `patch.apply` is gated, including `vg-code-default` and `vg-code-lex`; `ADMISSION_GATE_EXEMPT` no longer authorizes a product-default bypass. The 21 legacy bare-finish assertions remain a successor obligation and must be retargeted or replaced with exact-subject evidence; do not weaken the gate to satisfy them.
 
 ### Ticket 05 — Delete unused `ADMISSION_GATED_HARNESSES` or make it the only source
 - **Files:** `session.py`; `test/falsifiers/test_completion_gate_scope.py`

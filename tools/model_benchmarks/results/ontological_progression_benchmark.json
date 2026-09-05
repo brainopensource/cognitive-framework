@@ -1,0 +1,52 @@
+[
+  {
+    "mode": "0_blind",
+    "name": "Sem Skills (Blind / Zero-Shot)",
+    "success": false,
+    "turns": 1,
+    "total_tokens": 216,
+    "latency_seconds": 1.322,
+    "llm_latency": 1.285,
+    "test_status": "FAILED (failures=3, errors=0)",
+    "failure_reason": "AssertionError: False is not true : Initial request at 0.0 should be allowed"
+  },
+  {
+    "mode": "1_technique",
+    "name": "Com Technique 1 (Spec-Driven Open-Loop)",
+    "success": false,
+    "turns": 1,
+    "total_tokens": 318,
+    "latency_seconds": 2.157,
+    "llm_latency": 1.974,
+    "test_status": "FAILED (failures=3, errors=0)",
+    "failure_reason": "AssertionError: False is not true : Initial request at 0.0 should be allowed"
+  },
+  {
+    "mode": "2_proficiency",
+    "name": "Com Proficiency (Closed-Loop Autofix)",
+    "success": true,
+    "turns": 2,
+    "total_tokens": 559,
+    "latency_seconds": 3.965,
+    "test_status": "OK",
+    "failure_reason": "N/A (All tests passed)",
+    "history": [
+      {
+        "turn": 1,
+        "duration_seconds": 1.926,
+        "lda_delta_seconds": 0.13,
+        "tokens": 272,
+        "falsifier_status": "FAIL",
+        "falsifier_summary": "__main__.TestSlidingWindowLimiter.test_basic_capacity_allowance.test_basic_capacity_allowance: AssertionError: False is not true : Initial request at 0.0 should be allowed"
+      },
+      {
+        "turn": 2,
+        "duration_seconds": 1.992,
+        "lda_delta_seconds": 0.112,
+        "tokens": 287,
+        "falsifier_status": "PASS",
+        "falsifier_summary": "All tests passed successfully"
+      }
+    ]
+  }
+]

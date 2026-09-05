@@ -40,9 +40,12 @@ class TestDeterministicCassetteReplay(unittest.TestCase):
     def setUp(self) -> None:
         self.tmp = tempfile.TemporaryDirectory()
         self.workspace = Path(self.tmp.name)
-        (self.workspace / "calc.py").write_text("def add(a, b):\n    return a + b\n", encoding="utf-8")
+        (self.workspace / "calc.py").write_text("def add(a, b):\n    return a - b\n", encoding="utf-8")
         (self.workspace / "test_calc.py").write_text(
-            "from calc import add\n\ndef test_add():\n    assert add(2, 3) == 5\n", encoding="utf-8"
+            "import unittest\nfrom calc import add\n\n"
+            "class TestCalc(unittest.TestCase):\n"
+            "    def test_add(self):\n        self.assertEqual(add(2, 3), 5)\n",
+            encoding="utf-8",
         )
         self.signer = OperatorSigner(b"test-operator-held-approval-key")
         self.operator_key = self.signer.public_bytes

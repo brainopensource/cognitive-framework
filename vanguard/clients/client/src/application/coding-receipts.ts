@@ -59,6 +59,44 @@ export function formatHumanReceipt(projection: CodingProjection): string {
       }
       return `[route] ${projection.model ?? projection.text ?? "unknown"}`;
     }
+    case "note":
+      return `[assistant] ${projection.text ?? ""}`;
+    case "reflect":
+      return `[reflect] ${projection.text ?? projection.detail ?? ""}`.trimEnd();
+    case "verdict": {
+      const verdict = projection.verdict ?? projection.outcome ?? "recorded";
+      const detail = projection.detail ? ` ${projection.detail}` : "";
+      return `[verdict] ${verdict}${detail}`;
+    }
+    case "approval": {
+      const action = projection.action ?? projection.text ?? "mutating action";
+      const status = projection.status ?? "requested";
+      return `[approval] ${status}: ${action}`;
+    }
+    case "checkpoint": {
+      const id = projection.checkpointId ?? projection.text ?? "created";
+      const branch = projection.branchId && projection.branchId !== "main"
+        ? ` (${projection.branchId})`
+        : "";
+      return `[checkpoint] ${id}${branch}`;
+    }
+    case "child": {
+      const role = projection.role ?? projection.childId ?? "sub-agent";
+      const outcome = projection.outcome ? ` -> ${projection.outcome}` : "";
+      return `[child] ${role}${outcome}`;
+    }
+    case "capability":
+      return `[capability] ${projection.status ?? "changed"}: ${projection.capability ?? projection.text ?? "unnamed"}`;
+    case "context": {
+      const before = projection.beforeTokens;
+      const after = projection.afterTokens;
+      const delta = typeof before === "number" && typeof after === "number"
+        ? `${before} -> ${after} tokens`
+        : (projection.text ?? "compacted");
+      return `[context] ${delta}`;
+    }
+    case "conflict":
+      return `[conflict] ${projection.detail ?? projection.text ?? "detected"}`;
     case "error":
       return `[error] ${projection.detail ?? projection.text ?? "error"}`;
     default:

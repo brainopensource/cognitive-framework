@@ -1,3 +1,4 @@
+schema: aether.baac.challenge/1
 id: bench_single_2K_tier-1_fib_cli
 name: Fibonacci CLI and Pure Function
 scope: single

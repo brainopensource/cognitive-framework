@@ -106,13 +106,13 @@ class AccountingVectorCorpus(unittest.TestCase):
 
     def test_unknown_route_is_not_priced_as_free(self) -> None:
         """Unknown must stay distinct from zero (guidelines.md execution rules)."""
-        route = resolve_route("some/unregistered-model")
-        self.assertFalse(route.pricing_known)
-        self.assertEqual(route.pricing_source, "unknown")
+        from vanguard.packages.adapters.models.config import ModelPolicyError
+
+        with self.assertRaises(ModelPolicyError):
+            resolve_route("some/unregistered-model")
         free = resolve_route("openrouter/free")
         self.assertTrue(free.pricing_known)
         self.assertEqual(free.pricing_source, "free_tier")
-        self.assertNotEqual(route.pricing_source, free.pricing_source)
 
 
 class RegistryIsTheSolePricingSource(unittest.TestCase):

@@ -151,6 +151,21 @@ class TheTwoModesAlreadyExist(unittest.TestCase):
     def test_non_interactive_composes_benchmark_mode(self) -> None:
         self.assertIs(self._session(interactive=False).policy.base._mode, Mode.BENCHMARK)
 
+    def _ask_about_everything(self, session: HarnessSession):
+        """The same session, forced to ask about every declared capability.
+
+        `K-17` is about what benchmark mode does *with* an ask, so proving it
+        needs a policy that asks. Since T-70 the product default no longer
+        asks about the verbs it declares -- that is the point of T-70 -- so the
+        threshold is lowered here explicitly rather than smuggled in from a
+        hardcoded composition value.
+        """
+        from vanguard.packages.kernel import StandardPolicy
+
+        return StandardPolicy(
+            parent_scope=session.scope, mode=session.policy.base._mode,
+            approval_required_above="low", risk_of=session.harness.risk_of)
+
     def test_benchmark_mode_denies_rather_than_suspending(self) -> None:
         """`K-17`: a benchmark that blocks for a human has unbounded wall clock
         *and* a human contributing to the measured outcome."""
@@ -158,13 +173,15 @@ class TheTwoModesAlreadyExist(unittest.TestCase):
         from vanguard.packages.kernel import FailurePath, Outcome
 
         session = self._session(interactive=False)
-        decision = session.policy.authorize(
+        decision = self._ask_about_everything(session).authorize(
             _patch_request(), widens_capability=False,
             requested_scope=session.scope)
         self.assertIs(decision.outcome, Outcome.REJECT)
         self.assertIs(decision.failure, FailurePath.DENIED_ASK_FAIL_CLOSED)
 
     def test_interactive_mode_requires_approval_for_a_privileged_patch(self) -> None:
+        """`F-08`. The declared `mode: assisted` keeps a human on the run."""
+
         from vanguard.packages.kernel import Outcome
 
         session = self._session(interactive=True)
@@ -173,13 +190,32 @@ class TheTwoModesAlreadyExist(unittest.TestCase):
             requested_scope=session.scope)
         self.assertIs(decision.outcome, Outcome.REQUIRE_APPROVAL)
 
-    def test_benchmark_mode_never_hangs_waiting_for_a_human(self) -> None:
-        """The refusal is synchronous: no suspension token is issued."""
+    def test_a_benchmark_dispatches_the_verb_the_manifest_declared(self) -> None:
+        """T-70. Successor to the assertion that a benchmark denied it.
+
+        `vg-code-default` declares `threshold: standard`, so its own
+        `patch.apply` is not an ask at all and never becomes `F-07`'s denial.
+        A coding preset that cannot patch under benchmark measures nothing.
+        """
+        from vanguard.packages.kernel import FailurePath, Outcome
 
         session = self._session(interactive=False)
         decision = session.policy.authorize(
             _patch_request(), widens_capability=False,
             requested_scope=session.scope)
+        self.assertIs(decision.outcome, Outcome.ALLOW)
+        self.assertIsNot(decision.failure, FailurePath.DENIED_ASK_FAIL_CLOSED)
+
+    def test_benchmark_mode_never_hangs_waiting_for_a_human(self) -> None:
+        """The refusal is synchronous: no suspension token is issued."""
+
+        from vanguard.packages.kernel import Outcome
+
+        session = self._session(interactive=False)
+        decision = self._ask_about_everything(session).authorize(
+            _patch_request(), widens_capability=False,
+            requested_scope=session.scope)
+        self.assertIsNot(decision.outcome, Outcome.REQUIRE_APPROVAL)
         self.assertIsNone(getattr(decision, "granted_scope", None))
 
 
@@ -261,7 +297,7 @@ class TheIndexIsBoundOnlyWhenDeclared(unittest.TestCase):
     """W11-A item 4. BETA adds the JSON; this is the bind."""
 
     def test_a_pack_declaring_no_index_binds_none(self) -> None:
-        harness = Runtime.compose("vg-code-default", episode_id="ep-idx")
+        harness = Runtime.compose("vg-shell-only", episode_id="ep-idx")
         self.assertIsNone(harness.index_component)
 
     def test_supplying_an_index_to_a_pack_that_declares_none_is_refused(self) -> None:
@@ -278,7 +314,7 @@ class TheIndexIsBoundOnlyWhenDeclared(unittest.TestCase):
         task = TaskContext(brief="idx", repo_path=Path("/workspace"),
                            run_id="r", episode_id="ep-idx")
         with self.assertRaises(CompositionError):
-            HarnessSession(Runtime.compose("vg-code-default", episode_id="ep-idx"),
+            HarnessSession(Runtime.compose("vg-shell-only", episode_id="ep-idx"),
                            ports, task)
 
 

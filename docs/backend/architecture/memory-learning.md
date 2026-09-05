@@ -129,3 +129,15 @@ Vanguard implements a formal promotion pipeline before learned behaviors can mod
 - **Governed Learning**: `vanguard/packages/runtime/governance/learning.py`.
 - **Memory Adapter**: `vanguard/packages/adapters/stores/memory_engine.py`.
 - **Security & Authorization Tests**: `test/security/test_m8_memory_falsifiers.py`, `test/security/test_m8_memory_fake_parity.py`, `test/runtime/test_governed_learning.py`.
+
+---
+
+## Architectural Decisions & Philosophical Rationale
+
+### DEC-10 — Authorization-Before-Ranking in Memory Retrieval
+
+- **Decision:** Memory retrieval must verify principal access scope, category isolation, and legal hold/revocation *before* relevance ranking and artifact dereference.
+- **Rationale:** Post-ranking filtering leaks existence and metadata of unauthorized memory entries through relevance score distortions and token side-channels.
+- **Rejected alternative:** Retrieve-and-rank first, followed by downstream output filtering of unauthorized documents.
+- **Reversal condition:** Zero-knowledge cryptographic vector search that provably prevents cross-principal information leakage during un-authenticated indexing.
+

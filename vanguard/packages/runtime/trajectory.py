@@ -39,9 +39,9 @@ def _resolve_model_route(model: Any, ctx: Mapping[str, Any] | None = None) -> di
         elif "scripted" in cls_name:
             provider = "scripted"
             model_name = model_name or "scripted-cassette"
-        elif "ollama" in cls_name:
-            provider = "ollama"
-            model_name = model_name or "deepseek-r1"
+        elif "llama" in cls_name or "ollama" in cls_name:
+            provider = "llama_cpp"
+            model_name = model_name or "local-model"
         elif "openrouter" in cls_name:
             provider = "openrouter"
             model_name = model_name or "openrouter-default"
@@ -102,7 +102,7 @@ def _compute_turn_cost(
     if cost_micros is not None:
         usd_micros = int(cost_micros)
         usd_status = "measured"
-    elif route["provider"] in ("scripted", "fake", "mock", "lam", "ollama"):
+    elif route["provider"] in ("scripted", "fake", "mock", "lam", "llama_cpp", "llama", "ollama"):
         usd_micros = 0
         usd_status = "measured"
     else:

@@ -41,6 +41,8 @@ from ...kernel import Event
 from .compaction import CompactionStrategy, resolve_compaction_strategy
 from .layers import (
     BREAKPOINT_LAYERS,
+    GOAL_ECHO_SOURCE,
+    PINNED_L4_SOURCES,
     Block,
     CompiledContext,
     Fragment,
@@ -156,36 +158,53 @@ class ContextCompiler:
         """Assemble one prompt vector for one turn.
 
         `brief` is the immutable task statement (`VG-03 §10.5`). `notes` is the
-        rest of `L4`. `dialogue` is `L5`, oldest first.
+        rest of `L4`. `dialogue` is `L5`, oldest first. FEATURE_SPEC tiers 0–1
+        (settled invariants, falsified hypotheses, dead ends) are L4 head and
+        are not reachable by the budget; pressure caps L5 only.
         """
         task = ((Block(layer=Layer.TASK, source="operator", label="brief", text=brief),)
                 if brief else ())
-        notes_blocks = list(blocks_of(Layer.TASK, notes))
+        pinned_notes, flexible_notes = _partition_l4_notes(notes)
+        pinned_blocks = list(blocks_of(Layer.TASK, pinned_notes))
+        notes_blocks = list(blocks_of(Layer.TASK, flexible_notes))
         dialogue_blocks = list(blocks_of(Layer.DIALOGUE, dialogue))
+        if brief:
+            echo_text = brief if len(brief) <= 240 else brief[:237] + "..."
+            dialogue_blocks.append(Block(
+                layer=Layer.DIALOGUE,
+                source=GOAL_ECHO_SOURCE,
+                label="goal-echo",
+                text=f"Goal: {echo_text}",
+                evictable=False,
+            ))
 
-        breakpoints = self._breakpoints(task_present=bool(task or notes_blocks))
+        breakpoints = self._breakpoints(task_present=bool(task or pinned_blocks or notes_blocks))
         if len(breakpoints) > self._breakpoint_ceiling:
             raise CacheBreakpointCeilingExceeded(
                 f"{len(breakpoints)} breakpoints exceeds the ceiling of "
                 f"{self._breakpoint_ceiling} (VG-03 §10.2)")
 
-        floor = self._prefix_tokens + sum(block.token_estimate for block in task)
+        floor = (self._prefix_tokens
+                 + sum(block.token_estimate for block in task)
+                 + sum(block.token_estimate for block in pinned_blocks))
         if floor > self._token_ceiling:
             raise ContextBudgetExceeded(
-                f"L1-L3 plus the brief cost {floor} tokens against a ceiling of "
-                f"{self._token_ceiling}; none of them may be truncated")
+                f"L1-L3 plus the brief and pinned L4 cost {floor} tokens against a "
+                f"ceiling of {self._token_ceiling}; none of them may be truncated")
 
         # The candidate preimage, taken before `_fit` mutates the lists in
         # place. `_fit` is the only thing that can remove material, so this is
         # the last moment the un-compacted vector exists.
-        candidates = self._prefix + tuple(task) + tuple(notes_blocks) + tuple(dialogue_blocks)
+        candidates = (self._prefix + tuple(task) + tuple(pinned_blocks)
+                      + tuple(notes_blocks) + tuple(dialogue_blocks))
         candidate = digest_of([block.identity() for block in candidates])
         candidate_tokens = sum(block.token_estimate for block in candidates)
 
         elided, dropped = self._fit(floor, notes_blocks, dialogue_blocks)
 
         return CompiledContext(
-            blocks=self._prefix + tuple(task) + tuple(notes_blocks) + tuple(dialogue_blocks),
+            blocks=(self._prefix + tuple(task) + tuple(pinned_blocks)
+                    + tuple(notes_blocks) + tuple(dialogue_blocks)),
             breakpoints=breakpoints,
             elided=tuple(elided),
             dropped=tuple(dropped),
@@ -242,6 +261,31 @@ class ContextCompiler:
             dialogue=dialogue,
             options=self._compaction_options,
         )
+
+
+def _is_pinned_l4(fragment: Fragment) -> bool:
+    return fragment.source in PINNED_L4_SOURCES
+
+
+def _partition_l4_notes(
+    notes: Sequence[Fragment],
+) -> tuple[tuple[Fragment, ...], tuple[Fragment, ...]]:
+    """FEATURE_SPEC: invariants then dead ends at L4 head; only the rest may drop."""
+    invariants: list[Fragment] = []
+    negatives: list[Fragment] = []
+    other_pinned: list[Fragment] = []
+    flexible: list[Fragment] = []
+    for note in notes:
+        pinned = Fragment(source=note.source, label=note.label, text=note.text, evictable=False)
+        if note.source == "settled-invariant":
+            invariants.append(pinned)
+        elif note.source in {"falsified-hypothesis", "dead-end"}:
+            negatives.append(pinned)
+        elif _is_pinned_l4(note):
+            other_pinned.append(pinned)
+        else:
+            flexible.append(note)
+    return tuple(invariants + negatives + other_pinned), tuple(flexible)
 
 
 def _receipt_for(block: Block) -> Block:

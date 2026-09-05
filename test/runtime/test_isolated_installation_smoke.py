@@ -85,7 +85,7 @@ class TestIsolatedInstallationSmoke(unittest.TestCase):
     def test_package_archive_completeness(self) -> None:
         """Verify sdist tarball includes required packages, schemas, manifests, and metadata."""
         self.assertTrue(self.sdist_path.exists())
-        self.assertIn(self.sdist_filename, ("vanguard-runtime-0.9.0b1.tar.gz", "vanguard_runtime-0.9.0b1.tar.gz"))
+        self.assertIn(self.sdist_filename, ("vanguard-runtime-0.9.3.tar.gz", "vanguard_runtime-0.9.3.tar.gz"))
 
         pkg_root = self.extracted_pkg_root
         self.assertTrue((pkg_root / "pyproject.toml").is_file())
@@ -101,10 +101,10 @@ class TestIsolatedInstallationSmoke(unittest.TestCase):
         self.assertTrue((manifests_dir / "vg-code-explain" / "manifest.json").is_file())
 
     def test_cli_version_reports_release_identity(self) -> None:
-        """CLI --version reports authoritative 0.9.0b1 release identity."""
+        """CLI --version reports authoritative 0.9.3 release identity."""
         proc = self._run_cli(["--version"])
         self.assertEqual(proc.returncode, 0)
-        self.assertIn("vanguard 0.9.0b1", proc.stdout)
+        self.assertIn("vanguard 0.9.3", proc.stdout)
 
     def test_cli_init_creates_state_contract_and_keys(self) -> None:
         """CLI init initializes workspace state directory and Ed25519 operator key."""
@@ -121,7 +121,7 @@ class TestIsolatedInstallationSmoke(unittest.TestCase):
         """CLI doctor runs and reports diagnostics from installed distribution."""
         # Non-zero exit code is normal when external live keys (e.g. OpenRouter) are unset (fail-closed)
         proc = self._run_cli(["doctor", "--profile", "local"], check=False)
-        self.assertIn("Vanguard 0.9.0b1", proc.stdout)
+        self.assertIn("Vanguard 0.9.3", proc.stdout)
         self.assertIn("workspace", proc.stdout)
         self.assertIn("model_provider:fake", proc.stdout)
         self.assertIn("model_provider:cassette", proc.stdout)

@@ -1,0 +1,26 @@
+{
+  "schema": "aether.b20.membership/1",
+  "task_set_digest": "sha256:796b66662973297f6bca1ac4c98b4971ea67254cbe62ff7b27c290f8bcf9c6a9",
+  "tasks": [
+    {"id": "01_rate_limiter_lease_recovery", "oracle": "test/test_limiter.py", "kind": "Brownfield"},
+    {"id": "02_ed25519_signature_replay", "oracle": "test/test_verifier.py", "kind": "Brownfield"},
+    {"id": "03_trait_attenuation_escalation", "oracle": "test/test_attenuation.py", "kind": "Brownfield"},
+    {"id": "04_sqlite_wal_checkpoint_lock", "oracle": "test/test_concurrent_store.py", "kind": "Brownfield"},
+    {"id": "05_token_budget_clamping_drift", "oracle": "test/test_budget_falsifier.py", "kind": "Brownfield"},
+    {"id": "06_fts5_stale_index_rebuild", "oracle": "test/test_indexer_falsifier.py", "kind": "Brownfield"},
+    {"id": "07_context_lost_in_middle_prune", "oracle": "test/test_context_allocator.py", "kind": "Brownfield"},
+    {"id": "08_evaluator_oracle_timeout", "oracle": "test/test_sandbox_timeout.py", "kind": "Brownfield"},
+    {"id": "09_model_port_streaming_chunk_drop", "oracle": "test/test_streaming_falsifier.py", "kind": "Brownfield"},
+    {"id": "10_graph_ppr_dangling_node_sink", "oracle": "test/test_ppr_falsifier.py", "kind": "Brownfield"},
+    {"id": "11_kv_lru_ttl_store", "oracle": "test/test_suite.py", "kind": "Greenfield"},
+    {"id": "12_finite_state_machine_workflow", "oracle": "test/test_suite.py", "kind": "Greenfield"},
+    {"id": "13_semver_dependency_resolver", "oracle": "test/test_suite.py", "kind": "Greenfield"},
+    {"id": "14_merkle_tree_ledger", "oracle": "test/test_suite.py", "kind": "Greenfield"},
+    {"id": "15_circuit_breaker_proxy", "oracle": "test/test_suite.py", "kind": "Greenfield"},
+    {"id": "16_submodular_greedy_packer", "oracle": "test/test_suite.py", "kind": "Greenfield"},
+    {"id": "17_json_canonicalizer_jcs", "oracle": "test/test_suite.py", "kind": "Greenfield"},
+    {"id": "18_token_bucket_hierarchical", "oracle": "test/test_suite.py", "kind": "Greenfield"},
+    {"id": "19_markdown_section_splitter", "oracle": "test/test_suite.py", "kind": "Greenfield"},
+    {"id": "20_event_bus_pubsub_channel", "oracle": "test/test_suite.py", "kind": "Greenfield"}
+  ]
+}

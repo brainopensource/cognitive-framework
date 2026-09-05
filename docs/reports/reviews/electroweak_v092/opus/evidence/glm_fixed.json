@@ -1,0 +1,37 @@
+{
+ "condition": "fixed",
+ "model_port": "openrouter",
+ "model": "z-ai/glm-5.3-flash",
+ "task": "fib",
+ "terminal": "abandoned",
+ "turns": 7,
+ "detail": "turn bound 8 reached",
+ "usage": {
+  "promptTokens": 20348,
+  "completionTokens": 2463,
+  "totalTokens": 22811
+ },
+ "cost_micros": 1538,
+ "wall_s": 106.2,
+ "files": [
+  "fib.py"
+ ],
+ "oracle": "PASS",
+ "error": null,
+ "proposals": [
+  "patch.apply/effect",
+  "proc.exec/effect",
+  "None/finish",
+  "proc.exec/effect",
+  "None/finish",
+  "fs.read/effect",
+  "None/finish"
+ ],
+ "denials": [],
+ "effects": [
+  "EffectCompleted:patch.apply:",
+  "EffectCompleted:proc.exec:[exit 0] 0\n1\n1\n2\n3\n5\n8\n13\n21\n34\n",
+  "EffectCompleted:proc.exec:[exit 0] 0\n1\n1\n2\n3\n5\n8\n13\n21\n34\n",
+  "EffectCompleted:fs.read:\"\"\"Print the first 10 Fibonacci numbers.\"\"\"\n\n\ndef fibonacci("
+ ]
+}

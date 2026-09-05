@@ -75,8 +75,12 @@ class AbsentBackendsFailClosed(unittest.TestCase):
         self.assertEqual(len(calls), 1)
 
     def test_a_live_ollama_is_labelled_with_its_tag(self) -> None:
-        selected = select_model("ollama", model_name="deepseek-r1",
-                                probe=lambda e: True)
+        with patch(
+            "vanguard.packages.runtime.model_selection._ollama_tags",
+            return_value=("deepseek-r1",),
+        ):
+            selected = select_model("ollama", model_name="deepseek-r1",
+                                    probe=lambda e: True)
         self.assertEqual(selected.label, "ollama:deepseek-r1")
 
     def test_a_missing_api_key_is_refused_not_defaulted(self) -> None:

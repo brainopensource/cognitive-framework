@@ -1,0 +1,48 @@
+{
+ "condition": "fixed",
+ "model_port": "openrouter",
+ "model": "z-ai/glm-5.3-flash",
+ "task": "calc",
+ "terminal": "abandoned",
+ "turns": 9,
+ "detail": "turn bound 10 reached",
+ "usage": {
+  "promptTokens": 32461,
+  "completionTokens": 4327,
+  "totalTokens": 36788
+ },
+ "cost_micros": 2610,
+ "wall_s": 180.1,
+ "files": [
+  ".pytest_cache/.gitignore",
+  ".pytest_cache/CACHEDIR.TAG",
+  ".pytest_cache/README.md",
+  ".pytest_cache/v/cache/nodeids",
+  "src/__init__.py",
+  "src/calculator.py",
+  "test_calculator.py"
+ ],
+ "oracle": "PASS",
+ "error": null,
+ "proposals": [
+  "fs.read/effect",
+  "fs.read/effect",
+  "patch.apply/effect",
+  "proc.exec/effect",
+  "None/finish",
+  "fs.read/effect",
+  "proc.exec/effect",
+  "None/finish",
+  "proc.exec/effect"
+ ],
+ "denials": [],
+ "effects": [
+  "EffectCompleted:fs.read:from src.calculator import calculate_value\n\ndef test_formula",
+  "EffectCompleted:fs.read:def calculate_value(A: float, B: float) -> float:\n    result",
+  "EffectCompleted:patch.apply:",
+  "EffectCompleted:proc.exec:[exit 0] ============================= test session starts =",
+  "EffectCompleted:fs.read:def calculate_value(A: float, B: float) -> float:\n    result",
+  "EffectCompleted:proc.exec:[exit 0] ============================= test session starts =",
+  "EffectFailed:proc.exec:[exit 129] \nwarning: Not a git repository. Use --no-index to"
+ ]
+}

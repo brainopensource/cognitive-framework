@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "llama-cpp": {
+      "command": "python3",
+      "args": [
+        "/home/rock-dev/Coding/cognitive-framework/tools/llama_cpp/mcp_server.py"
+      ]
+    },
+    "lda-navigator": {
+      "command": "python3",
+      "args": [
+        "/home/rock-dev/Coding/cognitive-framework/tools/lda/mcp.py"
+      ]
+    },
+    "lam-engine": {
+      "command": "python3",
+      "args": [
+        "/home/rock-dev/Coding/cognitive-framework/tools/002_LLM_API_MOCK/mcp_server.py"
+      ]
+    },
+    "agent-plugins": {
+      "command": "python3",
+      "args": [
+        "/home/rock-dev/Coding/cognitive-framework/tools/agent_plugins/mcp_server.py"
+      ]
+    }
+  }
+}

@@ -117,6 +117,7 @@ class GreenfieldPolicy:
         smoke_test_created: bool,
         created_files: Sequence[str] = (),
         baseline: ScaffoldBaseline | None = None,
+        oracle_failed_on_stub: bool | None = None,
     ) -> GreenfieldDecision:
         baseline = baseline or self.baseline
         if self.assess().escaped_entries:
@@ -135,4 +136,37 @@ class GreenfieldPolicy:
             candidate = self.workspace / str(relative)
             if _safe_relative(self.workspace, candidate) is None:
                 return GreenfieldDecision(False, "PATH_ESCAPE", baseline)
+        if oracle_failed_on_stub is False or oracle_failed_on_stub is None:
+            return GreenfieldDecision(False, "VACUOUS_ORACLE", baseline)
+        if behavioral_passed and _implementation_is_stub(self.workspace, created_files):
+            return GreenfieldDecision(False, "VACUOUS_ORACLE", baseline)
         return GreenfieldDecision(True, "greenfield_completion_admissible", baseline)
+
+
+def _implementation_is_stub(workspace: Path, created_files: Sequence[str]) -> bool:
+    """True when created non-test files are missing, empty, or NotImplemented stubs."""
+    impls = tuple(
+        relative for relative in created_files
+        if "test" not in Path(relative).as_posix().lower()
+    )
+    if not impls:
+        return True
+    for relative in impls:
+        candidate = workspace / str(relative)
+        if not candidate.is_file():
+            return True
+        text = candidate.read_text(encoding="utf-8")
+        if "NotImplementedError" in text or "NotImplemented" in text:
+            return True
+        body = [
+            line.strip()
+            for line in text.splitlines()
+            if line.strip() and not line.strip().startswith("#")
+        ]
+        executable = [
+            line for line in body
+            if not line.startswith(("def ", "class ", "import ", "from ", "@"))
+        ]
+        if not executable or all(line in {"pass", "...", "return", "return None"} for line in executable):
+            return True
+    return False

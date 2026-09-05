@@ -9,8 +9,14 @@ evidence.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Any, Mapping, Sequence
+
+_VACUOUS_VERIFICATION_COMMAND = re.compile(
+    r"^\s*(?:true|/bin/true|/usr/bin/true|echo\b|printf\b)\b",
+    re.IGNORECASE,
+)
 
 try:
     from .task_classifier import classify_task
@@ -103,6 +109,16 @@ def check_multi_file_completeness(
     if unresolved:
         rejections.append("PUBLIC_INTERFACE_CALLERS_UNRESOLVED")
 
+    txn_files = observations.get("same_transaction_files")
+    if txn_files is not None and changed_public_symbols:
+        txn_set = {str(path) for path in txn_files}
+        if any(
+            str(caller) not in txn_set
+            for symbol in changed_public_symbols
+            for caller in caller_map.get(symbol, ())
+        ):
+            rejections.append("CALL_SITES_NOT_IN_SAME_TRANSACTION")
+
     evidence = dict(migration_evidence or {})
     if compatibility_evidence is not None:
         evidence["compatibility"] = compatibility_evidence
@@ -123,6 +139,10 @@ def check_multi_file_completeness(
     if not implicated:
         rejections.append("IMPLICATED_SET_EMPTY")
 
+    primary = tuple(str(path) for path in observations.get("primary_files", ()))
+    if observations.get("coverage_ratio") == 1.0 and not primary:
+        rejections.append("EMPTY_PRIMARY_VACUOUS_COVERAGE")
+
     return CompletenessReport(
         is_complete=not rejections,
         missing_inspections=tuple(missing),
@@ -138,6 +158,48 @@ class CodeDefaultCompletionPolicy:
     """Pack-owned adapter from runtime observations to an admission verdict."""
 
     spi_version = "1.0"
+
+    @staticmethod
+    def _run_greenfield_control(evidence: Mapping[str, Any]) -> Any:
+        """Run the pack's vacuity control on runtime-collected evidence.
+
+        The runtime owns execution and supplies the mediated control counts;
+        this pack owns the semantic rule that a green empty-stub control is
+        invalid. Keeping the call here makes the production completion path
+        use the same gate as the pack contract tests.
+        """
+        try:
+            from oracles.gate import GreenfieldControlOutcome, PackOracleGate
+        except ImportError as exc:  # pragma: no cover - broken pack install
+            return None, f"greenfield gate unavailable: {exc}"
+        control = evidence.get("control")
+        if not isinstance(control, Mapping):
+            # Compatibility for direct SPI callers. The public runtime always
+            # supplies ``control``; older pack callers supplied only the
+            # explicit boolean and verification count.
+            if isinstance(evidence.get("oracle_failed_on_stub"), bool):
+                verification = evidence.get("verification")
+                tests_run = getattr(
+                    verification, "executed_test_count", 0)
+                control = {
+                    "tests_run": tests_run,
+                    "failures": tests_run if evidence["oracle_failed_on_stub"] else 0,
+                    "errors": 0,
+                }
+            else:
+                return None, "greenfield control evidence missing"
+        try:
+            outcome = GreenfieldControlOutcome(
+                tests_run=control.get("tests_run", control.get("testsRun")),
+                failures=control.get("failures"),
+                errors=control.get("errors", 0),
+            )
+        except (TypeError, ValueError):
+            return None, "greenfield control evidence invalid"
+        decision = PackOracleGate().run_greenfield_control(lambda: outcome)
+        if hasattr(decision, "value"):
+            return decision.value, ""
+        return None, str(getattr(decision, "message", getattr(decision, "code", "control rejected")))
 
     def evaluate(
         self,
@@ -156,15 +218,42 @@ class CodeDefaultCompletionPolicy:
         if proposal.get("kind") != "finish":
             return {"admissible": False, "reason": "MODEL_DID_NOT_REQUEST_FINISH"}
         changed = tuple(changed_files)
-        if not changed:
-            return {"admissible": False, "reason": "MISSING_SOURCE_PATCH"}
+        primary = tuple(str(path) for path in observations.get("primary_files", ()))
+        if observations.get("coverage_ratio") == 1.0 and not primary:
+            return {"admissible": False, "reason": "EMPTY_PRIMARY_VACUOUS_COVERAGE"}
         surface = tuple(implicated_files) or changed
         classification = classify_task(task_text)
-        if classification.kind == "greenfield":
+        if not changed and classification.kind == "read-only":
+            return {"admissible": True, "reason": "read_only_task_admissible"}
+        if not changed:
+            return {"admissible": False, "reason": "MISSING_SOURCE_PATCH"}
+        bugfix_brief = classification.kind == "bugfix" or "bugfix" in task_text.lower()
+        treat_greenfield = classification.kind == "greenfield" and not bugfix_brief
+        if treat_greenfield:
             greenfield = observations.get("greenfield_evidence")
             if not isinstance(greenfield, Mapping):
                 return {"admissible": False, "reason": "GREENFIELD_EVIDENCE_REQUIRED"}
-            required = ("baseline_recorded", "structural_passed", "smoke_test_created", "behavioral_passed")
+            greenfield = dict(greenfield)
+            greenfield.setdefault("verification", verification)
+            control, control_error = self._run_greenfield_control(greenfield)
+            if control is None:
+                return {
+                    "admissible": False,
+                    "reason": (
+                        "VACUOUS_ORACLE"
+                        if greenfield.get("oracle_failed_on_stub") is False
+                        else "GREENFIELD_CONTROL_REQUIRED"
+                    ),
+                }
+            if greenfield.get("oracle_failed_on_stub") is False:
+                return {"admissible": False, "reason": "VACUOUS_ORACLE"}
+            required = (
+                "baseline_recorded",
+                "structural_passed",
+                "smoke_test_created",
+                "behavioral_passed",
+                "oracle_failed_on_stub",
+            )
             if any(not bool(greenfield.get(key)) for key in required):
                 return {"admissible": False, "reason": "GREENFIELD_EVIDENCE_INCOMPLETE"}
         review_required = bool(observations.get("review_required", False))
@@ -195,8 +284,11 @@ class CodeDefaultCompletionPolicy:
             migration_evidence=observations.get("migration_evidence"),
             truncated=bool(observations.get("truncated", False)),
             truncation_metadata=observations.get("truncation_metadata"),
+            primary_files=primary,
+            coverage_ratio=observations.get("coverage_ratio"),
+            same_transaction_files=observations.get("same_transaction_files"),
         )
-        if classification.kind != "greenfield" and not report.is_complete:
+        if (not treat_greenfield) and not report.is_complete:
             return {
                 "admissible": False,
                 "reason": report.rejections[0] if report.rejections else "COMPLETENESS_REJECTED",
@@ -216,7 +308,57 @@ class CodeDefaultCompletionPolicy:
             return {"admissible": False, "reason": "VERIFICATION_FAILED"}
         if not current_workspace_digest or workspace_digest != current_workspace_digest:
             return {"admissible": False, "reason": "VERIFICATION_STALE"}
+        command = _verification_command(verification, observations)
+        if _VACUOUS_VERIFICATION_COMMAND.match(command):
+            return {"admissible": False, "reason": "VACUOUS_VERIFICATION_COMMAND"}
+        if classification.kind == "bugfix":
+            pre_verify = observations.get("pre_verify", observations.get("pre_verification"))
+            if pre_verify is None:
+                return {"admissible": False, "reason": "FAIL_TO_PASS_REQUIRED"}
+            if _blob_passed(pre_verify):
+                return {"admissible": False, "reason": "VACUOUS_REPRODUCER"}
+            if not _blob_failed(pre_verify):
+                return {"admissible": False, "reason": "FAIL_TO_PASS_REQUIRED"}
+        task_test_ids = {str(item) for item in (observations.get("task_test_ids") or ())}
+        executed_test_ids = {str(item) for item in (observations.get("executed_test_ids") or ())}
+        if task_test_ids and task_test_ids.isdisjoint(executed_test_ids):
+            return {"admissible": False, "reason": "UNRELATED_SUITE"}
         return {"admissible": True, "reason": "completion_admissible"}
+
+
+def _verification_command(verification: Any, observations: Mapping[str, Any]) -> str:
+    if observations.get("verification_command"):
+        return str(observations["verification_command"])
+    if isinstance(verification, Mapping):
+        return str(
+            verification.get("verification_command")
+            or verification.get("verificationCommand")
+            or verification.get("command")
+            or ""
+        )
+    return str(getattr(verification, "verification_command", "") or "")
+
+
+def _blob_passed(blob: Any) -> bool:
+    if blob is None:
+        return False
+    if isinstance(blob, Mapping):
+        if blob.get("passed") is True:
+            return True
+        exit_code = int(blob.get("exit_code", blob.get("exitCode", -1)))
+        count = int(blob.get("executed_test_count", blob.get("executedTestCount", 0)))
+        return exit_code == 0 and count > 0
+    return bool(getattr(blob, "passed", False))
+
+
+def _blob_failed(blob: Any) -> bool:
+    if blob is None:
+        return False
+    if isinstance(blob, Mapping):
+        if blob.get("passed") is False:
+            return True
+        return not _blob_passed(blob)
+    return not bool(getattr(blob, "passed", False))
 
 
 # Friendly aliases used by pack composition and direct policy tests.

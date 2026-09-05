@@ -149,3 +149,22 @@ Kernel execution maps every exit to an explicit `FailurePath` entry (`05 §2.3`)
 - **Budget Linter**: `tools/linters/check_tcb_budget.py` ($\le 1438$ LOC).
 - **Domain Blindness Linter**: `tools/linters/check_domain_blindness.py`.
 - **Falsification Tests**: `test/kernel/test_dispatch.py`, `test/kernel/test_attenuation.py`, `test/kernel/test_grant_budget_events.py`.
+
+---
+
+## Architectural Decisions & Philosophical Rationale
+
+### DEC-02 — Domain-Blind Minimal Trusted Computing Base (TCB)
+
+- **Decision:** The privileged execution kernel is strictly domain-blind, dependency-free, and capped at an auditable code budget ($\le 1438$ logical LOC).
+- **Rationale:** Privilege escalation, mediation flaws, and non-deterministic leaks scale with TCB complexity. A small reference monitor operating solely on generic action descriptors, scopes, and budgets ensures formal and human auditability.
+- **Rejected alternative:** Embedding agent memory, model heuristics, or task domain validation directly inside the kernel dispatch path.
+- **Reversal condition:** Formal mathematical proof that dynamic multi-tenant agent mediation requires domain-aware kernel operations that cannot be safely expressed via user-space capability attenuation.
+
+### DEC-09 — Orthogonal Separation of Capability Grants and Plugin Isolation
+
+- **Decision:** Agent capability grants (attenuated S0–S12 permissions) and plugin isolation policies (OS sandboxing/containerization) are enforced as independent, orthogonal boundaries.
+- **Rationale:** Model safety (what an agent is allowed to request) and process security (what plugin binaries can execute on the host) protect against different threat vectors. Neither can substitute for the other.
+- **Rejected alternative:** Relying exclusively on process sandboxing to restrict agent actions, or relying exclusively on model-level capability tokens to contain untrusted binaries.
+- **Reversal condition:** A unified capability-secure OS substrate where user-space process execution and cognitive model calls share a single hardware capability architecture.
+

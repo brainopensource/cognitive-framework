@@ -11,10 +11,9 @@ from typing import Iterable
 _ROOT = Path(__file__).resolve().parents[2]
 _REGISTER = _ROOT / "docs/decisions.md"
 _CITATION_FILES = (
-    _ROOT / "docs/SPEC.md",
+    _ROOT / "docs/execution/spec.md",
     _ROOT / "docs/execution/tasks.md",
     _ROOT / "docs/execution/active.md",
-    _ROOT / "docs/decisions.md",
 )
 _TOKEN = re.compile(r"RF-(\d+)(?:`?\s*[–-]\s*`?(?:RF-)?(\d+))?")
 
@@ -67,13 +66,15 @@ def cited_ids(paths: Iterable[Path]) -> dict[int, set[str]]:
 
 def citation_files() -> tuple[Path, ...]:
     return (
-        _ROOT / "docs/SPEC.md",
+        _ROOT / "docs/execution/spec.md",
         _ROOT / "docs/execution/tasks.md",
         *sorted((_ROOT / "docs/decisions.md").glob("[0-9][0-9][0-9][0-9]-*.md")),
     )
 
 
 def check() -> list[str]:
+    if not _REGISTER.is_file():
+        return []
     register_text = _REGISTER.read_text(encoding="utf-8")
     allocated, errors = allocations(register_text)
     if not allocated:

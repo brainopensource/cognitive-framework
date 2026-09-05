@@ -8,9 +8,9 @@ owner: repository-governance
 canonical_for:
   - repository-backlog
   - feature-lifecycle-tracking
-version: 0.9.3
-last_verified: 2026-09-03
-lock_head: "66aa7a3c0c31"
+version: "0.9.3"
+last_verified: 2026-09-05
+lock_head: "3daa487c0be8"
 audience:
   - contributor
   - maintainer
@@ -98,7 +98,7 @@ graph LR
 | **TLS-01** | AdmissionGate Closed-Loop Validation | `agency` | Lane A | `DONE` | W-092-2 | Fail-closed patch requirement and fresh workspace verification enforcement. |
 | **TLS-02** | DeepSeek DSML / JSON Normalization | `agency` | Lane A | `DONE` | W-092-4 | Protocol recovery for malformed markdown tool calls and stream truncations. |
 | **TLS-03** | Tree-Sitter & SBFL Fault Localization | `ports` / `adapters`| Lane B | `DEFERRED` | Post-CMX-07 | Optional treatment; may enter WIP only after the canonical single-worker baseline is qualified and a preregistered ablation exists. |
-| **TLS-04** | AST Syntax Pre-Flight Gate (<0.2ms) | `adapters` | Lane A | `DEFERRED` | Post-CMX-07 | Optional treatment; current finish work must first make verification counts and subject binding truthful. |
+| **TLS-04** | AST Syntax Pre-Flight Gate (<0.2ms) | `adapters` | Lane A | `DONE` (mechanism) | MS-CHANGE | `adapters/environment/transaction.py` performs `ast.parse` preflight and aborts before durable flush. |
 | **TLS-05** | Speculative Git Checkpoint Engine | `adapters` | Lane A | `APPROVED` | W-092-4 | In-memory CoW git checkpoints with automatic rollback on test regression. |
 | **TLS-06** | AST Mutation Verification (Anti-Collusion)| `adapters` | Lane B | `PROPOSED` | M-8+ | Injects AST mutants to falsify ungrounded or no-op candidate test suites. |
 | **TLS-07** | Composable Web Research Port (SSRF-Safe)| `ports` / `adapters`| Lane A | `PROPOSED` | M-9 | Egress-controlled web search and fetch tools with domain allowlists. |
@@ -162,8 +162,8 @@ composition/lifecycle authority; infrastructure stays behind generic ports.
 
 | ID | Capability package | Primary owner | Status | Dependency | Acceptance gate |
 |---|---|---|---|---|---|
-| **CMX-01** | Current-mechanism delta and three presets | `packs/code-default`, manifests | `REOPENED` (product divergence) | EWK-Q disposition | Public fast/balanced/max still need accepted later harness behavior folded into one data-selected catalog; experimental manifest names are not product presets. |
-| **CMX-02** | Port-backed repository intelligence | `ports/index.py`, adapters, code-pack bindings | `PARTIAL` | CMX-09 | Public Coding Max presets now declare the shared index and the runtime constructs bounded `ContextPacket` context; staged task-ranked retrieval, epoch refresh and fallback evidence remain. |
+| **CMX-01** | Current-mechanism delta and three presets | `packs/code-default`, manifests | `IN_PROGRESS` | EWK-Q disposition | T-79 is an implementation candidate with 8/8 focused tests green (declared ceiling ≠ attenuation). Acceptance waits on boundary + related-surface + clean-subject review. |
+| **CMX-02** | Port-backed repository intelligence | `ports/index.py`, adapters, code-pack bindings | `PARTIAL` | IDX-01 | Public Coding Max presets now declare the shared index and the runtime constructs bounded `ContextPacket` context; staged task-ranked retrieval, epoch refresh and fallback evidence remain. |
 | **CMX-03** | Durable plan/context/recovery loop | code-pack policies + existing projections | `PARTIAL` | CMX-09 | Resume restores the original turn ceiling and approval mode, but rich task-state production, exact policy/profile/budget identity and 40+ turn cold parity remain. |
 | **CMX-04** | Multi-file and greenfield correctness | code-pack policies and fixtures | `REVIEWING` | CMX-10A, CMX-11 | Hermetic policies/fixtures and conservative verification observation exist; task-specific completion and repository-scale change-surface qualification remain. |
 | **CMX-05** | Coding Max application facade | `apps/coding_max`, shared application service, `vg` | `DONE (hermetic)` | CMX-03 | CLI and API invoke the same composition; run/status/resume/evidence/cost results agree; app owns no execution loop or provider HTTP |
@@ -171,9 +171,9 @@ composition/lifecycle authority; infrastructure stays behind generic ports.
 | **CMX-07** | Repository-scale qualification | benchmark program | `BLOCKED` (on REL-01R, CMX-09..11) | CMX-04, CMX-05 | Re-freeze the exact multi-class subject only after canonical completion, long-session resume and progressive-context gates pass. |
 | **CMX-08** | First-party reference-agent portfolio | apps + independent packs/manifests | `TECHNICAL SLICE DONE` | M-10 and stable public composition contract | Coding Max plus two non-coding supported agents install, run, resume, and emit attributable evidence through the same public framework contract |
 | **CMX-09** | Canonical Harness Convergence | runtime, code pack, manifests, thin app | `IN_PROGRESS` (Active in [`tasks.md`](tasks.md)) | W-092-F1 | Fold accepted later prompt/tool/recovery mechanisms into public presets; use one capability-derived admission/policy binding; exact technical delta governed by [`spec.md`](spec.md). |
-| **CMX-10A** | Truthful Task-Aware Completion | runtime + code-pack completion policy | `APPROVED` | CMX-09 | Parse real verification counts and fail closed on zero, stale, partial, incomplete or task-inapplicable evidence across bugfix, feature, migration, greenfield and read-only tasks. |
-| **CMX-10B** | Durable Long-Session Continuation | runtime/session/task projection | `APPROVED` | CMX-10A | Persist and restore exact task/composition/policy/budget/phase/next-action identity; prove 40+ turns and repeated fresh-process restarts without duplicate effects. |
-| **CMX-11** | Progressive Repository Context & Change Closure | agency context, `IndexPort`, adapters, code pack | `APPROVED` | CMX-09, CMX-10B | Put `ContextPacket` on the product path, reserve recovery/verification context, refresh by repository epoch, expose omissions, and prove multi-file/affected-test closure with deterministic fallback. |
+| **CMX-10A** | Truthful Task-Aware Completion | runtime + code-pack completion policy | `IN_PROGRESS` | CMX-09 | Parse real verification counts and fail closed on zero, stale, partial, incomplete or task-inapplicable evidence across bugfix, feature, migration, greenfield and read-only tasks. |
+| **CMX-10B** | Durable Long-Session Continuation | runtime/session/task projection | `DONE` | CMX-10A | Domain `SemanticTaskState`, fold, episode_id, σ-not-in-L3, 40-turn fold parity. Falsifiers green 2026-09-03. |
+| **CMX-11** | Progressive Repository Context & Change Closure | agency context, `IndexPort`, adapters, code pack | `IN_PROGRESS` | CMX-09, CMX-10B | SEE A stack T-14–T-16/T-36/T-37/T-45 MECHANISM. Remaining: T-46 `[PROPOSAL]` ranking. Change-closure T-18–T-20 MECHANISM; product MS-CHANGE stays `OPEN` on T-47–T-49. |
 
 ### 2.10 Octopus Meta-Controller & Swarm Topology (VISION.md §12, §16; M-OCT Horizon)
 
@@ -183,8 +183,44 @@ The Octopus / Conductor capability family represents the post-1.0 higher-order o
 |---|---|---|---|---|---|---|
 | **OCT-01** | Content-Addressed Mailbox Protocol | `domain/topology` | Lane A | `PROPOSED` | M-OCT / W-OCT-1 | Sub-agents communicate strictly by publishing and reading content-addressed immutable message digests (`digest_of(payload)`); zero shared memory; deterministic replayability. |
 | **OCT-02** | Declarative CoordinationPlan DAG & Merge Policies | `domain/topology` | Lane A | `PROPOSED` | M-OCT / W-OCT-2 | Topology declared as data DAG with per-mille budget shares ($\sum \text{budget\_share} \le 1000$); formal merge policies: `CONCAT`, `FIRST_COMPLETE`, `SYNTHESISE`, `UNANIMOUS`. |
-| **OCT-03** | Outer-Loop Multi-Day Roadmap Director | `runtime/outer_loop` | Lane A | `PROPOSED` | M-OCT / W-OCT-3 | Persistent director above `EpisodeEngine`; manages multi-episode roadmaps, survives process restarts, and yields verified milestone handoffs without unbounded context saturation. |
+| **OCT-03** | Outer-Loop Multi-Day Roadmap Director (≡ draft `DIR-01`) | `runtime/outer_loop` | Lane A | `PROPOSED` | M-OCT / W-OCT-3 | **Dependency:** `MS-CONTROL` closed. Persistent director above `EpisodeEngine`; manages multi-episode roadmaps, survives process restarts, and yields verified milestone handoffs without unbounded context saturation. |
 | **OCT-04** | Meta-Conductor & Swarm Goal Algebra | `runtime/outer_loop` | Lane A | `PROPOSED` | M-OCT / W-OCT-4 | Higher-order pilot framework; formal algebraic separation and reconciliation of individual worker objectives under a shared global campaign objective. |
+
+### 2.11 Electroweak Convergence: Harness Preconditions & Settlement Truth
+
+Accepted disposition of the Electroweak v0.9.2 review dossiers (Synthesis of
+Record, 2026-09-04). Eleven IDs were proposed across the two sources — six in the
+draft synthesis, five in the GPT (SOL + Terra) dossier. **Seven** open as capability
+packages here; the other four, all from the draft synthesis, resolved to live rows
+and are recorded as aliases in §3 rather than as new packages, per **R-01
+(architecture sprawl)**: a synthesis that names sprawl as a risk does not open a
+new row where a live one already carries the work.
+
+Five of the seven (`INS-01`, `DLG-01`, `BRG-01`, `EXP-01`, `ARM-01`) come from the
+GPT (SOL + Terra) dossier and the procedural evidence standard in §9. Each declares
+its admission route: **Route R** rows repair a defect verified at a named source
+line and close on a regression test; the single **Route L** row (`ARM-01`) claims
+lift and therefore stays `PROPOSED` until a preregistered ablation says otherwise.
+
+**Lifecycle checkpoint (2026-09-05 session stop).** HAR-01 and BRG-01 are `DONE
+(mechanism)`. INS-01 is `IN_PROGRESS`: T-84/T-85 are done, T-89 is a focused-
+green implementation candidate, and **T-97 is deferred this pass** (filed, not
+vanished). CMX-01/T-79 is a focused-green candidate. EXP-01 T-92–T-95 has a
+19-test implementation slice, but no live L0, frozen T-26, or T-27 disposition;
+ARM-01 remains proposed and gated on `MS-CONTROL`. Five boundary violations and
+four related-surface failures block acceptance. These lifecycle facts
+supersede the original admission-state labels retained in the dossier table
+below; task checkboxes remain the completion authority.
+
+| ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Reconciliation | Description & Acceptance Gate |
+|---|---|---|---|---|---|---|---|
+| **HAR-01** | Harness Precondition Repair (deaf-mute agent) | `domain` / `agency` / `runtime` / `adapters` | Lane A | `APPROVED` | MS-TRUTH (precondition) | **New.** No existing T-id covers native tool-call style, approval-policy passthrough, or `finish` declaration. Extends DIALECT (T-21, T-22). Precondition of **CMX-09**; does not subsume it. Adds T-69–T-74. | **Precondition.** No settlement gate is reachable until the agent can call tools, write, and finish. (1) Add explicit `ToolCallStyle.NATIVE` profiles only for production routes whose native-tool support is verified; unverified routes preserve the degradation chain. (2) `runtime/session.py:656` reads `components.approval_policy` instead of the literal `"low"`. (3) Declare `finish-tool.json` in `vg-code-{default,fast,balanced,max}`. (4) Two-axis settlement contract (**T-72**, see spec §3). (5) Purge the `provider: ollama` tier-1 route and resolve `$FRONTIER` in `packs/code-default/harness.yaml`. <br/>*Falsifier*: each native-declared route dispatches `patch.apply` and `finish` in `Mode.BENCHMARK` with no protocol degradation or `denied_ask_fail_closed`; an unverified route is never silently promoted to `NATIVE`; `grep -rn "ollama" packs/` is empty; `terminal_status=abandoned` plus `disposition=passed` round-trips without contradiction. |
+| **INS-01** | Product Instrument Integrity (identity · receipt · measured subject) | `runtime` / `benchmarks` / `clients` | Lane A | `APPROVED` (Route R) | MS-TRUTH (Wave 1) → MS-CONTROL (Wave 2) | **New.** GPT Blockers B/E plus **C-18**. No existing T-id covers run identity, receipt telemetry, or the benchmark subject. `MS-INSTRUMENT` is `CLOSED` over the **benchmark harness** subject (`test.benchmarks.test_instrument_ms`); the product CLI path was never its subject, so that closure does not transfer and this is not a REOPEN. Adds T-84, T-85, T-89, T-97. | **Instrument.** (1) Generated UUID/ULID run identity; `--resume <id>` is the only recovery route (`entrypoint.py:56`). (2) Receipt carries real `modelRoutes`, `promptTokens`, `completionTokens`, `verifiedStepIds` and cost provenance (`entrypoint.py:218`). (3) The canary executes through `entrypoint.execute`, not `Runtime.execute_profiled` directly (`agentic_harness_matrix_benchmark.py:98`). <br/>*Falsifier*: two `vg code` calls in one workspace produce two distinct ledgers and only `--resume` recovers a prior one; one live run's receipt carries a non-empty `modelRoutes`, non-null token counts, and `verifiedStepIds` matching the ledger; the canary runner's entry symbol is `entrypoint.execute`. |
+| **DLG-01** | Live Dialect Validation & Provenance | `adapters` | Lane A | `APPROVED` (Route R) | MS-TRUTH | **New.** Extends DIALECT (T-21/T-22) and T-82 rather than replacing them; `agency/episode/protocol_recovery.py` already supplies the bounded temperature-zero retry, so only validation and provenance are missing. Adds T-86, T-90. | **Dialect.** Pass the manifest `aliases.json` map into `ProposalTranslator.translate` on the live path (`openrouter.py:1204`); validate tool name and arguments against the declared schema; record the raw-response digest and typed classifier class in the ledger. Explicit alias table only — no fuzzy tool-name matching. <br/>*Falsifier*: an undeclared tool name is rejected typed and never translated; a declared alias resolves to its canonical verb; a malformed completion leaves a retrievable raw-response digest plus a typed failure class, and never a silent `note`. |
+| **BRG-01** | Local Inference Instrument Fail-Closed | `tools/llama_cpp` | Lane B | `APPROVED` (Route R) | MS-TRUTH (precondition of any `LIVE-LOCAL` row) | **New.** Lives outside `vanguard/packages/`: touches no kernel line, no port, and no wave file set. Precondition of every local measurement, which is why it is Wave 1 despite being tooling. Adds T-87, T-88, T-91. | **Instrument.** `--flash-attn on\|off\|auto`; `ONLINE` requires `proc.poll() is None`, the expected child PID, and a `/props` model + alias match; an occupied port is `MODEL_MISMATCH`, never silently adopted; `stop` terminates only an identity-verified recorded child; structured status `{ONLINE, REFUSED, FORBIDDEN, TIMEOUT, PID_STALE, MODEL_MISMATCH}`; MCP returns typed `EMPTY_COMPLETION` / `MAX_TOKENS_WITHOUT_CONTENT` instead of empty success. <br/>*Falsifier*: an invalid `-fa` child cannot be reported online while another server holds the port; `stop` never issues a process-name kill; an empty completion with `finish_reason=length` returns a typed error, not content. |
+| **EXP-01** | Measurement Ladder & Preregistration | `benchmarks` | Lane B | `APPROVED` (Route R — method, not lift) | MS-CONTROL | **New.** Operationalizes §2.2's ablation algebra and Opus's honest-comparison instrument at run level. **Consumes** T-51/T-52 rather than duplicating them: T-51 freezes the suite, T-52 supplies Wilson and \(\kappa\), EXP-01 supplies the ladder, the row schema, and the veto. Adds T-92–T-95. | **Method.** Four rungs (§9.2): L0 smoke triad, L1 twelve-task freeze, L2 ≥30-task canary, L3 arm comparison. Per-run evidence row schema (§9.3); metric set with **false-completion rate = 0** as a hard veto (§9.4); a hypothesis registry binding every Route L mechanism to a preregistered single-variable ablation. <br/>*Falsifier*: a rung-L2 report missing any required schema field is refused by the writer; a run with `disposition=passed` and no bound oracle digest cannot enter a report; a treatment with no registered hypothesis id cannot be scored; a `REPLAY` row cannot be published in the same table as a `LIVE-LOCAL` row. |
+| **ARM-01** | Comparative Arm Program (agents × models × presets) | `benchmarks` / `agency/manifests` | Lane B | `PROPOSED` (Route L) | MS-CONTROL (gate) → MS-SENIOR | **New.** The multi-agent comparison the framework exists to run. Deliberately `PROPOSED`, not `APPROVED`: it is authorized by a **closed MS-CONTROL and a landed EXP-01**, never by this document. Adds T-96. | **Comparison.** Declare arms as (manifest × model × preset) triples over one immutable task bundle; LAM-first hermetic protocol regression, then one live canary per authorized arm, then the frozen corpus. Provider outage, zero model calls, HTTP error, or missing credentials are `not_run` — never task failure, never a model-quality score. <br/>*Falsifier*: two arms differing in more than one declared dimension cannot be published as a comparison; every arm report cites the exact manifest digest, model id, server build, quantization, and sampling; `openrouter/free` cannot be cited as a stable benchmark identity unless it pins the selected model. |
+| **IDX-01** | LDA-Backed Repository Intelligence | `adapters` / `agency` | Lane B | `APPROVED` | MS-SEE | **New adapter only.** `IndexPort` already exists (`ports/index.py`) and is **not modified**. Third implementation beside `FileRepoIndex` / `InMemoryRepoIndex`. Closes the CMX-02 `PARTIAL` retrieval half; **narrows T-46** to optional query-local ranking in pack policy. Adds T-75–T-77. | **Intelligence.** `LdaRepoIndex` in `adapters/stores/lda_index.py` reads `.lda/index.db` (**80,618** relations, 10,580 symbols, 3,372 files) and returns unranked value objects. Expose `repo.{search_symbols,get_callers,get_dependencies,get_tests}` as bounded observations into **L5 only**. An A/B-able pack policy may PPR-rank results inside an explicit request; no ranking enters `IndexPort`, the adapter, or L1–L3. Emit provider cache breakpoints at the L3 boundary and record cache tokens. |
 
 ---
 
@@ -192,24 +228,32 @@ The Octopus / Conductor capability family represents the post-1.0 higher-order o
 
 Team capacity is chosen later. `requires:` edges live on tasks. This index maps packages to T-ids.
 
+**T-69–T-97 are filed in [`tasks.md`](tasks.md).** Their rows remain the task-level
+authority; this table is only the package index. A task may be marked complete only
+when its named falsifier and required evidence pass for the exact subject. The
+convergence baseline remains a separate evidence blocker and must not be regenerated
+to fit the current tree.
+
 | Package | Aliases | Related T-ids | MS-* | Notes |
 |---|---|---|---|---|
-| **INSTRUMENT** | REL-01R (related) | T-01–T-03, T-24–T-25, T-40–T-41 | MS-INSTRUMENT | Enumerator, SHA, dry-run ban |
-| **TRUTH** | CMX-10A, W-092-F2, v2 SUB-01† | T-04–T-08, T-42, T-38, T-23 | MS-TRUTH | †v2 SUB-01 = admission, **not** live backlog SUB-01 (kernel pipeline, DONE) |
-| **STATE** | CMX-10B, W-092-F3 | T-09–T-13, T-43–T-44 | MS-RESUME | `domain/task_state.py` MISSING |
-| **SEE** | CMX-11, PRG-01, W-092-F4 | T-14–T-16, T-36–T-37, T-45–T-46 | MS-SEE | One ContextCompiler; ResultDistiller T-36 |
-| **CHANGE** | TXN-01, SHD-01, TLS-04/05 | T-17–T-20, T-47–T-49 | MS-CHANGE | 2PC in adapters; tamper; completeness |
-| **DIALECT** | WRN-01, TLS-02 | T-21–T-22, T-50 | — | Typed failure classes; fail-closed resolve |
-| **CONTROL** | CMX-07, W-092-F5 | T-26–T-27, T-51–T-52 | MS-CONTROL | Frozen preregistration + canary |
+| **INSTRUMENT** | REL-01R | T-01–T-03, T-24–T-25, T-40–T-41 | MS-INSTRUMENT | `DONE` at `63b77116` |
+| **TRUTH** | CMX-10A, W-092-F2, HAR-01, *SET-01* | T-04–T-08, T-42, T-38, T-23, T-69–T-74, T-81, T-82 | MS-TRUTH | T-69–T-74/T-81/T-82 mechanisms landed; T-18 is wired through the default repo index; T-04 successor obligation remains open pending exact-subject evidence |
+| **STATE** | CMX-10B, W-092-F3 | T-09–T-13, T-43–T-44 | MS-RESUME | `DONE` at `8637db55` (closer receipt 2026-09-03). |
+| **SEE** | CMX-11, PRG-01, W-092-F4, IDX-01 | T-14–T-16, T-36–T-37, T-45, T-75–T-77 | MS-SEE | T-46 **narrowed**: optional query-local ranking stays in pack policy, never `IndexPort` or the adapter |
+| **CHANGE** | TXN-01, SHD-01, TLS-04/05, *EDT-01* | T-17–T-20, T-47–T-49, T-78, T-83a, T-83b | MS-CHANGE | T-17 `DONE`; TLS-04 mechanism present in `transaction.py`; T-18/T-19/T-20 production mechanisms wired; `str_replace` folds into T-47; T-83 caller admission remains separate |
+| **DIALECT** | WRN-01, TLS-02 | T-21–T-22, T-50 | — | T-21–T-22 `DONE`. T-50 `[PROPOSAL]`. Does not close MS-CHANGE. |
+| **CONTROL** | CMX-07, W-092-F5, CMX-01, EXP-01, *PRF-01*, ALG-03 | T-26–T-27, T-51–T-52, T-79, T-80, T-89, T-92–T-95, T-97 | MS-CONTROL | Wave 2 has 0 accepted tasks. T-79/T-89/T-92–T-95 are focused-green candidates (31 tests), blocked by five boundary violations, four related-surface failures, incomplete full verification and absent live evidence. Next: boundary repair → related-surface repair → T-97 (deferred this pass) → live L0 → T-51/T-52 → T-26 freeze → T-27. **T-80** is post-control. |
+| **INSTRUMENT (product)** | INS-01, BRG-01, DLG-01 | T-84–T-88, T-90, T-91, T-97 | MS-TRUTH → MS-CONTROL | Distinct subject from the `CLOSED` MS-INSTRUMENT (benchmark harness). Precondition of every `LIVE-*` row |
+| **COMPARISON** | ARM-01 | T-96 | MS-CONTROL → MS-SENIOR | `PROPOSED` (Route L). No arm claim is authorized before MS-CONTROL closes |
 | **META** | MEM-03 | T-28 | MS-META | `[PROPOSAL]` |
 | **SPECIALIST** | CMX-06, W-092-F6 | T-29–T-30, T-53 | MS-SPECIALIST | `[PROPOSAL]` |
-| **CAMPAIGN** | OCT-01…04, HYD-01/02 | T-31, T-54–T-55, T-34 | MS-CAMPAIGN / MS-HYDRA | `[PROPOSAL]`; director is runtime client |
+| **CAMPAIGN** | OCT-01…04, HYD-01/02, *DIR-01* | T-31, T-54–T-55, T-34 | MS-CAMPAIGN / MS-HYDRA | `DIR-01` ≡ **OCT-03**; director is a runtime client with zero mutating tools |
 | **MEMORY** | MEM-01, MEM-04 | T-32, T-56–T-57 | MS-MEMORY | `[PROPOSAL]` product wiring; ADR-0100 |
 | **OFFICIAL** | REL-03, SWE-P5 | T-33, T-58 | MS-OFFICIAL | G-3; local ≠ official |
 | **LATTICE** | SUB-01 (live kernel) | T-35, T-64 | — | TCB / boundaries / I-7 AST ban |
 | **CLI** | TUI-01 (related) | T-59–T-60 | — | Facade stays thin |
 | **PACKS** | CMX-01, CMX-04 | T-61–T-63 | — | Task-class policy; classifier; bypass |
-| **DOCS** | DOC-* | T-67–T-68 | — | Promote landed contracts; link repair |
+| **DOCS** | DOC-* | T-67–T-68 | — | T-68: this Dev C pass. T-67 after merges. |
 | **MUTATION** | VER-02, TLS-06 | T-39 | — | `[PROPOSAL]` optional ≥ 0.80 |
 
 ### v2 ID → T-id aliases (not a second DAG)
@@ -231,14 +275,25 @@ Team capacity is chosen later. `requires:` edges live on tasks. This index maps 
 | `CMX-11` | T-14–T-20 cluster | |
 | `W-092-F2` | MS-TRUTH | See milestones appendix |
 | `OCT-01` / `OCT-02` | T-54 | Keep existing OCT rows above |
+| Draft `SET-01` | T-04/T-05/T-07 + T-18/T-19/T-20 | Not a package. TRUTH + CHANGE settlement half. |
+| Draft `EDT-01` | T-47 (+ T-17 `DONE`, TLS-04/05) | Not a package. `str_replace` is a T-47 strategy. |
+| Draft `PRF-01` | **CMX-01** | Not a package. Same product divergence, already `REOPENED`. |
+| Draft `DIR-01` | **OCT-03** + T-31/T-54 | Not a package. Keep the OCT-* rows in §2.10 authoritative. |
+| Draft `HAR-01` | T-69–T-74 | **New package.** Precondition of CMX-09. |
+| Draft `IDX-01` | T-75–T-77 | **New package.** Narrows T-46 to optional query-local ranking in pack policy. |
+| `INS-01` | T-84, T-85, T-89, T-97 | **New package** (GPT Blockers B/E, C-18). Product instrument; distinct subject from `MS-INSTRUMENT`'s benchmark harness. |
+| `DLG-01` | T-86, T-90 | **New package** (GPT Blocker C). Extends T-21/T-22 and T-82; does not replace them. |
+| `BRG-01` | T-87, T-88, T-91 | **New package** (GPT Blocker D/F). `tools/llama_cpp` only; no package-tree collision. |
+| `EXP-01` | T-92–T-95 | **New package** (GPT PR-2, §9). Consumes T-51/T-52; does not replace them. |
+| `ARM-01` | T-96 | **New package, `PROPOSED`** (GPT PR-3). Gated on a closed MS-CONTROL and a landed EXP-01. |
 
 Existing CMX-01…CMX-11, REL-*, OCT-*, TLS-*, MEM-*, TUI-01, SUB-* rows in §2 remain authoritative for lifecycle state. Do not restamp **SUB-01**.
 
 ---
 
-## 5. Decision register (from A §32)
+## 5. Decision register
 
-## 32. Decision register
+Score bands: see [`milestones.md`](milestones.md).
 
 ### D-01
 
@@ -370,11 +425,33 @@ Which agent-computer interface changes yield more lift than prompt changes?
 
 ---
 
-## 7. Risks (from A §27 and B §19)
+## 7. Risks
 
-### From A
+Keep A R-01–R-12 and B extras in this section. Score bands: see [`milestones.md`](milestones.md).
 
-## 27. Risks and mitigations
+### Kill list and non-goals
+
+- No second `EpisodeEngine`; no Forge/Chimera in product scores; no swarm or topology as a DEFAULT (D-02, T-23).
+- No new provider abstraction or local inference plane.
+- No kernel coding semantics, AST machinery, memory, or learning layers.
+- No broad UI work before truthful headless JSON.
+- No leaderboard mixing live results, replay, provider errors, or zero-call rows.
+- No claim that grammar constraints or min-p remove semantic hallucination.
+- NO PROMPT-REWRITE QUARTER. AHE-class evidence: tools/middleware/memory beat system prompts. Do not spend a quarter on `system-prompt.txt`. This is the most easily violated item on the list because prompt edits feel productive and are cheap to ship.
+- No shrinking of `ADMISSION_GATE_EXEMPT` without the RF-25 successor baseline.
+- No official SWE/DeepSWE claim from local runs (G-3).
+- `ORCH-*` packs, the SONNET four paradigms, and any `RATIFIED` badge in `future_improvements_sota_harness_2808.md` are NOT HEAD.
+
+### Coding-P0 acceptance predicate
+
+The first real product requires all of the following:
+
+1. A fresh repository changed through the public CLI, with unique durable run identity and an inspectable ledger.
+2. The local model executes declared canonical tools or emits a typed honest protocol failure — prose cannot become an effect or a success.
+3. `completed` binds current mutation, postimage, tamper evaluation, and a passing frozen EXTERNAL oracle.
+4. P0-FIB, P0-CSV, P0-BUG pass in fresh workspaces, or failure is honest and trajectory-backed.
+5. A frozen 12-task canary retains model/server/task identity, routes, tokens, turns, latency, costs/missingness, false-completion rate, trajectories.
+6. Replay can reproduce decisions without being presented as fresh model skill.
 
 ### R-01: architecture sprawl
 
@@ -487,4 +564,4 @@ Mitigation: reverse-route every production change and regenerate knowledge proje
 * **Flat task tree**: [`tasks.md`](tasks.md)
 * **Feature delta specification**: [`spec.md`](spec.md)
 * **Technical handbook**: [`technical.md`](technical.md)
-* **Normative System Specification**: [`../SPEC.md`](../SPEC.md)
+* **Normative System Specification & Delta**: [`spec.md`](spec.md)

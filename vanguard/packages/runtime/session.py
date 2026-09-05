@@ -7,6 +7,7 @@ compose a harness and it does not write envelopes except through
 
 from __future__ import annotations
 
+import ast
 import json
 import re
 from dataclasses import dataclass, replace
@@ -19,19 +20,29 @@ from ..agency import EpisodeEngine, RunTermination
 from ..agency.episode import ProtocolRecoveryState
 from ..agency.episode.admission_gate import AdmissionGate, AdmissionVerdict, VerificationReceipt
 from ..agency.context import (
+    INDEX_PORT_UNBOUND,
     CompetencePriorRecorder,
     CompiledContext,
     ContextCompiler,
+    ContextPacket,
+    ContextPacketError,
     Fragment,
     build_context_packet,
+    validate_completion_epoch,
+    validate_completion_omissions,
+    validate_resume_identity,
 )
+from ..agency.context.distiller import distill_tool_output
+from ..agency.context.compiler import CONTEXT_POLICY_VERSION
 from ..agency.manifests.discovery import WorkspaceDiscovery
 from ..agency.provenance import NullProvenanceSink, ProvenanceSink
 from ..domain.canonicalisation.digest import digest_of
+from ..domain.workspace_epoch import WorkspaceEpoch
 from ..domain.ledger.agent_view import AgentView, fold_agent_view
 from ..domain.ledger.progress import ConfidenceRecord, ProgressView, fold_progress
 from ..domain.ledger.reducer import compute_state_digest, reconstruct_state
 from ..domain.ledger.state import LedgerState
+from ..kernel.attenuation import RISK_ORDER
 from ..kernel import (
     EffectRequest,
     AdapterOutcome,
@@ -75,8 +86,10 @@ from .evidence_capture import capture_evidence as _capture_evidence_pure
 from .prompt_assembler import PromptAssembler
 from .protocol_pipeline import default_protocol_pipeline
 from .response_handler import ResponseHandler
+from .task_state import fold_task_state
 from .telemetry import RunTelemetry, compute_run_telemetry, instrument_error as _telemetry_instrument_error
 from .trajectory import DelayedTerminalEmitter, assemble_trajectory
+from .governance.tamper_shield import TestTamperShield
 from .governance.approvals import (
     ApprovalAuthority,
     ApprovalDecision,
@@ -108,33 +121,167 @@ def _workspace_access_of(run_plan: Any) -> str:
     return getattr(requested, "workspace_access", None) or "workspace-write"
 
 
-#: Harnesses whose terminal ``finish`` must pass the pack completion policy
-#: (W-092-2: completion admitted only by fresh applicable verification).
-#: ``vg-code-default`` is deliberately NOT gated: closed M-2 acceptance
-#: falsifiers (e.g. RF-25 cold continuation) compose bare finishes through it,
-#: and gating it would reopen frozen milestone evidence.  Widening or shrinking
-#: this set is a governance decision to be recorded in
-#: ``docs/execution/active.md`` -- it is pinned by
-#: ``test/falsifiers/test_completion_gate_scope.py``, never changed silently.
-ADMISSION_GATED_HARNESSES = frozenset(
-    {"vg-code-fast", "vg-code-balanced", "vg-code-max", "vg-code-max-v2",
-     "vg-code-max-v2b", "vg-code-max-v3", "vg-herbs", "vg-chimera-v1", "vg-code-chimera"})
+#: Named approval tiers a manifest may declare, mapped onto the kernel risk
+#: ladder as `approval_required_above`. A tier names the highest risk that
+#: still dispatches without asking a human, so `standard` lets the declared
+#: medium `patch.apply` and high `proc.exec` through and still stops anything
+#: `critical`. A manifest may also declare a bare risk name, which passes
+#: through unchanged; anything else is undeclared and fails closed.
+_APPROVAL_TIERS: Mapping[str, str] = {
+    "strict": RISK_ORDER[0],
+    "standard": RISK_ORDER[2],
+    "permissive": RISK_ORDER[-1],
+}
 
-#: Presets deliberately exempt from capability-derived gating. Only shrinks.
-ADMISSION_GATE_EXEMPT = frozenset({"vg-code-default", "vg-code-lex"})
+#: The fail-closed resolution: ask above the weakest risk there is, i.e. ask
+#: about everything the manifest declares beyond a read. A missing, unparsable
+#: or unrecognised approval policy resolves here, never to a wider grant.
+_APPROVAL_FAIL_CLOSED = RISK_ORDER[0]
+
+#: Declared modes that seat a human at an interactive run. Under these, an
+#: interactive session keeps asking about every declared capability: the
+#: descriptor-bound Ed25519 approval flow is what interactive mode is *for*
+#: (`F-08`), and a manifest asking for assistance must not be read as an
+#: instruction to stop asking.
+_HUMAN_IN_THE_LOOP_MODES = frozenset({"assisted", "operator", "interactive"})
+
+
+def _declared_approval_policy(harness: Any) -> Mapping[str, Any] | None:
+    """The `components.approval_policy` the manifest already froze, or `None`.
+
+    Composition resolves the component to its text and folds it into the
+    frozen composition identity, so the policy is reachable here without a
+    second policy artifact and without widening `Harness` (T-70).
+    """
+    frozen = getattr(harness, "frozen", None)
+    declared = (getattr(frozen, "identity", None) or {}).get("approvalPolicy")
+    if isinstance(declared, Mapping):
+        return declared
+    if not isinstance(declared, str) or not declared.strip():
+        return None
+    try:
+        parsed = json.loads(declared)
+    except (TypeError, ValueError):
+        return None
+    return parsed if isinstance(parsed, Mapping) else None
+
+
+def resolve_approval_threshold(
+    harness: Any,
+    *,
+    interactive: bool,
+) -> str:
+    """Resolve `approval_required_above` from the manifest's declared policy.
+
+    The threshold used to be a literal in this file, so every run asked about
+    the two verbs a coding preset exists to use, and in benchmark mode
+    `StandardPolicy` turns an ask into `DENIED_ASK_FAIL_CLOSED` (`K-17`,
+    `F-07`) -- the product path could not patch or execute at all. The manifest
+    already declares the answer; read it rather than a second artifact (T-70).
+
+    The declared `threshold` governs the benchmark, where there is no human to
+    raise anything to. `mode` governs the interactive run: a pack asking to be
+    `assisted` keeps asking, so nothing here weakens `F-08` or the
+    descriptor-bound approval flow it exists to drive. Only a pack that
+    declares neither assistance nor an operator reaches `escalate_on`, which
+    names the verbs that must still suspend for a person.
+    """
+    policy = _declared_approval_policy(harness)
+    if policy is None:
+        return _APPROVAL_FAIL_CLOSED
+    declared = policy.get("threshold")
+    if not isinstance(declared, str):
+        return _APPROVAL_FAIL_CLOSED
+    tier = declared.strip().lower()
+    threshold = _APPROVAL_TIERS.get(tier, tier if tier in RISK_ORDER else None)
+    if threshold is None:
+        return _APPROVAL_FAIL_CLOSED
+    if not interactive:
+        return threshold
+    mode = policy.get("mode")
+    if not isinstance(mode, str) or mode.strip().lower() in _HUMAN_IN_THE_LOOP_MODES:
+        return _APPROVAL_FAIL_CLOSED
+    risk_of = getattr(harness, "risk_of", None) or {}
+    escalate_on = policy.get("escalate_on")
+    if not isinstance(escalate_on, Sequence) or isinstance(escalate_on, (str, bytes)):
+        return threshold
+    for verb in escalate_on:
+        risk = risk_of.get(verb) if isinstance(verb, str) else None
+        if not isinstance(risk, str) or risk not in RISK_ORDER:
+            continue
+        if RISK_ORDER.index(risk) <= RISK_ORDER.index(threshold):
+            threshold = RISK_ORDER[max(0, RISK_ORDER.index(risk) - 1)]
+    return threshold
+
+
+#: Interpreter flags that carry program text in the argv itself rather than
+#: naming a program to run. `python3 -c 'print("OK")'` is the agent's own
+#: prose, and `python3 -c 'print("3 tests passed")'` is the agent's own oracle;
+#: neither is a subject anything can be verified against (T-07).
+_INLINE_PROGRAM_FLAGS = frozenset({"-c", "-e", "--command", "--eval"})
+
+#: Executables whose invocation names a real test runner.
+_TEST_RUNNERS = frozenset({"pytest", "py.test", "unittest", "nose2", "tox"})
+
+
+@dataclass(frozen=True, slots=True)
+class VerificationSubject:
+    """What a verification receipt is a receipt *of* (T-07).
+
+    A command string alone cannot identify a subject: the same argv over a
+    different postimage, or against a different task, verified something else.
+    The digest therefore binds all three -- argv, the workspace it ran over,
+    and the task it was run for -- so a receipt cannot be carried across a
+    write or borrowed from another task and still match.
+    """
+
+    argv: tuple[str, ...]
+    workspace_digest: str
+    task_digest: str
+
+    def digest(self) -> str:
+        return digest_of({
+            "argv": list(self.argv),
+            "workspaceDigest": self.workspace_digest,
+            "taskDigest": self.task_digest,
+        })
+
+
+def verification_argv(args: Mapping[str, Any]) -> tuple[str, ...] | None:
+    """The typed argv of a verification command, or `None` if there is none.
+
+    A verification subject is a named runner invocation. Inline program text is
+    rejected outright: a model that can write the program can write its output,
+    so `python3 -c 'print("OK")'` is not verification, and neither is the same
+    one-liner with the word "test" inside the string it prints.
+    """
+    argv = args.get("argv", args.get("command", ()))
+    if isinstance(argv, str) or not isinstance(argv, Sequence) or not argv:
+        return None
+    tokens = tuple(str(item) for item in argv)
+    if any(token in _INLINE_PROGRAM_FLAGS for token in tokens):
+        return None
+    executable = tokens[0].rsplit("/", 1)[-1]
+    if executable in _TEST_RUNNERS:
+        return tokens
+    if any("test" in token.lower() for token in tokens):
+        return tokens
+    return None
 
 
 def admission_required(harness: Any) -> bool:
-    """Gate completion by declared capability, not by preset name.
+    """Gate completion by declared capability, and by nothing else (T-04/T-05).
 
-    A name allowlist meant every new preset shipped ungated until someone
-    remembered to edit the set, so a bare `finish` with zero effects scored as
-    a completed run. Any harness granted `patch.apply` has a completion claim
-    that must be admitted against real evidence.
+    This function is the single gating source of truth. There is no name
+    allowlist beside it and no exemption set behind it: `ADMISSION_GATED_HARNESSES`
+    (never read) and `ADMISSION_GATE_EXEMPT` (which bought `vg-code-default` and
+    `vg-code-lex` a permanent product-default bypass) are both gone, because two
+    name sets and a predicate could disagree and the names silently won.
+
+    Any harness granted `patch.apply` has a completion claim that must be
+    admitted against real evidence; a preset that ships tomorrow is gated by
+    what it declares, not by whether someone remembered to edit a set.
     """
-    name = getattr(harness, "harness", "")
-    if name in ADMISSION_GATE_EXEMPT:
-        return False
     return "patch.apply" in set(getattr(harness, "verbs", ()) or ())
 
 _CONTROLLER_BUDGET_KEYS: Mapping[str, str] = {
@@ -241,6 +388,7 @@ class _LayeredOperator:
             recorder=recorder,
             provenance=provenance,
             memory=memory,
+            task_state=task.resume_state,
         )
         self._handler = ResponseHandler(
             model=model,
@@ -250,6 +398,9 @@ class _LayeredOperator:
         self.contexts: list[Mapping[str, Any]] = []
         self._artifacts = artifacts
         self._meta_controller = meta_controller
+
+    def set_task_state(self, state: Mapping[str, Any] | None) -> None:
+        self._assembler.set_task_state(state)
 
     @property
     def _compiler(self) -> ContextCompiler:
@@ -360,18 +511,67 @@ def _route_of(model: Any) -> Mapping[str, Any]:
     }
 
 
-def _observed_test_count(detail: str) -> int:
-    """Extract a conservative test count from mediated verifier output.
+@dataclass(frozen=True, slots=True)
+class ObservedTestCounts:
+    """Parsed runner counts. None means unknown, never invented."""
 
-    Exit status alone is not evidence that a test was collected or executed.
-    Unknown/unparseable output intentionally returns zero so completion remains
-    fail-closed.  The parser accepts the stable summaries emitted by unittest
-    and pytest without coupling the runtime to either framework.
-    """
-    for pattern in (r"Ran\s+(\d+)\s+tests?\b", r"collected\s+(\d+)\s+items?\b"):
-        match = re.search(pattern, detail, flags=re.IGNORECASE)
-        if match:
-            return max(0, int(match.group(1)))
+    runner: str = "unknown"
+    collected: int | None = None
+    executed: int | None = None
+    passed: int | None = None
+    failed: int | None = None
+    skipped: int | None = None
+
+
+def parse_observed_test_counts(detail: str) -> ObservedTestCounts:
+    """Parse unittest/pytest summaries without inventing a runner or a count."""
+    text = detail or ""
+    ran = re.search(r"Ran\s+(\d+)\s+tests?\b", text, flags=re.IGNORECASE)
+    collected_m = re.search(r"collected\s+(\d+)\s+items?\b", text, flags=re.IGNORECASE)
+    passed_m = re.search(r"(\d+)\s+passed\b", text, flags=re.IGNORECASE)
+    failed_m = re.search(r"(\d+)\s+failed\b", text, flags=re.IGNORECASE)
+    skipped_m = re.search(r"(\d+)\s+skipped\b", text, flags=re.IGNORECASE)
+    if ran:
+        executed = max(0, int(ran.group(1)))
+        failed = skipped = passed = None
+        fail_block = re.search(r"FAILED\s*\(([^)]*)\)", text, flags=re.IGNORECASE)
+        if fail_block:
+            parts = fail_block.group(1)
+            def _named(name: str) -> int:
+                match = re.search(rf"{name}\s*=\s*(\d+)", parts, flags=re.IGNORECASE)
+                return int(match.group(1)) if match else 0
+            failed = _named("failures") + _named("errors")
+            skipped = _named("skipped")
+            passed = max(0, executed - failed - skipped)
+        elif re.search(r"\bOK\b", text):
+            passed, failed, skipped = executed, 0, 0
+        return ObservedTestCounts(
+            runner="unittest", collected=executed, executed=executed,
+            passed=passed, failed=failed, skipped=skipped,
+        )
+    if collected_m or passed_m or failed_m or skipped_m:
+        collected = int(collected_m.group(1)) if collected_m else None
+        passed = int(passed_m.group(1)) if passed_m else None
+        failed = int(failed_m.group(1)) if failed_m else None
+        skipped = int(skipped_m.group(1)) if skipped_m else None
+        known = [item for item in (passed, failed, skipped) if item is not None]
+        executed = sum(known) if known else collected
+        if passed == 0 and failed is None and skipped is None:
+            executed = 0
+        return ObservedTestCounts(
+            runner="pytest", collected=collected, executed=executed,
+            passed=passed, failed=failed, skipped=skipped,
+        )
+    return ObservedTestCounts()
+
+
+def _observed_test_count(detail: str) -> int:
+    """Conservative executed count. Unknown runners stay 0 (fail-closed)."""
+    counts = parse_observed_test_counts(detail)
+    if counts.executed is not None:
+        return max(0, counts.executed)
+    if counts.collected is not None:
+        return max(0, counts.collected)
     return 0
 
 
@@ -504,12 +704,23 @@ class HarnessSession:
         self._completion_inspected_files: set[str] = set()
         self._completion_verification: VerificationReceipt | None = None
         self._completion_verification_command: str | None = None
+        #: T-07. The typed subject the current verification receipt is bound
+        #: to; re-derived against live digests at admission so a receipt
+        #: cannot survive the write that invalidated it.
+        self._completion_verification_subject: VerificationSubject | None = None
         self._completion_redundant_verifications = 0
         self._completion_allowed_tools: frozenset[str] | None = None
+        self._active_episode_engine: EpisodeEngine | None = None
+        self._completion_oracle_failed_on_stub = False
+        self._completion_greenfield_control: Mapping[str, Any] | None = None
+        #: `I-SHD` / T-18. Frozen below, once the index this pack declared is
+        #: bound; `None` means the pack declared no oracle enumeration source.
+        self._tamper_shield: TestTamperShield | None = None
 
         repo = Path(task.repo_path)
         self.repo = repo
         self._completion_scaffold_baseline = self._empty_workspace_baseline()
+        self.context_packet: ContextPacket | None = None
         self.ledger = LedgerEmitter(
             ports.store,
             episode_id=task.episode_id,
@@ -570,18 +781,26 @@ class HarnessSession:
                 "an IndexPort was supplied but the manifest declares no index "
                 "component; bind it in the pack or do not pass it")
 
+        # `I-SHD` / T-18. Freeze the enumerated oracle set now, at turn 0,
+        # before the operator has seen the workspace -- a shield frozen after
+        # the first write would bless whatever the agent had already done to
+        # the tests. Enumeration is `IndexPort.tests()`; a pack that declares
+        # no index has no enumeration source, and its packet already carries
+        # `INDEX_PORT_UNBOUND` as an explicit omission rather than an empty
+        # shield that would silently admit every tampered oracle.
+        self._tamper_shield = self._freeze_tamper_shield()
+
         classifier = StandardClassifier([
             HeldAuthority(task.principal, frozenset(harness.verbs),
                           _ceiling_resources(harness), max_depth=4)])
         self.policy = _SwappablePolicy(StandardPolicy(
             parent_scope=self.scope,
             mode=Mode.INTERACTIVE if ports.interactive else Mode.BENCHMARK,
-            # Every non-`low` capability the manifest declares is descriptor-
-            # bound to a human. The threshold is one number and the manifest
-            # supplies the risks it applies to.
-            # TODO(S8-B-04): this literal is the last composition value the
-            # manifest does not own. It is replaced by the approval-threshold
-            # manifest component; Lane B lands that, not this sprint.
+            # The threshold is one number and the manifest supplies both it
+            # and the risks it applies to (`S8-B-04`, closed by T-70): the
+            # composition value is read from the pack's declared
+            # `components.approval_policy`, not hardcoded here. A pack that
+            # declares nothing usable fails closed to the strictest rung.
             # A sealed child scope is the already-approved delegation grant:
             # the parent approval covers the complete attenuated request, and
             # the child cannot widen that sealed membership. Requiring a
@@ -589,15 +808,22 @@ class HarnessSession:
             # high-risk role fail in benchmark mode, despite the parent having
             # explicitly authorized the bounded child plan. Unsealed runs
             # retain the normal benchmark/interactive approval rule.
-            approval_required_above=(None if self.scope.sealed else "low"),
+            approval_required_above=(
+                None if self.scope.sealed
+                else resolve_approval_threshold(
+                    harness, interactive=bool(ports.interactive))),
             risk_of=harness.risk_of,
         ))
 
         # One kernel per run (`S8-A-01` DoD). Everything that used to vary
         # between the three constructions now varies behind `_SwappablePolicy`.
-        governor = Governor(harness.budget)
+        governor = Governor({
+            key: amount for key, amount in harness.budget.items()
+            if key in ADDITIVE_DIMENSIONS
+        })
         for dim, amt in self.ledger_state().cumulative_budget_debits.items():
-            governor._spent[dim] = amt
+            if dim in governor._spent:
+                governor._spent[dim] = amt
 
         self.kernel = Kernel(
             adapters=self.adapters, policy=self.policy, classifier=classifier,
@@ -616,70 +842,19 @@ class HarnessSession:
                     for ref in task.artifact_refs))
         if discovered_env:
             env_parts.append(discovered_env)
-        if task.resume_state:
+        # Repository intelligence is dynamic, bounded context. Never put a
+        # complete flat index into the immutable environment prefix: large
+        # workspaces would consume the compaction budget before the first
+        # edit. The packet retains explicit omissions and provenance while
+        # the compiler receives only a compact orientation summary.
+        # IndexPort unbound/down still compiles: documented fallback, not a
+        # silent empty map (T-45).
+        orientation = self._bind_context_packet()
+        if orientation is not None:
             env_parts.append(
-                "=== Durable Coding Task State ===\n"
-                + json.dumps(dict(task.resume_state), sort_keys=True, default=str))
-        if self.index is not None:
-            # Repository intelligence is dynamic, bounded context. Never put a
-            # complete flat index into the immutable environment prefix: large
-            # workspaces would consume the compaction budget before the first
-            # edit. The packet retains explicit omissions and provenance while
-            # the compiler receives only a compact orientation summary.
-            mapped = self.index.repo_map(token_budget=4000)
-            if mapped.ok and mapped.value is not None:
-                repo_map = mapped.value
-                selected: list[Mapping[str, Any]] = [
-                    {"kind": "file", "path": path, "estimated_tokens": 4}
-                    for path in repo_map.files
-                ]
-                selected.extend(
-                    {"kind": "symbol", "identity": f"{item.path}:{item.line}:{item.name}",
-                     "path": item.path, "name": item.name, "line": item.line,
-                     "symbolKind": item.kind,
-                     "estimated_tokens": 8}
-                    for item in repo_map.symbols
-                )
-                selected.extend(
-                    {"kind": "dependency", "identity": f"{item.source}->{item.target}",
-                     "source": item.source, "target": item.target,
-                     "estimated_tokens": 6}
-                    for item in repo_map.dependencies
-                )
-                selected.extend(
-                    {"kind": "test", "path": item.test_path,
-                     "source": item.source_path, "estimated_tokens": 5}
-                    for item in repo_map.tests
-                )
-                packet = build_context_packet(
-                    task_digest=digest_of({"runId": task.run_id, "brief": task.brief}),
-                    repository_snapshot=repo_map.source_revision,
-                    provider=repo_map.adapter_id,
-                    provider_version="1",
-                    query_digest=digest_of({"brief": task.brief}),
-                    budget_tokens=4000,
-                    selected=selected,
-                    index_snapshot_digest=repo_map.source_revision,
-                    reserve_tokens=1000,
-                )
-                orientation = {
-                    "packetDigest": packet.digest(),
-                    "repositorySnapshot": packet.repository_snapshot,
-                    "files": list(packet.files)[:80],
-                    "symbols": [dict(item) for item in packet.symbols[:80]],
-                    "symbolSummary": [
-                        f"{item.get('symbolKind', item.get('kind', 'symbol'))} {item.get('name', '')}:{item.get('line', '')}"
-                        for item in packet.symbols[:80]
-                    ],
-                    "dependencies": [dict(item) for item in packet.dependencies[:80]],
-                    "tests": list(packet.tests)[:80],
-                    "omissions": list(packet.omissions),
-                    "truncated": bool(repo_map.truncated or packet.omissions),
-                }
-                env_parts.append(
-                    "=== Workspace Repository Map ===\n"
-                    "=== Bounded Repository Context Packet ===\n"
-                    + json.dumps(orientation, sort_keys=True, default=str))
+                "=== Workspace Repository Map ===\n"
+                "=== Bounded Repository Context Packet ===\n"
+                + json.dumps(orientation, sort_keys=True, default=str))
         env_text = "\n\n".join(part for part in env_parts if part)
         compiler = ContextCompiler(
             system_core=harness.system_core,
@@ -979,6 +1154,20 @@ class HarnessSession:
 
     # -- the lifecycle ----------------------------------------------------
 
+    def _budget_attenuation_fields(self) -> dict[str, Any]:
+        """Record overrides separately from the declared catalog ceiling.
+
+        ``budgetCeiling`` is the catalog (or manifest policy) identity.
+        ``maxTurns`` is the loop bound that actually fired. When a caller
+        supplies a tighter explicit limit, the difference is named here so
+        the ledger never claims the catalog was rewritten.
+        """
+        declared_turns = self.harness.budget.get("turns")
+        effective_turns = int(self.task.max_turns)
+        if declared_turns is None or int(declared_turns) == effective_turns:
+            return {}
+        return {"budgetAttenuation": {"turns": effective_turns}}
+
     def begin_episode(self) -> None:
         """Durably open a new episode before registry activation begins."""
         if self.ledger_state().episode.status != "pending":
@@ -1003,8 +1192,16 @@ class HarnessSession:
                     self.run_plan, "preregistration_digest", ""),
                 "maxTurns": int(self.task.max_turns),
                 "interactive": bool(self.ports.interactive),
+                **self._budget_attenuation_fields(),
             },
         ))
+        self.ledger.emit_kind(
+            "GoalDeclared",
+            run_id=self.task.run_id,
+            principal=self.task.principal,
+            episode_id=self.task.episode_id,
+            payload={"goalDigest": digest_of({"brief": self.task.brief})},
+        )
         self._episode_begun_here = True
 
     def run(self) -> RunResult:
@@ -1099,10 +1296,17 @@ class HarnessSession:
                 protocol_decoders=decoders,
                 patch_detector=patch_detector,
                 truncation_detector=truncation_detector,
+                # Raw composition tests and legacy in-process callers may
+                # intentionally omit a pack policy. The strict completion
+                # contract is enabled by the product activation seam, which
+                # supplies the pack-owned policy; this keeps retired low-level
+                # harness helpers from masquerading as product acceptance.
                 completion_admitter=(self._admit_completion
                                      if admission_required(harness)
+                                     and self.ports.completion_policy is not None
                                      else None),
                 completion_allowed_tools=self._completion_allowed_tools)
+            self._active_episode_engine = engine
             outcome = engine.run(
                 episode_id=task.episode_id, run_id=task.run_id,
                 principal=task.principal, brief=task.brief,
@@ -1118,6 +1322,10 @@ class HarnessSession:
             prior_turns = outcome.episode.turns
             prior_recovery_state = outcome.recovery_state
             terminal, detail = outcome.terminal, outcome.episode.detail
+            if (terminal is RunTermination.ABANDONED
+                    and "turn bound" in (detail or "")
+                    and "turns" in self.harness.budget):
+                terminal = RunTermination.BUDGET_EXHAUSTED
             suspended = _suspension(self.calls)
             _record(receipts, self.operator, self.calls)
             if suspended is None:
@@ -1156,7 +1364,11 @@ class HarnessSession:
                 terminal = RunTermination.INSTRUMENT_ERROR
                 detail = f"experience emission failed: {exc}"
 
-        verdict = self._on_terminal(self) if self._on_terminal is not None else self._evaluate()
+        verdict = (
+            self._on_terminal(self)
+            if self._on_terminal is not None
+            else self._evaluate(terminal_status=str(getattr(terminal, "value", terminal)))
+        )
         read_all = ports.store.read(EventRange(episode_id=task.episode_id))
         durable_events = list(read_all.value) if read_all.ok and read_all.value else list(self.ledger.events)
         if delayed.pending is None:
@@ -1283,7 +1495,7 @@ class HarnessSession:
         """
         return _telemetry_instrument_error(self.turns_consumed())
 
-    def _evaluate(self) -> Any:
+    def _evaluate(self, *, terminal_status: str = "") -> Any:
         """`ICD 3` / `M5`: the verdict comes from outside the episode.
 
         `ADR-0076 §5`: a verdict the daemon actually signed and bound is also
@@ -1306,8 +1518,28 @@ class HarnessSession:
         if isinstance(verdict, Verdict):
             record_verdict(
                 self.ledger, run_id=self.task.run_id, principal=self.task.principal,
-                episode_id=self.task.episode_id, verdict=verdict)
+                episode_id=self.task.episode_id, verdict=verdict,
+                task_id=self._current_task_digest(),
+                terminal_status=terminal_status,
+                executed_test_count=(
+                    self._completion_verification.executed_test_count
+                    if self._completion_verification is not None else 0
+                ),
+                oracle_digest=str(
+                    (self.task.preregistration or {}).get("oracle_digest", "")
+                ),
+                verification_subject_digest=(
+                    self._completion_verification.verification_subject_digest
+                    if self._completion_verification is not None else ""
+                ),
+            )
         return verdict
+
+    def _current_task_digest(self) -> str:
+        """The task identity a receipt must be bound to (T-07)."""
+        if self.run_plan is not None:
+            return self.run_plan.task_digest
+        return digest_of({"runId": self.task.run_id, "brief": self.task.brief})
 
     def _workspace_digest(self) -> str:
         snapshot = self.ports.environment.snapshot()
@@ -1315,11 +1547,232 @@ class HarnessSession:
             return snapshot.value.digest
         return ""
 
+    def _epoch_from_repo_map(self, repo_map: Any, *, compiled_at_turn: int) -> WorkspaceEpoch:
+        try:
+            return WorkspaceEpoch(
+                tree_hash=repo_map.tree_hash,
+                index_digest=repo_map.index_digest,
+                source_revision=repo_map.source_revision,
+                compiled_at_turn=compiled_at_turn,
+            )
+        except ValueError as exc:
+            raise ContextPacketError(str(exc)) from exc
+
+    def _compiled_at_turn(self) -> int:
+        packet = self.context_packet
+        if packet is not None and packet.workspace_epoch is not None:
+            return packet.workspace_epoch.compiled_at_turn
+        return 0
+
+    def _epoch_from_environment_snapshot(self, *, compiled_at_turn: int) -> WorkspaceEpoch:
+        """Bind epoch from the environment snapshot. Never invents index symbols."""
+        snapshot_fn = getattr(self.ports.environment, "snapshot", None)
+        if snapshot_fn is None:
+            raise ContextPacketError(
+                "INDEX_UNBOUND: environment snapshot unbound; cannot bind WorkspaceEpoch")
+        try:
+            snapshot = snapshot_fn()
+        except (AttributeError, TypeError, OSError) as exc:
+            raise ContextPacketError(
+                "INDEX_UNBOUND: environment snapshot unbound; cannot bind WorkspaceEpoch"
+            ) from exc
+        digest = ""
+        if getattr(snapshot, "ok", False) and snapshot.value is not None:
+            digest = str(getattr(snapshot.value, "digest", "") or "")
+        if not digest:
+            raise ContextPacketError(
+                "INDEX_UNBOUND: environment snapshot unbound; cannot bind WorkspaceEpoch")
+        try:
+            return WorkspaceEpoch(
+                tree_hash=digest,
+                index_digest=digest_of({"fallback": INDEX_PORT_UNBOUND, "treeHash": digest}),
+                source_revision=digest,
+                compiled_at_turn=compiled_at_turn,
+            )
+        except ValueError as exc:
+            raise ContextPacketError(
+                "INDEX_UNBOUND: environment snapshot unbound; cannot bind WorkspaceEpoch"
+            ) from exc
+
+    def current_workspace_epoch(self) -> WorkspaceEpoch:
+        """Live WorkspaceEpoch. IndexPort down falls back; snapshot unbound fails closed."""
+        turn = self._compiled_at_turn()
+        if self.index is not None:
+            mapped = self.index.repo_map(token_budget=4000)
+            if mapped.ok and mapped.value is not None:
+                return self._epoch_from_repo_map(mapped.value, compiled_at_turn=turn)
+        return self._epoch_from_environment_snapshot(compiled_at_turn=turn)
+
+    def _orientation_view(
+        self,
+        packet: ContextPacket | None,
+        *,
+        fallback_reason: str | None = None,
+    ) -> dict[str, Any]:
+        view: dict[str, Any] = {
+            "packetDigest": packet.digest() if packet is not None else None,
+            "repositorySnapshot": packet.repository_snapshot if packet is not None else "",
+            "files": list(packet.files)[:80] if packet is not None else [],
+            "symbols": [dict(item) for item in packet.symbols[:80]] if packet is not None else [],
+            "symbolSummary": [
+                f"{item.get('symbolKind', item.get('kind', 'symbol'))} {item.get('name', '')}:{item.get('line', '')}"
+                for item in (packet.symbols[:80] if packet is not None else ())
+            ],
+            "dependencies": (
+                [dict(item) for item in packet.dependencies[:80]] if packet is not None else []
+            ),
+            "tests": list(packet.tests)[:80] if packet is not None else [],
+            "omissions": (
+                list(packet.omissions) if packet is not None else [INDEX_PORT_UNBOUND]
+            ),
+            "truncated": bool(packet.truncated) if packet is not None else True,
+            "workspaceEpoch": (
+                packet.workspace_epoch.to_canonical_dict()
+                if packet is not None and packet.workspace_epoch is not None else None
+            ),
+        }
+        if fallback_reason is not None:
+            view["fallbackReason"] = fallback_reason
+        return view
+
+    def _bind_no_index_fallback(self, cause: str) -> Mapping[str, Any]:
+        """Documented no-index packet: empty symbols, explicit omission, epoch or fail-closed."""
+        reason = f"INDEX_UNBOUND: {cause}"
+        try:
+            epoch = self._epoch_from_environment_snapshot(
+                compiled_at_turn=self.turns_consumed())
+        except ContextPacketError:
+            self.context_packet = None
+            return self._orientation_view(None, fallback_reason=reason)
+        selection_policy_identity = {
+            "policyId": "agency.context-compiler/default",
+            "policyVersion": CONTEXT_POLICY_VERSION,
+        }
+        packet = build_context_packet(
+            task_digest=digest_of({"runId": self.task.run_id, "brief": self.task.brief}),
+            repository_snapshot=epoch.source_revision,
+            provider="index-unbound-fallback",
+            provider_version="1",
+            query_digest=digest_of({"brief": self.task.brief}),
+            budget_tokens=4000,
+            selected=(),
+            index_snapshot_digest=epoch.index_digest,
+            reserve_tokens=1000,
+            repository_identity=epoch.source_revision,
+            selection_policy_identity=selection_policy_identity,
+            workspace_epoch=epoch,
+            require_epoch=True,
+            map_truncated=True,
+            extra_omissions=(INDEX_PORT_UNBOUND,),
+        )
+        self.context_packet = packet
+        return self._orientation_view(packet, fallback_reason=reason)
+
+    def _bind_context_packet(self) -> Mapping[str, Any] | None:
+        """Compile a product packet bound to WorkspaceEpoch. Fallback if the map is unbound."""
+        if self.index is None:
+            return self._bind_no_index_fallback("IndexPort unbound")
+        mapped = self.index.repo_map(token_budget=4000)
+        if not mapped.ok or mapped.value is None:
+            cause = mapped.error.message if mapped.error is not None else "IndexPort snapshot unbound"
+            return self._bind_no_index_fallback(cause)
+        repo_map = mapped.value
+        try:
+            epoch = self._epoch_from_repo_map(repo_map, compiled_at_turn=self.turns_consumed())
+        except ContextPacketError as exc:
+            return self._bind_no_index_fallback(str(exc))
+        selected: list[Mapping[str, Any]] = [
+            {"kind": "file", "path": path, "estimated_tokens": 4}
+            for path in repo_map.files
+        ]
+        selected.extend(
+            {"kind": "symbol", "identity": f"{item.path}:{item.line}:{item.name}",
+             "path": item.path, "name": item.name, "line": item.line,
+             "symbolKind": item.kind,
+             "estimated_tokens": 8}
+            for item in repo_map.symbols
+        )
+        selected.extend(
+            {"kind": "dependency", "identity": f"{item.source}->{item.target}",
+             "source": item.source, "target": item.target,
+             "estimated_tokens": 6}
+            for item in repo_map.dependencies
+        )
+        selected.extend(
+            {"kind": "test", "path": item.test_path,
+             "source": item.source_path, "estimated_tokens": 5}
+            for item in repo_map.tests
+        )
+        selection_policy_identity = {
+            "policyId": "agency.context-compiler/default",
+            "policyVersion": CONTEXT_POLICY_VERSION,
+        }
+        packet = build_context_packet(
+            task_digest=digest_of({"runId": self.task.run_id, "brief": self.task.brief}),
+            repository_snapshot=repo_map.source_revision,
+            provider=repo_map.adapter_id,
+            provider_version="1",
+            query_digest=digest_of({"brief": self.task.brief}),
+            budget_tokens=4000,
+            selected=selected,
+            index_snapshot_digest=repo_map.source_revision,
+            reserve_tokens=1000,
+            repository_identity=repo_map.source_revision,
+            selection_policy_identity=selection_policy_identity,
+            workspace_epoch=epoch,
+            require_epoch=True,
+            map_truncated=bool(repo_map.truncated),
+        )
+        prior = self.task.resume_state if isinstance(self.task.resume_state, Mapping) else {}
+        prior_repo = prior.get("repositoryIdentity")
+        prior_policy = prior.get("selectionPolicyIdentity")
+        prior_index = prior.get("indexSnapshotDigest")
+        prior_epoch_raw = prior.get("workspaceEpoch")
+        prior_epoch = (
+            WorkspaceEpoch.from_mapping(prior_epoch_raw)
+            if isinstance(prior_epoch_raw, Mapping) else None
+        )
+        if prior_repo is not None or prior_policy is not None or prior_index is not None:
+            validate_resume_identity(
+                packet,
+                repository_identity=str(prior_repo or packet.repository_identity or ""),
+                index_snapshot_digest=(
+                    str(prior_index) if prior_index is not None
+                    else packet.index_snapshot_digest
+                ),
+                selection_policy_identity=(
+                    dict(prior_policy) if isinstance(prior_policy, Mapping)
+                    else selection_policy_identity
+                ),
+                workspace_epoch=prior_epoch,
+            )
+        self.context_packet = packet
+        return self._orientation_view(packet)
+
+    def _refresh_index_after_write(self) -> bool:
+        """Mediated IndexPort rebuild after a write. Next compile must not see a pre-write map."""
+        if self.index is not None:
+            self.index.index(str(self.repo))
+        self._bind_context_packet()
+        return self.context_packet is not None
+
+    def refresh_context_packet(self) -> ContextPacket:
+        """Recompile after a write. The previous packet cannot admit completed."""
+        if not self._refresh_index_after_write() or self.context_packet is None:
+            raise ContextPacketError(
+                "INDEX_UNBOUND: cannot refresh WorkspaceEpoch; IndexPort snapshot unbound")
+        return self.context_packet
+
     def _observe_completion_dispatch(self, request: EffectRequest, result: Any) -> None:
         """Capture patch and verification facts at the mediated boundary."""
-        if result.failure is not FailurePath.OK or result.outcome is None:
+        if result.outcome is None:
             return
         outcome = result.outcome
+        is_verification = request.action in {"test", "exec", "proc.exec"}
+        # A test runner's non-zero exit is behavioral evidence, not an
+        # unexecuted effect. Other failed effects cannot establish facts.
+        if result.failure is not FailurePath.OK and not is_verification:
+            return
         if request.action in {"read", "search"} or request.action == "fs.read":
             path = request.args.get("path")
             if isinstance(path, str) and path and not path.startswith(("/", "\\")):
@@ -1328,6 +1781,8 @@ class HarnessSession:
             path = request.args.get("path")
             if isinstance(path, str) and path and not path.startswith(("/", "\\")):
                 self._completion_changed_files.add(path.replace("\\", "/"))
+            self._refresh_sigma()
+            self._refresh_index_after_write()
             artifacts = getattr(self, "artifacts", None)
             if (artifacts is not None
                     and "reused durable settled effect" not in str(outcome.detail or "")):
@@ -1337,38 +1792,41 @@ class HarnessSession:
                      "resultDigest": outcome.result_digest},
                     turn=self.turns_consumed(),
                 )
-        if request.action not in {"test", "exec", "proc.exec"}:
+        if not is_verification:
             return
-        argv = request.args.get("argv", request.args.get("command", ()))
-        verification_command = (
-            argv if isinstance(argv, str) else " ".join(str(item) for item in argv)
-        )
-        executable = str(argv[0]) if isinstance(argv, Sequence) and not isinstance(argv, str) and argv else ""
-        is_test = executable.rsplit("/", 1)[-1] in {"pytest", "unittest"} or any(
-            "test" in str(item).lower() for item in (argv if isinstance(argv, Sequence) else (verification_command,)))
-        if not is_test:
+        argv = verification_argv(request.args)
+        if argv is None:
             return
+        verification_command = " ".join(argv)
         detail = str(outcome.detail or "")
         match = re.search(r"\[exit (-?\d+)\]", detail)
         exit_code = int(match.group(1)) if match else (0 if outcome.status == "ok" else 1)
         previous_verification = self._completion_verification
+        # T-07. The receipt is bound to a typed subject, not to a command
+        # string: argv, the postimage it ran over, and the task it ran for.
+        subject = VerificationSubject(
+            argv=argv,
+            workspace_digest=self._workspace_digest(),
+            task_digest=self._current_task_digest(),
+        )
+        self._completion_verification_subject = subject
         self._completion_verification = VerificationReceipt(
             exit_code=exit_code,
             executed_test_count=_observed_test_count(detail),
-            workspace_digest=self._workspace_digest(),
+            workspace_digest=subject.workspace_digest,
             task_digest=(self.run_plan.task_digest if self.run_plan is not None
                          else digest_of({"task": self.task.brief})),
             composition_digest=self.run_plan.composition_digest if self.run_plan is not None else self.harness.composition_digest,
             receipt_digest=outcome.result_digest or "",
             verification_command=verification_command,
-            verification_subject_digest=digest_of({"command": verification_command}),
+            verification_subject_digest=subject.digest(),
         )
         artifacts = getattr(self, "artifacts", None)
         if (artifacts is not None
                 and "reused durable settled effect" not in str(outcome.detail or "")):
             artifacts.capture(
                 "verification_report",
-                {"command": list(argv) if isinstance(argv, Sequence) else [],
+                {"command": list(argv),
                  "exitCode": exit_code,
                  "executedTestCount": self._completion_verification.executed_test_count,
                  "workspaceDigest": self._completion_verification.workspace_digest,
@@ -1376,6 +1834,23 @@ class HarnessSession:
                 turn=self.turns_consumed(),
             )
         self._completion_verification_command = verification_command
+        if (
+            getattr(self, "_completion_scaffold_baseline", False)
+            and exit_code != 0
+            and self._completion_verification.executed_test_count > 0
+            and self._changed_implementation_is_stub()
+        ):
+            self._completion_oracle_failed_on_stub = True
+        if getattr(self, "_completion_scaffold_baseline", False):
+            self._completion_greenfield_control = {
+                "tests_run": self._completion_verification.executed_test_count,
+                "failures": (
+                    self._completion_verification.executed_test_count
+                    if self._completion_oracle_failed_on_stub else 0
+                ),
+                "errors": 0,
+            }
+        self._refresh_sigma()
         if previous_verification is not None and self._completion_verification.passed:
             self._completion_redundant_verifications += 1
             if self._completion_redundant_verifications == 1:
@@ -1394,6 +1869,10 @@ class HarnessSession:
             elif self._completion_redundant_verifications >= 2:
                 self._completion_allowed_tools = frozenset(
                     {"agency.finish", "fs.read", "fs.search"})
+                if getattr(self, "_active_episode_engine", None) is not None:
+                    self._active_episode_engine.restrict_completion_tools(
+                        tuple(sorted(self._completion_allowed_tools))
+                    )
                 note = getattr(self.operator, "note", None)
                 if callable(note):
                     note(
@@ -1407,29 +1886,158 @@ class HarnessSession:
                         evictable=False,
                     )
 
+    def _refresh_sigma(self) -> None:
+        """Recompile L4 from the live fold after a write or verification."""
+        operator = getattr(self, "operator", None)
+        assembler = getattr(operator, "set_task_state", None)
+        if not callable(assembler):
+            return
+        read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
+        events = list(read.value or ()) if getattr(read, "ok", False) else []
+        if self.task.resume_state and not events:
+            assembler(dict(self.task.resume_state))
+            return
+        folded = fold_task_state(events, objective=self.task.brief)
+        assembler(folded.to_canonical_dict())
+
+    def _changed_implementation_is_stub(self) -> bool:
+        """Whether a changed non-test Python implementation is still a stub."""
+        candidates = [
+            self.repo / relative
+            for relative in self._completion_changed_files
+            if "test" not in Path(relative).name.lower()
+            and Path(relative).suffix == ".py"
+        ]
+        for candidate in candidates:
+            try:
+                tree = ast.parse(candidate.read_text(encoding="utf-8"))
+            except (OSError, SyntaxError, UnicodeError):
+                continue
+            for node in ast.walk(tree):
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    body = list(node.body)
+                    if body and all(
+                        isinstance(item, ast.Pass)
+                        or (
+                            isinstance(item, ast.Raise)
+                            and isinstance(item.exc, (ast.Name, ast.Call))
+                            and (
+                                getattr(item.exc, "id", "") == "NotImplementedError"
+                                or getattr(getattr(item.exc, "func", None), "id", "")
+                                == "NotImplementedError"
+                            )
+                        )
+                        for item in body
+                    ):
+                        return True
+        return False
+
+    def _completion_structure_is_valid(self) -> bool:
+        """Check file presence and Python syntax independently of test results."""
+        if not self._completion_changed_files:
+            return False
+        for relative in self._completion_changed_files:
+            candidate = self.repo / relative
+            if not candidate.is_file():
+                return False
+            if candidate.suffix == ".py":
+                try:
+                    ast.parse(candidate.read_text(encoding="utf-8"))
+                except (OSError, SyntaxError, UnicodeError):
+                    return False
+        return True
+
+    def _freeze_tamper_shield(self) -> TestTamperShield | None:
+        """Hash the IndexPort-enumerated oracle set for this workspace (T-18).
+
+        A shield that cannot enumerate is not a shield that saw nothing: the
+        mechanism records `enumeration_failed` and refuses admission, so an
+        index that goes down mid-freeze cannot be mistaken for a clean tree.
+        """
+        if self.index is None:
+            return None
+        try:
+            return TestTamperShield.freeze(self.repo, self.index)
+        except OSError:
+            return TestTamperShield(
+                workspace=self.repo, frozen_test_digests={}, enumeration_failed=True)
+
     def _admit_completion(self, _episode: Any, _proposal: Any) -> AdmissionVerdict:
         """Apply the coding completion contract before reducing ``finish``."""
         policy = self.ports.completion_policy or self._completion_gate
+        packet = self.context_packet
+        if packet is None:
+            return AdmissionVerdict(
+                False,
+                "INDEX_UNBOUND",
+                "ADMISSION GATE REJECTION: IndexPort unbound and WorkspaceEpoch could not bind.",
+            )
+        try:
+            validate_completion_epoch(packet, self.current_workspace_epoch())
+        except ContextPacketError:
+            return AdmissionVerdict(
+                False,
+                "PACKET_EPOCH_STALE",
+                "ADMISSION GATE REJECTION: Context packet WorkspaceEpoch is missing or stale. "
+                "Refresh the packet after the write before issuing completion.",
+            )
+        try:
+            validate_completion_omissions(
+                packet,
+                required=tuple(sorted(self._completion_changed_files)),
+            )
+        except ContextPacketError as exc:
+            return AdmissionVerdict(
+                False,
+                "PACKET_OMISSIONS_INCOMPLETE",
+                "ADMISSION GATE REJECTION: Context packet is truncated or omitted a "
+                f"required file. {exc}",
+            )
+        # `I-SHD` / T-18. The oracle set frozen at turn 0 is re-hashed against
+        # the workspace the completion claim is being made about. An agent that
+        # edited an assertion to make its own verification pass has no
+        # admissible completion, whatever the runner printed.
+        tamper = self._tamper_shield
+        if tamper is not None:
+            evaluated = tamper.evaluate(self.repo)
+            if not evaluated.admissible:
+                return AdmissionVerdict(
+                    False,
+                    evaluated.reason.split(":", 1)[0],
+                    "ADMISSION GATE REJECTION: the frozen test oracle set changed "
+                    f"during this episode ({evaluated.reason}). Restore the "
+                    "enumerated tests and re-verify; tests are the subject of "
+                    "verification, not part of the patch.",
+                )
         verdict = policy.evaluate(
             preset_name=self.harness.harness,
             changed_files=tuple(sorted(self._completion_changed_files)),
             proposal={"kind": "finish"},
             verification=self._completion_verification,
             current_workspace_digest=self._workspace_digest(),
-            current_task_digest=(self.run_plan.task_digest if self.run_plan is not None else digest_of({"runId": self.task.run_id, "brief": self.task.brief})),
+            current_task_digest=self._current_task_digest(),
             current_composition_digest=(self.run_plan.composition_digest if self.run_plan is not None else self.harness.composition_digest),
             current_verification_command=self._completion_verification_command,
+            # T-07. Re-derive the subject from the recorded argv against the
+            # *current* postimage and task, so a receipt whose subject moved
+            # under it reads as foreign rather than as fresh evidence.
             current_verification_subject_digest=(
-                digest_of({"command": self._completion_verification_command})
-                if self._completion_verification_command else None
+                replace(
+                    self._completion_verification_subject,
+                    workspace_digest=self._workspace_digest(),
+                    task_digest=self._current_task_digest(),
+                ).digest()
+                if self._completion_verification_subject is not None else None
             ),
             inspected_files=tuple(sorted(self._completion_inspected_files)),
             task_text=self.task.brief,
             greenfield_evidence={
                 "baseline_recorded": self._completion_scaffold_baseline,
-                "structural_passed": bool(self._completion_verification and self._completion_verification.passed),
+                "structural_passed": self._completion_structure_is_valid(),
                 "smoke_test_created": any("test" in path.lower() for path in self._completion_changed_files),
                 "behavioral_passed": bool(self._completion_verification and self._completion_verification.passed),
+                "oracle_failed_on_stub": self._completion_oracle_failed_on_stub,
+                "control": self._completion_greenfield_control,
             },
         )
         if isinstance(verdict, AdmissionVerdict):
@@ -1480,7 +2088,10 @@ def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any,
     digest = getattr(outcome, "result_digest", None) or ""
     text = f"tool result turn={turn} digest={digest}"
     if detail:
-        text += f"\n{detail}"
+        distilled = distill_tool_output(str(detail))
+        text += f"\n{distilled.compact_text}"
+        if distilled.truncated:
+            text += f"\nfullArtifactDigest={distilled.full_artifact_digest}"
     operator.note(label=f"tool-result-{turn}", source="tool_result", text=text)
     return _span_for(f"tool-result-{turn}", "tool_result")
 

@@ -64,7 +64,7 @@ def _package_version() -> str:
             from vanguard import __version__
             return __version__
         except ImportError:
-            return "0.9.0b1"
+            return "0.9.3"
 
 
 def _http_status_for_code(code: str) -> int:

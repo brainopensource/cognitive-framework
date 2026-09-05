@@ -6,8 +6,8 @@
     "vanguard/clients/*"
   ],
   "scripts": {
-    "vg": "npm --workspace @vanguard/cli run vg --",
-    "aether-tui": "npm --workspace @aether/tui run tui --",
+    "vg": "node bin/vg",
+    "aether-tui": "node bin/aether-tui",
     "build": "npm run build:contracts && npm run build:projections && npm run build:client && npm run build:tui-core && npm run build:ui-web && npm run build:tui && npm run build:desktop && npm run build:desktop-browser && npm run build:lab && npm run build:client-core && npm run build:cli && npm run build:studio && npm run build:studio-browser",
     "build:contracts": "npm --workspace @aether/contracts run build",
     "build:projections": "npm --workspace @aether/projections run build",

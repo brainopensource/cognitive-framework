@@ -1,0 +1,74 @@
+ [STATES AND INVARIANTS]
+- **State**: The current character being processed.
+- **Invariant**: The current state of the parser (e.g., initial state, inside quoted field, inside unquoted field).
+
+[EDGE-CASE TRAPS]
+- Handling of empty content or trailing line breaks.
+- Proper handling of consecutive double quotes within quoted fields.
+- Ensuring that commas within quoted fields do not terminate the field.
+
+[STEP-BY-STEP PSEUDOCODE]
+1. Initialize an empty list to hold the parsed records.
+2. Initialize an empty list to hold the current record's fields.
+3. Initialize a variable to keep track of the current state (e.g., 'initial', 'quoted', 'unquoted').
+4. Iterate over the content using an index `i`.
+5. For each character:
+   - If at the initial state and encountering a double quote, switch to 'quoted' state.
+   - If in 'quoted' state:
+     - If encountering another double quote, append a single double quote to the current field.
+     - If encountering a double quote followed by a comma or newline, switch to 'unquoted' state.
+   - If in 'unquoted' state:
+     - If encountering a comma, append an empty string to the current record and switch to 'initial' state.
+     - If encountering a newline, append the current field to the current record, append the current record to the list of records, and reset the current record and state.
+   - If at the initial state and encountering any other character, append the character to the current field.
+6. After the loop, handle any remaining field or record.
+7. Return the list of records.
+
+[EDGE-CASE TRACE]
+- Empty content: Should return an empty list.
+- Content with trailing line breaks: Should handle them gracefully.
+- Fields with only commas or double quotes: Should result in empty strings.
+
+Here is the conceptual outline:
+
+```
+Initialize:
+- records: list[list[str]] = []
+- current_record: list[str] = []
+- current_field: str = ""
+- state: str = "initial"
+
+Process each character in content:
+- For each character in content:
+  - If state == "initial":
+    - If character == '"':
+      state = "quoted"
+    - Else:
+      current_field += character
+  - If state == "quoted":
+    - If character == '"':
+      current_field += '"'
+    - Else:
+      current_field += character
+      if character == ',' or character == '\n' or character == '\r':
+        current_record.append(current_field)
+        current_field = ""
+        state = "initial"
+  - If state == "unquoted":
+    - If character == '"':
+      state = "quoted"
+    - Else:
+      current_field += character
+      if character == ',' or character == '\n' or character == '\r':
+        current_record.append(current_field)
+        current_field = ""
+        state = "initial"
+
+End of processing:
+- If current_field is not empty:
+  current_record.append(current_field)
+- If current_record is not empty:
+  records.append(current_record)
+
+Return records
+```

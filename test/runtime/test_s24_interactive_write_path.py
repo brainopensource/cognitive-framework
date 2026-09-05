@@ -1,4 +1,4 @@
-"""S24: a write completes under INTERACTIVE, and is still denied under BENCHMARK.
+"""S24: a write completes under INTERACTIVE, and asks nobody under BENCHMARK.
 
 `REQ-TRUST-001`, `K-17`. A coding harness that can never write is not a coding
 harness, and one that writes without a human in INTERACTIVE is not a safe one.
@@ -6,8 +6,12 @@ Both halves are asserted against the real `StandardPolicy` — no mock kernel,
 and no auto-approval in BENCHMARK.
 
 The approver here is a **test operator holding a real Ed25519 key**. It is not
-a bypass: it signs the exact descriptor, and the same run under BENCHMARK gets
-`denied_ask_fail_closed` with no signer in sight.
+a bypass: it signs the exact descriptor, and the pack's declared `mode:
+assisted` is what puts it in the loop at all.
+
+Under BENCHMARK there is no signer, and since T-70 there is no ask either: the
+pack's declared `threshold: standard` covers its own `patch.apply`, so the run
+proceeds without blocking rather than being denied for want of a human.
 """
 
 from __future__ import annotations
@@ -166,31 +170,41 @@ class AWriteCompletesUnderInteractive(unittest.TestCase):
         self.assertIn("ApprovalRequested", kinds)
 
 
-class BenchmarkStillDeniesTheSameVerb(unittest.TestCase):
-    """A-24-03, second half. `K-17`: no human, no privileged write."""
+class BenchmarkAsksNobodyAndWritesAnyway(unittest.TestCase):
+    """A-24-03, second half. Successor to `BenchmarkStillDeniesTheSameVerb`.
 
-    def test_the_patch_never_reaches_the_environment(self) -> None:
+    `K-17` said a benchmark must never block for a human, and the old
+    assertions read that as: the privileged write is denied. That was the
+    hardcoded `approval_required_above` speaking, not the manifest -- a coding
+    preset that cannot write under benchmark cannot be benchmarked at all.
+    Since T-70 the declared `threshold: standard` covers the pack's own
+    `patch.apply`, so the write proceeds *and* no human is ever asked. Both
+    halves are pinned here; `K-17` is upheld by the second, not the first.
+    """
+
+    def test_the_declared_write_reaches_the_environment(self) -> None:
         out = _run([_patch(), finish()], interactive=False,
                    environment=_Environment())
-        self.assertEqual(out["environment"].applied, [],
-                         "BENCHMARK let a privileged write through")
+        self.assertNotEqual(out["environment"].applied, [],
+                            "BENCHMARK denied a write the manifest declared")
 
-    def test_the_denial_is_recorded(self) -> None:
+    def test_the_write_is_recorded_as_authorized_not_denied(self) -> None:
         out = _run([_patch(), finish()], interactive=False,
                    environment=_Environment())
         receipts = {entry.verb: entry.receipt for entry in out["log"].entries}
-        self.assertEqual(receipts.get("patch.apply"), "AuthorizationDenied")
+        self.assertNotEqual(receipts.get("patch.apply"), "AuthorizationDenied")
 
     def test_no_approval_is_requested_without_a_human(self) -> None:
+        """`K-17` proper: the benchmark never blocks, whatever it decides."""
         out = _run([_patch(), finish()], interactive=False,
                    environment=_Environment())
         kinds = [event.kind for event in out["result"].events]
         self.assertNotIn("ApprovalRequested", kinds)
 
-    def test_the_workspace_is_untouched(self) -> None:
+    def test_the_workspace_carries_the_write_it_authorized(self) -> None:
         environment = _Environment()
         _run([_patch(), finish()], interactive=False, environment=environment)
-        self.assertEqual(environment.files["calc.py"], SOURCE)
+        self.assertEqual(environment.files["calc.py"], FIXED_SOURCE)
 
 
 class TheNextTurnSeesTheWrite(unittest.TestCase):

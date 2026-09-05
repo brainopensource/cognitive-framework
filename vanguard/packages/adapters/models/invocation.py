@@ -70,7 +70,19 @@ class ProposalTranslator:
             calls = _lift_fenced_tool_calls(text, tool_schemas)
         if not calls:
             calls = _lift_text_tool_calls(text)
+        if _contains_unparsed_tool_invocation(text):
+            return Result.fail(
+                "PREMATURE_FINISH_REJECTED",
+                "a note contained an invocation-like JSON action that could not "
+                "be validated; refusing to reinterpret it as finish",
+            )
         if not calls:
+            if _declares_finish(tool_schemas):
+                return Result.fail(
+                    "PREMATURE_FINISH_REJECTED",
+                    "the manifest declares an explicit finish tool; a text-only "
+                    "response cannot be promoted to completion",
+                )
             truncated = _unclosed_fence(text, tool_schemas)
             if truncated is not None:
                 return Result.fail(
@@ -84,24 +96,6 @@ class ProposalTranslator:
 
         call = calls[0]
         name = str(call["name"])
-
-        # An explicit completion tool. Under `tool_choice="required"` -- which
-        # the phase ladder sets on every turn -- the model is obliged to emit a
-        # tool call, so the text-only path below that produces a `finish` is
-        # unreachable and a run literally cannot terminate successfully. A
-        # declared completion verb gives the model a way to say "done" inside
-        # the protocol it is being forced to speak.
-        if name in {"finish", "agency.finish"}:
-            raw_args = call.get("arguments") or {}
-            if isinstance(raw_args, str):
-                try:
-                    raw_args = json.loads(raw_args)
-                except (TypeError, ValueError):
-                    raw_args = {}
-            note = ""
-            if isinstance(raw_args, Mapping):
-                note = str(raw_args.get("summary") or raw_args.get("note") or "")
-            return Result.success({"kind": "finish", "note": note or "Task completed."})
 
         declared: dict[str, str] = {}
 
@@ -230,6 +224,16 @@ class ProposalTranslator:
                 "instrument_error",
                 f"{name}: missing required argument(s): {', '.join(missing)}")
 
+        # Explicit completion is a declared tool, never a translator builtin.
+        # Resolve and validate it through the manifest first, then hand the
+        # candidate to agency admission; this branch grants no completion.
+        if action == "agency.finish":
+            finish_schema = schema_of.get(action)
+            error = _finish_arguments_error(finish_schema, args)
+            if error is not None:
+                return Result.fail("instrument_error", f"{name}: {error}")
+            return Result.success({"kind": "finish", "note": args["summary"]})
+
         selector = selector_of.get(action) or _selector_from_schema(
             properties or frozenset(args))
         resource = _bind_resource(selector, args, resource_root)
@@ -345,6 +349,10 @@ def _is_canonical_verb(name: str) -> bool:
 #: ```
 _FENCE = re.compile(r"^[ \t]*```[ \t]*(\S+)([^\n]*)\n(.*?)^[ \t]*```[ \t]*$",
                     re.DOTALL | re.MULTILINE)
+_JSON_FENCE = re.compile(
+    r"^[ \t]*```[ \t]*(?:json)?[ \t]*\n(.*?)^[ \t]*```[ \t]*$",
+    re.DOTALL | re.MULTILINE | re.IGNORECASE,
+)
 _KV = re.compile(r'(\w+)\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|(\S+))')
 
 
@@ -468,6 +476,42 @@ def _lift_text_tool_calls(text: str) -> list[dict[str, Any]]:
     return found[:1]
 
 
+def _contains_unparsed_tool_invocation(text: str) -> bool:
+    """Detect an invocation-like fenced object that recovery could not parse.
+
+    This signal is intentionally narrow. Ordinary prose and source-code fences
+    retain their existing behavior; only JSON-ish fences naming a call field
+    are prevented from silently decaying into an inferred ``finish``.
+    """
+    if not isinstance(text, str) or not text.strip():
+        return False
+    for match in _JSON_FENCE.finditer(text):
+        body = match.group(1)
+        if not re.search(r'["\'](?:action|verb|name)["\']\s*:', body,
+                         re.IGNORECASE):
+            continue
+        try:
+            decoded = json.loads(body)
+        except (TypeError, ValueError):
+            return True
+        if not isinstance(decoded, Mapping) or _tool_object_from_mapping(decoded) is None:
+            return True
+    return False
+
+
+def _declares_finish(tool_schemas: Sequence[Mapping[str, Any]]) -> bool:
+    """Whether the active manifest offers an explicit completion tool."""
+    for schema in tool_schemas:
+        if not isinstance(schema, Mapping):
+            continue
+        function = schema.get("function")
+        source = function if isinstance(function, Mapping) else schema
+        name = source.get("name") if isinstance(source, Mapping) else None
+        if name == "finish" or schema.get("verb") == "agency.finish":
+            return True
+    return False
+
+
 def _tool_object_from_json(raw: str) -> dict[str, Any] | None:
     try:
         obj = json.loads(raw)
@@ -477,7 +521,7 @@ def _tool_object_from_json(raw: str) -> dict[str, Any] | None:
 
 
 def _tool_object_from_mapping(obj: Mapping[str, Any]) -> dict[str, Any] | None:
-    name = obj.get("name") or obj.get("verb")
+    name = obj.get("name") or obj.get("verb") or obj.get("action")
     if not isinstance(name, str) or not name:
         return None
     # Plain JSON in a finish note is not a tool unless it names a verb or
@@ -485,7 +529,13 @@ def _tool_object_from_mapping(obj: Mapping[str, Any]) -> dict[str, Any] | None:
     # `parameters` is the third call spelling small models emit (F-21): it is
     # the key OpenAI's tool *schema* uses for the argument object, and
     # instruction-tuned models copy it into the call itself.
-    has_call_shape = "arguments" in obj or "args" in obj or "parameters" in obj or "verb" in obj
+    has_call_shape = (
+        "arguments" in obj
+        or "args" in obj
+        or "parameters" in obj
+        or "verb" in obj
+        or "action" in obj
+    )
     if not has_call_shape and not _is_canonical_verb(name):
         return None
     if "arguments" in obj:
@@ -496,7 +546,10 @@ def _tool_object_from_mapping(obj: Mapping[str, Any]) -> dict[str, Any] | None:
         arguments = obj.get("parameters")
     else:
         arguments = {key: value for key, value in obj.items()
-                     if key not in {"name", "verb", "id", "arguments", "args", "parameters"}}
+                     if key not in {
+                         "name", "verb", "action", "kind", "note", "id",
+                         "arguments", "args", "parameters",
+                     }}
     if arguments is None:
         arguments = {}
     return {"name": name, "arguments": arguments}
@@ -526,6 +579,29 @@ def _missing_required(args_schema: Any, args: Mapping[str, Any]) -> tuple[str, .
         return ()
     return tuple(str(key) for key in required
                  if str(key) not in args or args.get(str(key)) is None)
+
+
+def _finish_arguments_error(
+    args_schema: Mapping[str, Any] | None,
+    args: Mapping[str, Any],
+) -> str | None:
+    """Validate the declared completion payload before agency sees it."""
+    if not isinstance(args_schema, Mapping) or args_schema.get("type") != "object":
+        return "finish tool must declare an object schema"
+    properties = args_schema.get("properties")
+    if not isinstance(properties, Mapping):
+        return "finish tool must declare properties"
+    summary_schema = properties.get("summary")
+    if not isinstance(summary_schema, Mapping) or summary_schema.get("type") != "string":
+        return "finish tool must declare summary as a string"
+    summary = args.get("summary")
+    if not isinstance(summary, str) or not summary.strip():
+        return "summary must be a non-empty string"
+    if args_schema.get("additionalProperties") is False:
+        unknown = set(args) - {str(key) for key in properties}
+        if unknown:
+            return f"unsupported argument(s): {sorted(unknown)}"
+    return None
 
 
 def _selector_from_schema(properties: frozenset[str]) -> Mapping[str, Any] | None:

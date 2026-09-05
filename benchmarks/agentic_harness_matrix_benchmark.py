@@ -34,8 +34,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from vanguard.packages.runtime.root import Runtime, TaskContext
 from vanguard.packages.ports.event_store import EventRange
+from benchmarks.product_path import PRODUCT_PRESETS, execute_product
 from benchmarks.swe_bench.challenges import CHALLENGES
 
 MANIFEST_ROOT = ROOT / "vanguard" / "packages" / "agency" / "manifests"
@@ -76,40 +76,28 @@ def run_single_harness_task(
         subprocess.run(["git", "commit", "-m", "init"], cwd=repo, env=controlled_environment(os.environ), capture_output=True, check=False)
 
         run_id = f"bench-{harness_name}-{task_name}-{time.perf_counter_ns()}"
-        task = TaskContext(
-            brief=brief,
-            repo_path=repo,
-            run_id=run_id,
-            episode_id=f"episode-{run_id}",
-            max_turns=max_turns,
-        )
 
-        import importlib
-        SqliteEventStore = importlib.import_module("vanguard.packages.adapters.stores.event_store").SqliteEventStore
-        OperatorSigner = importlib.import_module("vanguard.packages.runtime.governance.approvals").OperatorSigner
-
-        db_path = repo / ".vanguard" / "state.sqlite3"
+        db_path = repo / ".vanguard" / "events.sqlite3"
         db_path.parent.mkdir(parents=True, exist_ok=True)
-        store = SqliteEventStore(db_path)
 
         start_t = time.perf_counter()
-        signer = OperatorSigner(b"bench-operator-approval-key-12345")
         try:
-            result = Runtime.execute_profiled(
-                manifest_path,
-                task,
-                profile_id=profile_id,
+            frame = execute_product(
+                workspace=repo,
+                brief=brief,
+                harness=harness_name,
+                preset=PRODUCT_PRESETS.get(harness_name, "balanced"),
                 model=model,
-                store=store,
-                approver=lambda challenge: signer.approve(challenge, reviewer="benchmark-oracle"),
-                approval_key=signer.public_bytes,
+                profile_id=profile_id,
+                run_id=run_id,
+                store_path=db_path,
                 interactive=False,
+                max_turns=max_turns,
             )
             wall_ms = (time.perf_counter() - start_t) * 1000.0
-            terminal = getattr(result, "terminal", None)
-            terminal_val = getattr(terminal, "value", str(terminal)).lower()
+            receipt = frame.get("result") or {}
+            terminal_val = str(receipt.get("outcome") or "error").lower()
 
-            # Execute oracle inside workspace
             import subprocess
             proc = subprocess.run(
                 [sys.executable, "-m", "unittest", "test_oracle.py"],
@@ -120,55 +108,78 @@ def run_single_harness_task(
                 timeout=15,
             )
             oracle_passed = proc.returncode == 0
-            oracle_score = 1.0 if oracle_passed else 0.0
 
-            telemetry = getattr(result, "telemetry", None)
-            prompt_tokens = getattr(telemetry, "prompt_tokens", None) or 120
-            comp_tokens = getattr(telemetry, "completion_tokens", None) or 85
-            usd_micros = getattr(telemetry, "usd_micros", None) or 250
+            prompt_tokens = receipt.get("promptTokens")
+            comp_tokens = receipt.get("completionTokens")
+            usd_micros = receipt.get("spentUsdMicros")
+            missing: list[str] = []
+            if prompt_tokens is None:
+                missing.append("prompt_tokens")
+            if comp_tokens is None:
+                missing.append("completion_tokens")
+            if usd_micros is None:
+                missing.append("usd_micros")
+            total_tokens = None
+            if isinstance(prompt_tokens, int) and isinstance(comp_tokens, int):
+                total_tokens = prompt_tokens + comp_tokens
 
-            # Compute storage amplification
-            from vanguard.packages.ports.event_store import EventRange
-            read_res = store.read(EventRange(run_id=run_id))
-            events = read_res.events if hasattr(read_res, "events") else []
-            raw_bytes = sum(len(ev.envelope_json.encode("utf-8")) for ev in events) if events else 1024
-            sqlite_bytes = db_path.stat().st_size if db_path.exists() else 0
-            waf = round(sqlite_bytes / max(1, raw_bytes), 2) if raw_bytes else 1.68
+            import importlib
+            SqliteEventStore = importlib.import_module(
+                "vanguard.packages.adapters.stores.event_store").SqliteEventStore
+            store = SqliteEventStore(db_path)
+            try:
+                read_res = store.read(EventRange(run_id=run_id))
+                events = list(read_res.value or ())
+            finally:
+                store.close()
+            raw_bytes = sum(len((getattr(ev, "canonical_json", lambda: "")() or "").encode("utf-8")) for ev in events) if events else None
+            sqlite_bytes = db_path.stat().st_size if db_path.exists() else None
+            waf = None
+            if raw_bytes and sqlite_bytes:
+                waf = round(sqlite_bytes / max(1, raw_bytes), 2)
 
             return {
                 "harness": harness_name,
                 "task": task_name,
                 "terminal": terminal_val,
+                "disposition": "passed" if oracle_passed else "failed",
                 "oracle_passed": oracle_passed,
-                "score": oracle_score,
-                "turns": getattr(result, "turns", 1),
+                "score": 1.0 if oracle_passed else 0.0,
+                "turns": receipt.get("turns"),
                 "wall_ms": round(wall_ms, 2),
                 "prompt_tokens": prompt_tokens,
                 "completion_tokens": comp_tokens,
-                "total_tokens": prompt_tokens + comp_tokens,
+                "total_tokens": total_tokens,
                 "usd_micros": usd_micros,
-                "cost_usd": round(usd_micros / 1_000_000.0, 6),
+                "cost_usd": None if not isinstance(usd_micros, int) else round(usd_micros / 1_000_000.0, 6),
                 "events_emitted": len(events),
                 "storage_amplification": waf,
                 "oracle_stderr": proc.stderr if not oracle_passed else "",
+                "missing": missing,
+                "preset": PRODUCT_PRESETS.get(harness_name),
             }
         except Exception as exc:
             return {
                 "harness": harness_name,
                 "task": task_name,
-                "terminal": "error",
-                "oracle_passed": False,
-                "score": 0.0,
-                "turns": 0,
+                "terminal": "instrument_error",
+                "disposition": "undeterminable",
+                "oracle_passed": None,
+                "score": None,
+                "turns": None,
                 "wall_ms": round((time.perf_counter() - start_t) * 1000.0, 2),
-                "prompt_tokens": 0,
-                "completion_tokens": 0,
-                "total_tokens": 0,
-                "usd_micros": 0,
-                "cost_usd": 0.0,
-                "events_emitted": 0,
-                "storage_amplification": 0.0,
+                "prompt_tokens": None,
+                "completion_tokens": None,
+                "total_tokens": None,
+                "usd_micros": None,
+                "cost_usd": None,
+                "events_emitted": None,
+                "storage_amplification": None,
                 "error": str(exc),
+                "missing": [
+                    "prompt_tokens", "completion_tokens", "usd_micros",
+                    "oracle_passed", "events_emitted",
+                ],
             }
 
 
@@ -540,7 +551,7 @@ def main() -> None:
     # Aggregate matrix
     matrix_output = {
         "timestamp": time.time(),
-        "framework": "Vanguard / AETHER Substrate 0.9.0b1 (Horizon 2: 0.9.1+)",
+        "framework": "Vanguard / AETHER Substrate 0.9.3",
         "coding_harness_benchmarks": swe_results,
         "rag_tutor_benchmarks": rag_results,
         "codefix_critic_benchmarks": codefix_results,

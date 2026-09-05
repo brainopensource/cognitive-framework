@@ -24,11 +24,23 @@ class SotaProtocolTests(unittest.TestCase):
         submission = BenchmarkSubmission(task.digest, "diff --git a/x b/x", "m", "h")
         receipt = BenchmarkReceipt("SWE-Bench Pro", task.digest, submission.digest,
                                    "h", "m", "e", outcome=None,
-                                   reason="dry run", split="dev")
+                                   reason="dry run", split="dev",
+                                   subject_sha="86142175fcab03ff93727ad1f5b336b22e01c66b")
         receipt.validate_subject(task, submission)
         with self.assertRaises(ValueError):
             BenchmarkReceipt("SWE-Bench Pro", task.digest, submission.digest,
-                             "h", "m", "e", outcome="PASS", split="held-out").validate_subject(task, submission)
+                             "h", "m", "e", outcome="PASS", split="held-out",
+                             subject_sha="86142175fcab03ff93727ad1f5b336b22e01c66b",
+                             patch_digest="sha256:" + ("ab" * 32)).validate_subject(task, submission)
+
+    def test_missing_subject_sha_refuses_receipt(self):
+        task = BenchmarkTask("t1", "SWE-Bench Pro", "dev")
+        submission = BenchmarkSubmission(task.digest, "diff --git a/x b/x", "m", "h")
+        with self.assertRaises(ValueError) as ctx:
+            BenchmarkReceipt("SWE-Bench Pro", task.digest, submission.digest,
+                             "h", "m", "e", outcome=None, reason="dry run",
+                             split="dev", subject_sha="")
+        self.assertIn("subject_sha", str(ctx.exception).lower())
 
     def test_section_and_resume_identity_fail_closed(self):
         section = SectionAddress("big.py", 40, 40, "sha256:pre")

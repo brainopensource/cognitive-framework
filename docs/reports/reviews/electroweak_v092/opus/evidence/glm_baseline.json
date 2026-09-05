@@ -1,0 +1,26 @@
+{
+ "condition": "baseline",
+ "model_port": "openrouter",
+ "model": "z-ai/glm-5.3-flash",
+ "task": "fib",
+ "terminal": "abandoned",
+ "turns": 3,
+ "detail": "no progress over 3 turns",
+ "usage": {
+  "promptTokens": 5410,
+  "completionTokens": 876,
+  "totalTokens": 6286
+ },
+ "cost_micros": 520,
+ "wall_s": 24.5,
+ "files": [],
+ "oracle": null,
+ "error": null,
+ "proposals": [
+  "None/finish",
+  "None/finish",
+  "None/finish"
+ ],
+ "denials": [],
+ "effects": []
+}

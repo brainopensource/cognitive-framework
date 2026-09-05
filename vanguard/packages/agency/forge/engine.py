@@ -287,7 +287,12 @@ def compute_workspace_digest(workspace_root: Path) -> str:
 
 
 def parse_test_output(output: str, exit_code: int) -> Tuple[int, tuple[str, ...], Optional[str], Optional[str]]:
-    """Extract test count, failing test names, exception type, and top frame from test stdout/stderr."""
+    """Extract test count, failing test names, exception type, and top frame from test stdout/stderr.
+
+    ``exit_code`` is retained for call-site compatibility. A zero exit status is
+    not evidence that a test ran; unknown or unparseable output keeps count 0.
+    """
+    _ = exit_code
     failing: list[str] = []
     test_count = 0
     exc_type: Optional[str] = None
@@ -305,10 +310,6 @@ def parse_test_output(output: str, exit_code: int) -> Tuple[int, tuple[str, ...]
         p_count = int(pyt_passed.group(1)) if pyt_passed else 0
         f_count = int(pyt_failed.group(1)) if pyt_failed else 0
         test_count = max(test_count, p_count + f_count)
-
-    # If all passed and exit_code == 0, fallback test_count to at least 1
-    if exit_code == 0 and test_count == 0:
-        test_count = 1
 
     # Extract FAIL/ERROR test names
     for line in output.splitlines():

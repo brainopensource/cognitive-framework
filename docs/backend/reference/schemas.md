@@ -76,6 +76,10 @@ pack middleware supplies bounded `IndexPort` symbol, dependency, and test observ
 observations do not authorize edits or completion and remain subordinate to runtime policy and
 exterior verification.
 
+Semantic task state (`vanguard/packages/domain/task_state.py`, `SemanticTaskState` /
+`CodingTaskState`) is a domain value with RFC 8785 JCS digest via `digest_of`. It is not a
+`schemas/` wire family. Runtime `fold_task_state` is the only producer.
+
 ---
 
 ## 2. Active Schema Families

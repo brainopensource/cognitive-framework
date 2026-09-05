@@ -29,6 +29,7 @@ from .lib import (
     reset_environment,
     verify_challenge_zero_state,
 )
+from .membership import enumerate_baac_challenges
 
 ROOT = Path(__file__).resolve().parents[2]
 CHALLENGES_DIR = ROOT / "benchmarks" / "baac" / "challenges"
@@ -40,24 +41,24 @@ def discover_challenges(
     single: Optional[str] = None,
     scope: Optional[str] = None,
 ) -> List[Path]:
-    """Find challenge directories matching tier, single, or scope filters."""
-    challenges: List[Path] = []
-    if not CHALLENGES_DIR.exists():
-        return challenges
-
-    tier_dirs = [d for d in sorted(CHALLENGES_DIR.iterdir()) if d.is_dir()]
+    """Find schema-valid challenge directories matching tier, single, or scope."""
+    challenges = list(enumerate_baac_challenges(CHALLENGES_DIR))
     if tier and tier.lower() != "all":
-        tier_dirs = [d for d in tier_dirs if d.name.lower() == tier.lower() or d.name.lower().endswith(tier.lower())]
-
-    for t_dir in tier_dirs:
-        for c_dir in sorted(t_dir.iterdir()):
-            if c_dir.is_dir() and (c_dir / "TASK.md").is_file():
-                if single and c_dir.name != single and single not in c_dir.name:
-                    continue
-                if scope and scope.lower() not in c_dir.name.lower():
-                    continue
-                challenges.append(c_dir)
-
+        challenges = [
+            path for path in challenges
+            if path.parent.name.lower() == tier.lower()
+            or path.parent.name.lower().endswith(tier.lower())
+        ]
+    if single:
+        challenges = [
+            path for path in challenges
+            if path.name == single or single in path.name
+        ]
+    if scope:
+        challenges = [
+            path for path in challenges
+            if scope.lower() in path.name.lower()
+        ]
     return challenges
 
 

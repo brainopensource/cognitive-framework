@@ -37,6 +37,7 @@ function codingRequestFromParsed(
     maxReplans: parsed.maxReplans ?? 2,
     maxPaidCalls: (parsed.budgetUsdMicros ?? 0) > 0 ? 20 : 0,
     budgetUsdMicros: parsed.budgetUsdMicros ?? 0,
+    allowPaid: Boolean(parsed.allowPaid),
     interactive: Boolean(parsed.interactive),
     dryPlan: Boolean(parsed.dryPlan),
     jsonlOut: parsed.jsonlOut,

@@ -23,14 +23,6 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-env_file = ROOT / ".env"
-if env_file.is_file():
-    for line in env_file.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if line and not line.startswith("#") and "=" in line:
-            k, v = line.split("=", 1)
-            if k.strip() == "OPENROUTER_API_KEY" and not os.environ.get(k.strip()):
-                os.environ[k.strip()] = v.strip().strip("'\"")
 
 from benchmarks.run_20_eval_suite import (  # noqa: E402
     ALL_CHALLENGES,
@@ -44,6 +36,7 @@ from benchmarks.sota_context import (  # noqa: E402
     CHALLENGES as SOTA_CHALLENGES,
     TIERS as SOTA_TIERS,
 )
+from benchmarks._env import load_benchmark_env
 from vanguard.packages.runtime.root import (  # noqa: E402
     application_service,
     Cassette,
@@ -272,4 +265,5 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    load_benchmark_env()
     raise SystemExit(main())

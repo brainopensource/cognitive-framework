@@ -1,3 +1,6 @@
+process.env.NODE_ENV = "test";
+process.env.AETHER_IN_MEMORY_PERSISTENCE = "1";
+
 import { strict as assert } from "node:assert";
 import { describe, it } from "node:test";
 import { TuiStore, createSignal } from "../src/store.js";

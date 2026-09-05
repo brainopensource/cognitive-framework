@@ -1,0 +1,68 @@
+{
+  "schema": "aether.hypothesis-registry/1",
+  "control": {
+    "id": "control",
+    "arm": "vg-code-balanced",
+    "product_path": "vanguard.packages.runtime.entrypoint.execute",
+    "workers": 1,
+    "note": "MS-CONTROL baseline. Treatments below are Route L and MUST NOT be scored before T-27 records a disposition and MS-CONTROL closes."
+  },
+  "hypotheses": {
+    "H-T78-str-replace": {
+      "task": "T-78",
+      "control_digest": "pending-T-26-freeze",
+      "varied_dimension": "edit_primitive",
+      "expected_metric": "false_completion_rate",
+      "expected_direction": "decrease",
+      "stopping_rule": "n_evaluable>=30 LIVE-* after MS-CONTROL"
+    },
+    "H-T75-lda-index": {
+      "task": "T-75",
+      "control_digest": "pending-T-26-freeze",
+      "varied_dimension": "index_adapter",
+      "expected_metric": "valid_first_tool_call_rate",
+      "expected_direction": "increase",
+      "stopping_rule": "n_evaluable>=30 LIVE-* after MS-CONTROL"
+    },
+    "H-T76-repo-tools": {
+      "task": "T-76",
+      "control_digest": "pending-T-26-freeze",
+      "varied_dimension": "l5_observations",
+      "expected_metric": "turn_waste_W",
+      "expected_direction": "decrease",
+      "stopping_rule": "n_evaluable>=30 LIVE-* after MS-CONTROL"
+    },
+    "H-T83b-callers": {
+      "task": "T-83b",
+      "control_digest": "pending-T-26-freeze",
+      "varied_dimension": "completion_admission",
+      "expected_metric": "false_completion_rate",
+      "expected_direction": "decrease",
+      "stopping_rule": "n_evaluable>=30 LIVE-* after MS-CONTROL"
+    },
+    "H-T86-aliases": {
+      "task": "T-86",
+      "control_digest": "pending-T-26-freeze",
+      "varied_dimension": "tool_name_validation",
+      "expected_metric": "malformed_tool_calls",
+      "expected_direction": "decrease",
+      "stopping_rule": "n_evaluable>=30 LIVE-* after MS-CONTROL"
+    },
+    "H-T90-dialect": {
+      "task": "T-90",
+      "control_digest": "pending-T-26-freeze",
+      "varied_dimension": "dialect_provenance",
+      "expected_metric": "recovery_attempts",
+      "expected_direction": "increase",
+      "stopping_rule": "n_evaluable>=30 LIVE-* after MS-CONTROL"
+    },
+    "H-T80-oscillation": {
+      "task": "T-80",
+      "control_digest": "pending-T-26-freeze",
+      "varied_dimension": "anti_thrash",
+      "expected_metric": "turn_waste_W",
+      "expected_direction": "decrease",
+      "stopping_rule": "n_evaluable>=30 LIVE-* after MS-CONTROL; post-control treatment only"
+    }
+  }
+}

@@ -1,3 +1,4 @@
+schema: aether.baac.challenge/1
 id: bench_multi_32K_tier-4_circuit_breaker
 name: Stateful Service Circuit Breaker
 scope: multi

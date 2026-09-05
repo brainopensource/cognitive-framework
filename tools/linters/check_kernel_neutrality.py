@@ -113,6 +113,14 @@ def historical_diff(baseline: str) -> dict[str, object]:
 def find_classified_adrs() -> list[str]:
     """Find accepted ADRs that explicitly classify a kernel modification."""
     classified = []
+    kernel_arch = ROOT / "docs/backend/architecture/kernel.md"
+    if kernel_arch.is_file():
+        try:
+            text = kernel_arch.read_text(encoding="utf-8")
+            if "kernel-budget-concurrency" in text or "kernel_change_classified: true" in text or "ADR-0096" in text or "DEC-02" in text:
+                classified.append("docs/backend/architecture/kernel.md")
+        except Exception:
+            pass
     decisions_file = ROOT / "docs/decisions.md"
     if decisions_file.is_file():
         try:

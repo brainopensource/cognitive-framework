@@ -34,10 +34,11 @@ __all__ = [
 ]
 
 #: Selectable ports. `mock` and `fake` are deterministic and offline.
-MODEL_PORTS = ("mock", "fake", "cassette", "lam", "ollama", "openrouter", "deepseek", "router")
+MODEL_PORTS = ("mock", "fake", "cassette", "lam", "llama_cpp", "llama", "ollama", "openrouter", "deepseek", "router", "cascade")
 
 #: Default local tag. Overridable, because whatever is pulled locally wins.
-DEFAULT_OLLAMA_MODEL = "deepseek-r1"
+DEFAULT_LLAMA_MODEL = "local-model"
+DEFAULT_OLLAMA_MODEL = DEFAULT_LLAMA_MODEL
 #: Local reasoning models emit a long think block before their first token, and
 #: a 60s ceiling turned that into `instrument_error: timed out` on the larger
 #: briefs -- an instrument failure that reads like a model scoring zero.
@@ -154,33 +155,40 @@ def select_model(
         )
         return SelectedModel(port="lam", model=model, label=f"lam:{target_model}")
 
-    if choice == "ollama":
-        from ..adapters.models.ollama import OllamaModel
+    if choice in {"llama_cpp", "llama", "ollama"}:
+        from ..adapters.models.llama_cpp import LlamaCppModel
 
-        endpoint = environ.get("VANGUARD_OLLAMA_ENDPOINT", "http://127.0.0.1:11434/api/chat")
+        default_ep = "http://127.0.0.1:8080/v1/chat/completions"
+        endpoint = environ.get("VANGUARD_LLAMA_ENDPOINT", environ.get("VANGUARD_OLLAMA_ENDPOINT", default_ep))
+        port_name = "llama_cpp" if choice != "ollama" else "ollama"
+        name = model_name or DEFAULT_LLAMA_MODEL
+
         if probe is not None:
-            name = model_name or DEFAULT_OLLAMA_MODEL
             if not probe(endpoint):
-                raise ModelUnavailable("ollama", f"no daemon answering at {endpoint}")
+                raise ModelUnavailable(port_name, f"no server answering at {endpoint}")
         else:
+            if not _probe_http(endpoint):
+                raise ModelUnavailable(port_name, f"no server answering at {endpoint}")
+
+        if choice == "ollama":
             installed = _ollama_tags(endpoint)
-            if not installed:
-                raise ModelUnavailable("ollama", f"no daemon answering at {endpoint}")
-            name = _resolve_tag(model_name or DEFAULT_OLLAMA_MODEL, installed)
-            if name is None:
+            resolved = _resolve_tag(name, installed)
+            if resolved is None:
+                if installed:
+                    raise ModelUnavailable(
+                        port_name, f"model {name!r} is not pulled")
                 raise ModelUnavailable(
-                    "ollama",
-                    f"{model_name or DEFAULT_OLLAMA_MODEL!r} is not pulled; "
-                    f"installed: {', '.join(sorted(installed))}",
-                )
+                    port_name, "backend responded but model tags were unavailable")
+            name = resolved
+
         return SelectedModel(
-            port="ollama",
-            model=OllamaModel(
+            port=port_name,
+            model=LlamaCppModel(
                 model=name,
                 endpoint=endpoint,
                 timeout_seconds=timeout_seconds or DEFAULT_LOCAL_TIMEOUT_SECONDS,
             ),
-            label=f"ollama:{name}",
+            label=f"{port_name}:{name}",
         )
 
     if choice in {"openrouter", "deepseek"}:
@@ -299,6 +307,29 @@ def select_model(
             label=f"router:{name}",
         )
 
+    if choice == "cascade":
+        from ..adapters.models.cascade import CascadingModel
+        from ..adapters.models.llama_cpp import LlamaCppModel
+        from ..adapters.models.openrouter import OpenRouterModel
+
+        endpoint = environ.get("VANGUARD_LLAMA_ENDPOINT", "http://127.0.0.1:8080/v1/chat/completions")
+        base = endpoint.rsplit("/v1", 1)[0]
+        health_url = f"{base}/health"
+        if probe is not None:
+            if not probe(health_url):
+                raise ModelUnavailable(choice, f"primary endpoint not answering at {health_url}")
+        else:
+            if not _probe_http(health_url):
+                raise ModelUnavailable(choice, f"primary endpoint not answering at {health_url}")
+
+        primary = LlamaCppModel(endpoint=endpoint)
+        fallback = OpenRouterModel(model=resolve_model("smart"))
+        return SelectedModel(
+            port="cascade",
+            model=CascadingModel(primary, fallback),
+            label="cascade:llama_cpp->smart",
+        )
+
     raise ModelUnavailable(choice, "unreachable")
 
 
@@ -309,7 +340,7 @@ def inspect_model_providers(env: Any = None) -> list[dict[str, Any]]:
     environ = env if env is not None else os.environ
     has_or_key = bool(environ.get("OPENROUTER_API_KEY"))
     has_ds_key = bool(environ.get("DEEPSEEK_API_KEY"))
-    ollama_ep = environ.get("VANGUARD_OLLAMA_ENDPOINT", "http://127.0.0.1:11434/api/chat")
+    llama_ep = environ.get("VANGUARD_LLAMA_ENDPOINT", environ.get("VANGUARD_OLLAMA_ENDPOINT", "http://127.0.0.1:8080/v1/chat/completions"))
 
     return [
         {
@@ -343,9 +374,9 @@ def inspect_model_providers(env: Any = None) -> list[dict[str, Any]]:
             "hasCredentials": bool(has_ds_key or has_or_key),
         },
         {
-            "port": "ollama",
-            "readiness": "configured",
-            "detail": f"endpoint: {ollama_ep}",
+            "port": "llama_cpp",
+            "readiness": "ready" if _probe_http(llama_ep) else "unconfigured",
+            "detail": f"endpoint: {llama_ep}",
             "hasCredentials": True,
         },
     ]
@@ -356,12 +387,15 @@ def _probe_http(endpoint: str) -> bool:
     import urllib.error
     import urllib.request
 
-    root = endpoint.split("/api/")[0]
-    try:
-        with urllib.request.urlopen(root, timeout=2.0) as response:
-            return 200 <= getattr(response, "status", 200) < 500
-    except Exception:
-        return False
+    root = endpoint.split("/v1/")[0].split("/api/")[0].rstrip("/")
+    for target in (f"{root}/health", root):
+        try:
+            req = urllib.request.Request(target, headers={"User-Agent": "vanguard/probe"})
+            with urllib.request.urlopen(req, timeout=1.0) as response:
+                return 200 <= getattr(response, "status", 200) < 500
+        except Exception:
+            continue
+    return False
 
 
 def _ollama_tags(endpoint: str) -> tuple[str, ...]:
@@ -369,7 +403,7 @@ def _ollama_tags(endpoint: str) -> tuple[str, ...]:
     import json
     import urllib.request
 
-    root = endpoint.split("/api/")[0]
+    root = endpoint.split("/v1/")[0].split("/api/")[0].rstrip("/")
     try:
         with urllib.request.urlopen(f"{root}/api/tags", timeout=3.0) as response:
             payload = json.loads(response.read().decode("utf-8"))

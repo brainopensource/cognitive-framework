@@ -9,7 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Mapping, Protocol, Sequence, runtime_checkable
 
-from .layers import Block, Layer
+from .layers import Block, Layer, GOAL_ECHO_SOURCE, PINNED_L4_SOURCES
 
 
 def _receipt_for(block: Block) -> Block:
@@ -24,6 +24,27 @@ def _receipt_for(block: Block) -> Block:
         text=f"[{block.label} from {block.source}: {block.byte_length} bytes elided after use]",
         evictable=False,
     )
+
+
+def _drop_flexible_notes(notes: list[Block], dropped: list[str], total, ceiling: int) -> None:
+    """T-15: drop flexible L4 notes under pressure; never FEATURE_SPEC pinned sources."""
+    while total() > ceiling and notes:
+        index = next((i for i, block in enumerate(notes) if block.source not in PINNED_L4_SOURCES), None)
+        if index is None:
+            break
+        dropped.append(notes.pop(index).label)
+
+
+def _drop_flexible_dialogue(dialogue: list[Block], dropped: list[str], elided: list[str], total, ceiling: int) -> None:
+    """T-36: drop L5 under pressure; the goal echo at the tail is not evictable."""
+    while total() > ceiling and dialogue:
+        index = next((i for i, block in enumerate(dialogue) if block.source != GOAL_ECHO_SOURCE), None)
+        if index is None:
+            break
+        removed = dialogue.pop(index)
+        dropped.append(removed.label)
+        if removed.label in elided:
+            elided.remove(removed.label)
 
 
 @runtime_checkable
@@ -70,19 +91,14 @@ class ResultEvictionStrategy:
         for index, block in enumerate(dialogue):
             if total() <= ceiling:
                 break
-            if not block.evictable:
+            if not block.evictable or block.source == GOAL_ECHO_SOURCE:
                 continue
             dialogue[index] = _receipt_for(block)
             elided.append(block.label)
 
-        while total() > ceiling and dialogue:
-            removed = dialogue.pop(0)
-            dropped.append(removed.label)
-            if removed.label in elided:
-                elided.remove(removed.label)
+        _drop_flexible_dialogue(dialogue, dropped, elided, total, ceiling)
 
-        while total() > ceiling and notes:
-            dropped.append(notes.pop(0).label)
+        _drop_flexible_notes(notes, dropped, total, ceiling)
 
         return elided, dropped
 
@@ -114,9 +130,12 @@ class RecencyWindowStrategy:
         elided: list[str] = []
         dropped: list[str] = []
 
-        # 1. Truncate dialogue to the recency window limit
-        while len(dialogue) > max_items:
-            removed = dialogue.pop(0)
+        # 1. Truncate dialogue to the recency window limit; keep the goal echo.
+        while len([b for b in dialogue if b.source != GOAL_ECHO_SOURCE]) > max_items:
+            index = next((i for i, block in enumerate(dialogue) if block.source != GOAL_ECHO_SOURCE), None)
+            if index is None:
+                break
+            removed = dialogue.pop(index)
             dropped.append(removed.label)
 
         def total() -> int:
@@ -126,21 +145,16 @@ class RecencyWindowStrategy:
         for index, block in enumerate(dialogue):
             if total() <= ceiling:
                 break
-            if not block.evictable:
+            if not block.evictable or block.source == GOAL_ECHO_SOURCE:
                 continue
             dialogue[index] = _receipt_for(block)
             elided.append(block.label)
 
-        # 3. If still exceeding ceiling, drop oldest dialogue items
-        while total() > ceiling and dialogue:
-            removed = dialogue.pop(0)
-            dropped.append(removed.label)
-            if removed.label in elided:
-                elided.remove(removed.label)
+        # 3. If still exceeding ceiling, drop oldest flexible dialogue items
+        _drop_flexible_dialogue(dialogue, dropped, elided, total, ceiling)
 
-        # 4. If still exceeding ceiling, drop oldest notes
-        while total() > ceiling and notes:
-            dropped.append(notes.pop(0).label)
+        # 4. If still exceeding ceiling, drop oldest flexible notes
+        _drop_flexible_notes(notes, dropped, total, ceiling)
 
         return elided, dropped
 
@@ -198,7 +212,10 @@ class StructuredConsolidateStrategy:
         to_consolidate: list[Block] = []
 
         while total() > ceiling and dialogue:
-            b = dialogue.pop(0)
+            index = next((i for i, block in enumerate(dialogue) if block.source != GOAL_ECHO_SOURCE), None)
+            if index is None:
+                break
+            b = dialogue.pop(index)
             dropped.append(b.label)
             to_consolidate.append(b)
             # Scan text for dead ends / decisions
@@ -220,11 +237,17 @@ class StructuredConsolidateStrategy:
 
             # If inserting summary_block pushed total over ceiling, drop remaining un-consolidated blocks
             while total() > ceiling and len(dialogue) > 1:
-                b = dialogue.pop(1)
+                index = next(
+                    (i for i, block in enumerate(dialogue)
+                     if block.source != GOAL_ECHO_SOURCE and block.label != "structured_record"),
+                    None,
+                )
+                if index is None:
+                    break
+                b = dialogue.pop(index)
                 dropped.append(b.label)
 
-        while total() > ceiling and notes:
-            dropped.append(notes.pop(0).label)
+        _drop_flexible_notes(notes, dropped, total, ceiling)
 
         return elided, dropped
 

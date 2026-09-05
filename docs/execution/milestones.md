@@ -13,17 +13,16 @@ purpose: Present stable TARGET milestone outcomes, dependencies, and acceptance 
 audience:
   - contributor
   - release-owner
-version: 0.9.3
-last_verified: 2026-09-03
-lock_head: "66aa7a3c0c31"
+version: "0.9.3"
+last_verified: 2026-09-05
+lock_head: "3daa487c0be8"
 derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN.md
   - .draft/DEVELOPMENT_FINAL_PLAN_B.md
   - .draft/DEVELOPMENT_FINAL_PLAN_v2.md
   - .draft/PHASE-0_DEVELOPMENT_FINAL_PLAN.md
 normative_authority:
-  - docs/SPEC.md#milestone-compatibility
-  - docs/decisions.md
+  - spec.md#milestone-compatibility
 relationships:
   - execution.tasks
   - execution.backlog
@@ -36,11 +35,19 @@ confidence: high
 
 # TARGET Milestone Gates
 
-## 1. Scope & Authority
+## 1. Scope
+
+Stable release outcomes only. Work tree: [`tasks.md`](tasks.md). Packages: [`backlog.md`](backlog.md). Deltas: [`spec.md`](spec.md). Handbook: [`technical.md`](technical.md).
+
+No sprint calendar. MS-* is `OPEN` until receipts exist. Package version **0.9.3** is not M-9.
+
+**Project checkpoint (2026-09-05 session stop, HEAD baseline `622131da`, dirty implementation tree).** Phase 0 / `MS-INSTRUMENT` remains `CLOSED` on its recorded subject. Wave 1 is `MECHANISM`: its load-bearing runtime mechanisms and 39 focused settlement/identity/receipt/approval falsifiers pass, but live T-92/L0, the T-04 successor set and exact-subject convergence evidence remain. Wave 2 / `MS-CONTROL` is `OPEN`: mechanism code for T-79/T-89/T-92–T-95 is present and the 31 named focused falsifiers are green, but **no task is accepted**. T-26 is `UNFROZEN` with the L2 arm pinned (single-worker `vg-code-balanced` / `balanced` / `entrypoint.execute`); T-27/T-51/T-52 remain open; **T-97 is deferred this pass** (filed, not vanished). No live control disposition exists. TCB is 1386; domain-blindness and execution-truth pass. The tree is **not gate-green**: five `check_boundaries.py` violations, plus four related-surface failures (`coding_max` facade CMX-04 ×2, RF-90 fakeBackend ×2). No task may be checked and no L0/L2 subject frozen until those are repaired, touched-surface verification passes, and the subject is clean. `just` is not installed; the gate is the `justfile` recipe bodies.
+
+Dual mission: (1) Coding Max on one `EpisodeEngine` path; (2) same substrate for other agents. CLI is a client of `ApplicationService`.
+
+## 2. M-0–M-10 and G-1–G-3
 
 This page defines stable release outcomes and gate predicates. It does not track day-to-day work packages (owned by [`backlog.md`](backlog.md)) or the flat task tree (owned by [`tasks.md`](tasks.md)). Mechanism presence does not infer milestone closure; closure requires producer-verifiable empirical receipts evaluated under the milestone acceptance boundary.
-
-Day-to-day work is the flat `T-*` tree. There is no sprint calendar and no WIP lane on this page. Status of **MS-*** rows is `OPEN` until receipts exist.
 
 | Milestone | TARGET Outcome | Acceptance Boundary | Status |
 |---|---|---|---|
@@ -55,132 +62,51 @@ Day-to-day work is the flat `T-*` tree. There is no sprint calendar and no WIP l
 | **M-9** | Installable operational beta `0.9.0b1` | Qualified M-1–M-8 evidence, unified product surfaces, health, two workflows, restart/resume, offline-after-install. | `UNAUTHORIZED` (Blocked on M-8) |
 | **M-10** | Final `0.9.0` release | Migration, backup/restore, fault/security/performance qualification, reproducible artifacts, soak, exact-subject signed envelope. | `UNAUTHORIZED` (Blocked on M-9) |
 
----
-
-## 2. Gate Semantics & Release Invariants
+### Gate semantics & release invariants
 
 - **Invariant G-1 (Evidence Verifiability)**: Unknown, missing, failed, degraded, or `undeterminable` evidence never satisfies a predicate.
 - **Invariant G-2 (Linear Authorization)**: M-9 cannot be authorized before M-8 has an exact producer-verifiable bundle and independent acceptance over its digest. M-10 closes only when `./ci/release_qualify.sh` exits `0` for the exact candidate.
 - **Invariant G-3 (Non-Contamination)**: Local test suites, cassettes, and self-authored oracles never constitute an official SWE-bench result. Official claims require the SWE-P5 protocol.
 
----
+## 3. Backend-finish overlay (MS-*)
 
----
+Reliability order (B §1; A §0 is the same sequence without the official-bench lane):
 
-## 3. Backend-finish TARGET overlay (MS-*)
+1. instrument identity → **MS-INSTRUMENT**
+2. truthful completion → **MS-TRUTH**
+3. durable σ / resume → **MS-RESUME**
+4. epoch-bound context → **MS-SEE**
+5. multi-file change closure → **MS-CHANGE**
+6. one EpisodeEngine control → **MS-CONTROL**
+7. meta / specialists / campaign / memory / official → MS-META…MS-OFFICIAL (`[PROPOSAL]` except as receipts appear)
 
-Vanguard v0.9.x backend finish contributes evidence to existing M-4–M-10 gates. Implementation details live in [`tasks.md`](tasks.md). Typed contracts live in [`spec.md`](spec.md). Engineering handbook: [`technical.md`](technical.md).
+| ID | TARGET | Acceptance | Status | Evidence |
+|---|---|---|---|---|
+| **MS-INSTRUMENT** | Exact-subject, schema-valid, dry-run-null instrument | membership digest; no `__pycache__` tasks; `subject_sha`; dry-run pass/cost/oracle null; PASS without patch digest refused; dispositions `{passed,failed,undeterminable,not_run}`; dirty tree fail-closed; BAAC `aether.baac.challenge/1` | `CLOSED` | `63b77116` + T-01–T-03 (`65768a6b`). Falsifier: `test.benchmarks.test_instrument_ms` |
+| **MS-TRUTH** | No `completed` without bound verification; no invented counts; one gate; **both settlement axes recorded, neither derived from the other**; greenfield vacuity rejection; anti-premature exit | T-42/T-38/T-23/T-72/T-81/T-82 are implemented and their focused falsifiers pass. T-18 is wired through the session and the default manifest declares `repo_index`; T-84/T-85 and BRG-01 T-87/T-88/T-91 are implemented. Still open: T-04's 21-test successor obligation, T-92/L0 and final exact-subject convergence evidence; T-89 is the product-subject bridge into control qualification. **Falsifier:** a run with zero patches or tampered tests cannot earn `passed`; greenfield passing on `pass`/`NotImplementedError` is rejected; a settlement claim recorded by an instrument that reuses a fixed run id or publishes an empty receipt is not evidence; **a run may legitimately record `terminal_status=abandoned` with `disposition=passed`, and the ledger replays it without contradiction** — the disposition axis is never derived from the termination axis, nor the reverse (`ICD §3`, `VG-03 §6.2`). | `MECHANISM` | Focused evidence 2026-09-05: 39 settlement/identity/receipt/approval tests pass through the live `entrypoint` -> `Runtime` -> ledger path; TCB is 1386 and domain-blindness/execution-truth pass. **MECHANISM, not empirical close:** L0 (T-92) has not run, CONVERGENCE-BASE-v1 remains fail-closed against the current subject, T-04's successor obligation is open, and the current branch boundary regression must be repaired before measurement. |
+| **MS-RESUME** | Fresh process restores episode_id, σ, L1–L3 prefix; σ not in L3 | T-09–T-13, T-43–T-44 green on commit `8637db55` | `CLOSED` | `uv run python3 -m unittest test.contracts.test_semantic_task_state test.runtime.test_task_state_fold test.runtime.test_resume_identity` — 16 tests OK (2026-09-03). σ not in L3; episode_id preserved; 40-turn fold parity. |
+| **MS-SEE** | Epoch-bound packets; omissions explicit; one `ContextCompiler`; cache-stable prefix; CTRF distillation; Trailing Goal Echo; port-backed intelligence | T-14–T-16, T-36, T-37, T-45 MECHANISM. Adds: `LdaRepoIndex` backs the **unchanged** `IndexPort` over `.lda/index.db` (**80,618** relations); `repo.*` tools return bounded observations into **L5 only**; provider cache breakpoints at the L3 boundary with `cache_read_tokens` recorded; test tool receipts parsed into CTRF (passing runs omitted, failure traces capped $\le 1500$ chars); `ContextCompiler` emits Trailing Goal Echo at tail of L5 (**T-77**). **T-46 is narrowed, not erased:** optional PPR ranking may be A/B-tested inside an agent-issued query in pack policy, never in `IndexPort`, the adapter, or L1–L3. **Falsifier:** `repo.get_callers` leaves the L1–L3 digest bit-identical across 10 turns; turn ≥ 2 cache-hit rate > 85%; compiler includes trailing goal echo; no ranking logic exists in `adapters/stores/lda_index.py`. | `OPEN` (gated on **IDX-01**) | `587db91a`, `33dc7c33`, `2a4cdaad`, `179f5616`, `81b7b572`, `c7995195`. One `ContextCompiler`; omissions are a ledger; no-index fallback documented. |
+| **MS-CHANGE** | Multi-file change closure; 2PC in adapters; exact edit primitive; reverse-caller admission; **zero kernel AST** | T-17 `DONE`; T-18/T-19/T-20 mechanisms are wired; **T-83a** (greenfield prompt modernization, no dependency) and **T-83b** (caller admission, `requires: T-75`) remain separate work. T-47 amended by **T-78** (exact `str_replace`, unique preimage, trimmed-EOL only — **no fuzzy cascade**). **TLS-04 closes as mechanism-present**: `ast.parse` preflight already lives in `adapters/environment/transaction.py` and aborts before durable flush. Read-before-edit remains prompt guidance plus an A/B-able strict profile, not a universal dispatch ladder. **Falsifier:** a syntax error in file N of M leaves all M byte-identical (`tree_hash_before == tree_hash_after`); public API signature changes reject completion if dependent call sites remain uninspected (**T-83b**); greenfield prompts contain zero *"Do not read or search first"* bans (**T-83a**); strict-policy and control runs differ only by the declared read-before-edit policy; `grep -c "import ast" vanguard/packages/kernel/*.py` is **0**; `check_tcb_budget.py` reports **1386 unchanged**. | `OPEN` | `5c9870f0`, `094fa899`, `db935138`, runtime tamper falsifiers 2026-09-05. Dialect tickets do not close this gate. |
+| **MS-CONTROL** | One `EpisodeEngine` coding path; **one preset catalog**; true budget enforcement; Forge/Chimera excluded from product scores | T-23 `DONE` (≠ qualification). Required and open: T-26/T-27, T-51/T-52, T-79, T-89, T-92–T-95 and T-97. T-79 must select **`packs/code-default/presets.json`** (`aether.code-preset/1`: fast `$0.05`/8t/16k, balanced `$0.15`/20t/40k, max `$0.40`/40t/96k), record the declared ceiling separately from any tighter caller attenuation, and enforce the effective bound. Qualify single-worker `vg-code-balanced` on the exact frozen candidate SHA at L2 (n ≥ 30, Wilson LB ≥ 0.40), through `entrypoint.py` (T-89), with false-completion rate exactly zero. **T-80/T-96 are post-control treatments; no specialist/director claim is authorized before closure.** | `OPEN` | Implementation candidates T-79/T-89/T-92–T-95 have **31/31 named focused tests green** and remain unchecked. Next: repair the five boundary violations and the four related-surface failures, verify the touched surface, then T-97 (deferred this pass), live L0, T-51/T-52, freeze T-26 on the clean exact SHA, then T-27. T-95 does not close this gate. |
+| **MS-META** | Controller off unless paired study valid | T-28 | `OPEN` `[PROPOSAL]` | |
+| **MS-SPECIALIST** | Treatments vs control | T-29–T-30, T-53 | `OPEN` `[PROPOSAL]` | |
+| **MS-CAMPAIGN** | Outer-loop director as a runtime client; isolated worktrees; CAS mailbox; test-time compute & Recursive Tournament Voting; merge by exterior tests | T-31, T-54, T-34. **`OCT-03` is the canonical row** (draft `DIR-01` is an alias). Director holds **zero** mutating verbs; child episodes run in isolated git worktrees under attenuated budgets; RTV may allocate evaluation and rank speculative candidates; roles exchange only content-addressed digests (OCT-01). Merge is decided solely by the bound `ExternalVerifier` test verdict, **never** LLM quorum or tournament votes. **Hard dependency: `MS-CONTROL` closed.** **Falsifier:** a crash at node K resumes at K+1 with no duplicate effects; a failing child cannot mutate the parent tree; changing an RTV score cannot admit a candidate whose exterior verdict failed. | `OPEN` `[PROPOSAL]` (gated on **MS-CONTROL**) | Staged to Wave 5 per **D-03**: a director dispatching unqualified inner episodes multiplies false completions across an expensive DAG. |
+| **MS-MEMORY** | Grants; held-out lift; rollback | T-32, T-56–T-57; M-8 empirical still open | `OPEN` `[PROPOSAL]` | |
+| **MS-OFFICIAL** | SWE-P5 / DeepSWE wrapper; local ≠ official | T-33, T-58; G-3 | `OPEN` `[PROPOSAL]` | |
+| **MS-SENIOR…LEAD** | Profiles | obligations (A §4) + measurement (B §7) + A §29 done-defs | `OPEN` | Tables below; one copy. |
+| **MS-HYDRA** | Bifurcation + living horizon | T-55; implementer = EpisodeEngine+pack | `OPEN` `[PROPOSAL]` | |
 
-These rows recast A §0 / B §1 reliability order as **capability outcomes**, not waves.
+**Subject boundary — why `MS-INSTRUMENT` is not reopened.** `MS-INSTRUMENT` is
+`CLOSED` over the *benchmark harness* subject (`63b77116` + T-01–T-03, falsifier
+`test.benchmarks.test_instrument_ms`), and that closure stands for its subject. The
+product CLI path — `runtime/entrypoint.py` — was never that subject, which is why the
+run-identity, receipt-telemetry and measured-subject findings do **not** meet the
+`REOPENED` predicate (backlog §1) and open **INS-01** in the `INSTRUMENT (product)`
+package instead. The consequence is the point: the moment the canary is required to
+run through the product path (**T-89**), `MS-INSTRUMENT`'s guarantees stop
+transferring and INS-01 becomes a precondition of `MS-CONTROL`, not a nicety.
 
-| ID | TARGET outcome | Acceptance | Status |
-|---|---|---|---|
-| **MS-INSTRUMENT** | Exact-subject, schema-valid, dry-run-null empirical instrument | Enumerator digest; no `__pycache__` tasks; `subject_sha` bound; dry-run pass/cost/oracle null (B §8.4/8.5; T-01–T-03, T-24–T-25, T-40–T-41) | `OPEN` |
-| **MS-TRUTH** | No `completed` without bound verification; Forge cannot invent counts; one gating function | AdmissionGate + `VerificationReceipt.passed`; A §9.7; T-04–T-08, T-42, T-38, T-23. T-04 remains `[PROPOSAL]` until RF-25 successor baseline | `OPEN` |
-| **MS-RESUME** | Fresh process restores episode_id, σ, prefix L1–L3; σ not in L3 | A §10.7; T-09–T-13, T-43–T-44. `domain/task_state.py` MISSING until T-09 | `OPEN` |
-| **MS-SEE** | Epoch-bound packets, omissions explicit, one ContextCompiler | A §11.9; v2 §3 target (not current L3 dump); T-14–T-16, T-36–T-37, T-45–T-46 | `OPEN` |
-| **MS-CHANGE** | 2PC multi-file, adapter preflight, tamper, implicated-set, greenfield oracle | A §12.8; v2 §4.2; T-17–T-20, T-47–T-49. AST never in kernel | `OPEN` |
-| **MS-CONTROL** | One EpisodeEngine coding path qualified; Forge/Chimera not in product scores | A §13.6; facade fast/balanced/max; T-26–T-27, T-51–T-52 | `OPEN` |
-| **MS-META** | Controller off unless paired study valid | A §14.7; T-28 `[PROPOSAL]` | `OPEN` `[PROPOSAL]` |
-| **MS-SPECIALIST** | Treatments vs control; exterior merge | A §15.6; T-29–T-30, T-53 `[PROPOSAL]` | `OPEN` `[PROPOSAL]` |
-| **MS-CAMPAIGN** | Director as runtime client; CAS handoffs | A §16.8; v2 §7.1; T-31, T-54–T-55, T-34 `[PROPOSAL]` | `OPEN` `[PROPOSAL]` |
-| **MS-MEMORY** | Product memory behind grants; held-out lift; rollback | A §17.7; M-8 remaining empirical; T-32, T-56–T-57 `[PROPOSAL]` product wiring | `OPEN` `[PROPOSAL]` |
-| **MS-OFFICIAL** | SWE-P5 / DeepSWE wrapper; local ≠ official | A §18.8; G-3; T-33, T-58 | `OPEN` `[PROPOSAL]` / blocked on control |
-| **MS-SENIOR** | Senior Developer profile | A §29.1 copied below | `OPEN` |
-| **MS-STAFF** | Staff Engineer profile | A §29.2 copied below | `OPEN` |
-| **MS-PRINCIPAL** | Principal Architect profile | A §29.3 copied below | `OPEN` |
-| **MS-LEAD** | Tech Lead profile | A §29.4 copied below | `OPEN` |
-| **MS-HYDRA** | Bifurcation + living horizon | v2 §7.3–7.4; T-55. Product implementer remains EpisodeEngine+pack, not ChimeraEngine | `OPEN` `[PROPOSAL]` |
-
-Dual mission (v2 §1.1): (1) SOTA coding agent (`Coding Max`) on one `EpisodeEngine` path. (2) Harness builder: compose other agents from the same substrate. CLI is a client of `ApplicationService`, not a second brain.
-
-### From A — executive reliability order (not a wave calendar)
-
-## 0. Executive decision
-
-AETHER should not begin by building a larger swarm.
-
-It should first make one coding lineage truthful, resumable, context-efficient, and independently verifiable.
-
-The program order is:
-
-1. repair benchmark and completion truth;
-2. establish durable semantic task state;
-3. put progressive repository context on the product path;
-4. prove multi-file greenfield and brownfield closure;
-5. qualify a strong single-agent control;
-6. add adaptive strategy as bounded policy;
-7. add specialist roles one treatment at a time;
-8. add the persistent outer loop only after inner-loop evidence is reliable;
-9. promote memory and skills only through held-out causal evidence;
-10. optimize models, budgets, and topology against cost-adjusted signed success.
-
-This ordering follows a simple reliability law:
-
-$$
-P(\text{campaign success})
-=
-\prod_{i=1}^{N}P(G_i\mid G_{<i}),
-$$
-
-where every weak milestone gate compounds across a long campaign.
-
-If a per-package gate is only $0.95$ reliable, a 20-package campaign has at most
-$0.95^{20}\approx0.358$ reliability before modeling other failures.
-
-Long-horizon SOTA therefore comes from reducing compounded epistemic error, not merely increasing turns.
-
-The recommended product target is a backend substrate that can instantiate four competency profiles:
-
-- Senior Developer: bounded feature and bug-fix ownership with evidence-backed completion;
-- Staff Engineer: repository-scale change planning, dependency management, and multi-package delivery;
-- Principal Architect: architectural constraints, trade-off analysis, migrations, and evolution plans;
-- Tech Lead: campaign decomposition, review routing, risk management, and operator escalation.
-
-These are not four new runtimes.
-
-They are four declarative organizations of the same causal substrate.
-
----
-
-### From B — executive decision and score-band ASPIRATION
-
-## 1. Executive decision
-
-**Recommended ordering.** Make one coding lineage truthful before adding more agents, more context, or more memory.
-
-The program order is:
-
-1. Restore benchmark and navigation identity so no later score can be laundered through a stale SHA, a `__pycache__` task, or a dry-run.
-2. Close false-positive completion on the product path (`vg-code-default` exemption, Forge `test_count = 1`, regex test-count inference).
-3. Promote semantic task state from a runtime fold dumped into frozen L3 into a domain value that the compiler, admission gate, and resume path all consume.
-4. Bind repository intelligence to a workspace epoch so progressive context cannot silently serve a pre-write snapshot.
-5. Prove greenfield scaffold-and-oracle and brownfield blast-radius closure on frozen internal tasks.
-6. Qualify a **single-agent** Coding Max control with Wilson intervals and explicit missingness.
-7. Add metacognition as a bounded, opt-in policy with paired ablations.
-8. Add specialist topologies only as named treatments against that control.
-9. Add a durable outer-loop campaign director only after inner-loop completion is fail-closed.
-10. Promote memory and skills only through held-out lift, separated authorities, and executable rollback.
-11. Enter official DeepSWE v1.1 / SWE-bench Pro / SWE-bench Verified programs as a **separate measurement lane**, never as the implementation definition of done.
-
-**Central architectural thesis.** AETHER already has the right substrate: a domain-blind kernel, an event-sourced ledger, one public run path, and pack-owned coding semantics. The product is blocked not by missing swarm machinery but by **untruthful settlement**. An agent that can declare success without a bound verification receipt, resume into a stale prefix, or be scored on an invalid task set cannot become a senior engineer no matter how many specialist roles are bolted on.
-
-The reliability law this plan obeys is:
-
-\[
-R_{\text{campaign}} = \prod_{t=1}^{T} \Pr(\text{honest progress}_t \mid \text{honest state}_{t-1})
-\]
-
-If any factor is an unmeasured heuristic (invented test counts, keyword task classification, frozen resume dumps, ungated `finish`), the product collapses with horizon \(T\). Multi-agent branching multiplies that product by a merge-error term. Therefore Plan B forbids default multi-agent behavior until a single lineage has a measured \(R\) on frozen tasks.
-
-**What this plan is not.**
-
-- It is not an authorization to start Waves 6–10.
-- It is not a claim that AETHER currently scores 60–90 on DeepSWE or SWE-bench Pro. **FACT:** no official receipt exists for HEAD `ebad36e`.
-- It is not a claim that Coding Max, Forge, and Chimera are one product. **FACT:** Forge and Chimera are parallel loops.
-- It is not a frontend plan. CLI/TUI control is a later consumer of this backend.
-
-**Score bands (ASPIRATION, not forecast).**
+Score-band ASPIRATION (not a forecast). Backlog points here.
 
 | Band | Internal meaning | External meaning | Premature if claimed today |
 |---|---|---|---|
@@ -190,54 +116,11 @@ If any factor is an unmeasured heuristic (invented test counts, keyword task cla
 | Stretch | DeepSWE \(\ge 80\%\) or Scale Pro public \(\ge 70\%\) under the **same** official scaffold | Would require model generation plus harness; not a Plan B exit | Yes |
 | Unsupported | “90/100”, “replaces staff engineers”, “beats all vendor scaffolds” | Professional replacement is not a benchmark outcome | Always |
 
-The user-requested 60–90 band is therefore a **mixture**: 60 is a plausible later qualification/competitive threshold on DeepSWE-class tasks; 90 is a stretch that current public leaderboards do not support as a near-term AETHER claim. SWE-bench Verified is saturating near 95%+ under vendor scaffolds and is the wrong trophy. SWE-bench Pro standardized scores remain far lower than vendor-scaffold scores; mixing those numbers is a methodology error this plan forbids.
+The user-requested 60–90 band is a **mixture**: 60 is a plausible later qualification/competitive threshold on DeepSWE-class tasks; 90 is a stretch that current public leaderboards do not support as a near-term AETHER claim.
 
+### Competency model (A §4 + A §29 + B §7, once)
 
-### From A — final recommendation
-
-## 36. Final recommendation
-
-The next release program should be judged by whether it creates an agent that can carry truth across time.
-
-That means:
-
-- truth across tool calls;
-- truth across context compaction;
-- truth across process restarts;
-- truth across files and packages;
-- truth across agent handoffs;
-- truth across evaluation boundaries;
-- truth across learning and promotion.
-
-The decisive technical sequence is:
-
-```text
-truthful evidence
-  -> durable semantic state
-  -> progressive context
-  -> change-surface closure
-  -> qualified single-agent control
-  -> measured adaptive strategy
-  -> measured specialist topology
-  -> durable campaign direction
-  -> governed learning
-  -> external frontier qualification
-```
-
-If AETHER follows this order, its distinctive advantage will not be a fashionable swarm diagram.
-
-Its advantage will be a small trusted substrate beneath agents that can work for hours or days, lose a process, recover their exact obligations, change strategy from evidence, coordinate specialists without sharing mutable hidden state, and stop only on independently bound proof.
-
-That is the path from a capable coding harness to a credible Senior Developer, Staff Engineer, Principal Architect, and Tech Lead substrate.
-
-
-### From A — competency model
-
-## 4. Competency model: agents as declarative projections
-
-### 4.1 Shared competency dimensions
-
-Every engineering profile should be scored on the same dimensions.
+Every engineering profile is scored on the same dimensions.
 
 | Dimension | Observable | Required evidence |
 |---|---|---|
@@ -252,131 +135,11 @@ Every engineering profile should be scored on the same dimensions.
 | Leadership | decomposition and review | campaign DAG and exterior verdicts |
 | Economics | value per cost | measured cost and latency |
 
-### 4.2 Senior Developer profile
+These are **measurable product profiles**, not job-title claims about replacing humans. Benchmark scores do not equal professional replacement.
 
-The Senior Developer profile owns one bounded task contract.
+#### Senior Developer (MS-SENIOR)
 
-It must:
-
-- reproduce before repairing when feasible;
-- locate the smallest causal change surface;
-- preserve repository conventions;
-- add or update falsifiers;
-- run targeted validation during iteration;
-- run required gates before completion;
-- report uncertainty honestly;
-- leave a resumable task state.
-
-Its default topology is one worker.
-
-Its optional reviewer is triggered only by risk.
-
-### 4.3 Staff Engineer profile
-
-The Staff Engineer profile owns a multi-package technical outcome.
-
-It must additionally:
-
-- construct a dependency DAG;
-- partition interfaces before files;
-- manage migrations and compatibility windows;
-- coordinate concurrent read-only investigation;
-- serialize conflicting writes;
-- track cross-package acceptance predicates;
-- maintain a decision and risk register;
-- produce integration evidence.
-
-Its default topology is director plus sequential package workers.
-
-### 4.4 Principal Architect profile
-
-The Principal Architect profile owns system evolution under constraints.
-
-It must additionally:
-
-- identify constitutional and normative constraints;
-- model alternatives and reversal conditions;
-- quantify blast radius and migration cost;
-- define stable ports rather than premature implementations;
-- preserve one source of runtime authority;
-- preregister architectural experiments;
-- reject complexity without measured lift;
-- specify rollback and compatibility semantics.
-
-Its primary artifacts are plans, decision proposals, formal invariants, and executable architecture tests.
-
-### 4.5 Tech Lead profile
-
-The Tech Lead profile owns campaign execution.
-
-It must additionally:
-
-- maintain WIP limits;
-- assign bounded work packages;
-- monitor evidence and budget events;
-- resolve blockers or escalate;
-- request revision at package boundaries;
-- prevent duplicated ownership;
-- close the campaign only when all acceptance predicates resolve;
-- preserve human override.
-
-The Tech Lead should not be a privileged bypass.
-
-It is a policy-constrained consumer of the same runtime.
-
----
-
-### From A — definition of done by capability level
-
-## 29. Definition of done by capability level
-
-### 29.1 Senior Developer done
-
-- at least 60% on frozen mixed internal repository tasks;
-- false-positive completion below 1%;
-- reliable focused-test selection;
-- clean multi-file change closure;
-- successful restart parity;
-- evidence-linked handoff.
-
-### 29.2 Staff Engineer done
-
-- successful 10-node campaign;
-- dependency-aware sequencing;
-- cross-package integration checks;
-- bounded revision loops;
-- no duplicate effects across restart;
-- measured cost advantage over naive giant-session control.
-
-### 29.3 Principal Architect done
-
-- successful repository-wide migration tasks;
-- explicit alternative and reversal analysis;
-- architecture invariant preservation;
-- low change amplification on subsequent tasks;
-- human reviewer acceptance of decision quality;
-- no reliance on hidden benchmark conventions.
-
-### 29.4 Tech Lead done
-
-- maintains WIP and budget constraints;
-- routes failures correctly;
-- requests operator intervention at defined boundaries;
-- completes or honestly terminates campaigns;
-- produces reconstructible status from ledger alone;
-- never bypasses exterior acceptance.
-
----
-
-### From B — competency profiles
-
-## 7. Competency profiles
-
-These are **measurable product profiles**, not job-title claims about replacing humans. Benchmark scores do not equal professional replacement ([OpenAI, separating signal from noise](https://openai.com/index/separating-signal-from-noise-coding-evaluations/)).
-
-METR’s 50% time-horizon is a different construct (human-expert duration at 50% success on METR’s suite) and is saturating at long durations; METR warns measurements above 16 hours are unreliable with the current suite ([METR time horizons](https://metr.org/time-horizons/)). Plan B uses METR only as a **qualitative horizon language**, not as a pass criterion.
-
-### 7.1 Senior Developer
+Owns one bounded task contract: reproduce before repairing when feasible; smallest causal change surface; preserve conventions; add or update falsifiers; targeted validation; required gates before completion; honest uncertainty; resumable task state. Default topology: one worker.
 
 | Axis | Requirement |
 |---|---|
@@ -386,10 +149,14 @@ METR’s 50% time-horizon is a different construct (human-expert duration at 50%
 | Artifacts | Patch, bound verification receipt, ledger |
 | Verification | Bound-local lattice ≥ `bound-local-receipt`; tamper shield on brownfield |
 | Completion gate | AdmissionGate + pack completeness; zero-test fail closed |
-| Internal criterion | Frozen senior-class suite Wilson LB \(\ge 0.50\) at \(n\ge 30\) **after** Waves 0–5 |
-| External | Not claimed; DeepSWE-like tasks are often harder than “senior afternoon bugs” |
+| Internal criterion | Frozen senior-class suite Wilson LB \(\ge 0.50\) at \(n\ge 30\) after MS-CONTROL |
+| External | Not claimed |
 
-### 7.2 Staff Engineer
+**Done (A §29.1):** at least 60% on frozen mixed internal repository tasks; false-positive completion below 1%; reliable focused-test selection; clean multi-file change closure; successful restart parity; evidence-linked handoff.
+
+#### Staff Engineer (MS-STAFF)
+
+Owns a multi-package technical outcome: dependency DAG; partition interfaces before files; migrations; serialize conflicting writes; cross-package acceptance; decision/risk register; integration evidence.
 
 | Axis | Requirement |
 |---|---|
@@ -402,7 +169,11 @@ METR’s 50% time-horizon is a different construct (human-expert duration at 50%
 | Internal criterion | Staff-class frozen suite LB \(\ge 0.40\) **and** resume parity on ≥5 tasks |
 | External | SWE-bench Pro public is the closest published analogue; **do not** quote vendor 80% as this profile |
 
-### 7.3 Principal Architect
+**Done (A §29.2):** successful 10-node campaign; dependency-aware sequencing; cross-package integration checks; bounded revision loops; no duplicate effects across restart; measured cost advantage over naive giant-session control.
+
+#### Principal Architect (MS-PRINCIPAL)
+
+Owns system evolution under constraints: constitutional constraints; alternatives and reversal; blast radius; stable ports; one runtime authority; preregistered experiments; reject complexity without measured lift.
 
 | Axis | Requirement |
 |---|---|
@@ -410,25 +181,31 @@ METR’s 50% time-horizon is a different construct (human-expert duration at 50%
 | Default topology | `architect-plan` (single writer) then implementer; reviewer has no admit authority |
 | Abilities | Extract requirements, write ports/types first, synthetic failing oracle, topological file DAG |
 | Artifacts | Architecture notes in \(\sigma.settled\_invariants\), oracle digest, scaffold |
-| Verification | Oracle fail-on-stub (FEATURE_SPEC §5) then pass-on-impl; no test mutation |
+| Verification | Oracle fail-on-stub then pass-on-impl; no test mutation |
 | Completion gate | Behavioral oracle + smoke + files exist; greenfield completeness policy |
 | Internal criterion | Greenfield suite \(n\ge 15\) with oracle-vacuity checks |
 | External | DeepSWE’s original tasks are closer than mined SWE-bench; still not “principal architect” |
 
-### 7.4 Tech Lead
+**Done (A §29.3):** successful repository-wide migration tasks; explicit alternative and reversal analysis; architecture invariant preservation; low change amplification on subsequent tasks; human reviewer acceptance of decision quality; no reliance on hidden benchmark conventions.
+
+#### Tech Lead (MS-LEAD)
+
+Owns campaign execution: WIP limits; bounded work packages; evidence and budget events; escalate; prevent duplicated ownership; close only when predicates resolve; human override. Not a privileged bypass.
 
 | Axis | Requirement |
 |---|---|
 | Scope | Campaign of multiple tasks; merge policy; operator checkpoints |
 | Default topology | Outer-loop director; inner loop still single-writer episodes |
-| Abilities | Decompose, sequence, refuse to start Wave-7 treatments without control, report missingness |
+| Abilities | Decompose, sequence, refuse specialist treatments without control, report missingness |
 | Artifacts | CoordinationPlan, per-node receipts, campaign fold |
 | Verification | Each node independently admitted; campaign success ≠ OR of conversational summaries |
 | Completion gate | All required nodes signed; rollback of a node does not corrupt others’ CAS artifacts |
 | Internal criterion | Campaign fixture of ≥8 nodes, one forced crash, resume of remaining DAG |
 | External | Not a public leaderboard |
 
-### 7.5 Mapping to public benches (cautious)
+**Done (A §29.4):** maintains WIP and budget constraints; routes failures correctly; requests operator intervention at defined boundaries; completes or honestly terminates campaigns; produces reconstructible status from ledger alone; never bypasses exterior acceptance.
+
+### Mapping to public benches (cautious)
 
 | Profile | Internal suite | Public analogue (not equivalent) |
 |---|---|---|
@@ -437,27 +214,16 @@ METR’s 50% time-horizon is a different construct (human-expert duration at 50%
 | Principal / long-horizon | Greenfield + original tasks | DeepSWE v1.1 (113 tasks, 91 repos); leaders 74%±1–4% on mini-swe-agent |
 | Tech lead | Campaign DAG | None; do not fake one |
 
----
-
-### From v2 — HYDRA TARGET (not a schedule)
-
-Copied outcome text lives in [`technical.md`](technical.md) (v2 §7). This row does not authorize default multi-agent.
-
-
----
-
 ## 4. Post-M-10 Horizon: Octopus Outer-Loop Meta-Orchestration (`M-OCT`)
 
-The following outcomes define the post-1.0 architectural horizon for multi-day, multi-agent campaign orchestration. They do not create active sprint milestones or authorize work that M-8/M-9 currently block.
+The following outcomes define the post-1.0 architectural horizon for multi-day, multi-agent campaign orchestration. They do not create a calendar or authorize work that M-8/M-9 currently block.
 
-| Wave | Horizon Outcome | Terminal Acceptance Boundary |
+| ID | Horizon Outcome | Terminal Acceptance Boundary |
 |---|---|---|
-| **W-OCT-1** | **Content-Addressed Mailbox Protocol** | Roles communicate strictly by publishing and reading content-addressed immutable message digests (`digest_of(payload)`); zero shared memory between roles; replayable multi-agent determinism. |
-| **W-OCT-2** | **Declarative CoordinationPlan DAG** | Topology declared as immutable data DAG with strict per-mille budget shares ($\sum \text{budget\_share} \le 1000$); formal merge policies implemented: `CONCAT`, `FIRST_COMPLETE`, `SYNTHESISE`, `UNANIMOUS`. |
-| **W-OCT-3** | **Outer-Loop Multi-Day Roadmap Director** | Higher-order director layer executing above `EpisodeEngine`; decomposes complex roadmaps into independent task DAGs across process boundaries without violating kernel S0–S12 contracts. |
-| **W-OCT-4** | **Meta-Conductor & Swarm Goal Algebra** | Formal algebraic separation and reconciliation of individual swarm agent objectives under a global parent mission; automated topology selection based on task classification. |
-
----
+| **W-OCT-1** / OCT-01 | **Content-Addressed Mailbox Protocol** | Roles communicate strictly by publishing and reading content-addressed immutable message digests (`digest_of(payload)`); zero shared memory between roles; replayable multi-agent determinism. |
+| **W-OCT-2** / OCT-02 | **Declarative CoordinationPlan DAG** | Topology declared as immutable data DAG with strict per-mille budget shares ($\sum \text{budget\_share} \le 1000$); formal merge policies implemented: `CONCAT`, `FIRST_COMPLETE`, `SYNTHESISE`, `UNANIMOUS`. |
+| **W-OCT-3** / OCT-03 | **Outer-Loop Multi-Day Roadmap Director** | Higher-order director layer executing above `EpisodeEngine`; decomposes complex roadmaps into independent task DAGs across process boundaries without violating kernel S0–S12 contracts. |
+| **W-OCT-4** / OCT-04 | **Meta-Conductor & Swarm Goal Algebra** | Formal algebraic separation and reconciliation of individual swarm agent objectives under a global parent mission; automated topology selection based on task classification. |
 
 ## 5. Parallel SWE Benchmark Program (SWE-P0–SWE-P5)
 
@@ -470,37 +236,16 @@ The following outcomes define the post-1.0 architectural horizon for multi-day, 
 | **SWE-P4** | Controlled larger run | Budgeted larger sample, independent audit, reproducible subject identity. | `BLOCKED` (on P3) |
 | **SWE-P5** | Official evaluation | Official benchmark procedure and receipt; local runs are never official. | `BLOCKED` (on P4) |
 
----
-
-## Appendix: historical W-092-F* aliases
+## Appendix: W-092-F* aliases
 
 Old overlay IDs remain resolvable. They are **not** the living work board.
 
-| Historical ID | Maps to | Notes |
-|---|---|---|
-| **W-092-F0** | MS-INSTRUMENT (partial; LDA health is present-docs/CI) | Historical `DONE` claim stays as history; do not treat as MS-* closure |
-| **W-092-F1** | MS-CONTROL path + CMX-09 | Canonical product path |
-| **W-092-F2** | MS-TRUTH | Alias `CMX-10A` |
-| **W-092-F3** | MS-RESUME | Alias `CMX-10B` |
-| **W-092-F4** | MS-SEE / MS-CHANGE | Alias `CMX-11` |
-| **W-092-F5** | MS-CONTROL qualification | Blocked on MS-TRUTH…MS-SEE |
-| **W-092-F6** | MS-SPECIALIST | `[PROPOSAL]` |
-
-Historical W-092 overlay text (pre-PHASE-0):
-
-## 3. Capability Wave Overlay: Backend Finish (W-092)
-
-Vanguard v0.9.2 is an implementation and qualification overlay contributing evidence to existing M-4–M-10 gates. Active implementation details live in [`tasks.md`](tasks.md) and [`FEATURE_SPEC.md`](FEATURE_SPEC.md).
-
-| Gate | Stable Outcome | Acceptance Predicate | Status |
-|---|---|---|---|
-| **W-092-F0** | Exact-subject navigation & benchmark truth | LDA/index health is HEAD-bound; runtime-to-patch-to-exterior-verdict evidence resolves; canary subjects content-addressed. | `DONE` (Consolidated & Validated) |
-| **W-092-F1** | One canonical Coding Max product path | Fast/balanced/max invoke `ApplicationService -> Runtime -> HarnessSession -> EpisodeEngine`; no parallel production engine or bypass. | `IN_PROGRESS` (Active in `tasks.md`) |
-| **W-092-F2** | Truthful task-aware completion | Observed test counts; zero-test/stale/partial evidence fails closed; bugfix/feature/migration/greenfield policies explicit. | `APPROVED` (Spec in `FEATURE_SPEC.md`) |
-| **W-092-F3** | Durable long-session continuation | Fresh process restores task/composition/policy/budget identity; never duplicates settled effects across 40+ turns. | `APPROVED` (Spec in `FEATURE_SPEC.md`) |
-| **W-092-F4** | Repository-scale progressive context | `ContextPacket` and `IndexPort` supply bounded, snapshot-bound, omission-bearing staged context with deterministic source fallback. | `APPROVED` (Spec in `FEATURE_SPEC.md`) |
-| **W-092-F5** | Product qualification | Frozen multi-class tasks produce exact patches, fresh verification, exterior verdicts, event evidence, and resume parity. | `BLOCKED` (Requires F1–F4 completion) |
-| **W-092-F6** | Specialist role disposition | Held-out ablations accept or reject reviewer/localizer/planner treatments without weakening verifier authority. | `DEFERRED` (Optional post-baseline) |
-
----
-
+| Historical ID | Maps to |
+|---|---|
+| W-092-F0 | MS-INSTRUMENT (LDA health is CI/present-docs, not this gate) |
+| W-092-F1 | MS-CONTROL path + CMX-09 |
+| W-092-F2 | MS-TRUTH |
+| W-092-F3 | MS-RESUME |
+| W-092-F4 | MS-SEE / MS-CHANGE |
+| W-092-F5 | MS-CONTROL qualification |
+| W-092-F6 | MS-SPECIALIST `[PROPOSAL]` |

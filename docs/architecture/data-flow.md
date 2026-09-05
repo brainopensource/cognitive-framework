@@ -29,8 +29,7 @@ evidence:
   - E-B-023
   - E-B-044
 normative_authority:
-  - ../SPEC.md
-  - ../decisions.md
+  - ../execution/spec.md
 relationships:
   - arch.system.overview
   - arch.system.boundaries

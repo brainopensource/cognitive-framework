@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 import unittest
+from unittest.mock import MagicMock
 
 from vanguard.packages.kernel import FailurePath
 from vanguard.packages.runtime.session import _record
@@ -17,6 +18,38 @@ class _Operator:
 
 
 class TestApprovalReentryFeedback(unittest.TestCase):
+    def test_redundant_verification_narrows_the_live_engine(self) -> None:
+        session = HarnessSession.__new__(HarnessSession)
+        session._completion_verification = SimpleNamespace(passed=True)
+        session._completion_redundant_verifications = 1
+        session._completion_allowed_tools = None
+        session._completion_scaffold_baseline = False
+        session._active_episode_engine = MagicMock()
+        session.run_plan = None
+        session.harness = SimpleNamespace(composition_digest="sha256:composition")
+        session.task = SimpleNamespace(run_id="run-1", brief="finish it")
+        session.operator = _Operator()
+        session._workspace_digest = lambda: "sha256:workspace"
+        request = SimpleNamespace(
+            action="proc.exec",
+            args={"argv": ["python3", "-m", "unittest", "discover"]},
+        )
+        result = SimpleNamespace(
+            failure=FailurePath.OK,
+            outcome=SimpleNamespace(
+                status="ok", detail="[exit 0] Ran 3 tests\nOK",
+                result_digest="sha256:verification",
+            ),
+        )
+
+        session._observe_completion_dispatch(request, result)
+
+        allowed = frozenset({"agency.finish", "fs.read", "fs.search"})
+        self.assertEqual(session._completion_allowed_tools, allowed)
+        session._active_episode_engine.restrict_completion_tools.assert_called_once_with(
+            tuple(sorted(allowed))
+        )
+
     def test_proc_exec_success_becomes_verification_evidence(self) -> None:
         session = HarnessSession.__new__(HarnessSession)
         session._completion_verification = None

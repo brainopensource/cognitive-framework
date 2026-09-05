@@ -232,6 +232,16 @@ def find_associated_tests(
     return engine.find_associated_tests(touched_files, touched_symbols)
 
 
+def index_delta(
+    repo_root: Path,
+    files: Optional[Sequence[str | Path]] = None,
+    profile: Optional[RepositoryProfile] = None,
+) -> Dict[str, Any]:
+    """Perform on-demand ephemeral incremental re-indexing on dirty/specified files."""
+    from .core.delta import index_delta as _index_delta
+    return _index_delta(repo_root=Path(repo_root), files=files, profile=profile)
+
+
 def compile_task_context(
     repo_root: Path,
     task: str,
@@ -240,13 +250,52 @@ def compile_task_context(
     profile: Optional[RepositoryProfile] = None,
     head_sha: Optional[str] = None,
     use_cache: bool = True,
+    auto_delta: bool = False,
 ) -> ContextPacket:
     ctx = AtlasContext.discover(Path(repo_root))
     profile = profile or ctx.profile
     head_sha = head_sha if head_sha is not None else ctx.head_sha
+    if auto_delta:
+        index_delta(repo_root, profile=profile)
     storage = get_storage(repo_root)
     stats = storage.get_stats()
     if stats["files"] == 0:
         index_repository(repo_root, incremental=False)
     compiler = ContextCompiler(repo_root, storage, profile=profile, head_sha=head_sha)
     return compiler.compile(task, budget=budget, strategy=strategy, use_cache=use_cache)
+
+
+def resolve_symbol_intent(
+    repo_root: Path,
+    query: str,
+    top_k: int = 5,
+    profile: Optional[RepositoryProfile] = None,
+) -> List[Dict[str, Any]]:
+    """Resolve natural language query to candidate symbols using offline multi-signal ranking."""
+    storage = get_storage(Path(repo_root))
+    from .core.resolve import resolve_symbol_intent as _resolve
+    return _resolve(storage=storage, query=query, top_k=top_k, profile=profile)
+
+
+def compile_task_plan(
+    repo_root: Path,
+    task: str,
+    budget: int = 8000,
+    strategy: str = "ppr_submodular",
+    top_symbols: int = 5,
+    auto_delta: bool = True,
+    profile: Optional[RepositoryProfile] = None,
+    head_sha: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Compile a complete one-shot task bundle in a single unified execution pass."""
+    from .core.plan import compile_task_plan as _compile_plan
+    return _compile_plan(
+        repo_root=Path(repo_root),
+        task=task,
+        budget=budget,
+        strategy=strategy,
+        top_symbols=top_symbols,
+        auto_delta=auto_delta,
+        profile=profile,
+        head_sha=head_sha,
+    )

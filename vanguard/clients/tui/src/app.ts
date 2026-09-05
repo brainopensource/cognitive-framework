@@ -14,6 +14,7 @@ import { renderHelpOverlay } from "./components/help-overlay.js";
 import { renderDiffViewer } from "./components/diff-viewer.js";
 import { renderSelectModal } from "./components/select-modal.js";
 import type { RuntimeClient } from "@aether/client";
+import type { FrontendPersistencePort } from "@aether/client";
 import { filterCommandsByQuery } from "@aether/tui-core";
 
 export type TuiAppOptions = {
@@ -21,6 +22,7 @@ export type TuiAppOptions = {
   initialState?: Partial<TuiStoreState>;
   screenOptions?: ScreenOptions;
   theme?: ThemeTokens;
+  persistence?: FrontendPersistencePort;
   /** Called after stop(), once raw mode and listeners are torn down. Lets an
    * embedding host (e.g. `vg run`'s interactive path) resolve its own
    * lifecycle instead of the TUI owning process.exit(). */
@@ -42,7 +44,7 @@ export class TuiApplication {
   constructor(options: TuiAppOptions = {}) {
     this.theme = options.theme ?? DEFAULT_THEME;
     this.screen = new TerminalScreen(options.screenOptions);
-    this.store = new TuiStore(options.initialState, options.client);
+    this.store = new TuiStore(options.initialState, options.client, options.persistence);
     this.parser = new KeyParser();
     this.onExitCallback = options.onExit;
     this.keyboard = new KeyboardManager(this.store, options.client, () => this.stop());

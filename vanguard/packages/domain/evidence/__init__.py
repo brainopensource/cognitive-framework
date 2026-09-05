@@ -30,6 +30,14 @@ from .preregistration import (
     Preregistration,
     PreregistrationError,
 )
+from .disposition import (
+    SETTLEMENT_SCHEMA,
+    DispositionError,
+    SettlementReceipt,
+    TaskDisposition,
+    disposition_to_outcome,
+    parse_settlement,
+)
 
 __all__ = [
     "Claim",
@@ -54,4 +62,11 @@ __all__ = [
     "PREREGISTRATION_API",
     "Preregistration",
     "PreregistrationError",
+    "SETTLEMENT_SCHEMA",
+    "DispositionError",
+    "SettlementReceipt",
+    "TaskDisposition",
+    "disposition_to_outcome",
+    "parse_settlement",
 ]
+

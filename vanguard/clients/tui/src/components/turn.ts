@@ -3,6 +3,7 @@ import { DEFAULT_THEME, type ThemeTokens } from "../theme.js";
 import type { ConversationTurn } from "@aether/projections";
 import { renderToolCard } from "./cards/tool-card.js";
 import { renderDiffCard } from "./cards/diff-card.js";
+import { cardStyle } from "./cards/card-style.js";
 
 export function renderTurn(
   screen: TerminalScreen,
@@ -41,7 +42,20 @@ export function renderTurn(
       const lines = renderDiffCard(screen, curRow, card.title, card.diff ?? "", isExpanded, theme);
       curRow += lines;
     } else {
-      const lines = renderToolCard(screen, curRow, card.title, card.details, card.durationMs, isExpanded, theme);
+      // Prefix the glyph for the card's semantic class and colour the row by
+      // status, so a failed effect, a pending approval and a cost line are
+      // distinguishable at a glance in a long transcript.
+      const { glyph, style } = cardStyle(card, theme);
+      const lines = renderToolCard(
+        screen,
+        curRow,
+        `${glyph} ${card.title}`,
+        card.details,
+        card.durationMs,
+        isExpanded,
+        theme,
+        style
+      );
       curRow += lines;
     }
   }

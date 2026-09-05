@@ -1,0 +1,315 @@
+[
+  {
+    "name": "Qwen2.5-Coder-1.5B-Instruct",
+    "tier": "Faixa 1 (1.5B) - Coding",
+    "file": "Qwen2.5-Coder-1.5B-Instruct-Q4_K_M.gguf",
+    "warmup_sec": 1.51,
+    "passed": false,
+    "turns_needed": 4,
+    "total_tokens": 1225,
+    "total_time_sec": 6.82,
+    "avg_speed_tok_s": 179.7,
+    "status": "FAIL",
+    "turns": [
+      {
+        "turn": 1,
+        "tokens": 261,
+        "duration_sec": 1.53,
+        "tokens_sec": 170.3,
+        "success": false,
+        "message": "Traceback (most recent call last):\n  File \"<string>\", line 54, in <module>\n  File \"<string>\", line 39, in run_falsifiers\nAssertionError: Failed Test 2 (Comma in quotes): got [['nome, completo', '', 'idade'], ['Silva, Joao', '', '30']]",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    rows = content.split('\\n')\n    parsed_rows = []\n    for row in rows:\n        fields = []\n        c..."
+      },
+      {
+        "turn": 2,
+        "tokens": 404,
+        "duration_sec": 2.2,
+        "tokens_sec": 183.81,
+        "success": false,
+        "message": "  File \"<string>\", line 61, in <module>\n  File \"<string>\", line 41, in run_falsifiers\n  File \"<string>\", line 17, in parse_csv\nUnboundLocalError: cannot access local variable 'fields' where it is not associated with a value",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    rows = content.split('\\n')\n    parsed_rows = []\n    current_field = ''\n    in_quotes = False\n    e..."
+      },
+      {
+        "turn": 3,
+        "tokens": 280,
+        "duration_sec": 1.53,
+        "tokens_sec": 182.88,
+        "success": false,
+        "message": "  File \"<string>\", line 61, in <module>\n  File \"<string>\", line 41, in run_falsifiers\n  File \"<string>\", line 17, in parse_csv\nUnboundLocalError: cannot access local variable 'fields' where it is not associated with a value",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    rows = content.split('\\n')\n    parsed_rows = []\n    current_field = ''\n    in_quotes = False\n    e..."
+      },
+      {
+        "turn": 4,
+        "tokens": 280,
+        "duration_sec": 1.56,
+        "tokens_sec": 180.03,
+        "success": false,
+        "message": "  File \"<string>\", line 61, in <module>\n  File \"<string>\", line 41, in run_falsifiers\n  File \"<string>\", line 17, in parse_csv\nUnboundLocalError: cannot access local variable 'fields' where it is not associated with a value",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    rows = content.split('\\n')\n    parsed_rows = []\n    current_field = ''\n    in_quotes = False\n    e..."
+      }
+    ]
+  },
+  {
+    "name": "DeepSeek-R1-Distill-Qwen-1.5B",
+    "tier": "Faixa 1 (1.5B) - Reasoning",
+    "file": "DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
+    "warmup_sec": 1.51,
+    "passed": false,
+    "turns_needed": 4,
+    "total_tokens": 4468,
+    "total_time_sec": 24.43,
+    "avg_speed_tok_s": 182.92,
+    "status": "FAIL",
+    "turns": [
+      {
+        "turn": 1,
+        "tokens": 2048,
+        "duration_sec": 10.78,
+        "tokens_sec": 189.97,
+        "success": false,
+        "message": "File \"<string>\", line 1\n    Okay, I need to write a Python function called parse_csv that takes a string content and returns a list of lists of strings. The output should be a matrix representing a CSV. Let's think about how to approach this.\n                                                                                                                                                                                      ^\nSyntaxError: unterminated string literal (detected at line 1)",
+        "code_sample": "Okay, I need to write a Python function called parse_csv that takes a string content and returns a list of lists of strings. The output should be a ma..."
+      },
+      {
+        "turn": 2,
+        "tokens": 1206,
+        "duration_sec": 6.78,
+        "tokens_sec": 177.82,
+        "success": false,
+        "message": "Traceback (most recent call last):\n  File \"<string>\", line 55, in <module>\n  File \"<string>\", line 40, in run_falsifiers\nAssertionError: Failed Test 2 (Comma in quotes): got [['nome', ' completo', 'idad'], ['Silva', ' Joao', '3']]",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    \"\"\"\n    Parses a CSV formatted string (RFC-4180) and returns a matrix of strings.\n    Rules:\n    1..."
+      },
+      {
+        "turn": 3,
+        "tokens": 990,
+        "duration_sec": 5.5,
+        "tokens_sec": 179.93,
+        "success": false,
+        "message": "Traceback (most recent call last):\n  File \"<string>\", line 55, in <module>\n  File \"<string>\", line 40, in run_falsifiers\nAssertionError: Failed Test 2 (Comma in quotes): got [['nome', ' completo', 'idad'], ['Silva', ' Joao', '3']]",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    \"\"\"\n    Parses a CSV formatted string (RFC-4180) and returns a matrix of strings.\n    Rules:\n    1..."
+      },
+      {
+        "turn": 4,
+        "tokens": 224,
+        "duration_sec": 1.36,
+        "tokens_sec": 164.63,
+        "success": false,
+        "message": "File \"<string>\", line 1\n    Okay, I need to fix the `parse_csv` function so that it passes the automated tests. The previous implementation had issues with handling escaped quotes and quoted fields correctly. Let me think about how to improve it.\n            ^^^^\nSyntaxError: invalid syntax",
+        "code_sample": "Okay, I need to fix the `parse_csv` function so that it passes the automated tests. The previous implementation had issues with handling escaped quote..."
+      }
+    ]
+  },
+  {
+    "name": "Qwen2.5-Coder-3B-Instruct",
+    "tier": "Faixa 2 (3B) - Coding",
+    "file": "Qwen2.5-Coder-3B-Instruct-Q4_K_M.gguf",
+    "warmup_sec": 2.0,
+    "passed": false,
+    "turns_needed": 4,
+    "total_tokens": 2078,
+    "total_time_sec": 19.36,
+    "avg_speed_tok_s": 107.34,
+    "status": "FAIL",
+    "turns": [
+      {
+        "turn": 1,
+        "tokens": 340,
+        "duration_sec": 3.22,
+        "tokens_sec": 105.75,
+        "success": false,
+        "message": "  File \"<string>\", line 43, in run_falsifiers\n  File \"<string>\", line 37, in parse_csv\n  File \"<string>\", line 25, in parse_field\nUnboundLocalError: cannot access local variable 'in_quote' where it is not associated with a value",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    \"\"\"\n    Parses a CSV formatted string (RFC-4180) and returns a matrix of strings.\n    Rules:\n    1..."
+      },
+      {
+        "turn": 2,
+        "tokens": 595,
+        "duration_sec": 5.37,
+        "tokens_sec": 110.76,
+        "success": false,
+        "message": "Execution timed out (5s)",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    \"\"\"\n    Parses a CSV formatted string (RFC-4180) and returns a matrix of strings.\n    Rules:\n    1..."
+      },
+      {
+        "turn": 3,
+        "tokens": 543,
+        "duration_sec": 5.11,
+        "tokens_sec": 106.23,
+        "success": false,
+        "message": "Execution timed out (5s)",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    \"\"\"\n    Parses a CSV formatted string (RFC-4180) and returns a matrix of strings.\n    Rules:\n    1..."
+      },
+      {
+        "turn": 4,
+        "tokens": 600,
+        "duration_sec": 5.66,
+        "tokens_sec": 106.0,
+        "success": false,
+        "message": "Execution timed out (5s)",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    \"\"\"\n    Parses a CSV formatted string (RFC-4180) and returns a matrix of strings.\n    Rules:\n    1..."
+      }
+    ]
+  },
+  {
+    "name": "Phi-4-mini-instruct (3.8B)",
+    "tier": "Faixa 2 (3.8B) - Reasoning",
+    "file": "Phi-4-mini-instruct-Q4_K_M.gguf",
+    "warmup_sec": 2.53,
+    "passed": false,
+    "turns_needed": 4,
+    "total_tokens": 1306,
+    "total_time_sec": 14.76,
+    "avg_speed_tok_s": 88.47,
+    "status": "FAIL",
+    "turns": [
+      {
+        "turn": 1,
+        "tokens": 298,
+        "duration_sec": 3.4,
+        "tokens_sec": 87.54,
+        "success": false,
+        "message": "Traceback (most recent call last):\n  File \"<string>\", line 67, in <module>\n  File \"<string>\", line 52, in run_falsifiers\nAssertionError: Failed Test 2 (Comma in quotes): got [['', 'idade'], ['', '30']]",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    def parse_record(record: str) -> list[str]:\n        fields = []\n        field_start = 0\n        in..."
+      },
+      {
+        "turn": 2,
+        "tokens": 336,
+        "duration_sec": 3.72,
+        "tokens_sec": 90.22,
+        "success": false,
+        "message": "Traceback (most recent call last):\n  File \"<string>\", line 71, in <module>\n  File \"<string>\", line 56, in run_falsifiers\nAssertionError: Failed Test 2 (Comma in quotes): got [['', 'idade'], ['', '30']]",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    def parse_record(record: str) -> list[str]:\n        fields = []\n        field_start = 0\n        in..."
+      },
+      {
+        "turn": 3,
+        "tokens": 336,
+        "duration_sec": 3.78,
+        "tokens_sec": 88.93,
+        "success": false,
+        "message": "Traceback (most recent call last):\n  File \"<string>\", line 71, in <module>\n  File \"<string>\", line 56, in run_falsifiers\nAssertionError: Failed Test 2 (Comma in quotes): got [['', 'idade'], ['', '30']]",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    def parse_record(record: str) -> list[str]:\n        fields = []\n        field_start = 0\n        in..."
+      },
+      {
+        "turn": 4,
+        "tokens": 336,
+        "duration_sec": 3.86,
+        "tokens_sec": 87.16,
+        "success": false,
+        "message": "Traceback (most recent call last):\n  File \"<string>\", line 71, in <module>\n  File \"<string>\", line 56, in run_falsifiers\nAssertionError: Failed Test 2 (Comma in quotes): got [['', 'idade'], ['', '30']]",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    def parse_record(record: str) -> list[str]:\n        fields = []\n        field_start = 0\n        in..."
+      }
+    ]
+  },
+  {
+    "name": "DeepSeek-Coder-V2-Lite (16B MoE)",
+    "tier": "Faixa 3 (16B MoE) - Coding",
+    "file": "DeepSeek-Coder-V2-Lite-Instruct-Q4_K_M.gguf",
+    "warmup_sec": 6.3,
+    "passed": false,
+    "turns_needed": 4,
+    "total_tokens": 2000,
+    "total_time_sec": 20.18,
+    "avg_speed_tok_s": 99.11,
+    "status": "FAIL",
+    "turns": [
+      {
+        "turn": 1,
+        "tokens": 503,
+        "duration_sec": 4.58,
+        "tokens_sec": 109.76,
+        "success": false,
+        "message": "Traceback (most recent call last):\n  File \"<string>\", line 59, in <module>\n  File \"<string>\", line 44, in run_falsifiers\nAssertionError: Failed Test 2 (Comma in quotes): got [['\"nome, completo\"', 'idade'], ['\"Silva, Joao\"', '30']]",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    \"\"\"\n    Parses a CSV formatted string (RFC-4180) and returns a matrix of strings.\n    Rules:\n    1..."
+      },
+      {
+        "turn": 2,
+        "tokens": 499,
+        "duration_sec": 5.09,
+        "tokens_sec": 98.13,
+        "success": false,
+        "message": "Traceback (most recent call last):\n  File \"<string>\", line 59, in <module>\n  File \"<string>\", line 44, in run_falsifiers\nAssertionError: Failed Test 2 (Comma in quotes): got [['\"nome, completo\"', 'idade'], ['\"Silva, Joao\"', '30']]",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    \"\"\"\n    Parses a CSV formatted string (RFC-4180) and returns a matrix of strings.\n    Rules:\n    1..."
+      },
+      {
+        "turn": 3,
+        "tokens": 499,
+        "duration_sec": 5.11,
+        "tokens_sec": 97.66,
+        "success": false,
+        "message": "Traceback (most recent call last):\n  File \"<string>\", line 59, in <module>\n  File \"<string>\", line 44, in run_falsifiers\nAssertionError: Failed Test 2 (Comma in quotes): got [['\"nome, completo\"', 'idade'], ['\"Silva, Joao\"', '30']]",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    \"\"\"\n    Parses a CSV formatted string (RFC-4180) and returns a matrix of strings.\n    Rules:\n    1..."
+      },
+      {
+        "turn": 4,
+        "tokens": 499,
+        "duration_sec": 5.4,
+        "tokens_sec": 92.37,
+        "success": false,
+        "message": "Traceback (most recent call last):\n  File \"<string>\", line 59, in <module>\n  File \"<string>\", line 44, in run_falsifiers\nAssertionError: Failed Test 2 (Comma in quotes): got [['\"nome, completo\"', 'idade'], ['\"Silva, Joao\"', '30']]",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    \"\"\"\n    Parses a CSV formatted string (RFC-4180) and returns a matrix of strings.\n    Rules:\n    1..."
+      }
+    ]
+  },
+  {
+    "name": "Qwen2.5-Coder-14B-Instruct",
+    "tier": "Faixa 3 (14B) - Coding",
+    "file": "Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf",
+    "warmup_sec": 6.22,
+    "passed": false,
+    "turns_needed": 4,
+    "total_tokens": 1160,
+    "total_time_sec": 39.16,
+    "avg_speed_tok_s": 29.62,
+    "status": "FAIL",
+    "turns": [
+      {
+        "turn": 1,
+        "tokens": 266,
+        "duration_sec": 9.02,
+        "tokens_sec": 29.5,
+        "success": false,
+        "message": "Traceback (most recent call last):\n  File \"<string>\", line 59, in <module>\n  File \"<string>\", line 48, in run_falsifiers\nAssertionError: Failed Test 3 (Newline in quotes): got [['id', 'descricao'], ['1', 'linha 1'], ['linha 2'], ['2', 'fim']]",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    \"\"\"\n    Parses a CSV formatted string (RFC-4180) and returns a matrix of strings.\n    Rules:\n    1..."
+      },
+      {
+        "turn": 2,
+        "tokens": 298,
+        "duration_sec": 9.94,
+        "tokens_sec": 29.98,
+        "success": false,
+        "message": "Traceback (most recent call last):\n  File \"<string>\", line 67, in <module>\n  File \"<string>\", line 56, in run_falsifiers\nAssertionError: Failed Test 3 (Newline in quotes): got [['id', 'descricao'], ['1', 'linha 1'], ['linha 2'], ['2', 'fim']]",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    \"\"\"\n    Parses a CSV formatted string (RFC-4180) and returns a matrix of strings.\n    Rules:\n    1..."
+      },
+      {
+        "turn": 3,
+        "tokens": 298,
+        "duration_sec": 10.06,
+        "tokens_sec": 29.63,
+        "success": false,
+        "message": "Traceback (most recent call last):\n  File \"<string>\", line 67, in <module>\n  File \"<string>\", line 56, in run_falsifiers\nAssertionError: Failed Test 3 (Newline in quotes): got [['id', 'descricao'], ['1', 'linha 1'], ['linha 2'], ['2', 'fim']]",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    \"\"\"\n    Parses a CSV formatted string (RFC-4180) and returns a matrix of strings.\n    Rules:\n    1..."
+      },
+      {
+        "turn": 4,
+        "tokens": 298,
+        "duration_sec": 10.15,
+        "tokens_sec": 29.36,
+        "success": false,
+        "message": "Traceback (most recent call last):\n  File \"<string>\", line 67, in <module>\n  File \"<string>\", line 56, in run_falsifiers\nAssertionError: Failed Test 3 (Newline in quotes): got [['id', 'descricao'], ['1', 'linha 1'], ['linha 2'], ['2', 'fim']]",
+        "code_sample": "def parse_csv(content: str) -> list[list[str]]:\n    \"\"\"\n    Parses a CSV formatted string (RFC-4180) and returns a matrix of strings.\n    Rules:\n    1..."
+      }
+    ]
+  },
+  {
+    "name": "DeepSeek-R1-Distill-Qwen-14B",
+    "tier": "Faixa 3 (14B) - Reasoning",
+    "file": "DeepSeek-R1-Distill-Qwen-14B-Q4_K_M.gguf",
+    "warmup_sec": 0.0,
+    "passed": false,
+    "turns_needed": 4,
+    "total_tokens": 0,
+    "total_time_sec": 0.0,
+    "avg_speed_tok_s": 0.0,
+    "status": "FAIL",
+    "error": "HTTP Error 400: Bad Request"
+  }
+]

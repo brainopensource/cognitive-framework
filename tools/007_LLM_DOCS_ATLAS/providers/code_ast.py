@@ -43,6 +43,8 @@ class CodeASTProvider(BaseProvider):
         repo_root: Path | Any,
         incremental: bool = False,
         file_states: Optional[Dict[str, Dict[str, Any]]] = None,
+        target_files: Optional[Sequence[Path | str]] = None,
+        storage: Optional[Any] = None,
     ) -> ProviderResult:
         root = Path(repo_root.root) if (hasattr(repo_root, "root") and not isinstance(repo_root, Path)) else Path(repo_root)
         profile = getattr(repo_root, "profile", None)
@@ -57,11 +59,19 @@ class CodeASTProvider(BaseProvider):
         legacy_entities: List[Entity] = []
         legacy_relations: List[Relation] = []
 
-        code_files = [
-            p for p in root.rglob("*")
-            if p.is_file() and p.suffix.lower() in code_exts
-            and not any(x in p.parts for x in skip_dirs)
-        ]
+        if target_files is not None:
+            resolved_targets = []
+            for f in target_files:
+                p = Path(f) if Path(f).is_absolute() else (root / f)
+                if p.is_file() and p.suffix.lower() in code_exts and not any(x in p.parts for x in skip_dirs):
+                    resolved_targets.append(p)
+            code_files = resolved_targets
+        else:
+            code_files = [
+                p for p in root.rglob("*")
+                if p.is_file() and p.suffix.lower() in code_exts
+                and not any(x in p.parts for x in skip_dirs)
+            ]
 
         # Intermediate structures for Two-Pass AST resolution
         parsed_py_files: Dict[str, tuple[ast.AST, str]] = {}
@@ -129,6 +139,7 @@ class CodeASTProvider(BaseProvider):
                     symbol_by_id,
                     symbol_by_qualname,
                     symbols_by_name,
+                    storage=storage,
                 )
                 relations.extend(call_rels)
             except Exception:
@@ -144,6 +155,7 @@ class CodeASTProvider(BaseProvider):
                     file_imports.get(rel_path, {}),
                     symbol_by_qualname,
                     symbols_by_name,
+                    storage=storage,
                 )
                 relations.extend(call_rels)
             except Exception:
@@ -340,6 +352,7 @@ class CodeASTProvider(BaseProvider):
         symbol_by_id: Dict[str, IRSymbol],
         symbol_by_qualname: Dict[str, IRSymbol],
         symbols_by_name: Dict[str, List[IRSymbol]],
+        storage: Optional[Any] = None,
     ) -> List[IRRelation]:
         relations: List[IRRelation] = []
         pkg = file_path.rsplit(".", 1)[0].replace("/", ".")
@@ -367,6 +380,7 @@ class CodeASTProvider(BaseProvider):
                             symbols_by_name,
                             relations,
                             is_test_file,
+                            storage=storage,
                         )
             elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 fn_qualname = f"{pkg}.{node.name}"
@@ -384,6 +398,7 @@ class CodeASTProvider(BaseProvider):
                     symbols_by_name,
                     relations,
                     is_test_file,
+                    storage=storage,
                 )
 
         return relations
@@ -400,6 +415,7 @@ class CodeASTProvider(BaseProvider):
         symbols_by_name: Dict[str, List[IRSymbol]],
         relations: List[IRRelation],
         is_test_file: bool,
+        storage: Optional[Any] = None,
     ) -> None:
         seen_calls: Set[str] = set()
 
@@ -474,6 +490,15 @@ class CodeASTProvider(BaseProvider):
                             confidence = ConfidenceTier.HEURISTIC
                     else:
                         target_id = f"name:{call_name}"
+
+                if target_id and target_id.startswith("name:") and storage is not None:
+                    lookup_name = target_id[5:]
+                    db_syms = storage.get_symbol(lookup_name, exact=True)
+                    if not db_syms and "." in lookup_name:
+                        db_syms = storage.get_symbol(lookup_name.split(".")[-1], exact=True)
+                    if db_syms:
+                        target_id = db_syms[0]["id"]
+                        confidence = ConfidenceTier.STRUCTURED_DOC
 
                 if not target_id:
                     continue
@@ -567,6 +592,7 @@ class CodeASTProvider(BaseProvider):
         imports_map: Dict[str, str],
         symbol_by_qualname: Dict[str, IRSymbol],
         symbols_by_name: Dict[str, List[IRSymbol]],
+        storage: Optional[Any] = None,
     ) -> List[IRRelation]:
         relations: List[IRRelation] = []
         is_test_file = "test" in file_path.lower() or file_path.endswith((".test.ts", ".spec.ts"))
@@ -620,6 +646,15 @@ class CodeASTProvider(BaseProvider):
                         conf = ConfidenceTier.STRUCTURED_DOC
                     else:
                         target_id = f"name:{call_expr}"
+
+                if target_id and target_id.startswith("name:") and storage is not None:
+                    lookup_name = target_id[5:]
+                    db_syms = storage.get_symbol(lookup_name, exact=True)
+                    if not db_syms and "." in lookup_name:
+                        db_syms = storage.get_symbol(lookup_name.split(".")[-1], exact=True)
+                    if db_syms:
+                        target_id = db_syms[0]["id"]
+                        conf = ConfidenceTier.STRUCTURED_DOC
 
                 loc = SourceLocation(file_path, idx, idx)
                 relations.append(

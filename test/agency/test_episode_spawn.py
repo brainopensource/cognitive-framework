@@ -266,7 +266,7 @@ class TestEpisodeEngineSpawn(unittest.TestCase):
             Fragment(source="env", label="c-obs-2", text="dependencies loaded"),
         ]
         child_compiled = child_compiler.compile(brief="Explore codebase", dialogue=child_dialogue)
-        self.assertEqual(len(child_compiled.blocks), 6)
+        self.assertEqual(len(child_compiled.blocks), 7)
 
         # Parent receives only the summary payload from SpawnResult
         spawn_payload = "Found 2 matching endpoints in auth.py"

@@ -111,7 +111,7 @@ class ChangeSurfaceEstimator:
         # Calculate coverage ratio
         mod_set = set(modified_files)
         touched = sum(1 for p in primary if p in mod_set or any(m.endswith(p) for m in mod_set))
-        coverage = touched / len(primary) if primary else 1.0
+        coverage = touched / len(primary) if primary else 0.0
 
         return ChangeSurfaceEstimate(
             primary_files=primary,

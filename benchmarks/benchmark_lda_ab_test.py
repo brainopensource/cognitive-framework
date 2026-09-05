@@ -29,16 +29,6 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-env_file = ROOT / ".env"
-if env_file.is_file():
-    for line in env_file.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if line and not line.startswith("#") and "=" in line:
-            k, v = line.split("=", 1)
-            k = k.strip()
-            v = v.strip().strip("'\"")
-            if k in {"OPENROUTER_API_KEY", "DEEPSEEK_API_KEY", "VANGUARD_ALLOW_PAID"}:
-                os.environ[k] = v
 
 from vanguard.packages.runtime.root import (
     application_service,
@@ -105,6 +95,7 @@ class TestHeadroomOracle(unittest.TestCase):
         self.assertEqual(compute_dynamic_headroom(500, 800, burst_mode=True), 0)
 
 if __name__ == "__main__":
+    load_benchmark_env()
     unittest.main()
 """
 
@@ -161,12 +152,14 @@ def compute_dynamic_headroom(allocated_micros: int, spent_micros: int, burst_mod
     # 4. Add existing public test file
     public_test_code = '''import unittest
 from benchmarks.baac.lib.budget import compute_dynamic_headroom
+from benchmarks._env import load_benchmark_env
 
 class TestBudgetPublic(unittest.TestCase):
     def test_basic_headroom(self):
         self.assertEqual(compute_dynamic_headroom(1000, 200), 800)
 
 if __name__ == "__main__":
+    load_benchmark_env()
     unittest.main()
 '''
     (ws / "tests/unit/test_budget.py").write_text(public_test_code, encoding="utf-8")
@@ -320,4 +313,5 @@ def main():
 
 
 if __name__ == "__main__":
+    load_benchmark_env()
     main()

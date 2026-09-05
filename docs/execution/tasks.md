@@ -14,10 +14,9 @@ audience:
   - contributor
   - release-owner
 version: 0.9.3
-last_verified: 2026-09-03
+last_verified: 2026-09-05
 lock_head: "66aa7a3c0c31"
 normative_authority:
-  - docs/SPEC.md
   - docs/execution/spec.md
   - docs/execution/technical.md
 relationships:
@@ -33,86 +32,96 @@ confidence: high
 
 Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technical.md`](technical.md). Packages: [`backlog.md`](backlog.md). TARGET gates: [`milestones.md`](milestones.md).
 
-**No sprints. No waves.** Check boxes as work completes. **Recommended reading order (not a schedule):** T-01–T-08, then T-09–T-13.
+**No sprints. No waves.** Check boxes as work completes. **Recommended reading order (not a schedule):** MS-SEE A stack T-16/T-15/T-36/T-37/T-45 is MECHANISM this-branch. T-04/T-05/T-07 landed 2026-09-04 (T-04 carries an open successor obligation; see its row). Do not create `progressive.py` (T-15). T-46 ranking stays `[PROPOSAL]`.
+
+**Current implementation handoff (2026-09-05 session stop; EW-9 wave names are scope labels, not a sprint calendar).** Phase 0 / `MS-INSTRUMENT` remains `CLOSED` on its frozen benchmark-harness subject. Wave 1 mechanisms T-69–T-74, T-81/T-82/T-83a, T-84/T-85 and T-87/T-88/T-91 are landed and their focused trust-spine set is green; empirical Wave 1 acceptance still requires a live T-92/L0 disposition, the T-04 successor obligation, and exact-subject convergence evidence. Wave 2 still has **0 accepted tasks**. Mechanism code for T-79/T-89/T-92–T-95 is in the dirty tree and the **31 named focused falsifiers** are green; checkboxes stay `[ ]`. Blockers: five `check_boundaries.py` hits in `benchmarks/ladder/evidence.py`, `benchmarks/ladder/l0_triad/runner.py`, `benchmarks/product_path.py`, and `runtime/cli.py`; plus four related-surface failures outside the 31 (`test.apps.coding_max.test_coding_max_facade` ×2, `test.falsifiers.test_rf90_generic_entrypoint` ×2). T-26 remains explicitly `UNFROZEN` (arm pinned, SHA not frozen). T-27 and T-51/T-52 remain open. **T-97 is deferred on the record for this pass** (TypeScript `aether code --help` / `-m` collision); it is not implemented and not vanished. Do not start T-80/T-96 or post-control work before `MS-CONTROL` closes. `just` is not the gate: run the `justfile` recipe bodies (`python3 tools/linters/...`, unittest). Knowledge artifacts, if regenerated later, live only under `.generated/knowledge/` — no new Markdown under `docs/`.
 
 B §18 tickets T-01–T-35 are canonical. A §31 maps into those IDs or T-36+ (see merge map appendix). v2 `SUB-*` are aliases. Live backlog `SUB-01` (kernel S0–S12) is a different package.
 
-Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-dag-do-not-execute-as-the-program).
+Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-dag-do-not-execute).
 
 ### Context: Instrument truth
 
 **T-01 Enumerator membership digest** (B)  
-- [ ] Schema-valid task manifest required; directory names insufficient  
-- [ ] Reject `__pycache__`, hidden, tmp, missing oracle, duplicate IDs, digest mismatch  
-- [ ] Order-independent task-set digest  
+- [x] Schema-valid task manifest required; directory names insufficient  
+- [x] Reject `__pycache__`, hidden, tmp, missing oracle, duplicate IDs, digest mismatch  
+- [x] Order-independent task-set digest  
 - Files: `benchmarks/benchmark_20_suite/runner.py`; create `test/benchmarks/test_b20_membership.py`  
 - Falsifier: `__pycache__` is not a task  
 
 **T-02 Subject SHA on every empirical JSON** (B)  
-- [ ] Bind `subject_sha` = frozen candidate `git rev-parse HEAD`  
-- [ ] Missing SHA ⇒ receipt refused  
+- [x] Bind `subject_sha` = frozen candidate `git rev-parse HEAD`  
+- [x] Missing SHA ⇒ receipt refused  
 - Files: `benchmarks/protocols.py`, B20 writer  
 - Requires: T-01  
 
 **T-03 Dry-run empirical field ban** (B)  
-- [ ] `dry_run ⇒` pass/cost/oracle_passed null  
+- [x] `dry_run ⇒` pass/cost/oracle_passed null  
 - Files: runners; cousin `test/benchmarks/test_m8_bundle.py`  
 
 **T-24 Patch identity on results** (B)  
-- [ ] PASS row without patch digest refused  
+- [x] PASS row without patch digest refused  
 - Requires: T-02  
 
 **T-25 Missingness taxonomy** (B)  
-- [ ] Distinct `passed` / `failed` / `undeterminable` / `not_run`  
-- [ ] Provider ≠ task fail; harness ≠ model; `DATASET_INVALID` ≠ fail  
+- [x] Distinct `passed` / `failed` / `undeterminable` / `not_run`  
+- [x] Provider ≠ task fail; harness ≠ model; `DATASET_INVALID` ≠ fail  
 - Requires: T-01, T-02  
 
 **T-40 Dirty-subject fail-closed** (A §31.9)  
-- [ ] Qualifying run on dirty tree fails closed  
+- [x] Qualifying run on dirty tree fails closed  
 - Related: T-02  
 
 **T-41 BAAC schema-valid discovery** (A §31.7)  
-- [ ] Require schema-valid manifests in BAAC (if distinct from T-01, keep both)  
+- [x] Require schema-valid manifests in BAAC (if distinct from T-01, keep both)  
 
 ### Context: Admission and verification truth
 
-**T-04 Remove default admission exemption** (B) `[PROPOSAL]` + successor baseline  
-- [ ] Record RF-25 / M-2 successor baseline **before** shrinking `ADMISSION_GATE_EXEMPT`  
-- [ ] Falsifier: `vg-code-default` + `finish` + no patch ⇒ not completed  
+**T-04 Remove default admission exemption** (B) — LANDED + successor obligation  
+- [x] Record RF-25 / M-2 successor baseline **before** shrinking `ADMISSION_GATE_EXEMPT`  
+- [x] Falsifier: `vg-code-default` + `finish` + no patch ⇒ not completed  
 - FACT: exemption pinned by `test/falsifiers/test_completion_gate_scope.py`  
 - Files: `runtime/session.py`  
+- **Successor baseline (recorded 2026-09-04, pre-shrink).** The named frozen falsifiers survive the shrink: `test/falsifiers/test_rf25_cold_continuation.py` and `test/falsifiers/test_rf23_trajectory_content.py` are green before and after. `test_completion_gate_scope.py` was rewritten as its own successor — it now pins the capability-derived contract instead of the exemption it used to freeze. The `ADMISSION_GATE_EXEMPT` pin in `test/runtime/test_observed_test_counts.py` was replaced by the T-07 subject cases in the same file.  
+- **Successor obligation (OPEN, 21 tests / 14 files).** Deferred by decision, not by oversight: each scripts a bare `finish` through `vg-code-default` / `vg-code-lex` and asserts `completed`. The gate now rejects it, the script exhausts, and the run ends `instrument_error`. These are mechanism tests whose turn budgets and outcomes were incidental to the exemption; none is a named M-2 falsifier. Retargeting them is a separate work package and MUST NOT be done by weakening the gate.  
+  `test/runtime/test_harness_session.py` (4) · `test/runtime/test_app_service_and_cli.py` (2) · `test/runtime/test_s22_refusal_is_recorded.py` (2) · `test/falsifiers/test_rf90_generic_entrypoint.py` (2) · `test/runtime/test_beta12_kill_and_resume.py` · `test/runtime/test_m8_turn_loop.py` · `test/runtime/test_evo13_cli_cassette_doctor.py` · `test/runtime/test_studio_gateway.py` · `test/runtime/test_evidence_capture.py` · `test/runtime/test_composition_root.py` · `test/agency/test_native_agent_catalog.py` · `test/apps/coding_max/test_coding_max_facade.py` · `test/benchmarks/test_beta14_performance_baseline.py` · `test/integration/test_reconstruction_packs.py` · `test/agency/test_cassette_replay.py`  
+  The last two are cassette replays; their sibling packs (`vg-code-claude-shaped`, `vg-code-opencode-shaped`, `vg-code-swe-mini`) are already red at HEAD for the identical reason, so those three and these two close together or not at all.  
 
 **T-05 One gating source of truth** (B)  
-- [ ] Delete unused `ADMISSION_GATED_HARNESSES` **or** make it the only source  
+- [x] Delete unused `ADMISSION_GATED_HARNESSES` **or** make it the only source  
+- Both name sets deleted; `admission_required` is the sole decider and reads declared capability only. Pinned by `test/falsifiers/test_completion_gate_scope.py`.  
 - Requires: T-04  
 - Files: `session.py`; `test_completion_gate_scope.py`  
 
-**T-06 Remove Forge `test_count = 1`** (B)  
-- [ ] Delete `forge/engine.py` L309–311 fallback  
-- [ ] Chimera `executed = 1` on bare exit 0 — same treatment (subtask from A G-01)  
-- Falsifier: exit 0 + empty output ⇒ not passed  
+**T-06 Remove Forge `test_count = 1`** (B)
+- [x] Delete `forge/engine.py` L309–311 fallback
+- [x] Chimera `executed = 1` on bare exit 0 — same treatment (subtask from A G-01)
+- Chimera non-zero-exit leftover closed in `63b77116`.
+- Falsifier: exit 0 + empty output ⇒ not passed
 
 **T-07 Typed verification command subject** (B)  
-- [ ] Bind argv digest + workspace digest + task digest  
-- [ ] `python3 -c 'print("OK")'` is not verification  
+- [x] Bind argv digest + workspace digest + task digest  
+- [x] `python3 -c 'print("OK")'` is not verification  
+- `VerificationSubject` in `session.py` digests all three; the subject is re-derived against live digests at admission, so a receipt cannot survive the write that invalidated it. `verification_argv` rejects inline interpreter program text outright — a model that writes the program writes its output too, so `python3 -c 'print("3 tests passed")'` is not a subject either. Falsifiers in `test/runtime/test_observed_test_counts.py`.  
 - Requires: T-04  
 
 **T-08 Parse counts without inventing** (B)  
-- [ ] collected/executed/passed/failed/skipped (A §31.2–3)  
-- [ ] `Ran 0 tests` / `0 passed` ⇒ 0  
-- [ ] Unrecognized runner remains unknown  
+- [x] collected/executed/passed/failed/skipped (A §31.2–3)  
+- [x] `Ran 0 tests` / `0 passed` ⇒ 0  
+- [x] Unrecognized runner remains unknown  
+- Session parser + pack `ParsedTestOutput.runner` landed `8637db55` (B). Chimera tail done by A (`63b77116`). Do not uncheck.
 - Requires: T-07  
 
 **T-42 Adversarial coding verification suite** (A §31.6)  
-- [ ] Replace retired `test/runtime/test_coding_verification.py` empty suite  
-- [ ] `true` / `echo 10 tests passed` cannot admit  
-- [ ] Unrelated suite cannot satisfy task relevance  
-- [ ] Stale verification after write rejected  
-- [ ] Foreign task/composition digest rejected  
+- [x] Replace retired `test/runtime/test_coding_verification.py` empty suite  
+- [x] `true` / `echo 10 tests passed` cannot admit  
+- [x] Unrelated suite cannot satisfy task relevance  
+- [x] Stale verification after write rejected  
+- [x] Foreign task/composition digest rejected  
 
 **T-38 Fail-to-pass reproducer (bugfix class)** (v2 §5.3, A §9.4)  
-- [ ] Pre-verify MUST fail; post-verify MUST pass; vacuous reproducer rejected  
-- [ ] Not a universal finish law (docs/research/explanation excluded)  
+- [x] Pre-verify MUST fail; post-verify MUST pass; vacuous reproducer rejected  
+- [x] Not a universal finish law (docs/research/explanation excluded)  
 
 **T-39 Mutation score ≥ 0.80** (v2 §5.4, VER-02) `[PROPOSAL]`  
 - [ ] Optional treatment; not default admission  
@@ -120,91 +129,96 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - Alias: `VER-02`, `TLS-06`  
 
 **T-23 Quarantine Forge/Chimera from Coding Max reports** (B)  
-- [ ] Product arms ⊆ `{vg-code-fast,balanced,max}`  
+- [x] Product arms ⊆ `{vg-code-fast,balanced,max}`  
 - Requires: T-06  
 
 ### Context: Semantic state and resume
 
-**T-09 Domain SemanticTaskState** (B) `[PROPOSAL]` merge with `CodingTaskState`  
-- [ ] Create `domain/task_state.py` (**MISSING**) stdlib + JCS  
-- [ ] Do not create a second authority beside `fold_task_state`  
-- [ ] A §6.2 extra types remain `[PROPOSAL]` catalog in spec, not this task’s scope  
+**T-09 Domain SemanticTaskState** (B) merge with `CodingTaskState`
+- [x] Land `vanguard/packages/domain/task_state.py` (stdlib + JCS) on commit `8637db55`
+- [x] `CodingTaskState is SemanticTaskState`; one fold: `runtime/task_state.py` `fold_task_state`
+- [x] A §6.2 extra types remain `[PROPOSAL]` in spec
+- Lock `66aa7a3c`: path MISSING. Branch: present on `8637db55` — B owns. MS-RESUME `CLOSED` (closer: 16 unittest OK, 2026-09-03).  
 
 **T-10 Runtime fold** (B)  
-- [ ] Fold events; unknown ignored; remove `"test" in action.lower()` inference  
-- [ ] Durable events: classified, hypothesis open/support/reject, obligation open/satisfied, etc. (A §10.2)  
+- [x] Fold events; unknown ignored; remove `"test" in action.lower()` inference  
+- [x] Durable events: classified, hypothesis open/support/reject, obligation open/satisfied, etc. (A §10.2)  
 - Requires: T-09  
 
 **T-11 Preserve episode_id on resume** (B)  
-- [ ] Stop synthesizing only `episode-{run_id}`  
+- [x] Stop synthesizing only `episode-{run_id}`  
 - Requires: T-10  
 
 **T-12 Stop dumping resume_state into L3** (B)  
-- [ ] σ in L4/L5; L1–L3 prefix identity after resume+write  
+- [x] σ in L4/L5; L1–L3 prefix identity after resume+write  
 - Requires: T-10  
 
 **T-13 ContextPacket resume identity** (B)  
-- [ ] Populate `validate_resume_identity` fields  
+- [x] Populate `validate_resume_identity` fields  
 - Requires: T-12  
 
 **T-43 Task class on projection** (A §31.11)  
-- [ ] Explicit task class on state (if not inside T-09 schema)  
+- [x] Explicit task class on state (if not inside T-09 schema)  
 
 **T-44 Resume parity vectors** (A §31.16–19)  
-- [ ] All semantic fields; restart-after-patch; restart-after-verification; 40-turn fresh-process  
+- [x] All semantic fields; restart-after-patch; restart-after-verification; 40-turn fresh-process  
 - Requires: T-11, T-12  
 
 ### Context: Context, index, epoch
 
 **T-14 WorkspaceEpoch** (B)  
-- [ ] `{treeHash, indexDigest, sourceRevision, compiledAtTurn}`  
-- [ ] Stale packet cannot justify completion  
+- [x] `{treeHash, indexDigest, sourceRevision, compiledAtTurn}`  
+- [x] Stale packet cannot justify completion  
 - Files: `ports/index.py`, `adapters/stores/repo_index.py`, session  
 
 **T-15 Progressive L4/L5 strategy** (B)  
-- [ ] Policy on existing `ContextCompiler`; **not** a second compiler (`PRG-01` alias)  
-- [ ] Settled invariants / dead ends non-evictable  
-- [ ] ResultDistiller at effect boundary (v2 §3.3) → if large, split T-36  
+- [x] Policy on existing `ContextCompiler`; **not** a second compiler (`PRG-01` alias)  
+- [x] Settled invariants / dead ends non-evictable  
+- [x] ResultDistiller at effect boundary (v2 §3.3) → split T-36  
 - Requires: T-12, T-14  
 
 **T-16 Index refresh after patch.apply** (B)  
-- [ ] Callers after write include new symbol or explicit omission  
+- [x] Callers after write include new symbol or explicit omission  
 - Requires: T-14  
 
 **T-36 ResultDistiller + output caps** (v2 §3.3, §13, WRN-02)  
-- [ ] Compact text + full artifact digest; ~1–2k char tool bodies  
-- [ ] Goal echo at tail of L5 (v2 §15)  
+- [x] Compact text + full artifact digest; ~1–2k char tool bodies  
+- [x] Goal echo at tail of L5 (v2 §15)  
 
 **T-37 Omission ledger in packet** (A §11.5, §31.20)  
-- [ ] Explicit omitted-items report; truncated ≠ complete  
+- [x] Explicit omitted-items report; truncated ≠ complete  
 
 **T-45 Deterministic no-index fallback** (A §31.23)  
-- [ ] Evidence when IndexPort unavailable  
+- [x] Evidence when IndexPort unavailable  
 
-**T-46 Phase-aware ranking** (A §31.22) `[PROPOSAL]` keep ranking out of IndexPort (B)  
+**T-46 Optional query-local ranking in pack policy** (A §31.22) `[PROPOSAL]`
+- [ ] A/B-able request-local ranking stays in pack policy; it never enters `IndexPort`, an index adapter, or L1–L3
 
 ### Context: Multi-file edit, 2PC, tamper, completeness
 
 **T-17 Atomic multi-file transaction** (B, v2 §4.2)  
-- [ ] Shadow tree; `ast.parse` in **adapter**; all-or-nothing  
-- [ ] File 4 of 5 syntax fail rolls back all  
-- [ ] Kernel MUST NOT gain AST  
+- [x] Shadow tree; `ast.parse` in **adapter**; all-or-nothing  
+- [x] File 4 of 5 syntax fail rolls back all  
+- [x] Kernel MUST NOT gain AST  
 - Files: create `adapters/environment/transaction.py`; `git.py`  
 - Requires: T-08 (honest verify)  
 
-**T-18 TestTamperShield** (B, spec §6)  
-- [ ] Enumerate tests via IndexPort, not only `Path.glob("test/**")`  
-- [ ] Assertion edit ⇒ admission reject  
+**T-18 TestTamperShield** `REOPENED` → CLOSED 2026-09-04 (B, spec §6)  
+- [x] Enumerate tests via IndexPort, not only `Path.glob("test/**")`  
+- [x] Assertion edit ⇒ admission reject  
+- [x] Wire `runtime/governance/tamper_shield.py` into `session._admit_completion`  
+- Historical audit note (superseded 2026-09-05): mechanism present, **zero production callers** — imported only by `test/runtime/test_tamper_shield.py`. The earlier receipt stood for its own subject; it did not carry forward to a shield nothing called.
+- Closed 2026-09-04: `HarnessSession` freezes the shield at turn 0 (`_freeze_tamper_shield`, after the declared IndexPort binds) and evaluates it in `_admit_completion` before the completion policy runs. A failed enumeration is not read as a clean tree. `TestTamperShieldIsWiredIntoAdmission` in `test/runtime/test_tamper_shield.py` drives the production call, not the mechanism in isolation. **Reach limit resolved 2026-09-05:** the default manifest now declares `vg-code-default/repo-index.json`; all four product presets have a declared repository index for the production tamper path.
 - Requires: T-17, T-14  
 
 **T-19 Greenfield oracle vacuity** (B, A §12.4, v2 §21.3)  
-- [ ] Tests that pass on stubs rejected  
+- [x] Tests that pass on stubs rejected  
 - Requires: T-18  
 
 **T-20 Brownfield implicated-set fail-closed** (B, A §12.2–12.3)  
-- [ ] Empty primary + coverage_ratio 1.0 cannot admit  
-- [ ] Greenfield bypass cannot apply to `bugfix`  
-- [ ] Public signature change ⇒ call sites in same transaction  
+- [x] Empty primary + coverage_ratio 1.0 cannot admit  
+- [x] Greenfield bypass cannot apply to `bugfix`  
+- [x] Public signature change ⇒ call sites in same transaction  
 - Requires: T-16  
 
 **T-47 Read-before-edit + multi-strategy apply** (v2 §14) `[PROPOSAL]`  
@@ -218,11 +232,11 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 ### Context: Dialect and model routing
 
 **T-21 Dialect typed failure classes** (B, spec §8)  
-- [ ] Truncated JSON, DeepSeek fence, XML tags classified without false `ok`  
+- [x] Truncated JSON, DeepSeek fence, XML tags classified without false `ok`  
 - Files: `adapters/models/dialect.py`; create `test/contracts/test_dialect_recovery.py`  
 
 **T-22 Fail-closed model resolve** (B)  
-- [ ] Alias or error; never silent unknown (`deepseek-v4-flash` vs `-0731`)  
+- [x] Alias or error; never silent unknown (`deepseek-v4-flash` vs `-0731`)  
 - Files: `routing.py`  
 
 **T-50 Routing experiments harness** (A §22.5) `[PROPOSAL]`  
@@ -233,6 +247,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 **T-26 Frozen control preregistration** (B; strip “Wave 5” from title)  
 - [ ] n, models, stop rule frozen before first paid call  
 - Requires: T-01–T-25 as applicable  
+- **draft contract 2026-09-05 (not a freeze):** `benchmarks/ladder/control_preregistration.json` exists with `status: UNFROZEN`, `subject_sha: null`. The L2 arm is pinned to single-worker `vg-code-balanced` / preset `balanced` / `vanguard.packages.runtime.entrypoint.execute` (Forge/Chimera/fast/max excluded). `require_frozen()` refuses scoring. This does not complete T-26 or authorize a paid call.  
 
 **T-27 Single-agent canary (eval)** (B)  
 - [ ] Disposition in {POSITIVE, NEGATIVE, UNDETERMINABLE, INVALID}  
@@ -337,10 +352,311 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - [ ] Run `docs_rag_v0.py --file` on every changed production path  
 - [ ] `just docs-knowledge` — never hand-edit `.generated/`  
 
-**T-68 Link repair** (PHASE-0 §8) — can start immediately; does not wait for T-01  
+**T-68 Link repair** (PHASE-0 §8) — can start immediately; does not wait for T-01
+- [x] Living `docs/execution/` / README / AGENTS: `active.md` → `tasks.md`; `FEATURE_SPEC.md` eliminated, `spec.md` is canonical delta contract
+- [x] Restore `docs/SPEC.md` (deleted in `614b7800`; compact TARGET contract)
+- [ ] Remaining historical mentions in handbook appendices / research reports — do not rewrite research  
+
+### Context: Electroweak convergence work tree
+
+- [x] **T-69: Capability-bound native tool-call profiles**
+  - **package**: HAR-01
+  - **subsystem**: domain
+  - **lane**: Lane A (Build/Core)
+  - **requires**: []
+  - **file_touches**: [`vanguard/packages/domain/models/profile.py`, `vanguard/packages/adapters/models/`, **[NEW]** `test/contracts/test_model_profiles.py`]
+  - **specification**: Declare `ToolCallStyle.NATIVE` only for routes whose native-tool support is verified by capability evidence; this is not a blanket promotion of every production model. Unknown or unverified routes preserve the `NATIVE → JSON_SCHEMA → FENCED_JSON → TEXT_GRAMMAR` degradation chain.
+  - **acceptance_falsifier**: `python3 -m unittest test.contracts.test_model_profiles -v` proves each native-declared route resolves `ToolCallStyle.NATIVE` and accepts its provider-shape vector; no unknown or unverified id is silently promoted, and each one still degrades `NATIVE → JSON_SCHEMA → FENCED_JSON → TEXT_GRAMMAR` via `degraded()`.
+
+- [x] **T-70: Approval threshold from declared `approval_policy`**
+  - **package**: HAR-01
+  - **subsystem**: runtime
+  - **lane**: Lane A (Build/Core)
+  - **requires**: [T-69]
+  - **file_touches**: [`vanguard/packages/runtime/session.py`, **[NEW]** `test/runtime/test_approval_passthrough.py`]
+  - **specification**: Resolve the benchmark approval threshold from the manifest's declared `components.approval_policy`. With `threshold: standard`, medium `patch.apply` and high `proc.exec` dispatch without a fail-closed ask denial.
+  - **acceptance_falsifier**: `python3 -m unittest test.runtime.test_approval_passthrough -v` passes and the literal approval threshold `"low"` is absent from `runtime/session.py`.
+  - **landed 2026-09-04**: `resolve_approval_threshold` reads the pack's frozen `components.approval_policy` — no second artifact, no `Harness` field. Declared `threshold` governs the benchmark, where `F-07` turns an ask into a denial; declared `mode: assisted` keeps interactive runs asking, so `F-08` and the Ed25519 descriptor-bound approval flow are untouched. Missing, malformed, non-object, non-string or unrecognised policy all fail closed to the strictest rung. Successors landed for the eight frozen falsifiers that read the old hardcoded denial as `K-17` itself: `test_repair_loop_and_modes.py` (2), `test_s17_s18_real_mock_episode.py` (2), `test_s24_interactive_write_path.py` (3), `test_composition_root.py` (1), plus the `S8-B-04` handoff marker in `test_composition_values.py`.
+
+- [x] **T-70a: Reproduce mid-stream SSE abort before flag change**
+  - **package**: HAR-01
+  - **subsystem**: adapters
+  - **lane**: Lane B (Audit/Test)
+  - **requires**: []
+  - **file_touches**: [`vanguard/packages/adapters/models/openrouter.py`, **[NEW]** `test/adapters/test_openrouter_stream_abort.py`]
+  - **specification**: Capture a red reproducer in which a truncated SSE chunk arrives after at least one delta before changing any transport flag. Close as `no_defect` if the current path cannot reproduce the failure.
+  - **acceptance_falsifier**: `python3 -m unittest test.adapters.test_openrouter_stream_abort -v` first demonstrates the reproducing failure, then guards the selected resolution.
+
+- [x] **T-71: Declare `finish-tool.json` in the product presets**
+  - **package**: HAR-01
+  - **subsystem**: agency
+  - **lane**: Lane A (Build/Core)
+  - **requires**: []
+  - **file_touches**: [`vanguard/packages/agency/manifests/vg-code-default/manifest.json`, `vanguard/packages/agency/manifests/vg-code-fast/manifest.json`, `vanguard/packages/agency/manifests/vg-code-balanced/manifest.json`, `vanguard/packages/agency/manifests/vg-code-max/manifest.json`, **[NEW]** `vanguard/packages/agency/manifests/vg-code-default/finish-tool.json`, **[NEW]** `test/contracts/test_manifest_components.py`]
+  - **specification**: Add a flat `finish` tool schema at the manifest root and declare it through the four product presets' `components.tools` maps. Every declared component path must resolve from the manifests root and every `kind` must exist in `kinds.json`.
+  - **acceptance_falsifier**: `python3 -m unittest test.contracts.test_manifest_components -v` proves the four presets resolve `finish` without introducing a `components/` directory.
+
+- [x] **T-72: Two-axis settlement contract**
+  - **package**: HAR-01
+  - **subsystem**: domain
+  - **lane**: Lane A (Build/Core)
+  - **requires**: []
+  - **file_touches**: [**[NEW]** `vanguard/packages/domain/evidence/disposition.py`, `vanguard/packages/domain/evidence/__init__.py`, `benchmarks/protocols.py`, **[NEW]** `test/contracts/test_settlement_disposition.py`]
+  - **specification**: Separate runtime terminal status from exterior task disposition and enforce the typed receipt invariants. Oracle `passed` never implies terminal `completed`; `terminal_status=abandoned` with `disposition=passed` is legal and must replay without contradiction.
+  - **acceptance_falsifier**: `python3 -m unittest test.contracts.test_settlement_disposition -v` rejects `passed` with zero executed tests, reasonless `undeterminable`, and `not_run` with an envelope digest; `disposition_to_outcome(NOT_RUN)` raises; `EpisodeCompleted` payloads contain no `disposition` key (no new ledger kind is allocated); and `abandoned` plus `passed` is accepted and replays without contradiction.
+
+- [x] **T-73: `EffectStarted` single-emission ledger falsifier**
+  - **package**: HAR-01
+  - **subsystem**: runtime
+  - **lane**: Lane B (Audit/Test)
+  - **requires**: [T-72]
+  - **file_touches**: [`vanguard/packages/runtime/ledger_emitter.py`, **[NEW]** `test/runtime/test_effect_started_singleton.py`]
+  - **specification**: Prove that replaying one effect emits exactly one `EffectStarted` with exactly one lease id. If the reproducer requires a kernel change, stop for an ADR and re-run the TCB guard before any fix lands.
+  - **acceptance_falsifier**: `python3 -m unittest test.runtime.test_effect_started_singleton -v` observes one and only one `EffectStarted` for the fixture effect.
+
+- [x] **T-74: Workspace `.pyc` hygiene**
+  - **package**: HAR-01
+  - **subsystem**: adapters
+  - **lane**: Lane A (Build/Core)
+  - **requires**: []
+  - **file_touches**: [`vanguard/packages/adapters/environment/sandboxed.py`, **[NEW]** `test/adapters/test_workspace_pycache.py`]
+  - **specification**: Route `PYTHONPYCACHEPREFIX` to sandbox tmpfs so test execution cannot mutate the subject workspace with bytecode. Preserve the pre-run workspace digest.
+  - **acceptance_falsifier**: `python3 -m unittest test.adapters.test_workspace_pycache -v` leaves no `*.pyc` beneath the workspace and reports identical before/after digests.
+
+- [ ] **T-75: `LdaRepoIndex` adapter**
+  - **package**: IDX-01
+  - **subsystem**: adapters
+  - **lane**: Lane B (Audit/Test)
+  - **requires**: []
+  - **file_touches**: [**[NEW]** `vanguard/packages/adapters/stores/lda_index.py`, `vanguard/packages/ports/index.py`, **[NEW]** `test/contracts/test_lda_repo_index.py`]
+  - **specification**: Implement the existing `IndexPort` structurally over `.lda/index.db` and return value-only symbols, dependency edges, and test associations. Missing or stale indexes fail deterministically without a partial map, preserving T-45's fallback; ranking does not enter the port or adapter.
+  - **acceptance_falsifier**: `python3 -m unittest test.contracts.test_lda_repo_index -v` proves structural conformance and deterministic stale/missing-index failure.
+
+- [ ] **T-76: Bind `repo.*` observation tools into L5**
+  - **package**: IDX-01
+  - **subsystem**: packs/
+  - **lane**: Lane B (Audit/Test)
+  - **requires**: [T-75]
+  - **file_touches**: [`packs/code-default/toolkits/repo_map.py`, `packs/code-default/plugins/index.yaml`, `vanguard/packages/adapters/bindings/code.py`, **[NEW]** `test/agency/test_l5_only_observations.py`]
+  - **specification**: Expose `repo.search_symbols`, `repo.get_callers`, `repo.get_dependencies`, and `repo.get_tests` as bounded observations. Their results enter L5 only and cannot perturb the frozen L1–L3 prefix.
+  - **acceptance_falsifier**: `python3 -m unittest test.agency.test_l5_only_observations -v` keeps the L1–L3 digest bit-identical across ten turns while retaining all four observations in L5.
+
+- [ ] **T-77: Cache breakpoints, CTRF distillation, and Trailing Goal Echo**
+  - **package**: IDX-01
+  - **subsystem**: agency
+  - **lane**: Lane A (Build/Core)
+  - **requires**: [T-76]
+  - **file_touches**: [`vanguard/packages/agency/context/compiler.py`, `vanguard/packages/agency/context/compaction.py`, `vanguard/packages/runtime/ledger_emitter.py`, **[NEW]** `test/agency/test_cache_breakpoints.py`]
+  - **specification**: Emit a provider cache breakpoint at the L3 boundary, record cache read/write tokens, distill test output into bounded CTRF, and append a compact Trailing Goal Echo to L5. Passing runs are omitted and failure diffs are capped at 1,500 characters without losing digest-addressable evidence.
+  - **acceptance_falsifier**: `python3 -m unittest test.agency.test_cache_breakpoints -v` proves prefix stability, a turn-two-or-later cache-hit rate above 85% on the fixture, bounded CTRF, and the L5 tail echo.
+
+- [ ] **T-78: Exact-match `str_replace` primitive**
+  - **package**: CHANGE
+  - **subsystem**: adapters
+  - **lane**: Lane A (Build/Core)
+  - **requires**: [T-17]
+  - **file_touches**: [`vanguard/packages/adapters/environment/git.py`, `vanguard/packages/adapters/environment/transaction.py`, **[NEW]** `test/adapters/test_str_replace_exact.py`]
+  - **specification**: Add an exact, unique-preimage `str_replace` routed through the existing atomic multi-file transaction manager. A non-unique preimage or any syntax failure fails closed with byte-identical rollback; no fuzzy or indentation-relaxation path exists.
+  - **acceptance_falsifier**: `python3 -m unittest test.adapters.test_str_replace_exact -v` yields typed `PATCH_PREIMAGE_MISMATCH` and preserves all five fixture files when file four fails syntax validation.
+
+- [ ] **T-79: Unify the preset catalog on `presets.json`**
+  - **package**: CMX-01
+  - **subsystem**: apps
+  - **lane**: Lane A (Build/Core)
+  - **requires**: [T-71]
+  - **file_touches**: [`vanguard/packages/apps/coding_max/facade.py`, `packs/code-default/load.py`, `vanguard/packages/agency/manifests/vg-code-fast/manifest.json`, `vanguard/packages/agency/manifests/vg-code-balanced/manifest.json`, `vanguard/packages/agency/manifests/vg-code-max/manifest.json`, **[NEW]** `test/apps/test_preset_budgets.py`]
+  - **specification**: Make `presets.json` the sole product budget catalog and remove the facade's Python `max_turns` default. Fast, balanced, and max must produce distinct declared ceilings of 50,000/150,000/400,000 µUSD and 8/20/40 turns.
+  - **acceptance_falsifier**: `python3 -m unittest test.apps.test_preset_budgets -v` proves `fast`/`balanced`/`max` yield three **distinct** `EpisodeStarted.budgetCeiling` values matching `presets.json` exactly (50,000/150,000/400,000 µUSD; 8/20/40 turns), that `max_turns` is never a Python default in the facade, and that `vg-code-fast` halts at turn eight with `BUDGET_EXHAUSTED`.
+  - **implementation candidate 2026-09-05 (session stop):** catalog compile in `packs/code-default/load.py`; distinct `vg-code-{fast,balanced,max}/budget-policy.json`; `EpisodeStarted.budgetCeiling` is the declared catalog (not `min(preset, override)`); tighter loop bounds record `budgetAttenuation.turns` separately; facade `max_turns` default is `None`; product `code` defaults to `vg-code-balanced`. Named falsifier **8/8** green (`test.apps.test_preset_budgets`). Keep unchecked: `runtime/cli.py` still imports `apps.coding_max` (boundary), and a related-surface run of `test.apps.coding_max.test_coding_max_facade` plus `test.falsifiers.test_rf90_generic_entrypoint` produced **4 failures** (patchless FakeModel finish reports `completed` on the facade path; RF-90 fakeBackend tape exhausts to `instrument_error` after the product completion gate refuses finish).
+
+- [ ] **T-80: Anti-thrashing workspace oscillation circuit breaker**
+  - **package**: CONTROL
+  - **subsystem**: agency
+  - **lane**: Lane A (Build/Core)
+  - **requires**: [T-78]
+  - **file_touches**: [`vanguard/packages/agency/episode/engine.py`, `packs/code-default/middleware/`, **[NEW]** `test/agency/test_anti_thrashing_circuit_breaker.py`]
+  - **specification**: Detect the two-cycle workspace oscillation where `d_t == d_{t-2}` before dispatching another proposal. Return typed `OSCILLATION_CIRCUIT_BREAKER` evidence that forces a hypothesis change.
+  - **acceptance_falsifier**: `python3 -m unittest test.agency.test_anti_thrashing_circuit_breaker -v` trips before the next proposal on the two-cycle digest fixture.
+
+- [x] **T-81: Greenfield oracle vacuity rejection**
+  - **package**: TRUTH
+  - **subsystem**: packs/
+  - **lane**: Lane B (Audit/Test)
+  - **requires**: [T-19]
+  - **file_touches**: [`packs/code-default/oracles/gate.py`, **[NEW]** `test/packs/test_greenfield_vacuity_rejection.py`]
+  - **specification**: Execute a greenfield suite against empty stubs containing only `pass` or `raise NotImplementedError`. If that control produces zero failures, reject the oracle as vacuous rather than treating it as evidence of completion.
+  - **acceptance_falsifier**: `python3 -m unittest test.packs.test_greenfield_vacuity_rejection -v` returns typed `VACUOUS_ORACLE_REJECTED` for the empty-stub control.
+
+- [x] **T-82: Fenced JSON action unwrapping and anti-premature finish**
+  - **package**: HAR-01 / TRUTH
+  - **subsystem**: adapters
+  - **lane**: Lane A (Build/Core)
+  - **requires**: [T-71]
+  - **file_touches**: [`vanguard/packages/adapters/models/invocation.py`, `vanguard/packages/adapters/models/dialect.py`, **[NEW]** `vanguard/packages/agency/admission.py`, **[NEW]** `test/adapters/test_dialect_fenced_action_recovery.py`]
+  - **specification**: Promote a markdown-fenced tool call found in `note` when the outer response carries `action: null`, after full typed validation. Reject unsolicited finish proposals before mutation/verification or while unparsed tool invocations remain with typed `PREMATURE_FINISH_REJECTED`.
+  - **acceptance_falsifier**: `python3 -m unittest test.adapters.test_dialect_fenced_action_recovery -v` recovers the fenced read action and rejects the premature finish fixture.
+
+- [x] **T-83a: Greenfield prompt modernization**
+  - **package**: TRUTH
+  - **subsystem**: packs/
+  - **lane**: Lane A (Build/Core)
+  - **requires**: []
+  - **file_touches**: [`packs/code-default/system-prompt.txt`]
+  - **specification**: Removes the instructions “Write ONE file per turn” and “do not read or search first” from the greenfield system prompt. This half carries no dependency: it does not wait for `IndexPort`, T-75, or the edit primitive.
+  - **acceptance_falsifier**: `! rg -n -i 'write one file per turn|do not read or search first' packs/code-default/system-prompt.txt`.
+
+- [ ] **T-83b: `callers_by_symbol` completion admission**
+  - **package**: CHANGE
+  - **subsystem**: runtime
+  - **lane**: Lane A (Build/Core)
+  - **requires**: [T-75]
+  - **file_touches**: [`vanguard/packages/runtime/session.py`, **[NEW]** `vanguard/packages/agency/multi_file_completeness.py`, **[NEW]** `test/runtime/test_multi_file_callers_admission.py`]
+  - **specification**: Feeds `IndexPort.get_callers` into `_admit_completion` through the multi-file completeness policy. A public-symbol edit cannot finish while known callers remain uninspected; T-78 is deliberately not a dependency.
+  - **acceptance_falsifier**: `python3 -m unittest test.runtime.test_multi_file_callers_admission -v` rejects the `file_a.py` change with typed `UNINSPECTED_CALLERS_REMAINING` until `file_b.py` is inspected or updated.
+
+- [x] **T-84: Unique durable run identity and explicit resume**
+  - **package**: INS-01
+  - **subsystem**: runtime
+  - **lane**: Lane A (Build/Core)
+  - **requires**: []
+  - **file_touches**: [`vanguard/packages/runtime/entrypoint.py`, `vanguard/clients/cli/`, **[NEW]** `test/runtime/test_run_identity.py`]
+  - **specification**: Generate a unique UUID/ULID when a code request omits `runId`; successive requests must create distinct ledgers. Only explicit `resumeFrom` recovers a prior ledger, and the generated id appears in both the first JSON frame and receipt.
+  - **acceptance_falsifier**: `python3 -m unittest test.runtime.test_run_identity -v` produces two distinct run ids and proves the literal `run-cli` is absent from `runtime/entrypoint.py`.
+
+- [x] **T-85: Product receipt telemetry passthrough**
+  - **package**: INS-01
+  - **subsystem**: runtime
+  - **lane**: Lane A (Build/Core)
+  - **requires**: [T-84]
+  - **file_touches**: [`vanguard/packages/runtime/entrypoint.py`, `vanguard/packages/runtime/compose.py`, `vanguard/packages/runtime/app_service.py`, **[NEW]** `test/runtime/test_receipt_telemetry.py`]
+  - **specification**: Populate successful product receipts from live runtime telemetry rather than empty constants. Carry model routes, prompt/completion tokens, the ledger's verified step set, and cost provenance.
+  - **acceptance_falsifier**: `python3 -m unittest test.runtime.test_receipt_telemetry -v` finds non-empty routes, non-null tokens, matching verified step ids, and no success-path `[]`/`None` telemetry constant.
+  - **landed 2026-09-05:** `entrypoint.execute` projects the success receipt through the shared `app_service._result_from_execution`, so the product path carries no second receipt algebra. Routes, prompt/completion tokens and measured cost come from the live `RunTelemetry`/trajectory; `verifiedStepIds` are folded from the ledger's TODO receipts (a `complete` step with no receipt digest is not projected) rather than from a bespoke event. The falsifier drives the real `entrypoint` -> `Runtime` -> ledger path and reds under mutation of the mapping.
+
+- [ ] **T-86: Live-path alias and tool-name validation**
+  - **package**: DLG-01
+  - **subsystem**: adapters
+  - **lane**: Lane A (Build/Core)
+  - **requires**: [T-69]
+  - **file_touches**: [`vanguard/packages/adapters/models/openrouter.py`, `vanguard/packages/adapters/models/invocation.py`, `vanguard/packages/agency/manifests/`, **[NEW]** `test/adapters/test_live_alias_validation.py`]
+  - **specification**: Pass declared manifest aliases into the live proposal translator and validate canonical tool names plus arguments against their schemas. Reject undeclared names with typed `TOOL_NOT_DECLARED`; fuzzy and edit-distance matching are forbidden.
+  - **acceptance_falsifier**: `python3 -m unittest test.adapters.test_live_alias_validation -v` resolves a declared alias, rejects undeclared or schema-invalid calls, and emits no translated effect for them.
+
+- [x] **T-87: Bridge lifecycle fail-closed**
+  - **package**: BRG-01
+  - **subsystem**: tools/
+  - **lane**: Lane B (Audit/Test)
+  - **requires**: []
+  - **file_touches**: [`tools/llama_cpp/cli.py`, **[NEW]** `test/tools/test_llama_bridge_lifecycle.py`]
+  - **specification**: Require a live expected child PID and matching `/props` model plus alias before reporting `ONLINE`; an occupied foreign port is never silently adopted. Stop only an identity-verified recorded child, with typed `MODEL_MISMATCH` and `PID_STALE` failures and no process-name kill.
+  - **acceptance_falsifier**: `python3 -m unittest test.tools.test_llama_bridge_lifecycle -v` verifies `--flash-attn on|off|auto`, keeps a child with an invalid launch contract `FAILED` and never `ONLINE` while a foreign server holds the port; adopting an occupied port without a matching `/props` model and alias yields typed `MODEL_MISMATCH`; a stale PID file yields typed `PID_STALE`; and stop issues no `pkill` or `pgrep -f`.
+
+- [x] **T-88: MCP fail-closed completions**
+  - **package**: BRG-01
+  - **subsystem**: tools/
+  - **lane**: Lane B (Audit/Test)
+  - **requires**: []
+  - **file_touches**: [`tools/llama_cpp/mcp_server.py`, **[NEW]** `test/tools/test_llama_mcp_failclosed.py`]
+  - **specification**: Convert empty completions into typed failures, using `MAX_TOKENS_WITHOUT_CONTENT` for `finish_reason=length` and `EMPTY_COMPLETION` otherwise. Permit at most one bounded retry and hide the raw chat template behind an explicit status opt-in.
+  - **acceptance_falsifier**: `python3 -m unittest test.tools.test_llama_mcp_failclosed -v` proves empty content cannot return success and the retry bound is one.
+
+- [ ] **T-89: Benchmarks execute the product path**
+  - **package**: INS-01 / EXP-01
+  - **subsystem**: benchmarks/
+  - **lane**: Lane A (Build/Core)
+  - **requires**: [T-84, T-85]
+  - **file_touches**: [`benchmarks/agentic_harness_matrix_benchmark.py`, `benchmarks/backend_baselines.py`, `vanguard/packages/runtime/entrypoint.py`, **[NEW]** `test/benchmarks/test_product_path_subject.py`]
+  - **specification**: Route the canary through `runtime.entrypoint.execute`, the same product subject exercised by `vg code`, rather than calling `Runtime.execute_profiled` directly. The runner and CLI must bind the same manifest digest and preset.
+  - **acceptance_falsifier**: `python3 -m unittest test.benchmarks.test_product_path_subject -v` rejects the direct-runtime runner and matches product-path manifest and preset identity.
+  - **implementation candidate 2026-09-05 (session stop):** canary runner calls `benchmarks.product_path.execute_product` → `entrypoint.execute`; no `Runtime.execute_profiled` on that runner. Named falsifier **4/4** green (`test.benchmarks.test_product_path_subject`). Keep unchecked: `product_path.py` imports `runtime.entrypoint` (benchmarks may import only `runtime.root` + ports).
+
+- [ ] **T-90: Raw-response digest and dialect classifier provenance**
+  - **package**: DLG-01
+  - **subsystem**: adapters
+  - **lane**: Lane B (Audit/Test)
+  - **requires**: [T-86]
+  - **file_touches**: [`vanguard/packages/adapters/models/dialect.py`, `vanguard/packages/runtime/ledger_emitter.py`, **[NEW]** `test/adapters/test_dialect_provenance.py`]
+  - **specification**: Record every normalization failure with a CAS-retrievable raw-response digest and a typed classifier among `not_json`, `missing_kind`, `xml_tool_tags`, `deepseek_fence`, `truncated`, and `tool_not_declared`. Never publish a malformed completion as a bare note.
+  - **acceptance_falsifier**: `python3 -m unittest test.adapters.test_dialect_provenance -v` resolves the full body from its digest and observes a typed class for every malformed fixture.
+
+- [x] **T-91: Native-only alias and environment purge**
+  - **package**: BRG-01 / HAR-01
+  - **subsystem**: adapters
+  - **lane**: Lane B (Audit/Test)
+  - **requires**: []
+  - **file_touches**: [`packs/code-default/harness.yaml`, `vanguard/packages/adapters/models/factory.py`, `vanguard/packages/adapters/models/routing.py`, `vanguard/packages/adapters/models/env_loader.py`, **[NEW]** `test/contracts/test_native_only_routes.py`]
+  - **specification**: Restrict local inference configuration to `VANGUARD_LLAMA_ENDPOINT` and `VANGUARD_LLAMA_MODEL`, and fail retired provider aliases with a typed routing error. Purge live `ollama` configuration while allowing only explicitly historical documentation mentions.
+  - **acceptance_falsifier**: `python3 -m unittest test.contracts.test_native_only_routes -v` passes and `rg -n -i 'ollama' packs/ vanguard/ tools/ docs/` returns only historical changelog entries.
+
+- [ ] **T-92: L0 smoke triad through the public CLI**
+  - **package**: EXP-01
+  - **subsystem**: benchmarks/
+  - **lane**: Lane A (Build/Core)
+  - **requires**: [T-84, T-85, T-87]
+  - **file_touches**: [**[NEW]** `benchmarks/ladder/l0_triad/`, **[NEW]** `test/benchmarks/test_l0_triad.py`]
+  - **specification**: Run P0-FIB, P0-CSV, and P0-BUG in fresh workspaces through the public CLI, retaining the trajectory and a typed reason on failure. Record fixture and oracle digests, and refuse `completed` when no patch digest exists.
+  - **acceptance_falsifier**: `python3 -m unittest test.benchmarks.test_l0_triad -v` gives every task either an exterior pass or a retained typed failure and rejects patchless completion.
+  - **implementation candidate 2026-09-05 (session stop):** P0-FIB / P0-CSV / P0-BUG fixtures + `l0_triad/runner.py` through `execute_product`. Named falsifier **4/4** hermetic green. This is runner mechanics, not a live L0 disposition and not Wave 1 empirical close. Keep unchecked: runner imports `domain.canonicalisation.digest`.
+
+- [ ] **T-93: L1 frozen pre-canary and evidence row schema**
+  - **package**: EXP-01
+  - **subsystem**: benchmarks/
+  - **lane**: Lane B (Audit/Test)
+  - **requires**: [T-92]
+  - **file_touches**: [`benchmarks/protocols.py`, **[NEW]** `benchmarks/ladder/l1_twelve/`, **[NEW]** `test/benchmarks/test_evidence_row_schema.py`]
+  - **specification**: Freeze twelve tasks—four greenfield, four single-file bug, and four data/CLI—under one `suite_digest`. Refuse incomplete evidence rows and prohibit a table from mixing `REPLAY` and `LIVE-LOCAL` evidence labels.
+  - **acceptance_falsifier**: `python3 -m unittest test.benchmarks.test_evidence_row_schema -v` refuses every row missing a required §9.3 field and every mixed-label table.
+  - **implementation candidate 2026-09-05 (session stop):** L1 twelve-task freeze in `benchmarks/ladder/l1_twelve/suite.json`; row writer refuses incomplete / patchless-completed / mixed REPLAY+LIVE. Named falsifier **5/5** green. Keep unchecked: `benchmarks/ladder/evidence.py` imports `domain.canonicalisation.digest` and `domain.evidence.disposition`.
+
+- [ ] **T-94: Metric set and false-completion veto**
+  - **package**: EXP-01
+  - **subsystem**: benchmarks/
+  - **lane**: Lane B (Audit/Test)
+  - **requires**: [T-93, T-72]
+  - **file_touches**: [`benchmarks/protocols.py`, `benchmarks/statistics.py`, **[NEW]** `test/benchmarks/test_metric_veto.py`]
+  - **specification**: Emit false-completion, valid-first-tool-call, malformed-tool, recovery, no-op, time-to-first-valid-action, turn-waste W, and κ metrics. Any non-zero false-completion rate fails the gate regardless of pass rate; Wilson lower bounds use only `LIVE-*` rows.
+  - **acceptance_falsifier**: `python3 -m unittest test.benchmarks.test_metric_veto -v` fails a non-zero false-completion fixture and excludes non-live rows from the Wilson denominator.
+  - **implementation candidate 2026-09-05 (session stop):** false-completion veto; Wilson on `LIVE-*` only; canary disposition ∈ `{POSITIVE, NEGATIVE, UNDETERMINABLE, INVALID}`; zero live observations → `UNDETERMINABLE`, not zero risk. Named falsifier **4/4** green. Keep unchecked until the shared Wave 2 gate is green. T-72 remains a landed dependency.
+
+- [ ] **T-95: Hypothesis registry and preregistration harness**
+  - **package**: EXP-01
+  - **subsystem**: benchmarks/
+  - **lane**: Lane B (Audit/Test)
+  - **requires**: [T-94]
+  - **file_touches**: [**[NEW]** `benchmarks/hypotheses.json`, `vanguard/packages/runtime/paired_evaluation.py`, **[NEW]** `test/benchmarks/test_preregistration.py`]
+  - **specification**: Bind every Route L row to a registered hypothesis with a control digest, one varied dimension, an expected metric and direction, and a stopping rule. Refuse paired comparisons that vary more than the single preregistered dimension.
+  - **acceptance_falsifier**: `python3 -m unittest test.benchmarks.test_preregistration -v` rejects unregistered treatments and multi-dimension comparisons.
+  - **implementation candidate 2026-09-05 (session stop):** `benchmarks/hypotheses.json` + `assert_single_varied_dimension`; named falsifier **6/6** green. The control preregistration intentionally remains `UNFROZEN`; this does not complete T-26, does not close `MS-CONTROL`, and does not authorize a paid call.
+
+- [ ] **T-96: Arm matrix and LAM-first comparison protocol**
+  - **package**: ARM-01
+  - **subsystem**: benchmarks/
+  - **lane**: Lane B (Audit/Test)
+  - **requires**: [T-95, MS-CONTROL (closed)]
+  - **file_touches**: [**[NEW]** `benchmarks/ladder/l3_arms/`, `vanguard/packages/agency/manifests/`, **[NEW]** `test/benchmarks/test_arm_matrix.py`]
+  - **specification**: Define each arm as a manifest-digest × model-id × preset triple and require LAM replay regression before live execution. Provider outages, HTTP errors, and zero-model-call runs record `not_run` with explicit missingness and stay outside the denominator.
+  - **acceptance_falsifier**: `python3 -m unittest test.benchmarks.test_arm_matrix -v` refuses multi-dimension arm comparisons and excludes every typed `not_run` row.
+
+- [ ] **T-97: CLI product surface — reproduce then repair**
+  - **package**: INS-01
+  - **subsystem**: client
+  - **lane**: Lane A (Build/Core)
+  - **requires**: [T-84]
+  - **file_touches**: [`vanguard/clients/cli/src/composition/parse-cli.ts`, `vanguard/clients/cli/src/main.ts`, **[NEW]** `test/cli/test_help_and_flags.spec.ts`]
+  - **specification**: Reproduce the current `aether code --help` behavior before repair, then make it print help and exit zero without a completion frame. Resolve the `-m` collision by an explicit binding whose losing spelling errors instead of silently winning.
+  - **acceptance_falsifier**: `npm test -- test/cli/test_help_and_flags.spec.ts` proves help exits zero and the conflicting flag cannot resolve ambiguously.
+  - **deferred 2026-09-05 (this pass):** not implemented. Remains filed under INS-01. Next Wave 2 close still owes help/`-m` after boundary repair; do not drop the row.
+
+#### Constitutional audit receipt — Prompt 12 (2026-09-04)
+
+- **PASS — TCB ceiling**: `python3 tools/linters/check_tcb_budget.py` reported exactly 1386 logical lines across 9 files, unchanged from the constitutional baseline; 52 lines of headroom are not an implementation budget.
+- **PASS — domain blindness (I-7)**: `python3 tools/linters/check_domain_blindness.py` reported no coding, pytest, or AST tokens in `vanguard/packages/domain/` or `vanguard/packages/kernel/`.
+- **PASS — hexagonal boundaries**: `python3 tools/linters/check_boundaries.py` checked 827 source files and passed the enforced import lattice.
+- **PASS — single `EpisodeEngine`**: the product path constructs `EpisodeEngine` once in `vanguard/packages/runtime/session.py`; recursive child execution uses the same engine class. `runtime/root.py` only re-exports Forge types, with no `ForgeFacade` invocation or Forge/Chimera parser reuse on the product path.
+- **PASS — anti-sprawl**: the Prompt 11–12 commit modifies `docs/execution/tasks.md` only and adds no Markdown path under `docs/`, including `docs/reports/` and `docs/architecture/`.
 
 
----
+
 
 ## Appendix: B §18 ticket bodies (verbatim)
 
@@ -366,12 +682,12 @@ Dependency key: `requires:`. Status: all `PROPOSED` unless noted.
 - **Requires:** none
 - **Falsifier:** dry-run JSON has null pass/cost
 
-### Ticket 04 — Remove default admission exemption
+### Ticket 04 — Remove default admission exemption (landed; successor open)
 - **Files:** `runtime/session.py` `ADMISSION_GATE_EXEMPT`
 - **Requires:** none
 - **Falsifier:** `vg-code-default` + `finish` + no patch ⇒ not completed
 - **Rollback:** if a named compatibility harness must stay exempt, shrink set with a recorded governance note — do not restore lex+default silently
-- **FACT (lock HEAD `66aa7a3c`).** The exemption is pinned, not accidental. [`test/falsifiers/test_completion_gate_scope.py`](../../test/falsifiers/test_completion_gate_scope.py) asserts `vg-code-default` ∉ `ADMISSION_GATED_HARNESSES` and documents that frozen M-2 falsifiers compose bare finishes through the default harness. Live `admission_required` (`runtime/session.py` L127–138) exempts `vg-code-default` / `vg-code-lex` via `ADMISSION_GATE_EXEMPT`; RF-25 cold-continuation evidence is on that product path. **Implementation of this ticket remains `[PROPOSAL]`** and requires a **successor baseline** for RF-25 / M-2 / `test_completion_gate_scope.py` before the exemption is removed — do not silently retarget those tests.
+- **FACT (current product path).** `admission_required` is capability-derived in `runtime/session.py`: a harness declaring `patch.apply` is gated, including `vg-code-default` and `vg-code-lex`; `ADMISSION_GATE_EXEMPT` no longer authorizes a product-default bypass. The 21 legacy bare-finish assertions remain a successor obligation and must be retargeted or replaced with exact-subject evidence; do not weaken the gate to satisfy them.
 
 ### Ticket 05 — Delete unused `ADMISSION_GATED_HARNESSES` or make it the only source
 - **Files:** `session.py`; `test/falsifiers/test_completion_gate_scope.py`
@@ -397,7 +713,7 @@ Dependency key: `requires:`. Status: all `PROPOSED` unless noted.
 - **Files:** create `domain/task_state.py` (**MISSING** in HEAD); FEATURE_SPEC §3
 - **Requires:** none technically; **schedule after** 04 so we do not persist false completes
 - **Falsifier:** `test/contracts/test_semantic_task_state.py` as specified
-- **FACT (lock HEAD `66aa7a3c`).** `vanguard/packages/domain/task_state.py` is **MISSING**. Live fold is [`runtime/task_state.py`](../../vanguard/packages/runtime/task_state.py) `CodingTaskState` + `fold_task_state`. This ticket remains **`[PROPOSAL]`**: merge FEATURE_SPEC `SemanticTaskState` with `CodingTaskState` per B §6.12 (this lattice **wins** over Plan A §6.2’s 17 domain types, which stay as a competing `[PROPOSAL]` in A). Do not invent a second task-state authority.
+- **FACT.** Schema is [`domain/task_state.py`](../../vanguard/packages/domain/task_state.py) (`SemanticTaskState`; `CodingTaskState` alias). Live fold remains [`runtime/task_state.py`](../../vanguard/packages/runtime/task_state.py) `fold_task_state`. A's 17 extra domain types stay `[PROPOSAL]`.
 
 ### Ticket 10 — Runtime fold of SemanticTaskState
 - **Files:** `runtime/task_state.py`
@@ -532,7 +848,7 @@ Dependency key: `requires:`. Status: all `PROPOSED` unless noted.
 Tickets 01–08 are the true critical path for long-horizon **truth**. Tickets 09–20 are the critical path for long-horizon **competence**. 21–25 are hygiene. 26–27 are the first honest score. 28–35 are gated. Waves 6–10 and tickets 28–35 are **`[PROPOSAL]`**; this lock does not authorize them.
 
 
----
+
 
 ## Appendix: A §31 → T-id merge map
 
@@ -568,62 +884,13 @@ Tickets 01–08 are the true critical path for long-horizon **truth**. Tickets 0
 | 29 single-agent CI | T-52 |
 | 30 first positive treatment | T-29 |
 
----
 
-## Appendix: historical CMX-09 DAG (do not execute as the program)
 
-Preserved from the pre-PHASE-0 `tasks.md`. T2–T7 map to T-09, T-17, T-18, T-15, T-21.
+## Appendix: historical CMX-09 DAG (do not execute)
 
----
-id: execution.tasks
-canonical_id: execution.tasks
-class: execution
-authority: execution
-truth_plane: TARGET
-status: living
-implementation_status: BACKEND_FINISH_ACTIVE
-owner: repository-governance
-canonical_for:
-  - active-sprint-task-dag
-  - current-work-state
-purpose: Dynamic execution graph and active task DAG for the in-flight sprint. Forensic audits quarantined.
-audience:
-  - contributor
-  - release-owner
-version: 0.9.2a4
-last_verified: 2026-09-03
-normative_authority:
-  - docs/SPEC.md
-  - docs/execution/FEATURE_SPEC.md
-relationships:
-  - execution.milestones
-  - execution.backlog
-  - execution.feature_spec
-reviewer: repository-governance
-confidence: high
----
+Pre-PHASE-0 T2–T7 map to T-09, T-17, T-18, T-15, T-21.
 
-# Active Sprint Work Runway: W-092-F1 / CMX-09
-
-```text
-====================================================================================================
-Authority: Execution (Dynamic Work DAG & Active Sub-Goal)
-Active Ticket: CMX-09 / W-092-F1 (Canonical Coding Max Convergence)
-Delta Contract: docs/execution/FEATURE_SPEC.md
-Forensic Rule: Commit SHAs, raw benchmark logs, and diagnostic autopsies are quarantined out of this file.
-====================================================================================================
-```
-
-## 1. Active WIP Lanes (WIP=1 Rule)
-
-| Lane | Assigned Owner | Active Package | Target Gate | Current Lifecycle State |
-|---|---|---|---|---|
-| **Lane A (Implementation)** | Senior Engineering Agent | **`CMX-09`** (Canonical Harness Convergence) | `W-092-F1` | `IN_PROGRESS` |
-| **Lane B (Independent Verification)** | Evaluator / Release Gate | **`REL-01R`** (Runner & Navigation Truth) | `W-092-F0` | `REVIEWING` |
-
----
-
-## 2. Dynamic Execution DAG (Lane A: `CMX-09`)
+### Historical CMX-09 DAG
 
 ```mermaid
 graph TD
@@ -636,7 +903,7 @@ graph TD
     T6 --> T7["T7: Dogfooding & Sprint Verification Gate<br/>(Milestone W-092-F1 Closure)"]
 ```
 
-### Active Sub-Goal & Task Status Matrix
+### Historical T0–T7 checklist (do not execute)
 
 - [x] **T0: Substrate Consolidation & Regression Hardening**
   - Consolidated divergent branches into `main` via PR #30.
@@ -644,13 +911,13 @@ graph TD
   - All 1,471 Python tests + 10 TypeScript workspaces passing green.
 
 - [x] **T1: Documentation Runway Refactor & Forensic Quarantine**
-  - Refactored `docs/execution/` into exactly 4 files (`milestones.md`, `backlog.md`, `FEATURE_SPEC.md`, `tasks.md`).
-  - Authored SOTA delta contract in [`FEATURE_SPEC.md`](FEATURE_SPEC.md).
+  - Refactored `docs/execution/` into the operational runway (`milestones.md`, `backlog.md`, `spec.md`, `tasks.md`).
+  - Authored SOTA delta contract in [`spec.md`](spec.md).
   - Quarantined autopsy logs, git commit digests, and historical forensics.
 
 - [ ] **T2: Domain Semantic Task State Vector (`CMX-09.1`)**
   - **File**: `vanguard/packages/domain/task_state.py`
-  - **Objective**: Implement `SemanticTaskState`, `TaskStep`, and `StepState` per [`FEATURE_SPEC.md`](FEATURE_SPEC.md) §3.
+  - **Objective**: Implement `SemanticTaskState`, `TaskStep`, and `StepState` per [`spec.md`](spec.md) §3.
   - **Falsifier**: `test/contracts/test_semantic_task_state.py` validating monotonic revision increments, immutability, and JCS serialization.
 
 - [ ] **T3: Two-Phase Commit Multi-File Transaction Manager (`CMX-09.2`)**
@@ -675,38 +942,4 @@ graph TD
 
 - [ ] **T7: Terminal Sprint Verification & Gate Promotion (`W-092-F1`)**
   - Run all boundary, TCB budget, and contract falsifiers.
-  - Promote verified interfaces from `FEATURE_SPEC.md` into canonical `docs/architecture/`.
-
----
-
-## 3. Active Blockers & Dependencies
-
-- **Blocker B-1**: None currently blocking Lane A. All T0 prerequisites green.
-- **Blocker B-2**: Lane B canary runs (`REL-02R`) blocked until `REL-01R` runner repair finishes.
-- **Blocker B-3**: `TUI-01` (`aether` terminal, [`backlog.md` §2.7](backlog.md)) is not a WIP=1 lane occupant — both lanes above are full — and its milestone (`M-9`/`TC-E-047`) stays `BLOCKED` on `M-8`. Its command-registry (`clients/tui-core`) and plan-mode-enforcement (`runtime/profiles.py`/`wiring.py`/`session.py`) slices landed opportunistically as self-contained, independently falsifiable units that do not contend for either occupied lane, per `backlog.md`'s scope note that it tracks "work outside the active sprint WIP=1 constraint." The OpenTUI qualification spike (`PRD_AETHER_TUI.md` §8.1) is only partially run (RSS over budget; see `backlog.md` `TUI-01`) — the render-layer rewrite and packaging remain unauthorized and unstarted pending a full spike pass and explicit lane authorization.
-
----
-
-## 4. Verification & Falsifier Execution Commands
-
-Autonomous agents executing tasks in this sprint MUST execute the following exact commands to validate progress:
-
-```bash
-# 1. Architecture boundaries & TCB budget (threshold <= 1438 LOC)
-python3 tools/linters/check_boundaries.py
-python3 tools/linters/check_tcb_budget.py
-
-# 2. Invariant linters
-python3 tools/linters/check_domain_blindness.py
-python3 tools/linters/check_isolation_policy.py
-python3 tools/linters/check_markdown_links.py
-
-# 3. Unit & contract test suites
-python3 -m unittest discover -s test/kernel -t .
-python3 -m unittest discover -s test/contracts -t .
-python3 -m unittest discover -s test/agency -t .
-python3 -m unittest discover -s test/runtime -t .
-
-# 4. Frontend & client test suite
-npm test
-```
+  - Promote verified interfaces from `spec.md` into canonical `docs/architecture/`.

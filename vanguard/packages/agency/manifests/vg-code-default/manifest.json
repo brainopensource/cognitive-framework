@@ -6,12 +6,14 @@
       "vg-code-default/read-tool.json",
       "vg-code-default/search-tool.json",
       "vg-code-default/patch-tool.json",
-      "vg-code-default/test-tool.json"
+      "vg-code-default/test-tool.json",
+      "vg-code-default/finish-tool.json"
     ],
     "context_policy": ["vg-code-default/context-policy.json"],
     "routing_policy": ["vg-code-default/routing-policy.json"],
     "approval_policy": ["vg-code-default/approval-policy.json"],
     "retrieval_policy": ["vg-code-default/retrieval-policy.json"],
+    "repo_index": ["vg-code-default/repo-index.json"],
     "skill": [
       "vg-code-default/skills/pytest-green.json",
       "vg-code-default/skills/read-receipt-before-repatch.json",
@@ -42,6 +44,12 @@
       "sink": "privileged",
       "selector": {"kind":"generic","uriPattern":"proc://exec/allow/git,pytest,ruff,python3"},
       "risk": "high"
+    },
+    {
+      "verb": "agency.finish",
+      "sink": "observation",
+      "selector": {"kind":"generic","uriPattern":"agency://finish"},
+      "risk": "low"
     }
   ],
   "evaluators": ["coding-oracle@3"],

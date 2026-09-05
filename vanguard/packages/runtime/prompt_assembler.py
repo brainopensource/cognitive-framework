@@ -50,6 +50,7 @@ class PromptAssembler:
         recorder: CompetencePriorRecorder | None = None,
         provenance: ProvenanceSink | None = None,
         memory: MemoryBinding | None = None,
+        task_state: Mapping[str, Any] | None = None,
     ) -> None:
         self._compiler = compiler
         self._task = task
@@ -58,6 +59,11 @@ class PromptAssembler:
         self._provenance = provenance
         self._memory = memory
         self._dialogue: list[Fragment] = []
+        self._task_state = dict(task_state) if isinstance(task_state, Mapping) else None
+
+    def set_task_state(self, state: Mapping[str, Any] | None) -> None:
+        """Replace the L4 σ note. Never written into the frozen L1–L3 prefix."""
+        self._task_state = dict(state) if isinstance(state, Mapping) else None
 
     @property
     def compiler(self) -> ContextCompiler:
@@ -133,8 +139,17 @@ class PromptAssembler:
     ) -> tuple[dict[str, Any], CompiledContext]:
         """Compile L1-L5 layers and construct the provider ContextBundle."""
         mem_fragments, memory_digest = self.memory_fragments()
+        notes: tuple[Fragment, ...] = ()
+        if self._task_state:
+            notes = (Fragment(
+                source="task-state",
+                label="sigma",
+                text=json.dumps(self._task_state, sort_keys=True, default=str),
+                evictable=False,
+            ),)
         compiled: CompiledContext = self._compiler.compile(
             brief=self._task.brief,
+            notes=notes,
             dialogue=tuple(self._dialogue) + mem_fragments,
         )
 

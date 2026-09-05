@@ -11,7 +11,7 @@ version: "0.2.0"
 last_verified: 2026-08-29
 future_canonical_owner: docs/product/frontend/PRD_FRONTEND_PLATFORM.md
 subordinate_to:
-  - ../../SPEC.md
+  - ../../execution/spec.md
 ---
 
 # Product Requirements Document: AETHER Frontend Platform & Shared Client Substrate

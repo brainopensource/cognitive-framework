@@ -1,0 +1,102 @@
+[
+  {
+    "name": "Phi-4-mini-instruct (3.8B)",
+    "warmup_sec": 2.52,
+    "passed": true,
+    "turns_needed": 2,
+    "final_score": 100,
+    "status": "PASS",
+    "total_tokens_all_turns": 284,
+    "turns": [
+      {
+        "turn": 1,
+        "duration_sec": 1.88,
+        "tokens": 174,
+        "tokens_sec": 92.73,
+        "reasoning_chars": 0,
+        "content_chars": 700,
+        "code": "print(fibonacci(6)  # Assuming fibonacci is a function that returns the nth Fibonacci number",
+        "retcode": 1,
+        "stdout": "",
+        "stderr": "File \"<string>\", line 1\n    print(fibonacci(6)  # Assuming fibonacci is a function that returns the nth Fibonacci number\n         ^\nSyntaxError: '(' was never closed",
+        "success": false
+      },
+      {
+        "turn": 2,
+        "duration_sec": 1.17,
+        "tokens": 110,
+        "tokens_sec": 93.89,
+        "reasoning_chars": 0,
+        "content_chars": 428,
+        "code": "print((lambda x: x if x <= 1 else (lambda f: f(x - 1) + f(x - 2)))(6))",
+        "retcode": 0,
+        "stdout": "<function <lambda>.<locals>.<lambda> at 0x7f6526a1d120>",
+        "stderr": "",
+        "success": true
+      }
+    ]
+  },
+  {
+    "name": "DeepSeek-R1-Distill-Qwen-14B",
+    "warmup_sec": 4.12,
+    "passed": false,
+    "turns_needed": 4,
+    "final_score": 50,
+    "status": "FAIL",
+    "total_tokens_all_turns": 9642,
+    "turns": [
+      {
+        "turn": 1,
+        "duration_sec": 61.58,
+        "tokens": 1984,
+        "tokens_sec": 32.22,
+        "reasoning_chars": 6762,
+        "content_chars": 419,
+        "code": "print((lambda l: (l.extend([l[-1]+l[-2] for _ in range(4)]) or l[5]))([0,1]))",
+        "retcode": 0,
+        "stdout": "1",
+        "stderr": "",
+        "success": false
+      },
+      {
+        "turn": 2,
+        "duration_sec": 108.54,
+        "tokens": 3158,
+        "tokens_sec": 29.09,
+        "reasoning_chars": 10315,
+        "content_chars": 685,
+        "code": "print((lambda l: (l.extend([l[-1]+l[-2] for _ in range(5)]) or l[5]))([0,1]))",
+        "retcode": 0,
+        "stdout": "1",
+        "stderr": "",
+        "success": false
+      },
+      {
+        "turn": 3,
+        "duration_sec": 127.06,
+        "tokens": 3535,
+        "tokens_sec": 27.82,
+        "reasoning_chars": 11383,
+        "content_chars": 685,
+        "code": "print((lambda l: (l.extend([l[-1]+l[-2] for _ in range(4)]) or l[5]))([1,1]))",
+        "retcode": 0,
+        "stdout": "2",
+        "stderr": "",
+        "success": false
+      },
+      {
+        "turn": 4,
+        "duration_sec": 38.54,
+        "tokens": 965,
+        "tokens_sec": 25.04,
+        "reasoning_chars": 3310,
+        "content_chars": 685,
+        "code": "print((lambda l: (l.extend([l[-1]+l[-2] for _ in range(4)]) or l[5]))([1,1]))",
+        "retcode": 0,
+        "stdout": "2",
+        "stderr": "",
+        "success": false
+      }
+    ]
+  }
+]

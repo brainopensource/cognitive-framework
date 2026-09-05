@@ -140,6 +140,9 @@ class TheLiveSmokeSkipsClosed(unittest.TestCase):
         from vanguard.packages.runtime.lab_driver import run_lab_task
 
         with tempfile.TemporaryDirectory() as tmp, patch(
+            "vanguard.packages.runtime.model_selection._probe_http",
+            return_value=True,
+        ), patch(
             "vanguard.packages.runtime.model_selection._ollama_tags",
             return_value=("installed:tag",),
         ):

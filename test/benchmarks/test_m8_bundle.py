@@ -15,6 +15,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from benchmarks.m8_heldout.bundle_signer import CredentialLeakError, bundle_digest, sign_bundle, verify_bundle
 from benchmarks.m8_heldout.canary import preflight_check
 from benchmarks.m8_heldout.receipts import PromotionReceipt, RollbackReceipt
+from benchmarks.protocols import write_b20_report
 
 
 class TestM8Bundle(unittest.TestCase):
@@ -30,6 +31,41 @@ class TestM8Bundle(unittest.TestCase):
         self.assertEqual({row["disposition"] for row in bundle["records"]}, {"NOT_RUN"})
         for key in ("success", "lift", "regression", "cost", "tokens", "latency"):
             self.assertIsNone(bundle["empirical"][key])
+
+    def test_b20_dry_run_has_null_pass_cost_oracle(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "benchmark_20_results.json"
+            report = write_b20_report(
+                path,
+                subject_sha="86142175fcab03ff93727ad1f5b336b22e01c66b",
+                dry_run=True,
+                task_ids=("01_rate_limiter_lease_recovery",),
+            )
+            self.assertIsNone(report["pass"])
+            self.assertIsNone(report["cost"])
+            self.assertIsNone(report["oracle"])
+            self.assertIsNone(report["oracle_passed"])
+            on_disk = json.loads(path.read_text(encoding="utf-8"))
+            self.assertIsNone(on_disk["pass"])
+            self.assertIsNone(on_disk["cost"])
+            self.assertIsNone(on_disk["oracle"])
+            self.assertIsNone(on_disk["oracle_passed"])
+            self.assertIsNone(on_disk["results"][0]["status"])
+            self.assertIsNone(on_disk["results"][0]["cost_usd"])
+            self.assertIsNone(on_disk["results"][0]["oracle_passed"])
+
+        runner = subprocess.run(
+            [sys.executable, "benchmarks/benchmark_20_suite/runner.py", "--dry-run"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        self.assertEqual(runner.returncode, 0, runner.stderr)
+        emitted = json.loads(runner.stdout)
+        self.assertIsNone(emitted["pass"])
+        self.assertIsNone(emitted["cost"])
+        self.assertIsNone(emitted["oracle"])
+        self.assertIsNone(emitted["oracle_passed"])
 
     def test_signature_is_deterministic_and_verifies(self) -> None:
         bundle = self._bundle()

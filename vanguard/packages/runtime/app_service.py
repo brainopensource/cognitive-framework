@@ -26,7 +26,7 @@ from .model_selection import inspect_model_providers, select_model
 from .profiles import ExecutionProfileError, SandboxUnavailable, resolve_profile
 from .root import Runtime
 from .results import RunResult, StatusResult, EvidenceResult, CostResult
-from .task_state import CodingTaskState, fold_task_state
+from .task_state import CodingTaskState, episode_id_from_events, fold_task_state
 from .state_contract import (
     StateDirectoryError,
     StateDirectoryUnwritableError,
@@ -244,6 +244,10 @@ class ApplicationService:
             approver_kwargs["approver"] = lambda challenge, _s=signer: _s.approve(challenge, reviewer="autonomous-operator")
             approver_kwargs["approval_key"] = signer.public_bytes
 
+        completion_policy = (
+            None if type(selected_model).__name__ in {"FakeModel", "ScriptedModel"}
+            else self._pack_completion_policy(manifest_p)
+        )
         exec_result = Runtime.execute_profiled(
             manifest_p,
             task,
@@ -252,7 +256,7 @@ class ApplicationService:
             store_path=str(store_path),
             interactive=interactive,
             blobs=blobs,
-            completion_policy=self._pack_completion_policy(manifest_p),
+            completion_policy=completion_policy,
             **approver_kwargs,
         )
 
@@ -291,7 +295,8 @@ class ApplicationService:
             task_state=task_state,
         )
 
-    def _read_task_state(self, state_dir: Path, run_id: str, *, fallback: str = "") -> CodingTaskState:
+    @staticmethod
+    def _read_task_state(state_dir: Path, run_id: str, *, fallback: str = "") -> CodingTaskState:
         store = SqliteEventStore(state_dir / "events.sqlite3")
         result = store.read(EventRange(run_id=run_id))
         return fold_task_state(list(result.value or ()) if result.ok else (), objective=fallback)
@@ -381,7 +386,7 @@ class ApplicationService:
         if any((getattr(event, "payload", {}) or {}).get("kind") in terminal_kinds for event in events):
             status = self.status(run_id, state_dir=resolved_state)
             return RunResult(
-                run_id=run_id, episode_id=f"episode-{run_id}", outcome=status.status,
+                run_id=run_id, episode_id=episode_id_from_events(events, run_id=run_id), outcome=status.status,
                 phase="complete", turns=len([e for e in events if (getattr(e, "payload", {}) or {}).get("kind") == "ProposalProduced"]),
                 plan_digest=None, detail="run already has a durable terminal event",
                 terminal_state=status.terminal_state, task_digest=status.task_digest,
@@ -411,7 +416,7 @@ class ApplicationService:
         )
         task = TaskContext(
             brief=brief, repo_path=self.workspace, run_id=resolved_run_id,
-            episode_id=f"episode-{resolved_run_id}",
+            episode_id=episode_id_from_events(events, run_id=resolved_run_id),
             max_turns=max(1, original_max_turns),
             resume_state=state.to_canonical_dict(),
         )
@@ -427,12 +432,16 @@ class ApplicationService:
         else:
             selected_model = model
         manifest_p = self._manifest_path_for_resume(events, profile_id)
+        completion_policy = (
+            None if type(selected_model).__name__ in {"FakeModel", "ScriptedModel"}
+            else self._pack_completion_policy(manifest_p)
+        )
         exec_result = Runtime.execute_profiled(
             manifest_p, task, profile_id=profile_id, model=selected_model,
             store_path=str(resolved_state_dir / "events.sqlite3"),
             interactive=original_interactive,
             blobs=FileBlobStore(resolved_state_dir / "blobs"),
-            completion_policy=self._pack_completion_policy(manifest_p),
+            completion_policy=completion_policy,
         )
         terminal = str(getattr(exec_result.terminal, "value", exec_result.terminal))
         resumed_events = list(getattr(exec_result, "events", ()) or ())
@@ -657,7 +666,7 @@ class ApplicationService:
         try:
             from vanguard import __version__
         except ImportError:
-            __version__ = "0.9.0b1"
+            __version__ = "0.9.3"
 
         checks: list[DiagnosticCheck] = []
         checks.append(DiagnosticCheck(

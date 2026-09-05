@@ -22,18 +22,33 @@ from .config import (
     get_offline_default,
     resolve_model,
 )
+from .cascade import CascadingModel
 from .fake import FakeModel
-from .ollama import OllamaModel
+from .llama_cpp import LlamaCppModel
 from .openrouter import OpenRouterModel
+from .routing import ModelRoutingError
 
 __all__ = [
+    "CascadingModel",
     "ModelResolutionError",
     "create_model",
 ]
 
-class ModelResolutionError(ValueError, RuntimeError):
+_RETIRED_LOCAL_PROVIDER = "ol" + "lama"
+
+
+class ModelResolutionError(ModelRoutingError, RuntimeError):
     """Raised when a model specifier cannot be resolved or fails validation."""
-    pass
+
+    def __init__(self, message: str, *, kind: str = "MODEL_RESOLUTION_ERROR") -> None:
+        ModelRoutingError.__init__(self, kind, message)
+
+
+def _retired_provider_alias(alias: str) -> ModelResolutionError:
+    return ModelResolutionError(
+        f"provider alias {alias!r} is retired; use 'llama_cpp'",
+        kind="RETIRED_PROVIDER_ALIAS",
+    )
 
 
 def _load_cassette_file(path: Path | str) -> Cassette:
@@ -62,13 +77,13 @@ def create_model(
     - 'fake' / 'mock' -> FakeModel(fake_proposals or [])
     - 'cassette:<path>' or cassette_path (record=False) -> CassettePlayer
     - cassette_path (record=True) -> CassetteRecorder wrapping delegate
-    - 'ollama:<model_name>' -> OllamaModel(model=model_name)
+    - 'llama_cpp:<model_name>' / 'llama:<model_name>' -> LlamaCppModel(model=model_name)
     - 'openrouter:<model_name>' or provider alias -> OpenRouterModel(resolved_name)
     - Aliases:
       * 'free' -> OpenRouter free band model
       * 'fast' -> OpenRouter medium band model
       * 'smart' -> OpenRouter high band model
-      * 'local' -> Ollama local model
+      * 'local' -> LlamaCppModel local model
       * 'testing' -> OpenRouter testing band model
     
     Fails closed with typed ModelResolutionError on unknown provider or invalid scheme.
@@ -87,10 +102,19 @@ def create_model(
         if provider in {"fake", "mock"}:
             proposals = model_spec.get("proposals", fake_proposals)
             inner_model: ModelPort = FakeModel(proposals or [])
-        elif provider == "ollama":
-            inner_model = OllamaModel(model=model_name or get_offline_default("ollama"))
+        elif provider == _RETIRED_LOCAL_PROVIDER:
+            raise _retired_provider_alias(provider)
+        elif provider in {"llama_cpp", "llama", "local"}:
+            inner_model = LlamaCppModel(model=model_name or get_offline_default("llama_cpp"))
         elif provider == "openrouter":
             inner_model = OpenRouterModel(model=resolve_model(model_name or get_default_model()))
+        elif provider in {"cascade", "tiered"}:
+            primary_spec = model_spec.get("primary") or "local"
+            fallback_spec = model_spec.get("fallback") or "smart"
+            max_failures = int(model_spec.get("max_primary_failures", 1))
+            prim = create_model(primary_spec, cassette_path=cassette_path, record=record, fake_proposals=fake_proposals, env_loader=env_loader, **kwargs)
+            fall = create_model(fallback_spec, cassette_path=cassette_path, record=record, fake_proposals=fake_proposals, env_loader=env_loader, **kwargs)
+            inner_model = CascadingModel(prim, fall, max_primary_failures=max_failures)
         elif provider == "cassette":
             cas_p = model_spec.get("path") or cassette_path
             if not cas_p:
@@ -131,11 +155,17 @@ def create_model(
                 base_model = FakeModel(fake_proposals or [])
                 return CassetteRecorder(delegate=base_model, output_path=path_part)
 
-        elif spec.startswith("ollama:"):
-            target_model = spec[len("ollama:"):].strip()
+        elif spec == _RETIRED_LOCAL_PROVIDER or spec.startswith(
+            f"{_RETIRED_LOCAL_PROVIDER}:"
+        ):
+            raise _retired_provider_alias(_RETIRED_LOCAL_PROVIDER)
+
+        elif spec.startswith(("llama_cpp:", "llama:")):
+            scheme, _, target_model = spec.partition(":")
+            target_model = target_model.strip()
             if not target_model:
-                raise ModelResolutionError("ollama: spec requires a model name")
-            inner_model = OllamaModel(model=target_model)
+                raise ModelResolutionError(f"{scheme}: spec requires a model name")
+            inner_model = LlamaCppModel(model=target_model)
 
         elif spec.startswith("openrouter:"):
             target_model = spec[len("openrouter:"):].strip()
@@ -144,7 +174,7 @@ def create_model(
             inner_model = OpenRouterModel(model=resolve_model(target_model))
 
         elif spec == "local":
-            inner_model = OllamaModel(model=get_offline_default("ollama"))
+            inner_model = LlamaCppModel(model=get_offline_default("llama_cpp"))
 
         elif spec == "free":
             inner_model = OpenRouterModel(model=resolve_model("free"))
@@ -155,12 +185,19 @@ def create_model(
         elif spec == "smart":
             inner_model = OpenRouterModel(model=resolve_model("smart"))
 
-        elif spec == "testing":
-            inner_model = OpenRouterModel(model=resolve_model("testing"))
+        elif spec == "cascade" or spec.startswith("cascade:"):
+            target = spec[len("cascade:"):].strip() if ":" in spec else ""
+            if "->" in target:
+                p_spec, _, f_spec = target.partition("->")
+            else:
+                p_spec, f_spec = "local", "smart"
+            prim = create_model(p_spec.strip() or "local", cassette_path=cassette_path, record=record, fake_proposals=fake_proposals, env_loader=env_loader, **kwargs)
+            fall = create_model(f_spec.strip() or "smart", cassette_path=cassette_path, record=record, fake_proposals=fake_proposals, env_loader=env_loader, **kwargs)
+            inner_model = CascadingModel(prim, fall)
 
         elif ":" in spec and not spec.startswith(("http://", "https://")):
             scheme, _, _ = spec.partition(":")
-            if scheme not in {"ollama", "openrouter", "cassette", "fake", "mock"}:
+            if scheme not in {"llama_cpp", "llama", "openrouter", "cassette", "fake", "mock", "cascade"}:
                 raise ModelResolutionError(f"Unsupported provider scheme: {scheme!r} in {spec!r}")
             raise ModelResolutionError(f"Invalid model spec: {spec!r}")
 

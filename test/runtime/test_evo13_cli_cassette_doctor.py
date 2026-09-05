@@ -63,7 +63,7 @@ class TestEvo13CliCassetteDoctor(unittest.TestCase):
 
         # Run an initial task with fake model
         run_res = app.run(
-            brief="sample task for cassette test",
+            brief="explain this sample task without changing files",
             model=fake_model,
             profile_id="product",
             interactive=False,
@@ -88,7 +88,7 @@ class TestEvo13CliCassetteDoctor(unittest.TestCase):
         # Replay cassette via CLI
         rep_code = main([
             "cassette", "replay", str(cassette_file),
-            "-b", "sample task for cassette test",
+            "-b", "explain this sample task without changing files",
             "-w", str(self.workspace),
         ])
         self.assertEqual(rep_code, 0)

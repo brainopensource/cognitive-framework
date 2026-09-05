@@ -1,3 +1,6 @@
+process.env.NODE_ENV = "test";
+process.env.AETHER_IN_MEMORY_PERSISTENCE = "1";
+
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, writeFileSync, rmSync, existsSync } from "node:fs";

@@ -171,3 +171,15 @@ A typical task execution flows through the architecture as follows:
 - **Hexagonal Boundary Enforcement**: `tools/linters/check_boundaries.py` (checked across production packages).
 - **TCB Budget Linter**: `tools/linters/check_tcb_budget.py` (1386 LOC <= 1438).
 - **Lifecycle Integration Tests**: `test/contracts/test_b2_lifecycle_integration.py`, `test/falsifiers/test_rf94_single_runtime_authority.py`.
+
+---
+
+## Architectural Decisions & Philosophical Rationale
+
+### DEC-01 — General Agentic Substrate over Domain-Specific Harness or Workflow Engine
+
+- **Decision:** AETHER is intentionally designed as a general event-sourced agentic computation substrate rather than a workflow engine, coding harness, or domain-specific application.
+- **Rationale:** Hardcoding workflow DAGs or domain semantics into the substrate constrains future cognitive topologies and couples low-level execution to ephemeral task structures. Substrate primitives must remain universally reusable.
+- **Rejected alternative:** A specialized workflow DAG orchestrator or language-model-specific coding harness with hardcoded task phases.
+- **Reversal condition:** Empirically demonstrable proof that general substrate primitives cannot express required agentic topologies without unacceptable overhead or ergonomic burden.
+

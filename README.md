@@ -7,13 +7,13 @@ canonical_for:
   - quick-start
 status: living
 owner: documentation-architect
-version: "0.9.0b1"
+version: "0.9.3"
 last_verified: 2026-09-03
 supersedes: []
 superseded_by: null
 ---
 
-# AETHER — Electroweak Development (Preparing for `0.9.x`)
+# AETHER — Strongforce Development (`0.9.3`)
 
 **AETHER is a general event-sourced agentic computation framework and experimental substrate.**
 
@@ -35,9 +35,9 @@ and composition, recursive delegation, declarative topologies, authorized durabl
 learning remain higher-layer capabilities rather than new cores. M-1 through M-3 are preservation
 anchors. The current delivery path is to repair the M-8 empirical-evidence path, issue an independent
 positive/negative/undeterminable disposition, then deliver Coding Max as a thin application over a
-thick declarative code-pack composition. M-9 `0.9.0b1`, M-10 `0.9.0`, and the post-M-10 1.0 horizon
-remain gated by exact-subject evidence; mechanism presence and green tests never substitute for
-independently accepted receipts.
+thick declarative code-pack composition. The living package is `0.9.3`. M-9 (historical gate name
+`0.9.0b1`), M-10 `0.9.0`, and the post-M-10 1.0 horizon remain gated by exact-subject evidence;
+mechanism presence and green tests never substitute for independently accepted receipts.
 
 ```text
 observe → propose → authorize → effect → receipt → evaluate
@@ -46,14 +46,14 @@ observe → propose → authorize → effect → receipt → evaluate
 | Dimension | Details |
 |---|---|
 | **Architectural authority** | [`VISION.md`](VISION.md) — constitutional; law and roadmap are subordinate to it |
-| **Normative law** | [`docs/SPEC.md`](docs/SPEC.md) + accepted ADRs indexed through [`docs/decisions.md`](docs/decisions.md) |
-| **Development package** | `vanguard-runtime` metadata currently declares `0.9.0b1` (`pyproject.toml` is the version source); that string is not M-9 acceptance. Python `>=3.10` (tested on Python 3.12 in CI) |
-| **Current status** | Execution runway: [`docs/execution/tasks.md`](docs/execution/tasks.md) (work tree), [`docs/execution/milestones.md`](docs/execution/milestones.md) (TARGET gates). Present HEAD architecture is `docs/SPEC.md` + `docs/architecture/` + `docs/backend/`. |
-| **Roadmap** | M-8 evidence integrity → Coding Max vertical slice → M-9 `0.9.0b1` → M-10 `0.9.0` → non-authorizing 1.0 qualification horizon |
+| **Normative law** | [`docs/execution/spec.md`](docs/execution/spec.md) (normative clauses, invariants & TCB ceilings; rationale in [`docs/backend/architecture/`](docs/backend/architecture/)) |
+| **Development package** | `vanguard-runtime` **0.9.3** (`pyproject.toml` is the version source). That string is not M-9 acceptance. Python `>=3.10` (tested on Python 3.12 in CI) |
+| **Current status** | Execution runway: [`docs/execution/tasks.md`](docs/execution/tasks.md) (work tree), [`docs/execution/milestones.md`](docs/execution/milestones.md) (TARGET gates). Present HEAD architecture is in `docs/execution/spec.md` + `docs/architecture/` + `docs/backend/`. |
+| **Roadmap** | `0.9.3` Strongforce line → M-8 evidence integrity → Coding Max vertical slice → M-9 installable beta (gate) → M-10 `0.9.0` → non-authorizing 1.0 qualification horizon |
 | **Production truth** | `vanguard/packages/` (`domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`; `apps` is a runtime client) |
 
 [![Vision](https://img.shields.io/badge/Law_Zero-VISION.md-purple.svg)](VISION.md)
-[![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/SPEC.md)
+[![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/execution/spec.md)
 [![Execution](https://img.shields.io/badge/Status-tasks.md-orange.svg)](docs/execution/tasks.md)
 
 ## 1. What exists today vs the locked target
@@ -94,7 +94,7 @@ Mechanism presence is not milestone acceptance; [`docs/execution/milestones.md`]
 5. Qualify Coding Max on frozen internal repository-scale tasks before enabling
    reviewer/specialist roles or experimental SBFL, mutation, branch-search, or
    ToolScript treatments.
-6. Authorize and qualify M-9 `0.9.0b1`, then M-10 `0.9.0`; after M-10, qualify
+6. Authorize and qualify M-9 (installable beta), then M-10 `0.9.0`; after M-10, qualify
    the stable framework plus Coding Max and two non-coding reference agents for
    the 1.0 horizon.
 7. Run official SWE-bench optimization as a separate preregistered measurement
@@ -120,12 +120,11 @@ All model access across runtime, benchmarks, CLI, and apps is **strictly governe
 | # | Layer | Documents |
 |---|---|---|
 | 0 | **Vision (constitutional)** | [`VISION.md`](VISION.md) — identity, ontology, direction |
-| 1 | **Law (normative)** | [`docs/SPEC.md`](docs/SPEC.md) |
-| 2 | **Decisions (binding)** | [`docs/decisions.md`](docs/decisions.md) |
-| 3 | **Architecture & Reference** | [`docs/architecture/`](docs/architecture/), [`docs/backend/`](docs/backend/), [`docs/frontend/`](docs/frontend/) |
-| 4 | **Product PRDs** | [`docs/product/`](docs/product/) |
-| 5 | **Execution runway** | [`docs/execution/tasks.md`](docs/execution/tasks.md), [`docs/execution/milestones.md`](docs/execution/milestones.md), [`docs/execution/spec.md`](docs/execution/spec.md), [`docs/execution/technical.md`](docs/execution/technical.md), [`docs/execution/backlog.md`](docs/execution/backlog.md) |
-| 6 | **Theory & Reports** | [`docs/theory/`](docs/theory/), [`docs/research/`](docs/research/), [`docs/reports/`](docs/reports/) |
+| 1 | **Law & Delta Spec (normative)** | [`docs/execution/spec.md`](docs/execution/spec.md) — normative requirements, TCB ceilings, invariants, and sprint delta |
+| 2 | **Architecture & Reference** | [`docs/architecture/`](docs/architecture/), [`docs/backend/`](docs/backend/), [`docs/frontend/`](docs/frontend/) — system workflows, subsystem design, DEC-01–DEC-11 rationale, wire contracts |
+| 3 | **Product PRDs** | [`docs/product/`](docs/product/) |
+| 4 | **Execution runway** | [`docs/execution/tasks.md`](docs/execution/tasks.md), [`docs/execution/milestones.md`](docs/execution/milestones.md), [`docs/execution/spec.md`](docs/execution/spec.md), [`docs/execution/technical.md`](docs/execution/technical.md), [`docs/execution/backlog.md`](docs/execution/backlog.md) |
+| 5 | **Theory & Reports** | [`docs/theory/`](docs/theory/), [`docs/research/`](docs/research/), [`docs/reports/`](docs/reports/) |
 
 A lower document may not be used to reject a Vision concept. This README introduces no architecture
 of its own.
@@ -133,24 +132,28 @@ of its own.
 ### Reading order
 
 1. [`VISION.md`](VISION.md) — what AETHER is and where it is going.
-2. [`docs/SPEC.md`](docs/SPEC.md) — normative requirements and invariants.
-3. [`docs/decisions.md`](docs/decisions.md) — accepted ADRs and decision index.
-4. [`docs/execution/tasks.md`](docs/execution/tasks.md) & [`docs/execution/milestones.md`](docs/execution/milestones.md) (future work vs TARGET gates).
-5. [`docs/architecture/overview.md`](docs/architecture/overview.md) — as-built map, navigational only.
+2. [`QUICKSTART.md`](QUICKSTART.md) — CLI installation, provider configuration, and practical benchmark tutorial.
+3. [`docs/execution/spec.md`](docs/execution/spec.md) — normative requirements, invariants, and delta contracts.
+4. [`docs/architecture/overview.md`](docs/architecture/overview.md) & [`docs/backend/`](docs/backend/) — as-built architecture and rationale.
+5. [`docs/execution/tasks.md`](docs/execution/tasks.md) & [`docs/execution/milestones.md`](docs/execution/milestones.md) (future work vs TARGET gates).
 
-### Fast targeted navigation
+### Fast targeted navigation (LDA SOTA Repository Intelligence)
 
-For implementation and review work, use the repository's generated intelligence to route a small,
-task-specific context before opening source broadly:
+For implementation and review work, use the repository's intelligence engine to route a small,
+task-specific context packet instead of opening source broadly or burning context window tokens:
 
 ```bash
-# 0. Bootstrap state (gates, headroom, known failures)
-cat dev_context_logs/context_summary.md
+# 1. One-shot task bundle: primary symbols, blast radius (callers), doc obligations, & test falsifiers
+uv run lda plan "<task keywords or intent>" --budget 8000
 
-# 1. Route a task to its canonical documents, inside a token budget
+# 2. Semantic intent symbol resolution (when symbol name is unknown):
+uv run lda resolve "<natural language intent or concept>"
+
+# 3. Sub-50ms incremental re-index after code edits (0 MB idle RAM, zero background daemon):
+uv run lda index --delta
+
+# 4. Fallback routing via standalone tools (when LDA index is cold or unbuilt):
 python3 tools/docs_rag_v0.py "<task keywords>" --budget 8000
-
-# 2. Reverse route a code path to its canonical owner documentation + symbols
 python3 tools/docs_rag_v0.py --file vanguard/packages/kernel/budget.py
 ```
 
@@ -169,9 +172,9 @@ These artifacts are navigation aids, not authorities. Confirm their repository r
 non-zero content, and referenced paths before use; an index that merely opens is not necessarily
 current or usable. If LDA or generated knowledge is empty, stale, or inconsistent, fall back to
 `rg --files`, targeted `rg`, canonical documentation, source, and tests. Prefer selected entries and
-sections over loading whole indexes or log directories into an AI context window. The canonical
-skill guide for repository intelligence is [`.agents/skills/lda-navigator/SKILL.md`](.agents/skills/lda-navigator/SKILL.md)
+sections over loading whole indexes or log directories into an AI context window. The canonical skill guide for repository intelligence is [`.agents/skills/lda-navigator/SKILL.md`](.agents/skills/lda-navigator/SKILL.md)
 (with in-depth technical formulation in [`docs/onboarding/SKILL_LDA_Docs_atlas.md`](docs/onboarding/SKILL_LDA_Docs_atlas.md)).
+Local GGUF model operations, server orchestration, and anti-hallucination protocols are defined in [`.agents/skills/llama-cpp/SKILL.md`](.agents/skills/llama-cpp/SKILL.md).
 The mandatory agent procedure and authority rules are defined in [`AGENTS.md`](AGENTS.md#repository-intelligence-navigation-protocol).
 
 ---
@@ -190,14 +193,15 @@ Aether-D-System/
 │   │   ├── kernel/                   # Pure security & attenuation core (TCB <= 1438 LOC: S0–S12 dispatch)
 │   │   ├── agency/                   # Recursive turn machine (EpisodeEngine, context, compaction)
 │   │   ├── runtime/                  # Compose, session, wiring, LedgerEmitter, evaluator gateway
-│   │   ├── adapters/                 # Adapters: models (OpenRouter/Ollama), evaluator, bwrap, SQLite
+│   │   ├── adapters/                 # Adapters: models (OpenRouter/llama.cpp), evaluator, bwrap, SQLite
 │   │   └── apps/                     # Thin application entrypoints (apps/coding_max)
 │   └── clients/                      # TypeScript client workspaces (CLI `vg`, Desktop UI, TUI, Studio, Lab)
 ├── packs/code-default/               # Domain Pack #1 (MHF harness, ast-patch, repo-map, terminal)
 ├── test/                             # Automated test suite (1100+ tests across 17 categories)
 ├── tools/                            # Boundary checkers, TCB budget, secrets scanner, codegen
 ├── schemas/                          # v4 wire schemas and MHF plugin/harness/event schemas
-└── containers/                       # Bubblewrap & OCI isolation images (UID 10001 worker, 10002 judge)
+├── containers/                       # Bubblewrap & OCI isolation images (UID 10001 worker, 10002 judge)
+└── .agents/                          # Universal Agent Capabilities (skills, techniques, proficiencies)
 ```
 
 ### Detailed Subsystem Inventory
@@ -208,9 +212,10 @@ Aether-D-System/
 | **Ports** | `vanguard/packages/ports/` | Hexagonal abstract interfaces: `KernelPort`, `ModelPort`, `SandboxPort`, `EvaluatorPort`, `EventStorePort`, `BlobStorePort`, `EnvironmentPort`, `DeterminismPort`, `IndexPort`, and the 5 SPI protocols (`spi.py`). |
 | **Kernel (TCB)** | `vanguard/packages/kernel/` | Pure security core (`<=1438` LOC limit; currently 1386 LOC). Implements 13-stage effect dispatch (`dispatch.py` S0–S12), monotonic capability attenuation (`attenuation.py`), typed budget algebra (`budget.py`), descriptor-bound capability grants (`grants.py`), action classification (`classifier.py`), fail-closed policy (`policy.py`), and cryptographic provenance DAG (`provenance.py`). Strictly domain-blind (Invariant I-7). |
 | **Agency** | `vanguard/packages/agency/` | Recursive turn engine. Implements `EpisodeEngine` (`episode/engine.py`) with budget enforcement and attenuated child subagent `spawn()`; context compiler & structured token compactor (`context/`). |
-| **Runtime** | `vanguard/packages/runtime/` | System composition and lifecycle. Modularly structured in place into `compose.py`, `session.py`, `wiring.py`, single-writer `ledger_emitter.py`, `evaluator_gateway.py`, governance approvals (`governance/`), and SQLite WAL event store adapters. |
-| **Adapters** | `vanguard/packages/adapters/` | Concrete implementations: Model adapters (`models/openrouter.py`, `ollama.py`, `cassette.py`, `fake.py`), Exterior Evaluator daemon & RPC client (`evaluators/daemon.py`, `gate.py`, `signing.py`), Rootless Bubblewrap Sandbox (`sandbox/rootless.py`), and SQLite WAL event store (`stores/event_store.py`). Must NEVER import kernel or agency. |
+| **Runtime** | `vanguard/packages/runtime/` | System composition and lifecycle. Modularly structured in place into `compose.py`, `session.py`, `wiring.py`, single-writer `ledger_emitter.py`, `evaluator_gateway.py`, governance approvals (`governance/`), and SQLite WAL event store adapters. Declarative capability catalog in `agent_plugins.py` (Invariant N-06). |
+| **Adapters** | `vanguard/packages/adapters/` | Concrete implementations: Model adapters (`models/openrouter.py`, `llama_cpp.py`, `cassette.py`, `fake.py`), Exterior Evaluator daemon & RPC client (`evaluators/daemon.py`, `gate.py`, `signing.py`), Rootless Bubblewrap Sandbox (`sandbox/rootless.py`), and SQLite WAL event store (`stores/event_store.py`). Must NEVER import kernel or agency. |
 | **Apps** | `vanguard/packages/apps/` | Thin application entrypoints (e.g., `vanguard/packages/apps/coding_max/facade.py` exposing `CodingMaxFacade` / `CodingMax`). Coordinates CLI/API requests into `ApplicationService` compositions. |
+| **Capabilities** | `.agents/` | Four-tier cognitive ontology: atomic skills (`test-runner`, `lda-navigator`, `llama-cpp`, `lam-engine`), open-loop techniques (`spec-driven-codegen`, `tdd-falsifier`), and closed feedback loop proficiencies (`autofix-swe-loop`). Exposes stdio MCP server (`vanguard-agent-capabilities`) and unified CLI (`tools/agent_plugins/`). Full architecture in [`.agents/README.md`](.agents/README.md). |
 | **Plugin Registry** | `vanguard/packages/runtime/registry/` | Canonical M-3 lifecycle FSM, isolation broker, worker wire, and composition compiler; M-3 falsifier closure remains active. |
 | **Code Pack #1** | `packs/code-default/` | First Modular Harness Framework (MHF) domain pack. Contains `harness.yaml`, plugin manifests (`fs`, `ast-patch`, `repo-map`, `terminal`, `evaluation-gate`, `single-planner`), prompt templates, and schema definitions. |
 | **Clients** | `vanguard/clients/` | TypeScript workspaces: interactive CLI (`vg`) in `clients/cli/`, Desktop UI (`clients/desktop/`), TUI (`clients/tui/`), Lab (`clients/lab/`), and Studio (`clients/studio/`). |
@@ -343,17 +348,25 @@ uv run <command>
 | **Sprint / Milestone closure** | `just verify` | Complete repository qualification gate |
 | **Release qualification** | `python3 tools/release_qualification.py` | Signed release envelope and external git receipt verification |
 
-### TypeScript CLI Environment (Node.js 20+)
+### Vanguard CLI (`vg`) Environment (Node.js 20+ & Python 3.10+)
+
+The Vanguard interactive CLI (`vg`) drives autonomous coding and benchmark tasks over the Python runtime lattice. Detailed tutorials, model tiers, and benchmark walkthroughs are documented in [`QUICKSTART.md`](QUICKSTART.md).
+
 ```bash
-# Install dependencies
+# 1. Install dependencies and build CLI wrappers in ~/.local/bin/
+uv sync
 npm ci
+bash vanguard/clients/cli/install.sh
 
-# Typecheck and run CLI test suite
-npm run typecheck
-npm test
+# 2. Configure environment (fail-closed mode 0600)
+echo "OPENROUTER_API_KEY=<your-key-here>" > .env && chmod 600 .env
+export OPENROUTER_API_KEY=$(grep '^OPENROUTER_API_KEY=' .env | cut -d= -f2)
 
-# Run interactive CLI
-npm run vg
+# 3. Automated coding execution (Headless Benchmark Mode)
+vg code /path/to/workspace --brief "TASK.md" --planner deepseek/deepseek-v4-flash-0731 --budget-usd 1 --benchmark --headless
+
+# 4. Interactive visual TUI (Human-in-the-Loop)
+cd /path/to/workspace && vg
 ```
 
 ---
@@ -361,9 +374,35 @@ npm run vg
 ## 8. Model Access & Adapter Architecture
 
 Model providers are strictly abstracted behind `ModelPort` (`vanguard/packages/ports/model.py`):
-- **Adapters on disk**: OpenRouter (`adapters/models/openrouter.py`), Ollama (`adapters/models/ollama.py`), Cassette replay (`adapters/models/cassette.py`), Fake (`adapters/models/fake.py`).
+- **Adapters on disk**: OpenRouter (`adapters/models/openrouter.py`), llama.cpp (`adapters/models/llama_cpp.py`), Cassette replay (`adapters/models/cassette.py`), Fake (`adapters/models/fake.py`).
 - **Provider Routing**: DeepSeek, OpenAI, Anthropic, and open-weights models are addressed via route configurations and environment keys (`OPENROUTER_API_KEY`, `DEEPSEEK_API_KEY`, `OPENAI_API_KEY`), not separate vendor files.
 - **Deterministic Testing**: Keep API keys unset during local test runs to ensure hermetic, deterministic execution against cassettes and fakes.
+
+### 8.1. Universal Agent Capability Quad & Model Context Protocol (MCP)
+
+To unlock autonomous coding and repair capabilities across both native Vanguard agents and external IDE harnesses (Cursor, Claude Code, OpenAI Codex, Google Antigravity), Vanguard exposes a four-part MCP tool suite synchronized via `python3 tools/universal_mcp_sync.py`:
+
+```text
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│                             THE UNIVERSAL MCP QUAD                               │
+├───────────────────────────────┬──────────────────────────────────────────────────┤
+│ 1. vanguard-llama-cpp         │ Native local GGUF inference via llama-server     │
+│    (tools/llama_cpp/mcp)      │ (Vulkan/ROCm, >160 tok/s, zero API cost)         │
+├───────────────────────────────┼──────────────────────────────────────────────────┤
+│ 2. vanguard-lda-navigator     │ SOTA graph-grounded AST retrieval & blast radius │
+│    (uv run lda)               │ (Sub-30ms incremental AST sync via lda --delta)  │
+├───────────────────────────────┼──────────────────────────────────────────────────┤
+│ 3. vanguard-lam-engine        │ LLM API Mock engine for zero-cost replay         │
+│    (tools/lam_engine/mcp)     │ (Sub-millisecond mock completions & cassettes)   │
+├───────────────────────────────┼──────────────────────────────────────────────────┤
+│ 4. vanguard-agent-capabilities│ Unified skills, techniques, and proficiencies    │
+│    (tools/agent_plugins/mcp)  │ (test-runner, spec-codegen, autofix-swe-loop)    │
+└───────────────────────────────┴──────────────────────────────────────────────────┘
+```
+
+The capability engine implements the 4-tier ontological progression:
+$$\text{Skills (Atomic)} \longrightarrow \text{Techniques (Open-Loop)} \longrightarrow \text{Proficiencies (Closed-Loop FSM)} \longrightarrow \text{Mastery (Meta-Heuristic)}$$
+Empirical benchmarks demonstrate that an autonomous closed-loop proficiency (`autofix-swe-loop`) achieves a **100% repair pass rate in <4.0s** on small 1.5B local models where open-loop prompting fails completely. Complete details in [`.agents/README.md`](.agents/README.md).
 
 ---
 
@@ -374,7 +413,7 @@ Model providers are strictly abstracted behind `ModelPort` (`vanguard/packages/p
 
 `AGENTS.md` is the single tool-neutral contributor contract for humans and AI agents. There are no
 model-specific instruction files. Future work lives in the five-file execution runway
-([`tasks.md`](docs/execution/tasks.md) and companions). Present HEAD architecture lives in `docs/SPEC.md` and `docs/architecture/`.
+([`tasks.md`](docs/execution/tasks.md) and companions). Present HEAD architecture lives in `docs/execution/spec.md` and `docs/architecture/`.
 
 
 ## 10. Mental models worth internalising
@@ -382,7 +421,7 @@ model-specific instruction files. Future work lives in the five-file execution r
 - **The episode is the program.** There is no workflow engine, no topology language, no graph
   validator — there is a loop that observes, proposes, gets authorised, acts, and reduces. If you find
   yourself declaring a shape for the work *before* the work runs, you are building the thing
-  `docs/SPEC.md` §1.1 (loop-over-DAG inversion) rejects.
+  [`docs/execution/spec.md`](docs/execution/spec.md) (loop-over-DAG inversion) rejects.
 - **The broker grants; the sandbox contains.** Two distinct boundaries. The kernel decides *whether* an
   effect is permitted. The perimeter decides *what an attacker can reach when the kernel was wrong*. A
   logical mediator in the host language is not containment — see [`docs/backend/architecture/kernel.md`](docs/backend/architecture/kernel.md)
@@ -397,7 +436,7 @@ model-specific instruction files. Future work lives in the five-file execution r
   actually deny. A green suite over unwired code is worse than no control — it manufactures false
   assurance.
 - **One document is normative per contract.** If you're about to write a second source of truth for
-  something `docs/SPEC.md` already owns, stop — extend the section, don't fork it.
+  something [`docs/execution/spec.md`](docs/execution/spec.md) already owns, stop — extend the section, don't fork it.
 - **Minimise what must be simultaneously correct.** The kernel has a strict <=1438 LOC target for exactly this reason —
   correctness argument size, not code golf.
 - **Polyglot plugins live outside the trusted computing base.** The wire schema (JSON Schema + JCS) *is*
@@ -423,7 +462,7 @@ shipped with a green suite.
 
 ## Where things live
 
-Read [`docs/SPEC.md`](docs/SPEC.md) for normative requirements and the as-built seven-package lattice
+Read [`docs/execution/spec.md`](docs/execution/spec.md) for normative requirements and the as-built seven-package lattice
 (`domain, ports, kernel, agency, runtime, adapters, apps`) enforced by `tools/linters/check_boundaries.py`.
 Evaluation and measurement rules (paired designs, McNemar, empirical evidence) are specified in
 [`docs/backend/architecture/assurance-evaluation.md`](docs/backend/architecture/assurance-evaluation.md) —

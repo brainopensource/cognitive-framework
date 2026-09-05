@@ -2,7 +2,7 @@
   "harness": "vg-code-balanced",
   "components": {
     "system_prompt": ["vg-code-default/system-prompt.txt"],
-    "tools": ["vg-code-default/read-tool.json", "vg-code-default/search-tool.json", "vg-code-default/patch-tool.json", "vg-code-default/test-tool.json"],
+    "tools": ["vg-code-default/read-tool.json", "vg-code-default/search-tool.json", "vg-code-default/patch-tool.json", "vg-code-default/test-tool.json", "vg-code-default/finish-tool.json"],
     "context_policy": ["vg-code-default/context-policy.json"],
     "routing_policy": ["vg-code-default/routing-policy.json"],
     "approval_policy": ["vg-code-default/approval-policy.json"],
@@ -14,9 +14,10 @@
     {"verb":"fs.read","sink":"observation","selector":{"kind":"fs","root":"/workspace","paths":["/workspace"]},"risk":"low"},
     {"verb":"fs.search","sink":"observation","selector":{"kind":"fs","root":"/workspace","paths":["/workspace"]},"risk":"low"},
     {"verb":"patch.apply","sink":"privileged","selector":{"kind":"fs","root":"/workspace","paths":["/workspace"]},"risk":"medium"},
-    {"verb":"proc.exec","sink":"privileged","selector":{"kind":"generic","uriPattern":"proc://exec/allow/git,pytest,ruff,python3"},"risk":"high"}
+    {"verb":"proc.exec","sink":"privileged","selector":{"kind":"generic","uriPattern":"proc://exec/allow/git,pytest,ruff,python3"},"risk":"high"},
+    {"verb":"agency.finish","sink":"observation","selector":{"kind":"generic","uriPattern":"agency://finish"},"risk":"low"}
   ],
   "evaluators": ["coding-oracle@3"],
-  "budgetPolicy": "vg-code-default/budget-policy.json",
+  "budgetPolicy": "vg-code-balanced/budget-policy.json",
   "undeletable": false
 }

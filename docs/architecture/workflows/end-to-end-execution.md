@@ -43,4 +43,4 @@ sequenceDiagram
 ## Canonical Components & Owners
 - **System Overview & Boundaries**: [`docs/architecture/overview.md`](../overview.md)
 - **Data Flow & Boundaries**: [`docs/architecture/boundaries.md`](../boundaries.md)
-- **Normative Contract**: [`docs/SPEC.md`](../../SPEC.md)
+- **Normative Contract**: [`docs/execution/spec.md`](../../execution/spec.md)

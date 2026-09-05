@@ -107,7 +107,7 @@ The context compiler organizes prompt tokens into five layers ordered by mutatio
 ```
 
 ### Prefix Stability & KV-Caching
-Layers L1–L3 are deterministically hashed and remain byte-identical across turns. L4 is stable within the task; L5 is the only layer mutated each turn. Cache participation is observed through digests and receipts rather than assumed from layout alone.
+Layers L1–L3 are deterministically hashed and remain byte-identical across turns. L4 is stable within the task; L5 is the only layer mutated each turn. Cache participation is observed through digests and receipts rather than assumed from layout alone. Product `ContextPacket` values bind `WorkspaceEpoch` (`tree_hash` ← treeHash, `index_digest` ← indexDigest, `source_revision` ← sourceRevision, `compiled_at_turn` ← compiledAtTurn). Epoch is a new field on the existing packet, not a second compiler; stale or missing epoch cannot admit `completed`.
 
 ### Context Compaction
 When the context approaches the token budget ceiling, `CompactionEngine` applies structured compaction to L5 while preserving higher layers:
@@ -173,7 +173,7 @@ Transitions depend on observed receipts, not merely on the attempted verb. In pa
 The code pack should maintain a replayable value equivalent to:
 
 ```text
-CodingTaskState
+SemanticTaskState / CodingTaskState (`domain/task_state.py`)
   task_identity
   repository_snapshot
   goal
@@ -255,3 +255,22 @@ Each class has a bounded retry limit and a recovery action. A retry is admissibl
 - **Context Compiler**: `vanguard/packages/agency/context/compiler.py`, `compaction.py`, `layers.py`.
 - **Harness Session Integration**: `vanguard/packages/runtime/session.py`.
 - **Tests**: `test/agency/test_episode.py`, `test/agency/test_context_compiler.py`, `test/contracts/test_m5a_agent_view.py`.
+
+---
+
+## Architectural Decisions & Philosophical Rationale
+
+### DEC-04 — Agent as Ephemeral Projection over Persistent Entity
+
+- **Decision:** An agent is an ephemeral identity, policy, and causal projection boundary, not a long-running, stateful in-memory process.
+- **Rationale:** Stateful agent processes leak memory, fail across process boundaries, and complicate multi-agent coordination. Reconstructing agent perspective on demand from event lineage guarantees stateless resumption and recovery.
+- **Rejected alternative:** Persistent thread-per-agent or actor-per-agent daemons retaining in-memory cognitive state.
+- **Reversal condition:** Evidence that cognitive streaming continuation requires low-latency in-memory state that cannot be reconstructed via prefix-cached token buffers.
+
+### DEC-08 — Sequential Turn Simplicity until Concurrency Proves Value
+
+- **Decision:** The canonical turn loop and topology execution remain strictly unary and sequential by default; concurrent dispatch is admitted only when justified by measured wall-time advantage on provably disjoint operations.
+- **Rationale:** Unrestricted concurrency introduces non-determinism, race conditions in budget accounting, replay divergence, and complex recovery semantics without guaranteed performance improvement.
+- **Rejected alternative:** Default asynchronous / multi-threaded turn dispatch across all agent nodes.
+- **Reversal condition:** Preregistered empirical benchmark evidence demonstrating $\ge 20\%$ median wall-time reduction with byte-identical result ordering on disjoint, read-only operations.
+

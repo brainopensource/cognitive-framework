@@ -1,0 +1,42 @@
+{
+ "condition": "fixed",
+ "model_port": "openrouter",
+ "model": "openrouter/free",
+ "task": "fib",
+ "terminal": "abandoned",
+ "turns": 10,
+ "detail": "turn bound 10 reached",
+ "usage": {
+  "promptTokens": 28846,
+  "completionTokens": 3211,
+  "totalTokens": 32057
+ },
+ "cost_micros": 0,
+ "wall_s": 81.4,
+ "files": [
+  "fib.py"
+ ],
+ "oracle": "PASS",
+ "error": null,
+ "proposals": [
+  "patch.apply/effect",
+  "fs.read/effect",
+  "proc.exec/effect",
+  "None/finish",
+  "proc.exec/effect",
+  "None/finish",
+  "None/finish",
+  "fs.read/effect",
+  "None/finish",
+  "fs.search/effect"
+ ],
+ "denials": [],
+ "effects": [
+  "EffectCompleted:patch.apply:",
+  "EffectCompleted:fs.read:def fibonacci(n):\n    a, b = 0, 1\n    for _ in range(n):\n   ",
+  "EffectCompleted:proc.exec:[exit 0] 0\n1\n1\n2\n3\n5\n8\n13\n21\n34\n",
+  "EffectCompleted:proc.exec:[exit 0] 0\n1\n1\n2\n3\n5\n8\n13\n21\n34\n",
+  "EffectCompleted:fs.read:def fibonacci(n):\n    a, b = 0, 1\n    for _ in range(n):\n   ",
+  "EffectCompleted:fs.search:[{\"file\": \"./fib.py\", \"line\": 1, \"content\": \"def fibonacci(n"
+ ]
+}

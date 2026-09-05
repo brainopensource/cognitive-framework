@@ -210,6 +210,43 @@ class LDAMCPServer:
                 "result": {
                     "tools": [
                         {
+                            "name": "lda_plan",
+                            "description": "Compile a one-shot task bundle: primary target symbols, blast radius upstream callers, test falsifiers, doc obligations, and token-budgeted context.",
+                            "inputSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "query": {"type": "string", "description": "Task keywords, goal, or intent description."},
+                                    "budget": {"type": "integer", "description": "Token budget (default: 8000).", "default": 8000},
+                                    "strategy": {"type": "string", "description": "Strategy: 'ppr_submodular' (default), 'hybrid_rrf', or 'fts5_bm25'.", "default": "ppr_submodular", "enum": ["ppr_submodular", "hybrid_rrf", "fts5_bm25"]},
+                                    "top_symbols": {"type": "integer", "description": "Number of primary symbols to pinpoint (default: 5).", "default": 5},
+                                    "auto_delta": {"type": "boolean", "description": "Automatically synchronize dirty files before planning.", "default": True},
+                                },
+                                "required": ["query"],
+                            },
+                        },
+                        {
+                            "name": "lda_resolve",
+                            "description": "Semantic intent symbol resolution: find candidate symbols by natural language description (multi-signal offline resolution without knowing exact symbol names).",
+                            "inputSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "query": {"type": "string", "description": "Natural language intent query (e.g. 'budget reservation and commitment')."},
+                                    "top_k": {"type": "integer", "description": "Number of symbols to return (default: 5).", "default": 5},
+                                },
+                                "required": ["query"],
+                            },
+                        },
+                        {
+                            "name": "lda_delta",
+                            "description": "Ephemeral incremental delta indexer: synchronizes dirty/modified files into the fact graph in <50ms with 0 MB idle RAM.",
+                            "inputSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "files": {"type": "array", "items": {"type": "string"}, "description": "Optional specific files to re-index (auto-detects dirty files if omitted)."},
+                                },
+                            },
+                        },
+                        {
                             "name": "lda_context",
                             "description": "Compile high-signal token-budgeted context packet containing canonical docs, symbols, tests, and documentation debt obligations for a task.",
                             "inputSchema": {
@@ -407,7 +444,34 @@ class LDAMCPServer:
         }
 
     def _execute_tool(self, name: str, args: Mapping[str, Any]) -> Any:
-        if name == "lda_context":
+        if name == "lda_plan":
+            from .atlas import compile_task_plan
+            query = args.get("query", "")
+            budget = args.get("budget", 8000)
+            strategy = args.get("strategy", "ppr_submodular")
+            top_symbols = args.get("top_symbols", 5)
+            auto_delta = args.get("auto_delta", True)
+            return compile_task_plan(
+                self._root,
+                query,
+                budget=budget,
+                strategy=strategy,
+                top_symbols=top_symbols,
+                auto_delta=auto_delta,
+            )
+
+        elif name == "lda_resolve":
+            from .atlas import resolve_symbol_intent
+            query = args.get("query", "")
+            top_k = args.get("top_k", 5)
+            return resolve_symbol_intent(self._root, query, top_k=top_k)
+
+        elif name == "lda_delta":
+            from .atlas import index_delta
+            files = args.get("files")
+            return index_delta(self._root, files=files)
+
+        elif name == "lda_context":
             query = args.get("query", "")
             budget = args.get("budget", 4000)
             strategy = args.get("strategy", "ppr_submodular")

@@ -7,7 +7,7 @@ canonical_for:
   - repository-anti-sprawl-rules
 status: living
 owner: repository-governance
-version: "0.9.0b1"
+version: "0.9.3"
 last_verified: 2026-09-03
 supersedes: []
 superseded_by: null
@@ -27,14 +27,11 @@ Vanguard / AETHER is a Python-first recursive-agency substrate (`requires-python
 All documentation is partitioned into distinct authority tiers:
 
 ```text
-VISION.md / AGENTS.md / docs/SPEC.md
-    Vision, Operational Rules, Compact Normative Law
-
-docs/decisions.md
-    Foundational Decision Record Index
+VISION.md / AGENTS.md / docs/execution/spec.md
+    Vision, Operational Rules, Compact Normative Law & Delta Spec
 
 docs/architecture/ & docs/backend/ & docs/frontend/ & docs/product/
-    System & Component Architecture, Reference, Product PRDs
+    System & Component Architecture (including DEC-01–DEC-11), Reference, Product PRDs
 
 docs/execution/
     Five-file operational runway: milestones.md, spec.md, technical.md, backlog.md, tasks.md
@@ -44,7 +41,7 @@ docs/theory/ | docs/research/ | docs/reports/
 ```
 
 - **Vision & Operational Rules**: [`VISION.md`](VISION.md), [`AGENTS.md`](AGENTS.md).
-- **The Law & Decisions**: [`docs/SPEC.md`](docs/SPEC.md) + [`docs/decisions.md`](docs/decisions.md).
+- **The Law & Invariants**: [`docs/execution/spec.md`](docs/execution/spec.md).
 - **The Execution Runway**: [`docs/execution/tasks.md`](docs/execution/tasks.md), [`docs/execution/spec.md`](docs/execution/spec.md), [`docs/execution/technical.md`](docs/execution/technical.md), [`docs/execution/milestones.md`](docs/execution/milestones.md), [`docs/execution/backlog.md`](docs/execution/backlog.md).
 
 ### Repository-Intelligence Navigation Protocol
@@ -74,26 +71,60 @@ sequence before broad exploration. Each step answers a specific development ques
 # Step 0 — Bootstrap state: which gates must stay green? what is already failing?
 cat dev_context_logs/context_summary.md          # refresh first with: make dev-context
 
-# Step 1 — Route the task: which subsystem, which canonical documents, what fits the budget?
+# Step 1 — Primary SOTA Fast Path: One-shot task bundle (symbols, callers, falsifiers, docs)
+#          Replaces multiple manual searches with a single, auto-delta synchronized plan.
+uv run lda plan "<task keywords or intent>" --budget 8000
+
+# Step 1b — Concept / intent lookup (when symbol name is unknown):
+uv run lda resolve "<natural language intent or concept>"
+
+# Step 2 — Post-edit sync (sub-50ms incremental re-index with 0 MB background daemon):
+uv run lda index --delta
+
+# Step 3 — Deterministic Fallback (when LDA index is cold, degraded, or unbuilt):
 python3 tools/docs_rag_v0.py "<task keywords>" --budget 8000
-
-# Step 2 — Reverse routing when starting from a code path you must modify:
-#          which documents am I obliged to read and keep synchronized?
 python3 tools/docs_rag_v0.py --file vanguard/packages/kernel/budget.py
-
-# Step 3 — Pin entry symbols, then read only the canonical owner + targeted ranges
 grep "<Symbol>" .generated/knowledge/symbols.jsonl
 ```
 
 - Step 0 answers: *which gates, headrooms, and failure signatures are already known?*
-- Step 1 answers: *which subsystem owns the task and which canonical owner documents apply?*
-- Step 2 answers: *what is the canonical documentation debt attached to the file I will edit?*
-- Step 3 answers: *which existing classes/protocols must my change extend without breaking?*
+- Step 1 answers: *which subsystem owns the task, what are the exact symbol ranges, who calls them (blast radius), which canonical docs must stay synchronized, and which executable test falsifiers verify the change?*
+- Step 1b answers: *which classes/functions implement a given semantic behavior or concept?*
+- Step 2 answers: *how do I refresh AST ranges and relation facts instantly after editing a file without a full rebuild?*
+- Step 3 answers: *how do I deterministically route documentation debt if the SQLite graph is unavailable?*
+
+#### Core LDA Engineering Patterns (Anti-Blind Exploration)
+
+Instead of dumping multi-thousand line files into context or running unguided greps, developers and agents MUST use these targeted patterns:
+
+1. **Explain Code & Explore Concepts** (e.g. *"how does explanation or artifact audit work?"*):
+   ```bash
+   uv run lda resolve "explanation agent"           # Finds exact class/function (e.g. explain.py::Explanation)
+   uv run lda context "explain artifact" --budget 3000 # Compiles token-bounded AST context
+   ```
+2. **Find Modules & Architecture Blast Radius**:
+   ```bash
+   uv run lda repomap --focus vanguard/packages/runtime/ --budget 2000 # Dense structural skeleton
+   uv run lda callers vanguard.packages.runtime.explain.explain_artifact # Upstream callers before touching
+   ```
+3. **Debug Bugs & Run Instant Falsifiers**:
+   ```bash
+   uv run lda plan "fix admission gate verification failure" # Bundles symbol + callers + exact test commands
+   # Output gives copy-paste falsifiers: python3 -m unittest test.packs.code_default.test_context_policy -v
+   ```
+4. **Create Features & Verify Drift**:
+   ```bash
+   uv run lda plan "<new feature description>"      # Identify required ports, protocols, and contracts
+   # [Implement surgical edits]
+   uv run lda index --delta                         # Sub-50ms AST synchronization
+   uv run lda drift --json                          # Verify 0 stale paths, 0 orphan contracts
+   ```
 
 **Health check before trust**: `.generated/knowledge/report.json` must report
 `"status": "VALIDATED"` with non-zero row counts. LDA users must additionally confirm
 `uv run lda doctor --json` reports `"index_healthy": true`. Operational workflows, MCP tools,
 and the token-efficient Golden Order are defined in [`.agents/skills/lda-navigator/SKILL.md`](.agents/skills/lda-navigator/SKILL.md).
+Local model inference and anti-hallucination protocols are defined in [`.agents/skills/llama-cpp/SKILL.md`](.agents/skills/llama-cpp/SKILL.md).
 Otherwise, report the degraded navigation mode and fall back deterministically to `rg --files`,
 targeted `rg`, canonical documents, source, and tests. A worked example of the full sequence is in
 [`docs/README.md`](docs/README.md) (§ Worked Example).
@@ -134,9 +165,37 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 | **`kernel/`** | `vanguard/packages/kernel/` | Trusted Computing Base (TCB limit `<=1438` LOC; currently 1386 LOC). 13-stage dispatch pipeline (S0–S12), monotonic capability attenuation, typed budget algebra, descriptor-bound capability grants, fail-closed policy, execution provenance DAG. Strictly domain-blind (Invariant I-7). |
 | **`agency/`** | `vanguard/packages/agency/` | Recursive turn loop engine (`EpisodeEngine`), attenuated child subagent `spawn()`, structured context compactor, admission gates, and prompt composers. |
 | **`runtime/`** | `vanguard/packages/runtime/` | System composition and lifecycle (`compose.py`, `session.py`, `wiring.py`), single-writer `LedgerEmitter`, Ed25519 cryptographic approvals (`governance/`), SQLite WAL event store. |
-| **`adapters/`** | `vanguard/packages/adapters/` | Concrete implementations: Models (OpenRouter, Ollama, Cassette, Fake), Evaluator daemon & RPC client (UID 10002), Rootless Bubblewrap Sandbox (`bwrap` UID 10001), SQLite WAL event store. **Must not** import `kernel` or `agency`. |
+| **`adapters/`** | `vanguard/packages/adapters/` | Concrete implementations: Models (OpenRouter, llama.cpp / llama-server, Cassette, Fake), Evaluator daemon & RPC client (UID 10002), Rootless Bubblewrap Sandbox (`bwrap` UID 10001), SQLite WAL event store. **Must not** import `kernel` or `agency`. |
 | **`apps/`** | `vanguard/packages/apps/` | Thin application entrypoints (e.g., `apps/coding_max/facade.py` exposing `CodingMaxFacade` / `CodingMax`). Coordinates CLI/API requests into `ApplicationService` compositions. |
 | **`clients/`** | `vanguard/clients/` | Client workspaces: TypeScript/React/Ink CLI (`vg`), Desktop UI, TUI, and Studio interfaces. |
+
+### Universal Agent Capability Layer (`.agents/`)
+
+Capabilities are partitioned into four ontological tiers under `.agents/` and registered into the runtime via [`vanguard/packages/runtime/agent_plugins.py`](vanguard/packages/runtime/agent_plugins.py):
+
+$$\text{Skill (Atomic)} \longrightarrow \text{Technique (Open-Loop)} \longrightarrow \text{Proficiency (Closed-Loop FSM)} \longrightarrow \text{Mastery (Meta-Heuristic)}$$
+
+| Tier | Directory | Description & Contracts | Examples |
+|---|---|---|---|
+| **Skills** | `.agents/skills/` | Atomic execution primitives with zero internal loops. Strictly hermetic and timeout-bounded. | [`test-runner`](.agents/skills/test-runner/SKILL.md), [`lda-navigator`](.agents/skills/lda-navigator/SKILL.md), [`llama-cpp`](.agents/skills/llama-cpp/SKILL.md), [`lam-engine`](.agents/skills/lam-engine/SKILL.md) |
+| **Techniques** | `.agents/techniques/` | Open-loop synergistic compositions of 2+ skills without stateful iteration. | [`spec-driven-codegen`](.agents/techniques/spec-driven-codegen/TECHNIQUE.md) (LDA + LLM), [`tdd-falsifier`](.agents/techniques/tdd-falsifier/TECHNIQUE.md) (LDA + TestRunner) |
+| **Proficiencies** | `.agents/proficiencies/` | Goal-seeking closed feedback loops governed by FSMs, sub-30ms AST delta re-indexing, and fail-closed rollback. | [`autofix-swe-loop`](.agents/proficiencies/autofix-swe-loop/PROFICIENCY.md) (T1 + T2 + AST Delta + Rollback) |
+| **Mastery** | *(Runtime / Horizon)* | Dynamic meta-heuristic routing and online algorithm selection over diverse problem topologies. | Future adaptive metacognition policies |
+
+#### Prompt Prefix Budget Constraint (`W12-A`)
+When injecting capability cards into agent prompts, prompt compilers must conform to the token headroom ceiling:
+$$\text{Length}(\text{CapabilityPrefix}) \le 4096 \text{ characters}$$
+Use `python3 tools/agent_plugins/cli.py prefix` or `build_compact_plugin_prompt_prefix()` to emit the standardized, token-bounded prefix (currently 1774 characters for 8 registered capabilities).
+
+#### Agent Capability CLI & MCP Tooling
+Agents can discover and run capabilities using:
+- **CLI Commands**:
+  - `python3 tools/agent_plugins/cli.py list` — List registered capabilities.
+  - `python3 tools/agent_plugins/cli.py prefix` — Emit compact prompt prefix.
+  - `python3 tools/agent_plugins/cli.py run test-runner "<test-cmd>"` — Run isolated test suite.
+  - `python3 tools/agent_plugins/cli.py autofix --task "<task>" --file "<target>"` — Run closed-loop SWE repair.
+- **Model Context Protocol (MCP)**:
+  `tools/agent_plugins/mcp_server.py` exposes stdio JSON-RPC tools (`agent_list_plugins`, `agent_run_test`, `agent_generate_patch`, `agent_run_falsifier`, `agent_autofix`). Synchronized across harnesses via `python3 tools/universal_mcp_sync.py`.
 
 ---
 
@@ -233,6 +292,9 @@ AI Agents working in this repository MUST comply with the following operational 
   - Run `just check` during incremental development loops.
   - Run `just verify` before claiming task, PR, or sprint completion.
 - **Honest Status Reporting**: Agents MUST report commands actually executed and NEVER claim `PASS` for an unexecuted command. Never suppress failing assertions with `|| true`. Fix task-introduced failures before declaring completion.
+- **Invariant N-06 Compliance**: Code inside `vanguard/packages/runtime/` (including capability catalogs such as `agent_plugins.py`) must remain pure declarative metadata and must never import `subprocess`. All subprocess execution and script runners belong strictly in `tools/` or `.agents/`.
+- **Fail-Closed Rollback Guarantee**: Iterative SWE repair loops and proficiencies must guarantee byte-for-byte rollback of mutated target files if the turn budget exhausts before all test falsifiers pass.
+- **Prompt Prefix Headroom**: Any prompt composition that embeds `.agents/` capability cards must strictly respect the $\le 4096$ character budget (`W12-A`).
 
 ---
 
@@ -247,10 +309,9 @@ When updating documentation, route information to its semantic owner:
 - **`docs/execution/`**: Exactly five authoritative operational runway documents:
   - `milestones.md`: Stable TARGET outcomes and release predicates (M-0 to M-10 plus MS-* overlay). No sprint calendar.
   - `backlog.md`: Stable capability package inventory (SUB-*, MEM-*, CMX-*, OCT-*, T-* aliases). No sprint queue.
-  - `spec.md`: Feature delta contract (typed schemas, invariants, error matrix). Historical name `FEATURE_SPEC.md` is a pointer.
+  - `spec.md`: Feature delta contract (typed schemas, invariants, error matrix).
   - `technical.md`: Self-explaining engineering handbook for remaining work (FACT vs `[PROPOSAL]`).
   - `tasks.md`: Flat tasks and subtasks by context. `requires:` edges only; no waves or WIP calendar.
-- **`docs/decisions.md`**: Immutable Architecture Decision Records (ADRs).
 - **`docs/theory/` | `docs/research/` | `docs/reports/`**: Non-canonical conceptual theory, research, and audit reports (`authority: non-canonical`).
 
 ---
@@ -262,8 +323,8 @@ When updating documentation, route information to its semantic owner:
 > AI Agents **MUST NOT** create new Markdown files under `docs/`, `docs/plans/`, or anywhere across the workspace to leave scratch notes, plans, reviews, or summaries.  
 > 
 > All documentation updates must strictly edit existing canonical files in the documentation hierarchy:
-> 1. **Modifying Normative Law** $\to$ Edit [`docs/SPEC.md`](docs/SPEC.md).
-> 2. **Recording Architectural Decisions** $\to$ Edit [`docs/decisions.md`](docs/decisions.md).
+> 1. **Modifying Normative Law & System Spec** $\to$ Edit [`docs/execution/spec.md`](docs/execution/spec.md).
+> 2. **Recording Architectural Rationale & Trade-offs** $\to$ Edit corresponding subsystem architecture docs in [`docs/backend/architecture/`](docs/backend/architecture/) or [`docs/architecture/`](docs/architecture/).
 > 3. **Updating Tasks or Execution Progress** $\to$ Edit [`docs/execution/tasks.md`](docs/execution/tasks.md) and [`docs/execution/spec.md`](docs/execution/spec.md). Engineering recipes go in [`docs/execution/technical.md`](docs/execution/technical.md).
 > 
 > **Invariant on Execution Architecture**: AI agents must never invent parallel architecture documents; all feature extensions must be expressed as delta contracts in `docs/execution/spec.md` and promoted to `docs/architecture/` upon milestone gate passage. The fifth execution file `technical.md` is the authorized handbook, not a second architecture plane.

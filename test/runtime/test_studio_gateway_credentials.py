@@ -53,7 +53,7 @@ class TestCredentialStatus(unittest.TestCase):
         Collapsing this into MISSING sends them to add a key they already
         added.
         """
-        _write_env(self.root, "OPENROUTER_API_KEY=sk-live-value\n", mode=0o644)
+        _write_env(self.root, "OPENROUTER_API_KEY=test-live-value\n", mode=0o644)
         status = credential_status(self.root)
         self.assertEqual(status["state"], "DENIED")
         self.assertIn("permissive", status["detail"])
@@ -64,13 +64,13 @@ class TestCredentialStatus(unittest.TestCase):
         self.assertEqual(status["state"], "INVALID")
 
     def test_well_formed_key_is_configured(self) -> None:
-        _write_env(self.root, "OPENROUTER_API_KEY=sk-or-v1-testvalue\n")
+        _write_env(self.root, "OPENROUTER_API_KEY=test-openrouter-value\n")
         status = credential_status(self.root)
         self.assertEqual(status["state"], "CONFIGURED")
         self.assertEqual(status["remedy"], "")
 
     def test_status_never_carries_the_secret(self) -> None:
-        secret = "sk-or-v1-do-not-leak-me"
+        secret = "test-openrouter-do-not-leak-me"
         _write_env(self.root, f"OPENROUTER_API_KEY={secret}\n")
         self.assertNotIn(secret, json.dumps(credential_status(self.root)))
 
@@ -79,7 +79,7 @@ class TestProviderProbe(unittest.TestCase):
     def setUp(self) -> None:
         self._tempdir = tempfile.TemporaryDirectory()
         self.root = Path(self._tempdir.name)
-        _write_env(self.root, "OPENROUTER_API_KEY=sk-or-v1-testvalue\n")
+        _write_env(self.root, "OPENROUTER_API_KEY=test-openrouter-value\n")
 
     def tearDown(self) -> None:
         self._tempdir.cleanup()
@@ -102,7 +102,7 @@ class TestProviderProbe(unittest.TestCase):
 
     def test_probe_sends_the_key_as_a_bearer_token(self) -> None:
         _result, captured = self._probe(200)
-        self.assertEqual(captured["headers"]["Authorization"], "Bearer sk-or-v1-testvalue")
+        self.assertEqual(captured["headers"]["Authorization"], "Bearer test-openrouter-value")
 
     def test_success(self) -> None:
         result, _ = self._probe(200)
@@ -181,12 +181,12 @@ class TestGatewayCredentialRoutes(unittest.TestCase):
         self.assertEqual(body["keyRef"], "OPENROUTER_API_KEY")
 
     def test_credentials_route_reports_a_configured_key(self) -> None:
-        _write_env(self.workspace, "OPENROUTER_API_KEY=sk-or-v1-testvalue\n")
+        _write_env(self.workspace, "OPENROUTER_API_KEY=test-openrouter-value\n")
         body = self._get("/api/credentials")
         self.assertEqual(body["state"], "CONFIGURED")
 
     def test_credentials_route_never_returns_the_secret(self) -> None:
-        secret = "sk-or-v1-never-in-a-response"
+        secret = "test-openrouter-never-in-a-response"
         _write_env(self.workspace, f"OPENROUTER_API_KEY={secret}\n")
         with urllib.request.urlopen(f"{self.base_url}/api/credentials", timeout=5) as response:
             self.assertNotIn(secret, response.read().decode("utf-8"))
@@ -247,13 +247,13 @@ class TestLaunchPayloadFidelity(unittest.TestCase):
         sent = self._launch(
             {
                 "brief": "do a thing",
-                "profileId": "code-default",
+                "profileId": "product",
                 "model": "deepseek/deepseek-v4-flash-0731",
                 "episodeId": "ep-1",
             }
         )
         self.assertEqual(sent["model"], "deepseek/deepseek-v4-flash-0731")
-        self.assertEqual(sent["profileId"], "code-default")
+        self.assertEqual(sent["profileId"], "product")
         self.assertEqual(sent["episodeId"], "ep-1")
 
     def test_manifest_resolves_to_a_real_pack_file(self) -> None:

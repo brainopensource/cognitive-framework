@@ -1,3 +1,4 @@
+schema: aether.baac.challenge/1
 id: bench_multi_8K_tier-2_json_todo_store
 name: JSON-Backed Todo Store
 scope: multi

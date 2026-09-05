@@ -61,18 +61,69 @@ class ModelCapabilityProfile:
 
 
 _PROFILES: dict[str, ModelCapabilityProfile] = {
-    "fake": ModelCapabilityProfile("fake", tool_call_style=ToolCallStyle.JSON_SCHEMA,
-                                    supports_system_role=True),
-    "openrouter/free": ModelCapabilityProfile("openrouter/free"),
+    "fake": ModelCapabilityProfile(
+        "fake",
+        tool_call_style=ToolCallStyle.JSON_SCHEMA,
+        supports_system_role=True,
+    ),
+    "openrouter/free": ModelCapabilityProfile(
+        "openrouter/free",
+        tool_call_style=ToolCallStyle.FENCED_JSON,
+    ),
+    # Primary production route: DeepSeek V4 Flash
+    "deepseek/deepseek-v4-flash-0731": ModelCapabilityProfile(
+        "deepseek/deepseek-v4-flash-0731",
+        tool_call_style=ToolCallStyle.NATIVE,
+        supports_parallel_tool_calls=True,
+    ),
+    # First fallback: GLM 5.3 Flash
+    "z-ai/glm-5.3-flash": ModelCapabilityProfile(
+        "z-ai/glm-5.3-flash",
+        tool_call_style=ToolCallStyle.NATIVE,
+    ),
+    # Unverified routes remain on the degradation path until a provider-shape
+    # vector proves native patch.apply and finish dispatch.
+    "deepseek/deepseek-v4-pro": ModelCapabilityProfile(
+        "deepseek/deepseek-v4-pro",
+        tool_call_style=ToolCallStyle.FENCED_JSON,
+    ),
+    "google/gemini-3.8-flash": ModelCapabilityProfile(
+        "google/gemini-3.8-flash",
+        tool_call_style=ToolCallStyle.FENCED_JSON,
+    ),
+    # Native local inference via llama.cpp / llama-server
+    "local-model": ModelCapabilityProfile(
+        "local-model",
+        tool_call_style=ToolCallStyle.NATIVE,
+        supports_parallel_tool_calls=True,
+    ),
+}
+
+_ALIASES: dict[str, str] = {
+    "deepseek/deepseek-v4-flash": "deepseek/deepseek-v4-flash-0731",
+    "deepseek-v4-flash": "deepseek/deepseek-v4-flash-0731",
+    "deepseek/flash": "deepseek/deepseek-v4-flash-0731",
+    "deepseek-v4-pro": "deepseek/deepseek-v4-pro",
+    "deepseek/pro": "deepseek/deepseek-v4-pro",
+    "glm-5.3-flash": "z-ai/glm-5.3-flash",
+    "gemini-3.8-flash": "google/gemini-3.8-flash",
+    "gemini-flash": "google/gemini-3.8-flash",
+    "llama_cpp": "local-model",
+    "llama": "local-model",
 }
 
 
 def profile_for(model_id: str | None) -> ModelCapabilityProfile:
     key = (model_id or "unknown").strip()
-    profile = _PROFILES.get(key)
+    resolved_key = _ALIASES.get(key, key)
+    profile = _PROFILES.get(resolved_key)
     if profile is not None:
         return profile
-    for prefix in ("openrouter:", "ollama:"):
-        if key.startswith(prefix) and key[len(prefix):] in _PROFILES:
-            return _PROFILES[key[len(prefix):]]
+    for prefix in ("openrouter:", "llama_cpp:", "llama:"):
+        if resolved_key.startswith(prefix):
+            stripped = resolved_key[len(prefix):]
+            target = _ALIASES.get(stripped, stripped)
+            if target in _PROFILES:
+                return _PROFILES[target]
     return ModelCapabilityProfile(key or "unknown")
+

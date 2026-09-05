@@ -1,3 +1,4 @@
+schema: aether.baac.challenge/1
 id: bench_multi_64K_tier-5_immutable_trie
 name: Persistent Immutable Prefix Trie
 scope: multi

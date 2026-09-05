@@ -996,18 +996,23 @@ class OpenRouterModel:
         tools: ToolSchemas,
         sampling: Sampling,
     ) -> Result[Proposal]:
-        route = resolve_route(self._model)
-        preflight = preflight_check(route)
-        if isinstance(preflight, Result) and not preflight.ok:
-            return preflight
+        if self._provider == "openrouter":
+            route = resolve_route(self._model)
+            preflight = preflight_check(route)
+            if isinstance(preflight, Result) and not preflight.ok:
+                return preflight
+            target_model = self._models[0] if self._models else route.resolved_model
+        else:
+            route = None
+            target_model = self._models[0] if self._models else self._model
 
         secret = self._lookup_secret()
-        if secret is None:
+        if secret is None and self._provider == "openrouter":
             return Result.fail(
                 kind="instrument_error",
                 message=f"secret reference {self.api_key_ref} is unset",
             )
-        target_model = self._models[0] if self._models else route.resolved_model
+        secret = secret or "not-needed"
         dialect = compile_intent(
             ModelIntent(system="", messages=tuple(_messages(context)),
                         tools=tuple(tools), sampling=dict(sampling)),
@@ -1088,6 +1093,7 @@ class OpenRouterModel:
                 return Result.fail(
                     kind="instrument_error",
                     message="provider streaming response was malformed, truncated, or empty",
+                    retryable=True,
                 )
         else:
             transport_result = self._execute_transport(headers, payload, secret)
@@ -1105,6 +1111,7 @@ class OpenRouterModel:
                     return Result.fail(
                         kind="instrument_error",
                         message="provider streaming response was malformed, truncated, or empty",
+                        retryable=True,
                     )
             else:
                 decoded = raw.decode("utf-8", "replace") if isinstance(raw, bytes) else str(raw)
@@ -1155,12 +1162,22 @@ class OpenRouterModel:
             total_tokens = prompt_tokens + completion_tokens
 
         uncached_prompt = max(0, prompt_tokens - cached_tokens)
-        usd_micros = (
-            (uncached_prompt * route.prompt_micros_per_1m)
-            + (cached_tokens * route.cached_micros_per_1m)
-            + (completion_tokens * route.completion_micros_per_1m)
-        ) // 1_000_000
-        cost_usd = round(usd_micros / 1_000_000.0, 8)
+        if route is not None:
+            usd_micros = (
+                (uncached_prompt * route.prompt_micros_per_1m)
+                + (cached_tokens * route.cached_micros_per_1m)
+                + (completion_tokens * route.completion_micros_per_1m)
+            ) // 1_000_000
+            cost_usd = round(usd_micros / 1_000_000.0, 8)
+            pricing_known = route.pricing_known
+            pricing_source = route.pricing_source
+            resolved_model = route.resolved_model
+        else:
+            usd_micros = 0
+            cost_usd = 0.0
+            pricing_known = True
+            pricing_source = "local"
+            resolved_model = target_model
 
         proposal["usage"] = {
             "prompt_tokens": prompt_tokens,
@@ -1169,16 +1186,16 @@ class OpenRouterModel:
             "total_tokens": total_tokens,
             "cost_usd": cost_usd,
             "usd_micros": usd_micros,
-            "pricing_known": route.pricing_known,
-            "pricing_source": route.pricing_source,
-            "resolved_model": route.resolved_model,
+            "pricing_known": pricing_known,
+            "pricing_source": pricing_source,
+            "resolved_model": resolved_model,
             "ttft_millis": ttft_millis,
         }
         proposal["cost_usd"] = cost_usd
         proposal["usd_micros"] = usd_micros
-        proposal["pricing_known"] = route.pricing_known
-        proposal["pricing_source"] = route.pricing_source
-        proposal["resolved_model"] = route.resolved_model
+        proposal["pricing_known"] = pricing_known
+        proposal["pricing_source"] = pricing_source
+        proposal["resolved_model"] = resolved_model
 
         # In streaming/live mode, if a provider emits multiple parallel tool calls,
         # normalize to the primary atomic action to satisfy the single-action protocol.

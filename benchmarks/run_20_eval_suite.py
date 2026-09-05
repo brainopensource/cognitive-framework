@@ -28,19 +28,9 @@ from vanguard.packages.runtime.root import (
     application_service,
 )
 
-env_file = ROOT / ".env"
-if env_file.is_file() and not os.environ.get("OPENROUTER_API_KEY"):
-    for env_line in env_file.read_text(encoding="utf-8").splitlines():
-        env_line = env_line.strip()
-        if env_line and not env_line.startswith("#") and "=" in env_line:
-            k, v = env_line.split("=", 1)
-            k = k.strip()
-            v = v.strip().strip("'\"")
-            if k in {"OPENROUTER_API_KEY", "DEEPSEEK_API_KEY", "VANGUARD_ALLOW_PAID"}:
-                os.environ[k] = v
-
 from benchmarks.swe_bench.challenges import CHALLENGES, SWEProChallenge
 from benchmarks.swe_bench.domain_challenges import DOMAIN_CHALLENGES
+from benchmarks._env import load_benchmark_env
 
 ALL_CHALLENGES: dict[str, SWEProChallenge] = {}
 ALL_CHALLENGES.update(CHALLENGES)
@@ -286,6 +276,7 @@ def run_full_suite(
 
 
 if __name__ == "__main__":
+    load_benchmark_env()
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true", help="Run with hermetic fake model")

@@ -271,6 +271,61 @@ class TestForgeAdmissionGate(unittest.TestCase):
         self.assertTrue(verdict.admissible)
         self.assertEqual(verdict.reason, "completion_admissible")
 
+    def test_rejects_zero_executed_tests_on_exit_zero(self) -> None:
+        receipt = VerificationReceipt(
+            exit_code=0,
+            executed_test_count=0,
+            workspace_digest="sha256:ws1",
+        )
+        self.assertFalse(receipt.passed)
+        verdict = self.gate.evaluate(
+            goal_contract=self.contract,
+            changed_files=("src/main.py",),
+            current_workspace_digest="sha256:ws1",
+            verification=receipt,
+        )
+        self.assertFalse(verdict.admissible)
+        self.assertEqual(verdict.reason, "VERIFICATION_FAILED")
+
+
+class TestForgeVerificationCountHonesty(unittest.TestCase):
+    """T-06: exit 0 without a parsed executed count is not a passing receipt."""
+
+    def test_empty_exit_zero_is_not_passed(self) -> None:
+        count, failing, exc_type, top_frame = parse_test_output("", exit_code=0)
+        self.assertEqual(count, 0)
+        self.assertEqual(failing, ())
+        self.assertIsNone(exc_type)
+        self.assertIsNone(top_frame)
+        receipt = VerificationReceipt(
+            exit_code=0,
+            executed_test_count=count,
+            workspace_digest="sha256:ws",
+        )
+        self.assertFalse(receipt.passed)
+
+    def test_unparseable_exit_zero_is_not_passed(self) -> None:
+        count, failing, _, _ = parse_test_output("command succeeded\nOK\n", exit_code=0)
+        self.assertEqual(count, 0)
+        self.assertEqual(failing, ())
+        receipt = VerificationReceipt(
+            exit_code=0,
+            executed_test_count=count,
+            workspace_digest="sha256:ws",
+        )
+        self.assertFalse(receipt.passed)
+
+    def test_parsed_unittest_count_still_green(self) -> None:
+        count, failing, _, _ = parse_test_output("Ran 3 tests in 0.01s\n\nOK\n", exit_code=0)
+        self.assertEqual(count, 3)
+        self.assertEqual(failing, ())
+        receipt = VerificationReceipt(
+            exit_code=0,
+            executed_test_count=count,
+            workspace_digest="sha256:ws",
+        )
+        self.assertTrue(receipt.passed)
+
 
 class TestForgeReflexRules(unittest.TestCase):
     """Tests for deterministic reflex rules."""

@@ -163,3 +163,15 @@ acceptance against the current source subject.
 - **Registry Services**: `vanguard/packages/runtime/registry/`.
 - **Boundary Linter**: `tools/linters/check_boundaries.py` (passes across all source files).
 - **Composition Tests**: `test/contracts/test_a1_canonical_composition.py`, `test/contracts/test_manifest_v2_graph.py`.
+
+---
+
+## Architectural Decisions & Philosophical Rationale
+
+### DEC-11 — Repository Intelligence as an Optional Authority-Free Projection
+
+- **Decision:** Repository-intelligence systems such as local symbol indexes, full-text search, dependency graphs, LDA, or SCIP-style providers are optional, reconstructible projections consumed above the substrate through the existing context and index seams. They may select and rank bounded context, but carry no execution authority and never supersede canonical documentation, source, tests, schemas, or causal evidence.
+- **Rationale:** High-density indexes materially reduce exploratory reads and context cost, especially for language-model agents, but coupling Vanguard to one index implementation would turn a navigation accelerator into a platform dependency and potential competing truth. Keeping retrieval value-only and provider-neutral preserves domain blindness, deterministic fallback, replaceability, and honest degradation when an index is empty, stale, or invalid.
+- **Rejected alternative:** Embedding LDA or another repository-intelligence engine into the kernel/runtime authority path, treating index health as evidence of source correctness, or requiring a populated external index for ordinary execution.
+- **Reversal condition:** Reproducible evidence that no provider-neutral context/index contract can preserve the required retrieval semantics or performance, together with a ratified replacement that maintains domain blindness, causal authority, offline operation, and deterministic fallback.
+

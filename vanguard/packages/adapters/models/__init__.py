@@ -1,8 +1,8 @@
 """Model adapter family; sibling adapter families must not import this package.
 
-PEP 562 lazy attribute access. `ollama` pulls urllib -> http.client ->
-email.parser (~106ms) which a `local`/fake-model run never uses. Names stay
-importable; the module body is only executed on first attribute access.
+PEP 562 lazy attribute access keeps transport-heavy imports out of local and
+fake-model startup. Names stay importable; a module body executes only on
+first attribute access.
 """
 from typing import TYPE_CHECKING
 
@@ -15,7 +15,7 @@ _LAZY = {
     "NormalizedResponse": ".dialect", "compile_intent": ".dialect",
     "normalize_response": ".dialect",
     "LamModelAdapter": ".lam",
-    "OllamaModel": ".ollama",
+    "LlamaCppModel": ".llama_cpp",
     "StochasticModelAdapter": ".stochastic",
     "perturbation_key": ".stochastic",
     "RECOVERABLE_BLOCK_TYPES": ".stochastic",
@@ -50,7 +50,7 @@ if TYPE_CHECKING:                    # keep static analysis and IDEs working
     from .fake import FakeModel
     from .invocation import ModelInvocation, ProposalTranslator
     from .lam import LamModelAdapter
-    from .ollama import OllamaModel
+    from .llama_cpp import LlamaCppModel
     from .stochastic import RECOVERABLE_BLOCK_TYPES, StochasticModelAdapter, perturbation_key
     from .factory import ModelResolutionError, create_model
 

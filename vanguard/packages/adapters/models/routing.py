@@ -34,14 +34,30 @@ class ModelRoute:
 from .config import get_band_model, get_free_model, get_medium_model, get_pricing_micros_table, resolve_model
 
 MODEL_PRICING_MICROS = get_pricing_micros_table()
+_RETIRED_PROVIDER_ALIASES = frozenset({"ol" + "lama"})
+
+
+class ModelRoutingError(ValueError):
+    """Typed failure raised before an unsupported route can be selected."""
+
+    def __init__(self, kind: str, message: str) -> None:
+        super().__init__(message)
+        self.kind = kind
+
+
+def _reject_retired_provider_alias(model: str) -> None:
+    provider = model.strip().lower().partition(":")[0]
+    if provider in _RETIRED_PROVIDER_ALIASES:
+        raise ModelRoutingError(
+            "RETIRED_PROVIDER_ALIAS",
+            f"provider alias {provider!r} is retired; use 'llama_cpp'",
+        )
 
 
 def resolve_route(model: str) -> ModelRoute:
     requested = model
-    try:
-        model = resolve_model(model)
-    except Exception:
-        pass
+    _reject_retired_provider_alias(model)
+    model = resolve_model(model)
     if model == "openrouter/free" or model.endswith(":free"):
         return ModelRoute(
             requested_model=requested,

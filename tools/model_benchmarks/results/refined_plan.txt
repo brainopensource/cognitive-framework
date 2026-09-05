@@ -1,0 +1,68 @@
+### STATES AND INVARIANTS
+1. **State: `START`**
+   - **Invariant:** At the beginning of a new field.
+   - **Transition:** 
+     - If `content[i]` is a comma `,`, move to `FIELD_SEPARATOR`.
+     - If `content[i]` is a double quote `"`, move to `QUOTED_FIELD`.
+     - If `content[i]` is a newline `\n` or `\r\n`, move to `NEWLINE`.
+     - Otherwise, move to `UNQUOTED_FIELD`.
+
+2. **State: `UNQUOTED_FIELD`**
+   - **Invariant:** Inside an unquoted field.
+   - **Transition:**
+     - If `content[i]` is a comma `,`, append the current field to the current record and move to `FIELD_SEPARATOR`.
+     - If `content[i]` is a newline `\n` or `\r\n`, append the current field to the current record, append the current record to the records list, and move to `NEWLINE`.
+     - Otherwise, continue in `UNQUOTED_FIELD`.
+
+3. **State: `QUOTED_FIELD`**
+   - **Invariant:** Inside a quoted field.
+   - **Transition:**
+     - If `content[i]` is a double quote `"`, check the next character:
+       - If `content[i+1]` is also a double quote `"`, append a single double quote `"` to the current field and increment `i` by 1.
+       - Otherwise, move to `FIELD_SEPARATOR`.
+     - If `content[i]` is a newline `\n` or `\r\n`, append the current field to the current record, append the current record to the records list, and move to `NEWLINE`.
+     - Otherwise, continue in `QUOTED_FIELD`.
+
+4. **State: `FIELD_SEPARATOR`**
+   - **Invariant:** After a field separator.
+   - **Transition:**
+     - If `content[i]` is a comma `,`, move to `FIELD_SEPARATOR`.
+     - If `content[i]` is a double quote `"`, move to `QUOTED_FIELD`.
+     - If `content[i]` is a newline `\n` or `\r\n`, move to `NEWLINE`.
+     - Otherwise, start a new field in `UNQUOTED_FIELD`.
+
+5. **State: `NEWLINE`**
+   - **Invariant:** After a newline.
+   - **Transition:**
+     - If `content[i]` is a comma `,`, move to `FIELD_SEPARATOR`.
+     - If `content[i]` is a double quote `"`, move to `QUOTED_FIELD`.
+     - If `content[i]` is a newline `\n` or `\r\n`, continue in `NEWLINE`.
+     - Otherwise, start a new record in `UNQUOTED_FIELD`.
+
+### EDGE-CASE TRAPS
+1. **Trailing commas:** Ensure that trailing commas result in empty strings in the output.
+2. **Trailing newlines:** Ensure that trailing newlines do not result in empty records.
+3. **Empty content:** Return an empty list if the input is an empty string.
+4. **Consecutive double quotes:** Ensure that consecutive double quotes inside quoted fields are interpreted as a single double quote.
+5. **Quoted fields with newlines:** Ensure that quoted fields can contain newlines without breaking the field.
+
+### STEP-BY-STEP PSEUDOCODE
+1. Initialize `records` as an empty list.
+2. Initialize `current_record` as an empty list.
+3. Initialize `current_field` as an empty string.
+4. Initialize `i` as 0.
+5. While `i` is less than the length of `content`:
+   - If `content[i]` is a comma `,`, append `current_field` to `current_record`, reset `current_field`, and move to `FIELD_SEPARATOR`.
+   - If `content[i]` is a double quote `"`, move to `QUOTED_FIELD`.
+   - If `content[i]` is a newline `\n` or `\r\n`, append `current_field` to `current_record`, append `current_record` to `records`, reset `current_record` and `current_field`, and move to `NEWLINE`.
+   - Otherwise, append `content[i]` to `current_field` and continue in `UNQUOTED_FIELD`.
+6. After the loop, if `current_field` is not empty, append it to `current_record`.
+7. If `current_record` is not empty, append it to `records`.
+8. Return `records`.
+
+### EDGE-CASE TRACE
+1. **Empty content:** `content = ""` -> `records = []`
+2. **Trailing commas:** `content = ",,"` -> `records = [['', '', '']]`
+3. **Trailing newlines:** `content = "\n\n"` -> `records = []`
+4. **Consecutive double quotes:** `content = '""""'` -> `records = [['""']]`
+5. **Quoted fields with newlines:** `content = '"a\nb"'` -> `records = [['a\nb']]`

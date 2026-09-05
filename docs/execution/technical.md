@@ -8,6 +8,7 @@ status: living
 owner: repository-governance
 canonical_for:
   - execution-technical-handbook
+version: "0.9.3"
 purpose: Self-explaining engineering handbook for future work. Present-tense architecture stays in docs/architecture and docs/backend.
 derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN.md
@@ -15,7 +16,7 @@ derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN_v2.md
   - .draft/PHASE-0_DEVELOPMENT_FINAL_PLAN.md
 lock_head: "66aa7a3c0c31"
-last_verified: 2026-09-03
+last_verified: 2026-09-05
 relationships:
   - execution.milestones
   - execution.feature_spec
@@ -27,15 +28,20 @@ relationships:
 
 Developers SHALL use this file plus [`spec.md`](spec.md), [`tasks.md`](tasks.md), [`milestones.md`](milestones.md), and [`backlog.md`](backlog.md). Drafts under `.draft/DEVELOPMENT_FINAL_PLAN*.md` are unused reference.
 
-**Present vs future.** `docs/architecture/`, `docs/backend/`, and `docs/SPEC.md` describe HEAD. This file describes how to implement remaining work and keeps `[PROPOSAL]` variants in full.
+**Present vs future.** `docs/architecture/`, `docs/backend/`, and `docs/execution/spec.md` describe HEAD. This file describes how to implement remaining work and keeps `[PROPOSAL]` variants in full.
 
 **Navigation before coding.** `uv run lda identity --json` then `uv run lda doctor --json`. Then `python3 tools/docs_rag_v0.py --file <path>` for the file you will edit. Kernel stays domain-blind (I-7). AST preflight belongs in `adapters/environment/`, never `kernel/dispatch.py` S7/S8.
 
 **Canonical task IDs** are `T-01`… in [`tasks.md`](tasks.md). v2 `SUB-*` / `TXN-*` are aliases in [`backlog.md`](backlog.md). Live kernel pipeline package `SUB-01` in the backlog is **not** v2 admission.
 
-**Recommended reading order (not a sprint):** T-01–T-08, then T-09–T-13.
+**Recommended reading order (not a sprint):** MS-SEE A stack T-16/T-15/T-36/T-37/T-45 is MECHANISM. T-14 and T-17 are MECHANISM. T-04's production gate is landed; its 21-test legacy successor remains open. T-46 ranking stays `[PROPOSAL]`.
 
-**FACT STORE path:** `adapters/stores/event_store.py` (not `runtime/event_store.py`). **`domain/task_state.py` is MISSING** until T-09.
+**FACT STORE path:** `adapters/stores/event_store.py`.
+**I-STATE.** Lock `66aa7a3c`: `domain/task_state.py` MISSING. Branch: LIVE `8637db55` (`SemanticTaskState`; fold in `runtime/task_state.py`). MS-RESUME `CLOSED`.
+**MS-INSTRUMENT CLOSED** at `63b77116`.
+**MS-RESUME CLOSED** at `8637db55`.
+**T-14 WorkspaceEpoch LIVE** `587db91a`. **T-16/T-15/T-36/T-37/T-45 LIVE** (`33dc7c33`, `2a4cdaad`, `179f5616`, `81b7b572`, `c7995195`). **T-17 adapter 2PC LIVE** `5c9870f0`.
+**T-04 / `ADMISSION_GATE_EXEMPT`:** the production exemption is removed. Do not weaken the gate to satisfy legacy bare-finish fixtures; retarget those fixtures as a separate successor.
 
 ## 0. Epistemic legend
 
@@ -65,11 +71,204 @@ Present docs to open while coding:
 
 Wave-titled sections copied below are **capability recipes**, not a calendar.
 
+## Electroweak v0.9.3 Wave 1–2 contract overlay
+
+**Overlay scope and epistemic status.** This is the implementation handbook for
+the authorized Electroweak Wave 1–2 contracts in [`spec.md`](spec.md) §EW-9.
+Rows explicitly marked **FACT** are observed mechanisms at the 2026-09-05
+checkpoint; rows marked `[PROPOSAL]` remain implementation recipes and MUST NOT
+be read as HEAD. Authorization comes from `spec.md` §EW-9; this file carries
+the recipe and handoff. The
+older Wave 0–10 sections below remain historical capability recipes with their
+existing titles. Do not renumber, retitle, or infer current scheduling from
+them.
+
+This overlay stops at the frozen control. It does not schedule or provide
+next-code recipes for Prompts 05, 06, 07, or 09; T-75–T-78, T-83b, T-77, T-80,
+OCT-03, or ARM-01. DLG-01's live alias/provenance work (T-86, T-90) is likewise
+post-control — Wave 3, alongside IDX-01 — and not part of the Wave 1 package
+set.
+
+### FACT — W1 HAR-01 harness preconditions
+
+No settlement result is useful until the product agent can call declared tools,
+write through the mediated path, and explicitly finish. Apply these repairs in
+the order below and keep their falsifiers executable:
+
+| Work item | Recipe | Required falsifier |
+|---|---|---|
+| Capability-bound native profiles (T-69) | In `domain/models/profile.py`, add an explicit `ToolCallStyle.NATIVE` profile only for a production route whose provider-shape vector has verified native dispatch. Preserve `NATIVE -> JSON_SCHEMA -> FENCED_JSON -> TEXT_GRAMMAR` for unknown/unverified routes. Never stamp the registry globally. | Every native-declared route dispatches `patch.apply` and `finish` without degradation; an unverified route is never promoted. |
+| Approval passthrough (T-70) | Replace the hardcoded unsealed threshold in `runtime/session.py` with the manifest's existing `components.approval_policy`; do not author a second policy artifact. | The product default honors `mode=assisted`, `threshold=standard`, and `escalate_on=[proc.exec]`; a missing/malformed component fails closed. |
+| Finish declaration (T-71) | Add the flat `vg-code-default/finish-tool.json` component and register it for the default/fast/balanced/max product manifests. Use the already supported `ProposalKind.FINISH`; do not add another verb or execution path. | All four manifests resolve the component and can propose `finish`; undeclared or malformed finish remains rejected. |
+| Streaming abort (T-70a) | First capture the OpenRouter SSE abort at the two non-retryable malformed/empty proposal call sites. Only after the regression fails may the retryable boundary be changed. | A malformed streamed chunk after completed effects enters bounded protocol recovery instead of discarding the episode. T-70a MUST NOT close as `no_defect` from the earlier hedge. |
+| Orientation selectors | Extend the existing `proc://exec/allow/...` set only with the minimum read-only orientation verbs required to locate the workspace and inspect files; keep selector grammar and mediation unchanged. | A fresh agent can orient, while an undeclared executable remains denied. |
+| `EffectStarted` singleton | Replay a ledger containing adjacent equal `descriptorDigest` and `leaseId` values before choosing the owner-side fix. The kernel is the sole authorized originator; do not spend TCB headroom speculatively. | One accepted effect produces exactly one `EffectStarted`. |
+| Effect-budget binding | Reproduce the known reservation shape before choosing the runtime/kernel boundary. Additive resources and structural ceilings remain distinct. | A known reservation never emits `{}` or an unexplained `-1` settlement. |
+| Completion-tool restriction | Re-verify autonomous no-approval re-entry, then bind `_completion_allowed_tools` inside the actual turn loop rather than only at outer engine construction if the defect remains. | The restriction applies on every autonomous iteration. |
+| Workspace initialization | Re-verify the advertised `kind=git` environment, then make `vanguard init` establish resolvable workspace state and initialize Git when absent. | Fresh `vanguard init` reaches mediated `proc.exec` without ambient `AETHER_WORKSPACE_ROOT`. |
+| Provider configuration | Remove the retired `ollama` route and resolve the literal `$FRONTIER` in the supported pack configuration. llama.cpp / llama-server remains the local inference standard. | Native-only route scan finds no retired alias or unresolved provider placeholder. |
+| Workspace hygiene (T-74) | Route `PYTHONPYCACHEPREFIX` outside the workspace tree. Keep index exclusions separate from workspace-digest truth. | A Python effect creates no agent-authored `.pyc` path in the workspace digest. |
+| Fenced-action recovery (T-82) | In the existing dialect/invocation pipeline, unwrap markdown-fenced JSON action blocks found in note payloads into candidate proposals. Do not execute raw text. Reject unsolicited `finish` when an invocation remains unparsed or no mutation occurred. | Fenced `patch.apply` recovers through validation; ambiguous or mutation-free finish fails closed. |
+| Greenfield prompt and vacuity (T-81/T-83a) | Remove the product prompt conflict that says not to read/search and to write one file per turn. State the scaffold -> red oracle -> atomic 2PC sequence. Keep structural and behavioral evidence distinct; reject `pass` and `NotImplementedError` stubs with `VACUOUS_ORACLE_REJECTED`. | A stub may not produce a green settlement; the same fixture must be red before implementation and green after it. |
+
+The kernel TCB remains **1386 logical LOC** for this overlay. A reproduced defect
+that truly requires kernel work needs separate authorization, its complete
+architecture package, and a fresh budget check; Wave 1 documentation does not
+spend the headroom.
+
+### W1 — TRUTH two-axis settlement and admission (landed mechanisms)
+
+Implement the domain value by following the exact contract in the Synthesis of
+Record §3.2; do not duplicate that module body here. The integration recipe is:
+
+1. Add the pure `TaskDisposition` enum and immutable `SettlementReceipt` under
+   `domain/evidence`, exporting the six named settlement symbols through the
+   package surface. The wire schema is `aether.settlement/1`.
+2. Enforce construction refusals for `passed` at zero executed tests, `passed`
+   without bound oracle and verification subject, reasonless
+   `undeterminable`, and evidence-bearing `not_run`. Make
+   `disposition_to_outcome(not_run)` raise `DispositionError`.
+3. Emit run termination only on existing `EpisodeCompleted` and emit the
+   settlement receipt only on existing `VerdictRecorded`. Allocate no new
+   ledger event kind. Keep `terminal_status` a plain string in the domain value
+   so `domain` does not import `agency`.
+4. Derive the benchmark disposition vocabulary from `TaskDisposition` and
+   preserve missingness-marker precedence. Gate only through
+   `satisfies_predicate`; never use `!= failed` as a positive test.
+5. T-04's production exemption is removed and the RF-25 successor assertions
+   are updated. Do not use legacy bare-finish fixtures as a reason to retain a
+   permanent product-default bypass; those fixtures remain a separate successor
+   obligation.
+6. In `_admit_completion`, join mutation receipt, current postimage/epoch,
+   relevant tests collected and executed, zero exit code, the existing
+   IndexPort-enumerated tamper shield, and zero unresolved omissions/stale-index
+   markers. Test implication/caller evidence is required only through the
+   currently authorized Wave 1 surface. **T-83b is out of scope here by
+   dependency, not by preference:** it wires `IndexPort.get_callers`, which has
+   no adapter until `LdaRepoIndex` lands in T-75 (Wave 3). Where the Synthesis
+   of Record §7 lists T-83b in the Wave 1 `session.py` cell it contradicts its
+   own dependency graph; the dependency governs. Do not re-litigate this.
+
+The axes are independent throughout. Oracle `PASS` never rewrites
+`RunTermination` to `completed`, and `abandoned + passed` is a valid settlement.
+The decisive contract tests are: `passed@0-tests` raises; reasonless
+`undeterminable` raises; `not_run` with an envelope digest raises; outcome
+projection of `not_run` raises; `EpisodeCompleted` contains no disposition; and
+ledger replay preserves `terminal_status=abandoned` with
+`disposition=passed`.
+
+### FACT — W1 INS-01 and BRG-01 instrument integrity
+
+INS-01 is an additive product-path repair. It does **not** reopen
+`spec.md` §1 or `MS-INSTRUMENT`.
+
+- Replace the literal CLI run identity with a generated UUID/ULID per new run.
+  Only `--resume <id>` may continue an existing identity. Two invocations in
+  one workspace must produce different ledgers.
+- Carry actual `modelRoutes`, non-null token accounting, `verifiedStepIds`, and
+  cost provenance from composition/application service into the product
+  receipt. Do not fill missing telemetry with synthetic zeroes.
+- Make benchmark execution call `runtime.entrypoint.execute`; a direct call to
+  `Runtime.execute_profiled` is useful only when explicitly labeled as a
+  different subject.
+- In `tools/llama_cpp/cli.py`, use the accepted flash-attention flag; declare
+  readiness only while the child is live, its PID matches, and `/props` binds
+  the expected model identity. Stop only that verified child, never blanket
+  `pkill`. In the MCP server, turn empty and max-token outputs into typed
+  fail-closed errors.
+
+Falsify with unique-run-identity, receipt-telemetry, product-path-subject,
+bridge-lifecycle, and bridge-empty-output tests. Provider outage, HTTP failure,
+or zero model calls settles as `not_run`, not task failure.
+
+### `IN_PROGRESS` — W2 CMX-01 preset unification (T-79)
+
+Unify the product path around the existing `packs/code-default/presets.json`
+catalog; do not author replacement budget numbers:
+
+| Preset | `usd_micros` | `millis` | `tokens` | `turns` |
+|---|---:|---:|---:|---:|
+| fast | 50,000 | 300,000 | 16,000 | 8 |
+| balanced | 150,000 | 900,000 | 40,000 | 20 |
+| max | 400,000 | 2,400,000 | 96,000 | 40 |
+
+Make `CodingMaxFacade` select that catalog, expose the overlay from the pack
+loader, give each product manifest its declared budget policy, and remove the
+facade's universal `max_turns=40` default. Trace the selected ceiling through
+`runtime/wiring.py` to `Governor` and assert it on `EpisodeStarted.budgetCeiling`.
+`usd_micros`, `millis`, `tokens`, and `bytes` are additive reservation
+dimensions; `turns` and `depth` are structural ceilings and are never summed.
+
+Checkpoint (session stop): catalog resolution, distinct manifest policies,
+cost/turn fields, declared `budgetCeiling` plus separate `budgetAttenuation`,
+and removal of `max_turns` from the facade signature are in the working tree.
+All 8 named T-79 tests pass. This is an implementation candidate, not accepted
+work. Before freezing L0: repair the five boundary violations in
+`benchmarks/ladder/evidence.py`, `benchmarks/ladder/l0_triad/runner.py`,
+`benchmarks/product_path.py`, and `runtime/cli.py`; repair the four
+related-surface failures (`test.apps.coding_max.test_coding_max_facade` ×2,
+`test.falsifiers.test_rf90_generic_entrypoint` ×2); then run the touched-surface
+gate on a clean subject. `just` is not installed — use the `justfile` recipe
+bodies. Do not add Markdown under `docs/`; regenerate knowledge only into
+`.generated/knowledge/` after package edits.
+
+### `[PROPOSAL]` W2 — EXP-01 evidence ladder and frozen control
+
+Build the instrument in increasing-cost rungs:
+
+1. **L0 (T-92):** run `P0-FIB`, `P0-CSV`, and `P0-BUG` in fresh workspaces via
+   the public CLI. This licenses only the Wave 1 smoke statement.
+2. **L1 (T-93):** freeze four greenfield, four single-file bug, and four
+   data/CLI tasks. Use them to find fixture/oracle defects; publish no pass rate
+   and never reuse tuned L1 tasks as L2 evaluation.
+3. **L2:** freeze the exact candidate SHA and a multi-class suite of at least 30
+   tasks. Execute single-worker `vg-code-balanced` through the product path.
+   Close `MS-CONTROL` only with Wilson LB >= 0.40 and false-completion rate 0.
+4. **L3:** after `MS-CONTROL`, compare immutable manifest x model x preset arms
+   with at least 30 tasks per arm and one declared dimension changed. License
+   relative task-class claims only.
+
+Freeze prompts, tools, fixtures, oracle, model, server flags, sampling, and
+budgets on the first measured attempt; any change resets the rung. The harness
+writes one append-only row per run with every field group from `spec.md` §EW-9.4,
+including `n`, `suite_digest`, and the oracle/tamper digests, and refuses blanks. It also refuses
+`pass_rate_pct` when observed rows are fewer than the frozen suite size.
+
+Partition `LIVE-LOCAL`, `LIVE-HOSTED`, `LIVE-HISTORICAL`, `REPLAY`, `STATIC`,
+and `UNDETERMINABLE`. Only current `LIVE-*` rows enter capability rates;
+undeterminable rows require reasons and leave the denominator. Bind every
+non-control run to the T-95 hypothesis registry with a control digest and one
+varied dimension.
+
+Publish false-completion rate, Wilson live oracle pass rate, valid first-call
+rate, malformed/recovery rate, no-op rate, time to first valid action, turn
+waste `W`, and token efficiency `kappa`. **False-completion rate must equal
+zero.** It vetoes every pass-rate, lift, latency, token, and cost claim. Publish
+the frozen control disposition even when it is negative or undeterminable.
+
+### Next-sprint handoff: Wave 2 close, then Wave 3+
+
+T-79/T-89/T-92–T-95 have 31 named focused tests green and remain unchecked.
+Execute the remaining work in this dependency order: **boundary repair ->
+related-surface repair (CMX-04 facade + RF-90) -> touched-surface verification
+-> T-97 (deferred this pass; TypeScript help/`-m`) -> live T-92/L0
+disposition -> T-51/T-52 reconciliation -> T-26 freeze -> T-27**. Freeze no
+paid subject before T-26; run L2 only as single-worker `vg-code-balanced` on
+the exact clean SHA. T-95 is the hypothesis registry, not gate close. Closure
+requires n >= 30, Wilson LB >= 0.40, false-completion rate 0, and a published
+POSITIVE, NEGATIVE, UNDETERMINABLE, or INVALID disposition.
+
+After `MS-CONTROL` closes, begin only the existing post-control rows: IDX-01
+T-75–T-77, T-78/T-83b change closure, DLG-01 T-86/T-90, then the
+preregistered treatments T-80/T-96 as their `requires:` edges permit. OCT-03,
+specialists, memory and campaign work remain blocked by their milestone gates;
+do not infer authorization merely from mechanism presence.
+
 ---
 
 ## From v2 — architecture catalog and SOTA harness mechanics
 
-Copied from [`.draft/DEVELOPMENT_FINAL_PLAN_v2.md`](../../.draft/DEVELOPMENT_FINAL_PLAN_v2.md) (locked triad). FACT / `[PROPOSAL]` tags remain binding.
+Copied from [`.draft/DEVELOPMENT_FINAL_PLAN_v2.md`](../reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN_v2.md) (locked triad). FACT / `[PROPOSAL]` tags remain binding.
 
 ## Locked triad roles
 
@@ -136,7 +335,7 @@ Vanguard is simultaneously two tightly integrated systems:
 
 - **Plan A remains program law**: reliability identity, wave order, competency profiles, formal model, per-class evidence, non-goals, D-01–D-10.
 - **Plan B remains substrate ground truth and the critical-path DAG**: empirical contradiction audit, live inventory, lattice placement, and Tickets 01–35 (operator one-pager 01–13 first).
-- **`DEVELOPMENT_FINAL_PLAN_v2.md` defines the System Architecture & Primitive Mechanics**: It synthesizes the extensive research in `docs/research/coding_harness/`, the outer-loop director in `docs/reports/reviews/electroweak_v092/octopus/`, and dynamic multi-agent topologies (`HYDRA`). It translates conceptual theory into typed protocols, concrete data models, and execution packages ready to be decomposed (in a *later* sprint) into [`milestones.md`](milestones.md), [`backlog.md`](backlog.md), [`docs/execution/spec.md`](spec.md) (current delta file; historical name `FEATURE_SPEC.md` is kept as a pointer), and [`tasks.md`](tasks.md).
+- **`DEVELOPMENT_FINAL_PLAN_v2.md` defines the System Architecture & Primitive Mechanics**: It synthesizes the extensive research in `docs/research/coding_harness/`, the outer-loop director in `docs/reports/reviews/electroweak_v092/octopus/`, and dynamic multi-agent topologies (`HYDRA`). It translates conceptual theory into typed protocols, concrete data models, and execution packages ready to be decomposed (in a *later* sprint) into [`milestones.md`](milestones.md), [`backlog.md`](backlog.md), [`docs/execution/spec.md`](spec.md) (current delta file), and [`tasks.md`](tasks.md).
 
 Historical claim (draft v2.0.0 §1.2, 2026-09-03): this document does not compete with nor replace `DEVELOPMENT_FINAL_PLAN_MERGED.md`; MERGED "remains the Substrate Ground Truth & Forensic Baseline" owning the empirical contradiction audit, the 3 headline metrics ($R_{\text{solve}}$, $C_{\text{turn}}$, $R_{\text{tamper}}$), and Tickets 01–35. **Keep that idea.** `[PROPOSAL]` if MERGED is restored as an optional historical sibling. It is **not** authority while absent. Critical-path numbering remains B tickets 01–35. v2 `SUB-*` / `M-HYD` inventory in §8 is `[PROPOSAL]` mapping, not a replacement DAG.
 
@@ -320,7 +519,7 @@ To maximize provider prompt caching (Anthropic, DeepSeek, OpenAI) from 27% to **
 ```
 **Rule**: `PREFIX_LAYERS` (L1–L3) are byte-frozen at session startup. No turn dynamic data may enter L1–L3.
 
-**FACT (product bug, not the target design; B §4.4).** Current session puts `resume_state` and `repo_map` into env / L3: `runtime/session.py` dumps `task.resume_state` JSON into env_parts at construction (L619–622) and pulls `index.repo_map(token_budget=4000)` into the same environment prefix (L623+). That freezes σ and the map in the KV-cache prefix. Target remains: σ in L4, epoch-bound map **not** in the frozen prefix. See B ticket 12.
+**FACT.** Session compiles σ into L4 notes (`PromptAssembler`, source `task-state`); it does not dump `resume_state` JSON into frozen L3. `repo_map` still enters the environment prefix at construction. Target remains: epoch-bound map **not** in the frozen prefix.
 
 `ContextCompiler` **FACT**: L1–L3 freeze at construction (`agency/context/compiler.py`). Compile is **not** a step inside `EpisodeEngine`. Product loop is session + compiler + engine: observe → propose → `recover_proposal` → `Kernel.dispatch` → ingest (`agency/episode/engine.py`).
 
@@ -344,7 +543,7 @@ To combat "Lost in the Middle" attention degradation, the prompt compiler pins a
 ```text
 ================================== ACTIVE WORKING SET ==================================
 Goal: Implement SemanticTaskState vector and verify JCS canonicalization
-Touched Files: vanguard/packages/domain/task_state.py (2 hunks)  # MISSING in HEAD 66aa7a3c; illustrative [PROPOSAL]
+Touched Files: vanguard/packages/domain/task_state.py (2 hunks)
 Current Verification: FAILING — test_jcs_canonical: AssertionError: keys not sorted
 Rejected Dead Ends:
   [Turn 04] Sorting keys with sorted(dict) — failed slots dataclass mapping
@@ -353,7 +552,7 @@ Next Objective: Use vanguard.packages.domain.canonical.canonical_json() reducer
 ========================================================================================
 ```
 
-**FACT.** `vanguard/packages/domain/task_state.py` is **MISSING** in HEAD `66aa7a3c`. Live fold is `runtime/task_state.py` (`CodingTaskState` + `fold_task_state`). B §6.12 wins over A's 17-type explosion for the merge. The working-set example above is kept as a sketch; do not read it as claiming the domain file exists.
+**FACT.** `vanguard/packages/domain/task_state.py` holds `SemanticTaskState` (`CodingTaskState` alias). The only fold is `runtime/task_state.py` `fold_task_state`. A's 17 extra domain types stay `[PROPOSAL]`. The working-set example is a sketch of L5 pinning, not a second store.
 
 ### 3.5 The Dead-Ends Algebra (`StructuredRecord.dead_ends`)
 In long-horizon debugging, **knowing what failed and why is 10× more valuable than knowing what succeeded**. 
@@ -470,7 +669,7 @@ class TestTamperShield:
 ```
 **Rule**: Modifying frozen test files triggers immediate fail-closed termination with `TAMPER_VIOLATION`.
 
-**FACT.** `tamper_shield.py` is **MISSING** in HEAD `66aa7a3c`. The shield is `[PROPOSAL]` (see also B FEATURE_SPEC-module routing). Keep the design.
+**MECHANISM (this branch, T-18).** `runtime/governance/tamper_shield.py` freezes IndexPort-enumerated test digests. Assertion or test-body edit fails admission (`TAMPER_VIOLATION`). `Path.glob("test/**")` is not the enumeration source. `HarnessSession` freezes and evaluates the shield through `_admit_completion`; `vg-code-default` now declares the repository index required to reach that path.
 
 ### 5.3 Gated Dual-Loop Reproducer Protocol (Fail-to-Pass Enforcement)
 To guarantee bug fixes are real and not coincidental passes:
@@ -488,7 +687,7 @@ Stage 7: CLEANUP         ──► Quarantine or promote reproducer into officia
 
 **I-1 universal signed finish is `[PROPOSAL]` and too strong** versus A §9.4 per-class evidence (A wins for completion policy) and versus the local vs exterior evaluator split (B §3.4). Keep this section as the bugfix-class protocol. Do not promote it to universal law for research/explanation/greenfield classes.
 
-**FACT (live admission, not this protocol).** `VerificationReceipt.passed` = `exit_code == 0 and executed_test_count > 0` (`admission_gate.py` 22–37). Session `_observed_test_count` returns 0 if unparseable (363–375). Forge still sets `test_count = 1` on green-empty (`forge/engine.py` 309–311). `admission_required` exempts `vg-code-default` / `vg-code-lex`, else `"patch.apply" in verbs` (`runtime/session.py` 124–138). `ADMISSION_GATED_HARNESSES` is unused in runtime.
+**FACT (live admission, not this protocol).** `VerificationReceipt.passed` = `exit_code == 0 and executed_test_count > 0` (`admission_gate.py` 22–37). Session `_observed_test_count` returns 0 if unparseable (363–375). Forge `parse_test_output` and Chimera bare-exit-0 parsing leave unknown counts at 0 (T-06). `admission_required` exempts `vg-code-default` / `vg-code-lex`, else `"patch.apply" in verbs` (`runtime/session.py` 124–138). `ADMISSION_GATED_HARNESSES` is unused in runtime.
 
 ### 5.4 Type-Aware Mutation Testing (EvalPlus / LLMorpheus)
 To defeat "tautological fixes" (hardcoding return values for known test cases):
@@ -645,7 +844,7 @@ To transition these architectural pillars into delivery without documentation sp
 | Package ID | Capability Name | Primary Subsystem | Implementation Deliverables | Target Gate |
 |---|---|---|---|---|
 | **`SUB-01`** | **Substrate Admission Repair** | `agency/episode/` | Fix `AdmissionGate` kwargs, wire `session.py` to require verification on default pack. | `W-092-F0` |
-| **`SUB-02`** | **Semantic Task State Vector** | `domain/task_state.py` **MISSING in HEAD `66aa7a3c`** `[PROPOSAL]` | `SemanticTaskState`, `TaskStep`, monotonic revision hashing, RFC 8785 JCS serialization. | `W-092-F1` |
+| **`SUB-02`** | **Semantic Task State Vector** | `domain/task_state.py` | `SemanticTaskState`, `TaskStep`, monotonic revision, RFC 8785 JCS; fold remains `fold_task_state`. | `W-092-F1` |
 | **`TXN-01`** | **2PC Multi-File Transaction** | `adapters/environment/`| `AtomicMultiFileTransactionManager`, shadow tree, preflight syntax and symbol validator. | `W-092-F1` |
 | **`SHD-01`** | **Cryptographic Tamper Shield**| `runtime/governance/` | `TestTamperShield`, Turn-0 test hashing, fail-closed rejection on test mutation. | `W-092-F1` |
 | **`PRG-01`** | **Progressive Context Compiler**| `agency/context/` | L1–L5 prefix-stable compiler, ephemeral cache markers, working-set header with dead ends. | `W-092-F1` |
@@ -661,7 +860,7 @@ To transition these architectural pillars into delivery without documentation sp
 | **`HYD-01`** | **Dynamic Bifurcation Classifier**| `agency/topology/` | Complexity functional $\mathcal{C}$, Mode A (Fluid ReAct) vs Mode B (Multi-Head DAG). | `M-HYD-1` |
 | **`HYD-02`** | **Living Horizon Planning Engine**| `agency/topology/` | Bounded horizon ($|m_{\text{active}}| \equiv 1$, $|\mathcal{Q}| \le 2$), event-sourced plan amendments. | `M-HYD-2` |
 
-**SUB-02 FACT.** `domain/task_state.py` is **MISSING** in HEAD `66aa7a3c`. Keep the row as `[PROPOSAL]`. Preferred merge is B §6.12 with live `CodingTaskState` in `runtime/task_state.py`.
+**SUB-02 FACT.** `domain/task_state.py` exists; `CodingTaskState` is the same type. Keep one fold in `runtime/task_state.py`. A's 17 extra types stay `[PROPOSAL]`.
 
 **PRG-01 must not be a second `ContextCompiler`.** `[PROPOSAL]` is L4/L5 strategy on the **existing** compiler (`agency/context/compiler.py`), matching B §6.8: "do not fork a second ContextCompiler class hierarchy if a strategy suffices." Rollback: if progressive compiler duplicates `ContextCompiler` into a second loop, reject.
 
@@ -708,7 +907,7 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 └──────────────────┴─────────────────────────────┴─────────────────────────────────────────────────┘
 ```
 
-**FACT.** Kernel row "ZERO coding, AST, or agent concepts allowed" is the winning lattice rule (I-7). §4.3 kernel S7/S8 AST hook is `[PROPOSAL]` **rejected**; see that subsection. Agency row `ProgressiveContextCompiler` must not fork a second compiler class (PRG-01 / B §6.8). Domain `SemanticTaskState` path is `[PROPOSAL]`; `domain/task_state.py` is **MISSING**. Event store FACT owner is `adapters/stores/event_store.py`, not a `runtime/event_store.py` module.
+**FACT.** Kernel row "ZERO coding, AST, or agent concepts allowed" is the winning lattice rule (I-7). §4.3 kernel S7/S8 AST hook is `[PROPOSAL]` **rejected**; see that subsection. Agency row `ProgressiveContextCompiler` must not fork a second compiler class (PRG-01 / B §6.8). Domain `SemanticTaskState` lives in `domain/task_state.py`; the fold stays in runtime. Event store FACT owner is `adapters/stores/event_store.py`, not a `runtime/event_store.py` module.
 
 No `KernelPort` symbol exists in `vanguard/packages/ports/` (FACT; keep A's `KernelPort` row as `[PROPOSAL]` — see A §2.1). Canonical composition path: `ApplicationService → Runtime → HarnessSession → EpisodeEngine → Kernel`. Campaign Service as an extra layer is A's `[PROPOSAL]`.
 
@@ -722,7 +921,7 @@ No `KernelPort` symbol exists in `vanguard/packages/ports/` (FACT; keep A's `Ker
 | **`I-TCB`** | **TCB Line Budget** | Production kernel LOC must strictly remain $\le 1438$ LOC. Enforced in CI via `check_tcb_budget.py`. |
 | **`I-STATE`**| **Zero Context Amnesia** | Settled invariants and falsified dead-ends are strictly non-evictable. They remain permanently pinned in prompt headers. |
 | **`I-TXN`** | **Preflighted Recoverability**| Multi-file edits must pass 0.2ms AST syntax checks before touching disk. Any failure triggers total in-memory rollback. **`[PROPOSAL]`**; live MECHANISM is sequential apply + post-write `ast.parse` observation. |
-| **`I-SHD`** | **Test Oracle Immutability** | Baseline test fixtures are hashed at Turn 0. Any write mutation to test fixtures triggers immediate fail-closed termination. **`[PROPOSAL]`** (`tamper_shield.py` MISSING). |
+| **`I-SHD`** | **Test Oracle Immutability** | Baseline test fixtures are hashed at Turn 0 via IndexPort. Any write mutation to frozen tests triggers fail-closed admission (`TAMPER_VIOLATION`). **MECHANISM** T-18 (`tamper_shield.py` LIVE and session-wired; default `repo_index` declared). |
 | **`I-MAIL`**| **Content-Addressed Handoff**| Inter-agent coordination occurs strictly via 64-character SHA-256 CAS digests ($O(1)$ token overhead). No raw transcript leakage. **`[PROPOSAL]`** (`domain/topology/` MISSING). |
 
 ---
@@ -869,7 +1068,7 @@ The L1–L5 layout in §3.2 is the right SOTA shape. This section expands produc
 
 **Cache.** Byte-identical L1–L3 across turns is how you get prefix/KV cache hits (Anthropic/OpenAI cache breakpoints). Do not put timestamps, random ids, or “turn 17 of 40” in L1. `stable_prefix_builder.py` exists for this. `vg-code-default` already uses recency-window + `evict_old_tool_results`. The 27% → >72% jump in §3.2 is **ASPIRATION**.
 
-**FACT vs target.** Current session dumps `resume_state` JSON and `repo_map` into env/L3 (B §4.4, `session.py` 619–622+). That is a product bug. Target: σ in L4; epoch-bound map not in the frozen prefix.
+**FACT vs target.** σ is compiled into L4 notes. `repo_map` still enters the environment prefix. Target: epoch-bound map not in the frozen prefix.
 
 **Rolling window.** Keep the last *N* turns (policy: 64 items is a start; token ceiling is the real constraint). Older **tool bodies** become receipts: “read `foo.py` 12kb at turn 4” — fact kept, bytes dropped (`ResultEvictionStrategy`).
 
@@ -935,7 +1134,7 @@ Rules that separate SOTA from a sticky-note bot:
 
 **MECHANISM.** `runtime/prompt_assembler.py` 107–113: authorize then `recall`. `runtime/memory.py` exists. Product four-tier wiring is `[PROPOSAL]`.
 
-**FACT.** Resume synthesizes `episode_id=f"episode-{run_id}"` (`app_service.py` ~414). Session dumps `resume_state` into L3. Target: persist original `episode_id`; put `CodingTaskState` in L4/L5.
+**FACT.** Resume restores the ledger `episode_id` via `episode_id_from_events`. New `run()` still synthesizes `episode-{run_id}`. σ is compiled into L4/L5.
 
 Long sessions are **many compacted turns over one durable $\sigma$**, optionally **many episodes in a campaign DAG**. One 400-turn transcript is how you get attention collapse.
 
@@ -1150,7 +1349,7 @@ Duplicated in A, B, and v2 so no file is a stub.
 
 ## From B — live inventory, gaps, formal model, lattice, workflows, file routing
 
-Copied from [`.draft/DEVELOPMENT_FINAL_PLAN_B.md`](../../.draft/DEVELOPMENT_FINAL_PLAN_B.md).
+Copied from [`.draft/DEVELOPMENT_FINAL_PLAN_B.md`](../reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN_B.md).
 
 ## 3. Current implementation inventory
 
@@ -1185,8 +1384,8 @@ Lock-time verb inventory matching pack YAML is appended as **§22** (does not re
 | Capability | Owner | Actual implementation | Current evidence | Gap | Disposition |
 |---|---|---|---|---|---|
 | HarnessSession | `runtime/session.py` L465–1443 | constructs one kernel; injects meta-controller; observes completion; exterior evaluate | session tests exist | test-count regex fail-closed (good) but coarse; resume dumps state into L3 | repair |
-| CodingTaskState | `runtime/task_state.py` L84–234, `fold_task_state` L237+ | discoveries, dead ends, todos, routes, implicated files | `test_coding_state` OK | lives in **runtime**, not domain; not consumed by ContextCompiler; `ProposalProduced` verification inference uses `"test" in action.lower()` | promote schema to domain; keep fold in runtime |
-| SemanticTaskState | `docs/execution/FEATURE_SPEC.md` §3 | **absent** / **MISSING** (`vanguard/packages/domain/task_state.py` does not exist) | claimed falsifier `test/contracts/test_semantic_task_state.py` absent | CMX-09 T2 not implemented | implement as domain value, fold from events |
+| CodingTaskState | `domain/task_state.py` (alias of `SemanticTaskState`); fold `runtime/task_state.py` `fold_task_state` | discoveries, dead ends, todos, routes, implicated files, task class, revision | `test_coding_state` + `test_semantic_task_state` OK | consumed as L4 σ notes, not frozen L3 | keep one fold |
+| SemanticTaskState | `vanguard/packages/domain/task_state.py` | merged FEATURE_SPEC + live fields; JCS digest | `test/contracts/test_semantic_task_state.py` | A's 17 extra types remain `[PROPOSAL]` | keep |
 | Checkpoints | `runtime/checkpoints.py` | blob-verified reconstruct; warm/cold parity | RF-96 tests exist | optional (needs blobs) | keep |
 | ApplicationService.resume | `runtime/app_service.py` L385–389 | `episode_id=f"episode-{resolved_run_id}"` | RF-25 proves **event fold** continuation | synthesized episode id may not match original ledger episode | repair |
 | CodingMaxFacade | `apps/coding_max/facade.py` L23–71 | thin client of `ApplicationService`; presets `fast|balanced|max` → `agency/manifests/vg-code-{preset}/manifest.json` | mechanism | no intelligence in apps; correct lattice | keep thin |
@@ -1206,7 +1405,7 @@ Lock-time verb inventory matching pack YAML is appended as **§22** (does not re
 
 | Capability | Owner | Actual implementation | Current evidence | Gap | Disposition |
 |---|---|---|---|---|---|
-| ForgeEngine | `agency/forge/engine.py` | own tools, own admission, **bypasses Kernel.dispatch**; `if exit_code == 0 and test_count == 0: test_count = 1` at L309–311 | forge unit tests | second runtime semantics; false-positive completion | reject-as-default; quarantine from Coding Max scores |
+| ForgeEngine | `agency/forge/engine.py` | own tools, own admission, **bypasses Kernel.dispatch**; unknown/unparseable counts stay 0 (T-06) | forge unit tests | second runtime semantics; quarantine from product scores is T-23 | reject-as-default; quarantine from Coding Max scores |
 | ChimeraEngine | `agency/chimera/engine.py` | parallel loop | chimera tests | same lattice tension | reject-as-default |
 | Role manifests | `agency/manifests/{localizer,reviewer,test_investigator}.py` | helpers that write artifacts; reviewer has **no admission authority** | CMX-08 falsifiers | not autonomous agents | keep as treatments after Wave 5 |
 | Topology lowering | `runtime/topology.py` | sequential default; rejects authority fields | topology tests OK this session | not a coding agent | keep |
@@ -1250,13 +1449,11 @@ Each gap answers: what exists, where, what is missing, why it blocks long-horizo
 
 ### 4.2 Invented test counts (Forge)
 
-**Exists.** `agency/forge/engine.py` L309–311 sets `test_count = 1` when `exit_code == 0` and parse failed.
+**FACT (T-06).** Forge `parse_test_output` no longer sets `test_count = 1` on `exit_code == 0` with empty or unparseable output. Chimera no longer sets `executed = 1` / `passed = 1` on bare exit 0 **or** non-zero exit without a parsed runner summary. Unknown counts stay 0; `VerificationReceipt.passed` remains `exit_code == 0 and executed_test_count > 0`.
 
-**Contrast.** `runtime/session.py` `_observed_test_count` L363–375 returns 0 on unparseable output (correct fail-closed).
+**Contrast.** `runtime/session.py` `_observed_test_count` L363–375 already returned 0 on unparseable output.
 
-**Why it blocks.** Forge can admit “green” on empty or unparsed suites. Any benchmark that scores Forge against Coding Max is then incomparable.
-
-**Smallest change.** Remove the fallback. If a later adapter cannot parse a CTRF/JUnit document, count is 0 and admission fails.
+**Remaining.** Typed runner adapters and collected/executed/passed/failed/skipped without inventing counts are T-08. Quarantine of Forge/Chimera from Coding Max reports is T-23.
 
 **Falsifier.** `exit_code == 0` + empty output ⇒ `VerificationReceipt.passed is False`.
 
@@ -1270,7 +1467,7 @@ Each gap answers: what exists, where, what is missing, why it blocks long-horizo
 
 ### 4.4 Incomplete restart identity
 
-**Exists.** RF-25 proves fresh-process fold continuation. `ApplicationService.resume` synthesizes `episode_id=f"episode-{run_id}"`. Session dumps `task.resume_state` JSON into **immutable L3** at construction (`session.py` L619–622). `ContextPacket.validate_resume_identity` is not fully populated on that path.
+**Exists.** RF-25 proves fresh-process fold continuation. `ApplicationService.resume` restores the ledger `episode_id` via `episode_id_from_events`. Session compiles σ into L4 notes (`PromptAssembler`); it does not dump `resume_state` into frozen L3. Orientation packets populate `repository_identity` / `selection_policy_identity` and call `validate_resume_identity` when prior identities are present.
 
 **Why it blocks.** Cognitive state (plan, dead ends, active file) is frozen in the prefix-cached environment. Later writes do not update L3. The model reasons about a snapshot that is definitionally stale after the first post-resume edit. Synthesized episode ids can fork attribution.
 
@@ -1336,11 +1533,11 @@ Octopus mailbox, CoordinationPlan DAG, outer-loop director, Hydra emergent agenc
 
 | FEATURE_SPEC path | Source on HEAD `ebad36e` |
 |---|---|
-| `vanguard/packages/domain/task_state.py` | missing / **MISSING** |
+| `vanguard/packages/domain/task_state.py` | present (`SemanticTaskState`; fold stays in runtime) |
 | `vanguard/packages/adapters/environment/transaction.py` | missing |
 | `vanguard/packages/runtime/governance/tamper_shield.py` | missing |
 | `vanguard/packages/agency/context/progressive.py` | missing |
-| `test/contracts/test_semantic_task_state.py` | missing |
+| `test/contracts/test_semantic_task_state.py` | present |
 | `test/runtime/test_atomic_multi_file_transaction.py` | missing |
 | `test/runtime/test_tamper_shield.py` | missing |
 | `test/agency/test_progressive_context_compiler.py` | missing |
@@ -1353,9 +1550,9 @@ Sprint `tasks.md` still lists T2–T6 as the active DAG. Plan B **agrees with th
 
 | Draft / research | Useful residue | Rejected or corrected |
 |---|---|---|
-| [`.draft/DEVELOPMENT_FINAL_PLAN.md`](../../.draft/DEVELOPMENT_FINAL_PLAN.md) | Same reliability-first ordering | Bound to SHA `7e08462c2cbb…`, not this HEAD; do not copy its evidence snapshot |
-| [`.draft/todo/SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md`](../../.draft/todo/SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md) | Five systems challenges; pre-mutation impact | Overclaims “undisputed SOTA”; some file targets ignore packs vs kernel |
-| [`.draft/todo/development_plan_guidelines_0209.md`](../../.draft/todo/development_plan_guidelines_0209.md) | Lattice, no second runtime, WIP | Forbids git; this planning task required git identity — planning ≠ that implementation prompt |
+| [`.draft/DEVELOPMENT_FINAL_PLAN.md`](../reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN.md) | Same reliability-first ordering | Bound to SHA `7e08462c2cbb…`, not this HEAD; do not copy its evidence snapshot |
+| [`.draft/todo/ELECTROWEAK_SYNTHESIS_SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md`](../../.draft/todo/ELECTROWEAK_SYNTHESIS_SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md) | Five systems challenges; pre-mutation impact | Overclaims “undisputed SOTA”; some file targets ignore packs vs kernel |
+| [`.draft/todo/ELECTROWEAK_SYNTHESIS_DEVELOPMENT_PLAN_GUIDELINES_0209.md`](../../.draft/todo/ELECTROWEAK_SYNTHESIS_DEVELOPMENT_PLAN_GUIDELINES_0209.md) | Lattice, no second runtime, WIP | Forbids git; this planning task required git identity — planning ≠ that implementation prompt |
 | [`.draft/HYDRA_MULTI_AGENT_TOPOLOGY_AND_EMERGENT_AGENCY.md`](../research/features/HYDRA_MULTI_AGENT_TOPOLOGY_AND_EMERGENT_AGENCY.md) | Mailbox metaphor | Default swarm; competing runtime authority |
 | [`.draft/SONNET_SUPER_AGENT.md`](../research/features/SONNET_SUPER_AGENT.md) | Competency rhetoric | Model folklore as architecture |
 | Octopus `long-horizon-context-engine.md` / `outer-loop-orchestrator.md` | Progressive packets; campaign director **above** EpisodeEngine | Not implemented; must not become a second engine |
@@ -1775,7 +1972,7 @@ Shared rollback for every wave: revert the wave’s files; do not weaken falsifi
 
 - **Objective.** No `completed` without bound verification; Forge cannot invent counts; default pack gated.
 - **Dependencies.** Wave 0 instrument (so later scores are not compared to B1).
-- **Source files.** `runtime/session.py` (`admission_required`, `_observed_test_count`, `_observe_completion_dispatch`); `agency/episode/admission_gate.py`; `agency/forge/engine.py` L309–311; pack completeness/parser.
+- **Source files.** `runtime/session.py` (`admission_required`, `_observed_test_count`, `_observe_completion_dispatch`); `agency/episode/admission_gate.py`; `agency/forge/engine.py` / `agency/chimera/verification.py` (T-06 count honesty); pack completeness/parser.
 - **Contracts.** `VerificationReceipt.passed ⇔ exit_code==0 ∧ count>0 ∧ identities match`; task class from pack policy, not substring alone.
 - **Packages.** agency, runtime, packs/code-default, forge quarantine.
 - **Tests.** Existing admission tests plus: default harness cannot finish empty; Forge fallback removed; greenfield vs bugfix policies explicit.
@@ -1789,7 +1986,7 @@ Shared rollback for every wave: revert the wave’s files; do not weaken falsifi
 
 - **Objective.** Domain `SemanticTaskState` + runtime fold; resume preserves episode_id; state not in L3; 40-turn / crash continuation.
 - **Dependencies.** Wave 1 (do not persist false completes).
-- **Source files.** **Create** `vanguard/packages/domain/task_state.py` (**MISSING** in HEAD); fold in `runtime/task_state.py` or sibling; `app_service.py` resume; `session.py` L619–622; `agency/context/packet.py` identity fields.
+- **Source files.** `vanguard/packages/domain/task_state.py` (landed); fold in `runtime/task_state.py`; `app_service.py` resume; `session.py` σ → L4; `agency/context/packet.py` identity fields.
 - **Contracts.** FEATURE_SPEC §3 plus provenance fields already on `CodingTaskState` (discoveries, dead_ends) merged, not duplicated forever.
 - **Packages.** domain, runtime, agency (view/compiler consumption), tests/contracts.
 - **Tests.** `test/contracts/test_semantic_task_state.py` as specified; RF-25 still green; new test: L3 prefix stable across resume+write.
@@ -1908,7 +2105,9 @@ Shared rollback for every wave: revert the wave’s files; do not weaken falsifi
 
 ---
 
-## 9. Sprint sequence
+## Appendix: historical schedule (do not execute)
+
+Copied A §19 / B Appendix B sprint labels. Capability recipes remain below as **Recipe: INSTRUMENT / TRUTH / RESUME / …** pointing at MS-* and T-*. This is not a calendar.
 
 Implementation lane (WIP=1) and evaluation lane (WIP=1) never share a writer.
 
@@ -2154,7 +2353,7 @@ See §2.6. Additionally, OpenAI’s evaluation note: coding evals mix signal and
 
 | Work | Create / modify | Tests | Canonical docs **after** acceptance (not this draft) |
 |---|---|---|---|
-| SemanticTaskState | **C** `vanguard/packages/domain/task_state.py` (**MISSING**) | **C** `test/contracts/test_semantic_task_state.py` | `docs/backend/architecture/runtime-execution.md`, FEATURE_SPEC promote |
+| SemanticTaskState | `vanguard/packages/domain/task_state.py` | `test/contracts/test_semantic_task_state.py` | `docs/backend/architecture/runtime-execution.md` |
 | Fold | **M** `vanguard/packages/runtime/task_state.py` | `test/agency/test_coding_state.py` | same |
 | Resume identity | **M** `vanguard/packages/runtime/app_service.py` | `test/runtime/test_resume_from_ledger.py`, RF-25 | runtime-execution |
 | Stop L3 dump | **M** `vanguard/packages/runtime/session.py` | `test/runtime/test_context_layer_residency.py` + new | agency.md |
@@ -2192,12 +2391,11 @@ See §2.6. Additionally, OpenAI’s evaluation note: coding evals mix signal and
 - [`VISION.md`](../../VISION.md)
 - [`AGENTS.md`](../../AGENTS.md)
 - [`README.md`](../../README.md)
-- [`docs/SPEC.md`](../SPEC.md)
-- [`docs/decisions.md`](../decisions.md)
+- [`docs/execution/spec.md`](spec.md)
 - [`docs/execution/active.md`](tasks.md)
 - [`docs/execution/milestones.md`](../execution/milestones.md)
 - [`docs/execution/backlog.md`](../execution/backlog.md)
-- [`docs/execution/FEATURE_SPEC.md`](../execution/FEATURE_SPEC.md)
+- [`docs/execution/spec.md`](../execution/spec.md)
 - [`docs/execution/tasks.md`](../execution/tasks.md)
 - [`docs/backend/architecture/agency.md`](../backend/architecture/agency.md)
 - [`docs/architecture/workflows/end-to-end-execution.md`](../architecture/workflows/end-to-end-execution.md)
@@ -2219,9 +2417,9 @@ See §2.6. Additionally, OpenAI’s evaluation note: coding evals mix signal and
 - [`benchmarks/protocols.py`](../../benchmarks/protocols.py)
 - [`benchmarks/sota_preregistration.json`](../../benchmarks/sota_preregistration.json)
 - [`benchmarks/sota_spend_ledger.json`](../../benchmarks/sota_spend_ledger.json)
-- [`.draft/DEVELOPMENT_FINAL_PLAN.md`](../../.draft/DEVELOPMENT_FINAL_PLAN.md) (non-authority; different SHA)
-- [`.draft/todo/SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md`](../../.draft/todo/SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md)
-- [`.draft/todo/development_plan_guidelines_0209.md`](../../.draft/todo/development_plan_guidelines_0209.md)
+- [`.draft/DEVELOPMENT_FINAL_PLAN.md`](../reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN.md) (non-authority; different SHA)
+- [`.draft/todo/ELECTROWEAK_SYNTHESIS_SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md`](../../.draft/todo/ELECTROWEAK_SYNTHESIS_SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md)
+- [`.draft/todo/ELECTROWEAK_SYNTHESIS_DEVELOPMENT_PLAN_GUIDELINES_0209.md`](../../.draft/todo/ELECTROWEAK_SYNTHESIS_DEVELOPMENT_PLAN_GUIDELINES_0209.md)
 - [`.draft/HYDRA_MULTI_AGENT_TOPOLOGY_AND_EMERGENT_AGENCY.md`](../research/features/HYDRA_MULTI_AGENT_TOPOLOGY_AND_EMERGENT_AGENCY.md)
 - [`.draft/SONNET_SUPER_AGENT.md`](../research/features/SONNET_SUPER_AGENT.md)
 - [`docs/research/theory/SOTA_AGENTIC_CODING_HARNESS_ENGINEERING_TREATISE.md`](../research/theory/SOTA_AGENTIC_CODING_HARNESS_ENGINEERING_TREATISE.md)
@@ -2287,7 +2485,7 @@ See §2.6. Additionally, OpenAI’s evaluation note: coding evals mix signal and
 
 This task’s intended unique created file:
 
-`/home/rock-dev/Coding/cognitive-framework/.draft/DEVELOPMENT_FINAL_PLAN_B.md`
+`.draft/DEVELOPMENT_FINAL_PLAN_B.md`
 
 No production code, tests, canonical docs, generated indexes, package metadata, benchmark artifacts, or existing drafts were to be modified.
 
@@ -2388,7 +2586,7 @@ No edge from W7 to W5 in reverse. No edge that lets Forge define W5.
 
 ## Appendix C — Why Plan B is not Plan A copied
 
-[`.draft/DEVELOPMENT_FINAL_PLAN.md`](../../.draft/DEVELOPMENT_FINAL_PLAN.md) is bound to `7e08462c2cbb…`. This file is bound to `ebad36e675f0…` plus this session’s 68 tests, TCB 1386, official DeepSWE/Scale fetches on 2026-09-03, and the observation that FEATURE_SPEC modules are **still missing**. Plan A’s reliability-first thesis is retained because **current source still supports it**, not because the earlier draft is authority.
+[`.draft/DEVELOPMENT_FINAL_PLAN.md`](../reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN.md) is bound to `7e08462c2cbb…`. This file is bound to `ebad36e675f0…` plus this session’s 68 tests, TCB 1386, official DeepSWE/Scale fetches on 2026-09-03, and the observation that FEATURE_SPEC modules are **still missing**. Plan A’s reliability-first thesis is retained because **current source still supports it**, not because the earlier draft is authority.
 
 **Lock-time addendum (2026-09-03, HEAD `66aa7a3c0c31`).** A, B, and v2 are now a locked triad: A = law, B = ground truth (this file, tickets 01–35), v2 = architecture catalog. YAML no longer says `does_not_modify` A; complements are A and v2. The `ebad36e` / LDA `STALE` binding above remains the planning-session snapshot. FEATURE_SPEC modules remain **MISSING** at lock HEAD.
 
@@ -2440,7 +2638,7 @@ INGEST → DISCOVER → PLAN → EDIT → VERIFY_TARGETED → RECOVER → VERIFY
 
 **FACT.** Stage transitions follow receipts, not conversational `finish`. Live inner loop is `ContextCompiler` freeze of L1–L3 at construction, then `EpisodeEngine`: observe → propose → `recover_proposal` → `Kernel.dispatch` → ingest (`agency/episode/engine.py`). Compile is **not** a step inside `EpisodeEngine`.
 
-**FACT.** `admission_required` exempts `vg-code-default` / `vg-code-lex`, else `"patch.apply" in verbs`. `ADMISSION_GATED_HARNESSES` is unused in runtime. `VerificationReceipt.passed` ⇔ `exit_code == 0 and executed_test_count > 0`. Session `_observed_test_count` returns 0 if unparseable. Forge still sets `test_count = 1` on green-empty.
+**FACT.** `admission_required` exempts `vg-code-default` / `vg-code-lex`, else `"patch.apply" in verbs`. `ADMISSION_GATED_HARNESSES` is unused in runtime. `VerificationReceipt.passed` ⇔ `exit_code == 0 and executed_test_count > 0`. Session `_observed_test_count` returns 0 if unparseable. Forge `parse_test_output` and Chimera bare-exit-0 parsing leave unknown counts at 0 (T-06).
 
 **Pointer.** Reliability order and competency profiles: A. Tickets 01–35 and lattice: this file. 2PC / AST / later phenotypes: v2 as `[PROPOSAL]` except sequential git apply + post-write `ast.parse` (MECHANISM).
 
@@ -2472,7 +2670,7 @@ Identical appendix in A, B, and v2. Duplication is required so no file is a stub
 
 ## From A — what the code already provides (G-01…G-12)
 
-Copied from [`.draft/DEVELOPMENT_FINAL_PLAN.md`](../../.draft/DEVELOPMENT_FINAL_PLAN.md).
+Copied from [`.draft/DEVELOPMENT_FINAL_PLAN.md`](../reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN.md).
 
 ## 2. What the code already provides
 
@@ -2581,13 +2779,9 @@ That boundary should remain stable while cognition evolves behind declarative ma
 
 #### G-01: completion evidence can be overstated
 
-`agency/forge/engine.py::parse_test_output` sets `test_count = 1` when exit code is zero and no recognized count exists.
+**FACT (T-06).** Forge `parse_test_output` and Chimera `VerificationCortex.parse_test_output` no longer invent `test_count = 1` / `executed = 1` on bare exit 0 or on non-zero exit without a parsed runner summary. Unknown counts stay 0.
 
-`agency/chimera/verification.py` contains a similar successful-command fallback.
-
-A zero exit code is not proof that a test ran.
-
-This blocks trustworthy completion.
+A zero exit code is still not proof that a test ran. Remaining invented-count work is typed runner adapters (T-08), not this fallback.
 
 #### G-02: verification classification is heuristic
 
@@ -2991,7 +3185,7 @@ It must not bypass `ApplicationService`, `Runtime`, `HarnessSession`, or the ker
 
 These values contain no model provider, filesystem I/O, or runtime authority.
 
-**FACT (HEAD `66aa7a3c`).** The current fold is `CodingTaskState` in `runtime/task_state.py` (`fold_task_state`). `vanguard/packages/domain/task_state.py` is **MISSING**. Preferred merge is B §6.12: promote schema to domain, keep the fold in runtime, do not run two authorities forever. Do not delete `GoalContract` / `CampaignPlan` / the rest of this 17-value list; they remain law-side targets.
+**FACT.** Schema is `domain/task_state.py` (`SemanticTaskState` / `CodingTaskState` alias). The only fold is `runtime/task_state.py` `fold_task_state`. Do not delete `GoalContract` / `CampaignPlan` / the rest of this 17-value list; they remain law-side `[PROPOSAL]` targets.
 
 **Historical claim.** This section read as if the 17 values were required next-code. They are `[PROPOSAL]` relative to the live fold.
 
@@ -4559,7 +4753,6 @@ Do not fork the app facade for every title.
 When implementation begins, route durable changes to:
 
 - `docs/SPEC.md` for normative requirements;
-- `docs/decisions.md` for accepted architectural decisions;
 - `docs/backend/architecture/agency.md` for turn/context mechanics;
 - `docs/backend/architecture/runtime-execution.md` for session and campaign execution;
 - `docs/backend/architecture/delegation-topology.md` for roles and topology;
@@ -5011,8 +5204,7 @@ The following sources informed this plan but do not all carry equal authority.
 
 - [`VISION.md`](../../VISION.md)
 - [`AGENTS.md`](../../AGENTS.md)
-- [`docs/SPEC.md`](../SPEC.md)
-- [`docs/decisions.md`](../decisions.md)
+- [`docs/execution/spec.md`](spec.md)
 
 ### Current architecture and execution
 
@@ -5021,8 +5213,8 @@ The following sources informed this plan but do not all carry equal authority.
   - **FACT (lock `66aa7a3c`):** this path is **missing**. Current execution files are `tasks.md`, `spec.md`, `milestones.md`, and `backlog.md`. Keep the link as the historical execution-board name from the `7e08462c` planning subject.
 - [`docs/execution/milestones.md`](../execution/milestones.md)
 - [`docs/execution/backlog.md`](../execution/backlog.md)
-- [`docs/execution/FEATURE_SPEC.md`](../execution/FEATURE_SPEC.md)
-  - **FACT (lock `66aa7a3c`):** the current delta-contract file is [`docs/execution/spec.md`](../execution/spec.md). Keep the `FEATURE_SPEC.md` link; it is the historical name used throughout this draft and in B/v2. Do not treat the missing filename as authorization to invent a parallel spec.
+- [`docs/execution/spec.md`](../execution/spec.md)
+  - **FACT (lock `66aa7a3c`):** the current delta-contract file is [`docs/execution/spec.md`](../execution/spec.md). Do not invent a parallel spec.
 - [`docs/execution/tasks.md`](../execution/tasks.md)
 - [`docs/backend/architecture/agency.md`](../backend/architecture/agency.md)
 - [`docs/backend/architecture/runtime-execution.md`](../backend/architecture/runtime-execution.md)
@@ -5034,8 +5226,8 @@ The following sources informed this plan but do not all carry equal authority.
 
 - [`HYDRA_MULTI_AGENT_TOPOLOGY_AND_EMERGENT_AGENCY.md`](../research/features/HYDRA_MULTI_AGENT_TOPOLOGY_AND_EMERGENT_AGENCY.md)
 - [`SONNET_SUPER_AGENT.md`](../research/features/SONNET_SUPER_AGENT.md)
-- [`todo/SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md`](../../.draft/todo/SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md)
-- [`todo/development_plan_guidelines_0209.md`](../../.draft/todo/development_plan_guidelines_0209.md)
+- [`todo/ELECTROWEAK_SYNTHESIS_SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md`](../../.draft/todo/ELECTROWEAK_SYNTHESIS_SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md)
+- [`todo/ELECTROWEAK_SYNTHESIS_DEVELOPMENT_PLAN_GUIDELINES_0209.md`](../../.draft/todo/ELECTROWEAK_SYNTHESIS_DEVELOPMENT_PLAN_GUIDELINES_0209.md)
 - [`docs/research/theory/SOTA_AGENTIC_CODING_HARNESS_ENGINEERING_TREATISE.md`](../research/theory/SOTA_AGENTIC_CODING_HARNESS_ENGINEERING_TREATISE.md)
 - [`docs/research/theory/optimizations_advanced_phd_LDA_techniques_tutorial.md`](../research/theory/optimizations_advanced_phd_LDA_techniques_tutorial.md)
 - [`docs/research/theory/agent-substrate.md`](../research/theory/agent-substrate.md)
@@ -5190,7 +5382,7 @@ Rules that separate SOTA from a sticky-note bot:
 
 **MECHANISM (HEAD `66aa7a3c`).** Authorize-then-recall is already implemented (`vanguard/packages/runtime/prompt_assembler.py`). Skills lifecycle exists (`vanguard/packages/runtime/skill_lifecycle.py`). Progressive disclosure (catalog in L2/L3; body on invoke) is the SOTA pattern for skills.
 
-**[PROPOSAL]** Product wiring that actually folds episodic \(\sigma\) into L4/L5, retrieves semantic hits under grant, and promotes skills only through held-out exterior eval (Wave 9). Current session dumping `resume_state` into env/L3 is a product bug, not the target (B §4.4; v2 §3).
+**FACT.** Session compiles episodic \(\sigma\) into L4 notes. **[PROPOSAL]** remains four-tier product wiring that retrieves semantic hits under grant and promotes skills only through held-out exterior eval (Wave 9).
 
 Long sessions are **many compacted turns over one durable \(\sigma\)**, optionally **many episodes in a campaign DAG**. One 400-turn transcript is how you get attention collapse. Campaign direction remains Wave 8 `[PROPOSAL]`; it is not a second `EpisodeEngine`.
 
@@ -5298,7 +5490,7 @@ Long sessions are **many compacted turns over one durable \(\sigma\)**, optional
 
 **MECHANISM (HEAD `66aa7a3c`).** Authorize-then-recall already exists (`runtime/prompt_assembler.py`). Skills lifecycle exists (`runtime/skill_lifecycle.py`). §17.3 authorization-before-retrieval remains law.
 
-**[PROPOSAL]** Product wiring of the four tiers into compiler packets (σ in L4, not dumped into L3). Current session puts `resume_state` into env/L3 — that is a product bug, not the target (B §4.4; v2 §3). Do not delete §17 memory classes; this table is the same idea under industry names.
+**FACT.** σ is compiled into L4, not dumped into L3. **[PROPOSAL]** remains four-tier product wiring of memory classes into compiler packets. Do not delete §17 memory classes; this table is the same idea under industry names.
 
 ---
 
@@ -5452,13 +5644,13 @@ Signed exact-subject evidence supports acceptance.
 
 | Field | Value |
 |---|---|
-| Repository | `/home/rock-dev/Coding/cognitive-framework` |
+| Repository | `cognitive-framework` |
 | Branch | `main` |
 | Lock HEAD | `66aa7a3c0c31cb68a2c0387a1ddf237c80084253` |
 | LDA index HEAD | `66aa7a3c0c31` |
 | LDA freshness vs HEAD | `FRESH` |
 | Lock date | 2026-09-03 |
-| Package version string | `0.9.0b1` in `pyproject.toml` (not M-9 acceptance) |
+| Package version string | `0.9.3` in `pyproject.toml` (not M-9 acceptance; lock-time string was `0.9.0b1`) |
 | Kernel TCB | **1386 / 1438** logical LOC (lock-time reconfirm not required for this draft-lock) |
 | Domain-blindness | Invariant I-7 still law; kernel remains domain-blind |
 
@@ -5466,7 +5658,7 @@ Signed exact-subject evidence supports acceptance.
 
 | Field | Value |
 |---|---|
-| Repository | `/home/rock-dev/Coding/cognitive-framework` |
+| Repository | `cognitive-framework` |
 | Branch | `main` |
 | HEAD | `ebad36e675f0eab6c4635851a91423f5a6541290` |
 | Worktree | dirty (pre-existing user work; this task created only this file) |
@@ -5573,4 +5765,3 @@ Unrelated user work exists under `vanguard/clients/tui*`, `vanguard/clients/cli`
 Sections 3–4 are FACT/MECHANISM. Section 5 is mathematics with stated assumptions. Sections 6–18 are PROPOSAL constrained by the lattice. Section 16 states what would be required before any ASPIRATION score is speakable.
 
 ---
-

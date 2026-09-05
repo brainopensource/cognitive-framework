@@ -117,22 +117,34 @@ class ReservationComesFromTheBudgetPolicy(unittest.TestCase):
         self.assertNotIn("Reservation(usd_micros=100, millis=1000)", source)
 
 
-class ApprovalThresholdIsMarkedForHandoff(unittest.TestCase):
-    def test_approval_literal_carries_a_pointer_to_its_replacement(self) -> None:
-        """S7-A-06 step 4: mark, do not implement. S8-B-04 owns the change."""
+class ApprovalThresholdIsOwnedByTheManifest(unittest.TestCase):
+    """Successor to the `S8-B-04` handoff marker, which T-70 closed.
 
+    The marker said the threshold was the last composition value the manifest
+    did not own. It does now: the value is resolved from the pack's declared
+    `components.approval_policy`, so the assertion is that no literal survives
+    at the wiring site -- not that a TODO still points at one.
+    """
+
+    def test_the_threshold_is_not_a_literal_at_the_wiring_site(self) -> None:
         source = (RUNTIME / "session.py").read_text(encoding="utf-8")
         tree = ast.parse(source)
-        line = None
-        for node in ast.walk(tree):
-            if isinstance(node, ast.keyword) and node.arg == "approval_required_above":
-                line = node.value.lineno
-                break
-        self.assertIsNotNone(line, "approval_required_above not found in session.py")
+        values = [
+            node.value for node in ast.walk(tree)
+            if isinstance(node, ast.keyword) and node.arg == "approval_required_above"
+        ]
+        self.assertTrue(values, "approval_required_above not found in session.py")
+        for value in values:
+            for literal in ast.walk(value):
+                if isinstance(literal, ast.Constant) and isinstance(literal.value, str):
+                    self.fail(
+                        "approval_required_above carries a hardcoded threshold "
+                        f"{literal.value!r}; resolve it from the manifest (T-70)")
 
-        lines = source.splitlines()
-        window = "\n".join(lines[max(0, line - 12) : line])
-        self.assertIn("TODO(S8-B-04)", window)
+    def test_the_handoff_marker_is_gone_because_the_handoff_landed(self) -> None:
+        source = (RUNTIME / "session.py").read_text(encoding="utf-8")
+        self.assertNotIn("TODO(S8-B-04)", source)
+        self.assertIn("resolve_approval_threshold", source)
 
 
 if __name__ == "__main__":

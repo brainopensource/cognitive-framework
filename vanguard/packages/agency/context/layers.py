@@ -26,7 +26,9 @@ __all__ = [
     "Block",
     "CompiledContext",
     "Fragment",
+    "GOAL_ECHO_SOURCE",
     "Layer",
+    "PINNED_L4_SOURCES",
     "PREFIX_LAYERS",
     "ROLE_FOR_LAYER",
     "estimate_tokens",
@@ -68,6 +70,16 @@ ROLE_FOR_LAYER: Mapping[Layer, str] = {
     Layer.TASK: "user",
     Layer.DIALOGUE: "user",
 }
+
+#: FEATURE_SPEC tiers 0–1 on L4. Compaction must not evict these sources.
+PINNED_L4_SOURCES: frozenset[str] = frozenset({
+    "settled-invariant",
+    "falsified-hypothesis",
+    "dead-end",
+})
+
+#: Short restatement of the brief at the tail of L5 (v2 §15 / T-36).
+GOAL_ECHO_SOURCE = "goal-echo"
 
 
 def estimate_tokens(text: str) -> int:

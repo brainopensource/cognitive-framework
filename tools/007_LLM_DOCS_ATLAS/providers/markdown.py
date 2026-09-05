@@ -31,6 +31,7 @@ class MarkdownDocProvider(BaseProvider):
         repo_root: Path | Any,
         incremental: bool = False,
         file_states: Optional[Dict[str, Dict[str, Any]]] = None,
+        target_files: Optional[Sequence[Path | str]] = None,
     ) -> ProviderResult:
         root = repo_root.root if hasattr(repo_root, "root") else Path(repo_root)
         profile = getattr(repo_root, "profile", None)
@@ -42,7 +43,15 @@ class MarkdownDocProvider(BaseProvider):
         relations: List[Relation] = []
         legacy_entities: List[Entity] = []
 
-        md_files = list(root.rglob("*.md")) + list(root.rglob("*.mdx"))
+        if target_files is not None:
+            resolved_targets = []
+            for f in target_files:
+                p = Path(f) if Path(f).is_absolute() else (root / f)
+                if p.is_file() and p.suffix.lower() in (".md", ".mdx") and not any(part in p.parts for part in skip_dirs):
+                    resolved_targets.append(p)
+            md_files = resolved_targets
+        else:
+            md_files = list(root.rglob("*.md")) + list(root.rglob("*.mdx"))
         for fpath in md_files:
             if any(part in fpath.parts for part in skip_dirs):
                 continue

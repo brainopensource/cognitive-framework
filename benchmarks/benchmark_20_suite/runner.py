@@ -40,6 +40,15 @@ if str(ROOT) not in sys.path:
 if str(ROOT / "tools" / "002_LLM_API_MOCK") not in sys.path:
     sys.path.insert(0, str(ROOT / "tools" / "002_LLM_API_MOCK"))
 
+from benchmarks.coding_max_report import CODING_MAX_ARMS, normalize_coding_max_arm, write_coding_max_report
+from benchmarks.protocols import (
+    B20MembershipError,
+    DirtySubjectError,
+    enumerate_b20_membership,
+    require_clean_subject,
+    write_b20_report,
+)
+
 # Centralized Model Registry Configuration
 from vanguard.packages.runtime.root import (
     get_default_model,
@@ -175,6 +184,7 @@ class ChallengeResult:
     latency_seconds: float
     diagnosis: str
     trajectory: List[Dict[str, Any]] = field(default_factory=list)
+    patch_digest: str = ""
 
 
 def extract_tool_calls_from_content(content: str) -> List[Dict[str, Any]]:
@@ -622,6 +632,7 @@ class BenchmarkRunner:
                     latency_seconds=round(total_latency, 2),
                     diagnosis=diagnosis,
                     trajectory=outcome.trajectory,
+                    patch_digest=_workspace_patch_digest(challenge_dir, ws_path),
                 )
 
             messages = [
@@ -775,6 +786,7 @@ class BenchmarkRunner:
                 latency_seconds=round(total_latency, 2),
                 diagnosis=diagnosis,
                 trajectory=trajectory,
+                patch_digest=_workspace_patch_digest(challenge_dir, ws_path),
             )
 
 
@@ -822,14 +834,80 @@ def print_results_matrix(results: List[ChallengeResult], total_cost: float, tota
     print("=" * 120 + "\n")
 
 
+def _workspace_patch_digest(baseline: Path, workspace: Path) -> str:
+    """Bind a PASS row to the post-edit workspace identity."""
+    hasher = hashlib.sha256()
+    for root in (baseline, workspace):
+        if not root.exists():
+            hasher.update(b"<missing>")
+            continue
+        for path in sorted(item for item in root.rglob("*") if item.is_file()):
+            hasher.update(str(path.relative_to(root)).encode("utf-8"))
+            hasher.update(path.read_bytes())
+    return "sha256:" + hasher.hexdigest()
+
+
+def resolve_frozen_subject_sha(repo_root: Path = ROOT) -> str:
+    """Bind empirical receipts to the frozen candidate HEAD SHA."""
+    proc = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    sha = (proc.stdout or "").strip()
+    if proc.returncode != 0 or not sha:
+        raise ValueError("B20 receipt refused: missing subject_sha")
+    return sha
+
+
 def main():
     parser = argparse.ArgumentParser(description="Run Benchmark 20 Suite")
     parser.add_argument("--model", default=None, help="Model identifier or alias (defaults to centralized config: get_default_paid_model())")
-    parser.add_argument("--preset", default="vg-code-max", choices=["vg-code-max", "vg-1-forge"], help="Harness preset (vg-code-max or vg-1-forge)")
+    parser.add_argument(
+        "--preset",
+        default="vg-code-max",
+        choices=["vg-code-fast", "vg-code-balanced", "vg-code-max", "vg-1-forge"],
+        help="Harness preset (Coding Max arms or experimental vg-1-forge)",
+    )
     parser.add_argument("--max-turns", type=int, default=8, help="Max turns per challenge")
     parser.add_argument("--budget", type=float, default=0.20, help="Max USD budget")
     parser.add_argument("--single", default=None, help="Run single challenge name for debugging")
+    parser.add_argument("--dry-run", action="store_true", help="Structural preflight; pass/cost/oracle stay null")
     args = parser.parse_args()
+
+    try:
+        membership = enumerate_b20_membership(SUITE_ROOT)
+    except B20MembershipError as exc:
+        print(f"INVALID membership: {exc}")
+        sys.exit(2)
+
+    records = list(membership.tasks)
+    if args.single:
+        records = [task for task in records if task.task_id == args.single]
+        if not records:
+            print(f"Challenge {args.single} not found in membership manifest")
+            sys.exit(1)
+
+    try:
+        subject_sha = resolve_frozen_subject_sha(ROOT)
+        if not args.dry_run:
+            require_clean_subject(ROOT)
+    except (ValueError, DirtySubjectError) as exc:
+        print(exc)
+        sys.exit(2)
+
+    if args.dry_run:
+        report = write_b20_report(
+            None,
+            subject_sha=subject_sha,
+            dry_run=True,
+            task_ids=[task.task_id for task in records],
+            harness=f"vanguard-{args.preset}",
+        )
+        print(json.dumps(report, indent=2))
+        return
 
     recorder = MockRecorder(LAM_SQLITE_PATH) if MockRecorder else None
     runner = BenchmarkRunner(
@@ -840,15 +918,7 @@ def main():
         recorder=recorder,
     )
 
-    challenge_dirs = sorted([
-        d for d in SUITE_ROOT.iterdir()
-        if d.is_dir() and not d.name.startswith("__")
-    ])
-    if args.single:
-        challenge_dirs = [d for d in challenge_dirs if d.name == args.single]
-        if not challenge_dirs:
-            print(f"Challenge {args.single} not found in {SUITE_ROOT}")
-            sys.exit(1)
+    challenge_dirs = [SUITE_ROOT / task.task_id for task in records]
 
     t_suite_start = time.perf_counter()
     results = []
@@ -860,31 +930,38 @@ def main():
     total_duration = time.perf_counter() - t_suite_start
     print_results_matrix(results, runner.total_cost_usd, total_duration)
 
-    report_data = {
-        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    result_rows = [
+        {
+            "id": r.challenge_id,
+            "kind": r.kind,
+            "status": r.status,
+            "turns": r.turns,
+            "tokens": r.total_tokens,
+            "cost_usd": round(r.cost_usd, 6),
+            "latency_s": r.latency_seconds,
+            "diagnosis": r.diagnosis,
+            "patch_digest": r.patch_digest,
+        }
+        for r in results
+    ]
+    write_kwargs = {
+        "subject_sha": subject_sha,
+        "dry_run": False,
+        "task_ids": [r.challenge_id for r in results],
+        "results": result_rows,
         "model": runner.model_name,
         "harness": f"vanguard-{runner.preset}",
-        "pass_rate_pct": round((sum(1 for r in results if r.status == 'PASS') / len(results)) * 100, 1),
         "total_cost_usd": round(runner.total_cost_usd, 6),
         "total_duration_seconds": round(total_duration, 2),
-        "results": [
-            {
-                "id": r.challenge_id,
-                "kind": r.kind,
-                "status": r.status,
-                "turns": r.turns,
-                "tokens": r.total_tokens,
-                "cost_usd": round(r.cost_usd, 6),
-                "latency_s": r.latency_seconds,
-                "diagnosis": r.diagnosis,
-            }
-            for r in results
-        ]
     }
     out_file = SUITE_ROOT / f"benchmark_20_results_{runner.preset.replace('-', '_')}.json"
-    out_file.write_text(json.dumps(report_data, indent=2), encoding="utf-8")
-    if runner.preset == "vg-code-max":
-        (SUITE_ROOT / "benchmark_20_results.json").write_text(json.dumps(report_data, indent=2), encoding="utf-8")
+    write_b20_report(out_file, **write_kwargs)
+    if normalize_coding_max_arm(runner.preset) in CODING_MAX_ARMS:
+        write_coding_max_report(
+            SUITE_ROOT / "benchmark_20_results.json",
+            arms=[runner.preset],
+            **write_kwargs,
+        )
 
 
 if __name__ == "__main__":

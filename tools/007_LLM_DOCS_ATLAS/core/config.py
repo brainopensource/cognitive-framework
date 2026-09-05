@@ -20,19 +20,55 @@ def _optional_yaml():
     return yaml
 
 
+def _simple_yaml_fallback(text: str) -> dict[str, Any]:
+    """Lightweight fallback parser for basic YAML when PyYAML is not installed."""
+    res: dict[str, Any] = {}
+    curr_dict: dict[str, Any] = res
+    curr_key: str | None = None
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if ":" in line:
+            parts = line.split(":", 1)
+            k = parts[0].strip()
+            v = parts[1].strip()
+            if not v:
+                curr_key = k
+                res[k] = {}
+                curr_dict = res[k]
+            else:
+                val: Any
+                if (v.startswith('"') and v.endswith('"')) or (v.startswith("'") and v.endswith("'")):
+                    val = v[1:-1]
+                elif v.lower() == "true":
+                    val = True
+                elif v.lower() == "false":
+                    val = False
+                elif v.isdigit():
+                    val = int(v)
+                else:
+                    val = v
+                if curr_key and raw_line.startswith(("  ", "\t")):
+                    curr_dict[k] = val
+                else:
+                    curr_key = None
+                    curr_dict = res
+                    res[k] = val
+    return res
+
+
 def load_repo_config(base: Path) -> Mapping[str, Any]:
     """Load lda.yaml / lda.yml / lda.toml from the repository root (empty if absent)."""
     config_yaml = base / "lda.yaml"
     config_yml = base / "lda.yml"
     config_toml = base / "lda.toml"
     if config_yaml.is_file() or config_yml.is_file():
+        path = config_yaml if config_yaml.is_file() else config_yml
         yaml = _optional_yaml()
         if yaml is None:
-            raise RuntimeError(
-                "lda.yaml found but PyYAML is not installed; "
-                "rename it to lda.toml (stdlib tomllib) for a zero-dependency setup"
-            )
-        path = config_yaml if config_yaml.is_file() else config_yml
+            # Zero-dependency fallback for simple lda.yaml files
+            return _simple_yaml_fallback(path.read_text(encoding="utf-8"))
         return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     if config_toml.is_file():
         with config_toml.open("rb") as handle:

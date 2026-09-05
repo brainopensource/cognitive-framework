@@ -29,16 +29,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-env_file = ROOT / ".env"
-if env_file.is_file():
-    for line in env_file.read_text(encoding="utf-8").splitlines():
-        line = line.strip()
-        if line and not line.startswith("#") and "=" in line:
-            k, v = line.split("=", 1)
-            k = k.strip()
-            v = v.strip().strip("'\"")
-            if k in {"OPENROUTER_API_KEY", "DEEPSEEK_API_KEY", "VANGUARD_ALLOW_PAID"}:
-                os.environ[k] = v
+from benchmarks._env import load_benchmark_env
+
 
 from vanguard.packages.runtime.root import (
     application_service,
@@ -186,6 +178,7 @@ class TestPublicInterface(unittest.TestCase):
         self.assertTrue(issubclass(ChecksumMismatchError, ProtocolError))
 
 if __name__ == "__main__":
+    load_benchmark_env()
     unittest.main()
 '''
 
@@ -261,6 +254,7 @@ class HiddenNeedleOracleTest(unittest.TestCase):
         self.assertEqual(calculate_retry_delay(100, 4, 35, max_ms=5000), 5000)
 
 if __name__ == "__main__":
+    load_benchmark_env()
     unittest.main()
 '''
 
@@ -417,4 +411,5 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    load_benchmark_env()
     sys.exit(main())

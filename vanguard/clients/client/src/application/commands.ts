@@ -47,6 +47,8 @@ export type CliOptions = {
   maxEpisodes?: number;
   maxReplans?: number;
   budgetUsdMicros?: number;
+  /** Explicit operator consent; a budget is only a ceiling. */
+  allowPaid?: boolean;
   interactive?: boolean;
   dryPlan?: boolean;
   json?: boolean;

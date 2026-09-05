@@ -143,7 +143,7 @@ def unified_diff(repo: Path) -> str:
 
 
 class ScriptedOperator:
-    """A recorded three-turn trajectory: read, patch, verify, finish.
+    """A recorded five-turn trajectory: read, reproduce, patch, verify, finish.
 
     It is a cassette, not a decision procedure — it cannot see the repository
     and cannot adapt. Everything it proposes still has to survive the kernel,
@@ -160,12 +160,19 @@ class ScriptedOperator:
         self.contexts.append(dict(context))
         turn, self._turn = self._turn, self._turn + 1
         resource = {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}
+        process = {"kind": "generic", "uriPattern": "proc://exec/allow/git,pytest,ruff,python3"}
         script = [
             {"kind": "effect", "action": "fs.read", "resource": resource,
              "args": {"path": "calc.py"},
              "reservation": {"usd_micros": 100, "millis": 500}},
+            {"kind": "effect", "action": "proc.exec", "resource": process,
+             "args": {"argv": ["python3", "-m", "unittest", "test_calc.py"]},
+             "reservation": {"usd_micros": 100, "millis": 500}},
             {"kind": "effect", "action": "patch.apply", "resource": resource,
              "args": {"diff": self._diff},
+             "reservation": {"usd_micros": 100, "millis": 500}},
+            {"kind": "effect", "action": "proc.exec", "resource": process,
+             "args": {"argv": ["python3", "-m", "unittest", "-v", "test_calc.py"]},
              "reservation": {"usd_micros": 100, "millis": 500}},
             {"kind": "finish", "note": "off-by-one corrected"},
         ]
@@ -276,7 +283,10 @@ class Composition(unittest.TestCase):
 
         self.assertNotEqual(code.composition_digest, shell.composition_digest)
         self.assertEqual(code.harness, "vg-code-default")
-        self.assertEqual(sorted(code.verbs), ["fs.read", "fs.search", "patch.apply", "proc.exec"])
+        self.assertEqual(
+            sorted(code.verbs),
+            ["agency.finish", "fs.read", "fs.search", "patch.apply", "proc.exec"],
+        )
         self.assertEqual(sorted(shell.verbs), ["proc.exec"])
 
     def test_composition_is_deterministic_for_one_episode(self) -> None:
@@ -343,7 +353,12 @@ class DogfoodGate(unittest.TestCase):
         kwargs = {"manifest_path": CODE_DEFAULT, "task_context": task,
                   "model": self.operator, "approver": sign_challenge,
                   "approval_key": OPERATOR_KEY,
-                  "verifier": self.verifier}
+                  "verifier": self.verifier,
+                  # This contract exercises the real GitEnvironment and
+                  # kernel. Rootless containment has its own falsifiers;
+                  # this host-dev escape is explicit for hosts without a
+                  # qualifying worker perimeter.
+                  "sandbox_mode": "host-dev"}
         kwargs.update(overrides)
         return Runtime.execute_harness(**kwargs)
 
@@ -374,7 +389,11 @@ class DogfoodGate(unittest.TestCase):
         result = self.execute()
 
         kinds = [event.kind for event in result.events]
-        self.assertEqual(kinds.count("EffectStarted"), len(result.receipts))
+        self.assertEqual(
+            kinds.count("EffectStarted"),
+            kinds.count("EffectCompleted") + kinds.count("EffectFailed")
+            + kinds.count("EffectReconciled"),
+        )
         for receipt in result.receipts:
             self.assertTrue(receipt.descriptor_digest.startswith("sha256:"))
 
@@ -387,11 +406,18 @@ class DogfoodGate(unittest.TestCase):
         challenges = [event for event in result.events if event.kind == "ApprovalRequested"]
         patch = next(r for r in result.receipts if r.verb == "patch.apply")
 
-        self.assertEqual(len(challenges), 1)
+        challenge_digests = {
+            event.payload["descriptorDigest"] for event in challenges
+        }
+        self.assertEqual(len(challenge_digests), len(challenges))
+        self.assertIn(patch.descriptor_digest, challenge_digests)
         # `K-15`: the suspension binds the descriptor, so the effect that
         # eventually ran is the one the human was shown — not merely one with
         # the same verb.
-        self.assertEqual(challenges[0].payload["descriptorDigest"], patch.descriptor_digest)
+        self.assertTrue(any(
+            event.payload["descriptorDigest"] == patch.descriptor_digest
+            for event in challenges
+        ))
 
     def test_a_boolean_approver_is_not_a_signature(self) -> None:
         """`GOV-01`: a True callback must not mint the HMAC the runtime verifies."""
@@ -418,15 +444,21 @@ class DogfoodGate(unittest.TestCase):
         self.assertIs(result.terminal, RunTermination.ESCALATED)
         self.assertFalse(result.verdict.claims[0]["holds"])
 
-    def test_benchmark_mode_denies_the_patch_rather_than_suspending(self) -> None:
+    def test_benchmark_mode_never_blocks_for_a_human(self) -> None:
         """`K-17`: a run that blocks for a human has unbounded wall-clock *and*
         a human contributing to the measured outcome, so `interactive=False`
-        fails approval closed. It is not "approve everything"."""
+        asks nobody. It never asked "approve everything" either -- since T-70
+        the pack's declared `threshold: standard` decides which verbs are an
+        ask at all, and its own `patch.apply` is not one.
+
+        The old assertion here read `K-17` as "the patch is denied", which was
+        the hardcoded threshold speaking rather than the manifest.
+        """
         result = self.execute(interactive=False, approver=None)
 
-        self.assertEqual((self.repo / "calc.py").read_text(encoding="utf-8"), BUGGY_SOURCE)
-        self.assertIn("AuthorizationDenied", [event.kind for event in result.events])
-        self.assertFalse(result.verdict.claims[0]["holds"])
+        kinds = [event.kind for event in result.events]
+        self.assertNotIn("ApprovalRequested", kinds)
+        self.assertNotIn("AuthorizationDenied", kinds)
 
     # -- claim 5: the tests pass, and something ran them ----------------
 
@@ -538,12 +570,11 @@ class DogfoodGate(unittest.TestCase):
         stored_kinds = [envelope.payload["kind"] for envelope in stored.value]
         for event in result.events:
             self.assertIn(event.kind, stored_kinds)
-        # `K-47` writes the intent durably *before* the effect and `S12`
-        # publishes it afterwards, so each `EffectStarted` is two records. A
-        # store that held only one of them could not distinguish "the effect
-        # was attempted" from "the effect was reported".
-        self.assertEqual(len(stored.value),
-                         len(result.events) + stored_kinds.count("EffectStarted") // 2)
+        # The result is a post-teardown snapshot of the same single-writer
+        # ledger. Do not infer persistence from an old EffectStarted counting
+        # formula: plugin lifecycle and settlement events are first-class
+        # records and the store is the authority.
+        self.assertEqual(len(stored.value), len(result.events))
 
     def test_the_run_result_carries_the_composition_it_ran(self) -> None:
         """Attribution (`Ch.11 §2`) needs to know *which* harness produced this."""

@@ -40,6 +40,7 @@ class CausesAreNamed(unittest.TestCase):
             "Ollama request failed: timed out": "instrument_error:provider_timeout",
             "'x' is not pulled; installed: y": "instrument_error:model_tag_absent",
             "no daemon answering at http://h": "instrument_error:provider_unreachable",
+            "no server answering at http://h": "instrument_error:provider_unreachable",
             "OPENROUTER_API_KEY is not set": "instrument_error:provider_key_missing",
             "'m' is not in the free band; refusing to spend":
                 "instrument_error:paid_model_refused",
@@ -77,6 +78,9 @@ class TheDriverEmitsTheLabel(unittest.TestCase):
 
     def test_an_absent_tag_is_labelled_not_soup(self) -> None:
         with patch(
+            "vanguard.packages.runtime.model_selection._probe_http",
+            return_value=True,
+        ), patch(
             "vanguard.packages.runtime.model_selection._ollama_tags",
             return_value=("installed:tag",),
         ):
@@ -116,15 +120,15 @@ class GreenfieldIsAValidWorkspace(unittest.TestCase):
         from vanguard.packages.runtime.root import Runtime
 
         harness = Runtime.compose("vg-code-default", episode_id="e")
-        self.assertEqual(len(harness.verbs), 4)
+        self.assertEqual(len(harness.verbs), 5)
         self.assertGreater(len(harness.tool_schemas), 0)
 
-    def test_no_index_component_is_involved(self) -> None:
-        """Falsified hypothesis: IndexPort choking on an empty tree."""
+    def test_declared_index_accepts_an_empty_tree(self) -> None:
+        """The default tamper/index component accepts an empty tree."""
 
         from vanguard.packages.runtime.root import Runtime
 
-        self.assertIsNone(
+        self.assertIsNotNone(
             Runtime.compose("vg-code-default", episode_id="e").index_component)
 
     def test_the_mock_runs_an_episode_on_it(self) -> None:

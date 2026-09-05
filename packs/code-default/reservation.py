@@ -15,7 +15,8 @@ def is_free_model(model: str) -> bool:
         model == "openrouter/free"
         or model.endswith(":free")
         or model.startswith("mock")
-        or model.startswith("ollama")
+        or model == "local-model"
+        or model.startswith(("llama_cpp:", "llama:"))
     )
 
 

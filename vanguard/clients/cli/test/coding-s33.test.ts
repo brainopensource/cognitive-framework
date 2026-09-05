@@ -30,6 +30,7 @@ function baseRequest(overrides: Partial<CodingRequest> = {}): CodingRequest {
     maxReplans: 2,
     maxPaidCalls: 0,
     budgetUsdMicros: 50_000,
+    allowPaid: true,
     interactive: true,
     dryPlan: false,
     json: true,
@@ -250,11 +251,13 @@ test("vg doctor human line renders host facts without inventing values", () => {
   assert.match(lines[0]!, /isWsl=true/);
 });
 
-test("python coding backend deterministic fake reaches the runtime", async () => {
+test("python coding backend deterministic fake reaches the runtime and stays fail-closed", async () => {
   const backend = createPythonCodingBackend();
   const { result, exitCode } = await backend.invoke(baseRequest());
-  assert.equal(exitCode, 0);
-  assert.equal(result.outcome, "completed");
+  // The product path must not turn a bare fake finish into completion after
+  // the capability-derived T-04 gate removed the default exemption.
+  assert.equal(exitCode, 3);
+  assert.notEqual(result.outcome, "completed");
   const kinds = result.projections.map((item) => item.kind);
   assert.ok(kinds.includes("complete"));
 });

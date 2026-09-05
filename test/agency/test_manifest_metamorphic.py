@@ -83,8 +83,8 @@ class TestManifestMetamorphicPolicy(unittest.TestCase):
 
             # Observable assertion: compiler output differs under mutated policy (S8-B-02 GREEN)
             self.assertNotEqual(compiled_default.blocks, compiled_mutated.blocks)
-            self.assertEqual(len([b for b in compiled_mutated.blocks if b.layer.value == "L5"]), 1)
-            self.assertEqual(len([b for b in compiled_default.blocks if b.layer.value == "L5"]), 6)
+            self.assertEqual(len([b for b in compiled_mutated.blocks if b.layer.value == "L5"]), 2)
+            self.assertEqual(len([b for b in compiled_default.blocks if b.layer.value == "L5"]), 7)
 
 
 if __name__ == "__main__":

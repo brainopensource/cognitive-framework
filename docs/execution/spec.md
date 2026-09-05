@@ -1,14 +1,15 @@
 ---
 id: execution.feature_spec
 canonical_id: execution.feature_spec
-class: specification
+class: execution
 authority: execution
-status: active
+status: living
 owner: repository-governance
 canonical_for:
   - active-feature-delta-specification
 version: "2.0.0"
-date: "2026-09-03"
+date: "2026-09-05"
+last_verified: 2026-09-05
 lock_head: "66aa7a3c0c31"
 derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN.md
@@ -16,7 +17,6 @@ derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN_v2.md
   - .draft/PHASE-0_DEVELOPMENT_FINAL_PLAN.md
 normative_authority:
-  - docs/SPEC.md
   - docs/architecture/boundaries.md
 relationships:
   - execution.milestones
@@ -25,37 +25,105 @@ relationships:
   - execution.technical
 ---
 
-# Feature Delta Specification (execution)
+# Feature & Target Specification (execution)
 
-This file is the typed SHALL-contract for **all remaining backend work**. Upon a task merging, promote landed contracts into present-tense `docs/architecture/` / `docs/backend/` / `docs/SPEC.md`. Modules marked **MISSING** do not exist at lock HEAD `66aa7a3c`.
+This document is the authoritative specification and typed delta contract for the active execution runway and TARGET release predicates.
+Lock SHA `66aa7a3c` is the forensic baseline. Implementation head for closed instrument work: `63b77116`. Resume closed at `8637db55` (MS-RESUME `CLOSED`).
 
 Companion handbook: [`technical.md`](technical.md). Task IDs: [`tasks.md`](tasks.md).
 
-Historical CMX-09-only delta is preserved as [Appendix H](#appendix-h-historical-cmx-09-delta).
+## 0. Normative System Clauses (TARGET Law)
 
-**Kernel (I-7).** AST preflight SHALL NOT enter `kernel/dispatch.py` S7/S8. S7/S8 remain RESERVE/VERIFY. Syntax checks belong in `adapters/environment/`.
+### 0.1 Identity and causal truth
+- **`TC-E-001`** AETHER **MUST** remain a general event-sourced agentic-computation substrate, not a domain-specific harness, workflow engine, or certification system.
+- **`TC-E-002`** The fundamental execution unit **MUST** be a typed causal operation within an execution lineage.
+- **`TC-E-003`** Durable causal events **MUST** be authoritative facts; large content **MUST** be content-addressed artifacts; projections, indexes, caches, and telemetry **MUST NOT** become a second truth.
+- **`TC-E-004`** Replay of persisted facts and probabilistic re-execution **MUST** remain distinct.
+- **`TC-E-005`** An agent **MUST** be represented as identity, policy, event-derived projection, and execution boundary. No persistent in-memory Agent object may be required for semantic continuation.
 
-**FACT canonical path.** `ApplicationService` → Runtime → `HarnessSession` → `EpisodeEngine` → `Kernel.dispatch`. ForgeEngine and ChimeraEngine SHALL NOT be the product path (`[PROPOSAL]` quarantine: T-23).
+### 0.2 Trusted execution
+- **`TC-E-022`** The S0–S12 microkernel **MUST** remain a bounded, domain-blind reference monitor for admissibility, authority, generic budgets, and effect settlement.
+- **`TC-E-023`** Capability grants constrain agents; isolation policy constrains plugin code. Neither authority system may substitute for the other.
+- **`TC-E-029`** All privileged effects **MUST** preserve declared-versus-emitted identity, merge controls at the call site, persist intent before dispatch, and fail closed on forged or widened authority.
+- **`TC-E-030`** Production replay parity **MUST** reconstruct durable storage in a fresh process.
+- **`TC-E-031`** Evaluation authority **MUST** remain exterior, identity-separated, and cryptographically bound.
+- **`TC-E-032`** Plugins **MUST** be untrusted by default and isolation claims **MUST** be measured rather than asserted.
+- **`TC-E-033`** The kernel and domain **MUST** remain domain-blind and within the ratified Trusted Core budget.
 
-**Admission (FACT).** Live function is `admission_required` (`runtime/session.py`): exempt `vg-code-default` / `vg-code-lex`, else `"patch.apply" in verbs`. `ADMISSION_GATED_HARNESSES` is unused. T-04 is `[PROPOSAL]` and needs an RF-25 successor baseline.
+### 0.3 Composition, turns, and extensibility
+- **`TC-E-008`** Static composition declares available capabilities; the durable trajectory records what actually occurred. Neither graph may impersonate the other.
+- **`TC-E-038`** The sole production chain **MUST** remain `mhf.manifest/2 -> CanonicalManifest -> FrozenComposition -> ActivationPlan -> RunPlan -> EpisodeEngine`.
+- **`TC-E-039`** The canonical turn loop **MUST** remain unary and sequential except where a separately ratified, measured disposition explicitly authorizes a bounded case.
+- **`TC-E-040`** Runtime profiles **MUST** be explicit and identity-bearing in `D_R`; unavailable requested containment **MUST** fail closed.
+- **`TC-E-041`** Plugin activation **MUST** materialize a usable service or handle, or fail. Lifecycle metadata alone is not activation.
+- **`TC-E-027`** JSON Schema, JCS, and golden vectors are the wire source of truth; generated readers SHOULD replace handwritten mirrors.
+- **`TC-E-053`** Pure deterministic transforms, bounded protocol recovery with no silent execution, state-dependent tool policy, deterministic failure attribution, and fail-closed preflight are the accepted `ADR-0106` evolution seam.
 
-**VerificationReceipt.passed (FACT).** `exit_code == 0 and executed_test_count > 0`. Unknown counts stay 0. Forge SHALL NOT set `test_count = 1` (T-06).
+### 0.4 Delegation, topology, and budgets
+- **`TC-E-013`** `agent.spawn` **MUST** be the sole recursive-delegation primitive and re-enter the ordinary runtime through an attenuated child lineage.
+- **`TC-E-014`** Child action, resource, constraint, depth, turn, and budget authority **MUST NOT** exceed the parent.
+- **`TC-E-042`** Additive resources are exactly `usd_micros`, `millis`, `tokens`, and `bytes`; depth and turns are structural ceilings.
+- **`TC-E-017`** Topology declarations carry no authority. Ready roles **MUST** execute as ordinary mediated children and exchange dependency context through authorized artifact references.
+- **`TC-E-049`** The required direct, planner/executor/reviewer, and fork/read/merge topologies **MUST** demonstrate real effects and persisted artifact flow before acceptance.
+- **`TC-E-052`** `mhf.topology/2` is an accepted workflow seam, not authority for a second runtime or unrestricted concurrent execution.
 
-**I-1 universal signed finish** (v2): `[PROPOSAL]` too strong. Per-class evidence (A §9.4) wins. Fail-to-pass is the **bugfix** class (T-38).
+### 0.5 State, memory, learning, and evidence
+- **`TC-E-018`** Memory retrieval **MUST** verify scoped, revocation-aware authorization before ranking and artifact dereference; retention never authorizes capture.
+- **`TC-E-019`** Learned compositions **MUST** be immutable, content-addressed, evaluated on held-out workloads, promoted by authority distinct from generator/evaluator, and reversibly rolled back.
+- **`TC-E-026`** `D_H`, `D_R`, and `D_X` **MUST** remain distinct identities and bind every behavior-affecting input at their respective planes.
+- **`TC-E-035`** A completed trajectory **MUST** preserve invoked-turn attribution, explicit missingness, conserved cost, and the verified pre-crash prefix.
+- **`TC-E-043`** New production event envelopes **MUST** use `mhf.event/2`; compatibility readers may accept frozen predecessors without rewriting historical identities.
+- **`TC-E-046`** Facts, artifacts, projections, telemetry, and attestations **MUST** remain distinct. Only exact-subject, digest-addressed, independently verified receipts may close mandatory gates.
 
-**Mutation score ≥ 0.80** (v2 §5.4): `[PROPOSAL]` optional treatment T-39, not default admission.
+### 0.6 Context, completion, recovery, and coding-harness evidence
+- **`TC-E-054`** Repository intelligence **MUST** remain an optional, authority-free projection above the substrate. A provider **MUST NOT** grant capabilities, propose or dispatch effects, replace canonical documentation or durable causal facts, or become a required dependency of the domain or kernel. Domain packs and adapters **SHOULD** consume it through the existing context and index seams and **MUST** preserve a deterministic source-level fallback.
+- **`TC-E-055`** A bounded repository-context packet **MUST** identify the task, repository snapshot, provider and provider version, query, selected references, estimated token cost, and material omissions by stable identities or digests. It **MUST NOT** imply completeness, freshness, or authority merely because retrieval succeeded.
+- **`TC-E-056`** Context selection **MUST** satisfy an explicit token budget. For selected items $S$ and context budget $B_C$, $\sum_{i \in S}\operatorname{tokens}(i) \le B_C$. Composition **MUST** reserve sufficient capacity for at least one bounded recovery or verification cycle; a non-compactable prefix and task state **MUST NOT** consume the entire usable context window.
+- **`TC-E-057`** Compaction **MUST** retain the task identity and constraints, current plan or next action, modified resources, last material failure, latest applicable verification, settled effects, and remaining budgets. It **MUST** be identity-bearing and observable; it **MUST NOT** silently erase information required to determine whether completion or another effect is admissible.
+- **`TC-E-058`** Model-requested finish **MUST NOT** by itself establish successful completion. Where task policy requires verification, completion **MUST** be admitted only by an applicable successful verification receipt bound to the current task and current post-effect subject. A receipt invalidated by a later relevant effect, a zero-test collection, or a mismatched subject **MUST NOT** admit completion.
+- **`TC-E-059`** Harness-local verification and exterior evaluation **MUST** remain distinct. Local verification MAY govern operational completion; it **MUST NOT** self-certify benchmark success, assurance, promotion, or release evidence. Exterior evaluators remain subject to `TC-E-031` and `TC-E-046`.
+- **`TC-E-060`** Recovery decisions **MUST** be typed, bounded by failure class, budget-aware, and durably attributable. A retry **MUST NOT** repeat an identical action with identical arguments against materially unchanged state unless the classified failure is transient and the policy explicitly admits another bounded attempt. Exhaustion **MUST** terminate or replan explicitly rather than loop silently.
+- **`TC-E-061`** A successful patch effect **MUST** bind its input subject, verify the required preimage or anchors, apply every declared hunk within the authorized workspace, and record the resulting postimage identity. Ambiguous anchors, partial application, workspace escape, or a postimage mismatch **MUST** fail closed and **MUST NOT** be represented as patch success.
+- **`TC-E-062`** A benchmark-qualifying run record **MUST** bind at minimum the run and task identities, repository snapshot, harness/configuration identity, provider/model identity, trajectory or event-log identity, terminal state and reason, produced patch identity when applicable, verification and evaluator receipt identities, and explicit token, cost, latency, turn, tool-call, and retry values or missingness. Repeated attempts **MUST NOT** be represented as independent task coverage, and a record lacking its immutable trajectory linkage **MUST NOT** support a capability claim.
 
-**I-STATE.** σ is a ledger fold. Do not dump `resume_state` JSON into frozen L3 (FACT current bug; T-12). `domain/task_state.py` is **MISSING** until T-09.
+### 0.7 Product and release boundary
+- **`TC-E-047`** M-9 remains a TARGET operational beta: unified configuration and clients, packaged CLI/API/TUI/Studio, real plugin lifecycle, health/readiness, two real workflows, restart/resume, and offline-after-install behavior.
+- **`TC-E-048`** M-10 remains a TARGET final release: supported migrations, backup/restore, deployment profiles, fault injection, security/performance qualification, reproducible artifacts, soak evidence, and an exact-subject signed release envelope.
+- **`TC-E-050`** Every client start-run path **MUST** select a valid runtime profile consistently with the identity-bearing profile contract.
+- **`TC-E-051`** Client surfaces SHOULD converge on a coherent command and configuration model without moving runtime authority into the clients.
 
-**Single-writer.** One writer per workspace; children that write are sequential or isolated worktrees.
+### 0.8 Inviolable Architectural Refusals
+AETHER does not authorize a second runtime, a domain-aware kernel, authoritative in-memory agent state, a workflow DAG with independent authority, self-certified promotion, silent containment downgrade, or evidence backfill. Any reversal requires current normative amendment and the required falsifiers; implementation convenience is not authority.
 
-**Authorize-before-retrieve.** Memory recall requires grant (`runtime/prompt_assembler.py`).
+## 0. Invariants
 
----
+- **I-7.** AST preflight SHALL NOT enter `kernel/dispatch.py` S7/S8. Syntax checks: `adapters/environment/`.
+- **I-TCB.** Kernel LOC ≤ 1438 (live 1386 at last A linter pass).
+- **INV-DELTA-1.** Domain state schemas: stdlib + JCS only.
+- **INV-DELTA-2.** This program SHALL NOT grow kernel past the TCB ceiling.
+- **INV-DELTA-3.** Multi-file writes are all-or-nothing. Preflight in the adapter. MECHANISM this-branch (T-17). Product MS-CHANGE remains `OPEN` (T-47–T-49 `[PROPOSAL]`). T-18–T-20 are MECHANISM.
+- **INV-DELTA-4.** Agents SHALL NOT mutate tests during implementation. Tamper shield MECHANISM this-branch (T-18). Enumerate via IndexPort, not `Path.glob("test/**")`. Product MS-CHANGE remains `OPEN` (T-47–T-49). Session `_tamper_shield.evaluate(...)` is wired through `_admit_completion`; the default manifest supplies the declared repository index.
+- **INV-DELTA-5.** L1–L3 prefix-stable. Compaction SHALL NOT drop settled invariants or falsified hypotheses.
+- **I-STATE.** σ is a ledger fold (`fold_task_state`). One schema: `SemanticTaskState` with alias `CodingTaskState`. Lock: `domain/task_state.py` MISSING. Branch: LIVE `8637db55`. MS-RESUME `CLOSED`.
+- **I-TXN.** 2PC lives in `adapters/environment/transaction.py`. This branch LIVE (T-17 MECHANISM). Lock `66aa7a3c` MISSING. Not kernel.
+- **Single-writer.** One writer per workspace.
+- **Authorize-before-retrieve.** Memory recall requires grant.
 
-## From A — product thesis, SOTA definition, non-goals
+**Canonical path (FACT).** `ApplicationService → Runtime → HarnessSession → EpisodeEngine → Kernel.dispatch`.
+Forge/Chimera SHALL NOT be the product path. Coding Max report arms SHALL be ⊆ `{vg-code-fast, vg-code-balanced, vg-code-max}` (T-23).
 
-## 3. Product thesis and non-goals
+**Admission (FACT).** `admission_required` is capability-derived: a harness with `patch.apply` is gated; there is no product-default exemption. T-04 retains an open successor obligation for legacy bare-finish fixtures, but the production gate is active.
+
+**VerificationReceipt.passed (FACT).** `exit_code == 0 and executed_test_count > 0`. Unknown → 0. Forge SHALL NOT set `test_count = 1` (T-06). Chimera SHALL NOT invent `executed = 1` on non-zero exit without a runner summary (`63b77116`).
+
+**I-1** (v2) universal signed finish: `[PROPOSAL]` too strong. A §9.4 "Per-class evidence" wins. Fail-to-pass = **bugfix** only (T-38).
+**Mutation ≥ 0.80:** T-39 `[PROPOSAL]`.
+
+## 1. Instrument (CLOSED — `63b77116` + T-01–T-03)
+
+B20 discovery SHALL require `aether.b20.membership/1`. Directory names insufficient. `__pycache__` / hidden / tmp are not tasks. Missing oracle, duplicate ids, digest mismatch → fail closed. Digest is order-independent. Every empirical JSON / `BenchmarkReceipt` SHALL bind `subject_sha`. Missing SHA → refuse. `dry_run` ⇒ `pass`/`cost`/`oracle`/`oracle_passed` null. PASS without patch digest → refuse. Dispositions exactly `{passed, failed, undeterminable, not_run}`. Provider / harness / `DATASET_INVALID` ≠ task fail. Qualifying dirty tree → fail closed (`require_clean_subject`). BAAC SHALL require `aether.baac.challenge/1`; bare `TASK.md` is not a challenge.
+
+## 2. Product thesis and non-goals
 
 ### 3.1 Product thesis
 
@@ -129,7 +197,9 @@ The following are explicitly deferred:
 
 ---
 
-## From A — domain values, ports, verification receipt, progressive packet, campaign, single-writer
+## 3. VerificationReceipt + counts
+
+Session parser target (T-08): `collected`/`executed`/`passed`/`failed`/`skipped`; `Ran 0 tests` / `0 passed` → 0; unknown runner stays unknown. **B landed the session parser and pack `ParsedTestOutput.runner` on `8637db55` (T-08 `[x]`). Do not uncheck.**
 
 `[PROPOSAL]` catalogs below are kept in full. Implementation merge for task state is B §6.12 (see [`technical.md`](technical.md)).
 
@@ -193,9 +263,14 @@ It must not bypass `ApplicationService`, `Runtime`, `HarnessSession`, or the ker
 
 These values contain no model provider, filesystem I/O, or runtime authority.
 
-**FACT (HEAD `66aa7a3c`).** The current fold is `CodingTaskState` in `runtime/task_state.py` (`fold_task_state`). `vanguard/packages/domain/task_state.py` is **MISSING**. Preferred merge is B §6.12: promote schema to domain, keep the fold in runtime, do not run two authorities forever. Do not delete `GoalContract` / `CampaignPlan` / the rest of this 17-value list; they remain law-side targets.
+**FACT.** Schema is `vanguard/packages/domain/task_state.py` (`SemanticTaskState` / `CodingTaskState` alias). The only fold remains `runtime/task_state.py` `fold_task_state`. A's 17 extra domain types stay `[PROPOSAL]` law-side targets; do not implement them here.
 
 **Historical claim.** This section read as if the 17 values were required next-code. They are `[PROPOSAL]` relative to the live fold.
+
+**AUTHORIZED (Wave 1).** Two further domain-pure values are *not* `[PROPOSAL]`:
+`TaskDisposition` and `SettlementReceipt`, specified in §EW-9.1 and landing in
+`domain/evidence/disposition.py` (T-72). They are Wave 1 law and are deliberately
+absent from the 17-value `[PROPOSAL]` list above; do not re-derive them here.
 
 ### 6.3 Required ports
 
@@ -360,7 +435,7 @@ This avoids shared-worktree races and invisible conflict resolution.
 
 ---
 
-## From A — task classes and per-class evidence
+## 4. Task classes and per-class evidence
 
 Per-class evidence wins over v2 I-1. Fail-to-pass (v2 §5.3) applies to class `bugfix`.
 
@@ -431,12 +506,12 @@ Research requires:
 - contradiction handling;
 - no fabricated citations.
 
-This per-class evidence matrix **wins** as program law over v2 §5.3 / I-1 “no finish without signed `VerificationReceipt`”. That universal signed-finish rule remains `[PROPOSAL]` and is too strong versus this matrix and versus the local vs exterior evaluator split (B §3.4). Fail-to-pass is required for **bugfix**; it is not a universal finish law for explanation or research.
+This per-class evidence matrix **wins** as program law over v2 §5.3 / I-1 “no finish without signed `VerificationReceipt`”. That universal signed-finish rule remains `[PROPOSAL]` and is too strong versus this matrix and versus the local vs exterior evaluator split (B §3.4). Fail-to-pass is required for **bugfix**; it is not a universal finish law for explanation or research. Bugfix admission SHALL require a failing pre-verify and a passing post-verify; a vacuous reproducer (pre-verify already passing) SHALL be refused (T-38). `true` and `echo 10 tests passed` SHALL NOT admit completion (T-42).
 
 
 ---
 
-## From A — prompt/policy, model strategy, security/operator
+## 10. Prompt, policy, model, security
 
 ## 21. Agent prompt and policy architecture
 
@@ -621,7 +696,7 @@ It must not become another runtime authority.
 
 ---
 
-## From A — stop, simplify, and rollback
+## 11. Stop, simplify, and rollback
 
 ## 28. Stop, simplify, and rollback rules
 
@@ -655,7 +730,7 @@ Rollback when:
 
 ---
 
-## From A — research and explanation agents; benchmark taxonomy
+## 12. Research, explanation, and benchmark taxonomy
 
 ## 25. Benchmark task taxonomy
 
@@ -778,7 +853,7 @@ Verify:
 
 ---
 
-## From v2 — TransformSpec (proposal sketch + live fields)
+## TransformSpec (proposal sketch + live fields)
 
 ### 2.4 Pure Artifact-Transform Algebra
 All in-memory transformations (diff parsing, AST skeletonization, token estimation, linting) must implement the **Pure Transform Contract** (`domain/transforms/contracts.py`):
@@ -834,7 +909,9 @@ Live sibling types in the same module (FACT, not a replacement of the sketch abo
 
 ---
 
-## From B — live tool/verb inventory and product target loop
+## 9. CLI and verbs
+
+MECHANISM: `run` / `status` / `resume` / `evidence` / `cost`. `[PROPOSAL]`: `cancel` / `doctor` / `checkpoint` / `--non-interactive`.
 
 ## 22. Live tool/verb inventory (lock HEAD `66aa7a3c`)
 
@@ -868,7 +945,7 @@ INGEST → DISCOVER → PLAN → EDIT → VERIFY_TARGETED → RECOVER → VERIFY
 
 **FACT.** Stage transitions follow receipts, not conversational `finish`. Live inner loop is `ContextCompiler` freeze of L1–L3 at construction, then `EpisodeEngine`: observe → propose → `recover_proposal` → `Kernel.dispatch` → ingest (`agency/episode/engine.py`). Compile is **not** a step inside `EpisodeEngine`.
 
-**FACT.** `admission_required` exempts `vg-code-default` / `vg-code-lex`, else `"patch.apply" in verbs`. `ADMISSION_GATED_HARNESSES` is unused in runtime. `VerificationReceipt.passed` ⇔ `exit_code == 0 and executed_test_count > 0`. Session `_observed_test_count` returns 0 if unparseable. Forge still sets `test_count = 1` on green-empty.
+**FACT.** `admission_required` exempts `vg-code-default` / `vg-code-lex`, else `"patch.apply" in verbs`. `ADMISSION_GATED_HARNESSES` is unused in runtime. `VerificationReceipt.passed` ⇔ `exit_code == 0 and executed_test_count > 0`. Session `_observed_test_count` returns 0 if unparseable. Forge `parse_test_output` and Chimera bare-exit-0 parsing leave unknown counts at 0 (T-06).
 
 **Pointer.** Reliability order and competency profiles: A. Tickets 01–35 and lattice: this file. 2PC / AST / later phenotypes: v2 as `[PROPOSAL]` except sequential git apply + post-write `ast.parse` (MECHANISM).
 
@@ -888,7 +965,9 @@ Keep `ContextPacket`. FEATURE_SPEC 4-tier budget is **L4/L5 policy on existing `
 | 2 Active AST slice | L5 | current files, epoch-bound |
 | 3 Symbol stubs | L5 remainder | IndexPort stubs with omissions |
 
-## WorkspaceEpoch `[PROPOSAL]` (T-14)
+## WorkspaceEpoch (T-14)
+
+Lock `66aa7a3c` **MISSING**. This branch **LIVE** — see §6 / §14.
 
 ```text
 WorkspaceEpoch := { treeHash, indexDigest, sourceRevision, compiledAtTurn }
@@ -898,14 +977,256 @@ Stale epoch ⇒ refresh or fail closed. Do not put `repo_map` or σ into frozen 
 
 ## Dialect FACT split
 
-Wire recovery: `adapters/models/dialect.py`. Malformed → Proposal: `agency/episode/protocol_recovery.py`. Taxonomy in Appendix H §8.
+Wire recovery: `adapters/models/dialect.py` T-21 MECHANISM. Truncated JSON, DeepSeek fence, and XML tool tags are classified; malformed never reports `ok`. Malformed → Proposal: `agency/episode/protocol_recovery.py`. Taxonomy in Appendix H §8.
 
 ## 2PC / tamper placement
 
-- 2PC: create `adapters/environment/transaction.py` (**MISSING**). `GitEnvironment.apply` is sequential today; `ast.parse` is post-write observation.
-- Tamper: create `runtime/governance/tamper_shield.py` (**MISSING**). Enumerate tests via IndexPort (T-18); `Path.glob("test/**")` is insufficient.
+- 2PC: `adapters/environment/transaction.py` this-branch LIVE (T-17 MECHANISM). Lock `66aa7a3c` MISSING. Multi-file `GitEnvironment.apply` preflights `ast.parse` then all-or-nothing flush. Single-file sequential observation (S8-B-09) unchanged. T-18–T-20 MECHANISM; MS-CHANGE stays `OPEN` on T-47–T-49.
+- Tamper: `runtime/governance/tamper_shield.py` this-branch LIVE (T-18). Enumerate via IndexPort; `Path.glob("test/**")` is insufficient. The session freezes and evaluates it through `_admit_completion`; the default product manifest declares `repo_index`.
 
 ---
+
+## 5. Task state
+
+Implementation merge is B §6.12: `SemanticTaskState` in `domain/`; `fold_task_state` in `runtime/`; unknown event kinds ignored; no `"test" in action.lower()`. A §6.2 extra types stay `[PROPOSAL]` in §16. `task_class` is a field on the projection (T-43).
+
+Branch: `vanguard/packages/domain/task_state.py` defines `SemanticTaskState` and `CodingTaskState = SemanticTaskState` (`8637db55`).
+
+## 6. Context packet and WorkspaceEpoch
+
+Keep `ContextPacket`. FEATURE_SPEC 4-tier budget is L4/L5 **policy** on existing `ContextCompiler` (not `progressive.py` as a second compiler) — T-15 this-branch **LIVE**. `WorkspaceEpoch := {treeHash, indexDigest, sourceRevision, compiledAtTurn}` this branch **LIVE**; lock `66aa7a3c` **MISSING**. T-14. Product compile stamps epoch on the existing packet; write refreshes the index then rebinds (T-16); stale or missing epoch MUST NOT admit `completed`. Tool bodies are distilled at the effect boundary with a goal echo at L5 (T-36). Packet `omissions` is a ledger; truncated ≠ complete (T-37). IndexPort unbound/down binds epoch from the environment snapshot with explicit `index.port.unbound` or fail-closed `INDEX_UNBOUND` — never invents symbols (T-45). Legacy packets without epoch may still resume via identity fields. T-46 ranking stays `[PROPOSAL]`.
+
+## 7. 2PC and tamper
+
+Living rule: T-17–T-20 MECHANISM — 2PC, IndexPort tamper freeze, greenfield vacuous-oracle reject, brownfield implicated-set fail-closed this-branch LIVE; lock `66aa7a3c` MISSING. Product MS-CHANGE remains `OPEN` (T-47–T-49 `[PROPOSAL]`). Historical CMX-09 schemas remain in Appendix H.
+
+## 8. Dialect
+
+Wire recovery: `adapters/models/dialect.py` T-21 MECHANISM. Truncated JSON, DeepSeek fence, and XML tool tags are classified; malformed never reports `ok`. Proposal recovery remains `agency/episode/protocol_recovery.py`.
+
+## EW-9. Electroweak v0.9.3 Wave 1–2 settlement and control delta
+
+This section is the typed TARGET contract for the Electroweak Wave 1–2 package
+set. It points to the product definition in §3.2 of this
+specification and does not replace the
+historical Wave 0–10 capability recipes in [`technical.md`](technical.md).
+Wave 1 is Settlement & Signal Truth; Wave 2 is Frozen Control, Honest
+Instrument & Presets. Edit/retrieval, context/reliability, and outer-director
+treatments remain outside this delta and MUST NOT be presented as Wave 1–2
+next-code.
+
+### EW-9.1 Two-axis settlement wire contract (TRUTH / T-72)
+
+The settlement model SHALL preserve two orthogonal questions:
+
+| Axis | Domain | Values | Existing ledger representation |
+|---|---|---|---|
+| run termination | `RunTermination` in `agency` | `completed`, `abstained`, `escalated`, `cancelled`, `budget_exhausted`, `instrument_error`, `runtime_error`, `abandoned` | `EpisodeCompleted` with `terminal_status` only |
+| task evaluation | `TaskDisposition` in `domain/evidence` | `passed`, `failed`, `undeterminable`, `not_run` | `VerdictRecorded` with `schema: aether.settlement/1` |
+
+`TaskDisposition` is the shared four-state vocabulary. Only `passed` satisfies
+an acceptance predicate. `undeterminable` and `not_run` are missingness, not a
+negative task result. `disposition_to_outcome()` SHALL refuse `not_run` because
+an evidence envelope binds a claim about an executed subject and therefore has
+only `passed | failed | undeterminable` outcomes.
+
+`SettlementReceipt` SHALL be a domain-pure, immutable value with this logical
+shape; §3.2 of the Synthesis of Record owns the future module body and MUST NOT
+be pasted into this specification:
+
+```text
+aether.settlement/1 := {
+  taskId: non-empty string,
+  disposition: TaskDisposition,
+  terminalStatus?: string,
+  oracleDigest?: digest,
+  verificationSubjectDigest?: digest,
+  executedTestCount: integer >= 0,
+  envelopeDigest?: digest,
+  undeterminableReason?: non-empty string
+}
+```
+
+The value SHALL refuse all of the following:
+
+- `passed` when `executedTestCount == 0`;
+- `passed` without both `oracleDigest` and `verificationSubjectDigest`;
+- `undeterminable` without `undeterminableReason`;
+- `not_run` with any execution count, oracle digest, verification-subject
+  digest, or envelope digest;
+- an empty `taskId`, a negative test count, or an unknown disposition.
+
+`terminalStatus` remains a plain string in the domain value: `domain` SHALL NOT
+import `agency`, and neither axis SHALL be computed from the other. In
+particular, oracle `passed` MUST NOT rewrite a run to `completed`.
+`terminal_status=abandoned` with `disposition=passed` is legal and MUST replay
+without contradiction. Conversely, `EpisodeCompleted` MUST NOT gain a
+`disposition` field.
+
+No new ledger event kind is allocated. The existing `EpisodeCompleted` and
+`VerdictRecorded` owners SHALL carry the axes above. Adding an event kind still
+requires its complete allocation package; this delta does not authorize one.
+The benchmark vocabulary SHALL derive from `TaskDisposition`, and readers MUST
+use its positive predicate rather than `disposition != failed`.
+
+### EW-9.2 Wave 1 — Settlement & Signal Truth
+
+Wave 1 is Route R repair work across **HAR-01**, **TRUTH**, **INS-01**, and
+**BRG-01**. Its acceptance contract is:
+
+| Package | Binding contract |
+|---|---|
+| HAR-01 | `NATIVE` tool calling is capability-bound. A production route may declare `ToolCallStyle.NATIVE` only after a provider-shape vector verifies native dispatch of both `patch.apply` and `finish`. Unknown or unverified routes retain the fail-closed degradation chain `NATIVE -> JSON_SCHEMA -> FENCED_JSON -> TEXT_GRAMMAR`; no registry-wide promotion is permitted. Manifest approval policy, the declared `finish` tool, minimum orientation commands, effect budgets, workspace initialization, and completion-tool restrictions SHALL reach the product path without hardcoded replacement. Fenced action notes MAY recover into candidate proposals, but unparsed invocations or a mutation-free unsolicited `finish` SHALL be rejected. |
+| TRUTH | Record both settlement axes per §EW-9.1. Before T-04 removes the product-default admission exemption, preserve the named RF-25 successor baseline. Mutating completion SHALL bind the mutation receipt, current postimage/epoch, relevant tests collected and executed, zero test exit, tamper evaluation against the frozen test set, and no unresolved omission or stale-index marker. Greenfield evidence SHALL distinguish structural from behavioral success and reject `pass` / `NotImplementedError` vacuity. The greenfield prompt SHALL not prohibit the scaffold -> red oracle -> atomic 2PC workflow. |
+| INS-01 | Generate a unique run identity for each invocation; continuation is explicit `--resume <id>`. Product receipts SHALL carry actual model routes, token counts, verified step identities, and cost provenance. This package extends product-path integrity and MUST NOT reopen §1 or `MS-INSTRUMENT`. |
+| BRG-01 | Local inference lifecycle is fail-closed: valid flash-attention flag, live child process, matching PID and `/props` identity before `ONLINE`, identity-scoped stop rather than blanket process killing, typed empty/max-token failures, and no retired provider alias on the supported route. |
+
+HAR-01 additionally requires reproduce-first handling for uncertain boundaries.
+The streaming abort at T-70a MUST be captured by a failing regression before a
+fix is selected and MUST NOT be closed as `no_defect` from an earlier hedge.
+Duplicate `EffectStarted`, unpopulated effect budgets, autonomous-loop tool
+restriction, and Git initialization SHALL likewise be re-verified at current
+HEAD before their repair boundary is chosen. Any resulting kernel change would
+require separate authorization and TCB accounting; this documentation delta
+does not change the 1386-line TCB baseline.
+
+Wave 1 acceptance requires the L0 public-CLI smoke triad to produce honest
+end-to-end evidence. L0 may license only “Wave 1 landed”; it MUST NOT license a
+capability or pass-rate claim.
+
+**Implementation checkpoint (non-normative, 2026-09-05).** Phase 0 / `MS-INSTRUMENT`
+remains closed on its frozen benchmark-harness subject. The Wave 1 mechanisms
+listed above are implemented and their focused trust-spine falsifiers pass;
+`MS-TRUTH` remains `MECHANISM`, not empirical close, until T-92/L0, the T-04
+successor obligation, and exact-subject convergence evidence are resolved.
+The current branch also carries five boundary failures across the new benchmark
+slice and `runtime/cli.py`, plus four related-surface failures on the
+`coding_max` facade and RF-90 fakeBackend; they must be repaired before any
+measured subject is frozen.
+
+### EW-9.3 Wave 2 — Frozen Control, Honest Instrument & Presets
+
+Wave 2 establishes the content-addressed control used by later treatments. It
+contains **CMX-01 (T-79)**, the Wave 2 portions of **INS-01**, and **EXP-01**:
+
+- The product path SHALL select the existing `aether.code-preset/1` catalog.
+  It SHALL preserve the declared `fast`, `balanced`, and `max` budgets rather
+  than inventing new values: respectively `(usd_micros, millis, tokens, turns)`
+  are `(50000, 300000, 16000, 8)`, `(150000, 900000, 40000, 20)`, and
+  `(400000, 2400000, 96000, 40)`. The facade SHALL NOT impose a universal
+  `max_turns=40` default. Additive reservation dimensions remain
+  `usd_micros | millis | tokens | bytes`; `turns` and `depth` remain structural
+  ceilings and MUST NOT be summed as reservations.
+- The frozen subject SHALL execute through the public product path, including
+  `runtime.entrypoint.execute`; a direct `Runtime.execute_profiled` benchmark
+  is a different subject and cannot qualify what ships.
+- The candidate SHA, dirty flag, suite membership/digest, task and oracle
+  digests, manifest/preset/model identities, provider/server identities,
+  sampling/prompt/tool-schema digests, and cost provenance SHALL be frozen.
+- `MS-CONTROL` closes only for single-worker `vg-code-balanced` on the exact
+  candidate SHA at L2 with `n >= 30`, Wilson lower bound `>= 0.40`, and
+  false-completion rate exactly zero. The result SHALL be published when
+  positive, negative, or undeterminable.
+
+**Implementation checkpoint (non-normative, 2026-09-05 session stop).** Wave 2
+has no accepted task. T-79/T-89/T-92–T-95 are implementation candidates with
+31 named focused tests green. Acceptance is blocked by five architecture-
+boundary violations, four related-surface failures (CMX-04 facade ×2; RF-90
+fakeBackend ×2), incomplete full verification, and absent live evidence.
+T-92's hermetic run proves runner mechanics, not the live L0 disposition.
+T-26 remains `UNFROZEN` with the L2 arm pinned (single-worker `vg-code-balanced`
+/ `balanced` / `entrypoint.execute`). T-27/T-51/T-52 remain open. **T-97 is
+deferred this pass** (filed under INS-01; TypeScript help/`-m`; not vanished).
+T-95 does not close `MS-CONTROL`. T-80 and T-96 remain post-control treatments.
+Declared `budgetCeiling` MUST match `presets.json`; any tighter loop bound is
+recorded separately as `budgetAttenuation` and MUST NOT rewrite the ceiling.
+
+### EW-9.4 Measurement ladder and evidence row (EXP-01)
+
+Rungs answer different questions and SHALL NOT be collapsed:
+
+| Rung | Frozen subject | License |
+|---|---|---|
+| L0 | `P0-FIB`, `P0-CSV`, `P0-BUG`; three fresh workspaces through the public CLI | Wave 1 smoke only; no pass rate |
+| L1 | 4 greenfield + 4 single-file bug + 4 data/CLI tasks | fixture/oracle/instrument readiness only; tasks tuned here MUST NOT be scored |
+| L2 | exact-subject product-path multi-class suite, `n >= 30` | control qualification and preregistered single-variable Route L verdicts |
+| L3 | immutable `(manifest x model x preset)` bundle, `n >= 30` per arm | relative, task-class-specific arm claims only |
+
+After the first measured attempt at a rung, changing a prompt, tool, fixture,
+oracle, model, server flag, sampling policy, or budget resets that rung. Each
+rung opens only after the lower rung is green on the current subject SHA; L2
+also requires INS-01 and BRG-01, and L3 requires closed `MS-CONTROL`.
+
+The harness SHALL append one immutable evidence row per run and refuse a row
+with absent required data. Missingness is an explicit value, never a blank:
+
+```text
+identity:     subject_sha, dirty_flag, suite_digest, n, task_id, task_digest,
+              oracle_digest, run_id
+arm:          manifest_digest, preset, model_id, provider, server_build,
+              gguf_digest, quantization, context_size, sampling_digest,
+              prompt_digest, tool_schema_digest
+execution:    evidence_label, raw_response_digest, valid_tool_calls,
+              malformed_tool_calls, recovery_attempts, turns,
+              time_to_first_valid_action_s, latency_s
+change:       patch_digest, postimage_digest, files_changed, no_op
+verification: tests_discovered, tests_executed, tests_passed, tests_failed,
+              tamper_digest, tamper_verdict
+settlement:   terminal_status, disposition, undeterminable_reason
+economics:    prompt_tokens, completion_tokens, cache_read_tokens,
+              cache_write_tokens, cost_usd_micros | local_time_proxy_s
+provenance:   hypothesis_id | "control", control_digest, varied_dimension
+```
+
+`REPLAY`, `LIVE-HISTORICAL`, `STATIC`, `UNDETERMINABLE`, `LIVE-LOCAL`, and
+`LIVE-HOSTED` evidence SHALL be labeled. Replay or historical evidence MUST NOT
+share a published capability table with current live evidence. Zero model calls
+settle as `not_run`, never as model failure. Undeterminable rows require a
+reason and are excluded from capability denominators. A result writer SHALL
+refuse `pass_rate_pct` when the observed result count is smaller than the frozen
+suite size. Every non-control mechanism SHALL bind to a preregistered hypothesis
+and one varied dimension.
+
+Every control and treatment report SHALL publish false-completion rate, live
+oracle pass rate with Wilson lower bound, valid first-tool-call rate,
+malformed-tool/recovery rate, no-op rate, time to first valid action, turn waste
+`W`, and token efficiency `kappa`. False-completion rate `= 0` is a hard veto:
+no pass rate, lift, latency, token, or cost advantage can override it. Only
+`LIVE-*` current rows enter capability rates.
+
+## 13. Stop-rollback / research-explanation remainder
+
+SHALL text for stop/simplify/rollback and research/explanation lives in §§11–12 above. Do not treat handbook prose as HEAD architecture.
+
+## 14. MISSING vs HEAD
+
+| Module | Lock `66aa7a3c` | This branch |
+|---|---|---|
+| `domain/task_state.py` | MISSING | LIVE (`8637db55`) |
+| `runtime/task_state.py` `fold_task_state` | LIVE (old schema) | Fold of domain type (`8637db55`) |
+| `adapters/environment/transaction.py` | MISSING | LIVE (T-17 MECHANISM). Lock `66aa7a3c` still MISSING |
+| `runtime/governance/tamper_shield.py` | MISSING | LIVE (T-18, session-wired) |
+| `agency/context/progressive.py` | MISSING | Do not add — policy on `ContextCompiler` |
+| `runtime/event_store.py` | MISSING | Owner remains `adapters/stores/event_store.py` |
+| `ADMISSION_GATE_EXEMPT` | FACT | Removed from the production decision; T-04 successor fixtures remain open |
+| `domain/workspace_epoch.py` `WorkspaceEpoch` | MISSING | LIVE (T-14). Lock `66aa7a3c` still MISSING |
+| Index refresh after write (T-16) | MISSING | LIVE (`33dc7c33`) |
+| L4/L5 policy on `ContextCompiler` (T-15) | MISSING | LIVE (`2a4cdaad`); no `progressive.py` |
+| ResultDistiller + L5 goal echo (T-36) | MISSING | LIVE (`179f5616`) |
+| Packet omission ledger (T-37) | MISSING | LIVE (`81b7b572`) |
+| No-index fallback (T-45) | MISSING | LIVE (`c7995195`); `INDEX_UNBOUND` typed |
+
+## 15. Error / verification matrix
+
+Living refusals: T-42 / T-38 / T-25 in §1 and §4. A §24 handbook matrix stays in [`technical.md`](technical.md).
+
+## 16. `[PROPOSAL]` catalogs
+
+A §6.2 17 types, extra ports, CampaignPlan, mutation 0.80 — tagged `[PROPOSAL]`. B §6.12 wins for what to implement.
+
+---
+
+*Historical CMX-09 draft. Living §§ 0–16 win.*
 
 # Appendix H: Historical CMX-09 delta
 

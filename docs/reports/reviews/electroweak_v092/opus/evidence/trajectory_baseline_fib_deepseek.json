@@ -1,0 +1,1272 @@
+[
+ {
+  "seq": 0,
+  "kind": "EpisodeStarted",
+  "payload": {
+   "kind": "EpisodeStarted",
+   "reason": "composed",
+   "alertable": false,
+   "episodeId": "episode-run-3adbe69b",
+   "objective": "Create a file fib.py in the workspace root that prints the first 10 Fibonacci numbers when run.",
+   "budgetCeiling": {
+    "usd_micros": 1000000,
+    "millis": 1800000,
+    "tokens": 64000
+   },
+   "scaffoldBaselineRecorded": true,
+   "harness": "vg-code-balanced",
+   "compositionDigest": "sha256:6190a312102979a9e9a08890cb42d01cda3f71c858d57c5fb5a7118bda4f68d0",
+   "activationDigest": "sha256:1727a385990bce943975f90c8f90fdab30670e1408067345d3eff9d81cfd484f",
+   "runDigest": "sha256:c0fae58e8c9133a238a3cc9845b087a641f065f5bbe964326666d569a2d0e38a",
+   "taskDigest": "sha256:4a672029af28846384212733d5841ba4ecb0efb63f90f997212cbc8960d814b5",
+   "preregistrationDigest": "",
+   "maxTurns": 6,
+   "interactive": true
+  }
+ },
+ {
+  "seq": 45,
+  "kind": "TurnStarted",
+  "payload": {
+   "kind": "TurnStarted",
+   "reason": "turn_opened",
+   "alertable": false,
+   "episodeId": "episode-run-3adbe69b",
+   "turn": 0,
+   "maxTurns": 6
+  }
+ },
+ {
+  "seq": 46,
+  "kind": "EvidenceClaimProduced",
+  "payload": {
+   "kind": "EvidenceClaimProduced",
+   "reason": "context_selection",
+   "alertable": false,
+   "claimId": "run-3adbe69b:context_selection:1",
+   "subject": "run:run-3adbe69b",
+   "predicate": "context_selection",
+   "value": {
+    "kind": "context_selection",
+    "subject": "run:run-3adbe69b",
+    "policyId": "agency.context-compiler/RecencyWindowStrategy",
+    "policyVersion": "1",
+    "parameters": {
+     "tokenCeiling": 64000,
+     "breakpointCeiling": 4,
+     "paramsDigest": "sha256:ea19f2bf2863b8cd6840ab8944a11e2f89cd64b2079eeb0a2bc7f74cd95ea135"
+    },
+    "inputDigest": "sha256:98110d303634f91285ccc07cd80400eea027ac136fc7ad6e713c3b95da8bca17",
+    "outputDigest": "sha256:98110d303634f91285ccc07cd80400eea027ac136fc7ad6e713c3b95da8bca17",
+    "labels": {
+     "selected": [
+      "system-core",
+      "tool-schemas",
+      "environment-map",
+      "brief",
+      "goal-echo"
+     ],
+     "dropped": [],
+     "elided": [],
+     "inputArtifacts": [],
+     "outputArtifacts": []
+    },
+    "counts": {
+     "tokenCount": 1331,
+     "layerCounts": {
+      "L1": 467,
+      "L2": 538,
+      "L3": 276,
+      "L4": 24,
+      "L5": 26
+     },
+     "prefixDigest": "sha256:9e98fce74a2e9580c130916fd843ebb83a5fc733db96473937cbfd9529fa06af"
+    },
+    "turn": 0
+   }
+  }
+ },
+ {
+  "seq": 47,
+  "kind": "ArtifactCreated",
+  "payload": {
+   "kind": "ArtifactCreated",
+   "reason": "artifact_captured:prompt",
+   "alertable": false,
+   "artifact": {
+    "artifactId": "run-3adbe69b:prompt:1",
+    "artifactKind": "M",
+    "version": "1.0.0",
+    "contentDigest": "sha256:831e72b775869b7d1419ca6dbb8f3c0474abcb228dcbcb13832d3a1c01592e4c"
+   },
+   "artifactId": "run-3adbe69b:prompt:1",
+   "role": "prompt",
+   "contentDigest": "sha256:831e72b775869b7d1419ca6dbb8f3c0474abcb228dcbcb13832d3a1c01592e4c",
+   "byteLength": 18705,
+   "stored": true,
+   "captured": true,
+   "retention": "standard",
+   "policyId": "runtime.capture-policy/local",
+   "policyVersion": "1",
+   "redactions": 0,
+   "turn": 0,
+   "labels": {
+    "promptDigest": "sha256:98110d303634f91285ccc07cd80400eea027ac136fc7ad6e713c3b95da8bca17",
+    "prefixDigest": "sha256:9e98fce74a2e9580c130916fd843ebb83a5fc733db96473937cbfd9529fa06af"
+   }
+  }
+ },
+ {
+  "seq": 48,
+  "kind": "ArtifactCreated",
+  "payload": {
+   "kind": "ArtifactCreated",
+   "reason": "artifact_captured:model_output",
+   "alertable": false,
+   "artifact": {
+    "artifactId": "run-3adbe69b:model_output:2",
+    "artifactKind": "M",
+    "version": "1.0.0",
+    "contentDigest": "sha256:bca86b24807eb1b3a09486685d07c78f88f9e9063f6fbeb62748b066f8e91e5e"
+   },
+   "artifactId": "run-3adbe69b:model_output:2",
+   "role": "model_output",
+   "contentDigest": "sha256:bca86b24807eb1b3a09486685d07c78f88f9e9063f6fbeb62748b066f8e91e5e",
+   "byteLength": 1082,
+   "stored": true,
+   "captured": true,
+   "retention": "standard",
+   "policyId": "runtime.capture-policy/local",
+   "policyVersion": "1",
+   "redactions": 0,
+   "turn": 0
+  }
+ },
+ {
+  "seq": 49,
+  "kind": "EvidenceClaimProduced",
+  "payload": {
+   "kind": "EvidenceClaimProduced",
+   "reason": "model_io",
+   "alertable": false,
+   "claimId": "run-3adbe69b:model_io:2",
+   "subject": "run:run-3adbe69b",
+   "predicate": "model_io",
+   "value": {
+    "kind": "model_io",
+    "subject": "run:run-3adbe69b",
+    "policyId": "runtime.capture-policy/local",
+    "policyVersion": "1",
+    "parameters": {
+     "adapter": "OpenRouterModel",
+     "provider": "openrouter",
+     "model": "deepseek/deepseek-v4-flash-0731",
+     "mode": "live"
+    },
+    "inputDigest": "sha256:831e72b775869b7d1419ca6dbb8f3c0474abcb228dcbcb13832d3a1c01592e4c",
+    "outputDigest": "sha256:bca86b24807eb1b3a09486685d07c78f88f9e9063f6fbeb62748b066f8e91e5e",
+    "labels": {
+     "inputCaptured": true,
+     "outputCaptured": true,
+     "retention": "standard"
+    },
+    "counts": {
+     "inputBytes": 18705,
+     "outputBytes": 1082
+    },
+    "artifacts": [
+     "run-3adbe69b:prompt:1",
+     "run-3adbe69b:model_output:2"
+    ],
+    "turn": 0
+   }
+  }
+ },
+ {
+  "seq": 50,
+  "kind": "ProposalProduced",
+  "payload": {
+   "kind": "ProposalProduced",
+   "reason": "finish",
+   "alertable": false,
+   "episodeId": "episode-run-3adbe69b",
+   "turn": 0,
+   "action": null,
+   "proposalDescriptor": "sha256:dd0b71613c582cc10d1f98ee502be4920de168dc0af8d97f47be89b98434a838",
+   "note": " I'll create the `fib.py` file with a simple script that prints the first 10 Fibonacci numbers.\n\n```json\n{\n  \"kind\": \"effect\",\n  \"action\": \"patch\",\n  \"args\": {\n    \"path\": \"fib.py\",\n    \"content\": \"a, b = 0, 1\\nfor _ in range(10):\\n    print(a)\\n    a, b = b, a + b\\n\"\n  }\n}\n```",
+   "diagnostics": {
+    "usage": {
+     "prompt_tokens": 449,
+     "completion_tokens": 99,
+     "cached_tokens": 0,
+     "total_tokens": 548,
+     "cost_usd": 4.7e-05,
+     "usd_micros": 47,
+     "pricing_known": true,
+     "pricing_source": "hardcoded",
+     "resolved_model": "deepseek/deepseek-v4-flash-0731",
+     "ttft_millis": 0
+    },
+    "resolved_model": "deepseek/deepseek-v4-flash-0731",
+    "model_fingerprint": "vllm-dev-ep-8b5ae245",
+    "cost_usd": 4.7e-05,
+    "usd_micros": 47,
+    "pricing_known": true,
+    "pricing_source": "hardcoded"
+   }
+  }
+ },
+ {
+  "seq": 51,
+  "kind": "EpisodeStateChanged",
+  "payload": {
+   "kind": "EpisodeStateChanged",
+   "reason": "protocol_recovery",
+   "alertable": false,
+   "episodeId": "episode-run-3adbe69b",
+   "recoveryState": {
+    "transportRetries": 0,
+    "protocolRetries": 0,
+    "truncationRetries": 0,
+    "effectRetries": 0,
+    "attemptedFingerprints": [],
+    "spentDecisions": []
+   }
+  }
+ },
+ {
+  "seq": 52,
+  "kind": "TurnStarted",
+  "payload": {
+   "kind": "TurnStarted",
+   "reason": "turn_opened",
+   "alertable": false,
+   "episodeId": "episode-run-3adbe69b",
+   "turn": 1,
+   "maxTurns": 6
+  }
+ },
+ {
+  "seq": 53,
+  "kind": "EvidenceClaimProduced",
+  "payload": {
+   "kind": "EvidenceClaimProduced",
+   "reason": "context_selection",
+   "alertable": false,
+   "claimId": "run-3adbe69b:context_selection:3",
+   "subject": "run:run-3adbe69b",
+   "predicate": "context_selection",
+   "value": {
+    "kind": "context_selection",
+    "subject": "run:run-3adbe69b",
+    "policyId": "agency.context-compiler/RecencyWindowStrategy",
+    "policyVersion": "1",
+    "parameters": {
+     "tokenCeiling": 64000,
+     "breakpointCeiling": 4,
+     "paramsDigest": "sha256:ea19f2bf2863b8cd6840ab8944a11e2f89cd64b2079eeb0a2bc7f74cd95ea135"
+    },
+    "inputDigest": "sha256:98110d303634f91285ccc07cd80400eea027ac136fc7ad6e713c3b95da8bca17",
+    "outputDigest": "sha256:98110d303634f91285ccc07cd80400eea027ac136fc7ad6e713c3b95da8bca17",
+    "labels": {
+     "selected": [
+      "system-core",
+      "tool-schemas",
+      "environment-map",
+      "brief",
+      "goal-echo"
+     ],
+     "dropped": [],
+     "elided": [],
+     "inputArtifacts": [],
+     "outputArtifacts": []
+    },
+    "counts": {
+     "tokenCount": 1331,
+     "layerCounts": {
+      "L1": 467,
+      "L2": 538,
+      "L3": 276,
+      "L4": 24,
+      "L5": 26
+     },
+     "prefixDigest": "sha256:9e98fce74a2e9580c130916fd843ebb83a5fc733db96473937cbfd9529fa06af"
+    },
+    "turn": 1
+   }
+  }
+ },
+ {
+  "seq": 54,
+  "kind": "ArtifactCreated",
+  "payload": {
+   "kind": "ArtifactCreated",
+   "reason": "artifact_captured:prompt",
+   "alertable": false,
+   "artifact": {
+    "artifactId": "run-3adbe69b:prompt:3",
+    "artifactKind": "M",
+    "version": "1.0.0",
+    "contentDigest": "sha256:848c20021d37e8afd49d0b915d13d9d805541d94302fac5836caf4093e9255b8"
+   },
+   "artifactId": "run-3adbe69b:prompt:3",
+   "role": "prompt",
+   "contentDigest": "sha256:848c20021d37e8afd49d0b915d13d9d805541d94302fac5836caf4093e9255b8",
+   "byteLength": 19257,
+   "stored": true,
+   "captured": true,
+   "retention": "standard",
+   "policyId": "runtime.capture-policy/local",
+   "policyVersion": "1",
+   "redactions": 0,
+   "turn": 1,
+   "labels": {
+    "promptDigest": "sha256:98110d303634f91285ccc07cd80400eea027ac136fc7ad6e713c3b95da8bca17",
+    "prefixDigest": "sha256:9e98fce74a2e9580c130916fd843ebb83a5fc733db96473937cbfd9529fa06af"
+   }
+  }
+ },
+ {
+  "seq": 55,
+  "kind": "ArtifactCreated",
+  "payload": {
+   "kind": "ArtifactCreated",
+   "reason": "artifact_captured:model_output",
+   "alertable": false,
+   "artifact": {
+    "artifactId": "run-3adbe69b:model_output:4",
+    "artifactKind": "M",
+    "version": "1.0.0",
+    "contentDigest": "sha256:272023887c06d5b67b57742d0d7a1d792b1dcd1e049f18cf1c3b5e55917a9c30"
+   },
+   "artifactId": "run-3adbe69b:model_output:4",
+   "role": "model_output",
+   "contentDigest": "sha256:272023887c06d5b67b57742d0d7a1d792b1dcd1e049f18cf1c3b5e55917a9c30",
+   "byteLength": 948,
+   "stored": true,
+   "captured": true,
+   "retention": "standard",
+   "policyId": "runtime.capture-policy/local",
+   "policyVersion": "1",
+   "redactions": 0,
+   "turn": 1
+  }
+ },
+ {
+  "seq": 56,
+  "kind": "EvidenceClaimProduced",
+  "payload": {
+   "kind": "EvidenceClaimProduced",
+   "reason": "model_io",
+   "alertable": false,
+   "claimId": "run-3adbe69b:model_io:4",
+   "subject": "run:run-3adbe69b",
+   "predicate": "model_io",
+   "value": {
+    "kind": "model_io",
+    "subject": "run:run-3adbe69b",
+    "policyId": "runtime.capture-policy/local",
+    "policyVersion": "1",
+    "parameters": {
+     "adapter": "OpenRouterModel",
+     "provider": "openrouter",
+     "model": "deepseek/deepseek-v4-flash-0731",
+     "mode": "live"
+    },
+    "inputDigest": "sha256:848c20021d37e8afd49d0b915d13d9d805541d94302fac5836caf4093e9255b8",
+    "outputDigest": "sha256:272023887c06d5b67b57742d0d7a1d792b1dcd1e049f18cf1c3b5e55917a9c30",
+    "labels": {
+     "inputCaptured": true,
+     "outputCaptured": true,
+     "retention": "standard"
+    },
+    "counts": {
+     "inputBytes": 19257,
+     "outputBytes": 948
+    },
+    "artifacts": [
+     "run-3adbe69b:prompt:3",
+     "run-3adbe69b:model_output:4"
+    ],
+    "turn": 1
+   }
+  }
+ },
+ {
+  "seq": 57,
+  "kind": "ProposalProduced",
+  "payload": {
+   "kind": "ProposalProduced",
+   "reason": "finish",
+   "alertable": false,
+   "episodeId": "episode-run-3adbe69b",
+   "turn": 1,
+   "action": null,
+   "proposalDescriptor": "sha256:dd0b71613c582cc10d1f98ee502be4920de168dc0af8d97f47be89b98434a838",
+   "note": " {\n  \"action\": \"write\",\n  \"args\": {\n    \"path\": \"fib.py\",\n    \"content\": \"def fib(n):\\n    a, b = 0, 1\\n    for _ in range(n):\\n        a, b = b, a + b\\n    return a\\n\\nfor i in range(10):\\n    print(fib(i))\\n\"\n  }\n}",
+   "diagnostics": {
+    "usage": {
+     "prompt_tokens": 518,
+     "completion_tokens": 89,
+     "cached_tokens": 0,
+     "total_tokens": 607,
+     "cost_usd": 4.9e-05,
+     "usd_micros": 49,
+     "pricing_known": true,
+     "pricing_source": "hardcoded",
+     "resolved_model": "deepseek/deepseek-v4-flash-0731",
+     "ttft_millis": 0
+    },
+    "resolved_model": "deepseek/deepseek-v4-flash-0731",
+    "model_fingerprint": "vllm-dev-ep-8b5ae245",
+    "cost_usd": 4.9e-05,
+    "usd_micros": 49,
+    "pricing_known": true,
+    "pricing_source": "hardcoded"
+   }
+  }
+ },
+ {
+  "seq": 58,
+  "kind": "EpisodeStateChanged",
+  "payload": {
+   "kind": "EpisodeStateChanged",
+   "reason": "protocol_recovery",
+   "alertable": false,
+   "episodeId": "episode-run-3adbe69b",
+   "recoveryState": {
+    "transportRetries": 0,
+    "protocolRetries": 0,
+    "truncationRetries": 0,
+    "effectRetries": 0,
+    "attemptedFingerprints": [],
+    "spentDecisions": []
+   }
+  }
+ },
+ {
+  "seq": 59,
+  "kind": "TurnStarted",
+  "payload": {
+   "kind": "TurnStarted",
+   "reason": "turn_opened",
+   "alertable": false,
+   "episodeId": "episode-run-3adbe69b",
+   "turn": 2,
+   "maxTurns": 6
+  }
+ },
+ {
+  "seq": 60,
+  "kind": "EvidenceClaimProduced",
+  "payload": {
+   "kind": "EvidenceClaimProduced",
+   "reason": "context_selection",
+   "alertable": false,
+   "claimId": "run-3adbe69b:context_selection:5",
+   "subject": "run:run-3adbe69b",
+   "predicate": "context_selection",
+   "value": {
+    "kind": "context_selection",
+    "subject": "run:run-3adbe69b",
+    "policyId": "agency.context-compiler/RecencyWindowStrategy",
+    "policyVersion": "1",
+    "parameters": {
+     "tokenCeiling": 64000,
+     "breakpointCeiling": 4,
+     "paramsDigest": "sha256:ea19f2bf2863b8cd6840ab8944a11e2f89cd64b2079eeb0a2bc7f74cd95ea135"
+    },
+    "inputDigest": "sha256:98110d303634f91285ccc07cd80400eea027ac136fc7ad6e713c3b95da8bca17",
+    "outputDigest": "sha256:98110d303634f91285ccc07cd80400eea027ac136fc7ad6e713c3b95da8bca17",
+    "labels": {
+     "selected": [
+      "system-core",
+      "tool-schemas",
+      "environment-map",
+      "brief",
+      "goal-echo"
+     ],
+     "dropped": [],
+     "elided": [],
+     "inputArtifacts": [],
+     "outputArtifacts": []
+    },
+    "counts": {
+     "tokenCount": 1331,
+     "layerCounts": {
+      "L1": 467,
+      "L2": 538,
+      "L3": 276,
+      "L4": 24,
+      "L5": 26
+     },
+     "prefixDigest": "sha256:9e98fce74a2e9580c130916fd843ebb83a5fc733db96473937cbfd9529fa06af"
+    },
+    "turn": 2
+   }
+  }
+ },
+ {
+  "seq": 61,
+  "kind": "ArtifactCreated",
+  "payload": {
+   "kind": "ArtifactCreated",
+   "reason": "artifact_captured:prompt",
+   "alertable": false,
+   "artifact": {
+    "artifactId": "run-3adbe69b:prompt:5",
+    "artifactKind": "M",
+    "version": "1.0.0",
+    "contentDigest": "sha256:848c20021d37e8afd49d0b915d13d9d805541d94302fac5836caf4093e9255b8"
+   },
+   "artifactId": "run-3adbe69b:prompt:5",
+   "role": "prompt",
+   "contentDigest": "sha256:848c20021d37e8afd49d0b915d13d9d805541d94302fac5836caf4093e9255b8",
+   "byteLength": 19257,
+   "stored": true,
+   "captured": true,
+   "retention": "standard",
+   "policyId": "runtime.capture-policy/local",
+   "policyVersion": "1",
+   "redactions": 0,
+   "turn": 2,
+   "labels": {
+    "promptDigest": "sha256:98110d303634f91285ccc07cd80400eea027ac136fc7ad6e713c3b95da8bca17",
+    "prefixDigest": "sha256:9e98fce74a2e9580c130916fd843ebb83a5fc733db96473937cbfd9529fa06af"
+   }
+  }
+ },
+ {
+  "seq": 62,
+  "kind": "ArtifactCreated",
+  "payload": {
+   "kind": "ArtifactCreated",
+   "reason": "artifact_captured:model_output",
+   "alertable": false,
+   "artifact": {
+    "artifactId": "run-3adbe69b:model_output:6",
+    "artifactKind": "M",
+    "version": "1.0.0",
+    "contentDigest": "sha256:e6b91883ce9ab763ba5e5cb84ed3905bcabaabdefd5f4a835c5ab432e4db7b83"
+   },
+   "artifactId": "run-3adbe69b:model_output:6",
+   "role": "model_output",
+   "contentDigest": "sha256:e6b91883ce9ab763ba5e5cb84ed3905bcabaabdefd5f4a835c5ab432e4db7b83",
+   "byteLength": 1008,
+   "stored": true,
+   "captured": true,
+   "retention": "standard",
+   "policyId": "runtime.capture-policy/local",
+   "policyVersion": "1",
+   "redactions": 0,
+   "turn": 2
+  }
+ },
+ {
+  "seq": 63,
+  "kind": "EvidenceClaimProduced",
+  "payload": {
+   "kind": "EvidenceClaimProduced",
+   "reason": "model_io",
+   "alertable": false,
+   "claimId": "run-3adbe69b:model_io:6",
+   "subject": "run:run-3adbe69b",
+   "predicate": "model_io",
+   "value": {
+    "kind": "model_io",
+    "subject": "run:run-3adbe69b",
+    "policyId": "runtime.capture-policy/local",
+    "policyVersion": "1",
+    "parameters": {
+     "adapter": "OpenRouterModel",
+     "provider": "openrouter",
+     "model": "deepseek/deepseek-v4-flash-0731",
+     "mode": "live"
+    },
+    "inputDigest": "sha256:848c20021d37e8afd49d0b915d13d9d805541d94302fac5836caf4093e9255b8",
+    "outputDigest": "sha256:e6b91883ce9ab763ba5e5cb84ed3905bcabaabdefd5f4a835c5ab432e4db7b83",
+    "labels": {
+     "inputCaptured": true,
+     "outputCaptured": true,
+     "retention": "standard"
+    },
+    "counts": {
+     "inputBytes": 19257,
+     "outputBytes": 1008
+    },
+    "artifacts": [
+     "run-3adbe69b:prompt:5",
+     "run-3adbe69b:model_output:6"
+    ],
+    "turn": 2
+   }
+  }
+ },
+ {
+  "seq": 64,
+  "kind": "ProposalProduced",
+  "payload": {
+   "kind": "ProposalProduced",
+   "reason": "finish",
+   "alertable": false,
+   "episodeId": "episode-run-3adbe69b",
+   "turn": 2,
+   "action": null,
+   "proposalDescriptor": "sha256:dd0b71613c582cc10d1f98ee502be4920de168dc0af8d97f47be89b98434a838",
+   "note": "```json\n{\n  \"action\": \"patch\",\n  \"args\": {\n    \"path\": \"fib.py\",\n    \"content\": \"def fib(n):\\n    a, b = 0, 1\\n    for _ in range(n):\\n        print(a)\\n        a, b = b, a + b\\n\\nif __name__ == \\\"__main__\\\":\\n    fib(10)\\n\"\n  },\n  \"kind\": \"effect\"\n}\n```",
+   "diagnostics": {
+    "usage": {
+     "prompt_tokens": 1885,
+     "completion_tokens": 103,
+     "cached_tokens": 0,
+     "total_tokens": 1988,
+     "cost_usd": 0.000141,
+     "usd_micros": 141,
+     "pricing_known": true,
+     "pricing_source": "hardcoded",
+     "resolved_model": "deepseek/deepseek-v4-flash-0731",
+     "ttft_millis": 0
+    },
+    "resolved_model": "deepseek/deepseek-v4-flash-0731",
+    "cost_usd": 0.000141,
+    "usd_micros": 141,
+    "pricing_known": true,
+    "pricing_source": "hardcoded"
+   }
+  }
+ },
+ {
+  "seq": 65,
+  "kind": "EpisodeCompleted",
+  "payload": {
+   "kind": "EpisodeCompleted",
+   "reason": "abandoned",
+   "alertable": false,
+   "episodeId": "episode-run-3adbe69b",
+   "outcome": "abandoned",
+   "trajectory": {
+    "schema": "mhf.trajectory/2",
+    "project_id": "project-default",
+    "run_id": "run-3adbe69b",
+    "episode_id": "episode-run-3adbe69b",
+    "parent_episode_id": null,
+    "principal_id": "agent-1",
+    "harness_digest": "sha256:6190a312102979a9e9a08890cb42d01cda3f71c858d57c5fb5a7118bda4f68d0",
+    "execution_digest": "sha256:c0fae58e8c9133a238a3cc9845b087a641f065f5bbe964326666d569a2d0e38a",
+    "run_digest": "sha256:c0fae58e8c9133a238a3cc9845b087a641f065f5bbe964326666d569a2d0e38a",
+    "activation_digest": "sha256:1727a385990bce943975f90c8f90fdab30670e1408067345d3eff9d81cfd484f",
+    "task_digest": "sha256:4a672029af28846384212733d5841ba4ecb0efb63f90f997212cbc8960d814b5",
+    "preregistration_digest": "",
+    "state_digest": "sha256:5b5ad63416fb07e1ea77109d658d7a12b55c19bd1043e80b74de215863fa98b5",
+    "event_range": {
+     "first_seq": 0,
+     "last_seq": 64,
+     "count": 65
+    },
+    "model_routes_used": [
+     {
+      "tier": 1,
+      "provider": "openrouter",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "model_fingerprint": "vllm-dev-ep-8b5ae245",
+      "fingerprint_unavailable_reason": null
+     }
+    ],
+    "turns": [
+     {
+      "turn": 0,
+      "context_digest": "sha256:c8492043108e8186907d9bf4a6f88d07db13aa82936503d4cc9b4ec3701be0dd",
+      "context_ref": null,
+      "proposal": {
+       "kind": "ProposalProduced",
+       "reason": "finish",
+       "alertable": false,
+       "episodeId": "episode-run-3adbe69b",
+       "turn": 0,
+       "action": null,
+       "proposalDescriptor": "sha256:dd0b71613c582cc10d1f98ee502be4920de168dc0af8d97f47be89b98434a838",
+       "note": " I'll create the `fib.py` file with a simple script that prints the first 10 Fibonacci numbers.\n\n```json\n{\n  \"kind\": \"effect\",\n  \"action\": \"patch\",\n  \"args\": {\n    \"path\": \"fib.py\",\n    \"content\": \"a, b = 0, 1\\nfor _ in range(10):\\n    print(a)\\n    a, b = b, a + b\\n\"\n  }\n}\n```",
+       "diagnostics": {
+        "usage": {
+         "prompt_tokens": 449,
+         "completion_tokens": 99,
+         "cached_tokens": 0,
+         "total_tokens": 548,
+         "cost_usd": 4.7e-05,
+         "usd_micros": 47,
+         "pricing_known": true,
+         "pricing_source": "hardcoded",
+         "resolved_model": "deepseek/deepseek-v4-flash-0731",
+         "ttft_millis": 0
+        },
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "model_fingerprint": "vllm-dev-ep-8b5ae245",
+        "cost_usd": 4.7e-05,
+        "usd_micros": 47,
+        "pricing_known": true,
+        "pricing_source": "hardcoded"
+       }
+      },
+      "receipts": [],
+      "invocations": [
+       {
+        "tier": 1,
+        "route": {
+         "provider": "openrouter",
+         "model": "deepseek/deepseek-v4-flash-0731",
+         "model_fingerprint": "vllm-dev-ep-8b5ae245",
+         "fingerprint_unavailable_reason": null
+        },
+        "usage": {
+         "prompt_tokens": 449,
+         "completion_tokens": 99
+        },
+        "cost": {
+         "usd_micros": 47,
+         "tokens": 548,
+         "bytes": 19162,
+         "millis": 1,
+         "measurement_status": {
+          "usd_micros": {
+           "status": "measured",
+           "reason": null
+          },
+          "tokens": {
+           "status": "measured",
+           "reason": null
+          },
+          "bytes": {
+           "status": "measured",
+           "reason": null
+          },
+          "millis": {
+           "status": "measured",
+           "reason": null
+          }
+         }
+        }
+       }
+      ],
+      "cost": {
+       "usd_micros": 47,
+       "tokens": 548,
+       "bytes": 19162,
+       "millis": 1,
+       "measurement_status": {
+        "usd_micros": {
+         "status": "measured",
+         "reason": null
+        },
+        "tokens": {
+         "status": "measured",
+         "reason": null
+        },
+        "bytes": {
+         "status": "measured",
+         "reason": null
+        },
+        "millis": {
+         "status": "measured",
+         "reason": null
+        }
+       }
+      },
+      "model_route": {
+       "provider": "openrouter",
+       "model": "deepseek/deepseek-v4-flash-0731",
+       "model_fingerprint": "vllm-dev-ep-8b5ae245",
+       "fingerprint_unavailable_reason": null
+      },
+      "model_input_ref": "sha256:831e72b775869b7d1419ca6dbb8f3c0474abcb228dcbcb13832d3a1c01592e4c",
+      "model_output_ref": "sha256:bca86b24807eb1b3a09486685d07c78f88f9e9063f6fbeb62748b066f8e91e5e"
+     },
+     {
+      "turn": 1,
+      "context_digest": "sha256:2e32b8b1f678afab2d94db3cd630af49ea990dadc802c01d583bc1b035e25ac0",
+      "context_ref": null,
+      "proposal": {
+       "kind": "ProposalProduced",
+       "reason": "finish",
+       "alertable": false,
+       "episodeId": "episode-run-3adbe69b",
+       "turn": 1,
+       "action": null,
+       "proposalDescriptor": "sha256:dd0b71613c582cc10d1f98ee502be4920de168dc0af8d97f47be89b98434a838",
+       "note": " {\n  \"action\": \"write\",\n  \"args\": {\n    \"path\": \"fib.py\",\n    \"content\": \"def fib(n):\\n    a, b = 0, 1\\n    for _ in range(n):\\n        a, b = b, a + b\\n    return a\\n\\nfor i in range(10):\\n    print(fib(i))\\n\"\n  }\n}",
+       "diagnostics": {
+        "usage": {
+         "prompt_tokens": 518,
+         "completion_tokens": 89,
+         "cached_tokens": 0,
+         "total_tokens": 607,
+         "cost_usd": 4.9e-05,
+         "usd_micros": 49,
+         "pricing_known": true,
+         "pricing_source": "hardcoded",
+         "resolved_model": "deepseek/deepseek-v4-flash-0731",
+         "ttft_millis": 0
+        },
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "model_fingerprint": "vllm-dev-ep-8b5ae245",
+        "cost_usd": 4.9e-05,
+        "usd_micros": 49,
+        "pricing_known": true,
+        "pricing_source": "hardcoded"
+       }
+      },
+      "receipts": [],
+      "invocations": [
+       {
+        "tier": 1,
+        "route": {
+         "provider": "openrouter",
+         "model": "deepseek/deepseek-v4-flash-0731",
+         "model_fingerprint": "vllm-dev-ep-8b5ae245",
+         "fingerprint_unavailable_reason": null
+        },
+        "usage": {
+         "prompt_tokens": 518,
+         "completion_tokens": 89
+        },
+        "cost": {
+         "usd_micros": 49,
+         "tokens": 607,
+         "bytes": 19649,
+         "millis": 1,
+         "measurement_status": {
+          "usd_micros": {
+           "status": "measured",
+           "reason": null
+          },
+          "tokens": {
+           "status": "measured",
+           "reason": null
+          },
+          "bytes": {
+           "status": "measured",
+           "reason": null
+          },
+          "millis": {
+           "status": "measured",
+           "reason": null
+          }
+         }
+        }
+       }
+      ],
+      "cost": {
+       "usd_micros": 49,
+       "tokens": 607,
+       "bytes": 19649,
+       "millis": 1,
+       "measurement_status": {
+        "usd_micros": {
+         "status": "measured",
+         "reason": null
+        },
+        "tokens": {
+         "status": "measured",
+         "reason": null
+        },
+        "bytes": {
+         "status": "measured",
+         "reason": null
+        },
+        "millis": {
+         "status": "measured",
+         "reason": null
+        }
+       }
+      },
+      "model_route": {
+       "provider": "openrouter",
+       "model": "deepseek/deepseek-v4-flash-0731",
+       "model_fingerprint": "vllm-dev-ep-8b5ae245",
+       "fingerprint_unavailable_reason": null
+      },
+      "model_input_ref": "sha256:848c20021d37e8afd49d0b915d13d9d805541d94302fac5836caf4093e9255b8",
+      "model_output_ref": "sha256:272023887c06d5b67b57742d0d7a1d792b1dcd1e049f18cf1c3b5e55917a9c30"
+     },
+     {
+      "turn": 2,
+      "context_digest": "sha256:02e608b2b1bbc8973cf48d446b92c8cf5e4f8814617b3dbb9cebc4a33608780d",
+      "context_ref": null,
+      "proposal": {
+       "kind": "ProposalProduced",
+       "reason": "finish",
+       "alertable": false,
+       "episodeId": "episode-run-3adbe69b",
+       "turn": 2,
+       "action": null,
+       "proposalDescriptor": "sha256:dd0b71613c582cc10d1f98ee502be4920de168dc0af8d97f47be89b98434a838",
+       "note": "```json\n{\n  \"action\": \"patch\",\n  \"args\": {\n    \"path\": \"fib.py\",\n    \"content\": \"def fib(n):\\n    a, b = 0, 1\\n    for _ in range(n):\\n        print(a)\\n        a, b = b, a + b\\n\\nif __name__ == \\\"__main__\\\":\\n    fib(10)\\n\"\n  },\n  \"kind\": \"effect\"\n}\n```",
+       "diagnostics": {
+        "usage": {
+         "prompt_tokens": 1885,
+         "completion_tokens": 103,
+         "cached_tokens": 0,
+         "total_tokens": 1988,
+         "cost_usd": 0.000141,
+         "usd_micros": 141,
+         "pricing_known": true,
+         "pricing_source": "hardcoded",
+         "resolved_model": "deepseek/deepseek-v4-flash-0731",
+         "ttft_millis": 0
+        },
+        "resolved_model": "deepseek/deepseek-v4-flash-0731",
+        "cost_usd": 0.000141,
+        "usd_micros": 141,
+        "pricing_known": true,
+        "pricing_source": "hardcoded"
+       }
+      },
+      "receipts": [],
+      "invocations": [
+       {
+        "tier": 1,
+        "route": {
+         "provider": "openrouter",
+         "model": "deepseek/deepseek-v4-flash-0731",
+         "model_fingerprint": null,
+         "fingerprint_unavailable_reason": "provider_did_not_report"
+        },
+        "usage": {
+         "prompt_tokens": 1885,
+         "completion_tokens": 103
+        },
+        "cost": {
+         "usd_micros": 141,
+         "tokens": 1988,
+         "bytes": 19612,
+         "millis": 1,
+         "measurement_status": {
+          "usd_micros": {
+           "status": "measured",
+           "reason": null
+          },
+          "tokens": {
+           "status": "measured",
+           "reason": null
+          },
+          "bytes": {
+           "status": "measured",
+           "reason": null
+          },
+          "millis": {
+           "status": "measured",
+           "reason": null
+          }
+         }
+        }
+       }
+      ],
+      "cost": {
+       "usd_micros": 141,
+       "tokens": 1988,
+       "bytes": 19612,
+       "millis": 1,
+       "measurement_status": {
+        "usd_micros": {
+         "status": "measured",
+         "reason": null
+        },
+        "tokens": {
+         "status": "measured",
+         "reason": null
+        },
+        "bytes": {
+         "status": "measured",
+         "reason": null
+        },
+        "millis": {
+         "status": "measured",
+         "reason": null
+        }
+       }
+      },
+      "model_route": {
+       "provider": "openrouter",
+       "model": "deepseek/deepseek-v4-flash-0731",
+       "model_fingerprint": null,
+       "fingerprint_unavailable_reason": "provider_did_not_report"
+      },
+      "model_input_ref": "sha256:848c20021d37e8afd49d0b915d13d9d805541d94302fac5836caf4093e9255b8",
+      "model_output_ref": "sha256:e6b91883ce9ab763ba5e5cb84ed3905bcabaabdefd5f4a835c5ab432e4db7b83"
+     }
+    ],
+    "verdict": null,
+    "verdict_absence_reason": "no_evaluator_bound",
+    "cost": {
+     "usd_micros": 237,
+     "tokens": 3143,
+     "bytes": 58423,
+     "millis": 3,
+     "measurement_status": {
+      "usd_micros": {
+       "status": "measured",
+       "reason": null
+      },
+      "tokens": {
+       "status": "measured",
+       "reason": null
+      },
+      "bytes": {
+       "status": "measured",
+       "reason": null
+      },
+      "millis": {
+       "status": "measured",
+       "reason": null
+      }
+     }
+    },
+    "outcome": "aborted",
+    "artifacts": [
+     {
+      "artifactId": "run-3adbe69b:prompt:1",
+      "digest": "sha256:831e72b775869b7d1419ca6dbb8f3c0474abcb228dcbcb13832d3a1c01592e4c",
+      "role": "prompt",
+      "schemaId": "mhf.prompt/1",
+      "sizeBytes": 18705,
+      "retentionClass": "standard",
+      "stored": true,
+      "producedBy": {
+       "component": "runtime.artifact-writer",
+       "policy_id": "runtime.capture-policy/local",
+       "policy_version": "1"
+      },
+      "refs": {
+       "turn": "0"
+      }
+     },
+     {
+      "artifactId": "run-3adbe69b:model_output:2",
+      "digest": "sha256:bca86b24807eb1b3a09486685d07c78f88f9e9063f6fbeb62748b066f8e91e5e",
+      "role": "model_output",
+      "schemaId": "mhf.model-output/1",
+      "sizeBytes": 1082,
+      "retentionClass": "standard",
+      "stored": true,
+      "producedBy": {
+       "component": "runtime.artifact-writer",
+       "policy_id": "runtime.capture-policy/local",
+       "policy_version": "1"
+      },
+      "refs": {
+       "turn": "0"
+      }
+     },
+     {
+      "artifactId": "run-3adbe69b:prompt:3",
+      "digest": "sha256:848c20021d37e8afd49d0b915d13d9d805541d94302fac5836caf4093e9255b8",
+      "role": "prompt",
+      "schemaId": "mhf.prompt/1",
+      "sizeBytes": 19257,
+      "retentionClass": "standard",
+      "stored": true,
+      "producedBy": {
+       "component": "runtime.artifact-writer",
+       "policy_id": "runtime.capture-policy/local",
+       "policy_version": "1"
+      },
+      "refs": {
+       "turn": "1"
+      }
+     },
+     {
+      "artifactId": "run-3adbe69b:model_output:4",
+      "digest": "sha256:272023887c06d5b67b57742d0d7a1d792b1dcd1e049f18cf1c3b5e55917a9c30",
+      "role": "model_output",
+      "schemaId": "mhf.model-output/1",
+      "sizeBytes": 948,
+      "retentionClass": "standard",
+      "stored": true,
+      "producedBy": {
+       "component": "runtime.artifact-writer",
+       "policy_id": "runtime.capture-policy/local",
+       "policy_version": "1"
+      },
+      "refs": {
+       "turn": "1"
+      }
+     },
+     {
+      "artifactId": "run-3adbe69b:prompt:5",
+      "digest": "sha256:848c20021d37e8afd49d0b915d13d9d805541d94302fac5836caf4093e9255b8",
+      "role": "prompt",
+      "schemaId": "mhf.prompt/1",
+      "sizeBytes": 19257,
+      "retentionClass": "standard",
+      "stored": true,
+      "producedBy": {
+       "component": "runtime.artifact-writer",
+       "policy_id": "runtime.capture-policy/local",
+       "policy_version": "1"
+      },
+      "refs": {
+       "turn": "2"
+      }
+     },
+     {
+      "artifactId": "run-3adbe69b:model_output:6",
+      "digest": "sha256:e6b91883ce9ab763ba5e5cb84ed3905bcabaabdefd5f4a835c5ab432e4db7b83",
+      "role": "model_output",
+      "schemaId": "mhf.model-output/1",
+      "sizeBytes": 1008,
+      "retentionClass": "standard",
+      "stored": true,
+      "producedBy": {
+       "component": "runtime.artifact-writer",
+       "policy_id": "runtime.capture-policy/local",
+       "policy_version": "1"
+      },
+      "refs": {
+       "turn": "2"
+      }
+     }
+    ],
+    "provenance": {
+     "context": [
+      {
+       "claimKind": "context_selection",
+       "policy": {
+        "id": "agency.context-compiler/RecencyWindowStrategy",
+        "version": "1",
+        "paramsDigest": "sha256:ea19f2bf2863b8cd6840ab8944a11e2f89cd64b2079eeb0a2bc7f74cd95ea135"
+       },
+       "inputDigest": "sha256:98110d303634f91285ccc07cd80400eea027ac136fc7ad6e713c3b95da8bca17",
+       "outputDigest": "sha256:98110d303634f91285ccc07cd80400eea027ac136fc7ad6e713c3b95da8bca17",
+       "metrics": {
+        "tokenCount": 1331,
+        "layerCounts": {
+         "L1": 467,
+         "L2": 538,
+         "L3": 276,
+         "L4": 24,
+         "L5": 26
+        }
+       },
+       "turnIndex": 0,
+       "selectedLabels": [
+        "system-core",
+        "tool-schemas",
+        "environment-map",
+        "brief",
+        "goal-echo"
+       ],
+       "droppedLabels": [],
+       "elidedLabels": [],
+       "inputArtifacts": [],
+       "outputArtifacts": []
+      },
+      {
+       "claimKind": "context_selection",
+       "policy": {
+        "id": "agency.context-compiler/RecencyWindowStrategy",
+        "version": "1",
+        "paramsDigest": "sha256:ea19f2bf2863b8cd6840ab8944a11e2f89cd64b2079eeb0a2bc7f74cd95ea135"
+       },
+       "inputDigest": "sha256:98110d303634f91285ccc07cd80400eea027ac136fc7ad6e713c3b95da8bca17",
+       "outputDigest": "sha256:98110d303634f91285ccc07cd80400eea027ac136fc7ad6e713c3b95da8bca17",
+       "metrics": {
+        "tokenCount": 1331,
+        "layerCounts": {
+         "L1": 467,
+         "L2": 538,
+         "L3": 276,
+         "L4": 24,
+         "L5": 26
+        }
+       },
+       "turnIndex": 1,
+       "selectedLabels": [
+        "system-core",
+        "tool-schemas",
+        "environment-map",
+        "brief",
+        "goal-echo"
+       ],
+       "droppedLabels": [],
+       "elidedLabels": [],
+       "inputArtifacts": [],
+       "outputArtifacts": []
+      },
+      {
+       "claimKind": "context_selection",
+       "policy": {
+        "id": "agency.context-compiler/RecencyWindowStrategy",
+        "version": "1",
+        "paramsDigest": "sha256:ea19f2bf2863b8cd6840ab8944a11e2f89cd64b2079eeb0a2bc7f74cd95ea135"
+       },
+       "inputDigest": "sha256:98110d303634f91285ccc07cd80400eea027ac136fc7ad6e713c3b95da8bca17",
+       "outputDigest": "sha256:98110d303634f91285ccc07cd80400eea027ac136fc7ad6e713c3b95da8bca17",
+       "metrics": {
+        "tokenCount": 1331,
+        "layerCounts": {
+         "L1": 467,
+         "L2": 538,
+         "L3": 276,
+         "L4": 24,
+         "L5": 26
+        }
+       },
+       "turnIndex": 2,
+       "selectedLabels": [
+        "system-core",
+        "tool-schemas",
+        "environment-map",
+        "brief",
+        "goal-echo"
+       ],
+       "droppedLabels": [],
+       "elidedLabels": [],
+       "inputArtifacts": [],
+       "outputArtifacts": []
+      }
+     ],
+     "compaction": [],
+     "cache": []
+    },
+    "reproducibility_at_run_close": {
+     "values": {
+      "state_reconstruction": {
+       "capability": "full_cold",
+       "verification": "unverified"
+      },
+      "semantic_replay": {
+       "capability": "unpinned",
+       "verification": "unverified"
+      },
+      "external_reexecution": "available",
+      "artifact_retention": "partial",
+      "environment_capture": "declared",
+      "provider_model_identity": "attributed"
+     },
+     "assessed_at": "1970-01-01T00:00:00.000Z",
+     "basis": [
+      "wal_durable:full_cold",
+      "state_reconstruction:unverified",
+      "pins_incomplete:unpinned",
+      "semantic_replay:unverified",
+      "provider_openrouter:available",
+      "retention_standard:partial",
+      "env_declared:declared",
+      "model_attributed:attributed"
+     ],
+     "reducer_version": "v1.1.0",
+     "schema_versions": {
+      "mhf.trajectory": "2",
+      "mhf.execution-profile": "2",
+      "mhf.event": "1"
+     }
+    },
+    "capture": {
+     "status": "complete",
+     "required": false,
+     "policy_id": "runtime.capture-policy/local",
+     "policy_version": "1"
+    }
+   }
+  }
+ }
+]

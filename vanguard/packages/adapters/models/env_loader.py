@@ -13,7 +13,7 @@ import stat
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Sequence
+from typing import Mapping, Sequence
 import re
 
 from ...ports.event_store import Result
@@ -26,11 +26,17 @@ __all__ = [
     "inject_into_environ",
     "ensure_openrouter_key_loaded",
     "load_api_key",
+    "load_local_inference_env",
     "load_protected_env",
+    "LOCAL_INFERENCE_KEYS",
 ]
 
 ALLOWED_KEY = "OPENROUTER_API_KEY"
 ALLOWED_KEYS = frozenset({ALLOWED_KEY})
+LOCAL_INFERENCE_KEYS = frozenset({
+    "VANGUARD_LLAMA_ENDPOINT",
+    "VANGUARD_LLAMA_MODEL",
+})
 _MAX_PERMS = 0o600
 _MAX_BYTES = 1024
 _KEY_NAME = re.compile(r"^[A-Z][A-Z0-9_]*$")
@@ -86,6 +92,18 @@ def ensure_openrouter_key_loaded(search_roots: Sequence[str | os.PathLike[str]])
             os.environ[ALLOWED_KEY] = result.value
             return "dotenv"
     return "missing"
+
+
+def load_local_inference_env(
+    environ: Mapping[str, str] | None = None,
+) -> dict[str, str]:
+    """Return only the supported native llama.cpp process-edge settings."""
+    source = os.environ if environ is None else environ
+    return {
+        key: value.strip()
+        for key in LOCAL_INFERENCE_KEYS
+        if isinstance((value := source.get(key)), str) and value.strip()
+    }
 
 
 def load_api_key(root: str | os.PathLike[str]) -> Result[str]:

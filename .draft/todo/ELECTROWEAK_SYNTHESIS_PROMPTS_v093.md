@@ -379,13 +379,15 @@ finish. Document the exact recipe, signatures, error types and falsifiers.
    an earlier revision of this prompt said "per production model" and that is now
    wrong): add an explicit `ToolCallStyle.NATIVE` profile ONLY for production
    routes whose native-tool support is VERIFIED by a provider-shape vector:
-   DeepSeek V4 Flash (`deepseek/deepseek-v4-flash-0731`) as primary, GLM 5.3 Flash
-   (`z-ai/glm-5.3-flash`) as first fallback, DeepSeek V4 Pro (`deepseek/deepseek-v4-pro`)
-   as second fallback, and `openrouter/free` for simple tasks. GLM 5.2 is excluded.
+   DeepSeek V4 Flash (`deepseek/deepseek-v4-flash-0731`) as primary, and GLM 5.3 Flash
+   (`z-ai/glm-5.3-flash`) as first fallback. `openrouter/free` serves simple tasks
+   under `FENCED_JSON`. DeepSeek V4 Pro is an unverified Tier 3 escalation fallback
+   and GLM 5.2 is excluded.
    Unverified and unknown registry entries MUST retain the honest degradation
    chain NATIVE→JSON_SCHEMA→FENCED_JSON→TEXT_GRAMMAR via `degraded()`.
    FALSIFIER: every native-declared route dispatches `patch.apply` and `finish`
    with no protocol degradation; an unverified route is never silently promoted.
+
 
 
 2. Approval threshold — `runtime/session.py:656`

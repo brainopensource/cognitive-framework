@@ -16,7 +16,6 @@ class TestModelProfiles(unittest.TestCase):
         native_routes = [
             "deepseek/deepseek-v4-flash-0731",
             "z-ai/glm-5.3-flash",
-            "deepseek/deepseek-v4-pro",
             "deepseek/deepseek-v4-flash",
             "deepseek-v4-flash",
             "openrouter:deepseek/deepseek-v4-flash-0731",
@@ -32,11 +31,13 @@ class TestModelProfiles(unittest.TestCase):
     def test_unknown_and_unverified_routes_not_promoted_to_native(self) -> None:
         unverified_routes = [
             "unknown",
+            "deepseek/deepseek-v4-pro",
             "z-ai/glm-5.2",
             "google/gemma-4-31b-it:free",
             "minimax/minimax-m3:free",
             "openai/gpt-5.6-luna",
             "custom/unverified-model",
+            "ollama:deepseek/deepseek-v4-flash",
             "",
             None,
         ]

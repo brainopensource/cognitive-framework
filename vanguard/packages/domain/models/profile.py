@@ -81,12 +81,6 @@ _PROFILES: dict[str, ModelCapabilityProfile] = {
         "z-ai/glm-5.3-flash",
         tool_call_style=ToolCallStyle.NATIVE,
     ),
-    # Second fallback: DeepSeek V4 Pro
-    "deepseek/deepseek-v4-pro": ModelCapabilityProfile(
-        "deepseek/deepseek-v4-pro",
-        tool_call_style=ToolCallStyle.NATIVE,
-        supports_parallel_tool_calls=True,
-    ),
 }
 
 _ALIASES: dict[str, str] = {
@@ -97,18 +91,18 @@ _ALIASES: dict[str, str] = {
 }
 
 
-
 def profile_for(model_id: str | None) -> ModelCapabilityProfile:
     key = (model_id or "unknown").strip()
     resolved_key = _ALIASES.get(key, key)
     profile = _PROFILES.get(resolved_key)
     if profile is not None:
         return profile
-    for prefix in ("openrouter:", "llama_cpp:", "llama:", "ollama:"):
+    for prefix in ("openrouter:", "llama_cpp:", "llama:"):
         if resolved_key.startswith(prefix):
             stripped = resolved_key[len(prefix):]
             target = _ALIASES.get(stripped, stripped)
             if target in _PROFILES:
                 return _PROFILES[target]
     return ModelCapabilityProfile(key or "unknown")
+
 

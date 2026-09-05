@@ -183,6 +183,9 @@ class LedgerEmitter:
         # writes `/2`; only a caller that says so writes `/1`.
         self._writer_version = writer_version
         self._policy_version = policy_version
+        self._effect_started_envelopes: dict[tuple[str, str], EventEnvelope] = {}
+        self._last_effect_started_identity: tuple[str, str] | None = None
+        self._last_effect_started_envelope: EventEnvelope | None = None
         if anchor is not None:
             self._seq = int(anchor.seq) + 1
             if anchor.schema_version in ("mhf.event/1", "mhf.event/2"):
@@ -193,6 +196,12 @@ class LedgerEmitter:
                 self._prev = anchor.content_digest or anchor.digest()
             else:
                 self._prev = None
+            if anchor.payload.get("kind") == "EffectStarted":
+                ident = self._effect_started_identity(anchor.payload)
+                if ident is not None:
+                    self._effect_started_envelopes[ident] = anchor
+                    self._last_effect_started_identity = ident
+                    self._last_effect_started_envelope = anchor
         else:
             self._seq, self._prev = self._load_chain(project_id)
 
@@ -271,9 +280,21 @@ class LedgerEmitter:
             idempotency_key=idempotency_key,
         )
 
+    @staticmethod
+    def _effect_started_identity(payload: Mapping[str, Any]) -> tuple[str, str] | None:
+        desc = payload.get("descriptorDigest") or payload.get("descriptor_digest")
+        lease = payload.get("leaseId") or payload.get("lease_id")
+        if desc is not None and lease is not None:
+            return (str(desc), str(lease))
+        return None
+
     def _remember(self, event: Event) -> None:
         if self.events and self.events[-1] is event:
             return
+        if event.kind == "EffectStarted":
+            ident = self._effect_started_identity(event.payload)
+            if ident is not None and ident in self._effect_started_envelopes:
+                return
         self.events.append(event)
 
     def _assert_writer(self, writer: str, kind: str) -> None:
@@ -334,6 +355,13 @@ class LedgerEmitter:
         envelopes = list(read.value) if read.ok and read.value else []
         if not envelopes:
             return 0, None
+        for env in envelopes:
+            if env.payload.get("kind") == "EffectStarted":
+                ident = self._effect_started_identity(env.payload)
+                if ident is not None:
+                    self._effect_started_envelopes[ident] = env
+                    self._last_effect_started_identity = ident
+                    self._last_effect_started_envelope = env
         last = envelopes[-1]
         try:
             seq = int(last.seq)
@@ -357,6 +385,10 @@ class LedgerEmitter:
         idempotency_key: str | None = None,
     ) -> EventEnvelope:
         self._assert_writer(writer, event.kind)
+        if event.kind == "EffectStarted":
+            ident = self._effect_started_identity(event.payload)
+            if ident is not None and ident in self._effect_started_envelopes:
+                return self._effect_started_envelopes[ident]
         seq = self._seq
         prev = self._prev
         ident = event_id(clock=self._clock, random=self._random)
@@ -408,6 +440,12 @@ class LedgerEmitter:
             raise OSError(result.error.message if result.error else "append rejected")
         self._seq = seq + 1
         self._prev = digest
+        if event.kind == "EffectStarted":
+            ident_key = self._effect_started_identity(event.payload)
+            if ident_key is not None:
+                self._effect_started_envelopes[ident_key] = envelope
+                self._last_effect_started_identity = ident_key
+                self._last_effect_started_envelope = envelope
         return envelope
 
 

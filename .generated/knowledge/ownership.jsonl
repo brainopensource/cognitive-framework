@@ -78,6 +78,7 @@
 {"canonical_id": "draft.development-final-plan-v2", "canonical_owner_path": "docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN_v2.md", "owner": "repository-governance"}
 {"canonical_id": "DOCUMENTATION_REFACTOR", "canonical_owner_path": "docs/reports/reviews/electroweak_v092/plans/DOCUMENTATION_REFACTOR.md", "owner": "repository-governance"}
 {"canonical_id": "draft.phase-0-development-final-plan", "canonical_owner_path": "docs/reports/reviews/electroweak_v092/plans/PHASE-0_DEVELOPMENT_FINAL_PLAN.md", "owner": "repository-governance"}
+{"canonical_id": "backend_issues_log", "canonical_owner_path": "docs/reports/reviews/electroweak_v092/plans/backend_issues_log.md", "owner": "repository-governance"}
 {"canonical_id": "frontend-cursor-suggested-approach-plan", "canonical_owner_path": "docs/reports/reviews/electroweak_v092/plans/frontend_cursor_suggested_approach_plan.md", "owner": "product-frontend"}
 {"canonical_id": "aether_technical_report_part1_foundations", "canonical_owner_path": "docs/reports/reviews/main/aether_technical_report_part1_foundations.md", "owner": "repository-governance"}
 {"canonical_id": "aether_technical_report_part2_architecture", "canonical_owner_path": "docs/reports/reviews/main/aether_technical_report_part2_architecture.md", "owner": "repository-governance"}

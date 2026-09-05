@@ -367,7 +367,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **specification**: Resolve the benchmark approval threshold from the manifest's declared `components.approval_policy`. With `threshold: standard`, medium `patch.apply` and high `proc.exec` dispatch without a fail-closed ask denial.
   - **acceptance_falsifier**: `python3 -m unittest test.runtime.test_approval_passthrough -v` passes and the literal approval threshold `"low"` is absent from `runtime/session.py`.
 
-- [ ] **T-70a: Reproduce mid-stream SSE abort before flag change**
+- [x] **T-70a: Reproduce mid-stream SSE abort before flag change**
   - **package**: HAR-01
   - **subsystem**: adapters
   - **lane**: Lane B (Audit/Test)
@@ -376,7 +376,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **specification**: Capture a red reproducer in which a truncated SSE chunk arrives after at least one delta before changing any transport flag. Close as `no_defect` if the current path cannot reproduce the failure.
   - **acceptance_falsifier**: `python3 -m unittest test.adapters.test_openrouter_stream_abort -v` first demonstrates the reproducing failure, then guards the selected resolution.
 
-- [ ] **T-71: Declare `finish-tool.json` in the product presets**
+- [x] **T-71: Declare `finish-tool.json` in the product presets**
   - **package**: HAR-01
   - **subsystem**: agency
   - **lane**: Lane A (Build/Core)
@@ -394,7 +394,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **specification**: Separate runtime terminal status from exterior task disposition and enforce the typed receipt invariants. Oracle `passed` never implies terminal `completed`; `terminal_status=abandoned` with `disposition=passed` is legal and must replay without contradiction.
   - **acceptance_falsifier**: `python3 -m unittest test.contracts.test_settlement_disposition -v` rejects `passed` with zero executed tests, reasonless `undeterminable`, and `not_run` with an envelope digest; `disposition_to_outcome(NOT_RUN)` raises; `EpisodeCompleted` payloads contain no `disposition` key (no new ledger kind is allocated); and `abandoned` plus `passed` is accepted and replays without contradiction.
 
-- [ ] **T-73: `EffectStarted` single-emission ledger falsifier**
+- [x] **T-73: `EffectStarted` single-emission ledger falsifier**
   - **package**: HAR-01
   - **subsystem**: runtime
   - **lane**: Lane B (Audit/Test)
@@ -403,7 +403,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **specification**: Prove that replaying one effect emits exactly one `EffectStarted` with exactly one lease id. If the reproducer requires a kernel change, stop for an ADR and re-run the TCB guard before any fix lands.
   - **acceptance_falsifier**: `python3 -m unittest test.runtime.test_effect_started_singleton -v` observes one and only one `EffectStarted` for the fixture effect.
 
-- [ ] **T-74: Workspace `.pyc` hygiene**
+- [x] **T-74: Workspace `.pyc` hygiene**
   - **package**: HAR-01
   - **subsystem**: adapters
   - **lane**: Lane A (Build/Core)
@@ -466,7 +466,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **specification**: Detect the two-cycle workspace oscillation where `d_t == d_{t-2}` before dispatching another proposal. Return typed `OSCILLATION_CIRCUIT_BREAKER` evidence that forces a hypothesis change.
   - **acceptance_falsifier**: `python3 -m unittest test.agency.test_anti_thrashing_circuit_breaker -v` trips before the next proposal on the two-cycle digest fixture.
 
-- [ ] **T-81: Greenfield oracle vacuity rejection**
+- [x] **T-81: Greenfield oracle vacuity rejection**
   - **package**: TRUTH
   - **subsystem**: packs/
   - **lane**: Lane B (Audit/Test)
@@ -475,7 +475,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **specification**: Execute a greenfield suite against empty stubs containing only `pass` or `raise NotImplementedError`. If that control produces zero failures, reject the oracle as vacuous rather than treating it as evidence of completion.
   - **acceptance_falsifier**: `python3 -m unittest test.packs.test_greenfield_vacuity_rejection -v` returns typed `VACUOUS_ORACLE_REJECTED` for the empty-stub control.
 
-- [ ] **T-82: Fenced JSON action unwrapping and anti-premature finish**
+- [x] **T-82: Fenced JSON action unwrapping and anti-premature finish**
   - **package**: HAR-01 / TRUTH
   - **subsystem**: adapters
   - **lane**: Lane A (Build/Core)
@@ -484,7 +484,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **specification**: Promote a markdown-fenced tool call found in `note` when the outer response carries `action: null`, after full typed validation. Reject unsolicited finish proposals before mutation/verification or while unparsed tool invocations remain with typed `PREMATURE_FINISH_REJECTED`.
   - **acceptance_falsifier**: `python3 -m unittest test.adapters.test_dialect_fenced_action_recovery -v` recovers the fenced read action and rejects the premature finish fixture.
 
-- [ ] **T-83a: Greenfield prompt modernization**
+- [x] **T-83a: Greenfield prompt modernization**
   - **package**: TRUTH
   - **subsystem**: packs/
   - **lane**: Lane A (Build/Core)
@@ -502,7 +502,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **specification**: Feeds `IndexPort.get_callers` into `_admit_completion` through the multi-file completeness policy. A public-symbol edit cannot finish while known callers remain uninspected; T-78 is deliberately not a dependency.
   - **acceptance_falsifier**: `python3 -m unittest test.runtime.test_multi_file_callers_admission -v` rejects the `file_a.py` change with typed `UNINSPECTED_CALLERS_REMAINING` until `file_b.py` is inspected or updated.
 
-- [ ] **T-84: Unique durable run identity and explicit resume**
+- [x] **T-84: Unique durable run identity and explicit resume**
   - **package**: INS-01
   - **subsystem**: runtime
   - **lane**: Lane A (Build/Core)
@@ -529,7 +529,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **specification**: Pass declared manifest aliases into the live proposal translator and validate canonical tool names plus arguments against their schemas. Reject undeclared names with typed `TOOL_NOT_DECLARED`; fuzzy and edit-distance matching are forbidden.
   - **acceptance_falsifier**: `python3 -m unittest test.adapters.test_live_alias_validation -v` resolves a declared alias, rejects undeclared or schema-invalid calls, and emits no translated effect for them.
 
-- [ ] **T-87: Bridge lifecycle fail-closed**
+- [x] **T-87: Bridge lifecycle fail-closed**
   - **package**: BRG-01
   - **subsystem**: tools/
   - **lane**: Lane B (Audit/Test)
@@ -538,7 +538,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **specification**: Require a live expected child PID and matching `/props` model plus alias before reporting `ONLINE`; an occupied foreign port is never silently adopted. Stop only an identity-verified recorded child, with typed `MODEL_MISMATCH` and `PID_STALE` failures and no process-name kill.
   - **acceptance_falsifier**: `python3 -m unittest test.tools.test_llama_bridge_lifecycle -v` keeps an invalid `-fa` child `FAILED` and never `ONLINE` while a foreign server holds the port; adopting an occupied port without a matching `/props` model and alias yields typed `MODEL_MISMATCH`; a stale PID file yields typed `PID_STALE`; and stop issues no `pkill` or `pgrep -f`.
 
-- [ ] **T-88: MCP fail-closed completions**
+- [x] **T-88: MCP fail-closed completions**
   - **package**: BRG-01
   - **subsystem**: tools/
   - **lane**: Lane B (Audit/Test)
@@ -565,7 +565,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **specification**: Record every normalization failure with a CAS-retrievable raw-response digest and a typed classifier among `not_json`, `missing_kind`, `xml_tool_tags`, `deepseek_fence`, `truncated`, and `tool_not_declared`. Never publish a malformed completion as a bare note.
   - **acceptance_falsifier**: `python3 -m unittest test.adapters.test_dialect_provenance -v` resolves the full body from its digest and observes a typed class for every malformed fixture.
 
-- [ ] **T-91: Native-only alias and environment purge**
+- [x] **T-91: Native-only alias and environment purge**
   - **package**: BRG-01 / HAR-01
   - **subsystem**: adapters
   - **lane**: Lane B (Audit/Test)

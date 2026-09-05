@@ -34,7 +34,18 @@ class LlamaMCPServer:
 
     def handle_tool_call(self, name: str, args: Dict[str, Any]) -> Dict[str, Any]:
         if name == "llama_status":
-            status = check_server_health(self.base_url)
+            status = dict(check_server_health(self.base_url))
+            include_template = bool(args.get("include_template") or args.get("show_template") or args.get("chat_template"))
+            if not include_template and "props" in status and isinstance(status["props"], dict):
+                props_clean = dict(status["props"])
+                props_clean.pop("chat_template", None)
+                props_clean.pop("template", None)
+                if "default_generation_settings" in props_clean and isinstance(props_clean["default_generation_settings"], dict):
+                    gen_clean = dict(props_clean["default_generation_settings"])
+                    gen_clean.pop("chat_template", None)
+                    gen_clean.pop("template", None)
+                    props_clean["default_generation_settings"] = gen_clean
+                status["props"] = props_clean
             return {
                 "content": [
                     {
@@ -106,39 +117,66 @@ class LlamaMCPServer:
                 headers={"Content-Type": "application/json", "User-Agent": "llama-mcp/1.0"},
             )
 
-            t0 = time.perf_counter()
-            try:
-                with urllib.request.urlopen(req, timeout=120.0) as resp:
-                    data = json.loads(resp.read().decode("utf-8"))
-                    dt = time.perf_counter() - t0
-                    choice = data.get("choices", [{}])[0]
-                    content = choice.get("message", {}).get("content", "")
-                    usage = data.get("usage", {})
-                    return {
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": content,
+            # At most 1 bounded retry (2 attempts total)
+            max_attempts = 2
+            last_error_code = "EMPTY_COMPLETION"
+            last_error_detail = ""
+
+            for attempt in range(max_attempts):
+                t0 = time.perf_counter()
+                try:
+                    with urllib.request.urlopen(req, timeout=120.0) as resp:
+                        data = json.loads(resp.read().decode("utf-8"))
+                        dt = time.perf_counter() - t0
+                        choices = data.get("choices") or []
+                        if not choices:
+                            last_error_code = "EMPTY_COMPLETION"
+                            last_error_detail = "Response contains no choices"
+                            continue
+
+                        choice = choices[0]
+                        message = choice.get("message") if isinstance(choice, dict) else {}
+                        content = message.get("content", "") if isinstance(message, dict) else ""
+                        finish_reason = choice.get("finish_reason") if isinstance(choice, dict) else None
+
+                        if not content or not content.strip():
+                            if finish_reason == "length":
+                                last_error_code = "MAX_TOKENS_WITHOUT_CONTENT"
+                                last_error_detail = "Generation reached max_tokens with empty content"
+                            else:
+                                last_error_code = "EMPTY_COMPLETION"
+                                last_error_detail = "Completion returned empty content"
+                            continue
+
+                        usage = data.get("usage", {})
+                        return {
+                            "content": [
+                                {
+                                    "type": "text",
+                                    "text": content,
+                                }
+                            ],
+                            "telemetry": {
+                                "latency_seconds": round(dt, 3),
+                                "usage": usage,
+                                "attempts": attempt + 1,
                             }
-                        ],
-                        "telemetry": {
-                            "latency_seconds": round(dt, 3),
-                            "usage": usage,
                         }
+                except Exception as exc:
+                    last_error_code = "REQUEST_FAILED"
+                    last_error_detail = f"Failed to communicate with llama-server at {self.base_url}: {exc}"
+                    continue
+
+            return {
+                "isError": True,
+                "error_code": last_error_code,
+                "content": [
+                    {
+                        "type": "text",
+                        "text": f"Error [{last_error_code}]: {last_error_detail} (after {max_attempts} attempts)",
                     }
-            except Exception as exc:
-                return {
-                    "isError": True,
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": (
-                                f"Failed to communicate with llama-server at {self.base_url}: {exc}\n"
-                                f"Hint: Start llama-server using `python3 tools/llama_cpp/cli.py serve --model <model.gguf>`"
-                            ),
-                        }
-                    ]
-                }
+                ]
+            }
 
         elif name == "llama_tokenize":
             content = args.get("content", "")

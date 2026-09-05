@@ -1093,6 +1093,7 @@ class OpenRouterModel:
                 return Result.fail(
                     kind="instrument_error",
                     message="provider streaming response was malformed, truncated, or empty",
+                    retryable=True,
                 )
         else:
             transport_result = self._execute_transport(headers, payload, secret)
@@ -1110,6 +1111,7 @@ class OpenRouterModel:
                     return Result.fail(
                         kind="instrument_error",
                         message="provider streaming response was malformed, truncated, or empty",
+                        retryable=True,
                     )
             else:
                 decoded = raw.decode("utf-8", "replace") if isinstance(raw, bytes) else str(raw)

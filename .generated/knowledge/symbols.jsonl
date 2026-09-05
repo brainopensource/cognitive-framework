@@ -160,6 +160,7 @@
 {"symbol": "DiscoveredInstruction", "kind": "class", "defined_in": "vanguard/packages/agency/manifests/discovery.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "Discovery", "kind": "class", "defined_in": "vanguard/packages/domain/task_state.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "DispatchResult", "kind": "class", "defined_in": "vanguard/packages/kernel/dispatch.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
+{"symbol": "DispositionError", "kind": "class", "defined_in": "vanguard/packages/domain/evidence/disposition.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "DistilledResult", "kind": "class", "defined_in": "vanguard/packages/agency/context/distiller.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "DogfoodReport", "kind": "class", "defined_in": "vanguard/packages/runtime/dogfood.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "DomainBindingRegistry", "kind": "class", "defined_in": "vanguard/packages/adapters/bindings/base.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -369,6 +370,7 @@
 {"symbol": "ModelRole", "kind": "class", "defined_in": "vanguard/packages/runtime/tier_escalation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ModelRoute", "kind": "class", "defined_in": "vanguard/packages/adapters/models/routing.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ModelRoute", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "ModelRoutingError", "kind": "class", "defined_in": "vanguard/packages/adapters/models/routing.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ModelUnavailable", "kind": "class", "defined_in": "vanguard/packages/runtime/model_selection.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "NamedComponent", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/manifest.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "NamedManifest", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/manifest.py", "canonical_owner": "docs/backend/reference/schemas.md"}
@@ -539,6 +541,7 @@
 {"symbol": "SessionLog", "kind": "class", "defined_in": "vanguard/packages/runtime/session_log.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "SessionLogEntry", "kind": "class", "defined_in": "vanguard/packages/runtime/session_log.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "SessionPorts", "kind": "class", "defined_in": "vanguard/packages/runtime/session.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "SettlementReceipt", "kind": "class", "defined_in": "vanguard/packages/domain/evidence/disposition.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "SignedSkillPromoter", "kind": "class", "defined_in": "vanguard/packages/runtime/skill_evaluation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "SignedVerdict", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "SingleModelRouter", "kind": "class", "defined_in": "vanguard/packages/adapters/models/routing.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -604,6 +607,7 @@
 {"symbol": "TableWorldEvaluator", "kind": "class", "defined_in": "vanguard/packages/adapters/environment/tableworld.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "TamperVerdict", "kind": "class", "defined_in": "vanguard/packages/runtime/governance/tamper_shield.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "TaskContext", "kind": "class", "defined_in": "vanguard/packages/runtime/compose.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "TaskDisposition", "kind": "class", "defined_in": "vanguard/packages/domain/evidence/disposition.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "TaskFeatures", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/blackboard.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "TaskReport", "kind": "class", "defined_in": "vanguard/packages/runtime/dogfood.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "TaskStep", "kind": "class", "defined_in": "vanguard/packages/domain/task_state.py", "canonical_owner": "docs/backend/reference/schemas.md"}
@@ -660,6 +664,7 @@
 {"symbol": "VerificationReceipt", "kind": "class", "defined_in": "vanguard/packages/agency/forge/engine.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "VerificationRecord", "kind": "class", "defined_in": "vanguard/packages/agency/chimera/blackboard.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "VerificationResult", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/suites/formal_sat.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "VerificationSubject", "kind": "class", "defined_in": "vanguard/packages/runtime/session.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "WalContentionMetrics", "kind": "class", "defined_in": "vanguard/packages/runtime/pareto_measurement.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "WireError", "kind": "class", "defined_in": "vanguard/packages/domain/wire/contracts.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "WorkerOperation", "kind": "class", "defined_in": "vanguard/packages/adapters/sandbox/worker.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}

@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import uuid
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -31,6 +32,7 @@ def _manifest(command: str) -> Path:
 def _doctor(request: Mapping[str, Any]) -> dict[str, Any]:
     facts = dict(discover_platform().to_dict())
     profile_id = str(request.get("profile") or "product")
+    run_id = str(request.get("runId") or "doctor")
     try:
         resolved = resolve_profile(
             profile_id, host_qualifies=facts.get("enforcement") == "full", host_facts=facts)
@@ -38,8 +40,8 @@ def _doctor(request: Mapping[str, Any]) -> dict[str, Any]:
         digest = resolved.digest
     except SandboxUnavailable as exc:
         outcome, detail, digest = "unavailable", str(exc), None
-    return {"type": "result", "result": {
-        "runId": str(request.get("runId") or "doctor"), "outcome": outcome,
+    return {"type": "result", "runId": run_id, "result": {
+        "runId": run_id, "outcome": outcome,
         "phase": "doctor", "attempts": 0, "turns": 0, "planDigest": digest,
         "activeStepId": None, "verifiedStepIds": [], "modelRoutes": [],
         "promptTokens": None, "completionTokens": None, "spentUsdMicros": None,
@@ -53,7 +55,13 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
         return _doctor(request)
     if command not in {"code", "explain", "resume"}:
         raise ValueError(f"unsupported coding command: {command!r}")
-    run_id = str(request.get("runId") or request.get("resumeFrom") or "run-cli")
+    resume_target = request.get("resumeFrom") or (request.get("runId") if command == "resume" else None)
+    if resume_target and str(resume_target).strip():
+        run_id = str(resume_target).strip()
+    elif request.get("runId") and str(request["runId"]).strip():
+        run_id = str(request["runId"]).strip()
+    else:
+        run_id = f"run-{uuid.uuid4().hex}"
     brief = str(request.get("brief") or request.get("question") or (f"Resume run {run_id}" if command == "resume" else "")).strip()
     if not brief:
         raise ValueError("brief or question is required")
@@ -78,8 +86,8 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
             allow_paid=bool(request.get("allowPaid", False)),
         ).model
     # A deterministic preview is a hermetic smoke path, not a durable run.
-    # Keep it out of the product profile's default persistent ledger: the
-    # legacy fixed `run-cli` identity would otherwise resume stale approval
+    # Keep it out of the product profile's default persistent ledger: a
+    # fixed identity would otherwise resume stale approval
     # events from a previous invocation and exhaust the episode budget.
     preview_store = SqliteEventStore(":memory:") if fake_backend else None
     configured_store_path = (
@@ -211,7 +219,7 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
     if last_note:
         projections.append({"kind": "note", "text": last_note})
     projections.append({"kind": "complete", "outcome": outcome, "turns": int(getattr(result.telemetry, "turns", 0))})
-    return {"type": "result", "result": {
+    return {"type": "result", "runId": run_id, "result": {
         "runId": run_id, "outcome": outcome, "phase": "complete", "attempts": 1,
         "turns": int(getattr(result.telemetry, "turns", 0)),
         "planDigest": result.run_digest or None, "activeStepId": None,
@@ -232,7 +240,7 @@ def main() -> int:
         try:
             frame = execute(json.loads(line))
         except Exception as exc:
-            frame = {"type": "result", "result": {
+            frame = {"type": "result", "runId": "unknown", "result": {
                 "runId": "unknown", "outcome": "instrument_error", "phase": "failed",
                 "attempts": 0, "turns": 0, "planDigest": None, "activeStepId": None,
                 "verifiedStepIds": [], "modelRoutes": [], "promptTokens": None,

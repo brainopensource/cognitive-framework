@@ -263,14 +263,25 @@ class SandboxedEnvironmentAdapter:
             cmd = req.command or req.args.get("argv")
             if not cmd:
                 return Result.fail("invalid_request", "command argv is required")
-                
+
+            cmd_list = list(cmd)
+            exec_name = Path(cmd_list[0]).name
+            if exec_name.startswith("python"):
+                # T-74: Route PYTHONPYCACHEPREFIX to sandbox tmpfs so test execution
+                # cannot mutate the subject workspace with bytecode.
+                if not any("pycache_prefix" in str(arg) for arg in cmd_list):
+                    cmd_list = [cmd_list[0], "-X", "pycache_prefix=/tmp/pycache", *cmd_list[1:]]
+            elif exec_name == "pytest":
+                if not any("cache_dir" in str(arg) for arg in cmd_list):
+                    cmd_list = [cmd_list[0], "-o", "cache_dir=/tmp/.pytest_cache", *cmd_list[1:]]
+
             op = WorkerRequest(
                 # `S10-A-02`. This said `proc.test` for every process call,
                 # including ones the manifest declared as `proc.exec` -- so the
                 # worker allowlist and the ledger saw an operation name the
                 # harness never granted.
                 operation="proc.exec",
-                args={"argv": list(cmd)},
+                args={"argv": cmd_list, "env": {"PYTHONPYCACHEPREFIX": "/tmp/pycache"}},
                 working_directory=req.working_directory or ".",
                 timeout_seconds=30.0,
                 max_output_bytes=10*1024*1024,

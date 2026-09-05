@@ -17,7 +17,7 @@ import time
 import urllib.error
 import urllib.request
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Mapping, Optional
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8080
@@ -41,7 +41,6 @@ def find_llama_server_binary() -> Optional[str]:
     # Common fallback locations on Linux/Fedora
     known_paths = [
         Path.home() / ".local/bin/llama-server",
-        Path("/usr/local/lib/ollama/llama-server"),
         Path("/usr/local/bin/llama-server"),
         Path("/usr/bin/llama-server"),
         Path("/opt/llama.cpp/llama-server"),
@@ -50,6 +49,79 @@ def find_llama_server_binary() -> Optional[str]:
         if candidate.is_file() and os.access(candidate, os.X_OK):
             return str(candidate)
     return None
+
+
+class LlamaBridgeError(Exception):
+    """Base exception for llama bridge lifecycle errors."""
+    def __init__(self, code: str, message: str) -> None:
+        super().__init__(f"[{code}] {message}")
+        self.code = code
+        self.message = message
+
+
+class ModelMismatchError(LlamaBridgeError):
+    def __init__(self, message: str = "Occupied port model/alias does not match expected identity") -> None:
+        super().__init__("MODEL_MISMATCH", message)
+
+
+class PidStaleError(LlamaBridgeError):
+    def __init__(self, message: str = "Recorded child PID is stale or not running") -> None:
+        super().__init__("PID_STALE", message)
+
+
+def check_props_identity(
+    props: Mapping[str, Any],
+    expected_model: str,
+    expected_alias: Optional[str] = None,
+) -> bool:
+    """Check if /props matches expected model and alias."""
+    if not props:
+        return False
+    default_gen = props.get("default_generation_settings", {}) if isinstance(props, Mapping) else {}
+    props_model = str(default_gen.get("model") or props.get("model") or "")
+    props_alias = str(props.get("alias") or props.get("model_alias") or "")
+
+    expected_model_name = Path(expected_model).name
+    expected_model_stem = Path(expected_model).stem
+
+    model_matches = False
+    if props_model:
+        model_matches = (
+            props_model == expected_model
+            or props_model == expected_model_name
+            or props_model == expected_model_stem
+            or Path(props_model).name == expected_model_name
+            or Path(props_model).stem == expected_model_stem
+            or (bool(expected_alias) and props_model == expected_alias)
+        )
+
+    alias_matches = True
+    if expected_alias:
+        if props_alias:
+            alias_matches = (props_alias == expected_alias)
+        elif props_model:
+            alias_matches = (props_model == expected_alias or model_matches)
+        else:
+            alias_matches = False
+
+    return bool(model_matches and alias_matches)
+
+
+def adopt_server(
+    base_url: str,
+    expected_model: str,
+    expected_alias: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Adopt an existing server on the port only if /props model and alias match."""
+    health = check_server_health(base_url)
+    if not health.get("online"):
+        raise LlamaBridgeError("SERVER_OFFLINE", f"No server online at {base_url}")
+    props = health.get("props", {})
+    if not check_props_identity(props, expected_model, expected_alias):
+        raise ModelMismatchError(
+            f"Occupied port {base_url} model/alias does not match expected ({expected_model}, {expected_alias})"
+        )
+    return health
 
 
 def scan_gguf_models(search_dirs: Optional[List[Path]] = None) -> List[Dict[str, Any]]:
@@ -153,22 +225,26 @@ def serve_command(args: argparse.Namespace) -> None:
     print(f"Command: {' '.join(cmd)}")
 
     if args.background:
-        proc = subprocess.Popen(
-            cmd,
-            stdout=open("/tmp/llama_server.log", "w"),
-            stderr=subprocess.STDOUT,
-            preexec_fn=os.setsid,
-        )
-        PID_FILE.write_text(str(proc.pid))
-        print(f"Server launched in background (PID: {proc.pid}). Logs: /tmp/llama_server.log")
-        # Wait up to 5s for health check
-        for _ in range(10):
-            time.sleep(0.5)
-            health = check_server_health(f"http://{args.host}:{args.port}")
-            if health["online"]:
-                print("Server is ONLINE and ready for requests.")
-                return
-        print("Server process started. Check /tmp/llama_server.log for startup progress.")
+        alias = args.alias or model_path.stem
+        try:
+            result = launch_server_process(
+                cmd,
+                host=args.host,
+                port=args.port,
+                expected_model=str(model_path),
+                expected_alias=alias,
+            )
+        except ModelMismatchError as exc:
+            print(f"Error [{exc.code}]: {exc.message}", file=sys.stderr)
+            sys.exit(1)
+
+        if result["status"] == "ONLINE":
+            print("Server is ONLINE and ready for requests.")
+        elif result["status"] == "FAILED":
+            print(f"Server launch FAILED: {result.get('error', 'unknown error')}", file=sys.stderr)
+            sys.exit(1)
+        else:
+            print("Server process started. Check /tmp/llama_server.log for startup progress.")
     else:
         try:
             subprocess.run(cmd)
@@ -176,28 +252,107 @@ def serve_command(args: argparse.Namespace) -> None:
             print("\nShutting down llama-server...")
 
 
-def stop_command(args: argparse.Namespace) -> None:
-    """Stop the background llama-server process."""
-    if not PID_FILE.exists():
-        print("No active PID file found at /tmp/llama_server.pid.")
-        # Check if any llama-server is running
-        res = subprocess.run(["pgrep", "-f", "llama-server"], capture_output=True, text=True)
-        if res.stdout.strip():
-            print(f"Found running llama-server PIDs: {res.stdout.strip()}")
-            subprocess.run(["pkill", "-f", "llama-server"])
-            print("Terminated running llama-server instances.")
-        return
+def launch_server_process(
+    cmd: list[str],
+    *,
+    host: str = DEFAULT_HOST,
+    port: int = DEFAULT_PORT,
+    expected_model: str,
+    expected_alias: Optional[str] = None,
+    log_file: str = "/tmp/llama_server.log",
+    pid_file: Path = PID_FILE,
+    max_wait_seconds: float = 5.0,
+) -> Dict[str, Any]:
+    """Launch server process and wait for readiness with fail-closed verification."""
+    base_url = f"http://{host}:{port}"
+
+    proc = subprocess.Popen(
+        cmd,
+        stdout=open(log_file, "w"),
+        stderr=subprocess.STDOUT,
+        preexec_fn=os.setsid,
+    )
+    pid_file.write_text(str(proc.pid))
+
+    start_t = time.time()
+    while (time.time() - start_t) < max_wait_seconds:
+        time.sleep(0.5)
+        # If child process exited prematurely, it must be FAILED, never ONLINE
+        if proc.poll() is not None:
+            return {
+                "status": "FAILED",
+                "online": False,
+                "error": f"Child process (PID {proc.pid}) exited with code {proc.poll()}",
+                "pid": proc.pid,
+            }
+        health = check_server_health(base_url)
+        if health.get("online"):
+            props = health.get("props", {})
+            if check_props_identity(props, expected_model, expected_alias):
+                return {
+                    "status": "ONLINE",
+                    "online": True,
+                    "pid": proc.pid,
+                    "health": health.get("health", {}),
+                    "props": props,
+                }
+            else:
+                return {
+                    "status": "FAILED",
+                    "online": False,
+                    "error": "MODEL_MISMATCH",
+                    "pid": proc.pid,
+                }
+
+    if proc.poll() is not None:
+        return {
+            "status": "FAILED",
+            "online": False,
+            "error": f"Child process exited with code {proc.poll()}",
+            "pid": proc.pid,
+        }
+
+    return {
+        "status": "STARTING",
+        "online": False,
+        "pid": proc.pid,
+    }
+
+
+def stop_server(pid_file: Path = PID_FILE) -> None:
+    """Stop only an identity-verified recorded child process."""
+    if not pid_file.exists():
+        raise PidStaleError(f"No active PID file found at {pid_file}")
 
     try:
-        pid = int(PID_FILE.read_text().strip())
+        pid_text = pid_file.read_text().strip()
+        pid = int(pid_text)
+    except (ValueError, OSError) as exc:
+        pid_file.unlink(missing_ok=True)
+        raise PidStaleError(f"Invalid PID file content: {exc}")
+
+    try:
+        os.kill(pid, 0)
+    except (ProcessLookupError, OSError):
+        pid_file.unlink(missing_ok=True)
+        raise PidStaleError(f"Process {pid} is not running (stale PID)")
+
+    try:
         os.kill(pid, signal.SIGTERM)
-        print(f"Sent SIGTERM to llama-server (PID {pid}).")
-        PID_FILE.unlink(missing_ok=True)
-    except ProcessLookupError:
-        print(f"Process {pid} was not running. Cleared PID file.")
-        PID_FILE.unlink(missing_ok=True)
-    except Exception as exc:
-        print(f"Error stopping process: {exc}", file=sys.stderr)
+        pid_file.unlink(missing_ok=True)
+    except (ProcessLookupError, OSError) as exc:
+        pid_file.unlink(missing_ok=True)
+        raise PidStaleError(f"Failed to stop process {pid}: {exc}")
+
+
+def stop_command(args: argparse.Namespace) -> None:
+    """Stop the background llama-server process."""
+    try:
+        stop_server()
+        print("Sent SIGTERM to llama-server.")
+    except PidStaleError as exc:
+        print(f"Error [{exc.code}]: {exc.message}", file=sys.stderr)
+        sys.exit(1)
 
 
 def status_command(args: argparse.Namespace) -> None:

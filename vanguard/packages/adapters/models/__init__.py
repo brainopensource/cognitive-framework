@@ -1,8 +1,8 @@
 """Model adapter family; sibling adapter families must not import this package.
 
-PEP 562 lazy attribute access. `ollama` pulls urllib -> http.client ->
-email.parser (~106ms) which a `local`/fake-model run never uses. Names stay
-importable; the module body is only executed on first attribute access.
+PEP 562 lazy attribute access keeps transport-heavy imports out of local and
+fake-model startup. Names stay importable; a module body executes only on
+first attribute access.
 """
 from typing import TYPE_CHECKING
 

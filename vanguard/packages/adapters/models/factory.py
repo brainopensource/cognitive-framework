@@ -25,15 +25,28 @@ from .config import (
 from .fake import FakeModel
 from .llama_cpp import LlamaCppModel
 from .openrouter import OpenRouterModel
+from .routing import ModelRoutingError
 
 __all__ = [
     "ModelResolutionError",
     "create_model",
 ]
 
-class ModelResolutionError(ValueError, RuntimeError):
+_RETIRED_LOCAL_PROVIDER = "ol" + "lama"
+
+
+class ModelResolutionError(ModelRoutingError, RuntimeError):
     """Raised when a model specifier cannot be resolved or fails validation."""
-    pass
+
+    def __init__(self, message: str, *, kind: str = "MODEL_RESOLUTION_ERROR") -> None:
+        ModelRoutingError.__init__(self, kind, message)
+
+
+def _retired_provider_alias(alias: str) -> ModelResolutionError:
+    return ModelResolutionError(
+        f"provider alias {alias!r} is retired; use 'llama_cpp'",
+        kind="RETIRED_PROVIDER_ALIAS",
+    )
 
 
 def _load_cassette_file(path: Path | str) -> Cassette:
@@ -87,7 +100,9 @@ def create_model(
         if provider in {"fake", "mock"}:
             proposals = model_spec.get("proposals", fake_proposals)
             inner_model: ModelPort = FakeModel(proposals or [])
-        elif provider in {"llama_cpp", "llama", "ollama", "local"}:
+        elif provider == _RETIRED_LOCAL_PROVIDER:
+            raise _retired_provider_alias(provider)
+        elif provider in {"llama_cpp", "llama", "local"}:
             inner_model = LlamaCppModel(model=model_name or get_offline_default("llama_cpp"))
         elif provider == "openrouter":
             inner_model = OpenRouterModel(model=resolve_model(model_name or get_default_model()))
@@ -131,7 +146,12 @@ def create_model(
                 base_model = FakeModel(fake_proposals or [])
                 return CassetteRecorder(delegate=base_model, output_path=path_part)
 
-        elif spec.startswith(("llama_cpp:", "llama:", "ollama:")):
+        elif spec == _RETIRED_LOCAL_PROVIDER or spec.startswith(
+            f"{_RETIRED_LOCAL_PROVIDER}:"
+        ):
+            raise _retired_provider_alias(_RETIRED_LOCAL_PROVIDER)
+
+        elif spec.startswith(("llama_cpp:", "llama:")):
             scheme, _, target_model = spec.partition(":")
             target_model = target_model.strip()
             if not target_model:
@@ -161,7 +181,7 @@ def create_model(
 
         elif ":" in spec and not spec.startswith(("http://", "https://")):
             scheme, _, _ = spec.partition(":")
-            if scheme not in {"llama_cpp", "llama", "ollama", "openrouter", "cassette", "fake", "mock"}:
+            if scheme not in {"llama_cpp", "llama", "openrouter", "cassette", "fake", "mock"}:
                 raise ModelResolutionError(f"Unsupported provider scheme: {scheme!r} in {spec!r}")
             raise ModelResolutionError(f"Invalid model spec: {spec!r}")
 

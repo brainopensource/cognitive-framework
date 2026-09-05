@@ -192,14 +192,18 @@ class CodeDefaultHarnessContract(unittest.TestCase):
 
     def test_code_default_contains_typed_tools_and_capabilities(self) -> None:
         components = dict(self.manifest.components)
-        self.assertEqual(len(components["tools"]), 4)
+        self.assertEqual(len(components["tools"]), 5)
         verbs = {cap.verb for cap in self.manifest.capabilities}
-        self.assertEqual(verbs, {"fs.read", "fs.search", "patch.apply", "proc.exec"})
+        self.assertEqual(
+            verbs,
+            {"fs.read", "fs.search", "patch.apply", "proc.exec", "agency.finish"},
+        )
         sinks = {cap.verb: cap.sink for cap in self.manifest.capabilities}
         self.assertEqual(sinks["fs.read"], "observation")
         self.assertEqual(sinks["fs.search"], "observation")
         self.assertEqual(sinks["patch.apply"], "privileged")
         self.assertEqual(sinks["proc.exec"], "privileged")
+        self.assertEqual(sinks["agency.finish"], "observation")
 
     def test_composition_digest_is_episode_independent(self) -> None:
         """ADR-0076 §4 / 1.3-A (F-11): see the sibling test on
@@ -234,4 +238,3 @@ class CodeDefaultHarnessContract(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

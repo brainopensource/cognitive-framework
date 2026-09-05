@@ -41,6 +41,7 @@ from ..domain.ledger.agent_view import AgentView, fold_agent_view
 from ..domain.ledger.progress import ConfidenceRecord, ProgressView, fold_progress
 from ..domain.ledger.reducer import compute_state_digest, reconstruct_state
 from ..domain.ledger.state import LedgerState
+from ..kernel.attenuation import RISK_ORDER
 from ..kernel import (
     EffectRequest,
     AdapterOutcome,
@@ -87,6 +88,7 @@ from .response_handler import ResponseHandler
 from .task_state import fold_task_state
 from .telemetry import RunTelemetry, compute_run_telemetry, instrument_error as _telemetry_instrument_error
 from .trajectory import DelayedTerminalEmitter, assemble_trajectory
+from .governance.tamper_shield import TestTamperShield
 from .governance.approvals import (
     ApprovalAuthority,
     ApprovalDecision,
@@ -118,33 +120,167 @@ def _workspace_access_of(run_plan: Any) -> str:
     return getattr(requested, "workspace_access", None) or "workspace-write"
 
 
-#: Harnesses whose terminal ``finish`` must pass the pack completion policy
-#: (W-092-2: completion admitted only by fresh applicable verification).
-#: ``vg-code-default`` is deliberately NOT gated: closed M-2 acceptance
-#: falsifiers (e.g. RF-25 cold continuation) compose bare finishes through it,
-#: and gating it would reopen frozen milestone evidence.  Widening or shrinking
-#: this set is a governance decision to be recorded in
-#: ``docs/execution/active.md`` -- it is pinned by
-#: ``test/falsifiers/test_completion_gate_scope.py``, never changed silently.
-ADMISSION_GATED_HARNESSES = frozenset(
-    {"vg-code-fast", "vg-code-balanced", "vg-code-max", "vg-code-max-v2",
-     "vg-code-max-v2b", "vg-code-max-v3", "vg-herbs", "vg-chimera-v1", "vg-code-chimera"})
+#: Named approval tiers a manifest may declare, mapped onto the kernel risk
+#: ladder as `approval_required_above`. A tier names the highest risk that
+#: still dispatches without asking a human, so `standard` lets the declared
+#: medium `patch.apply` and high `proc.exec` through and still stops anything
+#: `critical`. A manifest may also declare a bare risk name, which passes
+#: through unchanged; anything else is undeclared and fails closed.
+_APPROVAL_TIERS: Mapping[str, str] = {
+    "strict": RISK_ORDER[0],
+    "standard": RISK_ORDER[2],
+    "permissive": RISK_ORDER[-1],
+}
 
-#: Presets deliberately exempt from capability-derived gating. Only shrinks.
-ADMISSION_GATE_EXEMPT = frozenset({"vg-code-default", "vg-code-lex"})
+#: The fail-closed resolution: ask above the weakest risk there is, i.e. ask
+#: about everything the manifest declares beyond a read. A missing, unparsable
+#: or unrecognised approval policy resolves here, never to a wider grant.
+_APPROVAL_FAIL_CLOSED = RISK_ORDER[0]
+
+#: Declared modes that seat a human at an interactive run. Under these, an
+#: interactive session keeps asking about every declared capability: the
+#: descriptor-bound Ed25519 approval flow is what interactive mode is *for*
+#: (`F-08`), and a manifest asking for assistance must not be read as an
+#: instruction to stop asking.
+_HUMAN_IN_THE_LOOP_MODES = frozenset({"assisted", "operator", "interactive"})
+
+
+def _declared_approval_policy(harness: Any) -> Mapping[str, Any] | None:
+    """The `components.approval_policy` the manifest already froze, or `None`.
+
+    Composition resolves the component to its text and folds it into the
+    frozen composition identity, so the policy is reachable here without a
+    second policy artifact and without widening `Harness` (T-70).
+    """
+    frozen = getattr(harness, "frozen", None)
+    declared = (getattr(frozen, "identity", None) or {}).get("approvalPolicy")
+    if isinstance(declared, Mapping):
+        return declared
+    if not isinstance(declared, str) or not declared.strip():
+        return None
+    try:
+        parsed = json.loads(declared)
+    except (TypeError, ValueError):
+        return None
+    return parsed if isinstance(parsed, Mapping) else None
+
+
+def resolve_approval_threshold(
+    harness: Any,
+    *,
+    interactive: bool,
+) -> str:
+    """Resolve `approval_required_above` from the manifest's declared policy.
+
+    The threshold used to be a literal in this file, so every run asked about
+    the two verbs a coding preset exists to use, and in benchmark mode
+    `StandardPolicy` turns an ask into `DENIED_ASK_FAIL_CLOSED` (`K-17`,
+    `F-07`) -- the product path could not patch or execute at all. The manifest
+    already declares the answer; read it rather than a second artifact (T-70).
+
+    The declared `threshold` governs the benchmark, where there is no human to
+    raise anything to. `mode` governs the interactive run: a pack asking to be
+    `assisted` keeps asking, so nothing here weakens `F-08` or the
+    descriptor-bound approval flow it exists to drive. Only a pack that
+    declares neither assistance nor an operator reaches `escalate_on`, which
+    names the verbs that must still suspend for a person.
+    """
+    policy = _declared_approval_policy(harness)
+    if policy is None:
+        return _APPROVAL_FAIL_CLOSED
+    declared = policy.get("threshold")
+    if not isinstance(declared, str):
+        return _APPROVAL_FAIL_CLOSED
+    tier = declared.strip().lower()
+    threshold = _APPROVAL_TIERS.get(tier, tier if tier in RISK_ORDER else None)
+    if threshold is None:
+        return _APPROVAL_FAIL_CLOSED
+    if not interactive:
+        return threshold
+    mode = policy.get("mode")
+    if not isinstance(mode, str) or mode.strip().lower() in _HUMAN_IN_THE_LOOP_MODES:
+        return _APPROVAL_FAIL_CLOSED
+    risk_of = getattr(harness, "risk_of", None) or {}
+    escalate_on = policy.get("escalate_on")
+    if not isinstance(escalate_on, Sequence) or isinstance(escalate_on, (str, bytes)):
+        return threshold
+    for verb in escalate_on:
+        risk = risk_of.get(verb) if isinstance(verb, str) else None
+        if not isinstance(risk, str) or risk not in RISK_ORDER:
+            continue
+        if RISK_ORDER.index(risk) <= RISK_ORDER.index(threshold):
+            threshold = RISK_ORDER[max(0, RISK_ORDER.index(risk) - 1)]
+    return threshold
+
+
+#: Interpreter flags that carry program text in the argv itself rather than
+#: naming a program to run. `python3 -c 'print("OK")'` is the agent's own
+#: prose, and `python3 -c 'print("3 tests passed")'` is the agent's own oracle;
+#: neither is a subject anything can be verified against (T-07).
+_INLINE_PROGRAM_FLAGS = frozenset({"-c", "-e", "--command", "--eval"})
+
+#: Executables whose invocation names a real test runner.
+_TEST_RUNNERS = frozenset({"pytest", "py.test", "unittest", "nose2", "tox"})
+
+
+@dataclass(frozen=True, slots=True)
+class VerificationSubject:
+    """What a verification receipt is a receipt *of* (T-07).
+
+    A command string alone cannot identify a subject: the same argv over a
+    different postimage, or against a different task, verified something else.
+    The digest therefore binds all three -- argv, the workspace it ran over,
+    and the task it was run for -- so a receipt cannot be carried across a
+    write or borrowed from another task and still match.
+    """
+
+    argv: tuple[str, ...]
+    workspace_digest: str
+    task_digest: str
+
+    def digest(self) -> str:
+        return digest_of({
+            "argv": list(self.argv),
+            "workspaceDigest": self.workspace_digest,
+            "taskDigest": self.task_digest,
+        })
+
+
+def verification_argv(args: Mapping[str, Any]) -> tuple[str, ...] | None:
+    """The typed argv of a verification command, or `None` if there is none.
+
+    A verification subject is a named runner invocation. Inline program text is
+    rejected outright: a model that can write the program can write its output,
+    so `python3 -c 'print("OK")'` is not verification, and neither is the same
+    one-liner with the word "test" inside the string it prints.
+    """
+    argv = args.get("argv", args.get("command", ()))
+    if isinstance(argv, str) or not isinstance(argv, Sequence) or not argv:
+        return None
+    tokens = tuple(str(item) for item in argv)
+    if any(token in _INLINE_PROGRAM_FLAGS for token in tokens):
+        return None
+    executable = tokens[0].rsplit("/", 1)[-1]
+    if executable in _TEST_RUNNERS:
+        return tokens
+    if any("test" in token.lower() for token in tokens):
+        return tokens
+    return None
 
 
 def admission_required(harness: Any) -> bool:
-    """Gate completion by declared capability, not by preset name.
+    """Gate completion by declared capability, and by nothing else (T-04/T-05).
 
-    A name allowlist meant every new preset shipped ungated until someone
-    remembered to edit the set, so a bare `finish` with zero effects scored as
-    a completed run. Any harness granted `patch.apply` has a completion claim
-    that must be admitted against real evidence.
+    This function is the single gating source of truth. There is no name
+    allowlist beside it and no exemption set behind it: `ADMISSION_GATED_HARNESSES`
+    (never read) and `ADMISSION_GATE_EXEMPT` (which bought `vg-code-default` and
+    `vg-code-lex` a permanent product-default bypass) are both gone, because two
+    name sets and a predicate could disagree and the names silently won.
+
+    Any harness granted `patch.apply` has a completion claim that must be
+    admitted against real evidence; a preset that ships tomorrow is gated by
+    what it declares, not by whether someone remembered to edit a set.
     """
-    name = getattr(harness, "harness", "")
-    if name in ADMISSION_GATE_EXEMPT:
-        return False
     return "patch.apply" in set(getattr(harness, "verbs", ()) or ())
 
 _CONTROLLER_BUDGET_KEYS: Mapping[str, str] = {
@@ -567,8 +703,15 @@ class HarnessSession:
         self._completion_inspected_files: set[str] = set()
         self._completion_verification: VerificationReceipt | None = None
         self._completion_verification_command: str | None = None
+        #: T-07. The typed subject the current verification receipt is bound
+        #: to; re-derived against live digests at admission so a receipt
+        #: cannot survive the write that invalidated it.
+        self._completion_verification_subject: VerificationSubject | None = None
         self._completion_redundant_verifications = 0
         self._completion_allowed_tools: frozenset[str] | None = None
+        #: `I-SHD` / T-18. Frozen below, once the index this pack declared is
+        #: bound; `None` means the pack declared no oracle enumeration source.
+        self._tamper_shield: TestTamperShield | None = None
 
         repo = Path(task.repo_path)
         self.repo = repo
@@ -634,18 +777,26 @@ class HarnessSession:
                 "an IndexPort was supplied but the manifest declares no index "
                 "component; bind it in the pack or do not pass it")
 
+        # `I-SHD` / T-18. Freeze the enumerated oracle set now, at turn 0,
+        # before the operator has seen the workspace -- a shield frozen after
+        # the first write would bless whatever the agent had already done to
+        # the tests. Enumeration is `IndexPort.tests()`; a pack that declares
+        # no index has no enumeration source, and its packet already carries
+        # `INDEX_PORT_UNBOUND` as an explicit omission rather than an empty
+        # shield that would silently admit every tampered oracle.
+        self._tamper_shield = self._freeze_tamper_shield()
+
         classifier = StandardClassifier([
             HeldAuthority(task.principal, frozenset(harness.verbs),
                           _ceiling_resources(harness), max_depth=4)])
         self.policy = _SwappablePolicy(StandardPolicy(
             parent_scope=self.scope,
             mode=Mode.INTERACTIVE if ports.interactive else Mode.BENCHMARK,
-            # Every non-`low` capability the manifest declares is descriptor-
-            # bound to a human. The threshold is one number and the manifest
-            # supplies the risks it applies to.
-            # TODO(S8-B-04): this literal is the last composition value the
-            # manifest does not own. It is replaced by the approval-threshold
-            # manifest component; Lane B lands that, not this sprint.
+            # The threshold is one number and the manifest supplies both it
+            # and the risks it applies to (`S8-B-04`, closed by T-70): the
+            # composition value is read from the pack's declared
+            # `components.approval_policy`, not hardcoded here. A pack that
+            # declares nothing usable fails closed to the strictest rung.
             # A sealed child scope is the already-approved delegation grant:
             # the parent approval covers the complete attenuated request, and
             # the child cannot widen that sealed membership. Requiring a
@@ -653,7 +804,10 @@ class HarnessSession:
             # high-risk role fail in benchmark mode, despite the parent having
             # explicitly authorized the bounded child plan. Unsealed runs
             # retain the normal benchmark/interactive approval rule.
-            approval_required_above=(None if self.scope.sealed else "low"),
+            approval_required_above=(
+                None if self.scope.sealed
+                else resolve_approval_threshold(
+                    harness, interactive=bool(ports.interactive))),
             risk_of=harness.risk_of,
         ))
 
@@ -1322,6 +1476,12 @@ class HarnessSession:
                 episode_id=self.task.episode_id, verdict=verdict)
         return verdict
 
+    def _current_task_digest(self) -> str:
+        """The task identity a receipt must be bound to (T-07)."""
+        if self.run_plan is not None:
+            return self.run_plan.task_digest
+        return digest_of({"runId": self.task.run_id, "brief": self.task.brief})
+
     def _workspace_digest(self) -> str:
         snapshot = self.ports.environment.snapshot()
         if snapshot.ok and snapshot.value is not None:
@@ -1570,36 +1730,39 @@ class HarnessSession:
                 )
         if request.action not in {"test", "exec", "proc.exec"}:
             return
-        argv = request.args.get("argv", request.args.get("command", ()))
-        verification_command = (
-            argv if isinstance(argv, str) else " ".join(str(item) for item in argv)
-        )
-        executable = str(argv[0]) if isinstance(argv, Sequence) and not isinstance(argv, str) and argv else ""
-        is_test = executable.rsplit("/", 1)[-1] in {"pytest", "unittest"} or any(
-            "test" in str(item).lower() for item in (argv if isinstance(argv, Sequence) else (verification_command,)))
-        if not is_test:
+        argv = verification_argv(request.args)
+        if argv is None:
             return
+        verification_command = " ".join(argv)
         detail = str(outcome.detail or "")
         match = re.search(r"\[exit (-?\d+)\]", detail)
         exit_code = int(match.group(1)) if match else (0 if outcome.status == "ok" else 1)
         previous_verification = self._completion_verification
+        # T-07. The receipt is bound to a typed subject, not to a command
+        # string: argv, the postimage it ran over, and the task it ran for.
+        subject = VerificationSubject(
+            argv=argv,
+            workspace_digest=self._workspace_digest(),
+            task_digest=self._current_task_digest(),
+        )
+        self._completion_verification_subject = subject
         self._completion_verification = VerificationReceipt(
             exit_code=exit_code,
             executed_test_count=_observed_test_count(detail),
-            workspace_digest=self._workspace_digest(),
+            workspace_digest=subject.workspace_digest,
             task_digest=(self.run_plan.task_digest if self.run_plan is not None
                          else digest_of({"task": self.task.brief})),
             composition_digest=self.run_plan.composition_digest if self.run_plan is not None else self.harness.composition_digest,
             receipt_digest=outcome.result_digest or "",
             verification_command=verification_command,
-            verification_subject_digest=digest_of({"command": verification_command}),
+            verification_subject_digest=subject.digest(),
         )
         artifacts = getattr(self, "artifacts", None)
         if (artifacts is not None
                 and "reused durable settled effect" not in str(outcome.detail or "")):
             artifacts.capture(
                 "verification_report",
-                {"command": list(argv) if isinstance(argv, Sequence) else [],
+                {"command": list(argv),
                  "exitCode": exit_code,
                  "executedTestCount": self._completion_verification.executed_test_count,
                  "workspaceDigest": self._completion_verification.workspace_digest,
@@ -1652,6 +1815,21 @@ class HarnessSession:
         folded = fold_task_state(events, objective=self.task.brief)
         self.operator.set_task_state(folded.to_canonical_dict())
 
+    def _freeze_tamper_shield(self) -> TestTamperShield | None:
+        """Hash the IndexPort-enumerated oracle set for this workspace (T-18).
+
+        A shield that cannot enumerate is not a shield that saw nothing: the
+        mechanism records `enumeration_failed` and refuses admission, so an
+        index that goes down mid-freeze cannot be mistaken for a clean tree.
+        """
+        if self.index is None:
+            return None
+        try:
+            return TestTamperShield.freeze(self.repo, self.index)
+        except OSError:
+            return TestTamperShield(
+                workspace=self.repo, frozen_test_digests={}, enumeration_failed=True)
+
     def _admit_completion(self, _episode: Any, _proposal: Any) -> AdmissionVerdict:
         """Apply the coding completion contract before reducing ``finish``."""
         policy = self.ports.completion_policy or self._completion_gate
@@ -1683,18 +1861,41 @@ class HarnessSession:
                 "ADMISSION GATE REJECTION: Context packet is truncated or omitted a "
                 f"required file. {exc}",
             )
+        # `I-SHD` / T-18. The oracle set frozen at turn 0 is re-hashed against
+        # the workspace the completion claim is being made about. An agent that
+        # edited an assertion to make its own verification pass has no
+        # admissible completion, whatever the runner printed.
+        tamper = self._tamper_shield
+        if tamper is not None:
+            evaluated = tamper.evaluate(self.repo)
+            if not evaluated.admissible:
+                return AdmissionVerdict(
+                    False,
+                    evaluated.reason.split(":", 1)[0],
+                    "ADMISSION GATE REJECTION: the frozen test oracle set changed "
+                    f"during this episode ({evaluated.reason}). Restore the "
+                    "enumerated tests and re-verify; tests are the subject of "
+                    "verification, not part of the patch.",
+                )
         verdict = policy.evaluate(
             preset_name=self.harness.harness,
             changed_files=tuple(sorted(self._completion_changed_files)),
             proposal={"kind": "finish"},
             verification=self._completion_verification,
             current_workspace_digest=self._workspace_digest(),
-            current_task_digest=(self.run_plan.task_digest if self.run_plan is not None else digest_of({"runId": self.task.run_id, "brief": self.task.brief})),
+            current_task_digest=self._current_task_digest(),
             current_composition_digest=(self.run_plan.composition_digest if self.run_plan is not None else self.harness.composition_digest),
             current_verification_command=self._completion_verification_command,
+            # T-07. Re-derive the subject from the recorded argv against the
+            # *current* postimage and task, so a receipt whose subject moved
+            # under it reads as foreign rather than as fresh evidence.
             current_verification_subject_digest=(
-                digest_of({"command": self._completion_verification_command})
-                if self._completion_verification_command else None
+                replace(
+                    self._completion_verification_subject,
+                    workspace_digest=self._workspace_digest(),
+                    task_digest=self._current_task_digest(),
+                ).digest()
+                if self._completion_verification_subject is not None else None
             ),
             inspected_files=tuple(sorted(self._completion_inspected_files)),
             task_text=self.task.brief,

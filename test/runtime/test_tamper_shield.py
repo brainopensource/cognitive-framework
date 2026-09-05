@@ -2,6 +2,11 @@
 
 Path.glob("test/**") is insufficient: an index-known oracle outside that
 tree must still freeze, and an assertion edit must fail admission.
+
+`TestTamperShieldIsWiredIntoAdmission` is the reopened half.  The mechanism
+below was correct and had zero production callers, so nothing in a real run
+ever consulted it; these cases pin `HarnessSession` freezing the shield at
+turn 0 and evaluating it inside `_admit_completion`.
 """
 
 from __future__ import annotations
@@ -19,6 +24,12 @@ from vanguard.packages.ports.index import (
     TestAssociation,
 )
 from vanguard.packages.runtime.governance.tamper_shield import TestTamperShield
+from vanguard.packages.runtime.root import (
+    HarnessSession,
+    Runtime,
+    SessionPorts,
+    TaskContext,
+)
 
 _PUBLIC = "def test_public():\n    assert 1 + 1 == 2\n"
 _HIDDEN = "def test_hidden():\n    assert add(1, 1) == 2\n"
@@ -127,6 +138,85 @@ class TestTamperShieldAdmission(unittest.TestCase):
             self.assertFalse(verdict.admissible)
             self.assertIn("TAMPER", verdict.reason)
             self.assertTrue(public.exists())
+
+
+class TestTamperShieldIsWiredIntoAdmission(unittest.TestCase):
+    """T-18 REOPENED: the shield must have a production caller, not just a test."""
+
+    def _session(self, root: Path, index: _Index) -> HarnessSession:
+        from test.agency.doubles import ScriptedModel, finish
+        from test.runtime.test_harness_session import FakeClock, FakeEnvironment
+        from vanguard.packages.adapters.stores.event_store import SqliteEventStore
+
+        # `vg-code-max` is a product preset that declares a `repo_index`
+        # component, so the session binds an IndexPort and has an enumeration
+        # source to freeze.
+        harness = Runtime.compose("vg-code-max", episode_id="ep-tamper")
+        return HarnessSession(
+            harness,
+            SessionPorts(
+                model=ScriptedModel([finish("done")]),
+                environment=FakeEnvironment(),
+                clock=FakeClock(),
+                store=SqliteEventStore(":memory:"),
+                index=index,
+                interactive=False,
+            ),
+            TaskContext(
+                brief="tamper", repo_path=root, project_id="project-tamper",
+                run_id="run-tamper", episode_id="ep-tamper",
+                principal="agent-tamper", max_turns=2),
+        )
+
+    def test_the_session_freezes_the_enumerated_set_at_turn_zero(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _workspace(root)
+            session = self._session(
+                root, _Index(("test/test_app.py", "hidden/spec_oracle.py")))
+
+            self.assertIsNotNone(session._tamper_shield)
+            self.assertEqual(
+                set(session._tamper_shield.frozen_test_digests),
+                {"test/test_app.py", "hidden/spec_oracle.py"},
+            )
+
+    def test_an_assertion_edit_rejects_the_real_admission_call(self) -> None:
+        """The production path, not the mechanism in isolation."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _workspace(root)
+            session = self._session(
+                root, _Index(("test/test_app.py", "hidden/spec_oracle.py")))
+
+            (root / "hidden" / "spec_oracle.py").write_text(_TAMPERED, encoding="utf-8")
+            verdict = session._admit_completion(None, {"kind": "finish"})
+
+            self.assertFalse(verdict.admissible)
+            self.assertEqual(verdict.reason, "TAMPER_VIOLATION")
+            self.assertIn("spec_oracle.py", verdict.rejection_feedback or "")
+
+    def test_a_failed_enumeration_is_not_read_as_a_clean_tree(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _workspace(root)
+            session = self._session(root, _Index(("test/test_app.py",), fail=True))
+
+            self.assertTrue(session._tamper_shield.enumeration_failed)
+            verdict = session._admit_completion(None, {"kind": "finish"})
+            self.assertFalse(verdict.admissible)
+            self.assertEqual(verdict.reason, "TAMPER_VIOLATION")
+
+    def test_an_untouched_oracle_set_does_not_reject_on_tamper(self) -> None:
+        """The shield may not become a blanket denial of every completion."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            _workspace(root)
+            session = self._session(
+                root, _Index(("test/test_app.py", "hidden/spec_oracle.py")))
+
+            verdict = session._admit_completion(None, {"kind": "finish"})
+            self.assertNotEqual(verdict.reason, "TAMPER_VIOLATION")
 
 
 if __name__ == "__main__":

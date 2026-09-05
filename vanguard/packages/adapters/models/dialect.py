@@ -47,6 +47,10 @@ _SCHEMA = {"type": "object", "required": ["kind"], "properties": {
     "action": {"type": "string"}, "args": {"type": "object"},
 }}
 _FENCE = re.compile(r"```(?:json)?\s*(.+?)\s*```", re.DOTALL | re.IGNORECASE)
+_JSON_FENCE = re.compile(
+    r"^[ \t]*```[ \t]*(?:json)?[ \t]*\n(.*?)^[ \t]*```[ \t]*$",
+    re.DOTALL | re.MULTILINE | re.IGNORECASE,
+)
 _KIND = re.compile(r"^\s*KIND:\s*(\w+)\s*$", re.MULTILINE | re.IGNORECASE)
 _ACTION = re.compile(r"^\s*ACTION:\s*(\S+)\s*$", re.MULTILINE | re.IGNORECASE)
 _ARGS = re.compile(r"^\s*ARGS:\s*(\{.*\})\s*$", re.MULTILINE | re.IGNORECASE)
@@ -54,6 +58,9 @@ _THINK = re.compile(r"<think>.*?</think>", re.DOTALL | re.IGNORECASE)
 _DSML = re.compile(r"<\s*[|｜]?DSML[|｜]?", re.IGNORECASE)
 _XML_TOOL = re.compile(r"<\s*tool_call\b|<\s*function\s*=", re.IGNORECASE)
 _XML_BODY = re.compile(r"<tool_call>\s*(.*?)\s*</tool_call>", re.DOTALL | re.IGNORECASE)
+_INVOCATION_FIELD = re.compile(
+    r'["\'](?:action|verb|name)["\']\s*:', re.IGNORECASE,
+)
 
 
 def _tools_prompt(tools: Sequence[Mapping[str, Any]]) -> str:
@@ -150,10 +157,84 @@ def _balanced(text: str) -> str | None:
     return None
 
 
+def _effect_from_action_object(payload: Mapping[str, Any]) -> Mapping[str, Any] | None:
+    """Normalize one action-object spelling without granting it authority."""
+    action = payload.get("action") or payload.get("verb") or payload.get("name")
+    if not isinstance(action, str) or not action.strip():
+        return None
+    kind = payload.get("kind", "effect")
+    if kind != "effect":
+        return None
+    if "args" in payload:
+        args = payload.get("args")
+    elif "arguments" in payload:
+        args = payload.get("arguments")
+    elif "parameters" in payload:
+        args = payload.get("parameters")
+    else:
+        args = {
+            key: value for key, value in payload.items()
+            if key not in {
+                "action", "verb", "name", "kind", "note", "id",
+                "args", "arguments", "parameters",
+            }
+        }
+    if not isinstance(args, Mapping):
+        return None
+    return {"kind": "effect", "action": action.strip(), "args": dict(args)}
+
+
+def _recover_fenced_note(payload: Mapping[str, Any]) -> tuple[Mapping[str, Any] | None, bool]:
+    """Return a typed candidate only for a null outer action.
+
+    The boolean reports an invocation-like fence that was present but could
+    not be parsed and validated. Callers use it to avoid converting malformed
+    intended effects into successful finishes.
+    """
+    if "action" not in payload or payload.get("action") is not None:
+        return None, False
+    note = payload.get("note")
+    if not isinstance(note, str) or not note.strip():
+        return None, False
+    matches = tuple(_JSON_FENCE.finditer(note))
+    candidate: Mapping[str, Any] | None = None
+    for match in matches:
+        raw = match.group(1)
+        try:
+            decoded = json.loads(raw)
+        except (TypeError, ValueError):
+            if _INVOCATION_FIELD.search(raw):
+                return None, True
+            continue
+        if not isinstance(decoded, Mapping):
+            continue
+        decoded_candidate = _effect_from_action_object(decoded)
+        if decoded_candidate is not None:
+            if candidate is not None:
+                return None, True
+            candidate = decoded_candidate
+            continue
+        if any(key in decoded for key in ("action", "verb", "name")):
+            return None, True
+    if candidate is not None:
+        return candidate, False
+    return None, any(_INVOCATION_FIELD.search(match.group(1)) for match in matches)
+
+
 def normalize_response(raw: Any, profile: ModelCapabilityProfile | str | None = None) -> NormalizedResponse:
     resolved = profile if isinstance(profile, ModelCapabilityProfile) else profile_for(profile)
     usage = dict(raw.get("usage", {})) if isinstance(raw, Mapping) and isinstance(raw.get("usage"), Mapping) else {}
     if isinstance(raw, Mapping) and "kind" in raw:
+        recovered, unparsed = _recover_fenced_note(raw)
+        if recovered is not None:
+            return NormalizedResponse(recovered, usage=usage, raw_text=str(raw.get("note") or ""))
+        if unparsed:
+            return NormalizedResponse(
+                None,
+                "PREMATURE_FINISH_REJECTED",
+                usage,
+                str(raw.get("note") or ""),
+            )
         return NormalizedResponse(dict(raw), usage=usage)
     text = raw if isinstance(raw, str) else ""
     if isinstance(raw, Mapping):

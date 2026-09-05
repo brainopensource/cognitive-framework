@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import hashlib
 import json
-from typing import ClassVar, Sequence
+from dataclasses import dataclass
+from typing import Callable, ClassVar, Sequence
 
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
@@ -18,7 +19,25 @@ from vanguard.packages.domain.wire.types_gen import (
     SignedVerdict,
 )
 
-__all__ = ["PackOracleGate", "sign_verdict", "verify_verdict"]
+__all__ = [
+    "GreenfieldControlOutcome",
+    "PackOracleGate",
+    "sign_verdict",
+    "verify_verdict",
+]
+
+
+@dataclass(frozen=True, slots=True)
+class GreenfieldControlOutcome:
+    """Observed result of running an oracle against its empty-stub control."""
+
+    tests_run: int
+    failures: int
+    errors: int = 0
+
+    @property
+    def failed(self) -> bool:
+        return self.failures + self.errors > 0
 
 
 def sign_verdict(verdict: dict, private_key: bytes) -> str:
@@ -78,6 +97,33 @@ class PackOracleGate:
         if not oracle.id:
             return Err("invalid_request", "oracle id required")
         return Ok(oracle.id)
+
+    def run_greenfield_control(
+        self,
+        runner: Callable[[], GreenfieldControlOutcome],
+    ) -> Result[GreenfieldControlOutcome]:
+        """Require a synthesized oracle to be red on empty implementation stubs.
+
+        The caller supplies a mediated, hermetic runner already configured to
+        execute the oracle against ``pass`` or ``NotImplementedError`` stubs.
+        A green control cannot become completion evidence.
+        """
+        outcome = runner()
+        if any(
+            not isinstance(value, int) or isinstance(value, bool)
+            for value in (outcome.tests_run, outcome.failures, outcome.errors)
+        ):
+            return Err("invalid_request", "oracle control counts must be integers")
+        if min(outcome.tests_run, outcome.failures, outcome.errors) < 0:
+            return Err("invalid_request", "oracle control counts must be non-negative")
+        if outcome.failures + outcome.errors > outcome.tests_run:
+            return Err("invalid_request", "oracle control failures exceed tests run")
+        if not outcome.failed:
+            return Err(
+                "VACUOUS_ORACLE_REJECTED",
+                "greenfield oracle produced zero failures against empty stubs",
+            )
+        return Ok(outcome)
 
 
 def oracle_digest(body: bytes) -> str:

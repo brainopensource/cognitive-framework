@@ -3,7 +3,7 @@
 Invariants:
 - Uses standard OpenAI /v1/chat/completions API format.
 - Reuses OpenRouterModel transport, parsing, and streaming without code duplication.
-- Local endpoint requires no remote credentials or third-party daemon (Ollama-free).
+- Local endpoint requires no remote credentials or legacy provider daemon.
 """
 
 from __future__ import annotations

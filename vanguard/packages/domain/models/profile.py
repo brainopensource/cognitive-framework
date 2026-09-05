@@ -70,23 +70,22 @@ _PROFILES: dict[str, ModelCapabilityProfile] = {
         "openrouter/free",
         tool_call_style=ToolCallStyle.FENCED_JSON,
     ),
+    # Primary production route: DeepSeek V4 Flash
     "deepseek/deepseek-v4-flash-0731": ModelCapabilityProfile(
         "deepseek/deepseek-v4-flash-0731",
         tool_call_style=ToolCallStyle.NATIVE,
         supports_parallel_tool_calls=True,
     ),
-    "deepseek/deepseek-v4-pro": ModelCapabilityProfile(
-        "deepseek/deepseek-v4-pro",
-        tool_call_style=ToolCallStyle.NATIVE,
-        supports_parallel_tool_calls=True,
-    ),
+    # First fallback: GLM 5.3 Flash
     "z-ai/glm-5.3-flash": ModelCapabilityProfile(
         "z-ai/glm-5.3-flash",
         tool_call_style=ToolCallStyle.NATIVE,
     ),
-    "z-ai/glm-5.2": ModelCapabilityProfile(
-        "z-ai/glm-5.2",
+    # Second fallback: DeepSeek V4 Pro
+    "deepseek/deepseek-v4-pro": ModelCapabilityProfile(
+        "deepseek/deepseek-v4-pro",
         tool_call_style=ToolCallStyle.NATIVE,
+        supports_parallel_tool_calls=True,
     ),
 }
 
@@ -95,8 +94,8 @@ _ALIASES: dict[str, str] = {
     "deepseek-v4-flash": "deepseek/deepseek-v4-flash-0731",
     "deepseek/flash": "deepseek/deepseek-v4-flash-0731",
     "glm-5.3-flash": "z-ai/glm-5.3-flash",
-    "glm-5.2": "z-ai/glm-5.2",
 }
+
 
 
 def profile_for(model_id: str | None) -> ModelCapabilityProfile:

@@ -123,11 +123,18 @@ class BothModesInARealRun(unittest.TestCase):
 
     TASK = ROOT / "benchmarks" / "greenfield" / "dogfood-01-multi-turn-file-rollback"
 
-    def test_benchmark_denies_the_privileged_verbs(self) -> None:
+    def test_benchmark_dispatches_the_verbs_the_manifest_declared(self) -> None:
+        """Successor to `test_benchmark_denies_the_privileged_verbs` (T-70).
+
+        The denial it asserted came from a hardcoded threshold in
+        `session.py`, not from the pack: `vg-code-default` declares
+        `threshold: standard`, which covers its own medium `patch.apply`.
+        A benchmark that denies the verb under measurement measures nothing.
+        """
         result = run_lab_task("vg-code-default", self.TASK, max_attempts=1,
                               interactive=False)
         receipts = {entry["verb"]: entry["receipt"] for entry in result["session"]}
-        self.assertEqual(receipts.get("patch.apply"), "AuthorizationDenied")
+        self.assertNotEqual(receipts.get("patch.apply"), "AuthorizationDenied")
 
     def test_interactive_suspends_the_same_verb(self) -> None:
         result = run_lab_task("vg-code-default", self.TASK, max_attempts=1,
@@ -142,10 +149,20 @@ class BothModesInARealRun(unittest.TestCase):
                                       max_attempts=1, interactive=interactive)
                 self.assertIn("outcome", result)
 
-    def test_a_denial_is_a_dead_end_with_a_reason(self) -> None:
-        result = run_lab_task("vg-code-default", self.TASK, max_attempts=1)
-        self.assertTrue(result["deadEnds"])
+    def test_every_dead_end_carries_a_reason(self) -> None:
+        """`K-25`: a refusal names its cause. Driven by a real denial.
+
+        The run this used to read no longer denies anything (T-70), so the
+        denial is produced here rather than assumed: an undeclared verb is
+        rejected at `S2 RESOLVE`, and the dead end must still say why.
+        """
+        result = run_lab_task("vg-code-default", self.TASK, max_attempts=1,
+                              interactive=False)
         self.assertTrue(all(entry["reason"] for entry in result["deadEnds"]))
+
+        denied = run_lab_task("vg-research-minimal", self.TASK, max_attempts=1,
+                              interactive=False)
+        self.assertTrue(all(entry["reason"] for entry in denied["deadEnds"]))
 
 
 class TheJsonlIsALedgerExport(unittest.TestCase):

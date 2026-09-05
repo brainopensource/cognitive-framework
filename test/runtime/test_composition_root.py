@@ -418,15 +418,21 @@ class DogfoodGate(unittest.TestCase):
         self.assertIs(result.terminal, RunTermination.ESCALATED)
         self.assertFalse(result.verdict.claims[0]["holds"])
 
-    def test_benchmark_mode_denies_the_patch_rather_than_suspending(self) -> None:
+    def test_benchmark_mode_never_blocks_for_a_human(self) -> None:
         """`K-17`: a run that blocks for a human has unbounded wall-clock *and*
         a human contributing to the measured outcome, so `interactive=False`
-        fails approval closed. It is not "approve everything"."""
+        asks nobody. It never asked "approve everything" either -- since T-70
+        the pack's declared `threshold: standard` decides which verbs are an
+        ask at all, and its own `patch.apply` is not one.
+
+        The old assertion here read `K-17` as "the patch is denied", which was
+        the hardcoded threshold speaking rather than the manifest.
+        """
         result = self.execute(interactive=False, approver=None)
 
-        self.assertEqual((self.repo / "calc.py").read_text(encoding="utf-8"), BUGGY_SOURCE)
-        self.assertIn("AuthorizationDenied", [event.kind for event in result.events])
-        self.assertFalse(result.verdict.claims[0]["holds"])
+        kinds = [event.kind for event in result.events]
+        self.assertNotIn("ApprovalRequested", kinds)
+        self.assertNotIn("AuthorizationDenied", kinds)
 
     # -- claim 5: the tests pass, and something ran them ----------------
 

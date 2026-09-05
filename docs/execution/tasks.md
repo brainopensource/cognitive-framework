@@ -32,7 +32,7 @@ confidence: high
 
 Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technical.md`](technical.md). Packages: [`backlog.md`](backlog.md). TARGET gates: [`milestones.md`](milestones.md).
 
-**No sprints. No waves.** Check boxes as work completes. **Recommended reading order (not a schedule):** MS-SEE A stack T-16/T-15/T-36/T-37/T-45 is MECHANISM this-branch. Skip T-04/T-05/T-07. Do not create `progressive.py` (T-15). T-46 ranking stays `[PROPOSAL]`.
+**No sprints. No waves.** Check boxes as work completes. **Recommended reading order (not a schedule):** MS-SEE A stack T-16/T-15/T-36/T-37/T-45 is MECHANISM this-branch. T-04/T-05/T-07 landed 2026-09-04 (T-04 carries an open successor obligation; see its row). Do not create `progressive.py` (T-15). T-46 ranking stays `[PROPOSAL]`.
 
 B §18 tickets T-01–T-35 are canonical. A §31 maps into those IDs or T-36+ (see merge map appendix). v2 `SUB-*` are aliases. Live backlog `SUB-01` (kernel S0–S12) is a different package.
 
@@ -75,14 +75,19 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 
 ### Context: Admission and verification truth
 
-**T-04 Remove default admission exemption** (B) `[PROPOSAL]` + successor baseline  
-- [ ] Record RF-25 / M-2 successor baseline **before** shrinking `ADMISSION_GATE_EXEMPT`  
-- [ ] Falsifier: `vg-code-default` + `finish` + no patch ⇒ not completed  
+**T-04 Remove default admission exemption** (B) — LANDED + successor obligation  
+- [x] Record RF-25 / M-2 successor baseline **before** shrinking `ADMISSION_GATE_EXEMPT`  
+- [x] Falsifier: `vg-code-default` + `finish` + no patch ⇒ not completed  
 - FACT: exemption pinned by `test/falsifiers/test_completion_gate_scope.py`  
 - Files: `runtime/session.py`  
+- **Successor baseline (recorded 2026-09-04, pre-shrink).** The named frozen falsifiers survive the shrink: `test/falsifiers/test_rf25_cold_continuation.py` and `test/falsifiers/test_rf23_trajectory_content.py` are green before and after. `test_completion_gate_scope.py` was rewritten as its own successor — it now pins the capability-derived contract instead of the exemption it used to freeze. The `ADMISSION_GATE_EXEMPT` pin in `test/runtime/test_observed_test_counts.py` was replaced by the T-07 subject cases in the same file.  
+- **Successor obligation (OPEN, 21 tests / 14 files).** Deferred by decision, not by oversight: each scripts a bare `finish` through `vg-code-default` / `vg-code-lex` and asserts `completed`. The gate now rejects it, the script exhausts, and the run ends `instrument_error`. These are mechanism tests whose turn budgets and outcomes were incidental to the exemption; none is a named M-2 falsifier. Retargeting them is a separate work package and MUST NOT be done by weakening the gate.  
+  `test/runtime/test_harness_session.py` (4) · `test/runtime/test_app_service_and_cli.py` (2) · `test/runtime/test_s22_refusal_is_recorded.py` (2) · `test/falsifiers/test_rf90_generic_entrypoint.py` (2) · `test/runtime/test_beta12_kill_and_resume.py` · `test/runtime/test_m8_turn_loop.py` · `test/runtime/test_evo13_cli_cassette_doctor.py` · `test/runtime/test_studio_gateway.py` · `test/runtime/test_evidence_capture.py` · `test/runtime/test_composition_root.py` · `test/agency/test_native_agent_catalog.py` · `test/apps/coding_max/test_coding_max_facade.py` · `test/benchmarks/test_beta14_performance_baseline.py` · `test/integration/test_reconstruction_packs.py` · `test/agency/test_cassette_replay.py`  
+  The last two are cassette replays; their sibling packs (`vg-code-claude-shaped`, `vg-code-opencode-shaped`, `vg-code-swe-mini`) are already red at HEAD for the identical reason, so those three and these two close together or not at all.  
 
 **T-05 One gating source of truth** (B)  
-- [ ] Delete unused `ADMISSION_GATED_HARNESSES` **or** make it the only source  
+- [x] Delete unused `ADMISSION_GATED_HARNESSES` **or** make it the only source  
+- Both name sets deleted; `admission_required` is the sole decider and reads declared capability only. Pinned by `test/falsifiers/test_completion_gate_scope.py`.  
 - Requires: T-04  
 - Files: `session.py`; `test_completion_gate_scope.py`  
 
@@ -93,8 +98,9 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - Falsifier: exit 0 + empty output ⇒ not passed
 
 **T-07 Typed verification command subject** (B)  
-- [ ] Bind argv digest + workspace digest + task digest  
-- [ ] `python3 -c 'print("OK")'` is not verification  
+- [x] Bind argv digest + workspace digest + task digest  
+- [x] `python3 -c 'print("OK")'` is not verification  
+- `VerificationSubject` in `session.py` digests all three; the subject is re-derived against live digests at admission, so a receipt cannot survive the write that invalidated it. `verification_argv` rejects inline interpreter program text outright — a model that writes the program writes its output too, so `python3 -c 'print("3 tests passed")'` is not a subject either. Falsifiers in `test/runtime/test_observed_test_counts.py`.  
 - Requires: T-04  
 
 **T-08 Parse counts without inventing** (B)  
@@ -195,11 +201,12 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - Files: create `adapters/environment/transaction.py`; `git.py`  
 - Requires: T-08 (honest verify)  
 
-**T-18 TestTamperShield** `REOPENED` (B, spec §6)  
+**T-18 TestTamperShield** `REOPENED` → CLOSED 2026-09-04 (B, spec §6)  
 - [x] Enumerate tests via IndexPort, not only `Path.glob("test/**")`  
 - [x] Assertion edit ⇒ admission reject  
-- [ ] Wire `runtime/governance/tamper_shield.py` into `session._admit_completion`  
+- [x] Wire `runtime/governance/tamper_shield.py` into `session._admit_completion`  
 - Reopened 2026-09-04: mechanism present, **zero production callers** — imported only by `test/runtime/test_tamper_shield.py`. The earlier receipt stands for its own subject; it does not carry forward to a shield nothing calls.  
+- Closed 2026-09-04: `HarnessSession` freezes the shield at turn 0 (`_freeze_tamper_shield`, after the declared IndexPort binds) and evaluates it in `_admit_completion` before the completion policy runs. A failed enumeration is not read as a clean tree. `TestTamperShieldIsWiredIntoAdmission` in `test/runtime/test_tamper_shield.py` drives the production call, not the mechanism in isolation. **Reach limit:** the shield binds only where the pack declares a `repo_index` component — `vg-code-max` / `-fast` / `-balanced` do; `vg-code-default` declares `retrieval_policy` only and so composes with `index_component=None`. Giving the default preset an enumeration source is a manifest change, not a session change.  
 - Requires: T-17, T-14  
 
 **T-19 Greenfield oracle vacuity** (B, A §12.4, v2 §21.3)  
@@ -358,7 +365,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **specification**: Declare `ToolCallStyle.NATIVE` only for routes whose native-tool support is verified by capability evidence; this is not a blanket promotion of every production model. Unknown or unverified routes preserve the `NATIVE → JSON_SCHEMA → FENCED_JSON → TEXT_GRAMMAR` degradation chain.
   - **acceptance_falsifier**: `python3 -m unittest test.contracts.test_model_profiles -v` proves each native-declared route resolves `ToolCallStyle.NATIVE` and accepts its provider-shape vector; no unknown or unverified id is silently promoted, and each one still degrades `NATIVE → JSON_SCHEMA → FENCED_JSON → TEXT_GRAMMAR` via `degraded()`.
 
-- [ ] **T-70: Approval threshold from declared `approval_policy`**
+- [x] **T-70: Approval threshold from declared `approval_policy`**
   - **package**: HAR-01
   - **subsystem**: runtime
   - **lane**: Lane A (Build/Core)
@@ -366,6 +373,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **file_touches**: [`vanguard/packages/runtime/session.py`, **[NEW]** `test/runtime/test_approval_passthrough.py`]
   - **specification**: Resolve the benchmark approval threshold from the manifest's declared `components.approval_policy`. With `threshold: standard`, medium `patch.apply` and high `proc.exec` dispatch without a fail-closed ask denial.
   - **acceptance_falsifier**: `python3 -m unittest test.runtime.test_approval_passthrough -v` passes and the literal approval threshold `"low"` is absent from `runtime/session.py`.
+  - **landed 2026-09-04**: `resolve_approval_threshold` reads the pack's frozen `components.approval_policy` — no second artifact, no `Harness` field. Declared `threshold` governs the benchmark, where `F-07` turns an ask into a denial; declared `mode: assisted` keeps interactive runs asking, so `F-08` and the Ed25519 descriptor-bound approval flow are untouched. Missing, malformed, non-object, non-string or unrecognised policy all fail closed to the strictest rung. Successors landed for the eight frozen falsifiers that read the old hardcoded denial as `K-17` itself: `test_repair_loop_and_modes.py` (2), `test_s17_s18_real_mock_episode.py` (2), `test_s24_interactive_write_path.py` (3), `test_composition_root.py` (1), plus the `S8-B-04` handoff marker in `test_composition_values.py`.
 
 - [x] **T-70a: Reproduce mid-stream SSE abort before flag change**
   - **package**: HAR-01

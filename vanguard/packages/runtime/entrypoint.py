@@ -83,7 +83,7 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
             model_port,
             model_name=planner_model if planner_model and planner_model not in {"free", "default", "openrouter/free"} else None,
             timeout_seconds=float(request.get("modelTimeoutSeconds") or 300.0) if request.get("modelTimeoutSeconds") else None,
-            allow_paid=bool(request.get("allowPaid", False)),
+            allow_paid=bool(request.get("allowPaid", False)) or (int(request.get("budgetUsdMicros") or 0) > 0) or (int(request.get("maxPaidCalls") or 0) > 0),
         ).model
     # A deterministic preview is a hermetic smoke path, not a durable run.
     # Keep it out of the product profile's default persistent ledger: a

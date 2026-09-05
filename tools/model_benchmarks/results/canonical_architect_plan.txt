@@ -1,0 +1,55 @@
+[STATES AND INVARIANTS]
+1. **Scanner Loop**: Walk index `i` from 0 to len(content). Maintain `in_quotes = False`, `current_field = ""`, `current_record = []`, `records = []`.
+2. **Escaped Quotes**: While `in_quotes`, if `content[i] == '"'` and `i + 1 < len(content)` and `content[i+1] == '"'`: append `"` to `current_field`, increment `i += 2`.
+3. **Quote Toggle**: While `in_quotes`, if single `'"'`: set `in_quotes = False`, increment `i += 1`. Outside quotes, if `'"'`: set `in_quotes = True`, increment `i += 1`.
+4. **Comma Outside Quotes**: `current_record.append(current_field); current_field = ""; i += 1`.
+5. **Newline Outside Quotes**: handle both `
+` (skip 2 chars) and `
+` (skip 1 char): `current_record.append(current_field); records.append(current_record); current_record = []; current_field = ""`.
+6. **Loop Termination**: After the while loop finishes, if `content` is not empty (len(content) > 0): append `current_field` to `current_record`, and append `current_record` to `records`.
+
+[PSEUDOCODE]
+1. Initialize `i = 0`, `in_quotes = False`, `current_field = ""`, `current_record = []`, `records = []`.
+2. While `i < len(content)`:
+   - If `in_quotes`:
+     - If `content[i] == '"'` and `i + 1 < len(content)` and `content[i+1] == '"'`:
+       - Append `"` to `current_field`.
+       - Increment `i += 2`.
+     - Else if `content[i] == '"'`:
+       - Set `in_quotes = False`.
+       - Increment `i += 1`.
+   - Else:
+     - If `content[i] == '"'`:
+       - Set `in_quotes = True`.
+       - Increment `i += 1`.
+     - Else if `content[i] == ','`:
+       - Append `current_field` to `current_record`.
+       - Set `current_field = ""`.
+       - Increment `i += 1`.
+     - Else if `content[i] == '\n'` or `content[i] == '\r'`:
+       - If `i + 1 < len(content)` and `content[i] == '\r'` and `content[i+1] == '\n'`:
+         - Increment `i += 2`.
+       - Else:
+         - Increment `i += 1`.
+       - Append `current_field` to `current_record`.
+       - Append `current_record` to `records`.
+       - Set `current_record = []`.
+       - Set `current_field = ""`.
+     - Else:
+       - Append `content[i]` to `current_field`.
+       - Increment `i += 1`.
+3. After the while loop:
+   - If `content` is not empty:
+     - Append `current_field` to `current_record`.
+     - Append `current_record` to `records`.
+4. Return `records`.
+
+[EDGE-CASE BEHAVIOR]
+1. **Empty Content**: If `content` is an empty string (`""`), return an empty list `[]`.
+2. **Trailing Commas**: If a record ends with a comma (e.g., `",,"`), the last field should be an empty string `''`.
+3. **Quoted Empty Fields**: If a field is quoted but empty (e.g., `""`), it should be an empty string `''`.
+4. **Quoted Fields with Content**: If a field is quoted and contains content, the quotes should not appear in the output (e.g., `"hello,world"` should output `["hello,world"]`).
+5. **Escaped Quotes**: If a quoted field contains two consecutive double quotes (e.g., `"hello""world"`), they should be interpreted as a single double quote character (e.g., `["hello"world"]`).
+6. **Newline Handling**: Both `
+` and `
+` should be treated as record separators, ensuring that line breaks within quoted fields do not create new records.

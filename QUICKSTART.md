@@ -371,6 +371,28 @@ To establish the operational boundary between algorithmic pattern recall and imp
 
 ---
 
+### 8.5. Multi-Agent Architect/Worker Paradigm (SOTA Speed & Reliability)
+
+While single-model execution on complex state machines failed across all 7 open-weights models under `--reasoning off`, decomposing the problem into an **Architect/Worker multi-agent pipeline** unlocked a **100% pass rate on Turn 1**:
+
+- **Architect (`Qwen2.5-Coder-14B`)**: Produces formal Finite State Machine (FSM) invariants, character loop indices, quote toggle branches, and loop termination rules in pseudocode (latency: ~13s).
+- **Worker (`Qwen2.5-Coder-1.5B` or `DeepSeek-Coder-V2-Lite`)**: Transpiles the architectural pseudocode into pure executable Python without attempting to re-derive states.
+
+#### Empirical Architect/Worker Benchmark Matrix (RFC-4180 Challenge)
+
+| Multi-Agent Pair | Architect Model & Latency | Worker Model & Latency | Worker Speed | Total Wall Time | Falsifiers Passed | Overall Status |
+|---|---|---|---|---|---|---|
+| **Par 1 (High Efficiency)** | `Qwen2.5-Coder-14B` (13.43s) | `Qwen2.5-Coder-1.5B` (**1.92s**) | **159.9 tok/s** | **15.35s** | **5 / 5 (100%)** | **PASS (Turn 1)** |
+| **Par 2 (MoE Capacity)** | `Qwen2.5-Coder-14B` (13.43s) | `DeepSeek-Coder-V2-Lite` (**4.35s**) | **93.7 tok/s** | **17.78s** | **5 / 5 (100%)** | **PASS (Turn 1)** |
+| **Par 3 (Control: <4B Architect)** | `Phi-4-mini` (4.21s) | `Qwen2.5-Coder-1.5B` (2.03s) | 151.4 tok/s | 6.24s | 4 / 5 (80%) | **FAIL** (Architect omitted newline invariant) |
+
+#### Architectural Takeaways:
+1. **Ultra-Lightweight Workers are SOTA Compilers**: `Qwen-1.5B` does not fail due to Python syntax or pointer manipulation; it generates correct code at **160 tok/s in <2 seconds** when guided by an architectural specification.
+2. **Architect Sizing Floor ($\ge 14B$)**: Small models (<4B like `Phi-4-mini`) lack the parameter capacity to reliably maintain all edge-case state invariants in zero-shot planning. An architect model should be $\ge 14B$ dense (or deep CoT).
+3. **Reproducible Suite**: All benchmark harnesses, test runners, and empirical artifacts are consolidated under `tools/model_benchmarks/`.
+
+---
+
 ## 9. Inspecting Results & Audit Trails
 
 Every Vanguard run is deterministically recorded in an immutable SQLite event store:

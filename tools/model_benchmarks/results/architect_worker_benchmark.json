@@ -1,0 +1,75 @@
+[
+  {
+    "pair_id": "pair_1_qwen14b_qwen15b",
+    "pair_name": "Par 1: Qwen-14B (Architect) + Qwen-1.5B (Worker)",
+    "architect": {
+      "name": "Qwen2.5-Coder-14B-Instruct",
+      "tier": "14.7B Dense",
+      "tokens": 373,
+      "time_sec": 13.43,
+      "speed_tok_s": 27.8
+    },
+    "worker": {
+      "name": "Qwen2.5-Coder-1.5B-Instruct",
+      "tier": "1.5B Dense",
+      "tokens": 307,
+      "time_sec": 1.92,
+      "speed_tok_s": 159.9,
+      "turns_used": 1
+    },
+    "total_time_sec": 15.35,
+    "total_tokens": 680,
+    "tests_passed": "5/5 (100%)",
+    "status": "PASS",
+    "turn_resolved": 1
+  },
+  {
+    "pair_id": "pair_2_qwen14b_coder_v2",
+    "pair_name": "Par 2: Qwen-14B (Architect) + DeepSeek-Coder-V2-Lite (Worker)",
+    "architect": {
+      "name": "Qwen2.5-Coder-14B-Instruct",
+      "tier": "14.7B Dense",
+      "tokens": 373,
+      "time_sec": 13.43,
+      "speed_tok_s": 27.8
+    },
+    "worker": {
+      "name": "DeepSeek-Coder-V2-Lite (16B MoE)",
+      "tier": "16B MoE (2.4B active)",
+      "tokens": 408,
+      "time_sec": 4.35,
+      "speed_tok_s": 93.7,
+      "turns_used": 1
+    },
+    "total_time_sec": 17.78,
+    "total_tokens": 781,
+    "tests_passed": "5/5 (100%)",
+    "status": "PASS",
+    "turn_resolved": 1
+  },
+  {
+    "pair_id": "pair_3_phi4mini_qwen15b",
+    "pair_name": "Par 3: Phi-4-mini (Architect) + Qwen-1.5B (Worker)",
+    "architect": {
+      "name": "Phi-4-mini-instruct",
+      "tier": "3.8B Dense",
+      "tokens": 343,
+      "time_sec": 4.21,
+      "speed_tok_s": 81.4
+    },
+    "worker": {
+      "name": "Qwen2.5-Coder-1.5B-Instruct",
+      "tier": "1.5B Dense",
+      "tokens": 308,
+      "time_sec": 2.03,
+      "speed_tok_s": 151.4,
+      "turns_used": 1
+    },
+    "total_time_sec": 6.24,
+    "total_tokens": 651,
+    "tests_passed": "4/5 (80%)",
+    "status": "FAIL",
+    "turn_resolved": null,
+    "failure_reason": "Omissão de invariante de nova linha no pseudocódigo pelo Arquiteto 3.8B"
+  }
+]

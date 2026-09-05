@@ -1,0 +1,72 @@
+[STATES AND INVARIANTS]
+1. **State: START**
+   - **Invariant:** The scanner is at the beginning of a new field or record.
+   - **Transition:** Move to **IN_FIELD** when a non-comma character is encountered. Move to **END** when a newline character is encountered.
+
+2. **State: IN_FIELD**
+   - **Invariant:** The scanner is within a field that is not quoted.
+   - **Transition:** Move to **START** when a comma is encountered. Move to **END** when a newline character is encountered. Stay in **IN_FIELD** for any other character.
+
+3. **State: IN_QUOTED_FIELD**
+   - **Invariant:** The scanner is within a quoted field.
+   - **Transition:** Move to **IN_FIELD** when a closing quote is encountered. Stay in **IN_QUOTED_FIELD** for any other character, including commas and newlines.
+
+4. **State: END**
+   - **Invariant:** The scanner has reached the end of a record.
+   - **Transition:** Move to **START** when a new character is encountered.
+
+[EDGE-CASE TRAPS]
+1. **Trailing commas:** Ensure that trailing commas result in empty strings in the output.
+2. **Trailing newlines:** Ensure that trailing newlines do not result in empty records.
+3. **Empty content:** Handle empty input gracefully by returning an empty list.
+4. **Escaped quotes:** Ensure that two consecutive double quotes within a quoted field are interpreted as a single double quote.
+
+[STEP-BY-STEP PSEUDOCODE]
+1. Initialize an empty list `records` to store the final parsed records.
+2. Initialize an empty list `current_record` to store the fields of the current record.
+3. Initialize an empty string `current_field` to build the current field.
+4. Initialize a boolean `in_quoted_field` to `False` to track if the current field is quoted.
+5. Initialize an index `i` to `0` to iterate over the `content`.
+6. While `i` is less than the length of `content`:
+   - If `in_quoted_field` is `True`:
+     - If `content[i]` is a double quote and `content[i+1]` is also a double quote:
+       - Append a single double quote to `current_field`.
+       - Increment `i` by 2.
+     - Else if `content[i]` is a double quote:
+       - Set `in_quoted_field` to `False`.
+       - Increment `i` by 1.
+     - Else:
+       - Append `content[i]` to `current_field`.
+       - Increment `i` by 1.
+   - Else:
+     - If `content[i]` is a comma:
+       - Append `current_field` to `current_record`.
+       - Set `current_field` to an empty string.
+       - Increment `i` by 1.
+     - Else if `content[i]` is a double quote:
+       - Set `in_quoted_field` to `True`.
+       - Increment `i` by 1.
+     - Else if `content[i]` is a newline or carriage return followed by a newline:
+       - Append `current_field` to `current_record`.
+       - Append `current_record` to `records`.
+       - Set `current_record` to an empty list.
+       - Set `current_field` to an empty string.
+       - Increment `i` by 2 if it's a carriage return followed by a newline, otherwise by 1.
+     - Else:
+       - Append `content[i]` to `current_field`.
+       - Increment `i` by 1.
+7. After the loop, if `current_field` is not empty, append it to `current_record`.
+8. If `current_record` is not empty, append it to `records`.
+9. Return `records`.
+
+[EDGE-CASE TRACE]
+1. **Empty content:** `content = ""`
+   - Result: `[]`
+2. **Trailing commas:** `content = "a,,b,"`
+   - Result: `[['a', '', 'b', '']]`
+3. **Trailing newlines:** `content = "a\n\n"`
+   - Result: `[['a']]`
+4. **Escaped quotes:** `content = "a,\"b\",c"`
+   - Result: `[['a', '"b"', 'c']]`
+5. **Mixed quoted and unquoted fields:** `content = "a,b,\"c,d\",e"`
+   - Result: `[['a', 'b', 'c,d', 'e']]`

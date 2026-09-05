@@ -1,0 +1,118 @@
+[
+  {
+    "pair_name": "Par 1: Qwen-14B (Architect) + Qwen-1.5B (Worker)",
+    "architect": {
+      "name": "Qwen2.5-Coder-14B-Instruct",
+      "warmup_sec": 6.11,
+      "time_sec": 32.44,
+      "tokens": 912,
+      "speed_tok_s": 28.1
+    },
+    "worker": {
+      "name": "Qwen2.5-Coder-1.5B-Instruct",
+      "tier": "1.5B Dense",
+      "warmup_sec": 1.51,
+      "total_time_sec": 8.25,
+      "total_tokens": 1406,
+      "avg_speed_tok_s": 170.5,
+      "turns_needed": 4,
+      "passed": false,
+      "status": "FAIL",
+      "turns": [
+        {
+          "turn": 1,
+          "duration_sec": 1.89,
+          "tokens": 278,
+          "speed_tok_s": 147.0,
+          "passed": false,
+          "error": "Traceback (most recent call last):\n  File \"<string>\", line 65, in <module>\n  File \"<string>\", line 50, in run_falsifiers\nAssertionError: Failed Test 2 (Comma in quotes): got [['ome', ' completoidade'], ['ilva', ' Joao30']]"
+        },
+        {
+          "turn": 2,
+          "duration_sec": 2.12,
+          "tokens": 376,
+          "speed_tok_s": 177.0,
+          "passed": false,
+          "error": "Traceback (most recent call last):\n  File \"<string>\", line 66, in <module>\n  File \"<string>\", line 51, in run_falsifiers\nAssertionError: Failed Test 2 (Comma in quotes): got [['ome', ' completoidade'], ['ilva', ' Joao30']]"
+        },
+        {
+          "turn": 3,
+          "duration_sec": 2.11,
+          "tokens": 376,
+          "speed_tok_s": 177.8,
+          "passed": false,
+          "error": "Traceback (most recent call last):\n  File \"<string>\", line 66, in <module>\n  File \"<string>\", line 51, in run_falsifiers\nAssertionError: Failed Test 2 (Comma in quotes): got [['ome', ' completoidade'], ['ilva', ' Joao30']]"
+        },
+        {
+          "turn": 4,
+          "duration_sec": 2.12,
+          "tokens": 376,
+          "speed_tok_s": 177.6,
+          "passed": false,
+          "error": "Traceback (most recent call last):\n  File \"<string>\", line 66, in <module>\n  File \"<string>\", line 51, in run_falsifiers\nAssertionError: Failed Test 2 (Comma in quotes): got [['ome', ' completoidade'], ['ilva', ' Joao30']]"
+        }
+      ]
+    },
+    "total_latency_sec": 40.68,
+    "total_tokens": 2318,
+    "overall_status": "FAIL"
+  },
+  {
+    "pair_name": "Par 2: Qwen-14B (Architect) + DeepSeek-Coder-V2-Lite (Worker)",
+    "architect": {
+      "name": "Qwen2.5-Coder-14B-Instruct",
+      "warmup_sec": 6.11,
+      "time_sec": 32.44,
+      "tokens": 912,
+      "speed_tok_s": 28.1
+    },
+    "worker": {
+      "name": "DeepSeek-Coder-V2-Lite (16B MoE)",
+      "tier": "16B MoE (2.4B active)",
+      "warmup_sec": 4.08,
+      "total_time_sec": 18.2,
+      "total_tokens": 1573,
+      "avg_speed_tok_s": 86.4,
+      "turns_needed": 4,
+      "passed": false,
+      "status": "FAIL",
+      "turns": [
+        {
+          "turn": 1,
+          "duration_sec": 4.42,
+          "tokens": 372,
+          "speed_tok_s": 84.2,
+          "passed": false,
+          "error": "Execution timed out (3s)"
+        },
+        {
+          "turn": 2,
+          "duration_sec": 4.51,
+          "tokens": 400,
+          "speed_tok_s": 88.8,
+          "passed": false,
+          "error": "Traceback (most recent call last):\n  File \"<string>\", line 72, in <module>\n  File \"<string>\", line 69, in run_falsifiers\nAssertionError: Failed Test 5 (Empty cells): got [['a', '', 'c'], ['', '']]"
+        },
+        {
+          "turn": 3,
+          "duration_sec": 4.53,
+          "tokens": 401,
+          "speed_tok_s": 88.5,
+          "passed": false,
+          "error": "Traceback (most recent call last):\n  File \"<string>\", line 72, in <module>\n  File \"<string>\", line 69, in run_falsifiers\nAssertionError: Failed Test 5 (Empty cells): got [['a', '', 'c'], ['', '']]"
+        },
+        {
+          "turn": 4,
+          "duration_sec": 4.75,
+          "tokens": 400,
+          "speed_tok_s": 84.3,
+          "passed": false,
+          "error": "Traceback (most recent call last):\n  File \"<string>\", line 72, in <module>\n  File \"<string>\", line 69, in run_falsifiers\nAssertionError: Failed Test 5 (Empty cells): got [['a', '', 'c'], ['', '']]"
+        }
+      ]
+    },
+    "total_latency_sec": 50.63,
+    "total_tokens": 2485,
+    "overall_status": "FAIL"
+  }
+]

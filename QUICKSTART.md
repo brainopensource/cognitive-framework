@@ -307,27 +307,50 @@ vg code /path/to/target/workspace \
 
 ## 8. Empirical Local Model Benchmark Results (AMD RX 9060 XT 16GB)
 
-A comprehensive benchmark was executed across three quantization variants of `Qwen3.8-27B` on an AMD Radeon RX 9060 XT (16 GB VRAM) using the isolated L0 Smoke Triad (`fibo`, `bugfix`, `pandas`):
+A comprehensive benchmark suite was executed on an AMD Radeon RX 9060 XT (16 GB VRAM) using native `llama.cpp` (`llama-server`) with Vulkan GPU offloading (`-ngl 99`, `--reasoning off`).
 
-| Model | Weight Size | VRAM Footprint | Avg Speed (tok/s) | Task | Score (0–100) | Tests Passed | Status & Analysis |
-|---|---|---|---|---|---|---|---|
-| **`Qwen3.8-27B-UD-IQ1_M`** | 6.3 GB | 7.5 GB (44%) | **29.86** | `fibo`<br>`bugfix`<br>`pandas` | 0<br>30<br>0 | ❌ No<br>❌ No<br>❌ No | **FAIL (0/3 passed, 10/100 avg)**<br>Extreme 1-bit quantization degrades attention; looped in reasoning and hit token limits without emitting complete files. |
-| **`Qwen3.8-27B-UD-Q2_K_XL`** | 9.2 GB | 12.38 GB (72%) | **22.85** | `fibo`<br>`bugfix`<br>`pandas` | 100<br>100<br>80 |  Yes<br> Yes<br>❌ No | **PASS (2/3 passed, 93.3/100 avg)**<br>`fibo` and `bugfix` passed 100%. `pandas` code was correct, but test omitted `import csv`. Leaves 4–6 GB VRAM headroom for 8k+ context. |
-| **`Qwen3.8-27B-UD-Q4_K_S`** | 15.0 GB | 16.01 GB (93.6%) | **13.74** | `fibo`<br>`bugfix`<br>`pandas` | **100**<br>**100**<br>**100** |  **Yes**<br> **Yes**<br> **Yes** |  **PERFECT (3/3 passed, 100/100 avg)**<br>All 20/20 unit tests passed on first pass. Flawless syntax, typing, and validation. |
+### 8.1. Multi-Tier Open-Weights Model Matrix (0.5B to 27B)
 
-### Key Operational Insights & Sizing Rules
+The table below evaluates the primary open-weights models across their designated architectural sweet spots using standardized prompt evaluation (`"python code in the chat for printing 6th fibonacci value in one line"` with `max_tokens: 2048`):
 
-1. **The Quantization Cliff:**
-   - 1-bit (`IQ1_M`) is unusable for autonomous coding due to degraded grammar adherence and repetitive reasoning loops.
-   - 2-bit XL (`Q2_K_XL`) is the **speed/context champion**: fast (~23 tok/s), strong reasoning, and leaves ~5 GB VRAM for deep multi-turn context on 16 GB hardware.
-   - 4-bit Small (`Q4_K_S`) is the **precision champion**: flawless code generation (100% test pass rate), saturating 16 GB VRAM at 4k context.
+| Model | Architecture & Role | GGUF File Size | Context | Warmup (s) | Speed (tok/s) | Latency (s) | Score | Status | Operational Profile |
+|---|---|---|---|---|---|---|---|---|---|
+| **Qwen2.5-Coder-1.5B** | 1.5B Dense (Coding) | 941 MB | 8192 | 1.01s | **166.15** | 1.17s | 100 | **PASS** | Sub-3B syntax speed champion. Instantaneous generation (<1.2s) for live IDE completions. |
+| **DeepSeek-R1-Distill-1.5B** | 1.5B Dense (Reasoning) | 1.1 GB | 8192 | 1.00s | **169.37** | 2.26s | 100 | **PASS** | Completes compact CoT reasoning (~200 tokens) and emits working code block within 2.3s. |
+| **Qwen2.5-Coder-3B** | 3.1B Dense (Coding) | 1.8 GB | 8192 | 1.50s | **92.02** | **0.71s** | 100 | **PASS** | **Lowest total latency (0.71s).** High syntactic density with minimal memory footprint. |
+| **Phi-4-mini (3.8B)** | 3.8B Dense (Reasoning) | 2.4 GB | 8192 | 2.00s | **87.98** | 2.31s | 85 | **PASS** | Strong logic; generated both inline recursive functions and a lambda one-liner expression. |
+| **DeepSeek-Coder-V2-Lite** | 16B MoE *(2.4B active)* | 9.7 GB | 8192 | 3.57s | **109.81** | 2.80s | 100 | **PASS** | **MoE Velocity Champion:** Generates at **~110 tok/s** (faster than 3B dense) with 16B code quality. |
+| **Qwen2.5-Coder-14B** | 14.7B Dense (Coding) | 8.4 GB | 8192 | 5.09s | **28.85** | 2.74s | 100 | **PASS** | **SOTA 14B Coding:** Emitted direct array slice `print([0, 1, 1, 2, 3, 5, 8][5])` with zero preambles. |
+| **DeepSeek-R1-Distill-14B** | 14.7B Dense (Reasoning) | 8.4 GB | 8192 | 6.19s | **30.37** | 67.43s | 70 | **PARTIAL** | Massive reasoning depth; spent full 2048 token budget on number theory and sequence indices. |
+| **Mistral-Small-24B-2501** | 24B Dense (Tool Calling) | 13.4 GB | 4096 | 5.07s | **21.23** | 10.83s | 100 | **PASS** | **Tool-Calling SOTA:** Fits within 16GB VRAM at 4k context (~15.2 GB total VRAM). Flawless one-liner. |
+| **Qwen3.8-27B-Q4_K_S** | 27B Dense (Precision) | 15.0 GB | 4096 | 10.2s | **13.74** | 16.63s | 100 | **PASS** | Full 16GB VRAM saturation (93.6%). 100% pass rate across multi-file triad benchmarks. |
 
-2. **VRAM Budgeting on 16GB GPUs:**
-   - For tasks requiring large context windows (>8k tokens), use `Q2_K_XL` to avoid GPU out-of-memory or CPU offload bottlenecks.
-   - For self-contained implementation and refactoring tasks (up to 4k context), use `Q4_K_S` for highest test pass rates.
+---
 
-3. **Workspace Containment Invariant:**
-   - Any target directory undergoing `proc.exec` or automated tests must include a `.vanguard/workspace.toml` containing `root = "."` to satisfy containment boundary invariants.
+### 8.2. 27B Quantization Frontier (L0 Triad Tasks)
+
+Evaluation of `Qwen3.8-27B` across all 3 multi-file project tasks (`fibo`, `bugfix`, `pandas`):
+
+| Model Quant | Weight Size | VRAM Footprint | Speed (tok/s) | Triad Pass Rate | Avg Score | Status & Failure Analysis |
+|---|---|---|---|---|---|---|
+| **`IQ1_M` (1-bit)** | 6.3 GB | 7.5 GB (44%) | **29.86** | 0 / 3 (0%) | 10 / 100 | **FAIL:** Severe quant degradation; looped in reasoning and truncated before closing files. |
+| **`Q2_K_XL` (2-bit)** | 9.2 GB | 12.38 GB (72%) | **22.85** | 2 / 3 (66.7%) | 93.3 / 100 | **PASS:** `fibo` & `bugfix` 100% clean; `pandas` code was correct but test omitted `import csv`. |
+| **`Q4_K_S` (4-bit)** | 15.0 GB | 16.01 GB (93.6%) | **13.74** | **3 / 3 (100%)** | **100 / 100** | **PERFECT:** 20/20 unit tests across all 3 suites passed on the first attempt without errors. |
+
+---
+
+### 8.3. Architectural Insights & Sizing Rules
+
+1. **The MoE Velocity Breakthrough:**
+   - Sparse Mixture-of-Experts (`DeepSeek-Coder-V2-Lite`) delivers the ultimate speed-to-intelligence ratio: **109.81 tok/s** with an **8192 token context** while consuming only 9.7 GB of VRAM. It operates 4x faster than equivalent dense 14B models while retaining 16B parameter depth.
+2. **Dense Coding Precision Sweet Spot:**
+   - `Qwen2.5-Coder-14B` is the most reliable dense model under 16GB VRAM for autonomous agent dispatch (`vg code`), providing immediate, syntactically exact code blocks at **~29 tok/s**.
+3. **Tool Calling & JSON Schemas:**
+   - `Mistral-Small-24B-Instruct-2501` is the open-weights reference for structured tool calling. To keep it fully offloaded to GPU on 16GB hardware, configure context to **`-c 4096`**, ensuring total VRAM allocation stays under 15.5 GB.
+4. **Reasoning Models (DeepSeek-R1 Distillations):**
+   - Distilled R1 models natively prioritize reasoning tokens (`reasoning_content`). For simple tasks, smaller distillations (`1.5B`) conclude their thoughts within ~200 tokens and emit code cleanly. Larger distillations (`14B`) require **`max_tokens >= 4096`** or an explicit anti-thinking directive to prevent token budget exhaustion before code emission.
+5. **Workspace Containment Invariant:**
+   - Any workspace directory invoked with `proc.exec` or automated testing must include `.vanguard/workspace.toml` containing `root = "."` to satisfy containment boundary invariants.
 
 ---
 

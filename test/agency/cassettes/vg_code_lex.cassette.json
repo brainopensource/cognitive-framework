@@ -73,7 +73,7 @@
         "uriPattern": "proc://exec/allow/*"
       },
       "args": {
-        "cmd": "pytest test_calc.py"
+        "argv": ["python3", "-m", "unittest", "test_calc.py"]
       },
       "note": "Step 2: Reproduce - execute test suite to observe failure"
     },
@@ -155,7 +155,7 @@
         "uriPattern": "proc://exec/allow/*"
       },
       "args": {
-        "cmd": "pytest test_calc.py"
+        "argv": ["python3", "-m", "unittest", "-v", "test_calc.py"]
       },
       "note": "Step 5: Verify - re-run tests"
     },

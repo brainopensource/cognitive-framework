@@ -143,7 +143,7 @@ def unified_diff(repo: Path) -> str:
 
 
 class ScriptedOperator:
-    """A recorded three-turn trajectory: read, patch, verify, finish.
+    """A recorded five-turn trajectory: read, reproduce, patch, verify, finish.
 
     It is a cassette, not a decision procedure — it cannot see the repository
     and cannot adapt. Everything it proposes still has to survive the kernel,
@@ -160,12 +160,19 @@ class ScriptedOperator:
         self.contexts.append(dict(context))
         turn, self._turn = self._turn, self._turn + 1
         resource = {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]}
+        process = {"kind": "generic", "uriPattern": "proc://exec/allow/git,pytest,ruff,python3"}
         script = [
             {"kind": "effect", "action": "fs.read", "resource": resource,
              "args": {"path": "calc.py"},
              "reservation": {"usd_micros": 100, "millis": 500}},
+            {"kind": "effect", "action": "proc.exec", "resource": process,
+             "args": {"argv": ["python3", "-m", "unittest", "test_calc.py"]},
+             "reservation": {"usd_micros": 100, "millis": 500}},
             {"kind": "effect", "action": "patch.apply", "resource": resource,
              "args": {"diff": self._diff},
+             "reservation": {"usd_micros": 100, "millis": 500}},
+            {"kind": "effect", "action": "proc.exec", "resource": process,
+             "args": {"argv": ["python3", "-m", "unittest", "-v", "test_calc.py"]},
              "reservation": {"usd_micros": 100, "millis": 500}},
             {"kind": "finish", "note": "off-by-one corrected"},
         ]
@@ -276,7 +283,10 @@ class Composition(unittest.TestCase):
 
         self.assertNotEqual(code.composition_digest, shell.composition_digest)
         self.assertEqual(code.harness, "vg-code-default")
-        self.assertEqual(sorted(code.verbs), ["fs.read", "fs.search", "patch.apply", "proc.exec"])
+        self.assertEqual(
+            sorted(code.verbs),
+            ["agency.finish", "fs.read", "fs.search", "patch.apply", "proc.exec"],
+        )
         self.assertEqual(sorted(shell.verbs), ["proc.exec"])
 
     def test_composition_is_deterministic_for_one_episode(self) -> None:
@@ -374,7 +384,11 @@ class DogfoodGate(unittest.TestCase):
         result = self.execute()
 
         kinds = [event.kind for event in result.events]
-        self.assertEqual(kinds.count("EffectStarted"), len(result.receipts))
+        self.assertEqual(
+            kinds.count("EffectStarted"),
+            kinds.count("EffectCompleted") + kinds.count("EffectFailed")
+            + kinds.count("EffectReconciled"),
+        )
         for receipt in result.receipts:
             self.assertTrue(receipt.descriptor_digest.startswith("sha256:"))
 

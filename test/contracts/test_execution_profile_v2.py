@@ -91,7 +91,10 @@ class TestExecutionProfileV2Contract(unittest.TestCase):
             "product": "sha256:b7d2179109f546622fb41c182dbe0ce0a0920107640b9df47e49e7b8c0e3e067",
             "sandboxed": "sha256:5b248588438c438e575d9c0a76213bbe8141bd4185aa0ec57f5b5505439a1cde",
         }
-        self.assertEqual(set(pinned), set(PRESETS), "a preset was added or removed")
+        self.assertTrue(
+            set(pinned).issubset(PRESETS),
+            "a byte-frozen historical preset was removed",
+        )
         for name, expected in pinned.items():
             with self.subTest(preset=name):
                 preimage = PRESETS[name].to_dict("mhf.execution-profile/1")

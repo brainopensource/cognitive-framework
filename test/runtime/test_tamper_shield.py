@@ -148,10 +148,10 @@ class TestTamperShieldIsWiredIntoAdmission(unittest.TestCase):
         from test.runtime.test_harness_session import FakeClock, FakeEnvironment
         from vanguard.packages.adapters.stores.event_store import SqliteEventStore
 
-        # `vg-code-max` is a product preset that declares a `repo_index`
-        # component, so the session binds an IndexPort and has an enumeration
-        # source to freeze.
-        harness = Runtime.compose("vg-code-max", episode_id="ep-tamper")
+        # The public default preset must itself declare the enumeration source;
+        # inheriting protection only in fast/balanced/max leaves `vg code`
+        # fail-open.
+        harness = Runtime.compose("vg-code-default", episode_id="ep-tamper")
         return HarnessSession(
             harness,
             SessionPorts(

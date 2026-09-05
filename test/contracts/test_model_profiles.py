@@ -18,10 +18,6 @@ class TestModelProfiles(unittest.TestCase):
             "z-ai/glm-5.3-flash",
             "deepseek/deepseek-v4-flash",
             "deepseek-v4-flash",
-            "deepseek/deepseek-v4-pro",
-            "deepseek-v4-pro",
-            "google/gemini-3.8-flash",
-            "gemini-3.8-flash",
             "openrouter:deepseek/deepseek-v4-flash-0731",
         ]
         for route in native_routes:
@@ -39,6 +35,10 @@ class TestModelProfiles(unittest.TestCase):
             "google/gemma-4-31b-it:free",
             "minimax/minimax-m3:free",
             "openai/gpt-5.6-luna",
+            "deepseek/deepseek-v4-pro",
+            "deepseek-v4-pro",
+            "google/gemini-3.8-flash",
+            "gemini-3.8-flash",
             "custom/unverified-model",
             "ollama:deepseek/deepseek-v4-flash",
             "",

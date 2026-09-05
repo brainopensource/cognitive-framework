@@ -150,7 +150,11 @@ class ShellBaselineContract(unittest.TestCase):
 
 #: Manifest component role -> artifact kind, for the roles whose names differ.
 #: Mirrors `runtime.root.ROLE_KIND`; every other role is its own kind.
-_ROLE_KIND = {"system_prompt": "system_prompt", "tools": "tool_schema"}
+_ROLE_KIND = {
+    "system_prompt": "system_prompt",
+    "tools": "tool_schema",
+    "repo_index": "retrieval_policy",
+}
 
 
 def _code_default_workspace() -> Workspace:

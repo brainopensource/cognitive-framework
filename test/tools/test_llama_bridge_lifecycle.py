@@ -15,6 +15,11 @@ from tools.llama_cpp import cli
 
 
 class TestLlamaBridgeLifecycle(unittest.TestCase):
+    def test_serve_uses_typed_flash_attention_flag(self) -> None:
+        source = inspect.getsource(cli.serve_command)
+        self.assertIn('cmd.extend(["--flash-attn", args.flash_attn])', source)
+        self.assertNotIn('cmd.append("-fa")', source)
+
     def test_stop_issues_no_pkill_or_pgrep(self) -> None:
         """Stop must never invoke pkill or pgrep -f."""
         cli_source = inspect.getsource(cli)
@@ -57,8 +62,8 @@ class TestLlamaBridgeLifecycle(unittest.TestCase):
                 )
             self.assertEqual(ctx.exception.code, "MODEL_MISMATCH")
 
-    def test_invalid_flash_attn_child_remains_failed_and_never_online_while_foreign_server_holds_port(self) -> None:
-        """Keeps an invalid -fa child FAILED and never ONLINE while a foreign server holds the port."""
+    def test_failed_child_remains_failed_and_never_online_while_foreign_server_holds_port(self) -> None:
+        """Keeps a failed child FAILED while a foreign server holds the port."""
         with tempfile.TemporaryDirectory() as tmpdir:
             pid_file = pathlib.Path(tmpdir) / "test_server.pid"
             log_file = pathlib.Path(tmpdir) / "test_server.log"
@@ -69,7 +74,7 @@ class TestLlamaBridgeLifecycle(unittest.TestCase):
                 "alias": "foreign-alias",
             }
 
-            # Simulate child process that fails immediately (e.g. exit code 1 due to invalid -fa flag)
+            # Simulate a child process that fails immediately.
             mock_proc = MagicMock()
             mock_proc.pid = 42424
             mock_proc.poll.return_value = 1  # Exited with error!
@@ -83,7 +88,7 @@ class TestLlamaBridgeLifecycle(unittest.TestCase):
                 }
 
                 result = cli.launch_server_process(
-                    ["llama-server", "-m", "target.gguf", "-fa"],
+                    ["llama-server", "-m", "target.gguf", "--flash-attn", "on"],
                     host="127.0.0.1",
                     port=8080,
                     expected_model="target.gguf",

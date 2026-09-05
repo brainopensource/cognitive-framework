@@ -47,7 +47,17 @@ class TestNativeAgentCatalog(unittest.TestCase):
             profile_id="ci",
             model=fake_model,
         )
-        self.assertEqual(str(getattr(result.terminal, "value", result.terminal)), "completed")
+        self.assertEqual(
+            str(getattr(result.terminal, "value", result.terminal)),
+            "instrument_error",
+        )
+        self.assertTrue(
+            any(
+                event.kind == "EpisodeStateChanged"
+                for event in result.events
+            ),
+            "a rejected mutation-free finish must enter recovery before exhaustion",
+        )
 
     def test_code_explain_read_only_agent(self) -> None:
         manifest_p = self._manifest_dir("vg-code-explain")

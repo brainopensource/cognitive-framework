@@ -212,8 +212,8 @@ def serve_command(args: argparse.Namespace) -> None:
         "--alias", args.alias or model_path.stem,
     ]
 
-    if args.flash_attn:
-        cmd.append("-fa")
+    if args.flash_attn != "auto":
+        cmd.extend(["--flash-attn", args.flash_attn])
     if args.ctk:
         cmd.extend(["-ctk", args.ctk])
     if args.ctv:
@@ -266,12 +266,13 @@ def launch_server_process(
     """Launch server process and wait for readiness with fail-closed verification."""
     base_url = f"http://{host}:{port}"
 
-    proc = subprocess.Popen(
-        cmd,
-        stdout=open(log_file, "w"),
-        stderr=subprocess.STDOUT,
-        preexec_fn=os.setsid,
-    )
+    with open(log_file, "w", encoding="utf-8") as log_handle:
+        proc = subprocess.Popen(
+            cmd,
+            stdout=log_handle,
+            stderr=subprocess.STDOUT,
+            preexec_fn=os.setsid,
+        )
     pid_file.write_text(str(proc.pid))
 
     start_t = time.time()
@@ -492,7 +493,10 @@ def main() -> None:
     serve_p.add_argument("--port", type=int, default=DEFAULT_PORT, help="Bind port")
     serve_p.add_argument("--alias", default=None, help="Model alias name for API")
     serve_p.add_argument("--binary", default=None, help="Custom path to llama-server binary")
-    serve_p.add_argument("--flash-attn", action="store_true", help="Enable Flash Attention (-fa)")
+    serve_p.add_argument(
+        "--flash-attn", choices=["on", "off", "auto"], default="auto",
+        help="llama.cpp Flash Attention mode",
+    )
     serve_p.add_argument("--ctk", choices=["f16", "q8_0", "q4_0"], help="KV cache key quantization")
     serve_p.add_argument("--ctv", choices=["f16", "q8_0", "q4_0"], help="KV cache value quantization")
     serve_p.add_argument("-d", "--background", action="store_true", help="Run server in background daemon")

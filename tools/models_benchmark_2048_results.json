@@ -1,0 +1,98 @@
+[
+  {
+    "name": "Qwen2.5-Coder-1.5B-Instruct",
+    "tier": "Faixa 1 (0.5B\u20133B) - Coding",
+    "file": "Qwen2.5-Coder-1.5B-Instruct-Q4_K_M.gguf",
+    "result": {
+      "tokens_sec": 166.15,
+      "duration_sec": 1.17,
+      "tokens": 194,
+      "score": 100,
+      "status": "PASS",
+      "content": "Certainly! Below is a Python code snippet that prints the 6th Fibonacci number in one line:\n\n```python\nprint(fibonacci(6))\n```\n\nThis code defines a function `fibonacci` that calculates the nth Fibonacci number using recursion. The Fibonacci sequence is a series of numbers where each number is the sum of the two preceding ones, usually starting with 0 and 1. The function then calls `fibonacci(6)` to compute the 6th Fibonacci number and prints it.\n\nHere's the complete code:\n\n```python\ndef fibonacci(n):\n    if n == 0:\n        return 0\n    elif n == 1:\n        return 1\n    else:\n        return fibonacci(n-1) + fibonacci(n-2)\n\nprint(fibonacci(6))\n```\n\nWhen you run this code, it will output:\n\n```\n8\n```\n\nThis is the 6th Fibonacci number, which is 8.",
+      "reasoning_content": "",
+      "error": null,
+      "warmup_time_sec": 1.01
+    }
+  },
+  {
+    "name": "DeepSeek-R1-Distill-Qwen-1.5B",
+    "tier": "Faixa 1 (0.5B\u20133B) - Planning/Reasoning",
+    "file": "DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
+    "result": {
+      "tokens_sec": 169.37,
+      "duration_sec": 2.26,
+      "tokens": 382,
+      "score": 100,
+      "status": "PASS",
+      "content": "\n\nHere's a Python code snippet that calculates and prints the 6th Fibonacci value in one line:\n\n```python\ndef fibonacci(n):\n    if n == 0:\n        return 0\n    elif n == 1:\n        return 1\n    else:\n        return fibonacci(n-1) + fibonacci(n-2)\n\nprint(fibonacci(6))\n```\n\nThe output will be:\n\n```\n5\n```",
+      "reasoning_content": "\nOkay, the user is asking for Python code in the chat to print the 6th Fibonacci value in one line. I need to make sure the code is clear and easy to understand.\n\nFirst, I should recall how the Fibonacci sequence works. It starts with 0 and 1, and each subsequent number is the sum of the previous tw",
+      "error": null,
+      "warmup_time_sec": 1.0
+    }
+  },
+  {
+    "name": "Qwen2.5-Coder-3B-Instruct",
+    "tier": "Faixa 2 (3B\u20136B) - Coding",
+    "file": "Qwen2.5-Coder-3B-Instruct-Q4_K_M.gguf",
+    "result": {
+      "tokens_sec": 92.02,
+      "duration_sec": 0.71,
+      "tokens": 65,
+      "score": 100,
+      "status": "PASS",
+      "content": "Certainly! Here's a Python code snippet that prints the 6th Fibonacci number in one line:\n\n```python\nprint(sum([1, 1, 2, 3, 5, 8]))\n```\n\nThis code uses a list comprehension to generate the first six Fibonacci numbers and then calculates their sum.",
+      "reasoning_content": "",
+      "error": null,
+      "warmup_time_sec": 1.5
+    }
+  },
+  {
+    "name": "Phi-4-mini-instruct (3.8B)",
+    "tier": "Faixa 2 (3B\u20136B) - Planning/Reasoning",
+    "file": "Phi-4-mini-instruct-Q4_K_M.gguf",
+    "result": {
+      "tokens_sec": 87.98,
+      "duration_sec": 2.31,
+      "tokens": 203,
+      "score": 60,
+      "status": "PARTIAL",
+      "content": "Certainly! You can print the 6th Fibonacci number in Python using a one-liner like this:\n\n```python\nprint(fibonacci(6)  # Assuming fibonacci is a function that calculates Fibonacci numbers\n```\n\nHowever, since Python doesn't have a built-in Fibonacci function, you'll need to define it first. Here's a quick definition and the one-liner to print the 6th Fibonacci number:\n\n```python\ndef fibonacci(n): return n if n <= 1 else fibonacci(n-1) + fibonacci(n-2)\nprint(fibonacci(6))\n```\n\nIf you want to keep it in one line without defining the function separately, you can use a lambda function:\n\n```python\nprint((lambda n: n if n <= 1 else (lambda f: lambda x: f(n-1)(f(n-2))(lambda x: x))(6))\n```\n\nThis is a bit more complex and less readable, but it does print the 6th Fibonacci number in one line.",
+      "reasoning_content": "",
+      "error": null,
+      "warmup_time_sec": 2.0
+    }
+  },
+  {
+    "name": "Qwen2.5-Coder-14B-Instruct",
+    "tier": "Faixa 3 (6B\u201316B) - Coding",
+    "file": "Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf",
+    "result": {
+      "tokens_sec": 28.85,
+      "duration_sec": 2.74,
+      "tokens": 79,
+      "score": 100,
+      "status": "PASS",
+      "content": "Certainly! Here is a Python code snippet that prints the 6th Fibonacci number in one line:\n\n```python\nprint([0, 1, 1, 2, 3, 5, 8][5])\n```\n\nThis code uses a list to store the first six Fibonacci numbers and then prints the 6th element (index 5) of the list.",
+      "reasoning_content": "",
+      "error": null,
+      "warmup_time_sec": 5.09
+    }
+  },
+  {
+    "name": "DeepSeek-R1-Distill-Qwen-14B",
+    "tier": "Faixa 3 (6B\u201316B) - Planning/Reasoning",
+    "file": "DeepSeek-R1-Distill-Qwen-14B-Q4_K_M.gguf",
+    "result": {
+      "tokens_sec": 30.37,
+      "duration_sec": 67.43,
+      "tokens": 2048,
+      "score": 100,
+      "status": "PARTIAL",
+      "content": "",
+      "reasoning_content": "\nOkay, so I need to figure out how to print the 6th Fibonacci number in Python in just one line. Hmm, let's start by recalling what the Fibonacci sequence is. It's a sequence where each number is the sum of the two preceding ones, usually starting with 0 and 1. So the sequence goes 0, 1, 1, 2, 3, 5,",
+      "error": null,
+      "warmup_time_sec": 6.19
+    }
+  }
+]

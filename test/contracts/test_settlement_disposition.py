@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import unittest
 
+from vanguard.packages.adapters.evaluators.signing import VerdictSigner
+from vanguard.packages.adapters.stores.event_store import InMemoryEventStore
 from vanguard.packages.domain.evidence.disposition import (
     SETTLEMENT_SCHEMA,
     DispositionError,
@@ -12,6 +14,11 @@ from vanguard.packages.domain.evidence.disposition import (
     disposition_to_outcome,
     parse_settlement,
 )
+from vanguard.packages.domain.ledger.reducer import reconstruct_state
+from vanguard.packages.ports.evaluator import Verdict
+from vanguard.packages.ports.event_store import EventRange
+from vanguard.packages.runtime.evaluator_gateway import record_verdict
+from vanguard.packages.runtime.ledger_emitter import LedgerEmitter
 
 
 class TestSettlementDisposition(unittest.TestCase):
@@ -87,7 +94,7 @@ class TestSettlementDisposition(unittest.TestCase):
             disposition_to_outcome(TaskDisposition.UNDETERMINABLE), "undeterminable"
         )
 
-    def test_abandoned_with_passed_disposition_is_legal_and_roundtrips(self) -> None:
+    def test_abandoned_with_passed_disposition_is_legal_and_replays(self) -> None:
         receipt = SettlementReceipt(
             task_id="task-01",
             disposition=TaskDisposition.PASSED,
@@ -109,6 +116,52 @@ class TestSettlementDisposition(unittest.TestCase):
         self.assertEqual(parsed.disposition, TaskDisposition.PASSED)
         self.assertEqual(parsed.executed_test_count, 12)
         self.assertEqual(parsed.identity, receipt.identity)
+
+        signer = VerdictSigner(b"s" * 32, "settlement-key")
+        binding = {
+            "verdict": "pass",
+            "subject_digest": "sha256:subject",
+            "evaluation_request_id": "eval-settlement-1",
+            "oracle_id": "oracle-1",
+            "oracle_digest": "sha256:oracle",
+            "nonce": "n" * 16,
+            "key_id": signer.key_id,
+            "signed_at": "2026-09-05T00:00:00Z",
+        }
+        verdict = Verdict(
+            outcome="claims",
+            signature=signer.sign(binding),
+            signer_key_id=signer.key_id,
+            binding=binding,
+        )
+        store = InMemoryEventStore()
+        emitter = LedgerEmitter(
+            store,
+            episode_id="ep-settlement",
+            project_id="project-settlement",
+            principal_id="agent-1",
+            harness_digest="sha256:" + "a" * 64,
+            role="session",
+        )
+        envelope = record_verdict(
+            emitter,
+            run_id="run-settlement",
+            principal="agent-1",
+            episode_id="ep-settlement",
+            verdict=verdict,
+            task_id="task-01",
+            terminal_status="abandoned",
+            executed_test_count=12,
+            verification_subject_digest="sha256:subject",
+        )
+        self.assertIsNotNone(envelope)
+        assert envelope is not None
+        replayed = parse_settlement(envelope.payload)
+        self.assertEqual(replayed.disposition, TaskDisposition.PASSED)
+        self.assertEqual(replayed.terminal_status, "abandoned")
+        events = store.read(EventRange(episode_id="ep-settlement"))
+        state = reconstruct_state(events.value or ())
+        self.assertEqual(state.verdicts["eval-settlement-1"].verdict, "pass")
 
     def test_episode_completed_payloads_contain_no_disposition_key(self) -> None:
         # Contract assertion: Run termination payload has only terminal_status

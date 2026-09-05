@@ -1,0 +1,86 @@
+[
+  {
+    "name": "Qwen2.5-Coder-1.5B-Instruct",
+    "tier": "Faixa 1 (0.5B\u20133B) - Coding",
+    "file": "Qwen2.5-Coder-1.5B-Instruct-Q4_K_M.gguf",
+    "result": {
+      "tokens_sec": 163.72,
+      "duration_sec": 1.11,
+      "tokens": 181,
+      "score": 95,
+      "status": "PASS",
+      "content": "print(fibonacci(6)) with recursive function calculating fibonacci(6) = 8",
+      "error": null
+    }
+  },
+  {
+    "name": "DeepSeek-R1-Distill-Qwen-1.5B",
+    "tier": "Faixa 1 (0.5B\u20133B) - Planning/Reasoning",
+    "file": "DeepSeek-R1-Distill-Qwen-1.5B-Q4_K_M.gguf",
+    "result": {
+      "tokens_sec": 174.12,
+      "duration_sec": 1.47,
+      "tokens": 256,
+      "score": 0,
+      "status": "FAIL",
+      "content": "",
+      "error": null
+    }
+  },
+  {
+    "name": "Qwen2.5-Coder-3B-Instruct",
+    "tier": "Faixa 2 (3B\u20136B) - Coding",
+    "file": "Qwen2.5-Coder-3B-Instruct-Q4_K_M.gguf",
+    "result": {
+      "tokens_sec": 94.75,
+      "duration_sec": 0.85,
+      "tokens": 81,
+      "score": 100,
+      "status": "PASS",
+      "content": "Certainly! Here's a Python code snippet that prints the 6th Fibonacci number in one line:\n\n```python\nprint(sum([1, 1, 2, 3, 5, 8]))\n```\n\nThis code calculates the sum of the first six Fibonacci numbers (1, 1, 2, 3, 5, and 8) and prints the result.",
+      "error": null
+    }
+  },
+  {
+    "name": "Phi-4-mini-instruct (3.8B)",
+    "tier": "Faixa 2 (3B\u20136B) - Planning/Reasoning",
+    "file": "Phi-4-mini-instruct-Q4_K_M.gguf",
+    "result": {
+      "tokens_sec": 81.76,
+      "duration_sec": 2.01,
+      "tokens": 164,
+      "score": 100,
+      "status": "PASS",
+      "content": "Certainly! You can print the 6th Fibonacci number in one line using Python as follows:\n\n```python\nprint(fibonacci(6))\n```\n\nWhere `fibonacci` is a function that calculates the Fibonacci number at a given position. Here is the complete code for the `fibonacci` function:\n\n```python\ndef fibonacci(n):\n    if n <= 0:\n        return 0\n    elif n == 1:\n        return 1\n    else:\n        a, b = 0, 1\n        for _ in range(2, n + 1):\n            a, b = b, a + b\n        return b\n\nprint(fibonacci(6))\n```\n\nWhen you run this code, it will print the 6th Fibonacci number, which is `8`.",
+      "error": null
+    }
+  },
+  {
+    "name": "Qwen2.5-Coder-14B-Instruct",
+    "tier": "Faixa 3 (6B\u201316B) - Coding",
+    "file": "Qwen2.5-Coder-14B-Instruct-Q4_K_M.gguf",
+    "result": {
+      "tokens_sec": 27.18,
+      "duration_sec": 2.91,
+      "tokens": 79,
+      "score": 100,
+      "status": "PASS",
+      "content": "Certainly! Here's a Python code snippet to print the 6th Fibonacci number in one line:\n\n```python\nprint([0, 1, 1, 2, 3, 5, 8][5])\n```\n\nThis code uses a list to store the first six Fibonacci numbers and then prints the 6th element (index 5) of the list.",
+      "error": null
+    }
+  },
+  {
+    "name": "DeepSeek-R1-Distill-Qwen-14B",
+    "tier": "Faixa 3 (6B\u201316B) - Planning/Reasoning",
+    "file": "DeepSeek-R1-Distill-Qwen-14B-Q4_K_M.gguf",
+    "result": {
+      "tokens_sec": 28.68,
+      "duration_sec": 8.93,
+      "tokens": 256,
+      "score": 0,
+      "status": "FAIL",
+      "content": "",
+      "error": null
+    }
+  }
+]

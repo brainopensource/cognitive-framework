@@ -1,0 +1,36 @@
+[
+  {
+    "name": "DeepSeek-Coder-V2-Lite-Instruct (16B MoE)",
+    "tier": "16B MoE (2.4B active) - Coding",
+    "file": "DeepSeek-Coder-V2-Lite-Instruct-Q4_K_M.gguf",
+    "context_size": "8192",
+    "result": {
+      "tokens_sec": 109.81,
+      "duration_sec": 2.8,
+      "tokens": 308,
+      "score": 100,
+      "status": "PASS",
+      "content": " Certainly! You can print the 6th Fibonacci number in one line using Python. Here's a simple way to do it:\n\n```python\nfibonacci_sequence = [0, 1]\nfor i in range(2, 6):\n    fibonacci_sequence.append(fibonacci_sequence[i-1] + fibonacci_sequence[i-2])\nprint(fibonacci_sequence[5])\n```\n\nHowever, if you want to do it in one line, you can use a generator expression to calculate the Fibonacci sequence up to the 6th value and then print the 6th value:\n\n```python\nfibonacci_sequence = [0, 1]\n[fibonacci_sequence.append(fibonacci_sequence[i-1] + fibonacci_sequence[i-2]) for i in range(2, 6)]\nprint(fibonacci_sequence[5])\n```\n\nOr, even more concisely, you can use a generator to calculate the 6th Fibonacci number directly:\n\n```python\ndef fibonacci(n):\n    a, b = 0, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a\n\nprint(fibonacci(6))\n```\n\nThis last one-liner uses a generator function to calculate the 6th Fibonacci number directly.",
+      "reasoning_content": "",
+      "error": null,
+      "warmup_time_sec": 3.57
+    }
+  },
+  {
+    "name": "Mistral-Small-24B-Instruct-2501",
+    "tier": "24B Dense - Tool Calling / Reasoning",
+    "file": "Mistral-Small-24B-Instruct-2501-Q4_K_M.gguf",
+    "context_size": "4096",
+    "result": {
+      "tokens_sec": 21.23,
+      "duration_sec": 10.83,
+      "tokens": 230,
+      "score": 100,
+      "status": "PASS",
+      "content": "Certainly! You can calculate the 6th Fibonacci value in one line of Python code using a list comprehension or a simple function. Here's how you can do it:\n\n```python\nprint([0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89][5])\n```\n\nThis code snippet uses a predefined list of Fibonacci numbers and prints the 6th value (index 5, since list indices start at 0).\n\nAlternatively, you can use a more dynamic approach with a generator expression:\n\n```python\nprint(next((lambda x: x if x < 6 else None)(x) for x in (lambda a, b: (a, b, a + b) if a < 6 else (a, b))(0, 1)[0]))\n```\n\nThis code is more complex and less readable, but it demonstrates how you can generate Fibonacci numbers on the fly and extract the 6th value.\n\nFor simplicity and readability, the first approach is generally preferred.",
+      "reasoning_content": "",
+      "error": null,
+      "warmup_time_sec": 5.07
+    }
+  }
+]

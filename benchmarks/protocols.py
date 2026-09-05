@@ -14,6 +14,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping, Protocol, Sequence
 
+from vanguard.packages.domain.evidence.disposition import TaskDisposition
+
 SUPPORTED_PROTOCOLS = frozenset({"SWE-bench Verified", "SWE-Bench Pro", "DeepSWE v1.1"})
 
 __all__ = ["BenchmarkTask", "BenchmarkSubmission", "BenchmarkReceipt",
@@ -27,7 +29,7 @@ __all__ = ["BenchmarkTask", "BenchmarkSubmission", "BenchmarkReceipt",
 
 B20_MEMBERSHIP_SCHEMA = "aether.b20.membership/1"
 B20_REPORT_SCHEMA = "aether.b20.report/1"
-RESULT_DISPOSITIONS = frozenset({"passed", "failed", "undeterminable", "not_run"})
+RESULT_DISPOSITIONS = frozenset(item.value for item in TaskDisposition)
 _UNDETERMINABLE_MARKERS = (
     "provider_error",
     "provider_unavailable",

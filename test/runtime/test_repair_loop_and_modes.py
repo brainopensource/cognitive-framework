@@ -297,7 +297,7 @@ class TheIndexIsBoundOnlyWhenDeclared(unittest.TestCase):
     """W11-A item 4. BETA adds the JSON; this is the bind."""
 
     def test_a_pack_declaring_no_index_binds_none(self) -> None:
-        harness = Runtime.compose("vg-code-default", episode_id="ep-idx")
+        harness = Runtime.compose("vg-shell-only", episode_id="ep-idx")
         self.assertIsNone(harness.index_component)
 
     def test_supplying_an_index_to_a_pack_that_declares_none_is_refused(self) -> None:
@@ -314,7 +314,7 @@ class TheIndexIsBoundOnlyWhenDeclared(unittest.TestCase):
         task = TaskContext(brief="idx", repo_path=Path("/workspace"),
                            run_id="r", episode_id="ep-idx")
         with self.assertRaises(CompositionError):
-            HarnessSession(Runtime.compose("vg-code-default", episode_id="ep-idx"),
+            HarnessSession(Runtime.compose("vg-shell-only", episode_id="ep-idx"),
                            ports, task)
 
 

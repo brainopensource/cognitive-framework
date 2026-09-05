@@ -116,15 +116,15 @@ class GreenfieldIsAValidWorkspace(unittest.TestCase):
         from vanguard.packages.runtime.root import Runtime
 
         harness = Runtime.compose("vg-code-default", episode_id="e")
-        self.assertEqual(len(harness.verbs), 4)
+        self.assertEqual(len(harness.verbs), 5)
         self.assertGreater(len(harness.tool_schemas), 0)
 
-    def test_no_index_component_is_involved(self) -> None:
-        """Falsified hypothesis: IndexPort choking on an empty tree."""
+    def test_declared_index_accepts_an_empty_tree(self) -> None:
+        """The default tamper/index component accepts an empty tree."""
 
         from vanguard.packages.runtime.root import Runtime
 
-        self.assertIsNone(
+        self.assertIsNotNone(
             Runtime.compose("vg-code-default", episode_id="e").index_component)
 
     def test_the_mock_runs_an_episode_on_it(self) -> None:

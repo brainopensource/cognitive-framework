@@ -61,18 +61,55 @@ class ModelCapabilityProfile:
 
 
 _PROFILES: dict[str, ModelCapabilityProfile] = {
-    "fake": ModelCapabilityProfile("fake", tool_call_style=ToolCallStyle.JSON_SCHEMA,
-                                    supports_system_role=True),
-    "openrouter/free": ModelCapabilityProfile("openrouter/free"),
+    "fake": ModelCapabilityProfile(
+        "fake",
+        tool_call_style=ToolCallStyle.JSON_SCHEMA,
+        supports_system_role=True,
+    ),
+    "openrouter/free": ModelCapabilityProfile(
+        "openrouter/free",
+        tool_call_style=ToolCallStyle.FENCED_JSON,
+    ),
+    "deepseek/deepseek-v4-flash-0731": ModelCapabilityProfile(
+        "deepseek/deepseek-v4-flash-0731",
+        tool_call_style=ToolCallStyle.NATIVE,
+        supports_parallel_tool_calls=True,
+    ),
+    "deepseek/deepseek-v4-pro": ModelCapabilityProfile(
+        "deepseek/deepseek-v4-pro",
+        tool_call_style=ToolCallStyle.NATIVE,
+        supports_parallel_tool_calls=True,
+    ),
+    "z-ai/glm-5.3-flash": ModelCapabilityProfile(
+        "z-ai/glm-5.3-flash",
+        tool_call_style=ToolCallStyle.NATIVE,
+    ),
+    "z-ai/glm-5.2": ModelCapabilityProfile(
+        "z-ai/glm-5.2",
+        tool_call_style=ToolCallStyle.NATIVE,
+    ),
+}
+
+_ALIASES: dict[str, str] = {
+    "deepseek/deepseek-v4-flash": "deepseek/deepseek-v4-flash-0731",
+    "deepseek-v4-flash": "deepseek/deepseek-v4-flash-0731",
+    "deepseek/flash": "deepseek/deepseek-v4-flash-0731",
+    "glm-5.3-flash": "z-ai/glm-5.3-flash",
+    "glm-5.2": "z-ai/glm-5.2",
 }
 
 
 def profile_for(model_id: str | None) -> ModelCapabilityProfile:
     key = (model_id or "unknown").strip()
-    profile = _PROFILES.get(key)
+    resolved_key = _ALIASES.get(key, key)
+    profile = _PROFILES.get(resolved_key)
     if profile is not None:
         return profile
     for prefix in ("openrouter:", "llama_cpp:", "llama:", "ollama:"):
-        if key.startswith(prefix) and key[len(prefix):] in _PROFILES:
-            return _PROFILES[key[len(prefix):]]
+        if resolved_key.startswith(prefix):
+            stripped = resolved_key[len(prefix):]
+            target = _ALIASES.get(stripped, stripped)
+            if target in _PROFILES:
+                return _PROFILES[target]
     return ModelCapabilityProfile(key or "unknown")
+

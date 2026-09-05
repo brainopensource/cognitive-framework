@@ -349,7 +349,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 
 ### Context: Electroweak convergence work tree
 
-- [ ] **T-69: Capability-bound native tool-call profiles**
+- [x] **T-69: Capability-bound native tool-call profiles**
   - **package**: HAR-01
   - **subsystem**: domain
   - **lane**: Lane A (Build/Core)
@@ -385,7 +385,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **specification**: Add a flat `finish` tool schema at the manifest root and declare it through the four product presets' `components.tools` maps. Every declared component path must resolve from the manifests root and every `kind` must exist in `kinds.json`.
   - **acceptance_falsifier**: `python3 -m unittest test.contracts.test_manifest_components -v` proves the four presets resolve `finish` without introducing a `components/` directory.
 
-- [ ] **T-72: Two-axis settlement contract**
+- [x] **T-72: Two-axis settlement contract**
   - **package**: HAR-01
   - **subsystem**: domain
   - **lane**: Lane A (Build/Core)

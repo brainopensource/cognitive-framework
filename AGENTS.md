@@ -169,6 +169,34 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 | **`apps/`** | `vanguard/packages/apps/` | Thin application entrypoints (e.g., `apps/coding_max/facade.py` exposing `CodingMaxFacade` / `CodingMax`). Coordinates CLI/API requests into `ApplicationService` compositions. |
 | **`clients/`** | `vanguard/clients/` | Client workspaces: TypeScript/React/Ink CLI (`vg`), Desktop UI, TUI, and Studio interfaces. |
 
+### Universal Agent Capability Layer (`.agents/`)
+
+Capabilities are partitioned into four ontological tiers under `.agents/` and registered into the runtime via [`vanguard/packages/runtime/agent_plugins.py`](vanguard/packages/runtime/agent_plugins.py):
+
+$$\text{Skill (Atomic)} \longrightarrow \text{Technique (Open-Loop)} \longrightarrow \text{Proficiency (Closed-Loop FSM)} \longrightarrow \text{Mastery (Meta-Heuristic)}$$
+
+| Tier | Directory | Description & Contracts | Examples |
+|---|---|---|---|
+| **Skills** | `.agents/skills/` | Atomic execution primitives with zero internal loops. Strictly hermetic and timeout-bounded. | [`test-runner`](.agents/skills/test-runner/SKILL.md), [`lda-navigator`](.agents/skills/lda-navigator/SKILL.md), [`llama-cpp`](.agents/skills/llama-cpp/SKILL.md), [`lam-engine`](.agents/skills/lam-engine/SKILL.md) |
+| **Techniques** | `.agents/techniques/` | Open-loop synergistic compositions of 2+ skills without stateful iteration. | [`spec-driven-codegen`](.agents/techniques/spec-driven-codegen/TECHNIQUE.md) (LDA + LLM), [`tdd-falsifier`](.agents/techniques/tdd-falsifier/TECHNIQUE.md) (LDA + TestRunner) |
+| **Proficiencies** | `.agents/proficiencies/` | Goal-seeking closed feedback loops governed by FSMs, sub-30ms AST delta re-indexing, and fail-closed rollback. | [`autofix-swe-loop`](.agents/proficiencies/autofix-swe-loop/PROFICIENCY.md) (T1 + T2 + AST Delta + Rollback) |
+| **Mastery** | *(Runtime / Horizon)* | Dynamic meta-heuristic routing and online algorithm selection over diverse problem topologies. | Future adaptive metacognition policies |
+
+#### Prompt Prefix Budget Constraint (`W12-A`)
+When injecting capability cards into agent prompts, prompt compilers must conform to the token headroom ceiling:
+$$\text{Length}(\text{CapabilityPrefix}) \le 4096 \text{ characters}$$
+Use `python3 tools/agent_plugins/cli.py prefix` or `build_compact_plugin_prompt_prefix()` to emit the standardized, token-bounded prefix (currently 1774 characters for 8 registered capabilities).
+
+#### Agent Capability CLI & MCP Tooling
+Agents can discover and run capabilities using:
+- **CLI Commands**:
+  - `python3 tools/agent_plugins/cli.py list` — List registered capabilities.
+  - `python3 tools/agent_plugins/cli.py prefix` — Emit compact prompt prefix.
+  - `python3 tools/agent_plugins/cli.py run test-runner "<test-cmd>"` — Run isolated test suite.
+  - `python3 tools/agent_plugins/cli.py autofix --task "<task>" --file "<target>"` — Run closed-loop SWE repair.
+- **Model Context Protocol (MCP)**:
+  `tools/agent_plugins/mcp_server.py` exposes stdio JSON-RPC tools (`agent_list_plugins`, `agent_run_test`, `agent_generate_patch`, `agent_run_falsifier`, `agent_autofix`). Synchronized across harnesses via `python3 tools/universal_mcp_sync.py`.
+
 ---
 
 ## 2. Development & Testing Commands
@@ -264,6 +292,9 @@ AI Agents working in this repository MUST comply with the following operational 
   - Run `just check` during incremental development loops.
   - Run `just verify` before claiming task, PR, or sprint completion.
 - **Honest Status Reporting**: Agents MUST report commands actually executed and NEVER claim `PASS` for an unexecuted command. Never suppress failing assertions with `|| true`. Fix task-introduced failures before declaring completion.
+- **Invariant N-06 Compliance**: Code inside `vanguard/packages/runtime/` (including capability catalogs such as `agent_plugins.py`) must remain pure declarative metadata and must never import `subprocess`. All subprocess execution and script runners belong strictly in `tools/` or `.agents/`.
+- **Fail-Closed Rollback Guarantee**: Iterative SWE repair loops and proficiencies must guarantee byte-for-byte rollback of mutated target files if the turn budget exhausts before all test falsifiers pass.
+- **Prompt Prefix Headroom**: Any prompt composition that embeds `.agents/` capability cards must strictly respect the $\le 4096$ character budget (`W12-A`).
 
 ---
 

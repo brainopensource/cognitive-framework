@@ -464,6 +464,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **file_touches**: [`vanguard/packages/apps/coding_max/facade.py`, `packs/code-default/load.py`, `vanguard/packages/agency/manifests/vg-code-fast/manifest.json`, `vanguard/packages/agency/manifests/vg-code-balanced/manifest.json`, `vanguard/packages/agency/manifests/vg-code-max/manifest.json`, **[NEW]** `test/apps/test_preset_budgets.py`]
   - **specification**: Make `presets.json` the sole product budget catalog and remove the facade's Python `max_turns` default. Fast, balanced, and max must produce distinct declared ceilings of 50,000/150,000/400,000 µUSD and 8/20/40 turns.
   - **acceptance_falsifier**: `python3 -m unittest test.apps.test_preset_budgets -v` proves `fast`/`balanced`/`max` yield three **distinct** `EpisodeStarted.budgetCeiling` values matching `presets.json` exactly (50,000/150,000/400,000 µUSD; 8/20/40 turns), that `max_turns` is never a Python default in the facade, and that `vg-code-fast` halts at turn eight with `BUDGET_EXHAUSTED`.
+  - **scaffolded 2026-09-05 (not implemented):** `test/apps/test_preset_budgets.py` exists and is deliberately **red** on the three real gaps — the facade's `max_turns: int = 40` Python default, the three manifests sharing `vg-code-default/budget-policy.json`, and that policy carrying neither a `usdMicros` nor a `turns` dimension. The `EpisodeStarted.budgetCeiling` and `BUDGET_EXHAUSTED` cases are filed as a skipped class to be unskipped by the implementation. Do not green these by weakening the assertions.
 
 - [ ] **T-80: Anti-thrashing workspace oscillation circuit breaker**
   - **package**: CONTROL
@@ -527,7 +528,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **file_touches**: [`vanguard/packages/runtime/entrypoint.py`, `vanguard/packages/runtime/compose.py`, `vanguard/packages/runtime/app_service.py`, **[NEW]** `test/runtime/test_receipt_telemetry.py`]
   - **specification**: Populate successful product receipts from live runtime telemetry rather than empty constants. Carry model routes, prompt/completion tokens, the ledger's verified step set, and cost provenance.
   - **acceptance_falsifier**: `python3 -m unittest test.runtime.test_receipt_telemetry -v` finds non-empty routes, non-null tokens, matching verified step ids, and no success-path `[]`/`None` telemetry constant.
-  - **landed 2026-09-05:** `entrypoint.execute` projects trajectory routes, measured trajectory cost, and `RunTelemetry`; session records the verified-step set through durable `EpisodeStateChanged` facts. The falsifier passes with the product projection.
+  - **landed 2026-09-05:** `entrypoint.execute` projects the success receipt through the shared `app_service._result_from_execution`, so the product path carries no second receipt algebra. Routes, prompt/completion tokens and measured cost come from the live `RunTelemetry`/trajectory; `verifiedStepIds` are folded from the ledger's TODO receipts (a `complete` step with no receipt digest is not projected) rather than from a bespoke event. The falsifier drives the real `entrypoint` -> `Runtime` -> ledger path and reds under mutation of the mapping.
 
 - [ ] **T-86: Live-path alias and tool-name validation**
   - **package**: DLG-01

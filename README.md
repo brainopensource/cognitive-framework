@@ -200,7 +200,8 @@ Aether-D-System/
 ├── test/                             # Automated test suite (1100+ tests across 17 categories)
 ├── tools/                            # Boundary checkers, TCB budget, secrets scanner, codegen
 ├── schemas/                          # v4 wire schemas and MHF plugin/harness/event schemas
-└── containers/                       # Bubblewrap & OCI isolation images (UID 10001 worker, 10002 judge)
+├── containers/                       # Bubblewrap & OCI isolation images (UID 10001 worker, 10002 judge)
+└── .agents/                          # Universal Agent Capabilities (skills, techniques, proficiencies)
 ```
 
 ### Detailed Subsystem Inventory
@@ -211,9 +212,10 @@ Aether-D-System/
 | **Ports** | `vanguard/packages/ports/` | Hexagonal abstract interfaces: `KernelPort`, `ModelPort`, `SandboxPort`, `EvaluatorPort`, `EventStorePort`, `BlobStorePort`, `EnvironmentPort`, `DeterminismPort`, `IndexPort`, and the 5 SPI protocols (`spi.py`). |
 | **Kernel (TCB)** | `vanguard/packages/kernel/` | Pure security core (`<=1438` LOC limit; currently 1386 LOC). Implements 13-stage effect dispatch (`dispatch.py` S0–S12), monotonic capability attenuation (`attenuation.py`), typed budget algebra (`budget.py`), descriptor-bound capability grants (`grants.py`), action classification (`classifier.py`), fail-closed policy (`policy.py`), and cryptographic provenance DAG (`provenance.py`). Strictly domain-blind (Invariant I-7). |
 | **Agency** | `vanguard/packages/agency/` | Recursive turn engine. Implements `EpisodeEngine` (`episode/engine.py`) with budget enforcement and attenuated child subagent `spawn()`; context compiler & structured token compactor (`context/`). |
-| **Runtime** | `vanguard/packages/runtime/` | System composition and lifecycle. Modularly structured in place into `compose.py`, `session.py`, `wiring.py`, single-writer `ledger_emitter.py`, `evaluator_gateway.py`, governance approvals (`governance/`), and SQLite WAL event store adapters. |
+| **Runtime** | `vanguard/packages/runtime/` | System composition and lifecycle. Modularly structured in place into `compose.py`, `session.py`, `wiring.py`, single-writer `ledger_emitter.py`, `evaluator_gateway.py`, governance approvals (`governance/`), and SQLite WAL event store adapters. Declarative capability catalog in `agent_plugins.py` (Invariant N-06). |
 | **Adapters** | `vanguard/packages/adapters/` | Concrete implementations: Model adapters (`models/openrouter.py`, `llama_cpp.py`, `cassette.py`, `fake.py`), Exterior Evaluator daemon & RPC client (`evaluators/daemon.py`, `gate.py`, `signing.py`), Rootless Bubblewrap Sandbox (`sandbox/rootless.py`), and SQLite WAL event store (`stores/event_store.py`). Must NEVER import kernel or agency. |
 | **Apps** | `vanguard/packages/apps/` | Thin application entrypoints (e.g., `vanguard/packages/apps/coding_max/facade.py` exposing `CodingMaxFacade` / `CodingMax`). Coordinates CLI/API requests into `ApplicationService` compositions. |
+| **Capabilities** | `.agents/` | Four-tier cognitive ontology: atomic skills (`test-runner`, `lda-navigator`, `llama-cpp`, `lam-engine`), open-loop techniques (`spec-driven-codegen`, `tdd-falsifier`), and closed feedback loop proficiencies (`autofix-swe-loop`). Exposes stdio MCP server (`vanguard-agent-capabilities`) and unified CLI (`tools/agent_plugins/`). Full architecture in [`.agents/README.md`](.agents/README.md). |
 | **Plugin Registry** | `vanguard/packages/runtime/registry/` | Canonical M-3 lifecycle FSM, isolation broker, worker wire, and composition compiler; M-3 falsifier closure remains active. |
 | **Code Pack #1** | `packs/code-default/` | First Modular Harness Framework (MHF) domain pack. Contains `harness.yaml`, plugin manifests (`fs`, `ast-patch`, `repo-map`, `terminal`, `evaluation-gate`, `single-planner`), prompt templates, and schema definitions. |
 | **Clients** | `vanguard/clients/` | TypeScript workspaces: interactive CLI (`vg`) in `clients/cli/`, Desktop UI (`clients/desktop/`), TUI (`clients/tui/`), Lab (`clients/lab/`), and Studio (`clients/studio/`). |
@@ -375,6 +377,32 @@ Model providers are strictly abstracted behind `ModelPort` (`vanguard/packages/p
 - **Adapters on disk**: OpenRouter (`adapters/models/openrouter.py`), llama.cpp (`adapters/models/llama_cpp.py`), Cassette replay (`adapters/models/cassette.py`), Fake (`adapters/models/fake.py`).
 - **Provider Routing**: DeepSeek, OpenAI, Anthropic, and open-weights models are addressed via route configurations and environment keys (`OPENROUTER_API_KEY`, `DEEPSEEK_API_KEY`, `OPENAI_API_KEY`), not separate vendor files.
 - **Deterministic Testing**: Keep API keys unset during local test runs to ensure hermetic, deterministic execution against cassettes and fakes.
+
+### 8.1. Universal Agent Capability Quad & Model Context Protocol (MCP)
+
+To unlock autonomous coding and repair capabilities across both native Vanguard agents and external IDE harnesses (Cursor, Claude Code, OpenAI Codex, Google Antigravity), Vanguard exposes a four-part MCP tool suite synchronized via `python3 tools/universal_mcp_sync.py`:
+
+```text
+┌──────────────────────────────────────────────────────────────────────────────────┐
+│                             THE UNIVERSAL MCP QUAD                               │
+├───────────────────────────────┬──────────────────────────────────────────────────┤
+│ 1. vanguard-llama-cpp         │ Native local GGUF inference via llama-server     │
+│    (tools/llama_cpp/mcp)      │ (Vulkan/ROCm, >160 tok/s, zero API cost)         │
+├───────────────────────────────┼──────────────────────────────────────────────────┤
+│ 2. vanguard-lda-navigator     │ SOTA graph-grounded AST retrieval & blast radius │
+│    (uv run lda)               │ (Sub-30ms incremental AST sync via lda --delta)  │
+├───────────────────────────────┼──────────────────────────────────────────────────┤
+│ 3. vanguard-lam-engine        │ LLM API Mock engine for zero-cost replay         │
+│    (tools/lam_engine/mcp)     │ (Sub-millisecond mock completions & cassettes)   │
+├───────────────────────────────┼──────────────────────────────────────────────────┤
+│ 4. vanguard-agent-capabilities│ Unified skills, techniques, and proficiencies    │
+│    (tools/agent_plugins/mcp)  │ (test-runner, spec-codegen, autofix-swe-loop)    │
+└───────────────────────────────┴──────────────────────────────────────────────────┘
+```
+
+The capability engine implements the 4-tier ontological progression:
+$$\text{Skills (Atomic)} \longrightarrow \text{Techniques (Open-Loop)} \longrightarrow \text{Proficiencies (Closed-Loop FSM)} \longrightarrow \text{Mastery (Meta-Heuristic)}$$
+Empirical benchmarks demonstrate that an autonomous closed-loop proficiency (`autofix-swe-loop`) achieves a **100% repair pass rate in <4.0s** on small 1.5B local models where open-loop prompting fails completely. Complete details in [`.agents/README.md`](.agents/README.md).
 
 ---
 

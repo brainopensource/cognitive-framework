@@ -295,7 +295,8 @@ class ApplicationService:
             task_state=task_state,
         )
 
-    def _read_task_state(self, state_dir: Path, run_id: str, *, fallback: str = "") -> CodingTaskState:
+    @staticmethod
+    def _read_task_state(state_dir: Path, run_id: str, *, fallback: str = "") -> CodingTaskState:
         store = SqliteEventStore(state_dir / "events.sqlite3")
         result = store.read(EventRange(run_id=run_id))
         return fold_task_state(list(result.value or ()) if result.ok else (), objective=fallback)

@@ -151,18 +151,20 @@ def execute_autofix_loop(
                         last_error_feedback += f"\n[FAILURE: {f['test']}]\n{f['traceback']}"
                     last_error_feedback += (
                         "\n[ACTIONABLE REPAIR GUIDELINE]:\n"
-                        "- Look at the order of operations in allow():\n"
-                        "  1. Filter out expired timestamps first.\n"
-                        "  2. Check if capacity is reached: if len(self.timestamps) >= self.max_requests: return False\n"
-                        "  3. Only if not full, append now to timestamps and return True.\n"
-                        "Ensure `self.timestamps.append(now)` is placed AFTER the capacity check, NEVER before!"
+                        "- Analyze the failure traceback, error assertions, and expected vs actual values.\n"
+                        "- Ensure all edge cases and boundary conditions are properly guarded.\n"
+                        "- Return the complete corrected code in ```python ... ```."
                     )
                 elif diag.get("raw_stderr"):
                     last_error_feedback += "\n" + diag["raw_stderr"][-800:]
 
     finally:
         if server_proc:
-            server_proc.kill()
+            try:
+                server_proc.kill()
+                server_proc.wait(timeout=2.0)
+            except Exception:
+                pass
 
         if not resolved:
             # Fail-closed rollback

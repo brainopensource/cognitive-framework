@@ -128,16 +128,14 @@ def generate_patch(
         if error_feedback:
             feedback_block = f"\n[ACTIVE TEST FAILURES / TRACEBACKS]\n{error_feedback}\n"
 
-        prompt = f"""Task: Repair defect in {target_file or 'target module'}
+        prompt = f"""Task: Implement change / repair defect in {target_file or 'target module'}
 Description: {task}
 {facts_block}{code_block}{feedback_block}
 [MANDATORY REPAIR INSTRUCTIONS]
-1. Rewrite the complete class/module to fix the defect and make failing tests pass.
-2. In allow(now: float):
-   - Evict expired timestamps: keep only t where t > (now - window_seconds).
-   - If capacity is reached (len(self.timestamps) >= self.max_requests), return False WITHOUT appending now.
-   - Otherwise, append now and return True.
-3. Output ONLY the code enclosed in ```python ... ``` without conversational commentary.
+1. Rewrite the complete class/module to fulfill the task and make any failing tests pass.
+2. Adhere strictly to the architectural contracts, symbol boundaries, and typing invariants shown above.
+3. Preserve all existing public APIs, classes, and method signatures unless explicitly instructed otherwise.
+4. Output ONLY the complete valid Python code enclosed in ```python ... ``` without conversational commentary.
 """
 
         req_body = {
@@ -186,7 +184,11 @@ Description: {task}
         }
     finally:
         if owned_proc:
-            owned_proc.kill()
+            try:
+                owned_proc.kill()
+                owned_proc.wait(timeout=2.0)
+            except Exception:
+                pass
 
 def main():
     parser = argparse.ArgumentParser(description="Technique 1: Spec-Driven Code Generation")

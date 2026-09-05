@@ -18,9 +18,9 @@ import subprocess
 from pathlib import Path
 from typing import Dict, Any
 
-REPO_ROOT = Path("/home/rock-dev/Coding/cognitive-framework")
-MODEL_PATH = "/home/rock-dev/Models/Qwen2.5-Coder-1.5B-Instruct-Q4_K_M.gguf"
-LLAMA_SERVER = "/home/rock-dev/.local/bin/llama-server"
+REPO_ROOT = Path(__file__).resolve().parents[3]
+MODEL_PATH = os.environ.get("VANGUARD_LLAMA_MODEL", str(Path.home() / "Models" / "Qwen2.5-Coder-1.5B-Instruct-Q4_K_M.gguf"))
+LLAMA_SERVER = os.environ.get("LLAMA_SERVER_BIN", str(Path.home() / ".local/bin/llama-server"))
 HEALTH_URL = "http://127.0.0.1:8080/health"
 COMPLETIONS_URL = "http://127.0.0.1:8080/v1/chat/completions"
 

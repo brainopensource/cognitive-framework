@@ -22,12 +22,14 @@ from .config import (
     get_offline_default,
     resolve_model,
 )
+from .cascade import CascadingModel
 from .fake import FakeModel
 from .llama_cpp import LlamaCppModel
 from .openrouter import OpenRouterModel
 from .routing import ModelRoutingError
 
 __all__ = [
+    "CascadingModel",
     "ModelResolutionError",
     "create_model",
 ]
@@ -106,6 +108,13 @@ def create_model(
             inner_model = LlamaCppModel(model=model_name or get_offline_default("llama_cpp"))
         elif provider == "openrouter":
             inner_model = OpenRouterModel(model=resolve_model(model_name or get_default_model()))
+        elif provider in {"cascade", "tiered"}:
+            primary_spec = model_spec.get("primary") or "local"
+            fallback_spec = model_spec.get("fallback") or "smart"
+            max_failures = int(model_spec.get("max_primary_failures", 1))
+            prim = create_model(primary_spec, cassette_path=cassette_path, record=record, fake_proposals=fake_proposals, env_loader=env_loader, **kwargs)
+            fall = create_model(fallback_spec, cassette_path=cassette_path, record=record, fake_proposals=fake_proposals, env_loader=env_loader, **kwargs)
+            inner_model = CascadingModel(prim, fall, max_primary_failures=max_failures)
         elif provider == "cassette":
             cas_p = model_spec.get("path") or cassette_path
             if not cas_p:
@@ -176,12 +185,19 @@ def create_model(
         elif spec == "smart":
             inner_model = OpenRouterModel(model=resolve_model("smart"))
 
-        elif spec == "testing":
-            inner_model = OpenRouterModel(model=resolve_model("testing"))
+        elif spec == "cascade" or spec.startswith("cascade:"):
+            target = spec[len("cascade:"):].strip() if ":" in spec else ""
+            if "->" in target:
+                p_spec, _, f_spec = target.partition("->")
+            else:
+                p_spec, f_spec = "local", "smart"
+            prim = create_model(p_spec.strip() or "local", cassette_path=cassette_path, record=record, fake_proposals=fake_proposals, env_loader=env_loader, **kwargs)
+            fall = create_model(f_spec.strip() or "smart", cassette_path=cassette_path, record=record, fake_proposals=fake_proposals, env_loader=env_loader, **kwargs)
+            inner_model = CascadingModel(prim, fall)
 
         elif ":" in spec and not spec.startswith(("http://", "https://")):
             scheme, _, _ = spec.partition(":")
-            if scheme not in {"llama_cpp", "llama", "openrouter", "cassette", "fake", "mock"}:
+            if scheme not in {"llama_cpp", "llama", "openrouter", "cassette", "fake", "mock", "cascade"}:
                 raise ModelResolutionError(f"Unsupported provider scheme: {scheme!r} in {spec!r}")
             raise ModelResolutionError(f"Invalid model spec: {spec!r}")
 

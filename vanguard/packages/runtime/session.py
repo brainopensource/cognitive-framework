@@ -703,7 +703,6 @@ class HarnessSession:
         self._completion_changed_files: set[str] = set()
         self._completion_inspected_files: set[str] = set()
         self._completion_verification: VerificationReceipt | None = None
-        self._completion_verified_step_ids: set[str] = set()
         self._completion_verification_command: str | None = None
         #: T-07. The typed subject the current verification receipt is bound
         #: to; re-derived against live digests at admission so a receipt
@@ -1799,40 +1798,6 @@ class HarnessSession:
             verification_command=verification_command,
             verification_subject_digest=subject.digest(),
         )
-        # Keep the product receipt's verified-step set in the same durable
-        # ledger as the receipt itself.  EpisodeStateChanged is an existing
-        # schema/role-owned event; introducing a private in-memory list here
-        # would make the public entrypoint unable to prove what was verified
-        # after a fresh-process replay.
-        verified_step_ids = getattr(self, "_completion_verified_step_ids", None)
-        if verified_step_ids is None:
-            # Some focused contract fixtures construct a session with a
-            # minimal object factory. Keep the production invariant while
-            # remaining compatible with those fixtures.
-            verified_step_ids = set()
-            self._completion_verified_step_ids = verified_step_ids
-        if self._completion_verification.passed:
-            verified_step_ids.add(subject.digest())
-        ledger = getattr(self, "ledger", None)
-        if ledger is not None:
-            ledger.emit_kind(
-                "EpisodeStateChanged",
-                run_id=self.task.run_id,
-                principal=self.task.principal,
-                episode_id=self.task.episode_id,
-                payload={
-                    "lastVerification": {
-                        "stepId": subject.digest(),
-                        "exitCode": exit_code,
-                        "executedTestCount": self._completion_verification.executed_test_count,
-                        "verificationSubjectDigest": subject.digest(),
-                        "receiptDigest": self._completion_verification.receipt_digest,
-                        "verificationCommand": verification_command,
-                        "passed": self._completion_verification.passed,
-                    },
-                    "verifiedStepIds": sorted(verified_step_ids),
-                },
-            )
         artifacts = getattr(self, "artifacts", None)
         if (artifacts is not None
                 and "reused durable settled effect" not in str(outcome.detail or "")):

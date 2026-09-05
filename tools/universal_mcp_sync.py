@@ -51,6 +51,13 @@ TRIAD_SERVERS = {
         "skill": ".agents/skills/lam-engine/SKILL.md",
         "cli": "tools/002_LLM_API_MOCK/cli.py",
     },
+    "agent-plugins": {
+        "command": "python3",
+        "script": "tools/agent_plugins/mcp_server.py",
+        "description": "Vanguard unified agent capabilities (skills, techniques, proficiencies, test runner, autofix).",
+        "skill": ".agents/skills/autofix-loop/SKILL.md",
+        "cli": "tools/agent_plugins/cli.py",
+    },
 }
 
 
@@ -243,37 +250,49 @@ def sync_global_harnesses() -> List[str]:
 
 
 def sync_skills() -> List[str]:
-    """Mirror .agents/skills/ into harness-specific skill discovery folders."""
+    """Mirror .agents/ (skills, techniques, proficiencies) into harness-specific discovery folders."""
     actions = []
-    source_skills = REPO_ROOT / ".agents/skills"
-    if not source_skills.exists():
-        return actions
-
     home = Path.home()
-    target_dirs = [
-        home / ".cursor/skills-cursor",
-        home / ".claude/skills",
-        home / ".codex/skills",
-        REPO_ROOT / ".cursor/skills",
+
+    capability_sets = [
+        ("skills", REPO_ROOT / ".agents/skills", [
+            home / ".cursor/skills-cursor",
+            home / ".claude/skills",
+            home / ".codex/skills",
+            home / ".gemini/antigravity-cli/skills",
+            REPO_ROOT / ".cursor/skills",
+        ]),
+        ("techniques", REPO_ROOT / ".agents/techniques", [
+            home / ".cursor/techniques",
+            home / ".claude/techniques",
+            home / ".codex/techniques",
+        ]),
+        ("proficiencies", REPO_ROOT / ".agents/proficiencies", [
+            home / ".cursor/proficiencies",
+            home / ".claude/proficiencies",
+            home / ".codex/proficiencies",
+        ]),
     ]
 
-    for target in target_dirs:
-        try:
-            target.mkdir(parents=True, exist_ok=True)
-            for skill_dir in source_skills.iterdir():
-                if not skill_dir.is_dir():
-                    continue
-                dest_skill = target / skill_dir.name
-                if dest_skill.is_symlink() or dest_skill.exists():
-                    if dest_skill.is_symlink():
-                        dest_skill.unlink()
-                    else:
-                        shutil.rmtree(dest_skill)
-                # Create symlink for live synchronization
-                dest_skill.symlink_to(skill_dir, target_is_directory=True)
-            actions.append(f"Linked skills to {target}")
-        except Exception as exc:
-            actions.append(f"Could not link skills to {target}: {exc}")
+    for label, src_dir, target_dirs in capability_sets:
+        if not src_dir.exists() or not src_dir.is_dir():
+            continue
+        for target in target_dirs:
+            try:
+                target.mkdir(parents=True, exist_ok=True)
+                for item_dir in src_dir.iterdir():
+                    if not item_dir.is_dir():
+                        continue
+                    dest = target / item_dir.name
+                    if dest.is_symlink() or dest.exists():
+                        if dest.is_symlink():
+                            dest.unlink()
+                        else:
+                            shutil.rmtree(dest)
+                    dest.symlink_to(item_dir, target_is_directory=True)
+                actions.append(f"Linked {label} to {target}")
+            except Exception as exc:
+                actions.append(f"Could not link {label} to {target}: {exc}")
 
     return actions
 

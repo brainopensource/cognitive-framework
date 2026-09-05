@@ -393,7 +393,83 @@ While single-model execution on complex state machines failed across all 7 open-
 
 ---
 
-## 9. Inspecting Results & Audit Trails
+### 8.6. The Agent Ontological Progression (Skills, Techniques, Proficiencies)
+
+The repository structures agent capabilities along a rigorous four-tier ontological progression:
+$$\text{Skill (Atomic)} \longrightarrow \text{Technique (Composition)} \longrightarrow \text{Proficiency (Closed Feedback Loop)} \longrightarrow \text{Mastery (Meta-Heuristic)}$$
+
+1. **Skill (Atomic Capability)**: Single-responsibility, hermetic execution without internal loops (e.g. [`test-runner`](.agents/skills/test-runner/SKILL.md), [`lda-navigator`](.agents/skills/lda-navigator/SKILL.md), [`llama-cpp`](.agents/skills/llama-cpp/SKILL.md)).
+2. **Technique (Synergistic Composition)**: Open-loop, static composition of two or more skills without iterative control flow (e.g. [`spec-driven-codegen`](.agents/techniques/spec-driven-codegen/TECHNIQUE.md) combining LDA + LLM; [`tdd-falsifier`](.agents/techniques/tdd-falsifier/TECHNIQUE.md) combining LDA + TestRunner).
+3. **Proficiency (Closed-Loop Feedback FSM)**: Goal-seeking feedback state machine that iteratively executes code generation, sub-30ms AST delta synchronization, test falsification, and fail-closed rollback (e.g. [`autofix-swe-loop`](.agents/proficiencies/autofix-swe-loop/PROFICIENCY.md)).
+
+#### Empirical Benchmark: Closed-Loop Proficiency vs Open-Loop Techniques
+
+To measure the cognitive boost of closed-loop feedback vs open-loop prompting on small open-weights models, an empirical benchmark was conducted using `Qwen2.5-Coder-1.5B-Instruct-Q4_K_M.gguf` on an off-by-one sliding window rate limiter defect (`tools/model_benchmarks/experiments/bench_ontological_progression.py`):
+
+| Benchmark Mode | Paradigm | Turn Count | Pass / Fail | Total Time | Tokens | AST Sync Latency | Defect Elimination |
+|---|---|---|---|---|---|---|---|
+| **Mode 0** | Blind Zero-shot (Raw Prompt) | 1 turn | **FAIL** (0/3 tests) | 1.32s | 184 | N/A | Corrupted sliding window bounds |
+| **Mode 1** | Technique 1 (Spec-Driven Open-Loop) | 1 turn | **FAIL** (0/3 tests) | 2.16s | 231 | N/A | Accurate signature, off-by-one window cutoff |
+| **Mode 2** | **Proficiency (Autofix SWE Closed-Loop)** | **2 turns** | **PASS (3/3 tests)** | **3.96s** | **559** | **22ms (`lda --delta`)** | **100% verified repair with clean diff** |
+
+#### Running the Ontological Benchmark:
+```bash
+python3 tools/model_benchmarks/experiments/bench_ontological_progression.py
+```
+
+---
+
+## 9. Universal Agent Capabilities & Model Context Protocol (MCP) Architecture
+
+Agent capabilities are organized under `.agents/` and exposed to both the Vanguard runtime and external agent IDEs (Cursor, Claude Code, OpenAI Codex, Google Antigravity).
+
+### 9.1. Unified CLI (`tools/agent_plugins/cli.py`)
+
+```bash
+# 1. Discover all registered capabilities across skills, techniques, and proficiencies
+python3 tools/agent_plugins/cli.py list
+
+# 2. Output compact prompt prefix index for injection into agent context (<4096 chars)
+python3 tools/agent_plugins/cli.py prefix
+
+# 3. Execute atomic test runner with isolated subprocess and JSON output
+python3 tools/agent_plugins/cli.py run test-runner "python3 -m unittest test.kernel.test_dispatch -v"
+
+# 4. Run closed-loop SWE repair loop
+python3 tools/agent_plugins/cli.py autofix \
+  --task "Fix off-by-one error in sliding window limiter" \
+  --file "path/to/target.py" \
+  --max-turns 3
+```
+
+### 9.2. Universal Model Context Protocol (MCP) Server
+
+Vanguard exposes a unified stdio JSON-RPC MCP server (`tools/agent_plugins/mcp_server.py`) registered as `vanguard-agent-capabilities`:
+
+| MCP Tool Name | Description | Inputs |
+|---|---|---|
+| **`agent_list_plugins`** | Inspect registered skills, techniques, and proficiencies | `category` (optional) |
+| **`agent_run_test`** | Run isolated test suite with timeout and structured failure diagnostics | `test_cmd`, `timeout` |
+| **`agent_generate_patch`** | Generate grounded code patch using LDA context and LLM | `task`, `target_file`, `error_feedback` |
+| **`agent_run_falsifier`** | Discover and run test falsifiers for a file or symbol | `target_file`, `symbol` |
+| **`agent_autofix`** | Run autonomous closed-loop SWE repair state machine | `task`, `target_file`, `max_turns` |
+
+### 9.3. Cross-Harness MCP Synchronization
+
+Synchronize all Vanguard MCP servers (`vanguard-llama-cpp`, `vanguard-lda-navigator`, `vanguard-lam-engine`, `vanguard-agent-capabilities`) across client harnesses:
+
+```bash
+python3 tools/universal_mcp_sync.py
+```
+This automatically updates:
+- **Cursor**: `.cursor/mcp.json`
+- **Claude Code**: `~/.claude.json`
+- **OpenAI Codex**: `~/.codex/mcp.json`
+- **Google Antigravity**: `~/.gemini/antigravity-cli/mcp_config.json`
+
+---
+
+## 10. Inspecting Results & Audit Trails
 
 Every Vanguard run is deterministically recorded in an immutable SQLite event store:
 
@@ -413,7 +489,7 @@ Every Vanguard run is deterministically recorded in an immutable SQLite event st
 
 ---
 
-## 10. Invariants & Operational Rules to Remember
+## 11. Invariants & Operational Rules to Remember
 
 1. **Sandbox Command Allowlist**:
    When invoking `proc.exec` commands in code-default harnesses, only allowlisted binaries are permitted:

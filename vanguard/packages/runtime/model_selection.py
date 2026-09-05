@@ -34,7 +34,7 @@ __all__ = [
 ]
 
 #: Selectable ports. `mock` and `fake` are deterministic and offline.
-MODEL_PORTS = ("mock", "fake", "cassette", "lam", "llama_cpp", "llama", "ollama", "openrouter", "deepseek", "router")
+MODEL_PORTS = ("mock", "fake", "cassette", "lam", "llama_cpp", "llama", "ollama", "openrouter", "deepseek", "router", "cascade")
 
 #: Default local tag. Overridable, because whatever is pulled locally wins.
 DEFAULT_LLAMA_MODEL = "local-model"
@@ -305,6 +305,29 @@ def select_model(
                 environ=openrouter_environ,
             ),
             label=f"router:{name}",
+        )
+
+    if choice == "cascade":
+        from ..adapters.models.cascade import CascadingModel
+        from ..adapters.models.llama_cpp import LlamaCppModel
+        from ..adapters.models.openrouter import OpenRouterModel
+
+        endpoint = environ.get("VANGUARD_LLAMA_ENDPOINT", "http://127.0.0.1:8080/v1/chat/completions")
+        base = endpoint.rsplit("/v1", 1)[0]
+        health_url = f"{base}/health"
+        if probe is not None:
+            if not probe(health_url):
+                raise ModelUnavailable(choice, f"primary endpoint not answering at {health_url}")
+        else:
+            if not _probe_http(health_url):
+                raise ModelUnavailable(choice, f"primary endpoint not answering at {health_url}")
+
+        primary = LlamaCppModel(endpoint=endpoint)
+        fallback = OpenRouterModel(model=resolve_model("smart"))
+        return SelectedModel(
+            port="cascade",
+            model=CascadingModel(primary, fallback),
+            label="cascade:llama_cpp->smart",
         )
 
     raise ModelUnavailable(choice, "unreachable")

@@ -127,7 +127,6 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
     # unable to report why a run failed or what it cost, so fold the event
     # stream too. Unknown kinds are skipped, never guessed at (CT-44).
     last_note = ""
-    spent_micros = 0
     for ev in getattr(result, "events", ()) or ():
         kind = getattr(ev, "kind", "")
         payload = getattr(ev, "payload", {}) or {}
@@ -208,10 +207,6 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
                 "status": kind.replace("Capability", "").lower(),
                 "capability": str(payload.get("capability") or payload.get("name") or "unnamed"),
             })
-        elif kind == "BudgetCommitted":
-            micros = payload.get("usdMicros") or payload.get("costMicros")
-            if isinstance(micros, int):
-                spent_micros += micros
         elif kind == "BudgetExhausted":
             projections.append({
                 "kind": "budget",
@@ -221,34 +216,47 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
     if last_note:
         projections.append({"kind": "note", "text": last_note})
     projections.append({"kind": "complete", "outcome": outcome, "turns": int(getattr(result.telemetry, "turns", 0))})
-    trajectory = result.trajectory if isinstance(getattr(result, "trajectory", None), Mapping) else {}
-    routes = [dict(route) for route in trajectory.get("model_routes_used", ())
-              if isinstance(route, Mapping)]
-    verified_step_ids: list[str] = []
-    active_step_id: str | None = None
-    for ev in getattr(result, "events", ()) or ():
-        payload = getattr(ev, "payload", {}) or {}
-        if not isinstance(payload, Mapping):
-            continue
-        if payload.get("activeStepId"):
-            active_step_id = str(payload["activeStepId"])
-        raw_verified = payload.get("verifiedStepIds")
-        if isinstance(raw_verified, (list, tuple)):
-            verified_step_ids = [str(item) for item in raw_verified if str(item)]
-    telemetry = getattr(result, "telemetry", None)
-    cost = trajectory.get("cost") if isinstance(trajectory.get("cost"), Mapping) else {}
-    cost_status = (cost.get("measurement_status") or {}).get("usd_micros", {})
-    observed_cost = cost.get("usd_micros") if cost_status.get("status") == "measured" else None
+    # T-85. The receipt is projected through the *same* mapping the
+    # application service uses (`_result_from_execution`), so the product
+    # path cannot drift from a second, private receipt algebra. Verified
+    # steps come from the folded ledger, never from a bespoke event this
+    # function emits for itself.
+    from .app_service import ApplicationService
+
+    state_dir = configured_store_path.parent
+    task_state = ApplicationService._read_task_state(
+        state_dir, run_id, fallback=brief,
+    )
+    run_result = ApplicationService._result_from_execution(
+        run_id=run_id, outcome=outcome, phase="complete",
+        turns=int(getattr(result.telemetry, "turns", 0)),
+        plan_digest=result.run_digest or None, detail=result.detail,
+        projections=tuple(projections), episode_id=task.episode_id,
+        execution=result, task_state=task_state,
+    )
+    # A step counts as verified when the ledger carries both a terminal
+    # status and the receipt that earned it. A `complete` TODO with no
+    # receipt digest is an unevidenced claim and is not projected.
+    verified_step_ids = [
+        str(item.todo_id) for item in task_state.todo_items
+        if item.status == "complete" and item.receipt_digest
+    ]
+    active_step_id = next(
+        (str(item.todo_id) for item in task_state.todo_items
+         if item.status == "in_progress"), None,
+    )
+    usage = run_result.token_usage or {}
     return {"type": "result", "runId": run_id, "result": {
         "runId": run_id, "outcome": outcome, "phase": "complete", "attempts": 1,
-        "turns": int(getattr(telemetry, "turns", 0)),
-        "planDigest": result.run_digest or None, "activeStepId": active_step_id,
-        "verifiedStepIds": verified_step_ids, "modelRoutes": routes,
-        "promptTokens": getattr(telemetry, "prompt_tokens", None),
-        "completionTokens": getattr(telemetry, "completion_tokens", None),
-        "spentUsdMicros": observed_cost,
+        "turns": run_result.turns,
+        "planDigest": run_result.plan_digest, "activeStepId": active_step_id,
+        "verifiedStepIds": verified_step_ids,
+        "modelRoutes": [run_result.model_route] if run_result.model_route else [],
+        "promptTokens": usage.get("promptTokens"),
+        "completionTokens": usage.get("completionTokens"),
+        "spentUsdMicros": run_result.observed_cost,
         "projections": projections,
-        "detail": result.detail,
+        "detail": run_result.detail,
     }}
 
 

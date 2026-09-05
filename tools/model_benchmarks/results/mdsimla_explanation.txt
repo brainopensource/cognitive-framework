@@ -1,0 +1,137 @@
+### Architectural Role of `LdaRepoIndex` in the Hexagonal Lattice
+
+`LdaRepoIndex` serves as an adapter within the Hexagonal Architecture (also known as the Ports and Adapters pattern). Its primary role is to provide a concrete implementation of the `IndexPort` interface, allowing the core application logic to interact with the `.lda/index.db` database without being tightly coupled to its implementation details. This separation of concerns ensures that the application can be easily adapted to different data storage mechanisms or databases in the future.
+
+### SQL Queries for `files()`, `symbols()`, `dependencies()`, and `tests()`
+
+#### `files()`
+The `files()` method retrieves a list of file paths from the database. The SQL query for this method would be:
+```sql
+SELECT path FROM files WHERE path LIKE :prefix;
+```
+This query selects the `path` column from the `files` table where the `path` starts with the given `prefix`.
+
+#### `symbols()`
+The `symbols()` method retrieves a list of symbols based on the provided `name` and `path`. The SQL query for this method would be:
+```sql
+SELECT * FROM symbols WHERE name LIKE :name AND file_path LIKE :path;
+```
+This query selects all columns from the `symbols` table where the `name` matches the given `name` and the `file_path` matches the given `path`.
+
+#### `dependencies()`
+The `dependencies()` method retrieves a list of dependency edges based on the provided `path`. The SQL query for this method would be:
+```sql
+SELECT * FROM relations WHERE source_path LIKE :path;
+```
+This query selects all columns from the `relations` table where the `source_path` matches the given `path`.
+
+#### `tests()`
+The `tests()` method retrieves a list of test associations based on the provided `path`. The SQL query for this method would be:
+```sql
+SELECT * FROM relations WHERE kind = 'tests' AND source_path LIKE :path;
+```
+This query selects all columns from the `relations` table where the `kind` is 'tests' and the `source_path` matches the given `path`.
+
+### Enforcing the Fail-Closed Invariant
+
+To enforce the Fail-Closed invariant, the `LdaRepoIndex` adapter must check the existence and freshness of the `.lda/index.db` database and the `head_sha` in the `index_runs` table. If the database is missing or the `head_sha` does not match the current git revision, the adapter should return an error without attempting to perform any queries.
+
+Here is a high-level outline of how this can be implemented:
+1. **Check Database Existence**: Verify that the `.lda/index.db` file exists.
+2. **Check `head_sha`**: Query the `index_runs` table to get the latest `head_sha` and compare it with the current git revision.
+3. **Fail-Closed Logic**: If either the database is missing or the `head_sha` does not match, return an error.
+
+### Why Ranking/Heuristics are Strictly Forbidden
+
+Ranking or heuristics are strictly forbidden in this adapter because the architectural invariant requires that the adapter performs only deterministic queries. Ranking or heuristics introduce non-deterministic behavior, which can lead to inconsistent results and violate the fail-closed invariant. The adapter's role is to provide a reliable and predictable interface to the underlying database, and any form of ranking or heuristics would compromise this reliability.
+
+### Design Specification for `LdaRepoIndex`
+
+Here is a structured design specification that a junior coder can translate into Python:
+
+```python
+from typing import Sequence, Optional
+from vanguard.packages.ports.index import IndexPort, Result, Symbol, DependencyEdge, TestAssociation, RepositoryMap
+import sqlite3
+import os
+import subprocess
+
+class LdaRepoIndex(IndexPort):
+    def __init__(self, db_path: str):
+        self.db_path = db_path
+
+    def index(self, root: str) -> Result[int]:
+        # Implementation not shown
+        pass
+
+    def files(self, *, prefix: str = "") -> Result[Sequence[str]]:
+        if not self.is_database_valid():
+            return Result.error("Database is invalid or stale")
+        
+        conn = sqlite3.connect(self.db_path)
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT path FROM files WHERE path LIKE ?", (prefix,))
+            return Result.success([row[0] for row in cursor.fetchall()])
+        finally:
+            conn.close()
+
+    def symbols(self, *, name: str = "", path: str = "") -> Result[Sequence[Symbol]]:
+        if not self.is_database_valid():
+            return Result.error("Database is invalid or stale")
+        
+        conn = sqlite3.connect(self.db_path)
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM symbols WHERE name LIKE ? AND file_path LIKE ?", (name, path))
+            return Result.success([Symbol(*row) for row in cursor.fetchall()])
+        finally:
+            conn.close()
+
+    def dependencies(self, *, path: str = "") -> Result[Sequence[DependencyEdge]]:
+        if not self.is_database_valid():
+            return Result.error("Database is invalid or stale")
+        
+        conn = sqlite3.connect(self.db_path)
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM relations WHERE source_path LIKE ?", (path,))
+            return Result.success([DependencyEdge(*row) for row in cursor.fetchall()])
+        finally:
+            conn.close()
+
+    def tests(self, *, path: str = "") -> Result[Sequence[TestAssociation]]:
+        if not self.is_database_valid():
+            return Result.error("Database is invalid or stale")
+        
+        conn = sqlite3.connect(self.db_path)
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM relations WHERE kind = 'tests' AND source_path LIKE ?", (path,))
+            return Result.success([TestAssociation(*row) for row in cursor.fetchall()])
+        finally:
+            conn.close()
+
+    def repo_map(self, *, token_budget: int = 4000) -> Result[RepositoryMap]:
+        # Implementation not shown
+        pass
+
+    def is_database_valid(self) -> bool:
+        if not os.path.exists(self.db_path):
+            return False
+        
+        current_head_sha = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('utf-8').strip()
+        
+        conn = sqlite3.connect(self.db_path)
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SELECT head_sha FROM index_runs ORDER BY timestamp DESC LIMIT 1")
+            latest_head_sha = cursor.fetchone()
+            if latest_head_sha is None or latest_head_sha[0] != current_head_sha:
+                return False
+            return True
+        finally:
+            conn.close()
+```
+
+This design specification provides a clear and structured approach to implementing the `LdaRepoIndex` adapter, ensuring that it adheres to the architectural constraints and requirements specified in T-75.

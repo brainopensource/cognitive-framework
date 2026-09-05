@@ -170,6 +170,17 @@ def select_model(
             if not _probe_http(endpoint):
                 raise ModelUnavailable(port_name, f"no server answering at {endpoint}")
 
+        if choice == "ollama":
+            installed = _ollama_tags(endpoint)
+            resolved = _resolve_tag(name, installed)
+            if resolved is None:
+                if installed:
+                    raise ModelUnavailable(
+                        port_name, f"model {name!r} is not pulled")
+                raise ModelUnavailable(
+                    port_name, "backend responded but model tags were unavailable")
+            name = resolved
+
         return SelectedModel(
             port=port_name,
             model=LlamaCppModel(
@@ -369,7 +380,7 @@ def _ollama_tags(endpoint: str) -> tuple[str, ...]:
     import json
     import urllib.request
 
-    root = endpoint.split("/api/")[0]
+    root = endpoint.split("/v1/")[0].split("/api/")[0].rstrip("/")
     try:
         with urllib.request.urlopen(f"{root}/api/tags", timeout=3.0) as response:
             payload = json.loads(response.read().decode("utf-8"))

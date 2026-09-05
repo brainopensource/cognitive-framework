@@ -1,0 +1,21 @@
+{
+  "challenge": "MDSIMLA (Meta Desafio Self Improvement Multi Local Agent)",
+  "target_task": "T-75: LdaRepoIndex adapter (IDX-01)",
+  "harness": "vg-code-explain",
+  "phase1_reasoning": {
+    "model": "Qwen2.5-Coder-14B-Instruct",
+    "time_sec": 48.55,
+    "tokens": 1441,
+    "speed_tok_s": 29.7,
+    "output_file": "tools/model_benchmarks/results/mdsimla_explanation.txt"
+  },
+  "phase2_coding": {
+    "model": "Qwen2.5-Coder-1.5B-Instruct",
+    "time_sec": 4.44,
+    "tokens": 757,
+    "speed_tok_s": 170.6,
+    "output_file": "tools/model_benchmarks/results/mdsimla_synthesis.py"
+  },
+  "total_time_sec": 52.98,
+  "total_tokens": 2198
+}

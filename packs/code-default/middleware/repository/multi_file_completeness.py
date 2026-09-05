@@ -218,13 +218,15 @@ class CodeDefaultCompletionPolicy:
         if proposal.get("kind") != "finish":
             return {"admissible": False, "reason": "MODEL_DID_NOT_REQUEST_FINISH"}
         changed = tuple(changed_files)
-        if not changed:
-            return {"admissible": False, "reason": "MISSING_SOURCE_PATCH"}
         primary = tuple(str(path) for path in observations.get("primary_files", ()))
         if observations.get("coverage_ratio") == 1.0 and not primary:
             return {"admissible": False, "reason": "EMPTY_PRIMARY_VACUOUS_COVERAGE"}
         surface = tuple(implicated_files) or changed
         classification = classify_task(task_text)
+        if not changed and classification.kind == "read-only":
+            return {"admissible": True, "reason": "read_only_task_admissible"}
+        if not changed:
+            return {"admissible": False, "reason": "MISSING_SOURCE_PATCH"}
         bugfix_brief = classification.kind == "bugfix" or "bugfix" in task_text.lower()
         treat_greenfield = classification.kind == "greenfield" and not bugfix_brief
         if treat_greenfield:

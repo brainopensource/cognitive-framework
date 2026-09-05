@@ -67,6 +67,60 @@ Step 6: uv run lda drift --json (Verify zero doc drift or orphan contracts)
 
 ---
 
+## 4.1 Developer Playbook: 4 Core Scenarios
+
+### Scenario 1: Explaining Code & Exploring Concepts (Anti-Blind Grepping)
+- **Question:** *"Does Vanguard have an explanation agent or explanation mechanism?"*
+- **Why Blind Grepping Fails:** Running `grep -rn "explanation"` returns hundreds of lines across research notes, tests, and documentation, filling your context window with noise.
+- **The LDA Solution:**
+  ```bash
+  uv run lda resolve "explanation agent"
+  ```
+  In <1 second, LDA uses graph degree and architectural weighting to return the exact symbols:
+  - [`vanguard/packages/runtime/explain.py::Explanation`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/runtime/explain.py#L31) and [`explain_artifact`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/runtime/explain.py#L54) (normative audit engine for `vg why <artifact>`).
+  - [`vanguard/packages/domain/ledger/agent_view.py::AgentView`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/domain/ledger/agent_view.py#L31) (canonical ledger state projection).
+  To inspect the implementation within a token budget:
+  ```bash
+  uv run lda context "explain artifact" --budget 2500
+  ```
+
+### Scenario 2: Finding Modules & Understanding Blast Radius
+- **Question:** *"Where is a behavior implemented, and what will break if I change it?"*
+- **The LDA Solution:**
+  ```bash
+  # 1. Structural skeleton of the subsystem
+  uv run lda repomap --focus vanguard/packages/runtime/ --budget 2000
+  # 2. Who calls this function? (Blast radius)
+  uv run lda callers vanguard.packages.runtime.explain.explain_artifact
+  # 3. What does this function call? (Dependencies)
+  uv run lda callees vanguard.packages.runtime.explain.explain_artifact
+  ```
+
+### Scenario 3: Debugging Bugs & Instant Test Falsification
+- **Question:** *"I need to fix a bug in admission gate verification. Which tests prove/falsify it?"*
+- **The LDA Solution:**
+  ```bash
+  uv run lda plan "admission gate verification" --budget 4000
+  ```
+  LDA computes the graph intersection and outputs copy-paste test commands directly:
+  ```bash
+  python3 -m unittest test.packs.code_default.test_context_policy -v
+  ```
+
+### Scenario 4: Creating Features with Zero Documentation Drift
+- **Question:** *"I added or modified a port/adapter. How do I guarantee zero stale paths or contracts?"*
+- **The LDA Solution:**
+  ```bash
+  # 1. Plan feature dependencies
+  uv run lda plan "sqlite event store adapter"
+  # 2. After making surgical changes, sync AST in <30ms:
+  uv run lda index --delta
+  # 3. Check for documentation drift or broken link contracts:
+  uv run lda drift --json
+  ```
+
+---
+
 ## 5. Retrieval Strategies
 
 - `ppr_submodular` (default): Personalized PageRank graph diffusion + greedy submodular packing — optimal for architectural and graph-connected tasks.

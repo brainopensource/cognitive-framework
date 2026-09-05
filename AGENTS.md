@@ -93,6 +93,33 @@ grep "<Symbol>" .generated/knowledge/symbols.jsonl
 - Step 2 answers: *how do I refresh AST ranges and relation facts instantly after editing a file without a full rebuild?*
 - Step 3 answers: *how do I deterministically route documentation debt if the SQLite graph is unavailable?*
 
+#### Core LDA Engineering Patterns (Anti-Blind Exploration)
+
+Instead of dumping multi-thousand line files into context or running unguided greps, developers and agents MUST use these targeted patterns:
+
+1. **Explain Code & Explore Concepts** (e.g. *"how does explanation or artifact audit work?"*):
+   ```bash
+   uv run lda resolve "explanation agent"           # Finds exact class/function (e.g. explain.py::Explanation)
+   uv run lda context "explain artifact" --budget 3000 # Compiles token-bounded AST context
+   ```
+2. **Find Modules & Architecture Blast Radius**:
+   ```bash
+   uv run lda repomap --focus vanguard/packages/runtime/ --budget 2000 # Dense structural skeleton
+   uv run lda callers vanguard.packages.runtime.explain.explain_artifact # Upstream callers before touching
+   ```
+3. **Debug Bugs & Run Instant Falsifiers**:
+   ```bash
+   uv run lda plan "fix admission gate verification failure" # Bundles symbol + callers + exact test commands
+   # Output gives copy-paste falsifiers: python3 -m unittest test.packs.code_default.test_context_policy -v
+   ```
+4. **Create Features & Verify Drift**:
+   ```bash
+   uv run lda plan "<new feature description>"      # Identify required ports, protocols, and contracts
+   # [Implement surgical edits]
+   uv run lda index --delta                         # Sub-50ms AST synchronization
+   uv run lda drift --json                          # Verify 0 stale paths, 0 orphan contracts
+   ```
+
 **Health check before trust**: `.generated/knowledge/report.json` must report
 `"status": "VALIDATED"` with non-zero row counts. LDA users must additionally confirm
 `uv run lda doctor --json` reports `"index_healthy": true`. Operational workflows, MCP tools,

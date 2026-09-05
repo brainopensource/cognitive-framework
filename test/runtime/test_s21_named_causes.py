@@ -77,6 +77,9 @@ class TheDriverEmitsTheLabel(unittest.TestCase):
 
     def test_an_absent_tag_is_labelled_not_soup(self) -> None:
         with patch(
+            "vanguard.packages.runtime.model_selection._probe_http",
+            return_value=True,
+        ), patch(
             "vanguard.packages.runtime.model_selection._ollama_tags",
             return_value=("installed:tag",),
         ):

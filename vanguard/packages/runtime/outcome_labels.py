@@ -44,7 +44,9 @@ def classify_failure_cause(detail: str) -> str:
         return "instrument_error:provider_timeout"
     if "is not pulled" in lowered or "tag_absent" in lowered:
         return "instrument_error:model_tag_absent"
-    if "no daemon answering" in lowered or "unreachable" in lowered:
+    if ("no daemon answering" in lowered
+            or "no server answering" in lowered
+            or "unreachable" in lowered):
         return "instrument_error:provider_unreachable"
     if "key" in lowered and ("missing" in lowered or "not set" in lowered):
         return OutcomeLabel.PROVIDER_KEY_MISSING

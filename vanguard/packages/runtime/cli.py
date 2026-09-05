@@ -325,8 +325,8 @@ def cmd_cassette_replay(args: argparse.Namespace) -> int:
         app = ApplicationService(workspace=workspace)
         res = app.run(
             brief=args.brief,
-            model_port=player,
-            profile_id=getattr(args, "profile", "local"),
+            model=player,
+            profile_id=getattr(args, "profile", "product"),
             state_dir=getattr(args, "state_dir", None),
             interactive=False,
         )

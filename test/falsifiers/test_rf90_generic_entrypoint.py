@@ -17,7 +17,7 @@ class RF90GenericEntrypointFalsifier(unittest.TestCase):
     def test_code_and_explain_resolve_the_shared_manifest_entrypoint(self) -> None:
         self.assertEqual(entrypoint._manifest("code").name, "manifest.json")
         self.assertEqual(entrypoint._manifest("explain").name, "manifest.json")
-        self.assertIn("vg-code-default", str(entrypoint._manifest("code")))
+        self.assertIn("vg-code-balanced", str(entrypoint._manifest("code")))
         self.assertIn("vg-code-explain", str(entrypoint._manifest("explain")))
 
     def test_code_with_fake_backend_executes_cleanly(self) -> None:

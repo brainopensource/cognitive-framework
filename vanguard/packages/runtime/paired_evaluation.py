@@ -32,6 +32,7 @@ __all__ = [
     "RunMetrics",
     "measure_run",
     "paired_report",
+    "assert_single_varied_dimension",
 ]
 
 #: Effect-settling kinds. A tool call is counted where it *settled*, not where
@@ -261,6 +262,19 @@ class PairedReport:
             "deltas": {k: round(v, 6) for k, v in self.deltas.items()},
             "controllerEnabledByDefault": self.controller_enabled_by_default,
         }
+
+
+def assert_single_varied_dimension(
+    control: Mapping[str, Any],
+    treatment: Mapping[str, Any],
+    dimension: str,
+) -> None:
+    """Refuse a paired comparison that varies more than one preregistered key."""
+    keys = sorted(set(control) | set(treatment))
+    changed = [key for key in keys if control.get(key) != treatment.get(key)]
+    if changed != [dimension]:
+        raise ValueError(
+            f"comparison varies {changed}; preregistered dimension is {dimension!r}")
 
 
 def paired_report(

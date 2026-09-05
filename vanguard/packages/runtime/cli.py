@@ -180,11 +180,13 @@ def cmd_code(args: argparse.Namespace) -> int:
     state_dir = getattr(args, "state_dir", None)
     try:
         if args.code_command == "run":
-            manifest = Path(__file__).resolve().parents[1] / "agency" / "manifests" / f"vg-code-{args.preset}" / "manifest.json"
-            result = app.run(brief=args.task, manifest_path=manifest, profile_id=args.profile,
-                             run_id=args.run_id, model_port=args.model_port,
-                             planner_model=args.model, state_dir=state_dir,
-                             interactive=not args.non_interactive, max_turns=args.max_turns)
+            from vanguard.packages.apps.coding_max.facade import CodingMaxFacade
+            facade = CodingMaxFacade(workspace=workspace, service=app)
+            result = facade.run(
+                args.task, preset=args.preset, profile_id=args.profile,
+                run_id=args.run_id, model_port=args.model_port,
+                planner_model=args.model, state_dir=state_dir,
+                interactive=not args.non_interactive, max_turns=args.max_turns)
             print(json.dumps(result.to_dict(), indent=2))
             return EXIT_OK if result.outcome == "completed" else EXIT_TASK_FAILED
         if args.code_command == "status":
@@ -401,7 +403,7 @@ def build_parser() -> argparse.ArgumentParser:
     code_run.add_argument("--model", default=None)
     code_run.add_argument("--model-port", default="fake")
     code_run.add_argument("--run-id", default=None)
-    code_run.add_argument("--max-turns", type=int, default=20)
+    code_run.add_argument("--max-turns", type=int, default=None)
     code_run.add_argument("--non-interactive", action="store_true")
     code_run.add_argument("--state-dir", default=None,
                           help="durable state directory (defaults to <workspace>/.vanguard)")

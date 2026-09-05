@@ -9,7 +9,7 @@ canonical_for:
   - repository-backlog
   - feature-lifecycle-tracking
 version: "0.9.3"
-last_verified: 2026-09-04
+last_verified: 2026-09-05
 lock_head: "3daa487c0be8"
 audience:
   - contributor
@@ -162,7 +162,7 @@ composition/lifecycle authority; infrastructure stays behind generic ports.
 
 | ID | Capability package | Primary owner | Status | Dependency | Acceptance gate |
 |---|---|---|---|---|---|
-| **CMX-01** | Current-mechanism delta and three presets | `packs/code-default`, manifests | `APPROVED` | EWK-Q disposition | Absorbs draft `PRF-01`: unify two disjoint preset catalogs: `apps/coding_max/facade.py` routes to alias manifests and never reaches `packs/code-default/presets.json`. |
+| **CMX-01** | Current-mechanism delta and three presets | `packs/code-default`, manifests | `IN_PROGRESS` | EWK-Q disposition | T-79 is an implementation candidate with 8/8 focused tests green (declared ceiling ≠ attenuation). Acceptance waits on boundary + related-surface + clean-subject review. |
 | **CMX-02** | Port-backed repository intelligence | `ports/index.py`, adapters, code-pack bindings | `PARTIAL` | IDX-01 | Public Coding Max presets now declare the shared index and the runtime constructs bounded `ContextPacket` context; staged task-ranked retrieval, epoch refresh and fallback evidence remain. |
 | **CMX-03** | Durable plan/context/recovery loop | code-pack policies + existing projections | `PARTIAL` | CMX-09 | Resume restores the original turn ceiling and approval mode, but rich task-state production, exact policy/profile/budget identity and 40+ turn cold parity remain. |
 | **CMX-04** | Multi-file and greenfield correctness | code-pack policies and fixtures | `REVIEWING` | CMX-10A, CMX-11 | Hermetic policies/fixtures and conservative verification observation exist; task-specific completion and repository-scale change-surface qualification remain. |
@@ -202,6 +202,16 @@ its admission route: **Route R** rows repair a defect verified at a named source
 line and close on a regression test; the single **Route L** row (`ARM-01`) claims
 lift and therefore stays `PROPOSED` until a preregistered ablation says otherwise.
 
+**Lifecycle checkpoint (2026-09-05 session stop).** HAR-01 and BRG-01 are `DONE
+(mechanism)`. INS-01 is `IN_PROGRESS`: T-84/T-85 are done, T-89 is a focused-
+green implementation candidate, and **T-97 is deferred this pass** (filed, not
+vanished). CMX-01/T-79 is a focused-green candidate. EXP-01 T-92–T-95 has a
+19-test implementation slice, but no live L0, frozen T-26, or T-27 disposition;
+ARM-01 remains proposed and gated on `MS-CONTROL`. Five boundary violations and
+four related-surface failures block acceptance. These lifecycle facts
+supersede the original admission-state labels retained in the dossier table
+below; task checkboxes remain the completion authority.
+
 | ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Reconciliation | Description & Acceptance Gate |
 |---|---|---|---|---|---|---|---|
 | **HAR-01** | Harness Precondition Repair (deaf-mute agent) | `domain` / `agency` / `runtime` / `adapters` | Lane A | `APPROVED` | MS-TRUTH (precondition) | **New.** No existing T-id covers native tool-call style, approval-policy passthrough, or `finish` declaration. Extends DIALECT (T-21, T-22). Precondition of **CMX-09**; does not subsume it. Adds T-69–T-74. | **Precondition.** No settlement gate is reachable until the agent can call tools, write, and finish. (1) Add explicit `ToolCallStyle.NATIVE` profiles only for production routes whose native-tool support is verified; unverified routes preserve the degradation chain. (2) `runtime/session.py:656` reads `components.approval_policy` instead of the literal `"low"`. (3) Declare `finish-tool.json` in `vg-code-{default,fast,balanced,max}`. (4) Two-axis settlement contract (**T-72**, see spec §3). (5) Purge the `provider: ollama` tier-1 route and resolve `$FRONTIER` in `packs/code-default/harness.yaml`. <br/>*Falsifier*: each native-declared route dispatches `patch.apply` and `finish` in `Mode.BENCHMARK` with no protocol degradation or `denied_ask_fail_closed`; an unverified route is never silently promoted to `NATIVE`; `grep -rn "ollama" packs/` is empty; `terminal_status=abandoned` plus `disposition=passed` round-trips without contradiction. |
@@ -232,7 +242,7 @@ to fit the current tree.
 | **SEE** | CMX-11, PRG-01, W-092-F4, IDX-01 | T-14–T-16, T-36–T-37, T-45, T-75–T-77 | MS-SEE | T-46 **narrowed**: optional query-local ranking stays in pack policy, never `IndexPort` or the adapter |
 | **CHANGE** | TXN-01, SHD-01, TLS-04/05, *EDT-01* | T-17–T-20, T-47–T-49, T-78, T-83a, T-83b | MS-CHANGE | T-17 `DONE`; TLS-04 mechanism present in `transaction.py`; T-18/T-19/T-20 production mechanisms wired; `str_replace` folds into T-47; T-83 caller admission remains separate |
 | **DIALECT** | WRN-01, TLS-02 | T-21–T-22, T-50 | — | T-21–T-22 `DONE`. T-50 `[PROPOSAL]`. Does not close MS-CHANGE. |
-| **CONTROL** | CMX-07, W-092-F5, CMX-01, EXP-01, *PRF-01*, ALG-03 | T-26–T-27, T-51–T-52, T-79, T-80, T-89, T-92–T-95 | MS-CONTROL | Preset catalog unification is CMX-01, not a new package; EXP-01 supplies the ladder and the veto, and consumes T-51/T-52. **T-80** (anti-thrashing oscillation breaker, ALG-03) is a post-control **treatment**: it is measured against the frozen control and does not gate the MS-CONTROL baseline |
+| **CONTROL** | CMX-07, W-092-F5, CMX-01, EXP-01, *PRF-01*, ALG-03 | T-26–T-27, T-51–T-52, T-79, T-80, T-89, T-92–T-95, T-97 | MS-CONTROL | Wave 2 has 0 accepted tasks. T-79/T-89/T-92–T-95 are focused-green candidates (31 tests), blocked by five boundary violations, four related-surface failures, incomplete full verification and absent live evidence. Next: boundary repair → related-surface repair → T-97 (deferred this pass) → live L0 → T-51/T-52 → T-26 freeze → T-27. **T-80** is post-control. |
 | **INSTRUMENT (product)** | INS-01, BRG-01, DLG-01 | T-84–T-88, T-90, T-91, T-97 | MS-TRUTH → MS-CONTROL | Distinct subject from the `CLOSED` MS-INSTRUMENT (benchmark harness). Precondition of every `LIVE-*` row |
 | **COMPARISON** | ARM-01 | T-96 | MS-CONTROL → MS-SENIOR | `PROPOSED` (Route L). No arm claim is authorized before MS-CONTROL closes |
 | **META** | MEM-03 | T-28 | MS-META | `[PROPOSAL]` |

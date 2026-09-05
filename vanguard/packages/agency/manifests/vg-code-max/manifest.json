@@ -18,6 +18,6 @@
     {"verb":"agency.finish","sink":"observation","selector":{"kind":"generic","uriPattern":"agency://finish"},"risk":"low"}
   ],
   "evaluators": ["coding-oracle@3"],
-  "budgetPolicy": "vg-code-default/budget-policy.json",
+  "budgetPolicy": "vg-code-max/budget-policy.json",
   "undeletable": false
 }

@@ -7,6 +7,7 @@ import importlib.util
 import json
 import sys
 from copy import deepcopy
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -23,6 +24,8 @@ from vanguard.packages.domain.wire.types_gen import FrozenHarness
 
 __all__ = [
     "PACK_ROOT",
+    "PRESET_NAMES",
+    "ResolvedPresetPolicy",
     "compile_pack",
     "discover_plugins",
     "load_declared_entry",
@@ -30,7 +33,33 @@ __all__ = [
     "load_harness",
     "compile_preset",
     "load_preset",
+    "resolve_preset_policy",
+    "effective_limit",
+    "budget_policy_document",
 ]
+
+PRESET_NAMES = ("fast", "balanced", "max")
+_REQUIRED_BUDGET = ("usd_micros", "millis", "tokens", "turns")
+_SHARED_STRUCTURAL = {"effects": "128", "evaluations": "16", "depth": "1"}
+
+
+@dataclass(frozen=True, slots=True)
+class ResolvedPresetPolicy:
+    """Immutable catalog row. Declared ceilings never mutate under override."""
+
+    name: str
+    usd_micros: int
+    millis: int
+    tokens: int
+    turns: int
+
+    def as_budget_map(self) -> dict[str, int]:
+        return {
+            "usd_micros": self.usd_micros,
+            "millis": self.millis,
+            "tokens": self.tokens,
+            "turns": self.turns,
+        }
 
 PACK_ROOT = Path(__file__).resolve().parent
 PRESETS_PATH = PACK_ROOT / "presets.json"
@@ -94,6 +123,48 @@ def load_preset(name: str, pack_root: Path | None = None) -> dict[str, Any]:
         raise ValueError(f"preset {name!r} must be an object")
     _validate_overlay(overlay, f"presets.{name}")
     return overlay
+
+
+def resolve_preset_policy(name: str, pack_root: Path | None = None) -> ResolvedPresetPolicy:
+    """Compile one catalog row into a validated, immutable policy."""
+    overlay = load_preset(name, pack_root)
+    budget = overlay.get("budget") or {}
+    missing = [key for key in _REQUIRED_BUDGET if key not in budget]
+    if missing:
+        raise ValueError(f"presets.{name}.budget missing {missing}")
+    return ResolvedPresetPolicy(
+        name=name,
+        usd_micros=int(budget["usd_micros"]),
+        millis=int(budget["millis"]),
+        tokens=int(budget["tokens"]),
+        turns=int(budget["turns"]),
+    )
+
+
+def effective_limit(declared: int, explicit: int | None) -> int:
+    """Loop bound used when a caller supplies a tighter ceiling.
+
+    The declared catalog value is not rewritten. ``None`` means omitted, so
+    the declared ceiling binds. An explicit value may only attenuate.
+    """
+    if explicit is None:
+        return declared
+    if not isinstance(explicit, int) or isinstance(explicit, bool) or explicit < 0:
+        raise ValueError("explicit limit must be a non-negative integer")
+    return min(declared, explicit)
+
+
+def budget_policy_document(name: str, pack_root: Path | None = None) -> dict[str, str]:
+    """Manifest budget-policy JSON derived from the catalog (T-79 parity)."""
+    policy = resolve_preset_policy(name, pack_root)
+    document = {
+        "usdMicros": str(policy.usd_micros),
+        "wallClockMillis": str(policy.millis),
+        "tokens": str(policy.tokens),
+        "turns": str(policy.turns),
+    }
+    document.update(_SHARED_STRUCTURAL)
+    return document
 
 
 def compile_preset(name: str, pack_root: Path | None = None) -> FrozenHarness:

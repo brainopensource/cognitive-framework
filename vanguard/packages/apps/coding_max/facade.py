@@ -7,17 +7,36 @@ selection, effect mediation, persistence, and recovery.
 
 from __future__ import annotations
 
+import importlib.util
+import sys
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 from ...runtime.app_service import ApplicationService
 from ...runtime.results import CostResult, EvidenceResult, RunResult, StatusResult
 
 __all__ = ["CodingMax", "CodingMaxFacade", "InvalidPreset"]
 
+_PACK_LOAD = None
+
 
 class InvalidPreset(ValueError):
     """The caller requested a preset outside the frozen Coding Max catalog."""
+
+
+def _pack_loader() -> Any:
+    """Load ``packs/code-default/load.py`` — the catalog compiler."""
+    global _PACK_LOAD
+    if _PACK_LOAD is None:
+        path = Path(__file__).resolve().parents[4] / "packs" / "code-default" / "load.py"
+        spec = importlib.util.spec_from_file_location("code_default_load", path)
+        if spec is None or spec.loader is None:
+            raise ImportError(f"cannot load preset catalog from {path}")
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+        _PACK_LOAD = module
+    return _PACK_LOAD
 
 
 class CodingMaxFacade:
@@ -43,13 +62,18 @@ class CodingMaxFacade:
         run_id: str | None = None, model: Any = None, model_port: str | None = "fake",
         planner_model: str | None = None,
         state_dir: str | Path | None = None, interactive: bool = True,
-        max_turns: int = 40,
+        max_turns: int | None = None,
     ) -> RunResult:
         chosen = self._validate_preset(preset)
+        loader = _pack_loader()
+        policy = loader.resolve_preset_policy(chosen)
+        # Declared catalog stays on the composed policy. An explicit
+        # ``max_turns`` only attenuates the loop bound.
+        turns = loader.effective_limit(policy.turns, max_turns)
         return self.service.run(
             brief=brief, manifest_path=self._manifest(chosen), profile_id=profile_id,
             run_id=run_id, model=model, model_port=model_port, planner_model=planner_model, state_dir=state_dir,
-            interactive=interactive, max_turns=max_turns,
+            interactive=interactive, max_turns=turns,
         )
 
     def status(self, run_id: str, *, state_dir: str | Path | None = None) -> StatusResult:

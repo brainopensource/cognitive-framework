@@ -67,6 +67,13 @@ BUDGET_DIMENSION: Mapping[str, str] = {
     "bytes": "bytes",
 }
 
+#: Structural ceilings declared on the policy. They appear on
+#: ``EpisodeStarted.budgetCeiling`` and MUST NOT enter ``Governor``.
+STRUCTURAL_BUDGET_DIMENSION: Mapping[str, str] = {
+    "turns": "turns",
+    "depth": "depth",
+}
+
 
 # ---------------------------------------------------------------------------
 # Values
@@ -573,10 +580,15 @@ class Runtime:
     @classmethod
     def _budget(cls, policy: Mapping[str, Any] | str,
                 path: str = "budget policy") -> Mapping[str, int]:
-        """Budget ceilings, as `Reservation` dimensions (`CT-06`: int strings)."""
+        """Budget ceilings, as `Reservation` dimensions (`CT-06`: int strings).
+
+        Additive keys feed the governor. Structural keys (`turns`, `depth`)
+        are copied onto the harness so the ledger can name the declared
+        catalog without summing them as reservations.
+        """
         policy = cls._policy(policy, path)
         ceilings: dict[str, int] = {"usd_micros": 1_000_000}
-        for key, dimension in BUDGET_DIMENSION.items():
+        for key, dimension in {**BUDGET_DIMENSION, **STRUCTURAL_BUDGET_DIMENSION}.items():
             if key in policy:
                 try:
                     ceilings[dimension] = int(policy[key])

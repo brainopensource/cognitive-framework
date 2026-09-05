@@ -8,8 +8,8 @@ owner: repository-governance
 canonical_for:
   - active-feature-delta-specification
 version: "2.0.0"
-date: "2026-09-04"
-last_verified: 2026-09-04
+date: "2026-09-05"
+last_verified: 2026-09-05
 lock_head: "66aa7a3c0c31"
 derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN.md
@@ -1094,6 +1094,16 @@ Wave 1 acceptance requires the L0 public-CLI smoke triad to produce honest
 end-to-end evidence. L0 may license only “Wave 1 landed”; it MUST NOT license a
 capability or pass-rate claim.
 
+**Implementation checkpoint (non-normative, 2026-09-05).** Phase 0 / `MS-INSTRUMENT`
+remains closed on its frozen benchmark-harness subject. The Wave 1 mechanisms
+listed above are implemented and their focused trust-spine falsifiers pass;
+`MS-TRUTH` remains `MECHANISM`, not empirical close, until T-92/L0, the T-04
+successor obligation, and exact-subject convergence evidence are resolved.
+The current branch also carries five boundary failures across the new benchmark
+slice and `runtime/cli.py`, plus four related-surface failures on the
+`coding_max` facade and RF-90 fakeBackend; they must be repaired before any
+measured subject is frozen.
+
 ### EW-9.3 Wave 2 — Frozen Control, Honest Instrument & Presets
 
 Wave 2 establishes the content-addressed control used by later treatments. It
@@ -1117,6 +1127,19 @@ contains **CMX-01 (T-79)**, the Wave 2 portions of **INS-01**, and **EXP-01**:
   candidate SHA at L2 with `n >= 30`, Wilson lower bound `>= 0.40`, and
   false-completion rate exactly zero. The result SHALL be published when
   positive, negative, or undeterminable.
+
+**Implementation checkpoint (non-normative, 2026-09-05 session stop).** Wave 2
+has no accepted task. T-79/T-89/T-92–T-95 are implementation candidates with
+31 named focused tests green. Acceptance is blocked by five architecture-
+boundary violations, four related-surface failures (CMX-04 facade ×2; RF-90
+fakeBackend ×2), incomplete full verification, and absent live evidence.
+T-92's hermetic run proves runner mechanics, not the live L0 disposition.
+T-26 remains `UNFROZEN` with the L2 arm pinned (single-worker `vg-code-balanced`
+/ `balanced` / `entrypoint.execute`). T-27/T-51/T-52 remain open. **T-97 is
+deferred this pass** (filed under INS-01; TypeScript help/`-m`; not vanished).
+T-95 does not close `MS-CONTROL`. T-80 and T-96 remain post-control treatments.
+Declared `budgetCeiling` MUST match `presets.json`; any tighter loop bound is
+recorded separately as `budgetAttenuation` and MUST NOT rewrite the ceiling.
 
 ### EW-9.4 Measurement ladder and evidence row (EXP-01)
 

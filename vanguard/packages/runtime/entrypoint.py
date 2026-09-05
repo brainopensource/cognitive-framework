@@ -21,9 +21,43 @@ def _root() -> Path:
     return Path(os.environ.get("VANGUARD_ROOT", Path(__file__).resolve().parents[3]))
 
 
-def _manifest(command: str) -> Path:
-    name = "vg-code-explain" if command == "explain" else "vg-code-default"
+def _manifest(command: str, preset: str | None = None) -> Path:
+    if command == "explain":
+        name = "vg-code-explain"
+    elif command == "code":
+        chosen = (preset or "balanced").strip().lower()
+        if chosen not in {"fast", "balanced", "max"}:
+            raise ValueError(f"unknown Coding Max preset {chosen!r}")
+        name = f"vg-code-{chosen}"
+    else:
+        name = "vg-code-default"
     return _root() / "vanguard/packages/agency/manifests" / name / "manifest.json"
+
+
+_PACK_LOAD = None
+
+
+def _pack_loader() -> Any:
+    global _PACK_LOAD
+    if _PACK_LOAD is None:
+        import importlib.util
+        path = _root() / "packs" / "code-default" / "load.py"
+        spec = importlib.util.spec_from_file_location("code_default_load", path)
+        if spec is None or spec.loader is None:
+            raise ImportError(f"cannot load preset catalog from {path}")
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
+        spec.loader.exec_module(module)
+        _PACK_LOAD = module
+    return _PACK_LOAD
+
+
+def _resolve_turn_ceiling(preset: str, explicit: Any) -> int:
+    """Loop bound: omitted uses the catalog; explicit may only attenuate."""
+    loader = _pack_loader()
+    policy = loader.resolve_preset_policy(preset)
+    parsed = None if explicit in (None, "") else int(explicit)
+    return int(loader.effective_limit(policy.turns, parsed))
 
 
 def _completion_policy(manifest_path: Path) -> Any:
@@ -69,16 +103,35 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
     brief = str(request.get("brief") or request.get("question") or (f"Resume run {run_id}" if command == "resume" else "")).strip()
     if not brief:
         raise ValueError("brief or question is required")
+    preset = str(request.get("preset") or "balanced").strip().lower()
+    harness_override = str(request.get("harness") or "").strip()
+    if harness_override:
+        manifest_path = (
+            _root() / "vanguard/packages/agency/manifests" / harness_override / "manifest.json")
+        explicit = request.get("maxTurnsPerEpisode")
+        max_turns = 40 if explicit in (None, "") else int(explicit)
+    else:
+        if command == "code" and preset not in {"fast", "balanced", "max"}:
+            raise ValueError(f"unknown Coding Max preset {preset!r}")
+        manifest_path = _manifest(command, preset if command == "code" else None)
+        if command == "code":
+            max_turns = _resolve_turn_ceiling(preset, request.get("maxTurnsPerEpisode"))
+        else:
+            explicit = request.get("maxTurnsPerEpisode")
+            max_turns = 40 if explicit in (None, "") else int(explicit)
     task = TaskContext(
         brief=brief, repo_path=Path(str(request.get("workspace", "."))).resolve(),
         run_id=run_id, episode_id=f"episode-{run_id}",
         project_id=str(request.get("projectId") or "coding-preview"),
-        max_turns=int(request.get("maxTurnsPerEpisode") or 40),
+        max_turns=max_turns,
     )
     # The client-side deterministic smoke backend is an explicit, non-release
     fake_backend = request.get("fakeBackend")
     from .model_selection import select_model
-    if fake_backend:
+    injected = request.get("injectedModel")
+    if injected is not None:
+        selected_model = injected
+    elif fake_backend:
         selected_model = FakeModel([{"kind": "finish", "note": "deterministic preview"}])
     else:
         model_port = str(request.get("modelPort") or "openrouter").strip().lower()
@@ -101,13 +154,13 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
     # The fake model remains an explicit preview choice, but its captured
     # material is still kept in the same installation state directory.
     result = Runtime.execute_profiled(
-        _manifest(command), task,
+        manifest_path, task,
         profile_id=str(request.get("profile") or "product"),
         model=selected_model,
         store_path=str(configured_store_path),
         interactive=bool(request.get("interactive", True)),
         blobs=FileBlobStore(configured_store_path.parent / "blobs"),
-        completion_policy=_completion_policy(_manifest(command)),
+        completion_policy=_completion_policy(manifest_path),
     )
     terminal = str(getattr(result.terminal, "value", result.terminal))
     outcome = "completed" if terminal in {"completed", "abstained"} else terminal

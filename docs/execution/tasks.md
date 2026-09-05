@@ -14,7 +14,7 @@ audience:
   - contributor
   - release-owner
 version: 0.9.3
-last_verified: 2026-09-04
+last_verified: 2026-09-05
 lock_head: "66aa7a3c0c31"
 normative_authority:
   - docs/execution/spec.md
@@ -33,6 +33,8 @@ confidence: high
 Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technical.md`](technical.md). Packages: [`backlog.md`](backlog.md). TARGET gates: [`milestones.md`](milestones.md).
 
 **No sprints. No waves.** Check boxes as work completes. **Recommended reading order (not a schedule):** MS-SEE A stack T-16/T-15/T-36/T-37/T-45 is MECHANISM this-branch. T-04/T-05/T-07 landed 2026-09-04 (T-04 carries an open successor obligation; see its row). Do not create `progressive.py` (T-15). T-46 ranking stays `[PROPOSAL]`.
+
+**Current implementation handoff (2026-09-05 session stop; EW-9 wave names are scope labels, not a sprint calendar).** Phase 0 / `MS-INSTRUMENT` remains `CLOSED` on its frozen benchmark-harness subject. Wave 1 mechanisms T-69–T-74, T-81/T-82/T-83a, T-84/T-85 and T-87/T-88/T-91 are landed and their focused trust-spine set is green; empirical Wave 1 acceptance still requires a live T-92/L0 disposition, the T-04 successor obligation, and exact-subject convergence evidence. Wave 2 still has **0 accepted tasks**. Mechanism code for T-79/T-89/T-92–T-95 is in the dirty tree and the **31 named focused falsifiers** are green; checkboxes stay `[ ]`. Blockers: five `check_boundaries.py` hits in `benchmarks/ladder/evidence.py`, `benchmarks/ladder/l0_triad/runner.py`, `benchmarks/product_path.py`, and `runtime/cli.py`; plus four related-surface failures outside the 31 (`test.apps.coding_max.test_coding_max_facade` ×2, `test.falsifiers.test_rf90_generic_entrypoint` ×2). T-26 remains explicitly `UNFROZEN` (arm pinned, SHA not frozen). T-27 and T-51/T-52 remain open. **T-97 is deferred on the record for this pass** (TypeScript `aether code --help` / `-m` collision); it is not implemented and not vanished. Do not start T-80/T-96 or post-control work before `MS-CONTROL` closes. `just` is not the gate: run the `justfile` recipe bodies (`python3 tools/linters/...`, unittest). Knowledge artifacts, if regenerated later, live only under `.generated/knowledge/` — no new Markdown under `docs/`.
 
 B §18 tickets T-01–T-35 are canonical. A §31 maps into those IDs or T-36+ (see merge map appendix). v2 `SUB-*` are aliases. Live backlog `SUB-01` (kernel S0–S12) is a different package.
 
@@ -245,6 +247,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 **T-26 Frozen control preregistration** (B; strip “Wave 5” from title)  
 - [ ] n, models, stop rule frozen before first paid call  
 - Requires: T-01–T-25 as applicable  
+- **draft contract 2026-09-05 (not a freeze):** `benchmarks/ladder/control_preregistration.json` exists with `status: UNFROZEN`, `subject_sha: null`. The L2 arm is pinned to single-worker `vg-code-balanced` / preset `balanced` / `vanguard.packages.runtime.entrypoint.execute` (Forge/Chimera/fast/max excluded). `require_frozen()` refuses scoring. This does not complete T-26 or authorize a paid call.  
 
 **T-27 Single-agent canary (eval)** (B)  
 - [ ] Disposition in {POSITIVE, NEGATIVE, UNDETERMINABLE, INVALID}  
@@ -464,7 +467,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **file_touches**: [`vanguard/packages/apps/coding_max/facade.py`, `packs/code-default/load.py`, `vanguard/packages/agency/manifests/vg-code-fast/manifest.json`, `vanguard/packages/agency/manifests/vg-code-balanced/manifest.json`, `vanguard/packages/agency/manifests/vg-code-max/manifest.json`, **[NEW]** `test/apps/test_preset_budgets.py`]
   - **specification**: Make `presets.json` the sole product budget catalog and remove the facade's Python `max_turns` default. Fast, balanced, and max must produce distinct declared ceilings of 50,000/150,000/400,000 µUSD and 8/20/40 turns.
   - **acceptance_falsifier**: `python3 -m unittest test.apps.test_preset_budgets -v` proves `fast`/`balanced`/`max` yield three **distinct** `EpisodeStarted.budgetCeiling` values matching `presets.json` exactly (50,000/150,000/400,000 µUSD; 8/20/40 turns), that `max_turns` is never a Python default in the facade, and that `vg-code-fast` halts at turn eight with `BUDGET_EXHAUSTED`.
-  - **scaffolded 2026-09-05 (not implemented):** `test/apps/test_preset_budgets.py` exists and is deliberately **red** on the three real gaps — the facade's `max_turns: int = 40` Python default, the three manifests sharing `vg-code-default/budget-policy.json`, and that policy carrying neither a `usdMicros` nor a `turns` dimension. The `EpisodeStarted.budgetCeiling` and `BUDGET_EXHAUSTED` cases are filed as a skipped class to be unskipped by the implementation. Do not green these by weakening the assertions.
+  - **implementation candidate 2026-09-05 (session stop):** catalog compile in `packs/code-default/load.py`; distinct `vg-code-{fast,balanced,max}/budget-policy.json`; `EpisodeStarted.budgetCeiling` is the declared catalog (not `min(preset, override)`); tighter loop bounds record `budgetAttenuation.turns` separately; facade `max_turns` default is `None`; product `code` defaults to `vg-code-balanced`. Named falsifier **8/8** green (`test.apps.test_preset_budgets`). Keep unchecked: `runtime/cli.py` still imports `apps.coding_max` (boundary), and a related-surface run of `test.apps.coding_max.test_coding_max_facade` plus `test.falsifiers.test_rf90_generic_entrypoint` produced **4 failures** (patchless FakeModel finish reports `completed` on the facade path; RF-90 fakeBackend tape exhausts to `instrument_error` after the product completion gate refuses finish).
 
 - [ ] **T-80: Anti-thrashing workspace oscillation circuit breaker**
   - **package**: CONTROL
@@ -565,6 +568,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **file_touches**: [`benchmarks/agentic_harness_matrix_benchmark.py`, `benchmarks/backend_baselines.py`, `vanguard/packages/runtime/entrypoint.py`, **[NEW]** `test/benchmarks/test_product_path_subject.py`]
   - **specification**: Route the canary through `runtime.entrypoint.execute`, the same product subject exercised by `vg code`, rather than calling `Runtime.execute_profiled` directly. The runner and CLI must bind the same manifest digest and preset.
   - **acceptance_falsifier**: `python3 -m unittest test.benchmarks.test_product_path_subject -v` rejects the direct-runtime runner and matches product-path manifest and preset identity.
+  - **implementation candidate 2026-09-05 (session stop):** canary runner calls `benchmarks.product_path.execute_product` → `entrypoint.execute`; no `Runtime.execute_profiled` on that runner. Named falsifier **4/4** green (`test.benchmarks.test_product_path_subject`). Keep unchecked: `product_path.py` imports `runtime.entrypoint` (benchmarks may import only `runtime.root` + ports).
 
 - [ ] **T-90: Raw-response digest and dialect classifier provenance**
   - **package**: DLG-01
@@ -592,6 +596,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **file_touches**: [**[NEW]** `benchmarks/ladder/l0_triad/`, **[NEW]** `test/benchmarks/test_l0_triad.py`]
   - **specification**: Run P0-FIB, P0-CSV, and P0-BUG in fresh workspaces through the public CLI, retaining the trajectory and a typed reason on failure. Record fixture and oracle digests, and refuse `completed` when no patch digest exists.
   - **acceptance_falsifier**: `python3 -m unittest test.benchmarks.test_l0_triad -v` gives every task either an exterior pass or a retained typed failure and rejects patchless completion.
+  - **implementation candidate 2026-09-05 (session stop):** P0-FIB / P0-CSV / P0-BUG fixtures + `l0_triad/runner.py` through `execute_product`. Named falsifier **4/4** hermetic green. This is runner mechanics, not a live L0 disposition and not Wave 1 empirical close. Keep unchecked: runner imports `domain.canonicalisation.digest`.
 
 - [ ] **T-93: L1 frozen pre-canary and evidence row schema**
   - **package**: EXP-01
@@ -601,6 +606,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **file_touches**: [`benchmarks/protocols.py`, **[NEW]** `benchmarks/ladder/l1_twelve/`, **[NEW]** `test/benchmarks/test_evidence_row_schema.py`]
   - **specification**: Freeze twelve tasks—four greenfield, four single-file bug, and four data/CLI—under one `suite_digest`. Refuse incomplete evidence rows and prohibit a table from mixing `REPLAY` and `LIVE-LOCAL` evidence labels.
   - **acceptance_falsifier**: `python3 -m unittest test.benchmarks.test_evidence_row_schema -v` refuses every row missing a required §9.3 field and every mixed-label table.
+  - **implementation candidate 2026-09-05 (session stop):** L1 twelve-task freeze in `benchmarks/ladder/l1_twelve/suite.json`; row writer refuses incomplete / patchless-completed / mixed REPLAY+LIVE. Named falsifier **5/5** green. Keep unchecked: `benchmarks/ladder/evidence.py` imports `domain.canonicalisation.digest` and `domain.evidence.disposition`.
 
 - [ ] **T-94: Metric set and false-completion veto**
   - **package**: EXP-01
@@ -610,6 +616,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **file_touches**: [`benchmarks/protocols.py`, `benchmarks/statistics.py`, **[NEW]** `test/benchmarks/test_metric_veto.py`]
   - **specification**: Emit false-completion, valid-first-tool-call, malformed-tool, recovery, no-op, time-to-first-valid-action, turn-waste W, and κ metrics. Any non-zero false-completion rate fails the gate regardless of pass rate; Wilson lower bounds use only `LIVE-*` rows.
   - **acceptance_falsifier**: `python3 -m unittest test.benchmarks.test_metric_veto -v` fails a non-zero false-completion fixture and excludes non-live rows from the Wilson denominator.
+  - **implementation candidate 2026-09-05 (session stop):** false-completion veto; Wilson on `LIVE-*` only; canary disposition ∈ `{POSITIVE, NEGATIVE, UNDETERMINABLE, INVALID}`; zero live observations → `UNDETERMINABLE`, not zero risk. Named falsifier **4/4** green. Keep unchecked until the shared Wave 2 gate is green. T-72 remains a landed dependency.
 
 - [ ] **T-95: Hypothesis registry and preregistration harness**
   - **package**: EXP-01
@@ -619,6 +626,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **file_touches**: [**[NEW]** `benchmarks/hypotheses.json`, `vanguard/packages/runtime/paired_evaluation.py`, **[NEW]** `test/benchmarks/test_preregistration.py`]
   - **specification**: Bind every Route L row to a registered hypothesis with a control digest, one varied dimension, an expected metric and direction, and a stopping rule. Refuse paired comparisons that vary more than the single preregistered dimension.
   - **acceptance_falsifier**: `python3 -m unittest test.benchmarks.test_preregistration -v` rejects unregistered treatments and multi-dimension comparisons.
+  - **implementation candidate 2026-09-05 (session stop):** `benchmarks/hypotheses.json` + `assert_single_varied_dimension`; named falsifier **6/6** green. The control preregistration intentionally remains `UNFROZEN`; this does not complete T-26, does not close `MS-CONTROL`, and does not authorize a paid call.
 
 - [ ] **T-96: Arm matrix and LAM-first comparison protocol**
   - **package**: ARM-01
@@ -637,6 +645,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **file_touches**: [`vanguard/clients/cli/src/composition/parse-cli.ts`, `vanguard/clients/cli/src/main.ts`, **[NEW]** `test/cli/test_help_and_flags.spec.ts`]
   - **specification**: Reproduce the current `aether code --help` behavior before repair, then make it print help and exit zero without a completion frame. Resolve the `-m` collision by an explicit binding whose losing spelling errors instead of silently winning.
   - **acceptance_falsifier**: `npm test -- test/cli/test_help_and_flags.spec.ts` proves help exits zero and the conflicting flag cannot resolve ambiguously.
+  - **deferred 2026-09-05 (this pass):** not implemented. Remains filed under INS-01. Next Wave 2 close still owes help/`-m` after boundary repair; do not drop the row.
 
 #### Constitutional audit receipt — Prompt 12 (2026-09-04)
 

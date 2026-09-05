@@ -1,0 +1,10 @@
+{
+  "schema": "aether.l1-suite/1",
+  "n": 12,
+  "classes": {
+    "greenfield": ["L1-GF-01", "L1-GF-02", "L1-GF-03", "L1-GF-04"],
+    "single_file_bug": ["L1-BUG-01", "L1-BUG-02", "L1-BUG-03", "L1-BUG-04"],
+    "data_cli": ["L1-CLI-01", "L1-CLI-02", "L1-CLI-03", "L1-CLI-04"]
+  },
+  "note": "Fixture/oracle readiness only. Tasks tuned here MUST NOT be scored as L2."
+}

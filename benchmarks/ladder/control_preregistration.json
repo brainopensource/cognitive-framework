@@ -1,0 +1,24 @@
+{
+  "schema": "aether.control-preregistration/1",
+  "task": "T-26",
+  "status": "UNFROZEN",
+  "arm": {
+    "harness": "vg-code-balanced",
+    "preset": "balanced",
+    "workers": 1,
+    "product_path": "vanguard.packages.runtime.entrypoint.execute",
+    "excluded": ["forge", "chimera", "vg-code-fast", "vg-code-max"]
+  },
+  "sample": {
+    "n_min": 30,
+    "confidence": "wilson_95",
+    "wilson_lb_min": 0.40,
+    "retries_increase_coverage": false,
+    "stopping_rule": "stop after n_evaluable>=30 LIVE-* rows; retries never add tasks; publish POSITIVE only if wilson_lb>=0.40 and false_completion_rate==0; NEGATIVE and UNDETERMINABLE are valid published results and leave MS-CONTROL OPEN"
+  },
+  "subject_sha": null,
+  "suite_digest": null,
+  "model_id": null,
+  "frozen_at": null,
+  "notes": "T-27 disposition is recorded after the live canary. This file is the freeze contract, not a passing score."
+}

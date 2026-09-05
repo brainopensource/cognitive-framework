@@ -817,9 +817,13 @@ class HarnessSession:
 
         # One kernel per run (`S8-A-01` DoD). Everything that used to vary
         # between the three constructions now varies behind `_SwappablePolicy`.
-        governor = Governor(harness.budget)
+        governor = Governor({
+            key: amount for key, amount in harness.budget.items()
+            if key in ADDITIVE_DIMENSIONS
+        })
         for dim, amt in self.ledger_state().cumulative_budget_debits.items():
-            governor._spent[dim] = amt
+            if dim in governor._spent:
+                governor._spent[dim] = amt
 
         self.kernel = Kernel(
             adapters=self.adapters, policy=self.policy, classifier=classifier,
@@ -1150,6 +1154,20 @@ class HarnessSession:
 
     # -- the lifecycle ----------------------------------------------------
 
+    def _budget_attenuation_fields(self) -> dict[str, Any]:
+        """Record overrides separately from the declared catalog ceiling.
+
+        ``budgetCeiling`` is the catalog (or manifest policy) identity.
+        ``maxTurns`` is the loop bound that actually fired. When a caller
+        supplies a tighter explicit limit, the difference is named here so
+        the ledger never claims the catalog was rewritten.
+        """
+        declared_turns = self.harness.budget.get("turns")
+        effective_turns = int(self.task.max_turns)
+        if declared_turns is None or int(declared_turns) == effective_turns:
+            return {}
+        return {"budgetAttenuation": {"turns": effective_turns}}
+
     def begin_episode(self) -> None:
         """Durably open a new episode before registry activation begins."""
         if self.ledger_state().episode.status != "pending":
@@ -1174,6 +1192,7 @@ class HarnessSession:
                     self.run_plan, "preregistration_digest", ""),
                 "maxTurns": int(self.task.max_turns),
                 "interactive": bool(self.ports.interactive),
+                **self._budget_attenuation_fields(),
             },
         ))
         self.ledger.emit_kind(
@@ -1303,6 +1322,10 @@ class HarnessSession:
             prior_turns = outcome.episode.turns
             prior_recovery_state = outcome.recovery_state
             terminal, detail = outcome.terminal, outcome.episode.detail
+            if (terminal is RunTermination.ABANDONED
+                    and "turn bound" in (detail or "")
+                    and "turns" in self.harness.budget):
+                terminal = RunTermination.BUDGET_EXHAUSTED
             suspended = _suspension(self.calls)
             _record(receipts, self.operator, self.calls)
             if suspended is None:

@@ -16,7 +16,7 @@ derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN_v2.md
   - .draft/PHASE-0_DEVELOPMENT_FINAL_PLAN.md
 lock_head: "66aa7a3c0c31"
-last_verified: 2026-09-04
+last_verified: 2026-09-05
 relationships:
   - execution.milestones
   - execution.feature_spec
@@ -71,14 +71,14 @@ Present docs to open while coding:
 
 Wave-titled sections copied below are **capability recipes**, not a calendar.
 
-## Electroweak v0.9.3 Wave 1–2 contract overlay `[PROPOSAL]`
+## Electroweak v0.9.3 Wave 1–2 contract overlay
 
 **Overlay scope and epistemic status.** This is the implementation handbook for
 the authorized Electroweak Wave 1–2 contracts in [`spec.md`](spec.md) §EW-9.
-Per §0, every recipe below is **`[PROPOSAL]`**: the code it prescribes is not
-observed in current source and MUST NOT be read as HEAD. What is `FACT` is the
-*defect each recipe repairs*, observed at the file and line the recipe cites.
-Authorization comes from `spec.md` §EW-9; this file carries only the recipe. The
+Rows explicitly marked **FACT** are observed mechanisms at the 2026-09-05
+checkpoint; rows marked `[PROPOSAL]` remain implementation recipes and MUST NOT
+be read as HEAD. Authorization comes from `spec.md` §EW-9; this file carries
+the recipe and handoff. The
 older Wave 0–10 sections below remain historical capability recipes with their
 existing titles. Do not renumber, retitle, or infer current scheduling from
 them.
@@ -89,7 +89,7 @@ OCT-03, or ARM-01. DLG-01's live alias/provenance work (T-86, T-90) is likewise
 post-control — Wave 3, alongside IDX-01 — and not part of the Wave 1 package
 set.
 
-### `[PROPOSAL]` W1 — HAR-01 harness preconditions
+### FACT — W1 HAR-01 harness preconditions
 
 No settlement result is useful until the product agent can call declared tools,
 write through the mediated path, and explicitly finish. Apply these repairs in
@@ -157,7 +157,7 @@ projection of `not_run` raises; `EpisodeCompleted` contains no disposition; and
 ledger replay preserves `terminal_status=abandoned` with
 `disposition=passed`.
 
-### `[PROPOSAL]` W1 — INS-01 and BRG-01 instrument integrity
+### FACT — W1 INS-01 and BRG-01 instrument integrity
 
 INS-01 is an additive product-path repair. It does **not** reopen
 `spec.md` §1 or `MS-INSTRUMENT`.
@@ -181,7 +181,7 @@ Falsify with unique-run-identity, receipt-telemetry, product-path-subject,
 bridge-lifecycle, and bridge-empty-output tests. Provider outage, HTTP failure,
 or zero model calls settles as `not_run`, not task failure.
 
-### `[PROPOSAL]` W2 — CMX-01 preset unification (T-79)
+### `IN_PROGRESS` — W2 CMX-01 preset unification (T-79)
 
 Unify the product path around the existing `packs/code-default/presets.json`
 catalog; do not author replacement budget numbers:
@@ -198,6 +198,19 @@ facade's universal `max_turns=40` default. Trace the selected ceiling through
 `runtime/wiring.py` to `Governor` and assert it on `EpisodeStarted.budgetCeiling`.
 `usd_micros`, `millis`, `tokens`, and `bytes` are additive reservation
 dimensions; `turns` and `depth` are structural ceilings and are never summed.
+
+Checkpoint (session stop): catalog resolution, distinct manifest policies,
+cost/turn fields, declared `budgetCeiling` plus separate `budgetAttenuation`,
+and removal of `max_turns` from the facade signature are in the working tree.
+All 8 named T-79 tests pass. This is an implementation candidate, not accepted
+work. Before freezing L0: repair the five boundary violations in
+`benchmarks/ladder/evidence.py`, `benchmarks/ladder/l0_triad/runner.py`,
+`benchmarks/product_path.py`, and `runtime/cli.py`; repair the four
+related-surface failures (`test.apps.coding_max.test_coding_max_facade` ×2,
+`test.falsifiers.test_rf90_generic_entrypoint` ×2); then run the touched-surface
+gate on a clean subject. `just` is not installed — use the `justfile` recipe
+bodies. Do not add Markdown under `docs/`; regenerate knowledge only into
+`.generated/knowledge/` after package edits.
 
 ### `[PROPOSAL]` W2 — EXP-01 evidence ladder and frozen control
 
@@ -232,6 +245,24 @@ rate, malformed/recovery rate, no-op rate, time to first valid action, turn
 waste `W`, and token efficiency `kappa`. **False-completion rate must equal
 zero.** It vetoes every pass-rate, lift, latency, token, and cost claim. Publish
 the frozen control disposition even when it is negative or undeterminable.
+
+### Next-sprint handoff: Wave 2 close, then Wave 3+
+
+T-79/T-89/T-92–T-95 have 31 named focused tests green and remain unchecked.
+Execute the remaining work in this dependency order: **boundary repair ->
+related-surface repair (CMX-04 facade + RF-90) -> touched-surface verification
+-> T-97 (deferred this pass; TypeScript help/`-m`) -> live T-92/L0
+disposition -> T-51/T-52 reconciliation -> T-26 freeze -> T-27**. Freeze no
+paid subject before T-26; run L2 only as single-worker `vg-code-balanced` on
+the exact clean SHA. T-95 is the hypothesis registry, not gate close. Closure
+requires n >= 30, Wilson LB >= 0.40, false-completion rate 0, and a published
+POSITIVE, NEGATIVE, UNDETERMINABLE, or INVALID disposition.
+
+After `MS-CONTROL` closes, begin only the existing post-control rows: IDX-01
+T-75–T-77, T-78/T-83b change closure, DLG-01 T-86/T-90, then the
+preregistered treatments T-80/T-96 as their `requires:` edges permit. OCT-03,
+specialists, memory and campaign work remain blocked by their milestone gates;
+do not infer authorization merely from mechanism presence.
 
 ---
 

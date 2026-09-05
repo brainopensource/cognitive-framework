@@ -17,7 +17,7 @@ export const USAGE =
   "  vg code PATH [--brief TASK.md] [--planner MODEL] [--provider PROVIDER] [--model-port PORT]\n" +
   "          [--executor-band free|medium|high] [--recovery-model MODEL] [--profile PROFILE]\n" +
   "          [--wal-path PATH] [--store-path PATH] [--max-turns N] [--max-episodes N] [--max-replans N]\n" +
-  "          [--token-budget N] [--effect-budget N] [--budget-usd DOLLARS] [--interactive|--benchmark]\n" +
+  "          [--token-budget N] [--effect-budget N] [--budget-usd DOLLARS] [--allow-paid] [--interactive|--benchmark]\n" +
   "          [--dry-plan] [--resume RUN_ID] [--jsonl-out PATH] [--json] [--headless]\n" +
   "  vg explain PATH --question TEXT [--headless] [--json]\n" +
   "  vg doctor [PATH] [--headless] [--json]\n" +
@@ -29,7 +29,7 @@ export const USAGE =
   "       --repo --workspace --prompt --brief --model --manifest --decision --socket-path --yes|-y\n" +
   "       --planner --provider --model-port --executor-band --recovery-model --profile\n" +
   "       --wal-path --store-path --token-budget --effect-budget --max-turns --max-episodes --max-replans\n" +
-  "       --budget-usd --interactive --benchmark --dry-plan --jsonl-out --json --question --help";
+  "       --budget-usd --allow-paid --interactive --benchmark --dry-plan --jsonl-out --json --question --help";
 
 export function usage(): never {
   console.error(USAGE);
@@ -166,6 +166,7 @@ export function parseCliOptions(args: string[]): ParsedCli {
     maxEpisodes: intOr(value("--max-episodes"), 12),
     maxReplans: intOr(value("--max-replans"), 2),
     budgetUsdMicros,
+    allowPaid: flag("--allow-paid"),
     interactive: !flag("--benchmark"),
     dryPlan: flag("--dry-plan"),
     json: flag("--json"),

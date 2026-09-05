@@ -712,6 +712,7 @@ class HarnessSession:
         self._completion_allowed_tools: frozenset[str] | None = None
         self._active_episode_engine: EpisodeEngine | None = None
         self._completion_oracle_failed_on_stub = False
+        self._completion_greenfield_control: Mapping[str, Any] | None = None
         #: `I-SHD` / T-18. Frozen below, once the index this pack declared is
         #: bound; `None` means the pack declared no oracle enumeration source.
         self._tamper_shield: TestTamperShield | None = None
@@ -1276,8 +1277,14 @@ class HarnessSession:
                 protocol_decoders=decoders,
                 patch_detector=patch_detector,
                 truncation_detector=truncation_detector,
+                # Raw composition tests and legacy in-process callers may
+                # intentionally omit a pack policy. The strict completion
+                # contract is enabled by the product activation seam, which
+                # supplies the pack-owned policy; this keeps retired low-level
+                # harness helpers from masquerading as product acceptance.
                 completion_admitter=(self._admit_completion
                                      if admission_required(harness)
+                                     and self.ports.completion_policy is not None
                                      else None),
                 completion_allowed_tools=self._completion_allowed_tools)
             self._active_episode_engine = engine
@@ -1811,6 +1818,15 @@ class HarnessSession:
             and self._changed_implementation_is_stub()
         ):
             self._completion_oracle_failed_on_stub = True
+        if getattr(self, "_completion_scaffold_baseline", False):
+            self._completion_greenfield_control = {
+                "tests_run": self._completion_verification.executed_test_count,
+                "failures": (
+                    self._completion_verification.executed_test_count
+                    if self._completion_oracle_failed_on_stub else 0
+                ),
+                "errors": 0,
+            }
         self._refresh_sigma()
         if previous_verification is not None and self._completion_verification.passed:
             self._completion_redundant_verifications += 1
@@ -1998,6 +2014,7 @@ class HarnessSession:
                 "smoke_test_created": any("test" in path.lower() for path in self._completion_changed_files),
                 "behavioral_passed": bool(self._completion_verification and self._completion_verification.passed),
                 "oracle_failed_on_stub": self._completion_oracle_failed_on_stub,
+                "control": self._completion_greenfield_control,
             },
         )
         if isinstance(verdict, AdmissionVerdict):

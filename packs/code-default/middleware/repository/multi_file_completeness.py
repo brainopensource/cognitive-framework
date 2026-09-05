@@ -159,6 +159,48 @@ class CodeDefaultCompletionPolicy:
 
     spi_version = "1.0"
 
+    @staticmethod
+    def _run_greenfield_control(evidence: Mapping[str, Any]) -> Any:
+        """Run the pack's vacuity control on runtime-collected evidence.
+
+        The runtime owns execution and supplies the mediated control counts;
+        this pack owns the semantic rule that a green empty-stub control is
+        invalid. Keeping the call here makes the production completion path
+        use the same gate as the pack contract tests.
+        """
+        try:
+            from oracles.gate import GreenfieldControlOutcome, PackOracleGate
+        except ImportError as exc:  # pragma: no cover - broken pack install
+            return None, f"greenfield gate unavailable: {exc}"
+        control = evidence.get("control")
+        if not isinstance(control, Mapping):
+            # Compatibility for direct SPI callers. The public runtime always
+            # supplies ``control``; older pack callers supplied only the
+            # explicit boolean and verification count.
+            if isinstance(evidence.get("oracle_failed_on_stub"), bool):
+                verification = evidence.get("verification")
+                tests_run = getattr(
+                    verification, "executed_test_count", 0)
+                control = {
+                    "tests_run": tests_run,
+                    "failures": tests_run if evidence["oracle_failed_on_stub"] else 0,
+                    "errors": 0,
+                }
+            else:
+                return None, "greenfield control evidence missing"
+        try:
+            outcome = GreenfieldControlOutcome(
+                tests_run=control.get("tests_run", control.get("testsRun")),
+                failures=control.get("failures"),
+                errors=control.get("errors", 0),
+            )
+        except (TypeError, ValueError):
+            return None, "greenfield control evidence invalid"
+        decision = PackOracleGate().run_greenfield_control(lambda: outcome)
+        if hasattr(decision, "value"):
+            return decision.value, ""
+        return None, str(getattr(decision, "message", getattr(decision, "code", "control rejected")))
+
     def evaluate(
         self,
         preset_name: str,
@@ -189,6 +231,18 @@ class CodeDefaultCompletionPolicy:
             greenfield = observations.get("greenfield_evidence")
             if not isinstance(greenfield, Mapping):
                 return {"admissible": False, "reason": "GREENFIELD_EVIDENCE_REQUIRED"}
+            greenfield = dict(greenfield)
+            greenfield.setdefault("verification", verification)
+            control, control_error = self._run_greenfield_control(greenfield)
+            if control is None:
+                return {
+                    "admissible": False,
+                    "reason": (
+                        "VACUOUS_ORACLE"
+                        if greenfield.get("oracle_failed_on_stub") is False
+                        else "GREENFIELD_CONTROL_REQUIRED"
+                    ),
+                }
             if greenfield.get("oracle_failed_on_stub") is False:
                 return {"admissible": False, "reason": "VACUOUS_ORACLE"}
             required = (

@@ -354,6 +354,23 @@ Evaluation of `Qwen3.8-27B` across all 3 multi-file project tasks (`fibo`, `bugf
 
 ---
 
+### 8.4. Algorithmic Memory vs. State-Machine Rigor (The Reasoning Boundary)
+
+To establish the operational boundary between algorithmic pattern recall and imperative state-machine tracking under strict constraints (`-c 4096`, `--reasoning off`, max 4 iterative feedback turns), two contrasting challenges were evaluated across 7 local open-weights models:
+
+1. **Challenge 1: Shortest Path with $K$ Obstacles (3D BFS — Complexity Level 6.0)**:
+   - Standard LeetCode Hard pattern prevalent in pre-training corpuses.
+   - **Result**: Dense coding models (`Qwen2.5-Coder-1.5B`, `Qwen2.5-Coder-14B`) and MoE (`DeepSeek-Coder-V2-Lite`) passed on Turn 1 in <11s. `Phi-4-mini` recovered on Turn 2 (7.4s).
+2. **Challenge 2: RFC-4180 CSV Parser without `import csv` (State Machine — Complexity Level 3.5)**:
+   - Modest algorithmic depth, but requires strict tracking of 4 interdependent parser states: `in_quotes`, `consecutive_quotes` (`""`), `buffer`, and multiline delimiters (`\r\n`).
+   - **Result: 100% Failure across all 7 models.** Without chain-of-thought scratchpad tokens, models cannot maintain lexical state invariants. Smaller models fell into infinite scanner loops (`Qwen-3B`) or variable scope regressions (`Qwen-1.5B`), while 14B models remained trapped in line-based splitting heuristics (`Qwen-14B`).
+
+**Takeaway for Agent Workflows:**
+- For **canonical data structures and algorithmic transforms**, `--reasoning off` is exceptionally fast (100–180 tok/s) and completely safe.
+- For **custom parsers, grammars, and imperative state machines**, agents MUST allocate reasoning headroom (`-c 8192`, `--reasoning on` with `max_tokens >= 4096`) to permit internal state derivation before emitting implementation code.
+
+---
+
 ## 9. Inspecting Results & Audit Trails
 
 Every Vanguard run is deterministically recorded in an immutable SQLite event store:

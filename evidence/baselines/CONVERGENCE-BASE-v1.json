@@ -1,0 +1,98 @@
+{
+  "schema_version": "aether.baseline/1",
+  "baseline_id": "CONVERGENCE-BASE-v1",
+  "git_tag": "CONVERGENCE-BASE-v1",
+  "tag_object_sha": "ee80748872104f06c927e098fd5392b139ea7251",
+  "commit_sha": "532abf16defb23a0d91259f45aa7042c9b2bae6d",
+  "tree_digest": "sha256:16f7c4ed436e8a9342d8ef4b6ca777738e164122a6a99f4f3da4444c74e1b1ad",
+  "package_version": "0.9.0b1",
+  "dependency_lock_digest": "sha256:207b149465de7fb5c45ca08d6dddd09d268ac8a451a69e54a83d1f5d90d9c457",
+  "schema_pins": {
+    "schemas/mhf/artifact_created.schema.json": "sha256:031fb45b608878ec13f170e99304aa9a631ba6af6e2b275489be2f9a58f2ee30",
+    "schemas/mhf/baseline.schema.json": "sha256:622d5205027e5044c091708f8f47039ad447ace35917ab5ed8dec1685f705e7d",
+    "schemas/mhf/checkpoint.schema.json": "sha256:e07e6c13e389d552abcd2474d6c2dc5cea854d494ad721e163d7aa4fd5edfcb7",
+    "schemas/mhf/context_compacted.schema.json": "sha256:552bac98818a5e7538449a316d9355cd8f68a981330be7416227fd8290a2d078",
+    "schemas/mhf/effect_request.schema.json": "sha256:eb493f6d9bf35a5fc7d6029e57e76d4ed5c80141a9e4eb889c6d7d92457908c8",
+    "schemas/mhf/event_envelope.schema.json": "sha256:c2555635de76b7ff20fec96ad10f19cbfaa53399363102afc456f650528c5ede",
+    "schemas/mhf/event_envelope_v2.schema.json": "sha256:45aec56d9786e4b80f1e20dc8e51e1fed43b1b8e24b5faf0a588c7a6430b6b33",
+    "schemas/mhf/execution_profile.schema.json": "sha256:68336c6857693ada276e6217968117ec27840eaf2ad0df95c96bbed60a4a0e62",
+    "schemas/mhf/execution_profile_v2.schema.json": "sha256:53a127d8b36685a66575bc49a08669e59afce9881aa9d9350bd180bcf1a3ee6a",
+    "schemas/mhf/goal_declared.schema.json": "sha256:759e156b782a3946a95afa158b71eff21047b84fae2e97966fb9d75281d9e024",
+    "schemas/mhf/harness_manifest.schema.json": "sha256:a86a0df621cb53db584c8791ccfdcde1537d9c543723b23dded6e014db55b6c0",
+    "schemas/mhf/manifest_v2.schema.json": "sha256:03f9885a730c10e8e7c10ceb6926f9be0d8d2dff03b3a42758f8d00c35f2fc31",
+    "schemas/mhf/plan_revised.schema.json": "sha256:609b993d3e49ef30827ced2b368606daa01d0e1ed9f7dd9271a036f4b9e24da3",
+    "schemas/mhf/preregistration.schema.json": "sha256:038aa59946df52c9905ce8b29f7daab962b83fa146aa4f60fd2dae1c0aee6b10",
+    "schemas/mhf/progress_assessed.schema.json": "sha256:9e7432dae8c4c0072aa799e80c75634e85a8bf8623943571744ab0271c0187e3",
+    "schemas/mhf/provenance_claim.schema.json": "sha256:69e7d5d89b376cf563cdd25b11c0c738cea2887730e0d6246283a897dd3c3ed1",
+    "schemas/mhf/spi_payloads.schema.json": "sha256:314a7bff7b1abf14c8d7c57d5854e16872d604efacc2f148571f01382c7116db",
+    "schemas/mhf/strategy_changed.schema.json": "sha256:356d5b7b73503eb47e6d77f79d4b8edabe04a2d2cfffd5d7eb96e5e8f22e1779",
+    "schemas/mhf/topology.schema.json": "sha256:939aabefe87f4303545b32dfe4f1351c306da5ea2561df39e0819c671b15dcc2",
+    "schemas/mhf/trajectory.schema.json": "sha256:2034a4acb2321a104422498e7d1f468605f859b75ba2614ccd25e632b8140243",
+    "schemas/mhf/trajectory_v2.schema.json": "sha256:3f911b187cac62d4b8b4479bdf56ceda730e8a7f2a20cf0b33c84c144db5f5a3",
+    "schemas/v4/approval-decision.schema.json": "sha256:7396e2a24ba815bff358356b563572c2b3edbc4554638daed448d22a6a90ef31",
+    "schemas/v4/artifact-kind-registry.reader.schema.json": "sha256:65285849357c26aaadafd95181d59e2ec326b2adba8c7d6bc367756dd9657faa",
+    "schemas/v4/artifact-kind-registry.schema.json": "sha256:145e8c6abc093eda448c9baa1cd2b804b7052e7b0072262aa6ea40939fbc1c19",
+    "schemas/v4/artifact.reader.schema.json": "sha256:3161c594b07f1420a823bde1cdec3351659bfe73024fa435dbd3004442e90e98",
+    "schemas/v4/artifact.schema.json": "sha256:3888176adeba702d37146556b4eac88be28b2206b9dd5ac21854d12f0a42908f",
+    "schemas/v4/capability-grant.reader.schema.json": "sha256:5aa95de8ebef772993e89266f1b296604ad03dc53ef4f9f8c78cd5c5084dfdff",
+    "schemas/v4/capability-grant.schema.json": "sha256:4a0a4bd7b680058e8b8206e6fbccc65533c08963329dd1799306b318dd5aa107",
+    "schemas/v4/correction-record.reader.schema.json": "sha256:b1087b36d7235c328a86a21c0fcdbb4a8a562f1c5776f6d34e74e4352df34273",
+    "schemas/v4/correction-record.schema.json": "sha256:b43d126b4cee3836a7ea2a012d61dc9ee220f68f6da1342bebb8ab5a905fa5d5",
+    "schemas/v4/effect-descriptor.reader.schema.json": "sha256:d55461425da61638f1252570c611e830e054f72ac18601fafbd3dadd391b9bda",
+    "schemas/v4/effect-descriptor.schema.json": "sha256:79ec2ab970758dae0ef4123334e0de1dd75613b4124b07a0fc9e7847a9d14da5",
+    "schemas/v4/event-envelope.reader.schema.json": "sha256:31c4cc5219201758122cc9f140dc995e93ac4d4f122309b4bbbd68d3f9964292",
+    "schemas/v4/event-envelope.schema.json": "sha256:8de343561413b6f3bd0603c7380a7613f6174412cfa7812ac95e8839e7e80b45",
+    "schemas/v4/evidence-claim.reader.schema.json": "sha256:1aa174fa11063a897c66e95220e6c8ee01b94a62be530853fb765ba50930405f",
+    "schemas/v4/evidence-claim.schema.json": "sha256:cf41b7b29554b56b19cbeda4f4ab219993ef6e2e0d6e62a10638f77e59dd8be2",
+    "schemas/v4/harness-manifest.reader.schema.json": "sha256:2ea2925e75f7d76fd3ea23a1a30c09d20369a0b34ac3c9e066792ac215c6ba8a",
+    "schemas/v4/harness-manifest.schema.json": "sha256:684cc9d5dc6fc0ad7089f971e72e669ebaf7fa642dc72930ebc92e2d5ff2fb39",
+    "schemas/v4/invalidation-check-record.reader.schema.json": "sha256:b59d580feb3d22468abf3218fdadbf6159de069c47bbb988329089292c58b3fd",
+    "schemas/v4/invalidation-check-record.schema.json": "sha256:6f0ece75f056a8c7e66d7cdb2d09c41798e90448246cdf6d2976db3e4e25647f",
+    "schemas/v4/model_proposal.schema.json": "sha256:3b95b87839662a9545ed094a8979e57536d87aa4d18cb00337e9477d6e23ce5b",
+    "schemas/v4/primitives.reader.schema.json": "sha256:0bec2354cceb76e53e77349eb7c6cfe4528d8269f5e9b2cf5e0e6695867082d0",
+    "schemas/v4/primitives.schema.json": "sha256:3e2627a4130036a9028d35d470f0b83ee24ea4f7d0cc8feb50321cc627cca5a9",
+    "schemas/v4/process-definition.reader.schema.json": "sha256:71e0fece79de830a666164f2f6e02155bd65c50d548fe4a3e2f32653b810724e",
+    "schemas/v4/process-definition.schema.json": "sha256:adac45b58522ac37077f8889fb54b6b7e668746f590c4fa7e67471a474386ded",
+    "schemas/v4/process-instance.reader.schema.json": "sha256:cc775ceddc9c68cebeeeea4efa42b854ecd88c8435aab40f111c5fb0839dc87a",
+    "schemas/v4/process-instance.schema.json": "sha256:15bdfe5e12845f9b7cf075282f3013613a856cb84c734f0d8b9b668b5fbb4730",
+    "schemas/v4/receipt.reader.schema.json": "sha256:9ef30ebe98d50f2f3b05ba31a6c2bac5019ad1119a343cb35c58762b4e5c21f0",
+    "schemas/v4/receipt.schema.json": "sha256:e59509cb0025896bf8795939507a1f2be88d5213998c1b56f3eea8b9d7c7fb8c",
+    "schemas/v4/recording.reader.schema.json": "sha256:2c809b35c7c1bc2a84a28e221a562446bc5fa2f1864e348ba954163730c72849",
+    "schemas/v4/recording.schema.json": "sha256:c072853cf798134ac5ea7c14a84f236a773fdbe051b76582697366ef61d9aac7",
+    "schemas/v4/resource-selector.reader.schema.json": "sha256:d558210ebc36ef06a62b6ef4f87405684d608863e549d89dd88164130a72cb91",
+    "schemas/v4/resource-selector.schema.json": "sha256:9941f1c61e551bf6afd5120d34ef8064cd7889da836ac20bfbde6c0a5a6e2aae",
+    "schemas/v4/runtime-service.schema.json": "sha256:c44c725b52b240acf323dcfb686719727934911c182f510ea7ce60eddd431d0e",
+    "schemas/v4/worker_protocol.schema.json": "sha256:006036bec24c031414d40d13a78c14b455ae325841da538ece2d709deb58723d"
+  },
+  "reducer_pins": {
+    "vanguard/packages/domain/ledger/reducer.py": "sha256:faf46555bf8083564542a4dd374af66a21b109f1905dbac01b8236a5280f2e81",
+    "vanguard/packages/domain/ledger/state.py": "sha256:1892b0ed3323722957cf81caee2e91e3a51595374459f686a605cfb7d24ff173",
+    "vanguard/packages/domain/ledger/events.py": "sha256:f555498dd1229e7c80651b576f5de12c80d998f9735cca9f570e5b2b6ff34684",
+    "vanguard/packages/domain/ledger/agent_view.py": "sha256:0a703622145a9b5413f53aee73593661860d045c2c50620cc3fb921ad25ae029"
+  },
+  "prohibited_treatment_paths": [
+    "vanguard/packages/domain",
+    "vanguard/packages/kernel",
+    "vanguard/packages/ports"
+  ],
+  "required_gates": [
+    "RF-86",
+    "RF-98",
+    "python-suite",
+    "linters",
+    "uds-af-unix"
+  ],
+  "creator": {
+    "key_id": "dev-a-operator",
+    "public_key": "YC26yW0O4H2PbE9Vup7F11XEwOzlxDou9vvj5Em0WB8="
+  },
+  "reviewer": {
+    "key_id": "aether-evidence-reviewer-1",
+    "public_key": "sU3/2yOzJMopRXMicVebL20OeHIFkkMFFfvlk5B0J2k="
+  },
+  "signatures": {
+    "creator": "IkFhJ4ExJHBKEjx1QyoXxSC2jgEdWlQkhhMTMsJvh+5T9ApHWpuG32WAfTQ9NRykOziahYdWMp+svRJHF4hrCw==",
+    "reviewer": "zPgktdle/RyKO3T+DoIhzMKkNk0Q4hmy39Lk5SJ/WLtldN5e1jn/3M53eDDZdtEXWIkDJdykFrcBX2ublHBjAw=="
+  }
+}
+

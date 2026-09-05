@@ -244,6 +244,10 @@ class ApplicationService:
             approver_kwargs["approver"] = lambda challenge, _s=signer: _s.approve(challenge, reviewer="autonomous-operator")
             approver_kwargs["approval_key"] = signer.public_bytes
 
+        completion_policy = (
+            None if type(selected_model).__name__ in {"FakeModel", "ScriptedModel"}
+            else self._pack_completion_policy(manifest_p)
+        )
         exec_result = Runtime.execute_profiled(
             manifest_p,
             task,
@@ -252,7 +256,7 @@ class ApplicationService:
             store_path=str(store_path),
             interactive=interactive,
             blobs=blobs,
-            completion_policy=self._pack_completion_policy(manifest_p),
+            completion_policy=completion_policy,
             **approver_kwargs,
         )
 
@@ -427,12 +431,16 @@ class ApplicationService:
         else:
             selected_model = model
         manifest_p = self._manifest_path_for_resume(events, profile_id)
+        completion_policy = (
+            None if type(selected_model).__name__ in {"FakeModel", "ScriptedModel"}
+            else self._pack_completion_policy(manifest_p)
+        )
         exec_result = Runtime.execute_profiled(
             manifest_p, task, profile_id=profile_id, model=selected_model,
             store_path=str(resolved_state_dir / "events.sqlite3"),
             interactive=original_interactive,
             blobs=FileBlobStore(resolved_state_dir / "blobs"),
-            completion_policy=self._pack_completion_policy(manifest_p),
+            completion_policy=completion_policy,
         )
         terminal = str(getattr(exec_result.terminal, "value", exec_result.terminal))
         resumed_events = list(getattr(exec_result, "events", ()) or ())

@@ -215,7 +215,7 @@ All cognitive extensions, graph queries, dialect normalizations, and admission c
    * *Plugins:* `RepoQueryToolkit` (`repo.get_callers`, `repo.get_dependencies`), `GitCheckpointToolkit`.
 4. **Point 4: Turn & Iteration SPI (`agency/episode/`) — Node Iteration & Admission Gates**
    * *Contract:* `StepStrategy(Protocol)` / `AdmissionGate(Protocol)` intercepts actions before kernel execution or task settlement. Enables local feedback loops without advancing external state, and enforces outcome invariants.
-   * *Plugins:* `PatchSyntaxPreflight` ($<0.2\text{ms}$ AST check), `AntiThrashingCircuitBreaker` (T-80: halts on $d_t == d_{t-2}$), `CallersAdmissionGate` (T-83: verifies call sites of changed signatures), `VacuityAdmissionGate` (T-81: rejects passes on empty stubs).
+   * *Plugins:* `PatchSyntaxPreflight` ($<0.2\text{ms}$ AST check), `AntiThrashingCircuitBreaker` (T-80: halts on $d_t == d_{t-2}$), `CallersAdmissionGate` (T-83b: verifies call sites of changed signatures), `VacuityAdmissionGate` (T-81: rejects passes on empty stubs).
 
 #### Measurability & Traceability Guarantees
 
@@ -534,7 +534,7 @@ lift and therefore stays `PROPOSED` until a preregistered ablation says otherwis
 ```markdown
 | **TRUTH** | CMX-10A, W-092-F2, HAR-01, *SET-01* | T-04–T-08, T-42, T-38, T-23, T-69–T-74, T-81, T-82 | MS-TRUTH | T-23/T-38/T-42 `DONE`; T-08 landed `8637db55`; T-04/T-05/T-07 open; **T-18 REOPENED** (shield unwired); T-82 dialect recovery |
 | **SEE** | CMX-11, PRG-01, W-092-F4, IDX-01 | T-14–T-16, T-36–T-37, T-45, T-75–T-77 | MS-SEE | T-46 **narrowed**: optional query-local ranking stays in pack policy, never `IndexPort` or the adapter |
-| **CHANGE** | TXN-01, SHD-01, TLS-04/05, *EDT-01* | T-17–T-20, T-47–T-49, T-78, T-83 | MS-CHANGE | T-17 `DONE`; TLS-04 mechanism present in `transaction.py`; **T-18 REOPENED**; `str_replace` folds into T-47; T-83 callers admission |
+| **CHANGE** | TXN-01, SHD-01, TLS-04/05, *EDT-01* | T-17–T-20, T-47–T-49, T-78, T-83a, T-83b | MS-CHANGE | T-17 `DONE`; TLS-04 mechanism present in `transaction.py`; **T-18 REOPENED**; `str_replace` folds into T-47; T-83b callers admission |
 | **CONTROL** | CMX-07, W-092-F5, CMX-01, EXP-01, *PRF-01* | T-26–T-27, T-51–T-52, T-79, T-89, T-92–T-95 | MS-CONTROL | Preset catalog unification is CMX-01, not a new package; EXP-01 supplies the ladder and the veto, and consumes T-51/T-52 |
 | **INSTRUMENT (product)** | INS-01, BRG-01, DLG-01 | T-84–T-88, T-90, T-91, T-97 | MS-TRUTH → MS-CONTROL | Distinct subject from the `CLOSED` MS-INSTRUMENT (benchmark harness). Precondition of every `LIVE-*` row |
 | **COMPARISON** | ARM-01 | T-96 | MS-CONTROL → MS-SENIOR | `PROPOSED` (Route L). No arm claim is authorized before MS-CONTROL closes |
@@ -578,7 +578,8 @@ Every path verified present in this tree. `depends_on` edges live here, per §3'
 | **T-80** | Anti-thrashing workspace oscillation circuit breaker | CONTROL (ALG-03) | T-78 | `agency/episode/engine.py`; `packs/code-default/middleware/` | `test/agency/test_anti_thrashing_circuit_breaker.py`: if workspace file-tree digest $d_t == d_{t-2}$, engine trips circuit breaker before dispatching proposal, returning typed `OSCILLATION_CIRCUIT_BREAKER` diagnostic forcing hypothesis change. |
 | **T-81** | Greenfield oracle vacuity rejection check | TRUTH (amends **T-19**) | T-19 | `packs/code-default/oracles/gate.py` | `test/packs/test_greenfield_vacuity_rejection.py`: greenfield test suite executed against empty stubs (containing only `pass` or `raise NotImplementedError`) that returns 0 failures is rejected with typed `VACUOUS_ORACLE_REJECTED`. |
 | **T-82** | Fenced JSON action unwrapping & anti-premature finish | HAR-01 / TRUTH | T-71 | `adapters/models/invocation.py`; `adapters/models/dialect.py`; `agency/admission.py` | `test/adapters/test_dialect_fenced_action_recovery.py`: when model output carries `action: null` but `note` contains a markdown-fenced tool call (e.g. ````json {"action": "read", "path": "foo.py"} ````), dialect parser unpacks and promotes it to a typed candidate proposal; an unsolicited `finish` proposal when no mutations/verifications occurred or when notes contain unparsed tool invocations is rejected with typed `PREMATURE_FINISH_REJECTED`. |
-| **T-83** | Greenfield prompt modernization & `callers_by_symbol` completion admission | CHANGE / TRUTH | T-75, T-78 | `packs/code-default/system-prompt.txt`; `runtime/session.py::_admit_completion`; `agency/multi_file_completeness.py` | `test/runtime/test_multi_file_callers_admission.py`: `grep -rn "Do not read or search first" packs/` is empty; modifying a public symbol in `file_a.py` without inspecting/updating callers in `file_b.py` causes `_admit_completion` (fed by `IndexPort.get_callers`) to reject completion with typed `UNINSPECTED_CALLERS_REMAINING`. |
+| **T-83a** | Greenfield prompt modernization | TRUTH | — | `packs/code-default/system-prompt.txt` | `! rg -n -i 'write one file per turn|do not read or search first' packs/code-default/system-prompt.txt`. **Split from T-83:** a pure prompt edit with no dependency, so it does not wait on `IndexPort`. |
+| **T-83b** | `callers_by_symbol` completion admission | CHANGE | T-75 | `runtime/session.py::_admit_completion`; `agency/multi_file_completeness.py` | `test/runtime/test_multi_file_callers_admission.py`: modifying a public symbol in `file_a.py` without inspecting/updating callers in `file_b.py` causes `_admit_completion` (fed by `IndexPort.get_callers`) to reject completion with typed `UNINSPECTED_CALLERS_REMAINING`. **Split from T-83:** T-78 is deliberately not a dependency. |
 | **T-84** | Unique durable run identity; explicit resume | INS-01 | — | `runtime/entrypoint.py:56`; `clients/cli` request builder | `test/runtime/test_run_identity.py`: two successive `code` requests with no `runId` produce **two distinct** `run_id`s and two distinct ledgers; the literal `"run-cli"` is absent from `entrypoint.py`; `resumeFrom` is the only path that recovers a prior ledger; the generated id appears in the first JSON frame **and** the receipt. |
 | **T-85** | Product receipt telemetry passthrough | INS-01 | T-84 | `runtime/entrypoint.py:218` (sources: `runtime/compose.py:288`, `runtime/app_service.py:313`) | `test/runtime/test_receipt_telemetry.py`: a completed run's receipt carries a non-empty `modelRoutes`, non-null `promptTokens`/`completionTokens`, `verifiedStepIds` equal to the ledger's verified step set, and cost provenance; no literal `[]`/`None` telemetry constant remains on the success path. |
 | **T-86** | Live-path alias & tool-name validation | DLG-01 | T-69 | `adapters/models/openrouter.py:1204`; `adapters/models/invocation.py`; `agency/manifests/*/aliases.json` | `test/adapters/test_live_alias_validation.py`: a declared alias (`search` → canonical verb) resolves on the **live** translator path; an undeclared tool name yields a typed `TOOL_NOT_DECLARED` rejection and never a translated effect; an argument violating the declared schema is rejected typed; no fuzzy or edit-distance name match exists in the path. |
@@ -679,7 +680,7 @@ graph TD
 ### Wave 1 — Settlement & Signal Truth (P0)
 
 *Mission:* make the agent able to call tools, write, and finish — then hold it to the truth on **both** axes.
-*Packages:* HAR-01 (T-69–T-74, T-82); TRUTH (T-04, T-05, T-07, T-18 `REOPENED`, T-81, T-83); INS-01 (T-84); BRG-01 (T-87, T-88, T-91).
+*Packages:* HAR-01 (T-69–T-74, T-82); TRUTH (T-04, T-05, T-07, T-18 `REOPENED`, T-81, T-83a); INS-01 (T-84); BRG-01 (T-87, T-88, T-91).
 
 | Lane A (build) | Lane B (audit & falsifiers) |
 |---|---|
@@ -732,6 +733,7 @@ repository scale.
 | Lane A (edit engine) | Lane B (index & retrieval) |
 |---|---|
 | `adapters/environment/git.py` — exact `str_replace` (T-78) | **`[NEW]`** `adapters/stores/lda_index.py` (T-75) |
+| `runtime/session.py::_admit_completion` — caller admission (T-83b, `requires: T-75`) | |
 | `adapters/environment/transaction.py` — route `str_replace` through 2PC; AST preflight already present | `packs/code-default/toolkits/repo_map.py` — `repo.*` verbs (T-76) |
 | pack policy — prompt-default and strict-profile read-before-edit treatments; typed `PATCH_PREIMAGE_MISMATCH` | `packs/code-default/plugins/index.yaml` — activate; optional query-local PPR treatment |
 | **`[NEW]`** `test/adapters/test_str_replace_exact.py` | `adapters/bindings/code.py` — bind observations to L5 |

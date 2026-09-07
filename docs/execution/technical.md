@@ -150,6 +150,104 @@ T-111 reruns all required gates on the final subject, reconciles MS-CONTEXT and 
 **T-14 WorkspaceEpoch LIVE** `587db91a`. **T-16/T-15/T-36/T-37/T-45 LIVE** (`33dc7c33`, `2a4cdaad`, `179f5616`, `81b7b572`, `c7995195`). **T-17 adapter 2PC LIVE** `5c9870f0`.
 **T-04 / `ADMISSION_GATE_EXEMPT`:** the production exemption is removed. Do not weaken the gate to satisfy legacy bare-finish fixtures; retarget those fixtures as a separate successor.
 
+## Post-control reference handbook (FH-1) [PROPOSAL]
+
+The normative owner is [spec FH-1](spec.md#fh-1-post-control-backend-horizon-proposal); [tasks](tasks.md#context-post-control-horizon-fh-1-proposal) owns dependencies and prototype leaves. These algorithms refine [Part 3 §§5–6](../reports/reviews/aether_v093_review/part3_blueprints_and_interface_contracts.md). They are conditional reference algorithms, not executed production code. NT-1 compile/recover remains the near-term contract. The references' in-memory tests do not qualify disk durability or aggregate resource accounting.
+
+### Placement and compatibility decisions
+
+Reuse `domain` canonicalization/artifact values for tree/edit/check/delegation payloads; `ports/environment.py`, blob/event/evaluator ports and `ports/child_runtime.py` for effect seams; `adapters/environment/transaction.py` and `git.py` for capture/staging/export; existing stores for persistence; `runtime/ledger_emitter.py` and registered reducers for admission/projection; `runtime/delegation.py` and agency spawn for child lineage; code-pack planner/completion for domain phases. Benchmark scheduling/reporting belongs in `benchmarks/` and executable runners in `tools/`. Runtime never imports subprocess. The kernel remains unchanged.
+
+Trace the selected product manifest through bindings before retiring any patch frontend or planner. `DriveUntilGreenPlanner` and `AstPatchToolkit` demonstration paths do not establish which implementation runs in a given product profile. T-103 hardens current editing; CAS adds a new qualified workspace profile with an explicit migration boundary. Convert supported frontends to a common edit set; reject unsupported syntax rather than invoking fuzzy fallbacks. Reference `SnapshotBlobs`, `CandidateVerifier`, `PromotionLedger` and `SpawnGateway` are responsibility labels to map onto existing contracts, not four automatic new public ports.
+
+### Immutable trees and serializable promotion
+
+Let `H` be SHA-256 over canonical bytes and `J` the existing JCS encoder. A file node is `(path, file, mode, H(bytes))`; a directory is `(path, directory, mode, null)`. Define `tree_id = H(J(sorted(nodes, key=path)))`. Including parents, empty directories and modes makes absence and executable changes observable. Manifest ordering is deterministic; physical filesystem case collisions are rejected at capture/materialization. Check blobs on read and bound entries/total bytes before allocation. Capture must detect concurrent changes, not hash a mixed-time tree.
+
+The active branch is `(tree_id, generation) = fold(commit_events)`. Each successful compare-and-append increases generation, including rollback to an earlier tree. This prevents an old transaction from matching an A->B->A cycle. Linearization occurs at the durable commit event, not at candidate file writes. A pinned reader observes one immutable tree. Ordinary checkout export is intentionally weaker and has a distinct receipt.
+
+```text
+prepare_and_promote(request):
+  validate request, authority, bounds, baseline and current profile
+  derive transaction ID from task/composition/grant/branch/generation,
+    baseline/candidate/check-plan identities
+  if this transaction is committed: return its original durable receipt
+  fetch and verify baseline blobs; apply exact-preimage edits in isolation
+  validate final tree and applicable syntax; durably persist candidate blobs
+  reserve verification, publication and recovery resources
+  run each composition-required check on the immutable candidate
+  authenticate every receipt; reject incomplete, stale or cancelled checks
+  ask existing emitter's serialized admission to:
+    recheck transaction identity, current grant, head AND generation
+    verify durable blobs and complete required check set
+    append commit fact and update/rebuild the same head projection
+  if reply is lost: reconcile transaction identity; never undo blindly
+```
+
+The adapter's commit boundary must serialize competing appenders in a fresh-process test; a Python lock in one process is insufficient. Do not claim a new atomic event-store API exists before adapter qualification. Storage acknowledgement requires declared durability semantics, including directory synchronization where needed; fsync success is not a backup strategy. Fault-inject before/after blob persistence, verification receipt persistence, event commit and reply delivery. Orphan unpromoted blobs are collectible only after pending-operation pins expire under policy.
+
+```text
+export(candidate, destination):
+  acquire owned destination lock; validate destination identity and baseline
+  persist complete preimages and export intent before touching paths
+  publish under journal, checking unexpected external edits before each step
+  on completion: verify final bytes/modes/existence and persist receipt
+  on failure/restart: reconcile journal and each observed path digest
+    restore only owned mutations; preserve conflicting external edits
+    verify restoration, or quarantine and report RECOVERY_FAILED
+```
+
+A failure before branch promotion leaves the head unchanged. A post-promotion rollback uses a new expected-generation comparison. Export failure cannot erase a successful branch promotion. Mark/sweep retention roots include live heads, suspended branches, open transactions, accepted evidence and explicit user pins; use a consistent root snapshot or generation barrier so concurrent publication cannot race reclamation. Garbage collection remains grant-checked and bounded.
+
+### Conserved delegation and durable campaigns
+
+For each additive dimension `d`, require `spent_d + unsettled_d + sum(child_reserved_d) + recovery_reserved_d <= root_limit_d`; these are disjoint accounting categories, not double-counted costs. Use the existing governor/lease settlement path. Wall-clock deadlines and structural turn/depth ceilings are checked separately; parallel elapsed latency is not the sum of child runtimes. Unknown usage prevents claiming a fully measured cost and does not justify refunding a possibly spent reservation.
+
+```text
+delegate(request):
+  bind identity to parent lineage + call ID + canonical request digest
+  reconcile an existing intent/result under that identity first
+  validate grant expiry/revocation, scope, resources, depth and output schema
+  atomically admit an idempotent reservation/intent through existing machinery
+  dispatch through canonical child runtime under the reserved envelope
+  on uncertain dispatch: retain reservation and reconcile child lineage
+  on return: authenticate bounded findings and settle actual known usage
+  incorporate subject-valid evidence; parent alone owns mutation/admission
+```
+
+If reservation and intent cannot share one storage transaction, define a recoverable admission state machine: `reserved -> intent_recorded -> dispatched -> returned -> settled`. Each transition is idempotent; restart repairs an incomplete transition before dispatch. A reservation without recorded intent may be released only after proving dispatch never occurred. Cancellation propagates through the canonical lineage and reconciles outstanding effects. Do not construct a second governor or refund on arbitrary exceptions.
+
+Campaign readiness is `ready(v) iff every dependency u has an accepted artifact matching v's required interface/version`. A terminal child without that evidence is not ready. The director records a bounded plan revision and uses the current runtime client; each worker has an explicit lease, task, artifact inputs and budget. On restart reconcile leased/running nodes before selecting ready nodes. Merging independent candidates produces a new tree whose whole check plan must run. A read-only specialist treatment and a parallel-mutating treatment are different experiments. Basic DAG fixtures may qualify mechanics without positive specialist lift; full Octopus and recursive tournament treatments remain behind M-OCT.
+
+Memory promotion reuses the existing governed learning path: capture candidate lesson with subject/version/evidence, evaluate on a segregated development holdout, admit through a distinct promoter, and record supersession/rollback. Revocation invalidates materialized retrieval caches as well as future queries. Official evaluation holdouts never become training or adaptive selection data within that study.
+
+### Measurement model and reference evaluation procedure
+
+Freeze the evaluated system, not only the model name. Let `N` be the frozen eligible instance count, `R` verified resolutions, `U` undeterminable attempts and `C` total observed cost across all attempts. Report `R/N` with a Wilson interval; also report all disposition counts and the descriptive missingness bounds `[R/N, (R+U)/N]`. Those bounds are not a confidence interval. `C/R` is undefined when `R=0`; if cost is missing, report a known subtotal and missing count rather than a complete cost estimate. Infrastructure/dataset anomalies remain in the scheduling inventory; separately declared official denominators are reproduced exactly, with a reconciliation table.
+
+For paired arms use `delta = mean(y_treatment - y_control)` on identical task IDs. Predeclare a repository-clustered bootstrap for uncertainty where tasks share repositories, trial handling for stochastic outputs, and multiplicity correction for several treatments. McNemar's discordant-pair analysis may supplement binary outcomes; it does not resolve missingness or repository dependence. Freeze sample size, useful effect `delta_min`, cost/latency ceilings and stopping policy after control measurements and before treatment evaluation. Default decision confidence is 95%; thresholds are study fields, not invented universal scores.
+
+Promote a treatment only if the predeclared useful-lift predicate (`lower_bound(delta) > delta_min`) or a predeclared cost-saving/noninferiority alternative holds, mandatory invariants pass, and missingness rules permit inference. Choose the alternative before observing results. Zero observed false completion also needs its sample count and uncertainty; it is not proof of zero population risk. Do not repeatedly inspect ordinary confidence intervals and stop when positive; use fixed sampling or a preregistered sequential method.
+
+```text
+evaluate_frozen(manifest):
+  validate all frozen identities, authorized budget and evaluator isolation
+  for each scheduled instance/attempt:
+    materialize pinned baseline; execute selected runtime arm
+    seal prediction/patch artifact even when empty or invalid
+    evaluate independently with a unique subject-bound run identity
+    persist raw outputs and one canonical attempt disposition
+  reconcile expected IDs with all received/missing outputs
+  compute only declared per-corpus metrics and uncertainty
+  produce evidence bundle; independent reviewer issues a disposition
+```
+
+Pin SWE-bench code/dataset/environment and export `instance_id`, `model_name_or_path`, `model_patch` predictions to its upstream evaluator. Its result cache uses run/instance identity, so changed predictions need a new run ID. Preserve raw reports and distinguish harness execution from resolution. See the [official evaluation guide](https://www.swebench.com/SWE-bench/guides/evaluation/) (checked 2026-09-07; revalidate at implementation freeze).
+
+Pin Aider's polyglot corpus, runner and attempt/feedback protocol separately; report first-attempt and feedback-assisted results independently and identify the AETHER harness substitution. The [Aider benchmark documentation](https://aider.chat/docs/benchmarks.html) and [leaderboard methodology](https://aider.chat/docs/leaderboards/) are protocol sources, not evidence that this backend has achieved their scores (checked 2026-09-07). Do not hard-code leaderboard leaders into acceptance. For greenfield, freeze requirements, negative checks, clean-start/build conditions and evaluator independence; assess completeness/reproducibility separately from repository repair.
+
+Official protocol reproduction, public submission and a SOTA claim have distinct receipts. Public submission requires its existing release/operator authority. Select comparator eligibility and a dated comparison snapshot before running the study; incomparable harness/resource settings forbid a direct superiority claim. Negative or inconclusive results close the reporting task while leaving the performance gate open. Release qualification still requires M-8/M-9/M-10 and complete preservation recipes on the final subject.
+
 ## 0. Epistemic legend
 
 | Tag | Meaning |

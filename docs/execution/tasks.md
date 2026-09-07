@@ -363,6 +363,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 **T-26 Frozen control preregistration** (B; strip “Wave 5” from title)  
 - [ ] n, models, stop rule frozen before first paid call  
 - Requires: T-01–T-25 as applicable  
+- **requires (NT-1 addition)**: [T-111, T-97, T-92, T-51, T-52]; MS-BASELINE and MS-CONTEXT accepted on the candidate subject. No paid execution is implied by a documentation freeze.
 - **draft contract 2026-09-05 (not a freeze):** `benchmarks/ladder/control_preregistration.json` exists with `status: UNFROZEN`, `subject_sha: null`. The L2 arm is pinned to single-worker `vg-code-balanced` / preset `balanced` / `vanguard.packages.runtime.entrypoint.execute` (Forge/Chimera/fast/max excluded). `require_frozen()` refuses scoring. This does not complete T-26 or authorize a paid call.  
 
 **T-27 Single-agent canary (eval)** (B)  
@@ -558,13 +559,13 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **acceptance_falsifier**: `python3 -m unittest test.agency.test_l5_only_observations -v` keeps the L1–L3 digest bit-identical across ten turns while retaining all four observations in L5.
 
 - [ ] **T-77: Cache breakpoints, CTRF distillation, and Trailing Goal Echo**
-  - **package**: IDX-01
+  - **package**: CTX-01 (IDX-01 remains the optional retrieval consumer)
   - **subsystem**: agency
-  - **lane**: Lane A (Build/Core)
-  - **requires**: [T-76]
-  - **file_touches**: [`vanguard/packages/agency/context/compiler.py`, `vanguard/packages/agency/context/compaction.py`, `vanguard/packages/runtime/ledger_emitter.py`, **[NEW]** `test/agency/test_cache_breakpoints.py`]
-  - **specification**: Emit a provider cache breakpoint at the L3 boundary, record cache read/write tokens, distill test output into bounded CTRF, and append a compact Trailing Goal Echo to L5. Passing runs are omitted and failure diffs are capped at 1,500 characters without losing digest-addressable evidence.
-  - **acceptance_falsifier**: `python3 -m unittest test.agency.test_cache_breakpoints -v` proves prefix stability, a turn-two-or-later cache-hit rate above 85% on the fixture, bounded CTRF, and the L5 tail echo.
+  - **owner**: Stream B; provider serializer is A/T-105, durable emission A/T-107
+  - **requires**: [T-104, T-105]
+  - **file_touches**: [`vanguard/packages/agency/context/compiler.py`, `vanguard/packages/agency/context/compaction.py`, **[NEW]** `test/agency/test_cache_breakpoints.py`]
+  - **specification**: NT-C01–C06: preserve L1–L3 bytes, bounded test receipts and goal echo; negotiate cache controls through the provider serializer. Successful verification receipts remain in working state even when their raw passing logs are omitted. T-76 is not a prerequisite for provider-neutral context behavior.
+  - **acceptance_falsifier**: `python3 -m unittest test.agency.test_cache_breakpoints -v` proves stable prefix bytes and schema order, bounded artifact-addressed results, L5 tail echo and explicit cache-usage missingness. No universal fixture or live 85% cache-hit threshold.
 
 - [ ] **T-78: Exact-match `str_replace` primitive**
   - **package**: CHANGE
@@ -589,7 +590,8 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
   - **package**: CONTROL
   - **subsystem**: agency
   - **lane**: Lane A (Build/Core)
-  - **requires**: [T-78]
+  - **requires**: [T-78, T-106, MS-CONTROL (closed)]
+  - **scope clarification (NT-1)**: Post-control workspace/tool-policy treatment only. Reuse T-106's core detector; do not create a second cycle detector or enable consultation before control acceptance.
   - **file_touches**: [`vanguard/packages/agency/episode/engine.py`, `packs/code-default/middleware/`, **[NEW]** `test/agency/test_anti_thrashing_circuit_breaker.py`]
   - **specification**: Detect the two-cycle workspace oscillation where `d_t == d_{t-2}` before dispatching another proposal. Return typed `OSCILLATION_CIRCUIT_BREAKER` evidence that forces a hypothesis change.
   - **acceptance_falsifier**: `python3 -m unittest test.agency.test_anti_thrashing_circuit_breaker -v` trips before the next proposal on the two-cycle digest fixture.
@@ -756,12 +758,12 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 - [ ] **T-97: CLI product surface — reproduce then repair**
   - **package**: INS-01
   - **subsystem**: client
-  - **lane**: Lane A (Build/Core)
+  - **owner**: Stream A (active near-term, NT-1)
   - **requires**: [T-84]
-  - **file_touches**: [`vanguard/clients/cli/src/composition/parse-cli.ts`, `vanguard/clients/cli/src/main.ts`, **[NEW]** `test/cli/test_help_and_flags.spec.ts`]
+  - **file_touches**: [`vanguard/clients/cli/src/composition/parse-cli.ts`, `vanguard/clients/cli/src/main.ts`, `vanguard/clients/cli/test/commands.test.ts`]
   - **specification**: Reproduce the current `aether code --help` behavior before repair, then make it print help and exit zero without a completion frame. Resolve the `-m` collision by an explicit binding whose losing spelling errors instead of silently winning.
-  - **acceptance_falsifier**: `npm test -- test/cli/test_help_and_flags.spec.ts` proves help exits zero and the conflicting flag cannot resolve ambiguously.
-  - **deferred 2026-09-05 (this pass):** not implemented. Remains filed under INS-01. Next Wave 2 close still owes help/`-m` after boundary repair; do not drop the row.
+  - **acceptance_falsifier**: `npm --workspace @vanguard/cli test` proves help exits zero without an episode/model call, conflicting flags cannot resolve ambiguously, and non-success execution returns nonzero; `npm run typecheck` also required.
+  - **status**: Prior 2026-09-05 deferral superseded by NT-1; remains unchecked until executed evidence exists.
 
 #### Constitutional audit receipt — Prompt 12 (2026-09-04)
 

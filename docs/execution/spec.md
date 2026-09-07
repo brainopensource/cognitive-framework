@@ -9,7 +9,7 @@ canonical_for:
   - active-feature-delta-specification
 version: "2.0.0"
 date: "2026-09-05"
-last_verified: 2026-09-05
+last_verified: 2026-09-07
 lock_head: "66aa7a3c0c31"
 derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN.md
@@ -31,6 +31,66 @@ This document is the authoritative specification and typed delta contract for th
 Lock SHA `66aa7a3c` is the forensic baseline. Implementation head for closed instrument work: `63b77116`. Resume closed at `8637db55` (MS-RESUME `CLOSED`).
 
 Companion handbook: [`technical.md`](technical.md). Task IDs: [`tasks.md`](tasks.md).
+
+## NT-1. Near-term baseline, context, cache and recovery delta
+
+**Authority and scope (2026-09-07).** This executive amendment authorizes T-98–T-111 and the revised T-77 before control qualification. It supersedes earlier EW-9 exclusions only for deterministic context/cache/recovery hardening and baseline remediation. Existing T-09–T-16 mechanisms are extended, not re-created. T-80 remains the later workspace-policy treatment; deterministic semantic stall detection belongs to T-106. Model escalation, consultation, specialists, CAS workspace promotion, memory learning, new index backends and T-96 remain outside this iteration. Historical milestone receipts retain their original subjects. No new milestone is accepted by this amendment.
+
+### NT-1.1 Baseline and execution safety
+
+- **NT-B01:** Baseline receipts MUST bind source SHA, dirty-state digest, environment/runner identity, exact commands, collected/executed/skipped counts, failures/errors, import failures and output artifact digests. The historical 66/2,855 audit result MUST NOT be presented as a current measurement. An unexecuted command has status `not_run`, never `passed`.
+- **NT-B02:** Broad discovery and context-refresh workflows that execute tests MUST run in an isolated repository with independent Git metadata, redirected writable corpora, provider credentials removed and network denied until nonmutation is proven. Compare source/index/corpus bytes before and after; a linked worktree alone does not isolate Git metadata. Every required module MUST be collected or have a recorded retirement and successor claim. Silent deletion or skipping of failing/security tests is forbidden.
+- **NT-B03:** The near-term canonical Python runner is unittest. Essential safety setup MUST NOT depend on pytest hooks. Required additional runners remain explicit. Acceptance requires the complete `just check`/`just verify` recipe bodies, full `python3 -m unittest discover -s test -t .` in the qualified runner, and the declared TypeScript gates. Missing executables/dependencies block acceptance; invoking only available subsets does not satisfy the gate.
+- **NT-B04:** Product surfaces MUST preserve terminal status and task disposition as separate axes under EW-9.1. `abstained` MUST NOT become `completed`; a refusal cannot be relabeled as success by a facade, child adapter, CLI exit mapper, or benchmark writer. Successful completion requires fresh applicable evidence under TC-E-058. Help MUST perform no model/effect invocation. Existing budget-only presets MUST NOT be advertised as behaviorally distinct harness arms.
+
+### NT-1.2 Typed value contracts
+
+These are additive payload/value schemas, not new independent stores or unrestricted event kinds. All objects reject unknown required schema versions, invalid digests, duplicate stable identifiers, negative counters and booleans used as integer counts. Maps are serialized with existing RFC 8785 JCS; bytes are snapshotted before hashing. `Digest` means `sha256:` followed by 64 lowercase hex characters. Nullable observations represent explicit missingness; zero is an observed count. Runtime binds the values into registered `mhf.event/2` envelopes through the single emitter, including schema/event-coverage updates in T-107.
+
+| Value / version | Required typed fields | Validation and ownership |
+|---|---|---|
+| `aether.memory-view/1` | `schema: str`, `task: SemanticTaskState`, `cursor: int >= 0`, `lineage_id: str`, `reducer_version: str`, `evidence: Evidence[]` | Pure domain snapshot. Full existing task value retained; encode/decode canonical round trip. Runtime verifies cursor/lineage/reducer before use; digest alone grants no authority. |
+| `Evidence` | `key: str`, `subject: Digest`, `artifact: Digest`, `finding: str`, `body: str` | Nonempty identities/finding; body may be empty after eviction. Unique key per view. Historical evidence cannot masquerade as current-subject evidence. |
+| `Interaction` | `key: str`, `action: str`, `result: str`, `artifact: Digest` | One complete action/result unit; tool-call correlation preserved. Large result bodies become receipts before compilation. |
+| `aether.context-policy/2` | `schema: str`, `window/output/safety/recovery: int >= 0`, `high_percent: int`, `low_percent: int`, `max_items: int > 0`, `max_body_bytes: int > 0`, `serializer_id: str`, `counter_id: str` | `0 < low < high <= 100`; usable input positive. Initial high/low = 80/60, configurable and composition-pinned. Output + safety + recovery reserved before input selection. |
+| `aether.prompt-selection/1` | `schema: str`, `prefix_digest/state_digest/policy_digest/request_digest: Digest`, `subject: Digest`, `cursor: int >= 0`, `tokens: int >= 0`, `omissions: {key: str, reason: str}[]` | Reasons: `stale`, `body_elided`, `evidence_dropped`, `interaction_dropped`. Metadata records selection; prompt text remains an authorized artifact. |
+| `aether.recovery-state/1` | `schema: str`, `policy_digest: Digest`, `history: Attempt[]`, `errors: map[FailureClass,int >= 0]`, `interventions/decisions: int >= 0`, `pending_operation: str or null`, `deadline: str or null` | At most 12 attempts. Counters and decision budget survive resume/recomposition. Pending operation requires a deadline and unsettled reservation. |
+| `Attempt` | `fingerprint: Digest`, `outcome: str`, `progress_key: Digest`, `failure: FailureClass or null` | Fingerprint binds normalized action/arguments/input subject; progress key excludes clocks, telemetry and model self-assessment. |
+| `RecoveryDecision` | `action: continue/wait/reground/replan/stop`, `reason: str`, `delay_ms: int >= 0`, `state_digest: Digest`, `remaining_budget_ref: Digest` | No `consult` action in this iteration. Persist decision before next external request. Delay bounded by remaining deadline and allowance. |
+| `CacheObservation` | `model_id/serializer_id: str`, `prefix_digest/request_digest: Digest`, `read_tokens/write_tokens: int >= 0 or null`, `source: provider/local_fixture/unavailable` | Provider metrics never inferred from prefix equality; write/read costs remain distinct. |
+
+The versioned wrapper adds lineage/reducer validation to Part 3's reference `MemoryView`. It MUST reuse `SemanticTaskState`, `ProtocolRecoveryState`, existing context blocks and canonicalization; no second authoritative blackboard or retry engine is authorized. Schemas above govern production integration where the report's compact examples omit validation or effect adapters.
+
+### NT-1.3 Context and cache invariants
+
+- **NT-C01:** L1–L3 system/tool/environment bytes are frozen per composition epoch. Tool schemas MUST have stable list order and canonical keys. Changed schemas, instructions, model dialect or context policy require a new recorded epoch. Dynamic state and observations MUST NOT mutate the frozen prefix.
+- **NT-C02:** The complete original objective, constraints, active plan/next action, modified resources, last material failure, latest applicable verification, settled-effect identities and remaining budgets MUST survive eviction and restart. Complete task state remains durable. Relevant dead ends are selected as evidence; pinned-state overflow fails explicitly rather than silently discarding obligations.
+- **NT-C03:** `usable = window - output - safety - recovery` MUST be positive. Count the final provider-serialized request using an exact counter or documented conservative bound specific to that dialect. Final input count MUST be <= usable. An intermediate JSON envelope or generic character ratio is not proof that a different provider request fits.
+- **NT-C04:** Reject or truncate oversize display bodies into artifact-bound receipts before selection; cap item cardinality. Remove stale evidence; elide low-priority bodies; drop low-priority evidence; then drop oldest complete interactions. Preserve the newest complete interaction. Trigger at the high watermark and target the low watermark, allowing irreducible state above low but never above hard usable. If the irreducible request cannot fit, return `CONTEXT_BUDGET_EXCEEDED` without inference.
+- **NT-C05:** Capability-card injection MUST stay <= 4096 characters independently of token accounting. External text remains untrusted content. Selection identity and omissions MUST be durable before inference; telemetry failures cannot alter the selected bytes.
+- **NT-C06:** Provider serializers negotiate supported cache controls and report actual metrics or null. Stable-prefix tests prove bytes only. No universal 85% cache-hit gate is authorized. Any provider-specific cache-performance threshold requires a frozen provider/workload and separately authorized measured evidence. Reservations assume worst-case uncached usage.
+
+### NT-1.4 Bounded deterministic recovery
+
+**NT-R01:** Normalize attempts using action, validated arguments, input/resource digests and classified outcome. Detect >=3 unchanged signatures in a six-action window and repeated length-two/three cycles; retain at most twelve signatures. A separate verified progress key records new facts/falsified hypotheses, not transcript length or mere patch toggling. This pure detector extends existing recovery and does not schedule speculative workers.
+
+**NT-R02:** Initial policy permits one reground and one replan intervention per task, then stop; transport failures permit at most three retries. These bounds are configurable, versioned, reserved and never reset by restart, approval suspension or model switching. Transient delays use bounded exponential backoff with jitter, chosen once and persisted. Assertions/schema/preimage failures require changed information or a new hypothesis, not sleep. Permission/permanent/budget failures stop or await a separately authorized state change; no automatic authority expansion.
+
+**NT-R03:** Poll an existing pending operation only under its durable deadline and reservation. Unknown external outcomes remain unsettled and MUST be reconciled before replay/refund. Persist state and decisions through the current ledger before dispatch. An exhausted task cannot create an unverified success; existing owned workspace recovery must finish or produce an explicit recovery failure. CAS snapshot promotion is not introduced here.
+
+### NT-1.5 Failure matrix and preservation
+
+| Failure | Required response | Forbidden behavior |
+|---|---|---|
+| `BASELINE_UNSAFE` / `COLLECTION_INCOMPLETE` | Stop broad qualification; retain diagnostic artifact | Hide import errors or mutate contributor checkout |
+| `STATE_IDENTITY_MISMATCH` / `CONTEXT_STALE` | Reject snapshot/evidence; rederive from authorized current facts | Treat old cache or summary as authoritative |
+| `CONTEXT_BUDGET_EXCEEDED` | No inference; bounded receipt reduction or explicit recomposition | Trim objective or overspend context |
+| `VERIFICATION_STALE` / `TEST_COLLECTION_EMPTY` | Refuse completion; run applicable checks | Convert finish/refusal into success |
+| `NO_PROGRESS` / `PROTOCOL_INVALID` | Persist bounded reground/replan/stop decision | Reset counters or launch a specialist |
+| `PROVIDER_TRANSIENT` | Bounded deadline-aware retry with retained accounting | Unlimited retries or fictitious zero usage |
+| `RECOVERY_FAILED` | Quarantine owned work and report failure | Claim rollback or task success without evidence |
+
+**NT-I01:** Planned kernel delta = 0 LOC; ceiling remains 1438. All additions live above the domain-blind kernel. Ports cannot import agency/kernel; adapters cannot import agency/kernel; runtime cannot execute subprocesses (N-06). Preserve I-6 isolation, I-7 domain blindness, one event writer and grant/budget attenuation. **NT-I02:** New gates `MS-BASELINE` and `MS-CONTEXT` are prerequisites to a new T-26 control freeze, not replacements for historical M-1–M-3/MS-INSTRUMENT/MS-RESUME receipts or M-8–M-10 release predicates. Deterministic 100+ turn fixtures do not change the balanced product ceiling or imply benchmark success.
 
 ## 0. Normative System Clauses (TARGET Law)
 

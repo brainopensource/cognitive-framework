@@ -52,6 +52,10 @@ class WorkspaceSafetyTests(unittest.TestCase):
 
 
 class ChallengeLoadingTests(unittest.TestCase):
+    @unittest.skipUnless(
+        (ROOT.parent / "LEX_LLM_EXECUTION" / "lab").is_dir(),
+        "External LEX_LLM_EXECUTION lab not present",
+    )
     def test_loads_reference_challenge_without_mutating_it(self) -> None:
         challenge = load_challenge(ROOT.parent / "LEX_LLM_EXECUTION" / "lab", "semver_parser")
         self.assertIn("SemVer", challenge.problem)

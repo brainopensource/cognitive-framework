@@ -36,6 +36,15 @@ if str(ROOT) not in sys.path:
 from vanguard.packages.domain.workspace import get_workspace_path
 
 
+def _median(data: list[float]) -> float:
+    if not data:
+        return 0.0
+    s = sorted(data)
+    n = len(s)
+    mid = n // 2
+    return s[mid] if n % 2 != 0 else (s[mid - 1] + s[mid]) / 2.0
+
+
 def _time_ms(fn: Callable[[], Any], repeats: int) -> dict[str, Any]:
     samples: list[float] = []
     for _ in range(repeats):
@@ -46,7 +55,7 @@ def _time_ms(fn: Callable[[], Any], repeats: int) -> dict[str, Any]:
     return {
         "repeats": repeats,
         "min_ms": samples[0],
-        "median_ms": statistics.median(samples),
+        "median_ms": _median(samples),
         "p95_ms": samples[min(len(samples) - 1, int(len(samples) * 0.95))],
         "max_ms": samples[-1],
     }
@@ -359,8 +368,8 @@ def bench_multi_agent_token_overhead(repeats: int) -> dict[str, Any]:
 
     worker_samples = [_worker_agent_tokens() for _ in range(repeats)]
     planner_samples = [_planner_only_tokens() for _ in range(repeats)]
-    worker_tokens = statistics.median(worker_samples)
-    planner_tokens = statistics.median(planner_samples)
+    worker_tokens = _median(worker_samples)
+    planner_tokens = _median(planner_samples)
     return {
         "repeats": repeats,
         "single_agent_direct_execution_tokens_median": worker_tokens,
@@ -492,11 +501,11 @@ app.resume(run_id={_json.dumps(run_id)}, profile_id="local", model=model,
         "repeats_requested": repeats,
         "recovery_samples_captured": len(recovery_samples),
         "resume_after_kill_ms": (
-            {"median": statistics.median(recovery_samples), "min": min(recovery_samples), "max": max(recovery_samples)}
+            {"median": _median(recovery_samples), "min": min(recovery_samples), "max": max(recovery_samples)}
             if recovery_samples else None
         ),
         "uninterrupted_full_run_ms": (
-            {"median": statistics.median(uninterrupted_samples), "min": min(uninterrupted_samples), "max": max(uninterrupted_samples)}
+            {"median": _median(uninterrupted_samples), "min": min(uninterrupted_samples), "max": max(uninterrupted_samples)}
             if uninterrupted_samples else None
         ),
         "note": "resume_after_kill_ms times only the fresh resume process; the killed process's own wall time is separate and not comparable to a full uninterrupted run",

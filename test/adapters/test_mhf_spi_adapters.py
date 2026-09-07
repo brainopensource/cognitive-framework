@@ -50,7 +50,7 @@ from vanguard.packages.adapters.context.window import DefaultContextAdapter
 _BUDGET = Reservation(usd_micros=1, millis=1000, tokens=128, bytes=1024, turns=4, depth=1)
 _LIMITS = SandboxLimits(
     cpu_seconds=2,
-    address_space_bytes=256 * 1024 * 1024,
+    address_space_bytes=512 * 1024 * 1024,
     max_open_files=32,
     max_processes=64,
 )

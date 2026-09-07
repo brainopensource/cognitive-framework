@@ -6,11 +6,17 @@ import sys
 import unittest
 from pathlib import Path
 
+import importlib.util
+
 tools_dir = Path(__file__).resolve().parents[2] / "tools" / "002_LLM_API_MOCK"
 if str(tools_dir) not in sys.path:
     sys.path.insert(0, str(tools_dir))
 
-from ladder import run_ladder
+_spec = importlib.util.spec_from_file_location("mock_ladder", tools_dir / "ladder.py")
+_mod = importlib.util.module_from_spec(_spec)
+sys.modules["mock_ladder"] = _mod
+_spec.loader.exec_module(_mod)
+run_ladder = _mod.run_ladder
 
 
 class TestLamLadder(unittest.TestCase):

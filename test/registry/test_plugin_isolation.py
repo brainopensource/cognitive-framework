@@ -18,7 +18,7 @@ from vanguard.packages.domain.wire.types_gen import EventKind
 
 _LIMITS = SandboxLimits(
     cpu_seconds=2,
-    address_space_bytes=256 * 1024 * 1024,
+    address_space_bytes=512 * 1024 * 1024,
     max_open_files=32,
     max_processes=64,
 )

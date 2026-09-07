@@ -9,7 +9,7 @@ canonical_for:
   - repository-backlog
   - feature-lifecycle-tracking
 version: "0.9.3"
-last_verified: 2026-09-05
+last_verified: 2026-09-07
 lock_head: "3daa487c0be8"
 audience:
   - contributor
@@ -31,7 +31,7 @@ purpose: Track proposed, approved, in-progress, blocked, and deferred capability
 ====================================================================================================
 Authority: Execution (Sequencing & Lifecycle Tracking)
 Scope:     Capability Packages, Substrate Evolution, Tooling & Benchmarking Backlog
-Lanes:     Lane A (Dev A — Senior Principal) | Lane B (Dev B — Independent Evaluator)
+Streams:   A (Runtime/Product) | B (State/Agency) | C (Gates/Evidence)
 Invariant: Mechanism presence is not closure; state transitions require empirical receipts.
 ====================================================================================================
 ```
@@ -51,7 +51,7 @@ graph LR
 ```
 
 * **`PROPOSED`**: Candidate hypothesis, architectural proposal, or product feature under technical evaluation.
-* **`APPROVED`**: Specification and falsifiers ratified; awaiting implementation. Team capacity is chosen later; there is no WIP=1 calendar in this file.
+* **`APPROVED`**: Specification and falsifiers ratified; awaiting implementation. Current file ownership is in tasks.md; there is no WIP=1 calendar in this file.
 * **`IN_PROGRESS`**: Actively under implementation; checkboxes live in [`tasks.md`](tasks.md).
 * **`REVIEWING`**: Code implemented; awaiting independent empirical evaluation and receipt production.
 * **`BLOCKED`**: Execution halted due to prerequisite milestone gates (e.g., M-9 blocked on M-8).
@@ -64,6 +64,22 @@ graph LR
 ---
 
 ## 2. Capability Family Backlog
+
+### 2.0 Approved near-term package deltas (NT-1)
+
+This is package scope/lifecycle, not a second task queue. NT-1 in [`spec.md`](spec.md#nt-1-near-term-baseline-context-cache-and-recovery-delta) promotes the core reference decisions into canonical contracts. T-98–T-111 and revised T-77 own work in [`tasks.md`](tasks.md#near-term-ownership-and-ready-work). Stream A/B/C supersede historical lane labels for this scope only. Approval is not implementation or milestone acceptance.
+
+| Package | Approved scope and owner | Existing capability relationship | Acceptance / lifecycle |
+|---|---|---|---|
+| **GATE-01** | Nonmutating runner, complete collection, current failure inventory, dead-path cleanup and integrated gate; C coordinates, A/B fix their owned surfaces | Additive baseline qualification; preserves MS-INSTRUMENT's historical subject. T-98/T-101/T-108/T-109/T-111 | `APPROVED`; MS-BASELINE requires exact-subject complete Python/TS/recipe receipts, no silent falsifier loss and unchanged contributor state. |
+| **CTX-01** | Canonical working-state snapshots, bounded existing compiler, provider-aware counting/cache telemetry and 100+ turn deterministic preservation; B values/compiler, A codecs/runtime | Successor integration of CMX-03/CMX-10B/CMX-11, not duplicate memory or compiler. T-100/T-104/T-105/T-107/T-110; T-77 moved here from IDX-01 | `APPROVED`; MS-CONTEXT after MS-BASELINE. No new index backend or vector store; cache hits are measured, not guaranteed by fixtures. |
+| **REC-01** | Bounded semantic history, transport backoff, reground/replan/stop, durable decisions/deadlines; B policy, A bindings | Extends ProtocolRecoveryState and existing EpisodeEngine; T-106/T-107/T-110. T-80 consumes the core detector later | `APPROVED`; MS-CONTEXT. No consultation, routing expansion, specialist spawning or new retry loop. |
+| **INS-01 near-term delta** | Truthful terminal projection, thin facade, CLI help/flags/non-success exits; A | T-99/T-102 and active T-97 complete T-04/T-79/T-89 successors | `APPROVED` delta on existing in-progress package; no completed-without-evidence result through any product surface. |
+| **CMX-01 near-term delta** | Single preset catalog, normalized behavioral identity, declared versus effective budgets; C catalog, A consumers | T-103/T-102 integrate T-79; retain existing product ceilings | `APPROVED` delta; budget-only presets labeled honestly. Behavioral arm studies remain ARM-01/T-96 after control. |
+
+**Release dependency:** MS-BASELINE -> MS-CONTEXT -> new MS-CONTROL freeze/qualification. T-111 reconciles the integrated subject; T-26/T-27 retain their evidence obligations. M-8 empirical acceptance and M-9/M-10 authorization are unchanged. Existing DONE mechanisms retain their historical receipts; richer current product preservation needs the new gates.
+
+**Excluded from Iteration 1:** Part 3 CAS Tree/stage/transact promotion, journaled host export, delegate_readonly activation, advanced workspace-policy treatments, semantic memory learning, comparative model routing, new LDA/LSP backends and official benchmark/release execution. Their existing proposal packages remain recorded without new implementation authorization. Existing patch safety defects are remediation under T-108, not permission to build the CAS substrate.
 
 ### 2.1 Substrate, Kernel & Event Sourcing (VISION.md §1–6)
 
@@ -164,9 +180,9 @@ composition/lifecycle authority; infrastructure stays behind generic ports.
 |---|---|---|---|---|---|
 | **CMX-01** | Current-mechanism delta and three presets | `packs/code-default`, manifests | `IN_PROGRESS` | EWK-Q disposition | T-79 is an implementation candidate with 8/8 focused tests green (declared ceiling ≠ attenuation). Acceptance waits on boundary + related-surface + clean-subject review. |
 | **CMX-02** | Port-backed repository intelligence | `ports/index.py`, adapters, code-pack bindings | `PARTIAL` | IDX-01 | Public Coding Max presets now declare the shared index and the runtime constructs bounded `ContextPacket` context; staged task-ranked retrieval, epoch refresh and fallback evidence remain. |
-| **CMX-03** | Durable plan/context/recovery loop | code-pack policies + existing projections | `PARTIAL` | CMX-09 | Resume restores the original turn ceiling and approval mode, but rich task-state production, exact policy/profile/budget identity and 40+ turn cold parity remain. |
+| **CMX-03** | Durable plan/context/recovery loop | code-pack policies + existing projections | `PARTIAL` | CTX-01, REC-01 | Historical resume mechanism retained; NT-1 requires canonical snapshots, actual serialized budgets and persisted recovery decisions with 100+ turn deterministic qualification. |
 | **CMX-04** | Multi-file and greenfield correctness | code-pack policies and fixtures | `REVIEWING` | CMX-10A, CMX-11 | Hermetic policies/fixtures and conservative verification observation exist; task-specific completion and repository-scale change-surface qualification remain. |
-| **CMX-05** | Coding Max application facade | `apps/coding_max`, shared application service, `vg` | `DONE (hermetic)` | CMX-03 | CLI and API invoke the same composition; run/status/resume/evidence/cost results agree; app owns no execution loop or provider HTTP |
+| **CMX-05** | Coding Max application facade | `apps/coding_max`, shared application service, `vg` | `REOPENED` (current-subject product outcome) | INS-01 near-term delta | Historical hermetic receipt retained; present entrypoint/app-service refusal collapse prevents carrying completion equivalence forward. T-99/T-102 must prove one truthful execution path before new acceptance. |
 | **CMX-06** | Conditional review and mediated specialist roles | manifests/topology/child runtime | `BLOCKED` (on CMX-07) | CMX-05 and accepted baseline | Reviewer/localizer/test-investigator roles remain disabled until one-role-at-a-time held-out ablations beat the qualified single-worker control. |
 | **CMX-07** | Repository-scale qualification | benchmark program | `BLOCKED` (on REL-01R, CMX-09..11) | CMX-04, CMX-05 | Re-freeze the exact multi-class subject only after canonical completion, long-session resume and progressive-context gates pass. |
 | **CMX-08** | First-party reference-agent portfolio | apps + independent packs/manifests | `TECHNICAL SLICE DONE` | M-10 and stable public composition contract | Coding Max plus two non-coding supported agents install, run, resume, and emit attributable evidence through the same public framework contract |

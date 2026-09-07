@@ -9,12 +9,12 @@ implementation_status: BACKEND_FINISH_ACTIVE
 owner: repository-governance
 canonical_for:
   - execution-flat-task-tree
-purpose: Flat tasks and subtasks by context. No sprints, no waves, no WIP calendar. Team capacity is chosen later. requires: is the only order hint.
+purpose: Flat tasks and subtasks by context. No sprint calendar. Near-term ownership uses three exclusive streams; requires is the only ordering relation.
 audience:
   - contributor
   - release-owner
 version: 0.9.3
-last_verified: 2026-09-05
+last_verified: 2026-09-07
 lock_head: "66aa7a3c0c31"
 normative_authority:
   - docs/execution/spec.md
@@ -34,7 +34,123 @@ Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technic
 
 **No sprints. No waves.** Check boxes as work completes. **Recommended reading order (not a schedule):** MS-SEE A stack T-16/T-15/T-36/T-37/T-45 is MECHANISM this-branch. T-04/T-05/T-07 landed 2026-09-04 (T-04 carries an open successor obligation; see its row). Do not create `progressive.py` (T-15). T-46 ranking stays `[PROPOSAL]`.
 
-**Current implementation handoff (2026-09-05 session stop; EW-9 wave names are scope labels, not a sprint calendar).** Phase 0 / `MS-INSTRUMENT` remains `CLOSED` on its frozen benchmark-harness subject. Wave 1 mechanisms T-69–T-74, T-81/T-82/T-83a, T-84/T-85 and T-87/T-88/T-91 are landed and their focused trust-spine set is green; empirical Wave 1 acceptance still requires a live T-92/L0 disposition, the T-04 successor obligation, and exact-subject convergence evidence. Wave 2 still has **0 accepted tasks**. Mechanism code for T-79/T-89/T-92–T-95 is in the dirty tree and the **31 named focused falsifiers** are green; checkboxes stay `[ ]`. Blockers: five `check_boundaries.py` hits in `benchmarks/ladder/evidence.py`, `benchmarks/ladder/l0_triad/runner.py`, `benchmarks/product_path.py`, and `runtime/cli.py`; plus four related-surface failures outside the 31 (`test.apps.coding_max.test_coding_max_facade` ×2, `test.falsifiers.test_rf90_generic_entrypoint` ×2). T-26 remains explicitly `UNFROZEN` (arm pinned, SHA not frozen). T-27 and T-51/T-52 remain open. **T-97 is deferred on the record for this pass** (TypeScript `aether code --help` / `-m` collision); it is not implemented and not vanished. Do not start T-80/T-96 or post-control work before `MS-CONTROL` closes. `just` is not the gate: run the `justfile` recipe bodies (`python3 tools/linters/...`, unittest). Knowledge artifacts, if regenerated later, live only under `.generated/knowledge/` — no new Markdown under `docs/`.
+**Current handoff (2026-09-07; inspected source `483d99081648a96a31775fa1e310445824cec847`).** NT-1 in [`spec.md`](spec.md#nt-1-near-term-baseline-context-cache-and-recovery-delta) authorizes the near-term rows below. Historical 2026-09-05 counts and the audit's 66/2,855 result belong to their original SHAs, not this subject. Current source still collapses `abstained` into `completed` in entrypoint/app-service projections. Full current-suite disposition is unmeasured pending T-98/T-101; old context summaries are not acceptance evidence. Historical MS-INSTRUMENT/MS-RESUME receipts stand; MS-CONTROL remains OPEN, T-26 UNFROZEN, T-27/T-51/T-52 open. T-97 is now active near-term work. T-77 core caching and T-106 deterministic recovery are authorized before control; T-80/T-96, model consultation, specialists and CAS promotion remain post-control. No task is accepted by this documentation update. Run complete recipe bodies when `just` is unavailable, with broad tests isolated under NT-B02.
+
+## Near-term ownership and ready work
+
+The labels **Stream A/B/C** below are current engineering ownership, not the historical `(A)`/`(B)` source-document labels or prior Lane A/B roles. There is no sprint calendar. T-98, T-99 and T-100 are independently ready. T-99 uses an independent disposable repository for targeted reproductions; no broad contributor-tree suite is permitted before T-98. Dependencies are actual prerequisites, not hidden external approvals.
+
+| Stream | Exclusive owned files / exceptions | Integration rule |
+|---|---|---|
+| A — Runtime and product | `runtime/{entrypoint,app_service,child_runtime,cli,session,task_state,checkpoints,ledger_emitter}.py`; `apps/coding_max/`; `adapters/models/`; CLI parser/main/tests; runtime/app tests except C's explicitly listed collection fixtures | Sole writer of runtime bindings; B hands over pure interfaces. A owns T-97 and facade portions of T-79/T-89. |
+| B — Pure state, context, recovery and patch correctness | `domain/task_state.py`; `agency/context/`, `agency/episode/`; `adapters/environment/`; `packs/code-default/` except C's `presets.json`/`load.py`; corresponding agency/semantic-state/patch/transaction tests | T-100 -> T-104 -> T-106 within B; no edits to A's `session.py` or provider serializers. |
+| C — Test integrity, configuration and acceptance | `test/__init__.py`, `test/conftest.py`, shared safe fixtures, `test/lab/`, collection/nonmutation meta-tests; benchmarks/tests; tools/linters; CI/lockfiles/package manifests/`justfile`; preset catalog/load/manifests; execution docs and generated knowledge | Sole merge-queue/document owner. Remaining test files are assigned by T-101 before edits; C hands A fixture changes for A-owned tests. |
+
+Work in isolated branches with `main` as serial integration target. Shared-tree concurrent editing is forbidden. An explicit file assignment overrides a directory default; transfer a file only after the prior owner's patch lands. No two active rows may lease the same file. Zero planned file overlap is enforceable; semantic conflicts are resolved by integrated verification, not a promise of conflict-free Git merges. Read-only reviews may cross ownership. Generated files have only the generator as writer. If event/schema tooling needs changes, C lands schema-generator input changes while A owns emission/reducer consumers under T-107.
+
+### Context: Baseline and truthful product convergence
+
+- [ ] **T-98: Runner-independent isolation and nonmutation**
+  - **package / owner**: GATE-01 / Stream C
+  - **requires**: []
+  - **files**: `test/__init__.py`, `test/conftest.py`, shared test fixtures, `tools/linters/check_test_hygiene.py`, `justfile`; **[NEW]** `test/contracts/test_suite_nonmutation.py`
+  - **contract**: NT-B01–B03. Redirect corpora for unittest; independent Git metadata and no network/credentials. Provision missing declared gate dependencies without relaxing gates.
+  - **falsifier**: `python3 -m unittest test.contracts.test_suite_nonmutation test.tools.test_check_test_hygiene -v`; deliberate writes/staging escape fail the meta-test; contributor source/index/corpus digests unchanged.
+
+- [ ] **T-99: Lossless terminal projection and admission successors**
+  - **package / owner**: INS-01 / Stream A
+  - **requires**: []
+  - **files**: `runtime/entrypoint.py`, `runtime/app_service.py`, `runtime/child_runtime.py`, app/facade and RF-90 tests; paths are under `vanguard/packages/` unless test-qualified
+  - **contract**: NT-B04, EW-9.1; one terminal mapping, separate disposition. Supply real verification in successful T-04 successor fixtures; never weaken the gate.
+  - **falsifier**: `python3 -m unittest test.apps.coding_max.test_coding_max_facade test.falsifiers.test_rf90_generic_entrypoint test.falsifiers.test_completion_gate_scope -v`; a mutation collapsing refusal into completion fails at both public surfaces.
+
+- [ ] **T-101: Complete collection and current-subject failure inventory**
+  - **package / owner**: GATE-01 / Stream C
+  - **requires**: [T-98]
+  - **files**: `test/lab/`, retained lab-dependent falsifiers and their supported tooling, **[NEW]** `test/contracts/test_collection_integrity.py`, baseline receipt artifacts
+  - **contract**: NT-B01–B03. Classify every failure by current subject and assign exact files. Port required assertions to supported APIs; retire only with a recorded successor/withdrawn claim. Do not resurrect dead engines just to satisfy imports.
+  - **falsifier**: `python3 -m unittest test.contracts.test_collection_integrity -v`; intentionally absent/import-broken module fails. Full isolated discovery records all failures/errors/skips and catches no hidden collection loss.
+
+- [ ] **T-103: Preset and evidence configuration integrity**
+  - **package / owner**: CMX-01 / Stream C
+  - **requires**: [T-98]
+  - **files**: `packs/code-default/{presets.json,load.py}`, selected `agency/manifests/vg-code-{fast,balanced,max}/` files, preset/benchmark tests
+  - **contract**: NT-B04 and T-79. Preserve existing declared budgets, label budget-only differences honestly; normalized behavioral identity includes selected plugins. No new comparative arms.
+  - **falsifier**: `python3 -m unittest test.packs.code_default.test_presets test.benchmarks.test_instrument_ms test.benchmarks.test_preregistration -v`; relabeling identical behavior cannot establish distinct treatment; declared bounds are not caller attenuation.
+
+- [ ] **T-102: Thin facade and canonical product execution**
+  - **package / owner**: INS-01 / Stream A
+  - **requires**: [T-99, T-103]
+  - **files**: `apps/coding_max/facade.py`, `runtime/{entrypoint,cli,app_service}.py`, app/runtime tests
+  - **contract**: Complete T-79/T-89 product-side convergence without a second loader, default ceiling or execution loop; installed resources resolve through the supported package API.
+  - **falsifier**: `python3 -m unittest test.runtime.test_app_service_and_cli test.apps.coding_max.test_facade test.apps.test_preset_budgets -v`; same input/profile yields same declared/effective budgets and outcome through CLI/API/facade.
+
+- [ ] **T-108: Existing patch correctness and dead-path consolidation**
+  - **package / owner**: GATE-01 / Stream B
+  - **requires**: [T-98, T-101]
+  - **files**: `packs/code-default/toolkits/ast_patch.py`, selected `adapters/environment/` implementation and patch tests; unreachable agency implementations identified by T-101; runtime/manifest caller edits handed to A/C
+  - **contract**: TC-E-061. Reject stale/ambiguous preimages and incomplete hunks; one production patch semantics with permitted adapters/fakes. No deletion quota, no new CAS workspace engine, no loss of registered plugin/falsifier coverage.
+  - **falsifier**: `python3 -m unittest test.falsifiers.test_d6_patch_context_anchoring test.packs.code_default.test_ast_patch test.runtime.test_atomic_multi_file_transaction -v`; invalid file N leaves all owned preimages intact. Full collection follows removals.
+
+- [ ] **T-109: Integrated baseline acceptance**
+  - **package / owner**: GATE-01 / Stream C
+  - **requires**: [T-98, T-99, T-101, T-102, T-103, T-108, T-97]
+  - **files**: gate/tooling configuration and existing execution handoffs; defects remain assigned to their source owners
+  - **contract**: Close MS-BASELINE only on exact-subject complete receipts. Remaining failures found by T-101 are mandatory, not exclusions from this gate.
+  - **falsifier**: `python3 -m unittest discover -s test -t .` in the qualified isolated runner, complete `just check`, `just verify` recipe bodies and TypeScript gates. Zero failures/errors, no unaccounted module loss, source/index/corpus unchanged. Missing commands block acceptance.
+
+### Context: Canonical context, cache and deterministic recovery
+
+- [ ] **T-100: Canonical working-memory and recovery value contracts**
+  - **package / owner**: CTX-01 / Stream B
+  - **requires**: []
+  - **files**: `domain/task_state.py`, `agency/episode/protocol_recovery.py` value definitions, `test/contracts/test_semantic_task_state.py`
+  - **contract**: NT-1.2. Immutable canonical snapshots reuse SemanticTaskState; retain full state and add versioned cursor/lineage/reducer binding. Define bounded recovery serialization and migration before consumers.
+  - **falsifier**: `python3 -m unittest test.contracts.test_semantic_task_state -v`; nested-map mutation cannot alter captured bytes; bad versions/digests/counters/duplicate keys fail; old supported state round trips without effect replay.
+
+- [ ] **T-104: Bounded context selection on the existing compiler**
+  - **package / owner**: CTX-01 / Stream B
+  - **requires**: [T-100]
+  - **files**: `agency/context/{compiler,compaction,layers,distiller}.py`, context tests
+  - **contract**: NT-C01–C05. Port Prefix/compile_packet behavior into ContextCompiler; preserve mandatory state/newest interaction; bound body/item counts; stable tool ordering; omissions and policy identity.
+  - **falsifier**: `python3 -m unittest test.agency.test_context_compiler test.agency.test_context_packet -v`; oversize/stale evidence is elided with artifact identity; irreducible overflow performs no inference; token count fits final hard budget.
+
+- [ ] **T-105: Provider serialization and cache observation**
+  - **package / owner**: CTX-01 / Stream A
+  - **requires**: [T-102, T-104]
+  - **files**: existing `adapters/models/` request serializers, **[NEW]** `test/adapters/test_prompt_serialization_budget.py`; no B-owned compiler edits
+  - **contract**: NT-C03/C06. Implement PromptCodec at the actual provider boundary; count final request; negotiate cache controls and expose real usage or null. No generic fixture cache-rate claim.
+  - **falsifier**: `python3 -m unittest test.adapters.test_prompt_serialization_budget -v`; native tool-schema overhead fits; changed dynamic state preserves prefix bytes; cache misses preserve semantics and reservations use uncached bounds.
+
+- [ ] **T-106: Bounded deterministic stall recovery**
+  - **package / owner**: REC-01 / Stream B
+  - **requires**: [T-100, T-104]
+  - **files**: `agency/episode/{protocol_recovery,engine}.py`, `test/agency/test_protocol_recovery.py`
+  - **contract**: NT-R01–R03. Integrate Part 3 recover semantics with bounded histories, persisted decisions and reground/replan/stop only; consultations remain disabled. No second retry loop.
+  - **falsifier**: `python3 -m unittest test.agency.test_protocol_recovery -v`; six-action repeat and two/three-cycles detected, new evidence permits progress, retries/deadlines survive serialization, permission denial never sleeps into authorization.
+
+- [ ] **T-107: Runtime binding and durable selection/recovery events**
+  - **package / owner**: CTX-01 / REC-01 / Stream A
+  - **requires**: [T-100, T-104, T-105, T-106, T-109]
+  - **files**: `runtime/{session,task_state,checkpoints,ledger_emitter}.py`, runtime tests; C owns any schema-generator inputs/event registry tooling needed by this handoff
+  - **contract**: NT-1.2, NT-C05, NT-R03. Bind values and policies through composition; emit registered mhf.event/2 facts before inference/dispatch; reconstruct state without repeated effects; bump identities when behavior changes.
+  - **falsifier**: `python3 -m unittest test.runtime.test_task_state_fold test.runtime.test_resume_identity test.runtime.test_context_layer_residency test.runtime.test_coding_resume -v`; event-write failure blocks next external call, resume preserves counters and prefix epoch. `python3 tools/linters/check_event_coverage.py`.
+
+- [ ] **T-110: Long-session preservation qualification**
+  - **package / owner**: CTX-01 / REC-01 / Stream A
+  - **requires**: [T-107, T-77]
+  - **files**: **[NEW]** `test/runtime/test_long_session_context_recovery.py`, existing cold-resume fixtures; no new runtime path
+  - **contract**: NT-I02. At least 100 deterministic turns, forced compaction and fresh-process restart, misleading tool output, stale verification, pending-operation deadline and exhausted recovery. Dedicated test budget, unchanged public presets.
+  - **falsifier**: `python3 -m unittest test.runtime.test_long_session_context_recovery test.falsifiers.test_rf25_cold_continuation test.falsifiers.test_rf23_trajectory_content -v`; exact intent/constraints, next action, settled effects and accounting preserved; no false completion.
+
+- [ ] **T-111: Near-term gate reconciliation and control handoff**
+  - **package / owner**: GATE-01 / EXP-01 / Stream C
+  - **requires**: [T-109, T-110]
+  - **files**: existing five execution files; `benchmarks/ladder/control_preregistration.json` validation and receipt references; knowledge regenerated, never hand-edited
+  - **contract**: NT-I02. Verify final integrated SHA and MS-BASELINE/MS-CONTEXT predicates; keep T-26 UNFROZEN until all applicable dependencies and live-smoke dispositions are satisfied. This task does not make a paid call or close MS-CONTROL.
+  - **falsifier**: `python3 -m unittest test.benchmarks.test_preregistration test.falsifiers.test_rel02_frozen_canary -v`, full isolated gate on final subject; changing context/model/schema/policy identity refuses reuse of an old freeze.
+
+New test modules above are deliverables of their rows; absence before implementation is not a pass. Existing T-04/T-79/T-89/T-97 IDs retain their contracts; T-99/T-102/T-103 assign the successor integration work, not competing implementations. Historical checked mechanisms stay checked; all new rows remain unchecked until their receipts are accepted.
 
 B §18 tickets T-01–T-35 are canonical. A §31 maps into those IDs or T-36+ (see merge map appendix). v2 `SUB-*` are aliases. Live backlog `SUB-01` (kernel S0–S12) is a different package.
 

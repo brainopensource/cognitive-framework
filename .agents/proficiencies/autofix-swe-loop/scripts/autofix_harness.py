@@ -44,12 +44,17 @@ def execute_autofix_loop(
     target_file: str,
     test_cmd: Optional[str] = None,
     max_turns: int = 3,
-    model_path: str = "/home/rock-dev/Models/Qwen2.5-Coder-1.5B-Instruct-Q4_K_M.gguf",
+    model_path: Optional[str] = None,
     port: int = 8080,
     timeout: float = 15.0,
     budget: int = 2500
 ) -> Dict[str, Any]:
     t_loop_start = time.time()
+    if model_path is None:
+        model_path = os.environ.get(
+            "LOCAL_MODEL_PATH",
+            str(Path.home() / "Models" / "Qwen2.5-Coder-1.5B-Instruct-Q4_K_M.gguf"),
+        )
     
     if not os.path.exists(target_file):
         return {
@@ -200,7 +205,7 @@ def main():
     parser.add_argument("--target-file", required=True, help="Target file path to repair")
     parser.add_argument("--test-cmd", help="Explicit test command to verify fix")
     parser.add_argument("--max-turns", type=int, default=3, help="Maximum repair turns")
-    parser.add_argument("--model-path", default="/home/rock-dev/Models/Qwen2.5-Coder-1.5B-Instruct-Q4_K_M.gguf")
+    parser.add_argument("--model-path", default=None, help="Model GGUF file path (defaults to Qwen2.5-Coder-1.5B in ~/Models)")
     parser.add_argument("--port", type=int, default=8080)
     parser.add_argument("--timeout", type=float, default=15.0)
     parser.add_argument("--budget", type=int, default=2500)

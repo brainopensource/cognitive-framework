@@ -141,7 +141,7 @@ def sync_workspace_manifests() -> List[str]:
     """Write standard workspace root MCP configs (.mcp.json and mcp_config.json)."""
     actions = []
     servers_dict = {
-        name: get_server_config(name, absolute=True)
+        name: get_server_config(name, absolute=False)
         for name in TRIAD_SERVERS
     }
     payload = {"mcpServers": servers_dict}

@@ -14,8 +14,8 @@ composed_skills:
 # TDD Falsifier (Technique 2)
 
 **TDD Falsifier** is a composite agent technique combining:
-1. **Targeted Test Discovery** via [`lda-navigator`](file:///home/rock-dev/Coding/cognitive-framework/.agents/skills/lda-navigator/SKILL.md)
-2. **Hermetic Timeout-Protected Execution** via [`test-runner`](file:///home/rock-dev/Coding/cognitive-framework/.agents/skills/test-runner/SKILL.md)
+1. **Targeted Test Discovery** via [`lda-navigator`](../../skills/lda-navigator/SKILL.md)
+2. **Hermetic Timeout-Protected Execution** via [`test-runner`](../../skills/test-runner/SKILL.md)
 
 ---
 

@@ -159,7 +159,7 @@ In interactive mode, every mutating action (`patch.apply`, `proc.exec`) generate
 
 ## 6. Real Benchmark Walkthroughs (L0 Smoke Triad)
 
-Here are the exact configurations and verification steps from the isolated test benchmarks located in `/home/rock-dev/Coding/cognitive-framework-benchs/`:
+Here are the exact configurations and verification steps from the isolated test benchmarks located in `benchmarks/`:
 
 ### Example 1: Greenfield Module & CLI (`P0-FIB`)
 

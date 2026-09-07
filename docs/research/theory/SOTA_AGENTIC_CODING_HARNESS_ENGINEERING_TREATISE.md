@@ -122,7 +122,7 @@ A rigorous audit of recent benchmark runs across the Vanguard `Benchmark 20 Suit
 
 # 3. Comparative Architecture: Vanguard / 1-Forge vs. Hermes Agent
 
-We performed a deep-dive architectural inspection of the **Hermes Agent** codebase (`/home/rocha/Coding/Harness-D-power/src/hermes_agent/`) installed in the local environment and compared it against the **Vanguard / 1-Forge** substrate:
+We performed a deep-dive architectural inspection of the **Hermes Agent** codebase (`hermes_agent/`) installed in the environment and compared it against the **Vanguard / 1-Forge** substrate:
 
 ```
                                   ARCHITECTURAL TOPOLOGY COMPARISON
@@ -410,7 +410,7 @@ This ensures that when a model investigates `rate_limiter.py`, the index automat
 
 # 9. LLM API Mock (LAM) Engine & Deterministic Synthetic Benchmarking
 
-The **LLM API Mock (LAM)** ([`tools/002_LLM_API_MOCK/`](file:///home/rocha/Coding/Aether-D-System/tools/002_LLM_API_MOCK/)) enables zero-cost, hermetic CI verification of the agent harness.
+The **LLM API Mock (LAM)** ([`tools/002_LLM_API_MOCK/`](../../../tools/002_LLM_API_MOCK/)) enables zero-cost, hermetic CI verification of the agent harness.
 
 ```
        +-------------------------------------------------------------------------+

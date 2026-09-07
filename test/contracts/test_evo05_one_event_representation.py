@@ -24,7 +24,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SCAN_ROOTS = (ROOT / "vanguard", ROOT / "test", ROOT / "tools", ROOT / "lab", ROOT / "benchmarks")
+SCAN_ROOTS = (ROOT / "vanguard", ROOT / "test", ROOT / "tools", ROOT / "benchmarks")
 _SKIP_DIRS = {".git", "__pycache__", ".venv", "node_modules"}
 _BANNED_NAMES = frozenset({"EventEnvelope", "EventEnvelopeV2"})
 _GENERATED_MODULE_SUFFIX = "wire.types_gen"

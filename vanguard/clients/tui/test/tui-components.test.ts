@@ -46,7 +46,7 @@ describe("@aether/tui — Presentation Components", () => {
     const store = new TuiStore({
       agentId: "coding-agent",
       model: "openrouter/free",
-      workspacePath: "/home/rock-dev/Coding/cognitive-framework/vanguard/clients/cli",
+      workspacePath: "/home/user/Coding/cognitive-framework/vanguard/clients/cli",
     });
 
     renderHeader(screen, store.get(), 0);
@@ -55,7 +55,7 @@ describe("@aether/tui — Presentation Components", () => {
     assert.ok(written.includes("AETHER"));
     // The full absolute path must not appear verbatim -- it would overflow
     // past the right-aligned status tag on an 80-column terminal.
-    assert.equal(written.includes("/home/rock-dev/Coding/cognitive-framework/vanguard/clients/cli"), false);
+    assert.equal(written.includes("/home/user/Coding/cognitive-framework/vanguard/clients/cli"), false);
   });
 
   it("shortenPath keeps the last N segments and leaves short paths untouched", () => {

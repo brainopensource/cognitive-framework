@@ -11,5 +11,5 @@ authority: operational
 
 This skill exposes the **TDD Falsifier Technique** to coding harnesses that scan `skills/`.
 
-- **Canonical Technique:** [`TECHNIQUE.md`](file:///home/rock-dev/Coding/cognitive-framework/.agents/techniques/tdd-falsifier/TECHNIQUE.md)
-- **Executable Runner:** [`run_falsifier.py`](file:///home/rock-dev/Coding/cognitive-framework/.agents/techniques/tdd-falsifier/scripts/run_falsifier.py)
+- **Canonical Technique:** [`TECHNIQUE.md`](../../techniques/tdd-falsifier/TECHNIQUE.md)
+- **Executable Runner:** [`run_falsifier.py`](../../techniques/tdd-falsifier/scripts/run_falsifier.py)

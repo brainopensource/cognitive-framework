@@ -77,6 +77,16 @@ printf '%-42s ' "vanguard/clients (TypeScript src)"
 find vanguard/clients -path '*/src/*' -name '*.ts' -print0 \
   | xargs -0 wc -l 2>/dev/null | tail -1
 
+hr "F-B1 lossy terminal-state projection (expect 4 sites -> completed, 1 -> abandoned)"
+grep -rn 'in {"completed", "abstained"}\|"abstained":' --include=*.py \
+  vanguard/packages/runtime/ | grep -v __pycache__
+
+hr "F-B5 code --help is effectful and exits 0"
+timeout 90 node bin/aether code --help; echo "exit=$?"
+
+hr "TypeScript client suite (sibling-audit claim did NOT reproduce: expect pass)"
+npm --workspace @vanguard/cli test 2>&1 | tail -6
+
 hr "full dynamic suite (pytest is NOT installed; unittest is the only runnable path)"
 .venv/bin/python -m pytest --version 2>&1 | head -1
 .venv/bin/python -m unittest discover -s test -t . 2>&1 | tail -3

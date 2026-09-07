@@ -19,3 +19,21 @@ os.environ.setdefault("XDG_CACHE_HOME", str(Path(_WS_ROOT) / "cache"))
 os.environ.setdefault("XDG_STATE_HOME", str(Path(_WS_ROOT) / "state"))
 os.environ.setdefault("PYTHONPYCACHEPREFIX", str(Path(_WS_ROOT) / "cache" / "python"))
 os.environ.setdefault("npm_config_cache", str(Path(_WS_ROOT) / "cache" / "npm"))
+
+import atexit
+import shutil
+
+_TRACKED_LAM_DB = Path(_ROOT) / "tools" / "002_LLM_API_MOCK" / "lam.sqlite"
+if not os.environ.get("LAM_DB_PATH"):
+    _lam_dir = tempfile.mkdtemp(prefix="lam-db-", dir=str(_TMP_DIR))
+    _lam_scratch = Path(_lam_dir) / "lam.sqlite"
+    if _TRACKED_LAM_DB.is_file():
+        shutil.copy2(_TRACKED_LAM_DB, _lam_scratch)
+    os.environ["LAM_DB_PATH"] = str(_lam_scratch)
+    atexit.register(shutil.rmtree, _lam_dir, True)
+
+if not os.environ.get("BAAC_RUNS_DIR"):
+    _baac_runs = Path(_WS_ROOT) / "baac_runs"
+    _baac_runs.mkdir(parents=True, exist_ok=True)
+    os.environ["BAAC_RUNS_DIR"] = str(_baac_runs)
+

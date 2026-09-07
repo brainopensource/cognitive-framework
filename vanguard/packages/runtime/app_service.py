@@ -244,10 +244,11 @@ class ApplicationService:
             approver_kwargs["approver"] = lambda challenge, _s=signer: _s.approve(challenge, reviewer="autonomous-operator")
             approver_kwargs["approval_key"] = signer.public_bytes
 
-        completion_policy = (
-            None if type(selected_model).__name__ in {"FakeModel", "ScriptedModel"}
-            else self._pack_completion_policy(manifest_p)
-        )
+        # A model adapter cannot relax the completion contract.  In
+        # particular, deterministic models are used to falsify admission and
+        # must be subject to the same patch-and-verification evidence gate as
+        # a hosted model.
+        completion_policy = self._pack_completion_policy(manifest_p)
         exec_result = Runtime.execute_profiled(
             manifest_p,
             task,
@@ -432,10 +433,7 @@ class ApplicationService:
         else:
             selected_model = model
         manifest_p = self._manifest_path_for_resume(events, profile_id)
-        completion_policy = (
-            None if type(selected_model).__name__ in {"FakeModel", "ScriptedModel"}
-            else self._pack_completion_policy(manifest_p)
-        )
+        completion_policy = self._pack_completion_policy(manifest_p)
         exec_result = Runtime.execute_profiled(
             manifest_p, task, profile_id=profile_id, model=selected_model,
             store_path=str(resolved_state_dir / "events.sqlite3"),
@@ -509,7 +507,13 @@ class ApplicationService:
         state = fold_task_state(list(events))
         started = next((e.payload for e in events if e.payload.get("kind") == "EpisodeStarted"), {})
         terminal_event = next((e.payload for e in reversed(events) if e.payload.get("kind") in terminal_kinds), {})
-        status_value = "completed" if has_terminal else ("running" if count > 0 else "empty")
+        # Terminality is not success.  Project the terminal outcome so an
+        # admission rejection (for example, a finish without verification)
+        # cannot be turned back into a completed status by a later query.
+        terminal_outcome = str(terminal_event.get("outcome") or "")
+        status_value = terminal_outcome if has_terminal and terminal_outcome else (
+            "failed" if has_terminal else ("running" if count > 0 else "empty")
+        )
         missing = tuple(name for name, value in (
             ("taskDigest", started.get("taskDigest")),
             ("compositionDigest", started.get("compositionDigest")),
@@ -527,7 +531,7 @@ class ApplicationService:
             episode_id=next((e.episode_id for e in events if e.episode_id), None),
             task_digest=started.get("taskDigest"),
             composition_digest=started.get("compositionDigest"),
-            terminal_state=terminal_event.get("outcome") if has_terminal else None,
+            terminal_state=terminal_outcome or None,
             next_action=state.next_action,
             todo_state=tuple(item.to_dict() for item in state.todo_items),
             verification_identity=state.last_verification or None,

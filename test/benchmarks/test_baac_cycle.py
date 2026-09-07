@@ -72,6 +72,7 @@ sys.exit(0)
             preset="vg-1-forge",
             mode="lam",
             budget_config=BudgetCapConfig(max_turns=3, max_cost_usd=0.05),
+            run_dir=Path(self.temp_dir) / "runs" / "test-run",
         )
         res = runner.run_challenge(self.challenge_dir)
 

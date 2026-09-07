@@ -25,6 +25,12 @@ import tempfile
 import unittest
 from pathlib import Path
 
+# MS-META falsifier WITHDRAWN (Wave 2.5): the `lab/` research package was
+# removed from the tree, so this falsifier's subject no longer exists. The
+# obligation is withdrawn, not silently deleted -- restore this module if
+# `lab/` is ever reinstated.
+raise unittest.SkipTest("lab/ research package withdrawn; MS-META falsifier retired")
+
 from lab.m65_study import DegenerateFloorError, aa_noise_floor, run_study
 from vanguard.packages.adapters.models.lam import LamModelAdapter
 from vanguard.packages.domain.ledger.progress import ConfidenceRecord

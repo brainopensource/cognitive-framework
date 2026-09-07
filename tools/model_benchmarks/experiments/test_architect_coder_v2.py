@@ -1,10 +1,12 @@
 import json
+import os
+from pathlib import Path
 import subprocess
 import time
 import urllib.request
 
-LLAMA_SERVER = "/home/rock-dev/.local/bin/llama-server"
-CODER_V2_PATH = "/home/rock-dev/Models/DeepSeek-Coder-V2-Lite-Instruct-Q4_K_M.gguf"
+LLAMA_SERVER = os.environ.get("LLAMA_SERVER", str(Path.home() / ".local" / "bin" / "llama-server"))
+CODER_V2_PATH = os.environ.get("CODER_V2_PATH", str(Path.home() / "Models" / "DeepSeek-Coder-V2-Lite-Instruct-Q4_K_M.gguf"))
 HEALTH_URL = "http://127.0.0.1:8080/health"
 ENDPOINT = "http://127.0.0.1:8080/v1/chat/completions"
 

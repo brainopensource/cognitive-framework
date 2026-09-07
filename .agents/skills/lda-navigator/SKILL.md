@@ -77,8 +77,8 @@ Step 6: uv run lda drift --json (Verify zero doc drift or orphan contracts)
   uv run lda resolve "explanation agent"
   ```
   In <1 second, LDA uses graph degree and architectural weighting to return the exact symbols:
-  - [`vanguard/packages/runtime/explain.py::Explanation`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/runtime/explain.py#L31) and [`explain_artifact`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/runtime/explain.py#L54) (normative audit engine for `vg why <artifact>`).
-  - [`vanguard/packages/domain/ledger/agent_view.py::AgentView`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/domain/ledger/agent_view.py#L31) (canonical ledger state projection).
+  - [`vanguard/packages/runtime/explain.py::Explanation`](../../../vanguard/packages/runtime/explain.py#L31) and [`explain_artifact`](../../../vanguard/packages/runtime/explain.py#L54) (normative audit engine for `vg why <artifact>`).
+  - [`vanguard/packages/domain/ledger/agent_view.py::AgentView`](../../../vanguard/packages/domain/ledger/agent_view.py#L31) (canonical ledger state projection).
   To inspect the implementation within a token budget:
   ```bash
   uv run lda context "explain artifact" --budget 2500

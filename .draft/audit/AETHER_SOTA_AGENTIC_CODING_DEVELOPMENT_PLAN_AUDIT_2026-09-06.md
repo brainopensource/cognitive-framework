@@ -5,24 +5,25 @@ authority: non-canonical
 canonical_for: []
 status: historical-reference
 owner: repository-governance
-version: "1.0.0"
+version: "1.1.0"
 last_verified: 2026-09-06
 subject_head: "dfb0bb64fc82398b9a05f1e3457f4f45babfcbca"
 subject_branch: main
-evidence_boundary: current-source-plus-reproduced-local-gates
+report_revision_head: "2a5fb1ff78b5f7987db547b1ff86b297aad175c1"
+evidence_boundary: audited-source-plus-reproduced-local-gates
 ---
 
 # AETHER SOTA Agentic Coding Architecture and Development Plan Audit
 
 ## Abstract
 
-This auxiliary report evaluates whether AETHER/Vanguard's architecture, execution runway, coding-agent product, capability system, verification program, and performance claims are aligned with the state of the art in agentic software engineering. It also gives a concrete implementation order for moving from a sophisticated mechanism-rich prototype to an empirically qualified coding-agent framework.
+This auxiliary report evaluates AETHER/Vanguard's architecture, execution runway, coding-agent product, capability system, verification program, and performance claims against modern agentic-software practice. It then gives a dependency-ordered path from mechanism-rich prototype to empirically qualified coding-agent framework.
 
-The central conclusion is deliberately two-sided. AETHER's production substrate contains unusually strong ideas: a small capability-aware kernel, complete mediation of effects, monotonic budget attenuation, event-derived state, durable continuation, explicit context layers, exterior evaluation, exact-subject evidence, and a refusal to equate mechanism presence with accepted capability. Those choices agree with classical security engineering, ports-and-adapters architecture, event sourcing, test-driven development, supply-chain provenance, and current guidance from organizations building frontier coding agents.
+The conclusion is two-sided. AETHER's small capability-aware kernel, mediated effects, monotonic budget attenuation, event-derived state, durable continuation, exterior evaluation, and exact-subject evidence form a strong architecture. These choices agree with classical security engineering, ports-and-adapters, event sourcing, TDD, provenance standards, and current frontier-agent engineering guidance.
 
-However, the current repository cannot yet support a claim that the coding agent or universal capability layer is state of the art in delivered performance. At the audited commit, five dependency-boundary violations are reproducible; four related Python product tests fail; three TypeScript CLI test files fail; the documentation metadata gate fails; `aether code --help` invokes execution and returns an `instrument_error`; the LDA health commands disagree about index freshness; no accepted live L0 or L2 control disposition exists; and the tools-side autofix proficiency bypasses the production transaction, capability, sandbox, ledger, and admission mechanisms it is documented as exemplifying.
+At the audited commit, however, delivered SOTA performance is unproved: five boundary violations were reproducible, four related Python product tests and three TypeScript CLI test files failed, the documentation metadata gate failed, command help invoked execution, LDA health surfaces disagreed, no accepted live L0 or L2 control disposition existed, and the tools-side autofix proficiency bypassed the production trust spine it was described as exemplifying.
 
-The correct next move is therefore not more orchestration, more roles, or more speculative intelligence. It is to close the public product's truth boundary, restore all gates, produce exact-subject live evidence, and then add repository intelligence and capability composition behind stable ports. In Popperian terms, the project has many hypotheses and increasingly good falsifiers; its remaining work is to expose the central product claims to those falsifiers without changing the measured subject.
+The next move is to restore the public product's truth boundary and repository gates, then obtain exact-subject live evidence before adding repository intelligence, capability composition, or multi-agent treatments. The project already has substantial mechanism; it now needs evidence that binds the shipped path, measured subject, and claimed outcome.
 
 This file is non-canonical. It does not authorize implementation, alter milestone status, or supersede `VISION.md`, `AGENTS.md`, or the five execution-runway files. It records an audit and a proposed implementation plan for investigation.
 
@@ -36,7 +37,7 @@ The investigation asks five questions:
 
 1. Are `technical.md`, `spec.md`, `tasks.md`, `backlog.md`, and `milestones.md` mutually aligned and usable as an execution control plane?
 2. Does the as-built framework embody sound architecture for general AI agents, not merely one coding workflow?
-3. Is the Coding Max product path currently truthful, secure, recoverable, and competitive?
+3. Was the Coding Max product path at the audited commit truthful, secure, recoverable, and competitive?
 4. Is the Skills → Techniques → Proficiencies → Mastery capability model production-grade or still experimental?
 5. What should be implemented next, in what dependency order, and with which proof obligations?
 
@@ -50,7 +51,7 @@ branch: main
 date inspected: 2026-09-06
 ```
 
-The worktree was initially clean. Some validation commands subsequently produced changes in `tools/002_LLM_API_MOCK/lam.sqlite` and untracked BAAC run directories. Those outputs were preserved and were not used as qualifying evidence. This distinction matters: a source commit, a dirty workspace, and a generated run artifact are different subjects.
+The worktree was initially clean. Some validation commands subsequently changed `tools/002_LLM_API_MOCK/lam.sqlite` and created BAAC run directories; those outputs were excluded from qualifying evidence. This report was later committed at `2a5fb1ff`. Its findings remain scoped to the audited source commit above and must be re-run before being asserted about a later HEAD.
 
 ### 1.3 Epistemic classes
 
@@ -58,7 +59,7 @@ This report uses the following evidence classes:
 
 | Class | Meaning |
 |---|---|
-| `FACT` | Directly observed in current source, Git identity, or command output. |
+| `FACT` | Directly observed in the audited source, Git identity, or command output. |
 | `REPRODUCED` | A command was executed during the audit and produced the stated result. |
 | `INFERENCE` | A conclusion logically derived from facts but not itself an executed observation. |
 | `PROPOSAL` | Recommended future work; not a statement about current code. |
@@ -102,14 +103,14 @@ The following results were directly reproduced:
 | Falsifier-ID checker | PASS |
 | `npm run typecheck` | PASS across all workspaces |
 | `npm --workspace @vanguard/cli test` | FAIL; `transport`, `wave2`, and `wave4` test files |
-| Documentation metadata checker | FAIL; twelve research-document violations |
-| `aether code --help` equivalent | exits after emitting `[complete] instrument_error, 0 turns, unknown` |
+| Documentation metadata checker | FAIL; twelve violations under `docs/research/`; this did not by itself prove drift in the five execution files |
+| `node vanguard/clients/cli/dist/src/main.js code --help` | emitted `[complete] instrument_error, 0 turns, unknown`; this tested the built CLI entry point, not an installed `aether` wrapper |
 | Capability catalog | 10 registered entries, 4 executable runners |
 | Capability prompt prefix | 2,180/4,096 characters |
 | LDA `doctor` | reports healthy and current workspace HEAD |
 | LDA `identity` | reports index bound to `622131da`, therefore stale versus `dfb0bb64` |
 
-The full `just verify` gate was not and could not be claimed successful because earlier constituent gates already failed. This is an important negative result, not a procedural inconvenience.
+The full `just verify` gate was not claimed successful because constituent gates had already failed. The TypeScript result above identifies failing files, not root causes; those require targeted diagnosis.
 
 ---
 
@@ -139,7 +140,7 @@ $$
 E_{runtime\rightarrow apps}=\varnothing.
 $$
 
-The current import from `runtime/cli.py` to `apps/coding_max/facade.py` is not merely a style defect. It reverses the driver relationship and makes the runtime aware of one product client. Similarly, a benchmark that imports a private runtime helper does not measure the public port; it measures an implementation detail.
+The audited import from `runtime/cli.py` to `apps/coding_max/facade.py` is not merely a style defect. It reverses the driver relationship and makes the runtime aware of one product client. Similarly, a benchmark that imports a private runtime helper does not measure the public port; it measures an implementation detail.
 
 Cockburn also warns that architectural promises decay without a detection mechanism. AETHER's boundary linter is therefore not ancillary tooling; it is the executable form of the architecture. A boundary exception added only to legalize current code would destroy the falsifier and preserve the defect.
 
@@ -271,7 +272,7 @@ The SLSA provenance model similarly distinguishes subject, builder identity, bui
 
 ### 2.7 Statistical evaluation: point estimates are not capability
 
-If an agent solves $x$ of $n$ independent frozen tasks, the naïve pass-rate estimate is:
+If an agent solves $x$ of $n$ independent frozen trials, the naïve pass-rate estimate is:
 
 $$
 \hat p=\frac{x}{n}.
@@ -293,15 +294,15 @@ $$
 \operatorname{qualify}\iff LB_{Wilson}(x,n,0.95)\ge \tau.
 $$
 
-However, statistical calculation cannot repair invalid task membership, duplicated fixtures, missing trials, subject drift, or synthetic success labels. Measurement validity precedes estimation.
+However, repository tasks often share code, fixtures, or failure modes, so independence must not be assumed automatically. Wilson is appropriate for a clearly defined binomial pass@1 gate; clustered tasks or repeated attempts require task-level bootstrap, hierarchical analysis, or another dependence-aware design. No interval can repair invalid membership, duplicated fixtures, missing trials, subject drift, or synthetic labels.
 
-Paired harness comparisons should run both conditions on the same task identities and seeds where possible. McNemar's statistic operates on discordant paired outcomes:
+Paired harness comparisons should run both conditions on the same task identities and seeds where possible. For sufficient discordant counts, McNemar's continuity-corrected statistic is:
 
 $$
 \chi^2 = \frac{(|b-c|-1)^2}{b+c},
 $$
 
-where $b$ counts control-only successes and $c$ treatment-only successes. Missing and `not_run` outcomes require explicit policy; silently dropping asymmetric provider failures biases the comparison.
+where $b$ counts control-only successes and $c$ treatment-only successes. With few discordant pairs, use the exact binomial test. Missing and `not_run` outcomes require a preregistered policy; silently dropping asymmetric provider failures biases the comparison.
 
 ### 2.8 Modern agent-harness theory
 
@@ -319,123 +320,40 @@ O'Reilly's recent catalog frames the same production problem around tools, modul
 
 ---
 
-## 3. Formal model of AETHER as an agentic computation substrate
+## 3. Integrated system model and acceptance invariants
 
-### 3.1 Agent-environment loop
-
-Model the harness as a constrained partially observable controlled process:
+The useful mathematics can be reduced to three contracts. First, a model proposes an operation, but only the mediated runtime may change the environment:
 
 $$
-\mathcal{A}=
-\langle
-S,O,U,T,Z,R,C,B,E,V
-\rangle,
+u_t \xrightarrow{classify} \hat u_t
+\xrightarrow{authorize(C_t)} \tilde u_t
+\xrightarrow{reserve(B_t)} \bar u_t
+\xrightarrow{effect} (S_{t+1},r_t).
 $$
 
-where:
-
-- $S$ is environment and durable task state;
-- $O$ is the observation space;
-- $U$ is the set of model-proposed operations;
-- $T(S,u)$ is the mediated transition function;
-- $Z(S)$ produces bounded context observations;
-- $R$ is a utility or research reward, not runtime authority;
-- $C$ is the active capability set;
-- $B$ is the multidimensional budget;
-- $E$ is the append-only causal event stream;
-- $V$ is exterior verification.
-
-The model proposes $u_t$, but the environment transition occurs only after classification, authorization, budget reservation, execution, and settlement:
+For every child and later turn, authority and budget are monotone:
 
 $$
-u_t
-\xrightarrow{classify}
-\hat u_t
-\xrightarrow{authorize(C_t)}
-\tilde u_t
-\xrightarrow{reserve(B_t)}
-\bar u_t
-\xrightarrow{effect}
-(S_{t+1},r_t).
+C_{child}\subseteq C_{parent}, \qquad B_{t+1}\preceq B_t.
 $$
 
-This is more precise than saying an agent “has tools.” It distinguishes requested behavior from authorized and observed effects.
-
-### 3.2 Two-axis settlement theorem
-
-Let terminal state $T_r$ answer why runtime stopped, and task disposition $D_r$ answer whether an exterior acceptance predicate holds:
+Second, runtime terminal state $T_r$ and externally graded disposition $D_r$ are independent:
 
 $$
-T_r\in\{completed,abstained,abandoned,budget\_exhausted,cancelled,instrument\_error\}
+T_r\in\{completed,abstained,abandoned,budget\_exhausted,cancelled,instrument\_error\},
 $$
 
 $$
 D_r\in\{passed,failed,undeterminable,not\_run\}.
 $$
 
-In general there is no total function $f$ such that $D_r=f(T_r)$. Counterexamples prove independence:
-
-- A correct patch may pass exterior tests even if the model fails to emit the protocol's final `finish` action.
-- A model may emit `finish` without reading, mutating, or testing anything.
-- A provider failure yields `not_run`, not task failure.
-- An evaluator outage yields `undeterminable`, not model failure.
-
-Therefore:
+A `finish` proposal does not prove task success, and a provider or evaluator outage is not task failure. Publishing success therefore requires a passing exterior verdict bound to the postimage:
 
 $$
-\operatorname{publishSuccess}(r)
-\Rightarrow
-D_r=passed
-\land
-V_r.valid
-\land
-V_r.subject=H(S_{post}).
+publishSuccess(r)\Rightarrow D_r=passed\land V_r.valid\land V_r.subject=H(S_{post}).
 $$
 
-Runtime terminal `completed` is neither necessary nor sufficient for exterior success.
-
-### 3.3 Context as constrained submodular selection
-
-Let candidate context items be $X=\{x_1,\ldots,x_m\}$, each with token cost $c_i$, relevance $q_i$, redundancy $\rho_{ij}$, and provenance confidence $p_i$. Context construction can be expressed as:
-
-$$
-\max_{Y\subseteq X}
-\left[
-\sum_{i\in Y}p_iq_i
--\lambda\sum_{i,j\in Y}\rho_{ij}
-\right]
-\quad
-\text{s.t.}
-\sum_{i\in Y}c_i\le B_C.
-$$
-
-This explains why dumping a 5,767-line handbook into every prompt is not state of the art even if the handbook is accurate. High-signal routing, stable prefix layers, just-in-time observation, explicit omissions, and digest-addressable full artifacts are better.
-
-### 3.4 Performance objective
-
-A coding harness is a multi-objective system. One useful score is:
-
-$$
-U(\pi)=
-w_p P_{accepted}
--w_f P_{false\ completion}
--w_c\mathbb{E}[cost]
--w_l\mathbb{E}[latency]
--w_t\mathbb{E}[tokens]
--w_r\mathbb{E}[risk]
--w_h\mathbb{E}[human\ intervention].
-$$
-
-Subject to hard constraints:
-
-$$
-P_{false\ completion}=0,
-\quad C_{child}\subseteq C_{parent},
-\quad B_{t+1}\preceq B_t,
-\quad \text{dirty qualifying subject}=false.
-$$
-
-This makes clear why raw tokens per second or one successful micro-fix cannot establish SOTA status. A faster harness that corrupts files or reports false completion has lower utility.
+Third, optimization is multi-objective. Accepted success must be considered with false completion, cost, latency, tokens, risk, and human intervention. False completion and subject ambiguity are hard vetoes, not quantities to trade for throughput. These contracts capture the report's remaining equations without creating a second architectural specification.
 
 ---
 
@@ -445,7 +363,7 @@ This makes clear why raw tokens per second or one successful micro-fix cannot es
 
 #### Small trusted kernel
 
-The kernel budget is enforced and currently passes at 1,386 logical lines against a ceiling of 1,438. The architectural value is economy of mechanism: the code that classifies and authorizes effects remains small enough for concentrated review. TCB headroom is a safety margin, not an invitation to move coding intelligence into the kernel.
+At the audited commit, the kernel budget passed at 1,386 logical lines against a ceiling of 1,438. The architectural value is economy of mechanism: the code that classifies and authorizes effects remains small enough for concentrated review. TCB headroom is a safety margin, not an invitation to move coding intelligence into the kernel.
 
 #### One execution authority
 
@@ -483,7 +401,7 @@ These are related: public clients and benchmarks lack an adequate public product
 
 #### False completion projection
 
-`ApplicationService` and `entrypoint` currently map both `completed` and `abstained` terminal states to the string `completed`. That projection erases the difference the admission system was built to preserve. A patchless fake `finish` can consequently surface as completed even when the strict completion gate refused it.
+At the audited commit, `ApplicationService` and `entrypoint` mapped both `completed` and `abstained` terminal states to the string `completed`. That projection erased the difference the admission system was built to preserve. A patchless fake `finish` could consequently surface as completed even when the strict completion gate refused it.
 
 The repair principle is:
 
@@ -513,11 +431,11 @@ The five-file partition is sensible:
 - `backlog.md`: package inventory;
 - `technical.md`: implementation handbook.
 
-But current operational alignment is only partial.
+At the audited commit, operational alignment was only partial.
 
 #### Stale checkpoint identity
 
-`tasks.md` and `milestones.md` describe a dirty pre-merge tree. Their `lock_head` values differ from each other and from current HEAD. A living work board cannot be high-confidence while its opening state declaration names a different subject.
+`tasks.md` and `milestones.md` described a dirty pre-merge tree. Their `lock_head` values differed from each other and from the audited HEAD. A living work board cannot be high-confidence while its opening state declaration names a different subject.
 
 #### Competing critical paths
 
@@ -525,7 +443,7 @@ README/backlog emphasize `REL-01R → REL-02R → M-8`, while tasks/milestones e
 
 #### Status contradiction
 
-CMX-05 is labeled `DONE (hermetic)` while its current facade tests fail. “Done at historical subject” may be true, but the row does not say that. Current status should be `REGRESSED` or `REVIEWING` until the present subject is green.
+CMX-05 was labeled `DONE (hermetic)` while its facade falsifiers failed. “Done at historical subject” may be true, but the row did not say that. A current board should use `REGRESSED` or `REVIEWING` until its present subject is green.
 
 #### Technical handbook entropy
 
@@ -543,7 +461,7 @@ Historical evidence should remain in existing authorized historical sections or 
 
 #### Backend reference drift
 
-The backend references still describe Ollama, an `ollama.py` adapter, and `OLLAMA_HOST`; omit the current code CLI grammar; and show a fictitious `packs/code/manifest.json` Python import layout. These references are especially dangerous because they look like exact operational documentation.
+The audited backend references described Ollama, an `ollama.py` adapter, and `OLLAMA_HOST`; omitted the code CLI grammar; and showed a fictitious `packs/code/manifest.json` Python import layout. These references were especially dangerous because they looked like exact operational documentation.
 
 #### Authority error in the older audit
 
@@ -614,7 +532,7 @@ A capability manifest needs at least:
 
 ### 5.4 Autofix is outside the production trust spine
 
-The current autofix runner directly opens and rewrites the target file. It backs up one file in memory, calls local scripts via subprocess, ignores the exit status of LDA reindexing, and restores only that one file after failure. The falsifier layer contains a `shell=True` fallback. Model and binary paths are hard-coded to one developer machine.
+The audited autofix runner directly opened and rewrote the target file. It backed up one file in memory, called local scripts via subprocess, ignored the exit status of LDA reindexing, and restored only that file after failure. The falsifier layer contained a `shell=True` fallback, and model and binary paths were hard-coded to one developer machine.
 
 This creates several unproven conditions:
 
@@ -642,7 +560,7 @@ Strategy A provides architectural reuse but is more work. Strategy B is honest a
 
 ### 5.6 Progressive disclosure instead of a global catalog dump
 
-The current prefix fits the 4,096-character ceiling, but the scaling model is linear:
+The audited prefix fit the 4,096-character ceiling, but the scaling model is linear:
 
 $$
 L_{prefix}=\sum_{i=1}^{N}(L_{name_i}+L_{description_i}+L_{format}).
@@ -718,7 +636,7 @@ AETHER should use a portfolio:
 
 ### 6.4 Trial design
 
-Agent outputs vary. A task is not a trial, and a single trial is not a stable estimate. For each task/model/preset cell, either run multiple trials or explicitly define pass@1 as the product contract. Random seeds, sampling, model version, provider fingerprint, and retry policy must be fixed or recorded.
+Agent outputs vary. Define the estimand before running: product pass@1, repeated-attempt reliability, or best-of-$k$ are different claims. Record task, seed where controllable, sampling, model version, provider fingerprint, and retry policy. Repeated attempts on one task increase precision about that task; they do not replace breadth across independent repositories and defect classes.
 
 Treatments must vary one declared dimension where causal attribution is claimed:
 
@@ -747,309 +665,80 @@ NIST's AI RMF emphasizes incorporating trustworthiness into design, development,
 
 ## 7. Recommended implementation program
 
-### Phase 0 — establish one current truth surface
+The program below is intentionally shorter than the earlier phase list. Each work package has one outcome, concrete changes, and a gate; the gates also serve as the required falsifier architecture.
 
-**Objective:** make the next code change refer to one current source subject and one critical path.
+### WP-0 — rebaseline the execution plane
 
-Actions:
+Before editing production code, run the canonical gates on current HEAD and record the exact subject. Then synchronize the five execution files so they name one critical path and current statuses. Historical drafts remain evidence inputs, never authority. Explicitly map `REL-01R`/`REL-02R` to task owners, and mark any historically completed item as regressed when its current falsifier fails.
 
-1. Preserve historical artifacts, but update the current checkpoint in `tasks.md` to `dfb0bb64` plus the actual dirty-state caveat at execution time.
-2. Remove mutable implementation-session prose from the stable milestone table or label it as a historical snapshot.
-3. Add explicit task mappings for `REL-01R` and `REL-02R`, or state that existing T-IDs implement them.
-4. Downgrade CMX-05 from `DONE (hermetic)` while its current falsifiers fail.
-5. State one critical path shared by M-8 and MS-CONTROL.
-6. Keep `.draft/todo` non-authorizing; promote adopted decisions into canonical files.
+**Gate:** one clean subject is named consistently; every active item resolves an owner, `requires:` edges, and a named falsifier. This is a documentation/control-plane correction, not task acceptance.
 
-Exit predicate:
+### WP-1 — restore the public truth boundary
 
-$$
-\exists!\;P_{critical}
-\land
-\forall w\in WorkItems,\;owner(w),requires(w),falsifier(w)\text{ resolve}.
-$$
+Repair the five related boundary violations and the terminal projection together:
 
-### Phase 1 — repair the five boundaries
+1. Move Coding Max CLI orchestration out of `runtime.cli`, or make it call only generic public application operations. Runtime must not import `apps`.
+2. Export one stable product execution and manifest-identity surface used by CLI, API, and benchmarks; remove benchmark access to `entrypoint._manifest` and other private symbols.
+3. Expose value-only evidence receipts through an allowed public package, or keep benchmark vocabulary local and translate from public receipts. Do not duplicate digest algorithms.
+4. Preserve terminal state and exterior disposition as separate public fields. Remove `abstained → completed` coercion; a patchless `finish` must remain refused.
+5. Make RF-90 fake tapes perform an admissible sequence, or assert the typed non-success result. Never weaken completion law merely to satisfy a smoke test.
 
-**Objective:** make public clients use public ports while preserving one runtime authority.
+**Gate:** the boundary checker passes without new exceptions; the four reproduced Python failures are green; no adapter imports kernel/agency; no benchmark imports a private runtime name; and the following matrix holds:
 
-#### Runtime CLI to app inversion
-
-Preferred repair: move Coding Max CLI-specific orchestration to the application/client layer, or have `runtime.cli` invoke only generic `ApplicationService` operations with resolved public manifest/preset inputs. It must not import the app facade.
-
-Falsifiers:
-
-- AST/import scan proves no `runtime → apps` edge;
-- CLI/API results serialize from the same result value objects;
-- runtime contains no Coding Max provider logic;
-- invalid preset fails before any durable effect.
-
-#### Benchmark to private runtime imports
-
-Export a public product execution function and manifest identity query through the repository-authorized public runtime surface. Remove `_manifest` consumption from benchmarks. The public call must be the same call used by the CLI.
-
-Falsifiers:
-
-- benchmark imports only allowed public packages;
-- runner and CLI bind identical manifest digest and preset identity;
-- a test monkeypatching the public function observes both paths;
-- private symbol names are absent from benchmark imports.
-
-#### Benchmark digest and disposition imports
-
-Three options should be evaluated:
-
-1. expose value-only evidence types through an allowed public port package;
-2. place benchmark-only row vocabulary entirely in `benchmarks`, translating from product receipts;
-3. export a public receipt schema from runtime root.
-
-The preferred design is a value-only public evidence contract with no domain object handles. Avoid duplicating digest algorithms; use a stable public digest operation or receive digests from runtime receipts.
-
-Exit predicate: `check_boundaries.py` passes without new exceptions.
-
-### Phase 2 — restore two-axis completion truth
-
-**Objective:** ensure public outcomes do not fabricate completion.
-
-Actions:
-
-1. Remove `abstained → completed` coercion in `ApplicationService` and `entrypoint`.
-2. Audit all result projections for similar `terminal in {completed, abstained}` mappings.
-3. Decide the public vocabulary: terminal status and exterior disposition should be separate fields.
-4. Make `completed` require the product completion gate, not merely a terminal enum.
-5. Rewrite RF-90 fake tapes to perform an admissible action sequence, or assert a non-success terminal.
-6. Preserve strict rejection of patchless fake `finish`.
-
-Property-based matrix:
-
-| Terminal | Exterior disposition | Public success? |
+| Terminal | Disposition | Public success claim |
 |---|---|---|
-| completed | passed | yes |
-| completed | failed | no |
-| completed | undeterminable | no claim |
-| abstained | passed | task may be solved, runtime did not complete |
-| abandoned | passed | task solved externally; terminal remains abandoned |
+| completed | passed | allowed |
+| completed | failed | forbidden |
+| abstained/abandoned | passed | report both axes; do not rewrite terminal |
 | instrument_error | not_run | no capability score |
 
-Exit predicate:
+### WP-2 — repair the operator surface and all static gates
 
-$$
-false\_completion=0
-$$
+Parse global and command-local help before prompt construction or runtime composition. `--help` and `-h` must exit zero without model calls, ledger frames, or workspace effects; unknown, ambiguous, or value-missing flags must fail before execution. Reproduce and diagnose the `transport`, `wave2`, and `wave4` test-file failures rather than inferring their causes from file-level output.
 
-over the complete hermetic adversarial suite, with all four currently failing Python tests green.
+In the same gate-restoration package, update existing canonical references: remove active Ollama guidance in favor of llama.cpp/llama-server, replace the fictitious manifest example, document the real code-command grammar and public execution surface, and repair metadata violations in place. Deduplicate only the active recipes in `technical.md`; Git history is the archive. Unify LDA `doctor` and `identity` behind one freshness predicate, then regenerate knowledge artifacts after source and canonical documentation are correct.
 
-### Phase 3 — make the CLI a truthful operator surface
+**Gate:** built CLI help is effect-free; TypeScript and relevant Python suites pass; every `just verify` recipe constituent exits zero on the same clean commit; LDA surfaces identify that commit. The reported `-m` collision was not independently reproduced in this audit, so it must not be treated as a defect until a failing parser test demonstrates it.
 
-**Objective:** commands that inspect or request help must never execute an agent.
+### WP-3 — obtain live instrument and release evidence
 
-Actions:
+Run the frozen L0 triad through the same public entrypoint as the shipped code command. Each attempt must bind task, source, workspace preimage, model/provider, policy, oracle, patch, postimage, terminal, disposition, cost, and missingness. The exterior evaluator must remain outside agent authority. L0 demonstrates instrument viability only; three microtasks do not establish general capability.
 
-1. Parse global and command-local `--help`/`-h` before default prompt construction.
-2. Return exit code zero and write usage to the appropriate stream.
-3. Reject missing values for value flags rather than silently using defaults.
-4. Define one meaning for each short flag within a command scope; an unsupported losing spelling errors.
-5. Add the named TypeScript test file for help and flag semantics.
-6. Diagnose and repair the `transport`, `wave2`, and `wave4` CLI test-file failures.
-7. Document the actual `aether code` grammar in the existing backend commands reference.
+Then execute `REL-01R`, audit successor membership, freeze `REL-02R`, preregister the held-out comparison, and run control/treatment on the same runtime subject. A valid negative or undeterminable result closes an experiment record without accepting its lift predicate.
 
-Exit predicate:
+**Gate:** every passing row resolves its patch, oracle, and postimage digests; live and replay rows never share a denominator; provider outage maps to `not_run`; dirty or mismatched subjects cannot qualify; all aggregates expose numerator, denominator, and missingness.
 
-```text
-aether --help             -> 0, no runtime frame
-aether code --help        -> 0, no runtime frame
-aether code -h            -> 0, no runtime frame
-ambiguous/unknown option  -> nonzero, explanatory error, no runtime frame
-```
+### WP-4 — qualify the single-agent Coding Max control
 
-### Phase 4 — restore repository gates and documentation truth
+Complete T-51 corpus freeze and T-52 statistical/cost protocol, freeze T-26 on a clean exact SHA, then run T-27 with `vg-code-balanced` as the single-worker control. Preserve model, server, prompt, manifest, tool schema, policy, retry, and task identities. Apply the specified $n\ge30$, Wilson lower-bound $\ge0.40$, and zero-false-completion gate only if its binomial estimand and independence assumptions are defensible; otherwise retain the policy threshold but use a preregistered dependence-aware interval.
 
-**Objective:** reach a clean, reproducible candidate before live measurement.
+**Gate:** accepted control evidence exists on an exact clean subject, false completion is zero, missingness is explicit, and the statistical method matches the sampling unit. The threshold is an internal release predicate, not proof of human equivalence or industry SOTA.
 
-Actions:
+### WP-5 — converge intelligence and capability execution
 
-1. Fix documentation metadata failures in place without creating new canonical documents.
-2. Remove active Ollama instructions and replace them with llama.cpp/llama-server configuration.
-3. Replace the fictitious manifest example with a schema-valid excerpt matching current pack composition.
-4. Document the current code command and public product execution surface.
-5. Deduplicate the active portion of `technical.md`; retain one recipe per open task.
-6. Make LDA doctor and identity share one freshness calculation and one subject revision.
-7. Run the exact `just check` and `just verify` recipe bodies.
-8. Regenerate knowledge artifacts only after canonical documentation is correct.
-
-Exit predicate: every `just verify` constituent exits zero on a clean tree, and generated indexes identify that same HEAD.
-
-### Phase 5 — live L0 and empirical-runner repair
-
-**Objective:** demonstrate that the public product can act, mutate, verify, finish, and retain evidence.
-
-For each P0 task:
-
-1. materialize a fresh isolated workspace;
-2. bind task and oracle digests;
-3. run through the same public entrypoint as `aether code`;
-4. record model/provider identity and sampling;
-5. record every tool proposal, accepted effect, and receipt;
-6. retain patch and postimage digests;
-7. execute the exterior oracle outside the agent's authority;
-8. emit both terminal and disposition axes;
-9. preserve failures and missingness;
-10. confirm the source subject remained clean.
-
-The L0 claim is limited to instrument viability. Three successes do not establish general coding performance.
-
-### Phase 6 — M-8 successor evidence
-
-**Objective:** close the release-blocking empirical integrity path before product expansion.
-
-Actions:
-
-1. complete `REL-01R` over the repaired live executor;
-2. audit every successor task for unique content, workspace, oracle, split, and base revision;
-3. freeze `REL-02R` only after those identities resolve;
-4. preregister the held-out memory/learning comparison;
-5. execute control and treatment through the same runtime subject;
-6. report positive, negative, invalid, or undeterminable results honestly;
-7. require independent acceptance over the exact bundle digest.
-
-A negative valid result may close the experiment without accepting the lift predicate. This prevents endless tuning from rewriting the question after observing outcomes.
-
-### Phase 7 — single-agent Coding Max control
-
-**Objective:** establish a trustworthy baseline before adding specialists.
-
-Actions:
-
-1. complete T-51 multi-class corpus freeze;
-2. complete T-52 statistical and cost protocol;
-3. freeze T-26 on a clean exact SHA;
-4. run T-27 with `vg-code-balanced` as the single-worker control;
-5. require $n\ge30$, Wilson lower bound $\ge0.40$, and false completion zero;
-6. preserve model, server, prompt, manifest, tool schema, policy, and task identities.
-
-The threshold is an internal qualification criterion, not a claim of human professional equivalence.
-
-### Phase 8 — repository intelligence and change ergonomics
-
-**Objective:** improve localization and editing without creating a second policy engine.
-
-Dependency order:
+After control acceptance, add repository ergonomics in dependency order:
 
 ```text
 T-75 LdaRepoIndex
   → T-76 repo.* observations in L5
-  → T-77 cache breakpoints, CTRF, goal echo
+  → T-77 cache breakpoints / CTRF / goal echo
   → T-78 exact unique-preimage str_replace
   → T-83b caller-aware completion admission
 ```
 
-Key design constraints:
+Index values must be immutable; stale state fails deterministically; fallback is observable; ranking remains outside `IndexPort`; full outputs are digest-addressable; and editing reuses the existing two-phase transaction path. Transaction tests must cover duplicate/missing preimages, failure on file $k$ of $n$, cancellation, syntax failure, byte-for-byte multi-file restoration, and restored index epoch.
 
-- index results are immutable values;
-- stale index fails deterministically;
-- fallback is observable;
-- ranking stays request-local and experimental;
-- L1–L3 remains stable across dynamic observations;
-- full outputs remain digest-addressable;
-- edit operations use the existing 2PC transaction manager;
-- no fuzzy replacement is introduced without separate evidence.
+For capabilities, choose either governed production integration or an explicit experimental-tool label. Production capabilities need namespaced/versioned/content-addressed identity; schemas; declared effects, budgets, dependencies, and rollback class; on-demand instruction loading; kernel-mediated execution; process-tree cancellation; and receipts. Remove direct privileged writes, hard-coded developer paths, and `shell=True` fallback. Test the actual proficiency—including crash and multi-file rollback—not a hand-written approximation.
 
-### Phase 9 — capability convergence
+**Gate:** selection resolves one stable identity; undeclared effects are denied; child authority cannot widen; timeout kills the process tree; failure restores every declared mutable resource; unavailable infrastructure produces typed `not_run`/instrument failure; and capability selection shows measured outcome lift net of token, latency, and risk cost.
 
-**Objective:** turn the capability taxonomy into a governed system.
+### WP-6 — admit treatments only by evidence
 
-Actions:
-
-1. choose production integration or explicit experimental status for each capability;
-2. introduce namespaced, versioned, content-addressed manifests;
-3. declare effects, budgets, inputs, outputs, dependencies, and rollback class;
-4. load full instructions only after selection;
-5. route production execution through kernel-mediated ports;
-6. replace direct file writes with transactional effects;
-7. remove hard-coded developer paths;
-8. remove `shell=True` fallbacks;
-9. propagate cancellation and validate process-tree death;
-10. test the real proficiency, including crash and multi-file rollback;
-11. record capability ID and version in run receipts;
-12. evaluate task-to-capability selection and outcome lift.
-
-### Phase 10 — treatments, specialists, and campaigns
-
-Only after the single-agent baseline is accepted should the project evaluate:
-
-- anti-thrashing state-hash policies;
-- model routing and cascades;
-- test investigator, localizer, reviewer, or architect roles;
-- branch search and test-time compute;
-- durable campaign directors;
-- governed memory and skill promotion.
-
-Each added component creates orchestration cost and new failure edges. The admission rule should be:
-
-$$
-\operatorname{adopt}(t)
-\iff
-\Delta U_t>0
-\land
-\Delta falseCompletion_t=0
-\land
-\Delta securityRisk_t\le0
-\land
-CI(\Delta U_t)\text{ supports the decision}.
-$$
+Only after WP-4 should the default product consider anti-thrashing policies, cascades, specialist roles, branch search, campaign directors, governed memory, or skill promotion. Hold task/evaluator identity constant and vary one declared mechanism when making causal claims. Adopt a treatment only when preregistered evidence supports positive net utility, false completion remains zero, and security risk does not increase. This is the point at which “mastery” becomes a measured policy-selection layer rather than aspirational taxonomy.
 
 ---
 
-## 8. Required falsifier architecture
-
-### 8.1 Boundary properties
-
-- No runtime module imports `apps`.
-- No adapter imports kernel or agency.
-- Benchmarks import only public product/evidence surfaces.
-- No private-name import appears in benchmark runners.
-- Domain and kernel remain free of coding-specific concepts.
-
-### 8.2 Completion properties
-
-- `finish` without mutation and relevant verification cannot become completed.
-- zero executed tests cannot yield passed.
-- stale verification after write is invalid.
-- a test-modifying patch fails tamper policy.
-- an unrelated green test cannot satisfy task relevance.
-- terminal and disposition survive replay independently.
-
-### 8.3 Transaction properties
-
-- failure at file $k$ of $n$ restores every file byte-for-byte;
-- duplicate preimage fails rather than guessing;
-- missing preimage returns a typed mismatch;
-- syntax failure prevents durable flush;
-- cancellation during apply leaves no partial tree;
-- index epoch after rollback matches restored workspace.
-
-### 8.4 Capability properties
-
-- selection resolves one stable capability identity;
-- undeclared effects are denied;
-- child capability sets cannot widen;
-- timeout kills the complete subprocess tree;
-- failure restores every declared mutable resource;
-- unavailable local model returns typed `not_run`/instrument failure;
-- full runner integration, not a simulated helper, is exercised.
-
-### 8.5 Evaluation properties
-
-- task set digest is order-independent and membership-complete;
-- live and replay labels cannot share a denominator;
-- provider outage never becomes task failure;
-- dirty source cannot qualify;
-- report subject equals executed source subject;
-- every PASS resolves patch, oracle, and postimage digests;
-- every aggregate exposes numerator, denominator, and missingness.
-
----
-
-## 9. Risk register
+## 8. Risk register
 
 | Risk | Mechanism | Consequence | Mitigation | Release veto? |
 |---|---|---|---|---|
@@ -1068,66 +757,17 @@ $$
 
 ---
 
-## 10. Architecture decision recommendations
+## 9. Corrections to prior advice and conclusion
 
-### ADR recommendation A — preserve the kernel
+Four corrections are non-negotiable. Do not widen boundary allowlists merely to legalize current imports. Do not mark T-79/T-89/T-92–T-95 accepted from focused mechanism tests. Do not treat `.draft/todo` or any audit as execution authority. Do not call the capability layer production-grade until its real runners satisfy mediated-effects, cancellation, and multi-resource rollback falsifiers. Likewise, an `instrument_error` should never be reclassified simply to make an expected-success test green.
 
-Do not move AST parsing, benchmark semantics, repository ranking, role selection, or task-specific completion rules into the kernel. The kernel should continue to classify, authorize, reserve, mediate, and settle generic effects.
+The architecture is SOTA-aligned in important trust, provenance, continuation, and evaluation dimensions, but Coding Max SOTA performance and production-grade universal capabilities remain unproved. The runway's conceptual order is sound—single-agent control before treatments—but its operational truth was inconsistent at the audited commit. The decisive implementation sequence is WP-0 through WP-4: rebaseline, restore the public truth boundary, recover gates, obtain live evidence, and qualify the single-agent control. WP-5 and WP-6 follow only after that evidence exists.
 
-### ADR recommendation B — public application boundary
-
-Define one stable public application surface used by Python API, TypeScript CLI, benchmarks, and reference agents. Internal entrypoint helpers must not become de facto ports.
-
-### ADR recommendation C — settlement as two public fields
-
-Expose terminal status and task disposition independently in public results. Never overload `outcome` with both concepts. If backward compatibility requires `outcome`, define it as a projection with explicit loss semantics and do not use it for qualification.
-
-### ADR recommendation D — capabilities are declarations plus enforcement
-
-A Markdown capability card is documentation. A production capability is a content-addressed contract whose effects are enforceable by runtime policy. The catalog must distinguish these categories.
-
-### ADR recommendation E — evidence before orchestration
-
-Keep specialists, swarms, adaptive routing, and campaign directors disabled until a frozen single-worker baseline exists and paired evidence demonstrates net benefit. This matches both local risk economics and current frontier-agent guidance.
+The smallest correct next code package is WP-1. It resolves the common cause behind the boundary and false-completion defects without expanding the kernel. After WP-2 is gate-green on one clean subject, execute live L0 and release evidence; do not add cognitive architecture until the shipped path can prove what it did, why it stopped, whether the task passed, what it cost, and which exact source and evaluator support the claim.
 
 ---
 
-## 11. Final assessment
-
-### 11.1 Is the architecture good?
-
-Yes. The core substrate is coherent, security-conscious, and more rigorous than many agent frameworks. The combination of complete effect mediation, bounded authority, event-derived state, exact-subject provenance, exterior evaluation, and context economics is a credible foundation for general agents.
-
-### 11.2 Is it SOTA today?
-
-Architecturally SOTA-aligned: **yes, in several dimensions**.
-
-Empirically SOTA as a coding product: **not demonstrated**.
-
-Production-grade universal capabilities: **not yet**.
-
-High performance: **unknown**, because accepted multi-task live evidence is absent and current product gates fail.
-
-### 11.3 Is the execution runway aligned?
-
-The conceptual dependencies are mostly sound, particularly the refusal to enable multi-agent treatments before single-agent control. Operationally, the runway is not fully aligned because identities and statuses are stale, M-8 and MS-CONTROL present competing critical paths, and the handbook contains excessive historical duplication.
-
-### 11.4 Decisive next step
-
-The next implementation package should be one bounded “public truth restoration” change:
-
-1. repair the five boundary violations;
-2. preserve abstained/abandoned terminal truth;
-3. repair the four Python related-surface failures;
-4. fix command-local CLI help and the TypeScript failures;
-5. restore all verification gates;
-6. synchronize the existing five execution files to the exact subject.
-
-Then run live L0 and the M-8 successor evidence program. Do not add more cognitive architecture until the current product can prove what it did, why it stopped, whether the task passed, what it cost, and which exact source and evaluator produced that conclusion.
-
----
-
-## 12. References
+## 10. References
 
 ### Classical software and systems architecture
 
@@ -1171,40 +811,16 @@ Then run live L0 and the M-8 successor evidence program. Do not add more cogniti
 
 | Claim | Evidence | Confidence |
 |---|---|---|
-| Current TCB is within budget | Executed `check_tcb_budget.py`: 1,386/1,438 | High |
-| Tree has five boundary violations | Executed boundary checker; exact paths recorded | High |
+| Audited TCB is within budget | Executed `check_tcb_budget.py`: 1,386/1,438 | High |
+| Audited tree has five boundary violations | Executed boundary checker; exact paths recorded | High |
 | Wave-2 mechanisms have 31 focused green tests | Executed six named test modules | High, mechanism only |
 | Product completion surface regresses | Executed facade/RF-90 tests: four failures | High |
 | CLI help executes the product | Direct invocation emitted instrument error completion | High |
 | TypeScript types are coherent | Full monorepo typecheck passed | High |
 | CLI runtime behavior is green | Contradicted by three failing test files | High negative evidence |
-| LDA index is trustworthy for current source | Doctor/identity disagree; treated as stale | Low/invalid |
+| LDA index was trustworthy for audited source | Doctor/identity disagreed; treated as stale | Low/invalid |
 | Capability prefix fits limit | CLI emitted 2,180/4,096 chars | High |
 | Capability catalog has eight entries | Contradicted; CLI reports ten | High negative evidence |
 | Autofix rollback is production verified | Test does not call real runner; claim rejected | High |
 | Coding Max is SOTA | No accepted live control or official benchmark | Unsupported |
-| Core architecture follows ports/adapters | Source layout plus boundary law; five current violations | High at intent, partial at current conformance |
-
-## Appendix B — Definition of done for the next package
-
-The public-truth-restoration package is complete only when all statements below are true on the same clean commit:
-
-- [ ] Boundary checker reports zero violations.
-- [ ] No new boundary exceptions were added solely for current files.
-- [ ] Coding Max patchless finish never reports completed.
-- [ ] Terminal status and exterior disposition remain separate.
-- [ ] RF-90 fake tapes have semantically valid expectations.
-- [ ] `aether code --help` exits zero without model/runtime execution.
-- [ ] Unknown or ambiguous CLI flags fail before execution.
-- [ ] All CLI tests pass.
-- [ ] All relevant Python tests pass.
-- [ ] Documentation metadata passes.
-- [ ] Full verification recipe passes.
-- [ ] LDA doctor and identity report the same current HEAD.
-- [ ] The five execution documents name one current critical path.
-- [ ] No live benchmark result is claimed from hermetic mechanics alone.
-- [ ] The worktree is clean before the first qualifying run.
-
-## Appendix C — Interpretation warning
-
-This report is intentionally detailed, but detail is not authority. Equations clarify contracts; they do not prove implementation. Citations establish intellectual lineage; they do not make AETHER conformant. Tests provide evidence only for their asserted subjects. A benchmark score measures a model-harness-environment combination under one protocol; it does not establish human-equivalent professional competence. The durable standard remains: canonical law constrains, source implements, executable falsifiers challenge, and exact-subject evidence supports only the claims it actually measures.
+| Core architecture follows ports/adapters | Source layout plus boundary law; five audited violations | High at intent, partial at audited conformance |

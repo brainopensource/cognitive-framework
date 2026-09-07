@@ -12,7 +12,6 @@ if str(PACK) not in sys.path:
     sys.path.insert(0, str(PACK))
 
 from middleware.repository.multi_file_completeness import CodeDefaultCompletionPolicy
-from vanguard.packages.agency.chimera.verification import VerificationCortex
 from vanguard.packages.agency.episode.admission_gate import AdmissionGate, VerificationReceipt
 from vanguard.packages.agency.forge.engine import parse_test_output
 
@@ -54,13 +53,11 @@ def _admit_kwargs(**overrides: object) -> dict[str, object]:
 
 class TestAdversarialCodingVerificationT42(unittest.TestCase):
     def test_true_cannot_admit(self) -> None:
-        chimera = VerificationCortex.parse_test_output("", exit_code=0)
         forge_count, _, _, _ = parse_test_output("", exit_code=0)
-        self.assertEqual(chimera.executed_tests, 0)
         self.assertEqual(forge_count, 0)
         receipt = VerificationReceipt(
             exit_code=0,
-            executed_test_count=chimera.executed_tests,
+            executed_test_count=forge_count,
             workspace_digest="sha256:ws",
             verification_command="true",
         )
@@ -86,9 +83,7 @@ class TestAdversarialCodingVerificationT42(unittest.TestCase):
 
     def test_echo_ten_tests_passed_cannot_admit(self) -> None:
         spoof = "10 tests passed\n"
-        chimera = VerificationCortex.parse_test_output(spoof, exit_code=0)
         forge_count, _, _, _ = parse_test_output(spoof, exit_code=0)
-        self.assertEqual(chimera.executed_tests, 0)
         self.assertEqual(forge_count, 0)
         receipt = VerificationReceipt(
             exit_code=0,
@@ -177,14 +172,12 @@ class TestFailToPassT38(unittest.TestCase):
         self.assertTrue(verdict["admissible"])
 
 
-class TestChimeraNonZeroCountHonesty(unittest.TestCase):
+class TestNonZeroCountHonesty(unittest.TestCase):
     def test_nonzero_exit_without_runner_summary_does_not_invent_executed(self) -> None:
-        record = VerificationCortex.parse_test_output("", exit_code=1)
-        self.assertEqual(record.executed_tests, 0)
-        self.assertEqual(record.passed_tests, 0)
-        self.assertFalse(
-            VerificationReceipt(1, record.executed_tests, "sha256:ws").passed
-        )
+        executed, failing, _, _ = parse_test_output("", exit_code=1)
+        self.assertEqual(executed, 0)
+        self.assertEqual(failing, ())
+        self.assertFalse(VerificationReceipt(1, executed, "sha256:ws").passed)
 
 
 if __name__ == "__main__":

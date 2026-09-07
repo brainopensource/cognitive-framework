@@ -121,7 +121,8 @@ class TestSandboxWorker(unittest.TestCase):
         cmd = runner.commands[0]
         self.assertEqual(cmd[0], "/bin/sh")
         self.assertEqual(cmd[1], "-c")
-        self.assertEqual(cmd[2], 'printf "%s" "$1" | patch -p1')
+        self.assertIn('patch -p1', cmd[2])
+        self.assertIn('git apply', cmd[2])
         self.assertEqual(cmd[4], "--- a/file\n+++ b/file\n")
 
     def test_execute_proc_exec(self) -> None:

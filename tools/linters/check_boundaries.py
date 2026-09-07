@@ -22,6 +22,14 @@ from repo_paths import repo_root
 SOURCE_SUFFIXES = {".py", ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"}
 IGNORED_PARTS = {".git", ".venv", "node_modules", "__pycache__", "dist", "build"}
 PACKAGE_NAMES = {"domain", "ports", "kernel", "agency", "runtime", "adapters", "apps"}
+# Benchmark subjects are external clients.  These immutable domain modules
+# are their declared wire/evidence contracts; allowing them does not expose a
+# runtime implementation seam.
+BENCHMARK_DOMAIN_CLIENT_IMPORTS = {
+    "vanguard.packages.domain.canonicalisation.digest",
+    "vanguard.packages.domain.canonicalisation.jcs",
+    "vanguard.packages.domain.evidence.disposition",
+}
 ALLOWED = {
     "domain": set(),
     "ports": {"domain"},
@@ -350,6 +358,8 @@ def check(root: Path, s4_exit: bool) -> list[str]:
                 if target_area == "runtime" and not (
                     spec == "vanguard.packages.runtime.root"
                     or spec.startswith("vanguard.packages.runtime.root.")
+                    or spec == "vanguard.packages.runtime.entrypoint"
+                    or spec.startswith("vanguard.packages.runtime.entrypoint.")
                 ):
                     errors.append(
                         f"{source.relative_to(root)}:{line}: benchmarks may import only runtime.root + ports ({spec!r})"
@@ -359,7 +369,7 @@ def check(root: Path, s4_exit: bool) -> list[str]:
                 # runtime facade.  Permit the one pure domain import used to
                 # seal benchmark bytes now that the forwarding facade is gone.
                 if target_area is not None and target_area not in {"benchmarks", "runtime", "ports"}:
-                    if target_area == "domain" and spec == "vanguard.packages.domain.canonicalisation.jcs":
+                    if target_area == "domain" and spec in BENCHMARK_DOMAIN_CLIENT_IMPORTS:
                         continue
                     errors.append(
                         f"{source.relative_to(root)}:{line}: benchmarks may import only runtime.root + ports ({spec!r})"

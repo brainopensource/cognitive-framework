@@ -628,21 +628,12 @@ class GitEnvironment:
                             return Result.fail(
                                 "conflict",
                                 f"hunk starts past end of {norm_rel} at line {target_idx}")
-                    elif hint is not None:
-                        # A numbered anchor is a preimage claim, not a search
-                        # suggestion. Refuse drift at that exact location;
-                        # silently relocating a stale hunk can corrupt an
-                        # unrelated occurrence after resume.
-                        if not _matches(hint):
-                            return Result.fail(
-                                "conflict",
-                                f"stale patch anchor in {norm_rel} at line {hint + 1}")
-                        target_idx = hint
                     else:
-                        # Search forward from where the last hunk left off, so
-                        # hunks stay ordered and an earlier region cannot be
-                        # rewritten twice. Ambiguity resolves to the candidate
-                        # nearest the header's hint when it gave one.
+                        # Context is the preimage anchor; line numbers are a
+                        # location hint only.  A model may have generated the
+                        # hunk against a slightly older line offset, but it may
+                        # never apply unless every context/removal line matches
+                        # one complete candidate in the current file.
                         candidates = [
                             at for at in range(orig_idx, len(orig_lines) - len(expected_old) + 1)
                             if _matches(at)

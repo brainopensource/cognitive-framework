@@ -17,8 +17,14 @@ import urllib.error
 from pathlib import Path
 from typing import Dict, Any, Optional
 
-DEFAULT_MODEL = "/home/rock-dev/Models/Qwen2.5-Coder-1.5B-Instruct-Q4_K_M.gguf"
-LLAMA_SERVER_BIN = "/home/rock-dev/.local/bin/llama-server"
+DEFAULT_MODEL = os.environ.get(
+    "LOCAL_MODEL_PATH",
+    str(Path.home() / "Models" / "Qwen2.5-Coder-1.5B-Instruct-Q4_K_M.gguf"),
+)
+LLAMA_SERVER_BIN = os.environ.get(
+    "LLAMA_SERVER_BIN",
+    str(Path.home() / ".local" / "bin" / "llama-server"),
+)
 
 def is_server_healthy(port: int = 8080) -> bool:
     url = f"http://127.0.0.1:{port}/health"

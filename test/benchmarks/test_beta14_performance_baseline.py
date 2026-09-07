@@ -63,7 +63,7 @@ class TestBeta14PerformanceBaseline(unittest.TestCase):
         measurements: list[dict] = []
 
         for count in turn_counts:
-            state_dir = self.workspace / f".vanguard_run_{count}"
+            state_dir = self.workspace / ".vanguard" / f"run_{count}"
             state_dir.mkdir(parents=True, exist_ok=True)
 
             # Script a multi-turn model with read effects followed by finish
@@ -89,7 +89,7 @@ class TestBeta14PerformanceBaseline(unittest.TestCase):
 
             t0 = time.perf_counter()
             res = app.run(
-                brief=f"Execute {count} turns performance benchmark",
+                brief=f"Analyze read-only {count} turns performance benchmark",
                 profile_id="local",
                 run_id=run_id,
                 model=fake_model,

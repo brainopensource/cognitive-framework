@@ -14,8 +14,8 @@ composed_skills:
 # Spec-Driven Code Generation (Technique 1)
 
 **Spec-Driven Code Generation** is a composite agent technique combining:
-1. **Symbolic Fact Grounding** via [`lda-navigator`](file:///home/rock-dev/Coding/cognitive-framework/.agents/skills/lda-navigator/SKILL.md)
-2. **Local Neural Code Synthesis** via [`llama-cpp`](file:///home/rock-dev/Coding/cognitive-framework/.agents/skills/llama-cpp/SKILL.md)
+1. **Symbolic Fact Grounding** via [`lda-navigator`](../../skills/lda-navigator/SKILL.md)
+2. **Local Neural Code Synthesis** via [`llama-cpp`](../../skills/llama-cpp/SKILL.md)
 
 ---
 

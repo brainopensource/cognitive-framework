@@ -7,6 +7,7 @@ truth_plane: AS_MEASURED
 owner: external-review
 date: "2026-09-06"
 subject_sha: dfb0bb64
+revalidated_at: 2a5fb1ff
 subject_branch: main
 subject_state: clean
 audience:
@@ -28,8 +29,11 @@ relationships:
 
 # An Architectural and Empirical Audit of the AETHER / Vanguard Agent Substrate
 
-**Subject:** `dfb0bb64` (`main`, clean working tree)
-**Audit date:** 2026-09-06
+**Subject:** `dfb0bb64` (`main`, clean working tree).
+Still valid at `2a5fb1ff`: `git diff --stat dfb0bb64..2a5fb1ff` touches only
+`.draft/audit/**`, so no measurement below is affected.
+**Audit date:** 2026-09-06 · **Revision 2** (§F-B1 mechanism corrected; F-B5 added;
+sibling audits reconciled — [Appendix E2](#appendix-e2--reconciliation-with-the-two-sibling-audits))
 **Scope:** `vanguard/`, `packs/`, `benchmarks/`, `test/`, `tools/linters/`, `docs/execution/`
 **Method:** static dependency-graph measurement, cyclomatic analysis, clone detection, cryptographic configuration-identity proof, and full dynamic execution of the 2,855-test suite.
 
@@ -77,10 +81,13 @@ for four independent reasons, each established by direct evidence rather than in
 - **(A)** The Wave 2 work was merged to `main` while its own governing documents declare
   the gate blocking and the tree unmergeable. `main` is red: two of five architecture
   linters exit non-zero, and 66 of 2,855 tests fail or error.
-- **(B)** The product surface returns `outcome = "completed"` for a run containing no
-  patch and no verification receipt — a direct violation of `TC-E-058` at precisely the
-  boundary the T-27 canary is specified to measure through. Patch anchoring admits stale
-  anchors, violating `TC-E-061`.
+- **(B)** The completion gate works and its verdict is then thrown away: four sites in
+  `runtime/` project the terminal state `abstained` — *"the gate refused this"* — onto the
+  string `"completed"`, while a fifth projects it to `"abandoned"`. The product surface
+  therefore reports success for a run with no patch and no verification receipt,
+  violating `TC-E-058` at precisely the boundary the T-27 canary measures through.
+  Separately, patch anchoring admits stale anchors (`TC-E-061`), and `code --help`
+  executes the product and exits `0` on `instrument_error`.
 - **(C)** The three "distinct" presets `vg-code-{fast,balanced,max}` are **cryptographically
   identical** after removing two label fields (SHA-256
   `6f9a4df4dad104d0bbf82c3a52f0423f867bd06a046cff4062cdd1e02760afed`, all three).
@@ -99,10 +106,10 @@ for four independent reasons, each established by direct evidence rather than in
   so under the only runnable runner the guard never executes (F-A4). Discovered
   empirically during this audit; reverted.
 
-The remediation is not a rewrite. Every defect in classes B, C and D traces to a single
-structural cause — **duplicated concepts at architectural seams** (two entrypoints, two
-preset catalogues, three engines, six patch appliers) — and the corrective programme is
-predominantly *deletion and unification*, quantified in §12.
+The remediation is not a rewrite. Every class B, C and D defect sits at a seam where one
+concept has two or more implementations — two entrypoints, two preset catalogues, three
+engines, six patch appliers, and a terminal-state projection written four times (§8.3).
+The corrective programme is predominantly *deletion and unification* (§12).
 
 ---
 
@@ -170,26 +177,10 @@ just              NOT INSTALLED  ← gate executed via justfile recipe bodies
 
 ### 3.2 Commands executed
 
-```bash
-# Architecture gates (justfile `check` recipe body)
-for l in check_boundaries check_tcb_budget check_domain_blindness \
-         check_isolation_policy check_path_hygiene; do
-  python3 tools/linters/$l.py; echo "$l exit=$?"
-done
-
-# Full dynamic suite (pytest unavailable; unittest is the only runnable path)
-.venv/bin/python -m unittest discover -s test -t . 2> ut.err
-
-# Configuration identity proof
-for p in fast balanced max; do
-  sed -E 's/"harness":[^,]*/"H"/; s/"budgetPolicy":[^,]*/"B"/' \
-    vanguard/packages/agency/manifests/vg-code-$p/manifest.json | sha256sum
-done
-
-# Martin package metrics (Ca, Ce, I, A, D) over the AST import graph
-# Cyclomatic complexity per function via ast decision-point counting
-# (scripts retained in the session scratchpad; algorithms given in §8)
-```
+Every command is in **[Appendix E](#appendix-e--reproduction-script)**, kept as a single
+runnable script (`.draft/audit/reproduce.sh`) rather than restated here. Package metrics
+and cyclomatic complexity were computed by AST traversal; both algorithms are given
+inline in §8.1 and §8.2.
 
 ### 3.3 Headline measurements
 
@@ -202,6 +193,10 @@ done
 | Skipped | 19 |
 | Total red | **66** |
 | Wall clock | 180.4 s |
+| `npm run typecheck` (all TS workspaces) | PASS |
+| `npm --workspace @vanguard/cli test` | **PASS 81/81** (all 10 built test files executed) |
+| `aether code --help` | executes the product; prints `instrument_error`; **exits 0** |
+| `lda identity` / `lda doctor` freshness | agree (`FRESH` / `index_healthy: true`) |
 | Kernel logical LOC | 1,386 / 1,438 budget (**PASS**) |
 | Domain blindness | **PASS** |
 | Isolation policy | **PASS** |
@@ -384,23 +379,61 @@ receipt — returns `outcome = "completed"` through `CodingMaxFacade`.
 `MS-TRUTH`'s stated falsifier — *"a run with zero patches or tampered tests cannot earn
 `passed`"* — is presently refuted at the product surface.
 
-**The revealing detail.** The sibling entrypoint refuses correctly. From the same suite
-run, `entrypoint.execute` produces:
+#### Mechanism: a lossy terminal-state projection, replicated four times
 
-```
-RunTermination.INSTRUMENT_ERROR
-detail = "the manifest declares an explicit finish tool;
-          a text-only response cannot be promoted to completion"
+The gate is **not** absent. `RunTermination` (`agency/episode/state.py:31`) distinguishes
+`COMPLETED` from `ABSTAINED`, and its docstring states the reason explicitly:
+
+> *"Collapsing this with the evaluation outcome is how instrument failure silently
+> becomes task failure, so the evaluation axis is deliberately absent from `agency/`."*
+
+The admission gate correctly refuses the patchless finish and yields `ABSTAINED`. The
+defect is that the runtime then **projects that refusal onto the success string**:
+
+```python
+runtime/entrypoint.py:166   outcome = "completed" if terminal in {"completed","abstained"} else terminal
+runtime/app_service.py:264  outcome = "completed" if terminal in {"completed","abstained"} else terminal
+runtime/app_service.py:450  outcome=("completed" if terminal in {"completed","abstained"} else terminal)
+runtime/trajectory.py:319   "abstained": "completed",
 ```
 
-**Two entry points, two completion semantics.** The gate was implemented on one path and
-not the other, because there are two paths (F-D1). This is the causal chain that makes
-§7 the load-bearing section of this report: the correctness defect is a *consequence* of
-the structural defect.
+Formally, the projection $\pi$ is non-injective exactly where it must not be:
+
+$$\pi(\texttt{abstained}) = \pi(\texttt{completed}) = \texttt{"completed"}$$
+
+so `abstained` — *"the gate refused to admit this"* — is unrecoverable from the product
+result. The correct projection is the identity on both:
+$\pi(\texttt{abstained}) = \texttt{abstained}$, $\pi(\texttt{completed}) =
+\texttt{completed}$, and **neither is a task disposition** (`TC-E-059`).
+
+**A fifth site disagrees with the other four.** `runtime/child_runtime.py:46` maps the
+same state differently:
+
+```python
+TERMINAL_OUTCOMES = {"completed": "completed", "abstained": "abandoned", ...}
+```
+
+So one terminal state has **two contradictory projections in the same package**:
+a parent episode reports an abstention as `completed`, while the identical abstention in
+a child episode reports as `abandoned`. Under `TC-E-014` a child's authority may not
+exceed its parent's; here the child is *more* truthful than the parent. Any delegation
+study that aggregates parent and child outcomes is summing two different scales.
+
+**Correction to an earlier reading.** My first-pass diagnosis — "two entrypoints, two
+completion semantics" — was wrong about the causal direction. `entrypoint.execute` does
+**not** get this right: it carries the identical defective line at `:166`. The
+`INSTRUMENT_ERROR` I observed from `entrypoint` came from a *different* scenario (a
+text-only response with no finish tool call at all), not from the patchless-finish case.
+The duplication (F-D1) is therefore not the cause of this defect — it is the reason the
+defect had to be written **four times**, and the reason a single-site fix will not close
+it. This distinction changes the remedy: **R6 must repair the projection first, and unify
+the paths second.** Unifying two entrypoints that share the same bad line would preserve
+the bug and hide it better.
 
 **Consequence for the programme.** T-27 requires a false-completion rate of *exactly zero*
-measured through this boundary. The measurement is currently guaranteed to be wrong in the
-optimistic direction. No canary may be run until F-B1 is closed.
+measured through this boundary. Every abstention the gate correctly refuses is currently
+counted as a success, so the measurement is guaranteed to be wrong in the optimistic
+direction. No canary may be run until F-B1 is closed.
 
 ### F-B2 — Stale patch anchors are admitted
 
@@ -457,6 +490,37 @@ amplification is a first-order architectural property, not a performance nicety.
 Note that `test_resume_command_executes_without_explicit_brief` is red while
 `MS-RESUME` is recorded as `CLOSED` in `milestones.md:87`. A closed milestone with a
 red falsifier is a governance contradiction of the same family as F-A1.
+
+---
+
+### F-B5 — `code --help` executes the product and exits `0` on an error
+
+```
+$ node bin/aether code --help
+[complete] instrument_error, 0 turns, unknown
+$ echo $?
+0
+```
+
+Two defects compound here.
+
+1. **`--help` is not a terminal parser action.** It falls through to default prompt
+   construction and *executes the product*, with `--help` treated as the brief. A help
+   request is supposed to be a pure query; here it allocates a run id, composes a
+   manifest, and enters the episode loop. Beyond violating the ordinary CLI contract,
+   this is a measurement-hygiene defect: help invocations emit run records into the same
+   ledger the canary will be scored from.
+
+2. **The exit code is `0` while the terminal state is `instrument_error`.** This is worse
+   than the help bug and independent of it. Any CI step, benchmark harness, or shell
+   script that branches on `$?` — the ordinary contract — reads success from an
+   instrument failure. It is the same lossy-projection pathology as F-B1, expressed in
+   the process-exit channel rather than the result string: the error is *representable*
+   and is *discarded at the boundary*.
+
+`tasks.md` files this under T-97 (deferred: "TypeScript `aether code --help` / `-m`
+collision"). The deferral is defensible for the help text; **it is not defensible for the
+exit code**, which is a one-line fix on a surface that every automated caller depends on.
 
 ---
 
@@ -820,17 +884,19 @@ path mutation make the import graph a function of execution order. That is not a
 property a reproducible measurement instrument can afford — it interacts directly with
 `TC-E-030` (production replay parity in a fresh process).
 
-### F-D6 — Confirmed dead code
+### F-D6 — Confirmed dead code (deletion index)
 
-| Artefact | LOC | Evidence |
+Consolidated for deletion planning; each row is proved where cited.
+
+| Artefact | LOC | Proved in |
 |---|---|---|
-| `agency/chimera/**` | ~2,000 | Test-only importers; `facade.py` has none |
-| `packs/code-default/toolkits/composite.py` | — | Absent from `plugin.yaml`; no importer |
-| `load.budget_policy_document()` | — | Zero callers (F-C4) |
-| `load.compile_preset` / `compile_pack` | — | Test-only (F-C3) |
-| `root.py` Forge re-exports | — | No runtime consumer (F-D3) |
-| `adapters/bindings/lex_reproducer.py` | — | No importer found |
-| `adapters/models/ollama` | — | Referenced by a test; module absent; repository policy forbids Ollama |
+| `agency/chimera/**` | ~2,000 | F-D3 |
+| `load.compile_preset` / `compile_pack` | — | F-C3 |
+| `load.budget_policy_document()` | — | F-C4 |
+| `root.py` Forge re-exports | — | F-D3 |
+| `packs/code-default/toolkits/composite.py` | — | here: absent from `plugin.yaml`, no importer |
+| `adapters/bindings/lex_reproducer.py` | — | here: no importer found |
+| `adapters/models/ollama` | — | here: referenced by a test, module absent, forbidden by policy |
 
 ### F-D7 — Hygiene
 
@@ -984,6 +1050,7 @@ Measured by AST decision-point counting: $CC = 1 + |\{$`If`, `For`, `While`,
 | **Patch application** | **6** | `adapters/environment/{fake,git,sandboxed}.py`, `agency/chimera/patcher.py`, `agency/forge/{patcher,resilient_patcher}.py` (+ `packs/…/ast_patch.py`, `adapters/bindings/lex_surgical_editor.py` as tool-level variants) |
 | **Execution engine** | **3** | `agency/episode/engine.py`, `agency/forge/engine.py`, `agency/chimera/engine.py` |
 | **Product entrypoint** | **2** | `runtime/entrypoint.py`, `apps/coding_max/facade.py` (Type-2 clone, 11/13 lines identical) |
+| **Terminal-state projection** | **5** | `entrypoint.py:166`, `app_service.py:264,450`, `trajectory.py:319` (all → `"completed"`); `child_runtime.py:46` (→ `"abandoned"`) |
 | **Preset catalogue** | **2** | `packs/code-default/presets.json`, `agency/manifests/vg-code-*/budget-policy.json` |
 | **Manifest resolution** | **2** | `importlib.resources.files(...)` ×4 sites, raw path arithmetic ×2 sites |
 | **Preset name literal** | **5** | F-D1 table |
@@ -994,7 +1061,7 @@ Measured by AST decision-point counting: $CC = 1 + |\{$`If`, `For`, `While`,
 
 | Defect | Seam | Duplicated concept |
 |---|---|---|
-| F-B1 (`completed` without evidence) | facade vs entrypoint | product entrypoint |
+| F-B1 (`completed` without evidence) | 4 projection sites + 1 contradictory | terminal-state projection |
 | F-B2 (stale anchor) | 6 patch appliers | patch application |
 | F-C1 (identical arms) | presets.json vs manifests | preset catalogue |
 | F-D3 (incommensurable benchmarks) | EpisodeEngine vs Forge | execution engine |
@@ -1228,13 +1295,11 @@ needs nothing. The instrument needs F-C1 closed. The product needs F-B1 closed.
 
 ### 11.3 The single root cause
 
-Every class B, C and D finding reduces to **duplicated concepts at architectural seams**.
-The project's stated ambition — *"not having only one solution and optimising it, but
-having a range of solutions we can verify against each other"* — has been implemented as
+§8.3 establishes the pattern empirically; this is its consequence for strategy. The
+project's stated ambition — *"not having only one solution and optimising it, but having a
+range of solutions we can verify against each other"* — has been implemented as
 *duplicated implementations* rather than as *parameterised variation over one
-implementation*.
-
-These are opposite architectures with opposite cost curves:
+implementation*. These are opposite architectures with opposite cost curves:
 
 $$\text{duplication: } \quad \text{defect surface} \propto k \cdot n \qquad\qquad \text{parameterisation: } \quad \text{defect surface} \propto k + n$$
 
@@ -1281,7 +1346,9 @@ architecture.** Estimated net change: **−6,000 to −8,000 LOC**.
 
 | # | Action | Acceptance predicate |
 |---|---|---|
-| **R6** | **One completion gate.** Make `CodingMaxFacade` a thin argument-shaper over `entrypoint.execute`; delete the facade's independent path | `test_preset_finish_without_evidence_is_never_completed` green; a mutation that removes the gate turns *both* facade and entrypoint tests red |
+| **R6a** | **Repair the projection first** (F-B1): `abstained` must project to `abstained` at all four sites; reconcile the contradictory fifth site in `child_runtime.py` | `grep -c 'in {"completed", "abstained"}' vanguard/packages/runtime/` = 0; one terminal state has exactly one projection package-wide |
+| **R6b** | **Then unify the paths.** Make `CodingMaxFacade` a thin argument-shaper over `entrypoint.execute`; delete the facade's independent path | `test_preset_finish_without_evidence_is_never_completed` green; a mutation reintroducing the collapse turns *both* facade and entrypoint tests red |
+| **R6c** | **Make `--help` a terminal parser action and return a non-zero exit on non-success terminals** (F-B5) | `aether code --help` prints usage, runs no episode, exits 0; `aether code <failing>` exits non-zero |
 | **R7** | **Anchor verification fails closed** per `TC-E-061` | `test_d6_patch_context_anchoring` green; a deliberately stale anchor produces a typed failure, not an applied hunk |
 | **R8** | **Collapse patch appliers 6 → 2** (product + a fake for tests) | `grep -rl "def apply.*patch" vanguard/ packs/` returns ≤ 2 production files; F-B2's falsifier still green |
 | **R9** | **One entrypoint.** Delete `_pack_loader` from `facade.py`; delete the `harness_override` hardcoded `40`; route `cli.cmd_code` through `entrypoint` | `check_boundaries.py` no longer reports `runtime → apps`; `grep -c '"fast", "balanced", "max"'` across the tree ≤ 2 |
@@ -1339,6 +1406,11 @@ FAILED (failures=13, errors=53, skipped=19)
 ```
 
 *Side effect observed during this run: the suite staged three files and modified the tracked `lam.sqlite` corpus — see F-A4. Reverted after measurement.*
+
+Note that F-B5 (`code --help`) is **not** among these 66. It is not covered by any test in
+the suite, which is why an effectful help path and a zero exit code on `instrument_error`
+have survived. The TypeScript suite that does cover the CLI passes 81/81 — it asserts flag
+documentation and daemon honesty, but never asserts an exit code.
 
 **Failures (13):**
 
@@ -1488,6 +1560,55 @@ echo "== full dynamic suite =="
 .venv/bin/python -m unittest discover -s test -t . 2>&1 | tail -3
 ```
 
+### Appendix E2 — Reconciliation with the two sibling audits
+
+Two further audits of the same subject sit in this directory. They are **complementary,
+not contradictory**: they cover surfaces this report did not (the `.agents/` capability
+layer, `docs/backend/` staleness, the TypeScript clients, the `.draft/todo/` synthesis
+dossier), while this report contributes the quantitative structure (§8), the cryptographic
+preset-identity proof (F-C1), and the statistical corrections (§9).
+
+**Claims imported after independent verification**
+
+| Claim | Source | This audit's verification |
+|---|---|---|
+| `abstained` and `completed` both project to `"completed"` | `AETHER_SOTA…AUDIT` §4.2 | **Confirmed and extended.** Four sites, plus a contradictory fifth mapping to `"abandoned"` (F-B1). The fifth site is new here. |
+| `code --help` is an effectful request | `AETHER_SOTA…AUDIT` §4.2 | **Confirmed and extended.** Also exits `0` on `instrument_error` — the exit-code defect is new here (F-B5). |
+
+**Claims that did NOT reproduce on this subject** *(recorded as negative results, not as
+criticism — both are consistent with a transient state at the time of that audit)*
+
+| Claim | Source | Measured here |
+|---|---|---|
+| `npm --workspace @vanguard/cli test` FAILS on `transport`, `wave2`, `wave4` | `AETHER_SOTA…AUDIT` §1.4 | **Passes 81/81, 0 fail.** All ten source test files are present in `dist/test/` and were executed — this is not a stale-build artefact. |
+| `lda doctor` and `lda identity` disagree about index freshness | `AETHER_SOTA…AUDIT` §4.2 | **Both agree.** `identity` reports `freshness_vs_head: FRESH`, `doctor` reports `index_healthy: true`, both bound to HEAD. The index has evidently been rebuilt since; at that time it was pinned to `622131da` against HEAD `dfb0bb64`, which is a *staleness* condition rather than a design defect. |
+
+**A claim this report contests**
+
+`EXHAUSTIVE_ARCHITECTURAL_AUDIT_EXECUTION_VS_CODE.md` Thesis 1 holds that the execution
+documents are *"100% truthful"* and that Wave 2 is *"correctly held as unaccepted."*
+
+That was true at `622131da`. It is **false at `dfb0bb64`**: the work was merged to `main`
+(F-A1), so the documents' central operative claim — *"No task may be checked and no L0/L2
+subject frozen until those are repaired… and the subject is clean"* — now describes a
+state the repository has already left. The documents are *honest*; they are no longer
+*current*.
+
+The mechanism of the disagreement is itself the finding. Both sibling audits report
+"31/31 named falsifiers green" and Wave 1 "all PASS", inheriting those figures from the
+developer log rather than from a full suite execution. This report ran the full suite and
+found **66 red** (13 failures, 53 errors). The three findings that only a full run could
+surface — the deleted `lab/` package (F-D4), the `ladder` namespace collision (F-D5), and
+the suite's mutation of the working tree (F-A4) — were invisible to a narrow-set
+verification. **This is direct empirical support for F-A2: reporting a curated green while
+the wide red goes unmeasured is how all three of these defects survived two prior
+audits.**
+
+**Findings unique to this report and unchallenged by either sibling:** F-C1 (the three
+arms are cryptographically identical), F-C2 (the T-79 falsifier is mutation-inadequate),
+F-D4, F-D5, F-A4, and the §8/§9 quantitative results. The headline verdict and the
+remediation ordering in §12 stand.
+
 ### Appendix F — References
 
 **Architecture and design**
@@ -1544,9 +1665,10 @@ echo "== full dynamic suite =="
 |---|---|
 | Subject SHA | `dfb0bb64` |
 | Subject state | clean |
-| Findings | **5** governance · 4 correctness · 4 experimental-design · 7 structural |
-| Blocking for Wave 3 | F-A1, F-A3, **F-A4**, F-B1, F-B2, F-C1, F-C2, F-D4 |
+| Findings | **5** governance · **5** correctness · 4 experimental-design · 7 structural (**21**) |
+| Blocking for Wave 3 | F-A1, F-A3, F-A4, F-B1, F-B2, F-C1, F-C2, F-D4 |
 | Measurements reproducible via | Appendix E |
+| Sibling audits | reconciled in Appendix E2: 2 claims imported after verification, 2 did not reproduce, 1 contested |
 | Author | external architectural review |
 | Status | **draft — no code or documentation was modified in producing this report.** Executing the suite dirtied the tree (F-A4); the mutation was reverted and `git status` restored to its pre-audit state. |
 

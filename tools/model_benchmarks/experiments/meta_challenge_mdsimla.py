@@ -14,10 +14,10 @@ import time
 import urllib.request
 from pathlib import Path
 
-LLAMA_SERVER = "/home/rock-dev/.local/bin/llama-server"
+LLAMA_SERVER = os.environ.get("LLAMA_SERVER", str(Path.home() / ".local" / "bin" / "llama-server"))
 ENDPOINT = "http://127.0.0.1:8080/v1/chat/completions"
 HEALTH_URL = "http://127.0.0.1:8080/health"
-MODELS_DIR = Path("/home/rock-dev/Models")
+MODELS_DIR = Path(os.environ.get("MODELS_DIR", str(Path.home() / "Models")))
 
 def kill_server():
     subprocess.run(["pkill", "-9", "-f", "llama-server"], capture_output=True)

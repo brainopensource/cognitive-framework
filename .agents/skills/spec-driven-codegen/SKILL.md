@@ -11,5 +11,5 @@ authority: operational
 
 This skill exposes the **Spec-Driven Code Generation Technique** to coding harnesses that scan `skills/`.
 
-- **Canonical Technique:** [`TECHNIQUE.md`](file:///home/rock-dev/Coding/cognitive-framework/.agents/techniques/spec-driven-codegen/TECHNIQUE.md)
-- **Executable Runner:** [`generate_grounded_patch.py`](file:///home/rock-dev/Coding/cognitive-framework/.agents/techniques/spec-driven-codegen/scripts/generate_grounded_patch.py)
+- **Canonical Technique:** [`TECHNIQUE.md`](../../techniques/spec-driven-codegen/TECHNIQUE.md)
+- **Executable Runner:** [`generate_grounded_patch.py`](../../techniques/spec-driven-codegen/scripts/generate_grounded_patch.py)

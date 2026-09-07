@@ -34,11 +34,16 @@ def pytest_configure(config) -> None:
     os.environ.setdefault("XDG_CACHE_HOME", str(Path(ws_root) / "cache"))
     os.environ.setdefault("XDG_STATE_HOME", str(Path(ws_root) / "state"))
 
-    if os.environ.get("LAM_DB_PATH"):
-        return
-    directory = tempfile.mkdtemp(prefix="lam-db-", dir=tmp_dir)
-    scratch = Path(directory) / "lam.sqlite"
-    if _TRACKED_LAM_DB.is_file():
-        shutil.copy2(_TRACKED_LAM_DB, scratch)
-    os.environ["LAM_DB_PATH"] = str(scratch)
-    atexit.register(shutil.rmtree, directory, True)
+    if not os.environ.get("LAM_DB_PATH"):
+        directory = tempfile.mkdtemp(prefix="lam-db-", dir=tmp_dir)
+        scratch = Path(directory) / "lam.sqlite"
+        if _TRACKED_LAM_DB.is_file():
+            shutil.copy2(_TRACKED_LAM_DB, scratch)
+        os.environ["LAM_DB_PATH"] = str(scratch)
+        atexit.register(shutil.rmtree, directory, True)
+
+    if not os.environ.get("BAAC_RUNS_DIR"):
+        baac_runs = Path(ws_root) / "baac_runs"
+        baac_runs.mkdir(parents=True, exist_ok=True)
+        os.environ["BAAC_RUNS_DIR"] = str(baac_runs)
+

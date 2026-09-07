@@ -26,7 +26,7 @@ python3 .agents/proficiencies/autofix-swe-loop/scripts/autofix_harness.py \
 
 ### Composed Components
 
-- **Symbolic Grounding:** [`lda-navigator`](file:///home/rock-dev/Coding/cognitive-framework/.agents/skills/lda-navigator/SKILL.md)
-- **Local Model Execution:** [`llama-cpp`](file:///home/rock-dev/Coding/cognitive-framework/.agents/skills/llama-cpp/SKILL.md)
-- **Hermetic Test Runner:** [`test-runner`](file:///home/rock-dev/Coding/cognitive-framework/.agents/skills/test-runner/SKILL.md)
-- **Architecture Spec:** See [`PROFICIENCY.md`](file:///home/rock-dev/Coding/cognitive-framework/.agents/proficiencies/autofix-swe-loop/PROFICIENCY.md)
+- **Symbolic Grounding:** [`lda-navigator`](../lda-navigator/SKILL.md)
+- **Local Model Execution:** [`llama-cpp`](../llama-cpp/SKILL.md)
+- **Hermetic Test Runner:** [`test-runner`](../test-runner/SKILL.md)
+- **Architecture Spec:** See [`PROFICIENCY.md`](../../proficiencies/autofix-swe-loop/PROFICIENCY.md)

@@ -117,6 +117,11 @@ class EverySigningPathEmitsTheSameFormat(unittest.TestCase):
             signed = sign_envelope(_envelope(), path, "builder-key")
             self._sign_and_check(signed, load_key(path))
 
+    @unittest.skip(
+        "lab/ research package withdrawn (Wave 2.5): this producer path no longer "
+        "exists, so it cannot diverge. The builder and standalone-signer paths "
+        "still hold the one-format gate."
+    )
     def test_the_study_signs_re_derivably(self) -> None:
         from lab.m65_study import sign_evidence_envelope
 
@@ -142,6 +147,10 @@ class EverySigningPathEmitsTheSameFormat(unittest.TestCase):
             signed = parse_envelope(json.loads(bundle.read_text(encoding="utf-8")))
             self._sign_and_check(signed, load_key(path))
 
+    @unittest.skip(
+        "lab/ research package withdrawn (Wave 2.5): the source it scanned for a "
+        "baked-in seed no longer exists in the tree."
+    )
     def test_the_study_will_not_sign_with_a_key_baked_into_its_source(self) -> None:
         """A constant seed in the tree is forgeable by anyone who can read it."""
         source = (_ROOT / "lab" / "m65_study.py").read_text(encoding="utf-8")

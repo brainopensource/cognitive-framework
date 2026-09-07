@@ -214,7 +214,7 @@ By decoupling verbs, selectors, context policies, and evaluators into discrete J
 
 ### 2.1 The Benchmark Corpus & Empirical Baseline
 
-To ground architectural proposals in empirical truth, we examine the comprehensive benchmark ladder visualized in [`AGENT_ARCHITECTURE_MAP.html`](file:///home/rock-dev/Coding/cognitive-framework/AGENT_ARCHITECTURE_MAP.html). 
+To ground architectural proposals in empirical truth, we examine the comprehensive benchmark ladder visualized in [`AGENT_ARCHITECTURE_MAP.html`](../../../AGENT_ARCHITECTURE_MAP.html). 
 
 The evaluation corpus comprises 46 recorded runs executed across diverse models (`deepseek/deepseek-v4-flash-0731`, `glm-5.3-flash`, `openrouter/free`) evaluating software engineering problems spanning Tier 1 (LRU Cache, SemVer parser, ring buffers) through Tier 7 (distributed quota management, schema migration engines, large catalog alias collisions).
 

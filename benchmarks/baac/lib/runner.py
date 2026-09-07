@@ -95,6 +95,7 @@ class BaaCRunner:
         budget_config: Optional[BudgetCapConfig] = None,
         run_id: Optional[str] = None,
         extra_metadata: Optional[Dict[str, Any]] = None,
+        run_dir: Optional[Path] = None,
     ) -> None:
         self.preset = preset
         self.mode = mode
@@ -106,7 +107,8 @@ class BaaCRunner:
         # This makes the $0.10/1M-token/500-call ceiling cumulative.
         self.campaign_budget = BudgetTracker(self.budget_config)
         self.api_key = load_openrouter_api_key() if mode == "live" else ""
-        self.run_dir = BAAC_RUNS_DIR / self.run_id
+        base_runs_dir = Path(os.environ.get("BAAC_RUNS_DIR") or BAAC_RUNS_DIR)
+        self.run_dir = run_dir or (base_runs_dir / self.run_id)
         self.run_dir.mkdir(parents=True, exist_ok=True)
 
     def load_challenge_metadata(self, challenge_dir: Path) -> ChallengeMetadata:

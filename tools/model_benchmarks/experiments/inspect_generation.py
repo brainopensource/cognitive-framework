@@ -1,10 +1,13 @@
 import json
+import os
+from pathlib import Path
 import urllib.request
 import re
 import subprocess
 import time
 
-LLAMA_SERVER = "/home/rock-dev/.local/bin/llama-server"
+MODELS_DIR = Path(os.environ.get("MODELS_DIR", str(Path.home() / "Models")))
+LLAMA_SERVER = os.environ.get("LLAMA_SERVER", str(Path.home() / ".local" / "bin" / "llama-server"))
 ENDPOINT = "http://127.0.0.1:8080/v1/chat/completions"
 HEALTH_URL = "http://127.0.0.1:8080/health"
 
@@ -12,7 +15,7 @@ def start_server(model_file):
     subprocess.run(["pkill", "-9", "-f", "llama-server"], capture_output=True)
     time.sleep(1)
     cmd = [
-        LLAMA_SERVER, "-m", f"/home/rock-dev/Models/{model_file}",
+        LLAMA_SERVER, "-m", str(MODELS_DIR / model_file),
         "-c", "4096", "-ngl", "99", "--host", "127.0.0.1", "--port", "8080",
         "--alias", "local-model", "--reasoning", "off", "--jinja"
     ]

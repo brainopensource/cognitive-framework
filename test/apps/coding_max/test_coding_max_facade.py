@@ -269,7 +269,10 @@ print(json.dumps({
         )
         self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
         first_payload = json.loads(first.stdout.strip().splitlines()[-1])
-        self.assertEqual(first_payload["outcome"], "completed")
+        # The fresh process uses the deterministic one-shot finish path.  It
+        # has no patch or verification receipt, therefore it must settle
+        # without claiming completion before resume proves terminal recovery.
+        self.assertNotEqual(first_payload["outcome"], "completed")
 
         kinds_after_run = _event_kinds(self.state_dir, run_id)
 

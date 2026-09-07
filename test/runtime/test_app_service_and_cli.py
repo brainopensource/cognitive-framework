@@ -44,10 +44,11 @@ class TestAppServiceAndCli(unittest.TestCase):
             state_dir=self.state_dir,
         )
         self.assertEqual(run_res.run_id, "run-test-1")
-        self.assertEqual(run_res.outcome, "completed")
+        self.assertNotEqual(run_res.outcome, "completed")
 
         status_res = app.status("run-test-1", state_dir=self.state_dir)
         self.assertEqual(status_res.run_id, "run-test-1")
+        self.assertEqual(status_res.status, run_res.outcome)
         self.assertTrue(status_res.event_count > 0)
         self.assertTrue(status_res.as_of_seq > 0)
 
@@ -63,7 +64,7 @@ class TestAppServiceAndCli(unittest.TestCase):
             model=FakeModel([{"kind": "finish", "note": "resumed smoke test completed"}]),
         )
         self.assertEqual(resume_res.run_id, "run-test-1")
-        self.assertEqual(resume_res.outcome, "completed")
+        self.assertEqual(resume_res.outcome, run_res.outcome)
 
     def test_artifact_retrieval_and_digest_verification(self) -> None:
         app = ApplicationService(workspace=self.workspace)
@@ -125,8 +126,8 @@ class TestAppServiceAndCli(unittest.TestCase):
             text=True,
             check=False,
         )
-        self.assertEqual(res_run.returncode, 0)
-        self.assertIn("outcome: completed", res_run.stdout)
+        self.assertNotEqual(res_run.returncode, 0)
+        self.assertNotIn("outcome: completed", res_run.stdout)
 
         # CLI status
         res_status = subprocess.run(

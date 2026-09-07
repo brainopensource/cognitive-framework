@@ -16,7 +16,7 @@ derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN_v2.md
   - .draft/PHASE-0_DEVELOPMENT_FINAL_PLAN.md
 lock_head: "66aa7a3c0c31"
-last_verified: 2026-09-05
+last_verified: 2026-09-07
 relationships:
   - execution.milestones
   - execution.feature_spec
@@ -35,6 +35,113 @@ Developers SHALL use this file plus [`spec.md`](spec.md), [`tasks.md`](tasks.md)
 **Canonical task IDs** are `T-01`… in [`tasks.md`](tasks.md). v2 `SUB-*` / `TXN-*` are aliases in [`backlog.md`](backlog.md). Live kernel pipeline package `SUB-01` in the backlog is **not** v2 admission.
 
 **Recommended reading order (not a sprint):** MS-SEE A stack T-16/T-15/T-36/T-37/T-45 is MECHANISM. T-14 and T-17 are MECHANISM. T-04's production gate is landed; its 21-test legacy successor remains open. T-46 ranking stays `[PROPOSAL]`.
+
+## Near-term implementation handbook (NT-1)
+
+**Authorized TARGET, not AS_BUILT.** [`spec.md` §NT-1](spec.md#nt-1-near-term-baseline-context-cache-and-recovery-delta) is the normative owner; T-98–T-111 and revised T-77 own implementation. This section supersedes the older EW-9 scheduling exclusions for those rows only. The three current streams and exact write ownership live in [`tasks.md`](tasks.md#near-term-ownership-and-ready-work). Historical source labels A/B elsewhere are not current staffing. No sprint calendar or alternate task board is introduced.
+
+### Baseline recipe and contributor isolation
+
+T-98 creates an independent disposable repository, not a linked worktree sharing the contributor index. Capture source/index/corpus digests; redirect test databases before imports under unittest; remove provider credentials from child environments and deny network at the execution boundary. Build each temporary Git fixture with its own `.git` and verify its resolved root before any write/stage. A pytest-only `conftest` hook cannot establish safety for unittest. Copy/install declared dependencies in the isolated environment; do not quietly substitute a different test runner.
+
+T-101 inventories collection and executes the complete suite only in that environment. Include every import error and baseline failure; compare exact source/index/corpus state afterward. The expected collection inventory must derive from current test modules and protected falsifier IDs, not the historical number 2,855. A count dropping without a recorded successor is a gate failure. A missing `just` executable requires execution of all recipe bodies, not a PASS for the subset available. Install/fix declared dependencies under C ownership; record failures without suppressing them.
+
+Root tasks T-99/T-100 can proceed concurrently in independently isolated focused fixtures: A proves the terminal-projection defect; B defines pure value round trips. Their completion does not substitute for the full baseline gate. T-109 must incorporate every still-open failure identified by T-101. Deleting a duplicated implementation is preceded by caller, registry/resource and test-owner checks. Port required lab/security assertions; do not restore obsolete engines or discard falsifiers for a lower red count.
+
+### Integration map and schema migration
+
+| Reference primitive | Integrate into existing owner | Required adaptation |
+|---|---|---|
+| `MemoryView.capture/encode/decode`, `critical_state` | `domain/task_state.py`; runtime fold/checkpoints through A | Canonical byte snapshot, full SemanticTaskState retained; add lineage/reducer/cursor binding from NT-1.2. Reject stale/unknown identity before prompt use. |
+| `Prefix.build`, `compile_packet` | `agency/context/compiler.py`, `layers.py`, `compaction.py`, `distiller.py` | Stable schema-list order; final serialized counting; bounded cardinality/body size; full action/result units; preserve critical state and artifact-bound omissions. Do not create `progressive.py` or a second compiler. |
+| `PromptCodec` | Existing model request serializers under A | Real provider dialect and counter identity; supported cache controls; provider usage or explicit null. Local JSON-envelope counting is not evidence about a differently serialized remote request. |
+| `Recovery`, `recover` | `agency/episode/protocol_recovery.py`, existing engine recovery branch | Merge fields and bounded history into ProtocolRecoveryState; use versioned readers; remove consultation from the near-term policy. Persist decisions and counters through runtime. |
+| `stage`, `transact`, `delegate_readonly` | **[PROPOSAL] outside this iteration** | Do not activate CAS promotion, new topology or specialists. Existing patch/attenuation bug fixes stay on their current paths. |
+
+Part 3 is design provenance, not an alternate normative import. Production must implement NT-1 schemas, including stricter lineage checks and the no-consult recovery action set. Use current JCS `canonical_bytes`/`digest_of`, not ordinary JSON formatting as a substitute for canonical identity. Validate booleans separately from integer counters. A frozen dataclass with mutable nested mappings is not an immutable snapshot: capture canonical bytes and reconstruct fresh mappings when needed.
+
+Readers support existing accepted schema versions explicitly and reject unknown required versions. Never rewrite historical event identities. C owns registered schema/generator inputs; A owns emitter and reducer integration. Persist selection and recovery facts in registered `mhf.event/2` envelopes before external dispatch. If durable emission fails, stop the next request rather than proceed with unrecorded decision spend. Record policy/serializer/counter identity at composition, not inferred from class names alone.
+
+### Reference context-selection algorithm
+
+Implement this order in the existing compiler; no model call occurs during selection:
+
+1. Verify snapshot lineage/cursor/reducer and current subject. Freeze L1–L3 and canonical tool ordering for the epoch. Validate capability-card prefix <=4096 characters.
+2. Reserve output, safety and a recovery allowance from the model window. Refuse a nonpositive usable budget. Apply item/body bounds before invoking a tokenizer.
+3. Render the exact objective/constraints, current plan/next action, modified resources, material failure, applicable verification, settled effects and remaining budgets. Retain the complete state as an authorized artifact; relevant dead ends enter source-bound evidence.
+4. Remove stale evidence. Serialize through the selected provider codec and count that final request. Above 80% usable, compact toward 60%; both thresholds are versioned policy settings.
+5. Elide lowest-priority evidence bodies, then old result bodies into artifact receipts. Drop lowest-priority evidence next, then oldest complete interactions. Keep the newest complete interaction. Recount after each change or use proven conservative incremental bounds plus a final exact/bounded recount.
+6. Mandatory content may exceed the low watermark but never the hard ceiling. If still too large, return `CONTEXT_BUDGET_EXCEEDED` with no inference. Upstream may reduce an oversized result into a structured receipt; it cannot summarize away the original requirement.
+7. Emit request/prefix/state/policy digests and omission reasons; then infer under the reserved budget. Actual cached reads/writes remain telemetry with explicit source/missingness, not a guarantee made by the compiler.
+
+Keep passing-test evidence even when raw passing logs leave the prompt. Failure snippets alone are insufficient: retain argv/environment/subject identity, counts, exit status and output artifact references. Eviction is a presentation decision; it never erases ledger history or resets verification freshness. Tool outputs remain untrusted content, including text that asks to replace the goal.
+
+### Reference deterministic recovery algorithm
+
+The following pure policy kernel is an executable guide to NT-R01/R02. Integrate its semantics into the existing recovery class, not as another loop. The caller validates schema types, supplies normalized fingerprints, persists the returned decision and counters, and decrements the shared reservation. `history` includes the current attempt and excludes transport/poll-only records; each tuple is `(fingerprint, outcome, verified_progress_key)`.
+
+```python
+from dataclasses import dataclass
+from typing import Literal, Sequence
+
+Action = Literal["continue", "wait", "reground", "replan", "stop"]
+
+@dataclass(frozen=True)
+class CoreDecision:
+    action: Action
+    interventions: int
+    transport_retries: int
+    delay_ms: int
+    reason: str
+
+def decide_recovery(
+    history: Sequence[tuple[str, str, str]], *, failure: str | None,
+    interventions: int, transport_retries: int,
+    remaining_turns: int, remaining_ms: int, jitter: float,
+) -> CoreDecision:
+    for value in (interventions, transport_retries, remaining_turns, remaining_ms):
+        if type(value) is not int or value < 0:
+            raise ValueError("invalid nonnegative counter")
+    allowed = {None, "permission", "permanent", "budget", "transient",
+               "protocol", "patch", "verification", "context", "tool"}
+    if failure not in allowed or not 0 <= jitter <= 1:
+        raise ValueError("invalid failure or jitter")
+    if remaining_turns == 0 or remaining_ms == 0:
+        return CoreDecision("stop", interventions, transport_retries, 0, "budget")
+    if failure in {"permission", "permanent", "budget"}:
+        return CoreDecision("stop", interventions, transport_retries, 0, failure)
+    if failure == "transient":
+        if transport_retries >= 3:
+            return CoreDecision("stop", interventions, transport_retries, 0, "retry_limit")
+        delay = int(min(8000, 500 * 2 ** transport_retries) * (0.5 + jitter / 2))
+        if delay >= remaining_ms:
+            return CoreDecision("stop", interventions, transport_retries, 0, "deadline")
+        return CoreDecision("wait", interventions, transport_retries + 1, delay, "transient")
+    window = tuple(history[-6:])
+    if not window or any(len(item) != 3 or not all(item) for item in window):
+        raise ValueError("semantic history requires complete identities")
+    repeated = window.count(window[-1]) >= 3
+    cycle = any(len(window) >= 2 * n and window[-n:] == window[-2*n:-n]
+                for n in (2, 3))
+    stagnant = len(window) == 6 and len({item[2] for item in window}) == 1
+    if not (failure or repeated or cycle or stagnant):
+        return CoreDecision("continue", interventions, transport_retries, 0, "progress")
+    if interventions >= 2:
+        return CoreDecision("stop", interventions, transport_retries, 0, "intervention_limit")
+    action: Action = "reground" if interventions == 0 else "replan"
+    return CoreDecision(action, interventions + 1, transport_retries, 0,
+                        failure or "no_progress")
+```
+
+Keep at most twelve attempt records in durable recovery state. Distinct fresh evidence may justify repeated syntax/tests; changed prose/timestamps do not. Persist chosen jitter delay and deadline, not a random generator state. Pending-operation polling is handled before this policy: reconcile the existing handle under its original deadline, charge elapsed budget, and never create a second operation. Unknown external effects keep their reservation; no refund solely because a transport call raised.
+
+Recovery does not change grants, tool authorization or the parent budget. Near-term exhaustion stops after reground/replan; Part 3's optional `consult` branch is not promoted. T-80 can later consume this detector to study different workspace/tool policies after MS-CONTROL. On stop, reconcile existing owned mutation/recovery work; report `RECOVERY_FAILED` if restoration cannot be proved. Do not claim that existing filesystem transactions already have crash-safe CAS promotion.
+
+### Gate and handoff recipe
+
+Pure contracts may land before baseline acceptance, but runtime enablement T-107 requires T-109. C accepts MS-BASELINE from complete integrated receipts; A binds context/recovery only after B's values/algorithms and A's provider codec are ready. B/T-77 then qualifies cache/receipt behavior without assuming a backend hit rate. A/T-110 runs a >=100-turn deterministic scenario with forced compaction, restart, stale verification and pending-operation exhaustion using a dedicated test profile. It MUST NOT enlarge balanced's product turn ceiling.
+
+T-111 reruns all required gates on the final subject, reconciles MS-CONTEXT and hands a clean exact identity to T-26. Register policy, model, prompt, tool and serializer identity before live L0/L2 measurement; changed behavior invalidates an earlier freeze. Neither mock success nor a negative valid control result accepts a positive capability gate. C updates only the existing five execution files and generator-produced knowledge; production changes also update their mapped architecture owners.
 
 **FACT STORE path:** `adapters/stores/event_store.py`.
 **I-STATE.** Lock `66aa7a3c`: `domain/task_state.py` MISSING. Branch: LIVE `8637db55` (`SemanticTaskState`; fold in `runtime/task_state.py`). MS-RESUME `CLOSED`.
@@ -83,11 +190,11 @@ older Wave 0–10 sections below remain historical capability recipes with their
 existing titles. Do not renumber, retitle, or infer current scheduling from
 them.
 
-This overlay stops at the frozen control. It does not schedule or provide
-next-code recipes for Prompts 05, 06, 07, or 09; T-75–T-78, T-83b, T-77, T-80,
-OCT-03, or ARM-01. DLG-01's live alias/provenance work (T-86, T-90) is likewise
-post-control — Wave 3, alongside IDX-01 — and not part of the Wave 1 package
-set.
+This historical EW-9 overlay stops at frozen control. NT-1 above now authorizes
+T-77 context/cache hardening and T-106 core recovery before that freeze, plus
+the explicitly listed baseline repairs. T-75/T-76, T-78/T-83b extensions,
+T-80 workspace-policy treatments, OCT-03 and ARM-01 remain post-control.
+DLG-01 live alias/provenance work (T-86/T-90) remains outside this iteration.
 
 ### FACT — W1 HAR-01 harness preconditions
 
@@ -246,7 +353,7 @@ waste `W`, and token efficiency `kappa`. **False-completion rate must equal
 zero.** It vetoes every pass-rate, lift, latency, token, and cost claim. Publish
 the frozen control disposition even when it is negative or undeterminable.
 
-### Next-sprint handoff: Wave 2 close, then Wave 3+
+### Historical EW-9 handoff (superseded for near-term ordering by NT-1)
 
 T-79/T-89/T-92–T-95 have 31 named focused tests green and remain unchecked.
 Execute the remaining work in this dependency order: **boundary repair ->
@@ -258,9 +365,10 @@ the exact clean SHA. T-95 is the hypothesis registry, not gate close. Closure
 requires n >= 30, Wilson LB >= 0.40, false-completion rate 0, and a published
 POSITIVE, NEGATIVE, UNDETERMINABLE, or INVALID disposition.
 
-After `MS-CONTROL` closes, begin only the existing post-control rows: IDX-01
-T-75–T-77, T-78/T-83b change closure, DLG-01 T-86/T-90, then the
-preregistered treatments T-80/T-96 as their `requires:` edges permit. OCT-03,
+After `MS-CONTROL` closes, the remaining post-control rows are IDX-01
+T-75/T-76, T-78/T-83b change closure, DLG-01 T-86/T-90, then the
+preregistered treatments T-80/T-96 as their `requires:` edges permit. T-77
+and core recovery are now pre-control under NT-1. OCT-03,
 specialists, memory and campaign work remain blocked by their milestone gates;
 do not infer authorization merely from mechanism presence.
 

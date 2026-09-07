@@ -156,6 +156,132 @@ B §18 tickets T-01–T-35 are canonical. A §31 maps into those IDs or T-36+ (s
 
 Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-dag-do-not-execute).
 
+### Context: Post-control horizon (FH-1) [PROPOSAL]
+
+All leaves remain unchecked and provisional. `requires:` edges are the only execution ordering; “Sprints 3–5” is a horizon label, not a schedule. T-27 below means **MS-CONTROL accepted**, including T-111, T-26 and all applicable predecessors; a negative T-27 disposition does not unlock prototypes. Preserve NT-1 Stream A/B/C ownership and scope. Future owner labels below identify subsystems, not assignments to concurrent agents. Before implementation, refine each leaf into exact files, registered schemas, runnable falsifiers, finite budgets and migration obligations using the measured control subject.
+
+These leaves refine existing T-17/T-28–T-34/T-49–T-58/T-67/T-80/T-96 families rather than creating competing implementations. [FH-1](spec.md#fh-1-post-control-backend-horizon-proposal) supplies contracts and [milestones](milestones.md#post-control-horizon-release-predicates-fh-1) supplies acceptance. Official evaluation of the single controller does not require optional CAS/campaign/memory work; any measured arm using those features does require their accepted gates. No paid calls or public submissions are authorized by this tree.
+
+- [ ] **T-112: Canonical tree and edit-set contracts [PROPOSAL]**
+  - **owner**: domain values; ports contract review
+  - **requires**: [T-27]
+  - **contract**: FH-C01; CAS-01
+  - **prototype leaves**: Define versioned entries, node/tree digests, bounds and exact edit-set validation; map existing port seams before adding any API.
+  - **falsifier / acceptance**: Round-trip bytes/modes/empty directories; reject duplicate/escaping paths, unsupported nodes and malformed digests.
+
+- [ ] **T-113: Durable snapshot adapter and isolated materialization [PROPOSAL]**
+  - **owner**: adapters/environment and blob store
+  - **requires**: [T-112]
+  - **contract**: FH-C01; CAS-01
+  - **prototype leaves**: Capture consistently, persist blobs before acknowledgement, materialize pinned trees and scratch outputs; bound storage.
+  - **falsifier / acceptance**: Capture race, crash during blob write, corruption, symlink and case-collision rejection; verifier cannot write active source.
+
+- [ ] **T-114: Authenticated candidate verification and atomic promotion [PROPOSAL]**
+  - **owner**: runtime emitter/reducers; adapter transaction boundary
+  - **requires**: [T-113]
+  - **contract**: FH-C02; CAS-01
+  - **prototype leaves**: Bind check plan and trusted receipts; implement idempotency and head/generation compare-and-append with registered events.
+  - **falsifier / acceptance**: Concurrent promotion admits one winner; stale receipts, omitted checks, forged verdicts and ABA reject; lost reply reconciles.
+
+- [ ] **T-115: Checkout export recovery and CAS retention [PROPOSAL]**
+  - **owner**: environment/store adapters; runtime lifecycle
+  - **requires**: [T-114]
+  - **contract**: FH-C03/FH-C04; CAS-01
+  - **prototype leaves**: Journal export/preimages, preserve metadata and external edits; implement rollback as new promotion and bounded pinned GC.
+  - **falsifier / acceptance**: Crash at each exported path; restore exact bytes/modes/existence or quarantine; GC cannot remove live/pending evidence.
+
+- [ ] **T-116: CAS integration qualification [PROPOSAL]**
+  - **owner**: test/runtime; test/contracts; test/adapters
+  - **requires**: [T-115]
+  - **contract**: MS-CAS
+  - **prototype leaves**: Drive selected product profile through capture, multi-file edit, verification, promotion, restart and separate export.
+  - **falsifier / acceptance**: Fresh-process persistence and second-verifier failure preserve baseline; full preservation gates; publish exact-subject MS-CAS disposition.
+
+- [ ] **T-117: Specialist wire and scope contracts [PROPOSAL]**
+  - **owner**: domain/ports; agency policy
+  - **requires**: [T-27]
+  - **contract**: FH-D01/FH-D02; DEL-01
+  - **prototype leaves**: Bind parent/call/request identities, artifact inputs, bounded findings and composition-owned read effects; reuse spawn values.
+  - **falsifier / acceptance**: Reject parent/subject mismatch, authority escalation, malformed output and credential-bearing context.
+
+- [ ] **T-118: Canonical spawn lifecycle and resource qualification [PROPOSAL]**
+  - **owner**: runtime delegation; agency spawn; focused test owners
+  - **requires**: [T-117]
+  - **contract**: MS-DELEGATION
+  - **prototype leaves**: Reserve through current governor, persist/reconcile intent and lineage; handle cancellation, revocation and unknown usage.
+  - **falsifier / acceptance**: Sibling overreservation, crash before/after dispatch, repeated call IDs and pending cancellation; no duplicate child/refund.
+
+- [ ] **T-119: Preregistered adaptive and specialist treatments [PROPOSAL]**
+  - **owner**: benchmarks paired studies; pack policies
+  - **requires**: [T-118, T-122]
+  - **contract**: EXP-02; MS-META/MS-SPECIALIST
+  - **prototype leaves**: Refine T-28/T-29/T-30/T-50/T-80/T-96 into separately frozen one-variable studies; mutating variants additionally require T-116.
+  - **falsifier / acceptance**: Same tasks and total ceilings, missingness/cost/latency accounting; valid negative/inconclusive disables treatment; positive gate needs prespecified lift.
+
+- [ ] **T-120: Durable campaign prototype [PROPOSAL]**
+  - **owner**: runtime client and existing scheduling; test integration
+  - **requires**: [T-116, T-118]
+  - **contract**: FH-D03; OCT-03
+  - **prototype leaves**: Refine T-31/T-34/T-54: versioned DAG, artifacts, node leases, single merge owner and bounded replanning; no second execution loop.
+  - **falsifier / acceptance**: Crash at each node boundary, unresolved child, failed dependency and conflicting candidates; no duplicate writes; combined-tree verification.
+
+- [ ] **T-121: Governed memory product qualification [PROPOSAL]**
+  - **owner**: existing memory/learning runtime and adapters; evaluator tests
+  - **requires**: [T-27]
+  - **contract**: MS-MEMORY; MEM-QUAL
+  - **prototype leaves**: Refine T-32/T-56/T-57: versioned lessons, authorization/revocation, independent evaluation/promotion and rollback.
+  - **falsifier / acceptance**: Cross-project leakage and stale cache denied; failed promotion retains evidence; held-out lift disposition; reconcile remaining M-8 predicates.
+
+- [ ] **T-122: Frozen evaluation schema and independent evaluator boundary [PROPOSAL]**
+  - **owner**: benchmarks protocols; existing evaluator adapters; test owners
+  - **requires**: [T-27]
+  - **contract**: FH-E01/FH-E02; EVAL-02
+  - **prototype leaves**: Define corpus/arm/attempt identities, denominator reconciliation, unique evaluator runs and immutable prediction artifacts.
+  - **falsifier / acceptance**: Reject unfrozen manifest, stale cache, forged receipt, missing row and worker access to oracle; preserve setup failure and unknown cost.
+
+- [ ] **T-123: SWE-bench Verified protocol adapter [PROPOSAL]**
+  - **owner**: benchmarks/tools runners and benchmark tests
+  - **requires**: [T-122]
+  - **contract**: FH-E03; EVAL-02
+  - **prototype leaves**: Pin upstream evaluator/dataset/images and prediction format; reproduce reference outputs in isolated fixtures before paid execution.
+  - **falsifier / acceptance**: Known pass/fail/empty/invalid patches, timeout and missing report retain upstream meaning; changed patch cannot reuse cached verdict.
+
+- [ ] **T-124: Aider polyglot protocol adapter [PROPOSAL]**
+  - **owner**: benchmarks/tools runners and benchmark tests
+  - **requires**: [T-122]
+  - **contract**: FH-E03; EVAL-02
+  - **prototype leaves**: Pin corpus/runner/edit/feedback rules; label AETHER harness substitution and preserve first-attempt versus retry metrics.
+  - **falsifier / acceptance**: Multilingual build/test collection, invalid edit, feedback-budget exhaustion and missing output; no pooling with Verified.
+
+- [ ] **T-125: Greenfield corpus and evaluation protocol gate [PROPOSAL]**
+  - **owner**: benchmarks corpus/evaluator and test owners
+  - **requires**: [T-123, T-124]
+  - **contract**: MS-EVAL; EVAL-02
+  - **prototype leaves**: Refine T-51/T-58 with separate requirement-to-check corpus, negative/stub cases and clean-start verification; audit all adapters.
+  - **falsifier / acceptance**: Placeholder-only implementations fail exterior checks; all expected attempts accounted; publish protocol disposition without claiming live scores.
+
+- [ ] **T-126: Official frozen benchmark execution and audit [PROPOSAL]**
+  - **owner**: benchmark execution and independent evidence review
+  - **requires**: [T-125]
+  - **contract**: MS-OFFICIAL; SWE-P4/SWE-P5
+  - **prototype leaves**: After applicable SWE-P3/P4 predicates, freeze exact arms, spend, sample/stop policy and run authorized evaluations; preserve T-33 DeepSWE separately.
+  - **falsifier / acceptance**: Complete raw outputs, corpus-specific denominators and reproducible evaluator results; retain negative/missing outcomes; submission authority explicit.
+
+- [ ] **T-127: Dated SOTA comparison disposition [PROPOSAL]**
+  - **owner**: benchmark statistics and independent reviewer
+  - **requires**: [T-126]
+  - **contract**: MS-SOTA
+  - **prototype leaves**: Freeze eligible comparator/metric/resource envelope and statistical threshold before evaluation; compare only compatible protocols.
+  - **falsifier / acceptance**: Independent replay/statistical audit; declare positive/negative/inconclusive/invalid; no universal score or professional-equivalence claim.
+
+- [ ] **T-128: Full-horizon release reconciliation [PROPOSAL]**
+  - **owner**: execution governance; architecture owners and release reviewers
+  - **requires**: [T-126]
+  - **contract**: M-8/M-9/M-10; REL-QUAL
+  - **prototype leaves**: Map accepted profile features to evidence and canonical architecture, migrate/version schemas, retire superseded paths with successor tests.
+  - **falsifier / acceptance**: Complete release recipes and independent evidence review; retain M-8/M-9/M-10 predicates. T-127 required only for a SOTA claim; T-116/T-118/T-120/T-121 required when corresponding features ship.
+
+
 ### Context: Instrument truth
 
 **T-01 Enumerator membership digest** (B)  

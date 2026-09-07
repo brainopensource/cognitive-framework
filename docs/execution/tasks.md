@@ -38,6 +38,21 @@ Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technic
 
 ## Near-term ownership and ready work
 
+**Operational Vocabulary Standard:**
+- Execution units are strictly identified by **Stream + Task ID + Milestone Gate** (e.g. `Stream A: T-99 -> MS-BASELINE`).
+- Terms such as "sprint", "wave", and "phase" are retired historical designations and carry no operational authority.
+- The `requires:` edges are the sole dependency ordering.
+
+### Active Ready-Work Board (`requires: []`)
+
+| Task ID | Stream | Package | Subsystem & Task | Prerequisites | Falsifier Command |
+|---|---|---|---|---|---|
+| **T-98** | **Stream C** | GATE-01 | Runner-independent isolation and nonmutation | `[]` (READY) | `python3 -m unittest test.contracts.test_suite_nonmutation test.tools.test_check_test_hygiene -v` |
+| **T-99** | **Stream A** | INS-01 | Lossless terminal projection (fix `abstained` -> `completed` collapse) | `[]` (READY) | `python3 -m unittest test.apps.coding_max.test_coding_max_facade test.falsifiers.test_rf90_generic_entrypoint test.falsifiers.test_completion_gate_scope -v` |
+| **T-100** | **Stream B** | CTX-01 | Canonical working-memory and recovery value contracts | `[]` (READY) | `python3 -m unittest test.contracts.test_semantic_task_state -v` |
+
+### Stream Ownership and Boundaries
+
 The labels **Stream A/B/C** below are current engineering ownership, not the historical `(A)`/`(B)` source-document labels or prior Lane A/B roles. There is no sprint calendar. T-98, T-99 and T-100 are independently ready. T-99 uses an independent disposable repository for targeted reproductions; no broad contributor-tree suite is permitted before T-98. Dependencies are actual prerequisites, not hidden external approvals.
 
 | Stream | Exclusive owned files / exceptions | Integration rule |

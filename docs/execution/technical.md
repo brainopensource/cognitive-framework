@@ -2313,7 +2313,7 @@ Shared rollback for every wave: revert the wave’s files; do not weaken falsifi
 
 ## Appendix: historical schedule (do not execute)
 
-Copied A §19 / B Appendix B sprint labels. Capability recipes remain below as **Recipe: INSTRUMENT / TRUTH / RESUME / …** pointing at MS-* and T-*. This is not a calendar.
+Copied A §19 / B Appendix B sprint labels. Capability recipes remain below as **Recipe: INSTRUMENT / TRUTH / RESUME / …** pointing at `MS-*` and `T-*`. This is not a calendar.
 
 Implementation lane (WIP=1) and evaluation lane (WIP=1) never share a writer.
 

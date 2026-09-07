@@ -1,3 +1,14 @@
+---
+id: research-hydra-topology
+class: research
+authority: non-canonical
+canonical_for: []
+status: proposal
+owner: research
+version: "2.0.0"
+last_verified: 2026-09-07
+---
+
 # HYDRA: Autonomous Neuro-Symbolic Meta-Agency, Adaptive Topologies, and Composable Software Engineering Substrates
 
 **Document Class:** Principal Systems Architecture Treatise & Mathematical Specification  

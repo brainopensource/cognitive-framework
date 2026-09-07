@@ -1,3 +1,14 @@
+---
+id: research-frontend-tui-development
+class: research
+authority: non-canonical
+canonical_for: []
+status: proposal
+owner: research
+version: "0.1.0"
+last_verified: 2026-09-07
+---
+
 SOTA Coding-Agent TUI for AETHER
 
 Context

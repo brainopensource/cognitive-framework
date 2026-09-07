@@ -1,3 +1,14 @@
+---
+id: research-frontend-backend-integration
+class: research
+authority: non-canonical
+canonical_for: []
+status: historical-reference
+owner: research
+version: "0.1.0"
+last_verified: 2026-09-07
+---
+
 # Full Plan (Archived): Backend/Frontend Integration, Test Buildout, and Build/Ship/Distribute for AETHER Clients
 
 > Status: **Archived for future sprint authorization.** Drafted 2026-08-31 during a planning session. Only Phase 0 and Phase 1 (F0 wire contract freeze + F1 single causal event ledger) were authorized for immediate execution — see `.claude/plans/scalable-nibbling-graham.md` for that scoped slice. Everything else below (F2–F8, test buildout, build/ship/distribute) is deferred pending future authorization.

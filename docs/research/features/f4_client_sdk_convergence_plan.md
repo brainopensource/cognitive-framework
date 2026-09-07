@@ -1,3 +1,14 @@
+---
+id: research-f4-client-sdk-convergence
+class: research
+authority: non-canonical
+canonical_for: []
+status: proposal
+owner: research
+version: "0.1.0"
+last_verified: 2026-09-07
+---
+
 # F4 — Client SDK Convergence: Incremental Migration Plan (Draft)
 
 > Status: drafted 2026-08-31, not yet authorized for execution. Companion to `.draft/frontend_backend_integration_full_plan.md` (this is the detailed breakdown of that plan's F4 phase). Written after F0 (wire contract freeze), F1 (single causal ledger), and F6 (Studio Observatory live wiring, verified end-to-end against a real gateway) shipped in `vanguard/clients/contracts` and `vanguard/clients/studio`.

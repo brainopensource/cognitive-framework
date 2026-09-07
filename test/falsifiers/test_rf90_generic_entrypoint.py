@@ -29,7 +29,9 @@ class RF90GenericEntrypointFalsifier(unittest.TestCase):
             "profile": "product",
         })
         self.assertEqual(frame["type"], "result")
-        self.assertIn(frame["result"]["outcome"], {"completed", "abstained"})
+        # The fake backend emits a bare finish, which must be rejected without
+        # patch and verification receipts.
+        self.assertNotEqual(frame["result"]["outcome"], "completed")
 
     def test_resume_command_executes_without_explicit_brief(self) -> None:
         frame = entrypoint.execute({
@@ -40,7 +42,7 @@ class RF90GenericEntrypointFalsifier(unittest.TestCase):
             "profile": "product",
         })
         self.assertEqual(frame["type"], "result")
-        self.assertIn(frame["result"]["outcome"], {"completed", "abstained"})
+        self.assertNotEqual(frame["result"]["outcome"], "completed")
 
 
 if __name__ == "__main__":

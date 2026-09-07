@@ -1,3 +1,14 @@
+---
+id: research-lda-improvement-plan
+class: research
+authority: non-canonical
+canonical_for: []
+status: proposal
+owner: research
+version: "0.1.0"
+last_verified: 2026-09-07
+---
+
 # SOTA Architectural Specification: Repository Intelligence as a Universal Context Engine
 
 ```text

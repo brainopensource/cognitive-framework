@@ -131,7 +131,11 @@ print("P2 Outcome:", res.outcome, "Turns:", res.turns)
             text=True,
             check=True,
         )
-        self.assertIn("P2 Outcome: completed", proc2.stdout)
+        # A finish-only deterministic model has no patch/verification
+        # evidence.  Resume must recover terminal state without fabricating a
+        # completion claim.
+        self.assertIn("P2 Outcome:", proc2.stdout)
+        self.assertNotIn("P2 Outcome: completed", proc2.stdout)
 
         # Query events from the resumed run
         proc_events = subprocess.run(
@@ -283,7 +287,8 @@ print("RESUME Outcome:", res.outcome, "Turns:", res.turns)
             check=True,
             timeout=60,
         )
-        self.assertIn("RESUME Outcome: completed", proc2.stdout, proc2.stdout + proc2.stderr)
+        self.assertIn("RESUME Outcome:", proc2.stdout, proc2.stdout + proc2.stderr)
+        self.assertNotIn("RESUME Outcome: completed", proc2.stdout, proc2.stdout + proc2.stderr)
 
         final_count = _effect_completed_count(state_dir, run_id)
         self.assertEqual(

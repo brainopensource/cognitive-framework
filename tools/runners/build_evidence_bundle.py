@@ -315,7 +315,8 @@ def build_m6(
         "schema_trajectory": "schemas/mhf/trajectory_v2.schema.json",
     }
     surface = {name: _sha256_file(subject_root / path)
-               for name, path in surface_paths.items()}
+               for name, path in surface_paths.items()
+               if (subject_root / path).is_file()}
     if not isinstance(falsifier_report.get("returncode"), int):
         raise ValueError("M-6 report must contain the subprocess returncode")
     passed = (
@@ -418,7 +419,8 @@ def _suite_bundle(
     differ, so only those are parameters.
     """
     surface = {name: _sha256_file(subject_root / path)
-               for name, path in surface_paths.items()}
+               for name, path in surface_paths.items()
+               if (subject_root / path).is_file()}
     if evidence_root is None:
         evidence_root = _REPO_ROOT / "evidence"
     evidence_root = evidence_root.resolve()

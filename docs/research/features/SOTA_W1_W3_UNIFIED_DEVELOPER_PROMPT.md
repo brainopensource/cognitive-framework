@@ -1,3 +1,14 @@
+---
+id: research-sota-w1-w3-developer-prompt
+class: research
+authority: non-canonical
+canonical_for: []
+status: proposal
+owner: research
+version: "0.1.0"
+last_verified: 2026-09-07
+---
+
 # SOTA-W1..W3 Unified Developer Prompt — Build Lane / Measurement Lane Re-Cut
 
 Subject: `ca47eef7da1b4075f8a69d238fe1626fa1ab4c8e` (re-audit; do not trust this SHA blindly)

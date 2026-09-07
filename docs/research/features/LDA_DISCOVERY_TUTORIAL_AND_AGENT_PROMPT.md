@@ -1,3 +1,14 @@
+---
+id: research-lda-discovery-tutorial
+class: research
+authority: non-canonical
+canonical_for: []
+status: reference
+owner: research
+version: "0.1.0"
+last_verified: 2026-09-07
+---
+
 # LDA Discovery Tutorial + Agent Prompt
 
 **Verified against index rebuilt 2026-08-31 at HEAD `ca47eef`.**

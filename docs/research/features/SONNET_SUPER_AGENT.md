@@ -1,9 +1,16 @@
 ---
+id: research-sonnet-super-agent
+class: research
+authority: non-canonical
+canonical_for: []
+status: proposal
+owner: research
+version: "0.1.0"
+last_verified: 2026-09-07
 title: The Sonnet Super-Agent Report
 subtitle: Empirical Forensics, vg-coder-v4, and a Divergent-Paradigm Roadmap Toward 10/10 Autonomous Software Engineering
 author: Claude (Sonnet 5) — Staff Engineer / Principal Architect working session
 date: 2026-09-02
-status: DRAFT — proposal and findings, not yet ratified
 scope: AETHER / Vanguard agentic coding substrate
 ---
 

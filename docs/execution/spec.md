@@ -92,6 +92,70 @@ The versioned wrapper adds lineage/reducer validation to Part 3's reference `Mem
 
 **NT-I01:** Planned kernel delta = 0 LOC; ceiling remains 1438. All additions live above the domain-blind kernel. Ports cannot import agency/kernel; adapters cannot import agency/kernel; runtime cannot execute subprocesses (N-06). Preserve I-6 isolation, I-7 domain blindness, one event writer and grant/budget attenuation. **NT-I02:** New gates `MS-BASELINE` and `MS-CONTEXT` are prerequisites to a new T-26 control freeze, not replacements for historical M-1–M-3/MS-INSTRUMENT/MS-RESUME receipts or M-8–M-10 release predicates. Deterministic 100+ turn fixtures do not change the balanced product ceiling or imply benchmark success.
 
+## FH-1. Post-control backend horizon [PROPOSAL]
+
+This section defines conditional TARGET contracts for prototype refinement after NT-1. It does not activate implementations, change T-98–T-111, authorize paid runs, or accept milestones. “Sprints 3–5” maps to capability dependencies in tasks, not a calendar. FH-1 governs the future CAS/delegation/evaluation scope where older proposal catalogs differ. Historical accepted subjects remain intact. The reference provenance is [Part 3 §§5–6](../reports/reviews/aether_v093_review/part3_blueprints_and_interface_contracts.md); its Python protocols are illustrative seams, not a requirement for additional public ports. Gate ownership is in [milestones.md](milestones.md#post-control-horizon-release-predicates-fh-1); algorithms are in [technical.md](technical.md#post-control-reference-handbook-fh-1-proposal).
+
+### FH-1.1 Immutable workspace contracts
+
+All proposed schemas use NT-1 digest/type validation and existing JCS encoding. Unknown required versions fail closed. These are domain values with no filesystem access. Exact source bytes are blobs; directories and file modes are part of identity.
+
+| Schema | Required fields | Constraints |
+|---|---|---|
+| `aether.tree/1` | sorted `entries: {path, kind: file/directory, mode, blob: Digest or null}[]` | Relative canonical POSIX paths; no duplicates, traversal, `.git`, backslash or NUL; all parents explicitly directories; modes 0..0777; directories have null blobs, files have verified blobs. Empty directories retained. Reject symlinks, special files, filesystem case/normalization collisions and unsupported metadata before capture. |
+| `aether.edit-set/1` | `baseline: Digest`, `edits: {path, expected_node: Digest or null, replacement: entry or null}[]`, `policy: Digest` | Nonempty, unique paths; null expected means absent; null replacement means delete. Exact preimage required. Validate the final complete tree and applicable language syntax before verification. |
+| `aether.check-plan/1` | `task, composition: Digest`, `checks: {id, argv, cwd, environment: Digest, timeout_ms, kind, minimum_tests}[]` | Unique IDs, explicit argv, relative cwd, finite positive deadlines; test checks require positive collection; build/static checks may declare zero. Pack/composition owns required checks. |
+| `aether.candidate-check/1` | `candidate, plan, command, environment: Digest`, `check_id`, `verifier_identity`, `operation_id`, `exit_code`, `collected/executed: int or null`, `timed_out`, `cancelled`, `outputs: Digest[]`, `attestation` | Authenticated runtime verifier provenance; no model-authored receipt admission. Missing counts cannot satisfy test checks. Successful process exit alone is insufficient. |
+| `aether.promotion/1` | `transaction_id, task, composition, grant: Digest`, `branch`, `expected_head, candidate, check_plan: Digest`, `expected_generation: int`, `receipts: Digest[]` | Identity binds all fields except receipt collection; validate full required check set and authorization again at commit. Generation is monotonic, preventing ABA after rollback. |
+| `aether.export-journal/1` | `operation_id`, `candidate, destination_baseline: Digest`, `destination_identity`, `preimage_manifest: Digest`, `state`, `completed_paths` | Runtime-owned intent; adapters perform export. States: prepared/publishing/committed/restoring/restored/quarantined. Preserve bytes, modes and existence. |
+
+**FH-C01:** Capture MUST enforce declared path/count/byte bounds and obtain a consistent source snapshot under workspace ownership; a concurrently changing capture is rejected or retried within budget. Persist file blobs and manifest durably before acknowledgement. Reads verify digests and grants; content addressing grants no access. Initial materialization supports only declared regular files/directories. Tests get an immutable source mount plus declared scratch/build outputs; tools requiring source mutation run on a disposable copy whose source digest is rechecked before accepting evidence.
+
+**FH-C02:** Promotion MUST perform idempotency lookup, expected head AND generation comparison, current authority validation, required authenticated verification checks, and commit-event append inside the existing single-writer serialization boundary. The branch head is a fold of registered `mhf.event/2` facts, with any cached projection updated transactionally. There MUST NOT be another independently writable head or ledger. A concurrent loser returns conflict without mutation. A replay of an already committed transaction returns its original result, even if the branch later advanced.
+
+**FH-C03:** Before commit, failure/cancellation/exhaustion leaves the active head unchanged. After an unknown commit reply, reconcile transaction identity before retry or refund. Post-commit rollback is a new authorized compare-and-append to a retained snapshot, never event deletion. Readers pin one head/generation for an operation; atomic visibility applies only to consumers of this workspace abstraction. Existing checkouts receive no atomic multi-file visibility guarantee.
+
+**FH-C04:** Checkout export requires explicit destination ownership, a lock respected by framework writers, durable preimages/journal, and a final baseline comparison. External changes stop publication; unsupported concurrent writers preclude an exclusive-export guarantee. Recover each interrupted operation idempotently; restoration failure quarantines the destination. Return separate promotion and export dispositions. Live heads, pending operations, accepted evidence and authorized retention roots pin CAS blobs; bounded mark/sweep GC cannot reclaim them. Missing/corrupt blobs stop resume or promotion, never reconstruct fabricated evidence.
+
+### FH-1.2 Delegation and campaign contracts
+
+| Schema | Required fields | Constraints |
+|---|---|---|
+| `aether.specialist-request/1` | `call_id`, `parent_lineage`, `task, composition, policy, grant: Digest`, `role`, `inputs: Digest[]`, `output_schema`, `scope`, `budget`, `deadline`, `depth_limit` | Scope uses existing wire contracts; no kernel type in public ports. Stable request identity binds parent and call ID. Read-only effect allowlist is composition-owned. |
+| `aether.specialist-findings/1` | `request: Digest`, `child_lineage`, `subject: Digest`, `claims: {finding, evidence: Digest[], validity}[]`, `limitations`, `terminal_status`, `disposition`, `usage_receipt: Digest` | Bounded payload; verify lineage, subject, schema and evidence before parent incorporation. Findings are advisory and cannot satisfy exterior acceptance. |
+| `aether.campaign-plan/1` | `campaign_id`, `version`, `objective: Digest`, `nodes: {id, task, inputs, output_schema, requires, owner, acceptance_plan}[]`, `budget`, `policy: Digest` | Acyclic dependencies; explicit interface contracts and merge owner; plan revisions recorded. Ready means dependencies have applicable accepted artifacts, not merely terminal children. |
+
+**FH-D01:** Extend canonical `SpawnRequest`/`SpawnAdapter`, child runtime and existing agency spawn. Validate current expiry/revocation, scope attenuation and depth at dispatch. Reserve additive sibling envelopes (`usd_micros`, `millis`, `tokens`, `bytes`) through existing governor leases; turns/depth remain structural ceilings. Persist intent and reservation before child dispatch; reconcile partial admission without a second budget accountant. Unknown child outcomes keep reservations unsettled. Parent cancellation propagates deadlines; a timeout never proves no effect occurred.
+
+**FH-D02:** Default treatment permits bounded read-only specialists and one parent writer. No raw authenticated session handle enters child context. Optional parallel implementers require isolated candidates, explicit ownership, MS-CAS acceptance and a separately frozen treatment. Parent integration is a new candidate requiring verification of the combined tree. Child passes, role votes and model preferences cannot promote it.
+
+**FH-D03:** Campaign policy is a runtime client above the existing execution path and has zero arbitrary mutation verbs. Durable node leases, attempts and artifact references use the current ledger; no second EpisodeEngine or scheduler accounting. Restart reconciles pending nodes before dispatch. Replanning cannot silently enlarge objective/grants/budget. Persist blocked/failed/undeterminable outcomes and bounded replan allowances; failed dependencies do not become ready. Full Octopus/HYDRA activation retains the M-OCT/post-M-10 boundary.
+
+### FH-1.3 Evaluator and experiment boundary
+
+**FH-E01:** A versioned `aether.evaluation-manifest/1` MUST freeze corpus source/revision/split, exact instance IDs and digest, runtime SHA, composition/prompt/tool/model identities, environment images, inference/evaluator versions, attempt/feedback policy, seeds or explicit nondeterminism, budget, statistical plan, acceptance margin and stop rule. Null/unfrozen fields forbid scoring. The evaluator materializes the final submitted patch independently and cannot trust the agent's tests or finish message. Official test patches/answers and held-out results MUST NOT enter the worker's context or memory learning. Public availability is not proof of uncontaminated training; disclose unknown exposure.
+
+**FH-E02:** A versioned `aether.evaluation-attempt/1` binds manifest, instance, attempt, base/candidate/patch digests, prediction artifact, evaluator run identity, command/image, raw result/log artifacts, terminal status, task disposition, failure attribution and observed usage/missingness. Emit one canonical row per scheduled attempt, including no-output, invalid-patch, infrastructure and dataset failures. Preserve original attempts when rerunning; a changed patch requires a new evaluator run identity to avoid stale result caches. Unknown cost stays null, never zero.
+
+**FH-E03:** SWE-bench Verified uses pinned upstream evaluation and prediction format; Aider polyglot uses its separately pinned corpus, runner and feedback/attempt rules. Report AETHER-on-Aider results as such; replacing Aider's harness does not reproduce an Aider leaderboard row. First-attempt and retry-assisted outcomes are separate. Greenfield has an independent requirement-based corpus and exterior acceptance. None of these scores are pooled or labeled interchangeable. G-3 and SWE-P5 remain mandatory for official claims.
+
+**FH-E04:** Paired treatments hold tasks and total budgets fixed and vary one declared component. Include coordination, verification, retries and failures in cost/latency. Use prespecified uncertainty estimates and multiplicity/stop handling; do not tune on held-out results. Protocol qualification can close with a valid negative result; treatment promotion requires the predeclared positive predicate. SOTA is a dated, benchmark-specific comparison against a reproducible eligible comparator, with uncertainty and resource differences disclosed. An inconclusive or negative result completes an honest report but does not establish superiority.
+
+### FH-1.4 Failure and compatibility matrix
+
+| Failure | Required outcome |
+|---|---|
+| `TREE_UNSUPPORTED` / `CAPTURE_CHANGED` / `PATCH_PREIMAGE_MISMATCH` | Reject candidate before active mutation; retain bounded diagnosis. |
+| `BLOB_CORRUPT` / `BLOB_MISSING` | Refuse materialization/promotion; repair storage under separate authority. |
+| `CHECK_INCOMPLETE` / `VERIFIER_UNTRUSTED` / `VERIFICATION_STALE` | Refuse promotion and task acceptance. |
+| `PROMOTION_CONFLICT` | Keep current head; rebase creates a new candidate and invalidates old verification. |
+| `PROMOTION_UNKNOWN` / `CHILD_UNKNOWN` | Reconcile durable operation; no blind replay/refund. |
+| `EXPORT_CONFLICT` / `RECOVERY_FAILED` | Stop export; restore only owned changes or quarantine; no false rollback claim. |
+| `DELEGATION_DENIED` / `BUDGET_DENIED` | No child dispatch; scope and budget never enlarged by fallback. |
+| `EVALUATION_INVALID` / `EVALUATION_INCOMPLETE` | Preserve denominator and null metrics; no acceptance. |
+
+Schemas/events need registered readers, version migration and coverage falsifiers before activation. Existing events are never rewritten. All legacy patch frontends must converge on one validated edit set for the CAS profile, with explicit compatibility tests; retain old profiles only where their weaker guarantees are stated. Domain stays pure; syntax/filesystem/process work stays in packs/adapters/tools; runtime composes and emits. Planned kernel delta remains zero LOC, ceiling 1438. M-8 acceptance and M-9/M-10 predicates remain independent obligations.
+
 ## 0. Normative System Clauses (TARGET Law)
 
 ### 0.1 Identity and causal truth

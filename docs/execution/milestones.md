@@ -56,6 +56,24 @@ MS-CONTROL additionally requires MS-BASELINE and MS-CONTEXT on its candidate sub
 
 Dual mission: (1) Coding Max on one `EpisodeEngine` path; (2) same substrate for other agents. CLI is a client of `ApplicationService`.
 
+### Post-control horizon release predicates (FH-1)
+
+All rows below are **OPEN [PROPOSAL]**. They define future acceptance, not implementation authorization or a sprint calendar. NT-1 and its control gate remain unchanged. The normative owner is [FH-1](spec.md#fh-1-post-control-backend-horizon-proposal). Existing MS-* rows are extended for these future subjects, not replaced or retrospectively accepted.
+
+| Gate | Dependencies | Required acceptance evidence |
+|---|---|---|
+| **MS-CAS** | MS-CONTROL; T-112–T-116 | Durable immutable tree capture, exact edit sets, isolated verification and atomic ledger-head promotion; disk/process fault injection at every persistence boundary; concurrent winner/loser and ABA tests; lost reply reconciliation; bounded GC; separate journaled checkout export preserves modes/existence or reports quarantine. No atomic-host-checkout claim. |
+| **MS-DELEGATION** | MS-CONTROL; T-117–T-118 | Canonical child lineage, scope and aggregate budget conservation; restart/revocation/cancellation and unknown-outcome reconciliation; child cannot mutate parent or acceptance records. This qualifies mechanics, not specialist performance. |
+| **MS-SPECIALIST / MS-META extension** | MS-DELEGATION; T-119; MS-CAS additionally for mutating workers | Preregistered paired study against frozen control, cost/latency/missingness included. Enable only treatments satisfying the chosen useful-lift or cost-saving/noninferiority predicate. Valid negative/inconclusive study remains disabled. T-28/T-29/T-30/T-50 retain ownership of their treatment families. |
+| **MS-CAMPAIGN extension** | MS-CAS; MS-DELEGATION; T-120 | Existing runtime client resumes DAG execution after crashes without duplicate effects; parent owns merge; integration checks validate combined tree; blocked dependencies, scope change and exhausted replans have explicit outcomes. A basic campaign does not require a positive specialist study; performance claims do. Full M-OCT remains post-M-10. |
+| **MS-MEMORY extension** | MS-CONTROL; T-121 and existing M-8 predicates | Project authorization/revocation at retrieval and caches; separate generation/evaluation/promotion; versioned lessons, held-out lift, rollback and leakage falsifiers. Memory treatment never trains on the evaluation holdout. This row alone does not accept M-8. |
+| **MS-EVAL** | MS-CONTROL; T-122–T-125 | Qualified immutable candidate/evaluator separation, pinned Verified and Aider adapters, separate greenfield corpus, faithful reference-result replay and failure accounting. No live score required to qualify protocol; no score inferred from fixtures. |
+| **MS-OFFICIAL extension** | MS-EVAL; SWE-P4/SWE-P5; T-126 | Authorized frozen runs, complete upstream outputs/predictions, exact-subject audit and benchmark-specific reporting; missing instances preserved. Optional CAS/topology/memory dependencies apply only if included in the measured arm. Existing DeepSWE T-33 remains a distinct track. |
+| **MS-SOTA** | MS-OFFICIAL; T-127 | Dated eligible comparator, frozen metric/resource envelope, prespecified statistical superiority criterion and reproducible evidence. Passing an official protocol or reporting a score does not close this gate. Negative/inconclusive outcomes remain published with gate OPEN. |
+| **Release handoff** | T-128; applicable accepted gates; existing M-8/M-9/M-10 | Complete preservation recipes on release subject, independently reviewed evidence digest, migration/rollback and operator claims matched to qualified features. M-9 cannot precede M-8; M-10 retains release_qualify exit-zero predicate. |
+
+Dependency spine: `MS-BASELINE -> MS-CONTEXT -> MS-CONTROL`; thereafter CAS, delegation, memory and evaluation are conditional branches. No requirement to build campaigns or achieve MS-SOTA before evaluating the single controller. A released profile advertises only its accepted branches. Prototype refinements require updated contracts and leaf falsifiers before implementation, with no weakened gate by silent threshold changes.
+
 ## 2. M-0–M-10 and G-1–G-3
 
 This page defines stable release outcomes and gate predicates. It does not track day-to-day work packages (owned by [`backlog.md`](backlog.md)) or the flat task tree (owned by [`tasks.md`](tasks.md)). Mechanism presence does not infer milestone closure; closure requires producer-verifiable empirical receipts evaluated under the milestone acceptance boundary.

@@ -81,6 +81,22 @@ This is package scope/lifecycle, not a second task queue. NT-1 in [`spec.md`](sp
 
 **Excluded from Iteration 1:** Part 3 CAS Tree/stage/transact promotion, journaled host export, delegate_readonly activation, advanced workspace-policy treatments, semantic memory learning, comparative model routing, new LDA/LSP backends and official benchmark/release execution. Their existing proposal packages remain recorded without new implementation authorization. Existing patch safety defects are remediation under T-108, not permission to build the CAS substrate.
 
+### 2.0a Post-control capability packages (FH-1) [PROPOSAL]
+
+These packages extend existing owners and remain `PROPOSED`; they do not alter approved NT-1 work. Contracts: [spec FH-1](spec.md#fh-1-post-control-backend-horizon-proposal). Acceptance: [horizon gates](milestones.md#post-control-horizon-release-predicates-fh-1). The only work tree is [T-112–T-128](tasks.md#context-post-control-horizon-fh-1-proposal).
+
+| Package | Scope and existing ownership | Gate / work refinement |
+|---|---|---|
+| **CAS-01** | Extend transaction/environment adapters, blob storage and runtime emitter with canonical trees, isolated candidates, compare-and-append promotion, recovery, export and GC | MS-CAS; T-112–T-116 refine T-17/T-30/T-49. T-17's historical preflight guarantee is not durable CAS qualification. |
+| **DEL-01** | Existing spawn/child runtime and governor: bounded read-only specialists, idempotent dispatch and reconciled cancellation | MS-DELEGATION; T-117/T-118 refine T-29/T-34/T-53, preserve accepted M-6 subjects. |
+| **EXP-02** | Optional routing/recovery/specialist experiments; same budget and task conditions, no automatic treatment activation | MS-META/MS-SPECIALIST; T-119 refines T-28/T-29/T-30/T-50/T-80/T-96. |
+| **OCT-03 extension** | Minimal durable campaign client, dependency artifacts, owned integration and bounded replanning | MS-CAMPAIGN; T-120 refines T-31/T-54/T-34. T-55/HYDRA and full Octopus remain post-M-10 horizon, not default dependencies. |
+| **MEM-QUAL** | Existing memory/learning contracts: project-scoped lessons, revocation, independent promotion and measured lift | MS-MEMORY and M-8; T-121 refines T-32/T-56/T-57. No mandatory vector store. |
+| **EVAL-02** | Subject-bound external evaluator, Verified and Aider protocol adapters, distinct greenfield completeness corpus | MS-EVAL; T-122–T-125 refine T-51/T-58; reuse instrument and evaluator seams. DeepSWE T-33 stays separate. |
+| **REL-QUAL extension** | Frozen official runs, statistical comparison, independent evidence review and release claim reconciliation | MS-OFFICIAL/MS-SOTA; T-126–T-128 refine T-33/T-58/T-67 and SWE-P3–P5. No guaranteed score or professional-equivalence claim. |
+
+Advance packages from PROPOSED only after applicable predecessor acceptance and an implementation-ready leaf review. A valid negative experiment is retained as evidence and leaves its treatment disabled; protocol closure and positive capability acceptance are different dispositions. Larger tree stores, parallel writers, learned routers and semantic memory ranking require measured need and separately pinned treatments. Schema additions reuse existing ports unless an independently replaceable responsibility demonstrably lacks a contract.
+
 ### 2.1 Substrate, Kernel & Event Sourcing (VISION.md §1–6)
 
 | ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Description & Acceptance Gate |

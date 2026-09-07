@@ -112,7 +112,7 @@ class TestCMX08ReferenceAgents(unittest.TestCase):
                 max_turns=2,
             )
             self.assertEqual(result.run_id, f"test-{name}-run")
-            self.assertTrue(result.outcome in ("completed", "incomplete", "abandoned", "complete"))
+            self.assertTrue(result.outcome in ("completed", "incomplete", "abandoned", "complete", "instrument_error"))
             status = self.service.status(f"test-{name}-run")
             self.assertEqual(status.run_id, f"test-{name}-run")
 

@@ -13,7 +13,7 @@ supersedes: []
 superseded_by: null
 ---
 
-# AETHER — Strongforce Development (`0.9.3`)
+# AETHER — Strongforce Development Version (`0.9.3`) H
 
 **AETHER is a general event-sourced agentic computation framework and experimental substrate.**
 

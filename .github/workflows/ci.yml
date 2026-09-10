@@ -134,10 +134,9 @@ jobs:
       - name: Local markdown links check
         run: python3 tools/linters/check_markdown_links.py
 
-      - name: Markdown linting and MkDocs strict build
+      - name: Markdown linting
         run: |
           npx markdownlint-cli2 "docs/**/*.md" "README.md" "AGENTS.md" "VISION.md"
-          uv run mkdocs build --strict
 
       - name: Secret scan check
         run: python3 tools/linters/scan_secrets.py
@@ -207,4 +206,3 @@ jobs:
           uv run python tools/linters/check_doc_metadata.py
           uv run python tools/linters/check_markdown_links.py
           npx markdownlint-cli2 "docs/**/*.md" "README.md" "AGENTS.md" "VISION.md"
-          uv run mkdocs build --strict

@@ -303,22 +303,16 @@ The repository uses `just` to expose clean, repository-owned validation commands
 # 1. Normal local development check (fast)
 just check
 
-# 2. Browse local documentation with live rendering (MkDocs + Mermaid)
-just docs-serve
-
-# 3. Validate documentation structure, frontmatter, links, and linting
+# 2. Validate documentation structure, frontmatter, links, and linting
 just docs-check
 
-# 4. Strict MkDocs site build
-just docs-build
-
-# 5. Regenerate machine-readable knowledge base (.generated/knowledge/)
+# 3. Regenerate machine-readable knowledge base (.generated/knowledge/)
 just docs-knowledge
 
-# 6. Complete documentation qualification gate
+# 4. Complete documentation qualification gate
 just docs-full
 
-# 7. Complete local/CI qualification gate (run before PR completion / sprint closure)
+# 5. Complete local/CI qualification gate (run before PR completion / sprint closure)
 just verify
 ```
 
@@ -342,7 +336,6 @@ uv run <command>
 | Situation | Command | Scope & Behavior |
 |---|---|---|
 | **Normal development** | `just check` | Fast architectural linters, TCB budget, and doc metadata checks |
-| **Browse documentation** | `just docs-serve` | Serve MkDocs site with live Mermaid rendering at `localhost:8000` |
 | **Validate documentation** | `just docs-check` | Frontmatter validation, link/anchor checks, and markdownlint |
 | **Before PR / Task completion** | `just verify` | Complete local/CI gate: locks, linters, tests, typecheck, docs-full |
 | **Sprint / Milestone closure** | `just verify` | Complete repository qualification gate |

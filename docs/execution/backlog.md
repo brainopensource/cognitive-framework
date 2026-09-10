@@ -69,6 +69,10 @@ graph LR
 
 This is package scope/lifecycle, not a second task queue. NT-1 in [`spec.md`](spec.md#nt-1-near-term-baseline-context-cache-and-recovery-delta) promotes the core reference decisions into canonical contracts. T-98–T-111 and revised T-77 own work in [`tasks.md`](tasks.md#near-term-ownership-and-ready-work). Stream A/B/C supersede historical lane labels for this scope only. Approval is not implementation or milestone acceptance.
 
+Anything that makes the system's own evidence trustworthy is core to the Beta MVP. Anything that makes the runtime safe for untrusted callers or third parties is post-beta.
+
+Accordingly, truthful terminal/disposition projection, canonical state and recovery values, test-suite nonmutation and measurement integrity, patch atomicity, context compaction, and process restart/resume are core. Host sandboxing (`bwrap`, containers, seccomp), production network-policy enforcement, CAS workspaces, specialists, delegation, campaign orchestration, governed memory, and external benchmark claims are post-beta. The latter capabilities already use the MS-CONTROL and FH-1 fences below; this classification adds no second fence.
+
 | Package | Approved scope and owner | Existing capability relationship | Acceptance / lifecycle |
 |---|---|---|---|
 | **GATE-01** | Nonmutating runner, complete collection, current failure inventory, dead-path cleanup and integrated gate; C coordinates, A/B fix their owned surfaces | Additive baseline qualification; preserves MS-INSTRUMENT's historical subject. T-98/T-101/T-108/T-109/T-111 | `APPROVED`; MS-BASELINE requires exact-subject complete Python/TS/recipe receipts, no silent falsifier loss and unchanged contributor state. |
@@ -79,7 +83,7 @@ This is package scope/lifecycle, not a second task queue. NT-1 in [`spec.md`](sp
 
 **Release dependency:** MS-BASELINE -> MS-CONTEXT -> new MS-CONTROL freeze/qualification. T-111 reconciles the integrated subject; T-26/T-27 retain their evidence obligations. M-8 empirical acceptance and M-9/M-10 authorization are unchanged. Existing DONE mechanisms retain their historical receipts; richer current product preservation needs the new gates.
 
-**Excluded from Iteration 1:** Part 3 CAS Tree/stage/transact promotion, journaled host export, delegate_readonly activation, advanced workspace-policy treatments, semantic memory learning, comparative model routing, new LDA/LSP backends and official benchmark/release execution. Their existing proposal packages remain recorded without new implementation authorization. Existing patch safety defects are remediation under T-108, not permission to build the CAS substrate.
+**Post-beta under the Beta MVP boundary:** Part 3 CAS Tree/stage/transact promotion, journaled host export, host sandboxing and production network-policy enforcement, delegate_readonly activation, advanced workspace-policy treatments, specialists and delegation, campaign orchestration, governed semantic memory learning, comparative model routing, new LDA/LSP backends, and external benchmark/release claims. Their existing MS-CONTROL and FH-1 fences remain the sole authorization boundaries; no duplicate fence is introduced here. Existing patch safety defects are core remediation under T-108, not permission to build the CAS substrate.
 
 ### 2.0a Post-control capability packages (FH-1) [PROPOSAL]
 
@@ -139,10 +143,10 @@ Advance packages from PROPOSED only after applicable predecessor acceptance and 
 
 | ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Description & Acceptance Gate |
 |---|---|---|---|---|---|---|
-| **DOC-01** | MkDocs + Native Mermaid + Strict Gate | `docs` | Lane A | `DONE` | P0 | `pymdownx.superfences` Mermaid rendering and MkDocs strict build. |
+| **DOC-01** | MkDocs HTML Generator (Deprecated) | `docs` | Lane A | `DEPRECATED` | P0 | Deprecated in favor of raw Markdown docs and fast AST/JSONL knowledge retrieval. |
 | **DOC-02** | Deterministic Knowledge Base (.jsonl) | `tools` | Lane A | `DONE` | P0 | Machine-generated `catalog`, `code-map`, `symbols`, and `ownership` files. |
 | **DOC-03** | Structured RAG V0 (Deterministic) | `tools` | Lane A | `DONE` | P0 | Exact-ID and authority-weighted context query tool (`tools/docs_rag_v0.py`). |
-| **DOC-04** | Griffe & mkdocstrings Python API Docs | `docs` / `tools` | Lane A | `APPROVED` | P1 | Auto-generated API documentation for ports and public runtime contracts. |
+| **DOC-04** | Griffe & mkdocstrings API Docs (Deprecated) | `docs` / `tools` | Lane A | `DEPRECATED` | P1 | Deprecated in favor of LDA AST indexing and symbols knowledge base. |
 | **DOC-05** | AST-Grep Structural Repository Indexer | `tools` | Lane B | `PROPOSED` | P1 | Structural AST queries for callers, adapters, and deprecated APIs. |
 | **DOC-06** | SCIP Language-Agnostic Symbol Index | `tools` | Lane B | `PROPOSED` | P1 | SCIP indexer generating full cross-language symbol maps for Python & TS. |
 

@@ -589,10 +589,11 @@ class GitEnvironment:
                         break
                     has_hunk = True
                     try:
-                        hint = parse_hunk_header(lines[i])
+                        header = lines[i]
+                        hint = parse_hunk_header(header)
                         i += 1
                         body, i = collect_hunk_body(lines, i)
-                        require_complete_hunk(body, norm_rel)
+                        require_complete_hunk(body, norm_rel, header)
                     except HunkFailure as exc:
                         return Result.fail(exc.kind, exc.message)
                     hunks.append((hint, body))

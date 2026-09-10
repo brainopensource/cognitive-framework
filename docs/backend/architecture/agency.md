@@ -128,6 +128,8 @@ LLMs may produce outputs that violate tool schema syntax or fail JSON parsing. R
 | Missing Required Field | Inject missing parameter description. | Max 2 retries per turn. |
 | Repeated Failure | Elevate to `RecoveryDecision.FAIL_TURN` with synthetic error receipt. | Halts turn after 3 attempts. |
 
+An authorization denial emitted by the kernel is a durable receipt, not a retried effect. The next bounded model turn may select a narrower permitted action, but an immediate `finish` after the denial is abandoned; completion may follow only a permitted subsequent action.
+
 ---
 
 ## 5. Terminal Dispositions (`RunTermination`)

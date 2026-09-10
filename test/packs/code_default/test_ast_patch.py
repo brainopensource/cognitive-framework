@@ -135,6 +135,24 @@ class AstPatchTests(unittest.TestCase):
         self.assertEqual(target.read_text(encoding="utf-8"), source)
         self.assertEqual(stat.S_IMODE(target.stat().st_mode), 0o640)
 
+    def test_unified_diff_with_false_line_counts_is_rejected(self) -> None:
+        from vanguard.packages.domain.wire.result import Err
+
+        target = self.workspace / "mod.py"
+        source = "def foo():\n    return 1\n"
+        target.write_text(source, encoding="utf-8")
+        malformed = (
+            "--- a/mod.py\n+++ b/mod.py\n@@ -1,20 +1,20 @@\n"
+            " def foo():\n-    return 1\n+    return 2\n"
+        )
+        result = self.toolkit.execute(
+            self._request(path="mod.py", diff=malformed),
+            self.ctx,
+        )
+        self.assertIsInstance(result, Err)
+        self.assertIn("hunk line count mismatch", result.message)
+        self.assertEqual(target.read_text(encoding="utf-8"), source)
+
     def test_stale_anchor_digest_is_rejected(self) -> None:
         import os
         import stat

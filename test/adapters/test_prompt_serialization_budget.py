@@ -84,13 +84,18 @@ def _body(bundle, *, model: str) -> dict:
 class TheCountIsTakenOnTheFinalRequest(unittest.TestCase):
     def test_the_bound_is_conservative_over_the_serialized_bytes(self) -> None:
         payload = b'{"model":"x","messages":[]}'
-        self.assertEqual(
-            count_serialized_tokens(payload),
-            -(-len(payload) // CONSERVATIVE_BYTES_PER_TOKEN),
-        )
-        # Over-counting is the only safe direction for a fail-closed budget.
-        self.assertGreater(count_serialized_tokens(payload), len(payload) // 4)
+        self.assertEqual(CONSERVATIVE_BYTES_PER_TOKEN, 1)
+        self.assertEqual(count_serialized_tokens(payload), len(payload))
         self.assertEqual(count_serialized_tokens(b""), 0)
+
+    def test_the_fallback_does_not_assume_average_natural_language_density(self) -> None:
+        # JSON may contain punctuation-heavy generated data, code, or UTF-8.
+        # Without the route's exact tokenizer the only fail-closed byte-level
+        # BPE ceiling is one token per serialized byte; bytes/3 is an average,
+        # not an upper bound.
+        for payload in (b'! ! ! ! !', bytes(range(128)), "🧪漢字".encode("utf-8")):
+            with self.subTest(payload=payload):
+                self.assertEqual(count_serialized_tokens(payload), len(payload))
 
     def test_native_tool_schema_overhead_is_counted_not_ignored(self) -> None:
         bundle = _packet("ran pytest -> ImportError").bundle()

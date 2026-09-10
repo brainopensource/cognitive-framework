@@ -64,13 +64,34 @@ def collect_hunk_body(lines: Sequence[str], index: int) -> tuple[list[str], int]
     return body, index
 
 
-def require_complete_hunk(body: Sequence[str], path: str) -> None:
+def require_complete_hunk(
+    body: Sequence[str],
+    path: str,
+    header: str | None = None,
+) -> None:
+    """Reject empty/edit-free hunks and false declared body line counts."""
     if not body:
         raise HunkFailure("invalid_request", f"incomplete hunk in {path}: empty body")
     if not any(line[:1] in "+-" for line in body):
         raise HunkFailure(
             "invalid_request",
             f"incomplete hunk in {path}: no insertions or deletions",
+        )
+    if header is None or header.strip() in ("@@", "@@@"):  # count-free extension
+        return
+    match = _HUNK_HEADER.match(header)
+    if match is None:
+        raise HunkFailure("invalid_request", f"malformed hunk header: {header}")
+    declared_old = int(match.group(2)) if match.group(2) is not None else 1
+    declared_new = int(match.group(4)) if match.group(4) is not None else 1
+    actual_old = sum(line[:1] in ("-", " ") for line in body)
+    actual_new = sum(line[:1] in ("+", " ") for line in body)
+    if (declared_old, declared_new) != (actual_old, actual_new):
+        raise HunkFailure(
+            "invalid_request",
+            f"hunk line count mismatch in {path}: header declares "
+            f"-{declared_old}/+{declared_new}, body contains "
+            f"-{actual_old}/+{actual_new}",
         )
 
 
@@ -182,10 +203,11 @@ def apply_unified_to_text(before: str, diff: str, path: str = "<patch>") -> str:
                 index += 1
             continue
         if line.startswith("@@"):
-            hint = parse_hunk_header(line)
+            header = line
+            hint = parse_hunk_header(header)
             index += 1
             body, index = collect_hunk_body(lines, index)
-            require_complete_hunk(body, path)
+            require_complete_hunk(body, path, header)
             hunks.append((hint, body))
             continue
         index += 1

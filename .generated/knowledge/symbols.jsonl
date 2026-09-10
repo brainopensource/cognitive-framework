@@ -282,6 +282,7 @@
 {"symbol": "HeldAuthority", "kind": "class", "defined_in": "vanguard/packages/kernel/classifier.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "HeldOutEvaluator", "kind": "class", "defined_in": "vanguard/packages/runtime/skill_evaluation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "HmacAuthenticator", "kind": "class", "defined_in": "vanguard/packages/kernel/grants.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
+{"symbol": "HunkFailure", "kind": "class", "defined_in": "vanguard/packages/adapters/environment/hunks.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ICompletionPolicy", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "IContextManager", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "IEvaluationGate", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}

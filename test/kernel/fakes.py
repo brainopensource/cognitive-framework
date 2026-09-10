@@ -233,7 +233,19 @@ def build(
     if governor.trace is not trace:
         trace = governor.trace
     issuer = issuer or GrantIssuer()
-    scope = scope or parent_scope()
+    # The held authority and parent policy scope describe the same test
+    # subject unless a caller deliberately injects a narrower scope.  Keeping
+    # the default scope fixed at fs.read/fs.write made a supplied held action
+    # such as patch.apply fail policy attenuation before the test could reach
+    # the behavior it was exercising.
+    if scope is None:
+        default_scope = parent_scope()
+        scope = Scope(
+            actions=held_actions,
+            resources=default_scope.resources,
+            constraints=default_scope.constraints,
+            depth=default_scope.depth,
+        )
     classifier = classifier or StandardClassifier([
         HeldAuthority("agent-1", held_actions, tuple(held_resources), max_depth=4)])
     policy = policy or StandardPolicy(

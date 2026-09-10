@@ -616,6 +616,22 @@ class EpisodeEngine:
             # -- a non-effect proposal reduces straight to a terminal ----
             terminal = TERMINAL_FOR_KIND.get(proposal.kind)
             if terminal is not None:
+                # Permission recovery never retries the denied effect, but a
+                # denial remains observable feedback so a later turn can pick
+                # a different, narrower effect.  That feedback cannot be
+                # converted directly into success by an immediate finish.
+                # A successful subsequent dispatch replaces the recovery
+                # decision with ``continue`` and may therefore complete
+                # normally.
+                if (proposal.kind == ProposalKind.FINISH
+                        and recovery_state.last_decision is not None
+                        and recovery_state.last_decision.action == "stop"
+                        and recovery_state.last_decision.reason == "permission"):
+                    episode = episode.terminated(
+                        RunTermination.ABANDONED,
+                        "permission denial requires a permitted next action",
+                    )
+                    break
                 if (proposal.kind == ProposalKind.FINISH
                         and self._completion_admitter is not None):
                     verdict = self._completion_admitter(episode, proposal)
@@ -815,9 +831,11 @@ class EpisodeEngine:
                 episode, recovery_state, attempt, proposal,
             )
             self._emit_recovery_state(episode, recovery_state)
-            if semantic.action == "stop" and failure_kind == FailureClass.PERMISSION.value:
-                episode = episode.terminated(RunTermination.ABANDONED, semantic.reason)
-                break
+            # A kernel denial is durable feedback, not a terminal result.  The
+            # next provider turn must be allowed to select a narrower action;
+            # stopping here made the recorded F-09 denial indistinguishable
+            # from a crash and prevented the scripted trust trajectory from
+            # reaching its subsequent safe effect.
             if semantic.action == "wait":
                 if not _apply_retry(
                     RecoveryDecision(

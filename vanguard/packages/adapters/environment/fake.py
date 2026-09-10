@@ -39,7 +39,7 @@ from .hunks import (
 
 __all__ = ["FakeEnvironment"]
 
-_DIFF_HEADER = re.compile(r"^diff --git a/(.+) b/(.+)$")")
+_DIFF_HEADER = re.compile(r"^diff --git a/(.+) b/(.+)$")
 
 
 def _is_safe_relative_path(path: str) -> bool:
@@ -281,10 +281,11 @@ class FakeEnvironment:
                         break
                     has_hunk = True
                     try:
-                        hint = parse_hunk_header(lines[i])
+                        header = lines[i]
+                        hint = parse_hunk_header(header)
                         i += 1
                         body, i = collect_hunk_body(lines, i)
-                        require_complete_hunk(body, target_path)
+                        require_complete_hunk(body, target_path, header)
                     except HunkFailure as exc:
                         return Result.fail(exc.kind, exc.message)
                     hunks.append((hint, body))

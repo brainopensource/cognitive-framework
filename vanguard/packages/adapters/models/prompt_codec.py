@@ -38,15 +38,15 @@ __all__ = [
     "supports_cache_control",
 ]
 
-# NT-C03 requires "an exact counter or documented conservative bound specific
-# to that dialect". This is the documented bound for the OpenAI-style JSON
-# chat dialect: the payload is JSON with ASCII structural characters, quoted
-# keys and escaped strings, on which production BPE vocabularies average well
-# above 3 bytes per token. Dividing by 3 and rounding up therefore over-counts
-# relative to any of them, which is the direction a fail-closed budget needs.
-# An adapter that can call the provider's own tokeniser passes ``counter`` and
-# this bound is not used at all.
-CONSERVATIVE_BYTES_PER_TOKEN = 3
+# NT-C03 permits an exact route tokenizer or a documented conservative bound.
+# Average natural-language density (for example, three or four bytes/token) is
+# not an upper bound for punctuation-heavy code, generated data, or arbitrary
+# UTF-8. OpenAI-compatible production tokenizers are byte-level: every emitted
+# token consumes at least one serialized byte. Counting one token per byte is
+# therefore the fail-closed ceiling when the adapter has no exact tokenizer.
+# An adapter with the provider's tokenizer injects ``counter`` and avoids this
+# deliberately pessimistic fallback.
+CONSERVATIVE_BYTES_PER_TOKEN = 1
 
 # Anthropic-family routes are the ones documented to accept explicit
 # ``cache_control`` breakpoints on the OpenAI-compatible surface. Everything

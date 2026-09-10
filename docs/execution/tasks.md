@@ -106,19 +106,21 @@ Work executes on the active feature branch (`feat/aether-framework-electroweak-c
   - **falsifier**: `python3 -m unittest test.packs.code_default.test_presets test.benchmarks.test_instrument_ms test.benchmarks.test_preregistration -v`; relabeling identical behavior cannot establish distinct treatment; declared bounds are not caller attenuation.
   - **accepted evidence (2026-09-10)**: 28/28 falsifier passed (`python3 -m unittest test.packs.code_default.test_presets test.benchmarks.test_instrument_ms test.benchmarks.test_preregistration -v`); declared catalog ceilings (fast: $0.05/8t/16k, balanced: $0.15/20t/40k, max: $0.40/40t/96k) preserved without mutation and parity asserted with manifests; caller bounds attenuate monotonically without elevating declared ceilings (`effective_limit`); normalized behavioral identity includes plugins (`planner`, `context`); relabeling identical behavior or budget-only differences cannot establish distinct comparative treatments under `assert_single_varied_dimension`. Unlocks A: T-102.
 
-- [ ] **T-102: Thin facade and canonical product execution**
+- [x] **T-102: Thin facade and canonical product execution**
   - **package / owner**: INS-01 / Stream A
   - **requires**: [T-99, T-103]
   - **files**: `apps/coding_max/facade.py`, `runtime/{entrypoint,cli,app_service}.py`, app/runtime tests
   - **contract**: Complete T-79/T-89 product-side convergence without a second loader, default ceiling or execution loop; installed resources resolve through the supported package API.
   - **falsifier**: `python3 -m unittest test.runtime.test_app_service_and_cli test.apps.coding_max.test_facade test.apps.test_preset_budgets -v`; same input/profile yields same declared/effective budgets and outcome through CLI/API/facade.
+  - **accepted evidence (2026-09-10)**: leadership independently inspected the runtime catalog, facade, entrypoint, application-service and CLI convergence on `7594c2381eb56d071855a69f8743deca0a8609fb`; the named falsifier passed 19/19. `pack_catalog.py` is the sole `spec_from_file_location` pack loader and preset allowlist owner, installed manifests resolve through package resources, caller limits only attenuate catalog ceilings, and no parallel product execution loop was introduced. Acceptance is scoped to T-102 and does not accept T-108, authorize T-109, or close MS-BASELINE.
 
-- [ ] **T-108: Existing patch correctness and dead-path consolidation**
+- [x] **T-108: Existing patch correctness and dead-path consolidation**
   - **package / owner**: GATE-01 / Stream B
   - **requires**: [T-98, T-101]
   - **files**: `packs/code-default/toolkits/ast_patch.py`, selected `adapters/environment/` implementation and patch tests; unreachable agency implementations identified by T-101; runtime/manifest caller edits handed to A/C
   - **contract**: TC-E-061. Reject stale/ambiguous preimages and incomplete hunks; one production patch semantics with permitted adapters/fakes. No deletion quota, no new CAS workspace engine, no loss of registered plugin/falsifier coverage.
   - **falsifier**: `python3 -m unittest test.falsifiers.test_d6_patch_context_anchoring test.packs.code_default.test_ast_patch test.runtime.test_atomic_multi_file_transaction -v`; invalid file N leaves all owned preimages intact. Full collection follows removals.
+  - **accepted evidence (2026-09-10)**: leadership corrected the committed `fake.py` syntax defect and independently falsified stale/ambiguous anchors, empty/edit-free hunks, false declared old/new hunk counts, and five-file rollback. The combined T-108 slice passed 25/25; hunk start lines remain relocation hints but declared counts now bind the complete body. Git/Fake and the pack toolkit reuse `adapters/environment/hunks.py`; multi-file Git commits reuse `AtomicMultiFileTransactionManager`; no CAS workspace engine or parallel patch semantics was introduced. Unlocks T-109.
 
 - [ ] **T-109: Integrated baseline acceptance**
   - **package / owner**: GATE-01 / Stream C
@@ -145,12 +147,13 @@ Work executes on the active feature branch (`feat/aether-framework-electroweak-c
   - **falsifier**: `python3 -m unittest test.agency.test_context_compiler test.agency.test_context_packet -v`; oversize/stale evidence is elided with artifact identity; irreducible overflow performs no inference; token count fits final hard budget.
   - **accepted evidence (2026-09-10)**: compiler/packet slice 41/41; implementation extends the existing compiler and introduces no parallel context path.
 
-- [ ] **T-105: Provider serialization and cache observation**
+- [x] **T-105: Provider serialization and cache observation**
   - **package / owner**: CTX-01 / Stream A
   - **requires**: [T-102, T-104]
   - **files**: existing `adapters/models/` request serializers, **[NEW]** `test/adapters/test_prompt_serialization_budget.py`; no B-owned compiler edits
   - **contract**: NT-C03/C06. Implement PromptCodec at the actual provider boundary; count final request; negotiate cache controls and expose real usage or null. No generic fixture cache-rate claim.
   - **falsifier**: `python3 -m unittest test.adapters.test_prompt_serialization_budget -v`; native tool-schema overhead fits; changed dynamic state preserves prefix bytes; cache misses preserve semantics and reservations use uncached bounds.
+  - **accepted evidence (2026-09-10)**: leadership replaced the unsafe average `ceil(bytes/3)` estimate with a fail-closed one-token-per-UTF-8-byte ceiling for byte-level provider tokenizers; routes may inject an exact tokenizer. Adversarial punctuation, arbitrary bytes and multibyte UTF-8 now falsify density assumptions. The codec still counts the final posted request and native tool schemas, keeps cache observations nullable, and never widens reservations from cache reports. The expanded named falsifier passed 24/24; no B-owned compiler or parallel context path was introduced.
 
 - [x] **T-106: Bounded deterministic stall recovery**
   - **package / owner**: REC-01 / Stream B

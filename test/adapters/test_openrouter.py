@@ -726,22 +726,16 @@ class OpenRouterModelContract(unittest.TestCase):
         self.assertEqual(result.value["action"], "fs.read")
         self.assertEqual(result.value["args"], {"path": "calc.py"})
 
-    def test_unknown_model_pricing_marked_explicitly(self) -> None:
-        payload = json.dumps({
-            "choices": [{"message": {"role": "assistant", "content": "custom model reply"}}],
-            "usage": {"prompt_tokens": 100, "completion_tokens": 50, "total_tokens": 150},
-        }).encode("utf-8")
+    def test_unknown_model_is_refused_before_any_provider_request(self) -> None:
         port = OpenRouterModel(
             model="custom/unknown-model-xyz",
             api_key_ref="OPENROUTER_API_KEY",
-            transport=_status_transport(200, payload),
+            transport=_boom_transport,
             environ={"OPENROUTER_API_KEY": SECRET},
             stream=False,
         )
-        result = port.propose(CONTEXT, TOOLS, SAMPLING)
-        self.assertTrue(result.ok)
-        self.assertFalse(result.value["usage"]["pricing_known"])
-        self.assertFalse(result.value["pricing_known"])
+        with self.assertRaises(ValueError):
+            port.propose(CONTEXT, TOOLS, SAMPLING)
 
     def test_unknown_pricing_never_invents_a_cost(self) -> None:
         cost, known = calculate_cost_micros(

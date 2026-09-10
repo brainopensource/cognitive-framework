@@ -33,7 +33,7 @@ SRC = "def add(a: int, b: int) -> int:\n    return a + b\n\ndef multiply(a: int,
 # The literal diff deepseek emitted in the failed RF-95 run.
 BARE = "--- a/src/calc.py\n+++ b/src/calc.py\n@@\n def multiply(a: int, b: int) -> int:\n-    return 0  # BUG: should multiply\n+    return a * b"
 NOHDR = "@@\n def multiply(a: int, b: int) -> int:\n-    return 0  # BUG: should multiply\n+    return a * b"
-WRONGLINE = "--- a/src/calc.py\n+++ b/src/calc.py\n@@ -1,3 +1,3 @@\n def multiply(a: int, b: int) -> int:\n-    return 0  # BUG: should multiply\n+    return a * b"
+WRONGLINE = "--- a/src/calc.py\n+++ b/src/calc.py\n@@ -1,2 +1,2 @@\n def multiply(a: int, b: int) -> int:\n-    return 0  # BUG: should multiply\n+    return a * b"
 GOOD = "--- a/src/calc.py\n+++ b/src/calc.py\n@@ -4,2 +4,2 @@\n def multiply(a: int, b: int) -> int:\n-    return 0  # BUG: should multiply\n+    return a * b"
 NOMATCH = "--- a/src/calc.py\n+++ b/src/calc.py\n@@\n def nonexistent(x):\n-    return 1\n+    return 2"
 
@@ -110,6 +110,13 @@ INCOMPLETE = "--- a/src/calc.py\n+++ b/src/calc.py\n@@\n"
 TRUNCATED = (
     "--- a/src/calc.py\n+++ b/src/calc.py\n"
     "@@\n def multiply(a: int, b: int) -> int:\n"
+)
+BAD_COUNTS = (
+    "--- a/src/calc.py\n+++ b/src/calc.py\n"
+    "@@ -4,99 +4,98 @@\n"
+    " def multiply(a: int, b: int) -> int:\n"
+    "-    return 0  # BUG: should multiply\n"
+    "+    return a * b"
 )
 
 
@@ -190,5 +197,20 @@ class FaultMutation(unittest.TestCase):
         )
         self.assertFalse(result.ok)
         self.assertIn("incomplete", result.error.message)
+        self.assertEqual(target.read_text(), SRC)
+        self.assertEqual(stat.S_IMODE(target.stat().st_mode), 0o640)
+
+    def test_declared_hunk_counts_must_match_the_body(self) -> None:
+        repo, target, env = self._repo()
+        result = env.apply(
+            EffectRequest(
+                verb="patch.apply",
+                action="patch",
+                args={"path": "src/calc.py", "diff": BAD_COUNTS},
+                patch=BAD_COUNTS,
+            )
+        )
+        self.assertFalse(result.ok)
+        self.assertIn("hunk line count mismatch", result.error.message)
         self.assertEqual(target.read_text(), SRC)
         self.assertEqual(stat.S_IMODE(target.stat().st_mode), 0o640)

@@ -8,9 +8,24 @@ proximate cause of the RF-95 failure. Anchoring must not become guessing: the
 last test proves a hunk matching nothing is still refused and the file is left
 byte-identical."""
 
-import tempfile, subprocess, unittest
+"""D6: the patch applier locates a hunk by context, as patch(1) does.
+
+Every diff here is one deepseek actually emitted during the failed RF-95
+attempt, or a variation of it. The applier previously demanded that a hunk sit
+at the exact line its header claimed, so a correct fix with an absent or wrong
+offset was rejected as a context mismatch -- stricter than git apply, and the
+proximate cause of the RF-95 failure. Anchoring must not become guessing: the
+last test proves a hunk matching nothing is still refused and the file is left
+byte-identical."""
+
+import os
+import stat
+import tempfile
+import subprocess
+import unittest
 from pathlib import Path
 from vanguard.packages.adapters.environment.git import GitEnvironmentAdapter
+from vanguard.packages.domain.canonicalisation.digest import digest_bytes
 from vanguard.packages.ports.environment import EffectRequest
 
 SRC = "def add(a: int, b: int) -> int:\n    return a + b\n\ndef multiply(a: int, b: int) -> int:\n    return 0  # BUG: should multiply\n"
@@ -89,3 +104,91 @@ class Ambiguity(unittest.TestCase):
         self.assertIn("ambiguous", r.error.message)
         # Anchoring must never silently edit the wrong location.
         self.assertEqual((repo / "src" / "calc.py").read_text(), AMBIG_SRC)
+
+
+INCOMPLETE = "--- a/src/calc.py\n+++ b/src/calc.py\n@@\n"
+TRUNCATED = (
+    "--- a/src/calc.py\n+++ b/src/calc.py\n"
+    "@@\n def multiply(a: int, b: int) -> int:\n"
+)
+
+
+class FaultMutation(unittest.TestCase):
+    def _repo(self, source: str = SRC) -> tuple[Path, Path, GitEnvironmentAdapter]:
+        d = tempfile.mkdtemp()
+        repo = Path(d)
+        subprocess.run(["git", "init", "-b", "main"], cwd=repo, capture_output=True)
+        (repo / "src").mkdir()
+        target = repo / "src" / "calc.py"
+        target.write_text(source)
+        os.chmod(target, 0o640)
+        return repo, target, GitEnvironmentAdapter(repo)
+
+    def test_changed_preimage_is_rejected(self) -> None:
+        repo, target, env = self._repo()
+        stale = digest_bytes(SRC.encode("utf-8"))
+        mutated = SRC.replace("def add", "def sum")
+        target.write_text(mutated)
+        os.chmod(target, 0o640)
+        result = env.apply(
+            EffectRequest(
+                verb="patch.apply",
+                action="patch",
+                args={
+                    "path": "src/calc.py",
+                    "diff": BARE,
+                    "expected_preimage": stale,
+                },
+                patch=BARE,
+            )
+        )
+        self.assertFalse(result.ok)
+        self.assertEqual(result.error.kind, "conflict")
+        self.assertIn("stale preimage", result.error.message)
+        self.assertEqual(target.read_text(), mutated)
+        self.assertEqual(stat.S_IMODE(target.stat().st_mode), 0o640)
+
+    def test_ambiguous_anchoring_is_rejected(self) -> None:
+        repo, target, env = self._repo(AMBIG_SRC)
+        result = env.apply(
+            EffectRequest(
+                verb="patch.apply",
+                action="patch",
+                args={"path": "src/calc.py", "diff": AMBIG},
+                patch=AMBIG,
+            )
+        )
+        self.assertFalse(result.ok)
+        self.assertIn("ambiguous", result.error.message)
+        self.assertEqual(target.read_text(), AMBIG_SRC)
+        self.assertEqual(stat.S_IMODE(target.stat().st_mode), 0o640)
+
+    def test_incomplete_hunk_is_rejected_and_preserves_mode(self) -> None:
+        repo, target, env = self._repo()
+        result = env.apply(
+            EffectRequest(
+                verb="patch.apply",
+                action="patch",
+                args={"path": "src/calc.py", "diff": INCOMPLETE},
+                patch=INCOMPLETE,
+            )
+        )
+        self.assertFalse(result.ok)
+        self.assertIn("incomplete", result.error.message)
+        self.assertEqual(target.read_text(), SRC)
+        self.assertEqual(stat.S_IMODE(target.stat().st_mode), 0o640)
+
+    def test_truncated_hunk_without_edits_is_rejected(self) -> None:
+        repo, target, env = self._repo()
+        result = env.apply(
+            EffectRequest(
+                verb="patch.apply",
+                action="patch",
+                args={"path": "src/calc.py", "diff": TRUNCATED},
+                patch=TRUNCATED,
+            )
+        )
+        self.assertFalse(result.ok)
+        self.assertIn("incomplete", result.error.message)
+        self.assertEqual(target.read_text(), SRC)
+        self.assertEqual(stat.S_IMODE(target.stat().st_mode), 0o640)

@@ -17,7 +17,18 @@ RecoveryStatus = Literal["accept", "retry_model", "fail_instrument"]
 
 RECOVERY_STATE_SCHEMA = "aether.recovery-state/1"
 MAX_DURABLE_ATTEMPTS = 12
+MAX_INTERVENTIONS = 2
+MAX_TRANSPORT_RETRIES = 3
 _DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
+_RECOVER_FAILURES = frozenset({
+    "permission", "permanent", "budget", "transient",
+    "protocol", "patch", "verification", "context", "tool",
+})
+_FAILURE_ALIAS = {
+    "transport": "transient",
+    "provider": "transient",
+    "truncation": "protocol",
+}
 
 
 class FailureClass(str, Enum):
@@ -167,6 +178,92 @@ def semantic_attempt_fingerprint(
     })
 
 
+def semantic_progress_key(
+    facts: Mapping[str, Any] | None = None,
+    falsified: Sequence[str] = (),
+) -> str:
+    """Verified facts and falsified hypotheses; clocks and receipts are excluded."""
+    return digest_of({
+        "facts": dict(facts or {}),
+        "falsified": [str(item) for item in falsified],
+    })
+
+
+def _map_recovery_failure(failure: str | None) -> str | None:
+    if failure is None or failure == "":
+        return None
+    mapped = _FAILURE_ALIAS.get(failure, failure)
+    if mapped not in _RECOVER_FAILURES:
+        raise ValueError("invalid failure or jitter")
+    return mapped
+
+
+@dataclass(frozen=True, slots=True)
+class CoreDecision:
+    """Pure NT-R01/R02 policy result before the versioned decision envelope."""
+
+    action: str
+    interventions: int
+    transport_retries: int
+    delay_ms: int
+    reason: str
+
+    def __post_init__(self) -> None:
+        if self.action not in _RECOVERY_ACTIONS:
+            raise ValueError("unsupported recovery action")
+        _natural(self.interventions, "interventions")
+        _natural(self.transport_retries, "transport retries")
+        _natural(self.delay_ms, "delay_ms")
+        _require_text(self.reason, "recovery reason")
+
+
+def decide_recovery(
+    history: Sequence[tuple[str, str, str]], *, failure: str | None,
+    interventions: int, transport_retries: int,
+    remaining_turns: int, remaining_ms: int, jitter: float,
+    max_transport_retries: int = MAX_TRANSPORT_RETRIES,
+    max_interventions: int = MAX_INTERVENTIONS,
+) -> CoreDecision:
+    """Bounded stall detector: six-action repeats, 2/3-cycles, then reground/replan/stop."""
+    for value in (
+        interventions, transport_retries, remaining_turns, remaining_ms,
+        max_transport_retries, max_interventions,
+    ):
+        if type(value) is not int or value < 0:
+            raise ValueError("invalid nonnegative counter")
+    mapped = _map_recovery_failure(failure)
+    if not 0 <= jitter <= 1:
+        raise ValueError("invalid failure or jitter")
+    if remaining_turns == 0 or remaining_ms == 0:
+        return CoreDecision("stop", interventions, transport_retries, 0, "budget")
+    if mapped in {"permission", "permanent", "budget"}:
+        return CoreDecision("stop", interventions, transport_retries, 0, mapped)
+    if mapped == "transient":
+        if transport_retries >= max_transport_retries:
+            return CoreDecision("stop", interventions, transport_retries, 0, "retry_limit")
+        delay = int(min(8000, 500 * 2 ** transport_retries) * (0.5 + jitter / 2))
+        if delay >= remaining_ms:
+            return CoreDecision("stop", interventions, transport_retries, 0, "deadline")
+        return CoreDecision("wait", interventions, transport_retries + 1, delay, "transient")
+    window = tuple(history[-6:])
+    if not window or any(len(item) != 3 or not all(item) for item in window):
+        raise ValueError("semantic history requires complete identities")
+    repeated = window.count(window[-1]) >= 3
+    cycle = any(
+        len(window) >= 2 * length and window[-length:] == window[-2 * length:-length]
+        for length in (2, 3)
+    )
+    stagnant = len(window) == 6 and len({item[2] for item in window}) == 1
+    if not (mapped or repeated or cycle or stagnant):
+        return CoreDecision("continue", interventions, transport_retries, 0, "progress")
+    if interventions >= max_interventions:
+        return CoreDecision("stop", interventions, transport_retries, 0, "intervention_limit")
+    action = "reground" if interventions == 0 else "replan"
+    return CoreDecision(
+        action, interventions + 1, transport_retries, 0, mapped or "no_progress",
+    )
+
+
 @dataclass(frozen=True, slots=True)
 class RecoveryDecision:
     """The outcome of evaluating a raw model response through protocol recovery."""
@@ -221,6 +318,7 @@ class ProtocolRecoveryState:
     decisions: int = 0
     pending_operation: str | None = None
     deadline: str | None = None
+    last_decision: SemanticRecoveryDecision | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "attempted_fingerprints", tuple(self.attempted_fingerprints))
@@ -270,6 +368,10 @@ class ProtocolRecoveryState:
             raise TypeError("pending operation must be a string")
         if deadline is not None and not isinstance(deadline, str):
             raise TypeError("deadline must be a string")
+        if self.last_decision is not None and not isinstance(
+            self.last_decision, SemanticRecoveryDecision,
+        ):
+            raise TypeError("last decision must be SemanticRecoveryDecision")
 
     def with_protocol_retry(self) -> ProtocolRecoveryState:
         return replace(self, protocol_retries=self.protocol_retries + 1)
@@ -307,6 +409,8 @@ class ProtocolRecoveryState:
             "maxProtocolRetries": self.max_protocol_retries,
             "maxTruncationRetries": self.max_truncation_retries,
             "maxEffectRetries": self.max_effect_retries,
+            "maxInterventions": MAX_INTERVENTIONS,
+            "actions": sorted(_RECOVERY_ACTIONS),
         })
 
     def _history(self) -> tuple[Attempt, ...]:
@@ -322,8 +426,13 @@ class ProtocolRecoveryState:
             items.append(Attempt(fingerprint, outcome, fingerprint, None))
         return tuple(items)
 
+    def history_tuples(self) -> tuple[tuple[str, str, str], ...]:
+        return tuple(
+            (item.fingerprint, item.outcome, item.progress_key) for item in self._history()
+        )
+
     def to_dict(self) -> dict[str, Any]:
-        return {
+        payload = {
             "schema": RECOVERY_STATE_SCHEMA,
             "policyDigest": self._policy_digest(),
             "history": [item.to_dict() for item in self._history()],
@@ -343,6 +452,9 @@ class ProtocolRecoveryState:
             "attemptedFingerprints": list(self.attempted_fingerprints),
             "spentDecisions": list(self.spent_decisions),
         }
+        if self.last_decision is not None:
+            payload["lastDecision"] = self.last_decision.to_dict()
+        return payload
 
     def encode(self) -> bytes:
         return canonical_bytes(self.to_dict())
@@ -422,6 +534,7 @@ class ProtocolRecoveryState:
             decisions=_natural(raw["decisions"], "decisions"),
             pending_operation=raw["pendingOperation"],
             deadline=raw["deadline"],
+            last_decision=_last_decision_from(raw),
         )
 
     @classmethod
@@ -474,7 +587,79 @@ def _legacy_ceiling(
     return default
 
 
+def _last_decision_from(raw: Mapping[str, Any]) -> SemanticRecoveryDecision | None:
+    payload = raw.get("lastDecision", raw.get("last_decision"))
+    if payload is None:
+        return None
+    return SemanticRecoveryDecision.from_mapping(payload)
+
+
 RecoveryState = ProtocolRecoveryState
+
+
+def recover(
+    state: ProtocolRecoveryState,
+    attempt: Attempt,
+    *,
+    remaining_ms: int,
+    remaining_turns: int,
+    jitter: float,
+    state_digest: str,
+    remaining_budget_ref: str,
+    deadline: str | None = None,
+) -> tuple[SemanticRecoveryDecision, ProtocolRecoveryState]:
+    """Apply NT-R01/R02 to one attempt and persist counters, delay, and decision."""
+    mapped = _map_recovery_failure(attempt.failure)
+    base_history = state._history()
+    if mapped == "transient":
+        history = base_history
+    else:
+        history = (base_history + (attempt,))[-MAX_DURABLE_ATTEMPTS:]
+    tuples = tuple((item.fingerprint, item.outcome, item.progress_key) for item in history)
+    core = decide_recovery(
+        tuples,
+        failure=mapped,
+        interventions=state.interventions,
+        transport_retries=state.transport_retries,
+        remaining_turns=remaining_turns,
+        remaining_ms=remaining_ms,
+        jitter=jitter,
+        max_transport_retries=state.max_transport_retries,
+        max_interventions=MAX_INTERVENTIONS,
+    )
+    errors = dict(state.errors)
+    if attempt.failure:
+        errors[attempt.failure] = errors.get(attempt.failure, 0) + 1
+    pending = state.pending_operation
+    held_deadline = state.deadline
+    if core.action == "wait":
+        pending = attempt.fingerprint
+        held_deadline = deadline if deadline else f"delay-ms:{core.delay_ms}"
+    elif core.action != "continue":
+        pending = None
+        held_deadline = None
+    decision = SemanticRecoveryDecision(
+        action=core.action,
+        reason=core.reason,
+        delay_ms=core.delay_ms,
+        state_digest=state_digest,
+        remaining_budget_ref=remaining_budget_ref,
+    )
+    next_state = replace(
+        state,
+        history=history,
+        attempted_fingerprints=tuple(item.fingerprint for item in history),
+        spent_decisions=tuple(item.outcome for item in history),
+        errors=errors,
+        interventions=core.interventions,
+        transport_retries=core.transport_retries,
+        decisions=state.decisions + 1,
+        pending_operation=pending,
+        deadline=held_deadline,
+        last_decision=decision,
+        policy_digest=state.policy_digest or state._policy_digest(),
+    )
+    return decision, next_state
 
 
 class ProtocolRecoveryPolicy:
@@ -558,10 +743,24 @@ class ProtocolRecoveryPolicy:
     def decide_failure(
         self, detail: str, state: ProtocolRecoveryState, *, action: str = "",
         arguments: Mapping[str, Any] | None = None, workspace_digest: str = "",
+        remaining_ms: int = 1, remaining_turns: int = 1, jitter: float = 0.0,
     ) -> tuple[RecoveryDecision, ProtocolRecoveryState]:
         kind = self.classify(detail)
         fingerprint = semantic_attempt_fingerprint(action or kind.value, arguments, workspace_digest)
-        if state.has_attempted(fingerprint) or kind in {FailureClass.PERMISSION, FailureClass.BUDGET}:
+        progress = semantic_progress_key({"action": action or kind.value, "class": kind.value})
+        if kind in {FailureClass.PERMISSION, FailureClass.BUDGET}:
+            attempt = Attempt(fingerprint, kind.value, progress, kind.value)
+            semantic, next_state = recover(
+                state, attempt,
+                remaining_ms=remaining_ms, remaining_turns=remaining_turns,
+                jitter=jitter, state_digest=fingerprint,
+                remaining_budget_ref=fingerprint,
+            )
+            return RecoveryDecision(
+                status="fail_instrument" if semantic.action == "stop" else "retry_model",
+                failure_code=kind.value,
+            ), next_state
+        if state.has_attempted(fingerprint):
             return RecoveryDecision(status="fail_instrument", failure_code=kind.value), state.record_attempt(fingerprint, "no_retry")
         next_state = state.record_attempt(fingerprint, "retry")
         if kind is FailureClass.TRUNCATION and next_state.truncation_retries <= self.max_truncation_retries:

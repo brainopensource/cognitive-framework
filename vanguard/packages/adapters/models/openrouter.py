@@ -23,6 +23,12 @@ from ...ports.model import ContextBundle, Proposal, Sampling, ToolSchemas
 from .cassette import Cassette, CassettePlayer, CassetteRecorder
 from .invocation import ProposalTranslator
 from .dialect import ModelIntent, compile_intent
+from .prompt_codec import (
+    CacheObservation,
+    PromptBudget,
+    PromptBudgetExceeded,
+    PromptCodec,
+)
 from ...domain.models.profile import profile_for
 from .routing import resolve_route, preflight_check
 
@@ -702,6 +708,9 @@ class OpenRouterModel:
         request_timeout: float = 30.0,
         monotonic: Callable[[], float] = time.monotonic,
         provider: str = "openrouter",
+        prompt_budget: PromptBudget | None = None,
+        prompt_codec: PromptCodec | None = None,
+        cache_controls: bool | None = None,
     ) -> None:
         self.api_key_ref = api_key_ref
         self._endpoint = endpoint
@@ -728,6 +737,17 @@ class OpenRouterModel:
             raise ValueError("request_timeout must be positive")
         self._request_timeout = float(request_timeout)
         self._monotonic = monotonic
+        # T-105 / NT-C03. The codec is the one place this adapter turns a
+        # request into bytes; the reservation it enforces is the provider
+        # window minus output, safety and recovery, and it is always the
+        # worst-case uncached bound. ``None`` means no window was declared to
+        # this adapter, so the codec counts and reports without inventing a
+        # limit it cannot justify.
+        self._prompt_budget = prompt_budget
+        self._prompt_codec = prompt_codec or PromptCodec()
+        self._cache_controls = cache_controls
+        self._last_request: Any = None
+        self._last_cache_observation: CacheObservation | None = None
         self._player = (
             CassettePlayer(cassette, match_mode="tape")
             if cassette is not None and mode == "replay"
@@ -1065,7 +1085,22 @@ class OpenRouterModel:
                     body_obj["tool_choice"] = tool_choice
                 elif isinstance(tool_choice, Mapping):
                     body_obj["tool_choice"] = dict(tool_choice)
-        payload = json.dumps(body_obj, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+        # NT-C03. Count the request that is actually sent -- native tool
+        # schemas included -- against the usable window, and fail closed
+        # rather than let a provider truncate silently.
+        try:
+            serialized = self._prompt_codec.serialize(
+                body_obj,
+                context=context,
+                budget=self._prompt_budget,
+                model=target_model,
+                cache_controls=self._cache_controls,
+            )
+        except PromptBudgetExceeded as exc:
+            return Result.fail(kind="instrument_error", message=str(exc))
+        self._last_request = serialized
+        body_obj = dict(serialized.body)
+        payload = serialized.payload
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {secret}",
@@ -1179,7 +1214,16 @@ class OpenRouterModel:
             pricing_source = "local"
             resolved_model = target_model
 
+        # NT-C06. Report what the provider said about cache reuse, or record
+        # that it said nothing. ``cachedTokens: null`` is missingness, not
+        # zero, and no hit rate is derived from either.
+        observation = PromptCodec.observe_cache(raw_usage, model=target_model)
+        self._last_cache_observation = observation
+
         proposal["usage"] = {
+            **observation.to_dict(),
+            "serializedInputTokens": serialized.input_tokens,
+            "toolSchemaTokens": serialized.tool_schema_tokens,
             "prompt_tokens": prompt_tokens,
             "completion_tokens": completion_tokens,
             "cached_tokens": cached_tokens,

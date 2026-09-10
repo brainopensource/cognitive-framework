@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import os
 import sys
 import uuid
 from pathlib import Path
@@ -12,53 +11,29 @@ from typing import Any, Mapping
 from ..adapters.models.fake import FakeModel
 from ..adapters.stores.blob_store import FileBlobStore
 from ..adapters.sandbox.platform import discover_platform
-from .app_service import project_terminal_outcome
+from .app_service import project_receipts, project_terminal_outcome
 from .compose import TaskContext
+from . import pack_catalog
 from .profiles import SandboxUnavailable, resolve_profile
 from .root import Runtime
 
 
-def _root() -> Path:
-    return Path(os.environ.get("VANGUARD_ROOT", Path(__file__).resolve().parents[3]))
-
-
 def _manifest(command: str, preset: str | None = None) -> Path:
+    """Resolve the installed manifest a product command selects.
+
+    T-102. The preset allowlist and the manifest lookup both live in
+    ``pack_catalog``; this surface owns no second copy of either.
+    """
     if command == "explain":
-        name = "vg-code-explain"
-    elif command == "code":
-        chosen = (preset or "balanced").strip().lower()
-        if chosen not in {"fast", "balanced", "max"}:
-            raise ValueError(f"unknown Coding Max preset {chosen!r}")
-        name = f"vg-code-{chosen}"
-    else:
-        name = "vg-code-default"
-    return _root() / "vanguard/packages/agency/manifests" / name / "manifest.json"
-
-
-_PACK_LOAD = None
-
-
-def _pack_loader() -> Any:
-    global _PACK_LOAD
-    if _PACK_LOAD is None:
-        import importlib.util
-        path = _root() / "packs" / "code-default" / "load.py"
-        spec = importlib.util.spec_from_file_location("code_default_load", path)
-        if spec is None or spec.loader is None:
-            raise ImportError(f"cannot load preset catalog from {path}")
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[spec.name] = module
-        spec.loader.exec_module(module)
-        _PACK_LOAD = module
-    return _PACK_LOAD
+        return pack_catalog.manifest_path("vg-code-explain")
+    if command == "code":
+        return pack_catalog.preset_manifest_path(preset)
+    return pack_catalog.manifest_path("vg-code-default")
 
 
 def _resolve_turn_ceiling(preset: str, explicit: Any) -> int:
     """Loop bound: omitted uses the catalog; explicit may only attenuate."""
-    loader = _pack_loader()
-    policy = loader.resolve_preset_policy(preset)
-    parsed = None if explicit in (None, "") else int(explicit)
-    return int(loader.effective_limit(policy.turns, parsed))
+    return pack_catalog.turn_ceiling(preset, explicit)
 
 
 def _completion_policy(manifest_path: Path) -> Any:
@@ -106,20 +81,22 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
         raise ValueError("brief or question is required")
     preset = str(request.get("preset") or "balanced").strip().lower()
     harness_override = str(request.get("harness") or "").strip()
+    explicit_turns = request.get("maxTurnsPerEpisode")
     if harness_override:
-        manifest_path = (
-            _root() / "vanguard/packages/agency/manifests" / harness_override / "manifest.json")
-        explicit = request.get("maxTurnsPerEpisode")
-        max_turns = 40 if explicit in (None, "") else int(explicit)
+        manifest_path = pack_catalog.manifest_path(harness_override)
+        max_turns = (
+            pack_catalog.DEFAULT_TURN_CEILING if explicit_turns in (None, "")
+            else int(explicit_turns))
     else:
-        if command == "code" and preset not in {"fast", "balanced", "max"}:
-            raise ValueError(f"unknown Coding Max preset {preset!r}")
+        # ``_manifest`` validates the preset against the catalog, so this
+        # surface raises on an unknown preset without holding its own list.
         manifest_path = _manifest(command, preset if command == "code" else None)
         if command == "code":
-            max_turns = _resolve_turn_ceiling(preset, request.get("maxTurnsPerEpisode"))
+            max_turns = _resolve_turn_ceiling(preset, explicit_turns)
         else:
-            explicit = request.get("maxTurnsPerEpisode")
-            max_turns = 40 if explicit in (None, "") else int(explicit)
+            max_turns = (
+                pack_catalog.DEFAULT_TURN_CEILING if explicit_turns in (None, "")
+                else int(explicit_turns))
     task = TaskContext(
         brief=brief, repo_path=Path(str(request.get("workspace", "."))).resolve(),
         run_id=run_id, episode_id=f"episode-{run_id}",
@@ -166,17 +143,7 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
     # NT-B04. One projection rule, shared with the application service; this
     # surface does not own a second copy of it.
     outcome = project_terminal_outcome(result.terminal)
-    projections: list[dict[str, Any]] = []
-    for rec in getattr(result, "receipts", ()) or ():
-        verb = getattr(rec, "verb", "")
-        rec_outcome = getattr(rec, "outcome", "")
-        rec_detail = getattr(rec, "detail", "")
-        if verb == "fs.read":
-            projections.append({"kind": "read", "path": rec_detail or "file"})
-        elif verb in ("patch.apply", "fs.patch", "fs.write"):
-            projections.append({"kind": "write", "path": rec_detail or "patch", "text": rec_outcome})
-        elif verb == "proc.exec":
-            projections.append({"kind": "test", "path": rec_detail or "exec", "exitCode": 0 if rec_outcome == "ok" else 1})
+    projections: list[dict[str, Any]] = project_receipts(result)
     # The ledger already carries verification, spend, approval, recovery and
     # sub-agent lifecycle. Projecting only fs/proc receipts left `--headless`
     # unable to report why a run failed or what it cost, so fold the event

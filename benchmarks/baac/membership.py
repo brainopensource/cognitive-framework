@@ -3,9 +3,40 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Mapping
+from typing import Any, Mapping
 
-import yaml
+try:
+    import yaml
+
+    def _safe_load_yaml(text: str) -> Any:
+        return yaml.safe_load(text)
+except ImportError:
+    def _safe_load_yaml(text: str) -> Any:
+        data: dict[str, Any] = {}
+        current_key: str | None = None
+        for line in text.splitlines():
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if line.startswith("- ") and current_key:
+                if not isinstance(data.get(current_key), list):
+                    data[current_key] = []
+                data[current_key].append(line[2:].strip().strip("\"'"))
+                continue
+            if ":" in line:
+                k, v = line.split(":", 1)
+                k = k.strip()
+                v = v.strip()
+                current_key = k
+                if not v:
+                    data[k] = None
+                elif v == "{}":
+                    data[k] = {}
+                elif v.isdigit():
+                    data[k] = int(v)
+                else:
+                    data[k] = v.strip("\"'")
+        return data
 
 from benchmarks.baac.schema import ChallengeMetadata
 from benchmarks.protocols import is_rejected_b20_name
@@ -27,8 +58,8 @@ class BAACMembershipError(ValueError):
 def parse_baac_challenge_manifest(path: Path) -> ChallengeMetadata:
     """Admit one challenge only from a schema-valid ``challenge.yaml``."""
     try:
-        payload = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
-    except (OSError, yaml.YAMLError) as exc:
+        payload = _safe_load_yaml(Path(path).read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
         raise BAACMembershipError("challenge manifest is not valid YAML") from exc
     if not isinstance(payload, Mapping) or payload.get("schema") != BAAC_CHALLENGE_SCHEMA:
         raise BAACMembershipError(

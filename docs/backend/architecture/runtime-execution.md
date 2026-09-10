@@ -184,6 +184,10 @@ the same value transitively through `RunResult`. It preserves the normalized ter
 because their frozen enum has no `abstained` member, refusal projects to `aborted`, never
 `completed`. Both mappings concern termination only; acceptance/disposition remains on verdict.
 
+### 6.2 Environment patch apply (TC-E-061)
+
+`GitEnvironment.apply` and `FakeEnvironment.apply` share one in-memory hunk algorithm (`adapters/environment/hunks.py`). Context lines are the preimage anchor; hunk line numbers are hints only. A declared `expected_preimage` / `expected_preimages` digest that does not match the current file fails closed as `conflict`. Bare `@@` hunks that match more than one location, empty or edit-free hunks, and malformed hunk bodies are refused before any write. Multi-file applies still go through `AtomicMultiFileTransactionManager`: syntax preflight or a later-file refusal restores every original byte and file mode. Single-file Python syntax remains an observation receipt (S8-B-09), not a rollback. The pack toolkit `mhf.toolkit.ast-patch` reuses the same hunk/preimage rules; it is not a second patcher. CAS workspace promotion is not part of this path.
+
 ## 7. Semantic Continuation
 
 Cold resume reconstructs safety/accounting state and reconciles effects. `SemanticTaskState` (`CodingTaskState` alias) in `vanguard/packages/domain/task_state.py` is the compact durable continuation value: task class, completion requirements, plan/discoveries/dead ends, implicated and modified files, route decisions, evidence-gated TODOs, latest verification, settled effects, next action, remaining budgets, monotonic revision, and backlog steps. Runtime `fold_task_state` is the only producer. Resume preserves the ledger `episode_id` and compiles σ into L4/L5; it must not dump `resume_state` JSON into frozen L3. This packet is derived state; missing evidence must fail explicitly or trigger regrounding rather than silently invent context.
@@ -197,3 +201,4 @@ Cold resume reconstructs safety/accounting state and reconciles effects. `Semant
 - **Profile Resolution**: `vanguard/packages/runtime/profiles.py` (`resolve_profile`, `ExecutionProfile`).
 - **Lifecycle Integration Tests**: `test/contracts/test_b2_lifecycle_integration.py`, `test/falsifiers/test_rf94_single_runtime_authority.py`, `test/runtime/test_harness_session.py`.
 - **Terminal Projection Falsifiers**: `test/falsifiers/test_completion_gate_scope.py`, `test/apps/coding_max/test_coding_max_facade.py`, `test/contracts/test_trajectory_v2.py`.
+- **Patch Apply Falsifiers**: `test/falsifiers/test_d6_patch_context_anchoring.py`, `test/packs/code_default/test_ast_patch.py`, `test/runtime/test_atomic_multi_file_transaction.py`.

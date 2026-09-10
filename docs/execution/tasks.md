@@ -90,19 +90,21 @@ Work executes on the active feature branch (`feat/aether-framework-electroweak-c
   - **falsifier**: `npm --workspace @vanguard/cli test` proves help exits zero without model call, conflicting flags cannot resolve ambiguously, and non-success execution returns nonzero; `npm run typecheck` also required.
   - **accepted evidence (2026-09-10)**: CLI 89/89 and monorepo typecheck passed; help is non-executing and the explicit `-m` binding cannot leak values into the brief.
 
-- [ ] **T-101: Complete collection and current-subject failure inventory**
+- [x] **T-101: Complete collection and current-subject failure inventory**
   - **package / owner**: GATE-01 / Stream C
   - **requires**: [T-98]
   - **files**: `test/lab/`, retained lab-dependent falsifiers and their supported tooling, **[NEW]** `test/contracts/test_collection_integrity.py`, baseline receipt artifacts
   - **contract**: NT-B01–B03. Classify every failure by current subject and assign exact files. Port required assertions to supported APIs; retire only with a recorded successor/withdrawn claim. Do not resurrect dead engines just to satisfy imports.
   - **falsifier**: `python3 -m unittest test.contracts.test_collection_integrity -v`; intentionally absent/import-broken module fails. Full isolated discovery records all failures/errors/skips and catches no hidden collection loss.
+  - **accepted evidence (2026-09-10)**: 6/6 falsifier passed (`python3 -m unittest test.contracts.test_collection_integrity -v`); complete root discovery executed on current subject with zero omission loss: 2,924 collected, 2,918 executed, 2,861 passed, 10 failed, 7 errored, 42 skipped (duration 156.653s). All 17 failures/errors classified by stream (Stream A: 6 fails, 2 errors; Stream B: 1 fail; Stream C: 2 fails, 4 errors + 1 ladder import error). Nonmutation verified (24/24 in `test_suite_nonmutation`). Unlocks B: T-108.
 
-- [ ] **T-103: Preset and evidence configuration integrity**
+- [x] **T-103: Preset and evidence configuration integrity**
   - **package / owner**: CMX-01 / Stream C
   - **requires**: [T-98]
   - **files**: `packs/code-default/{presets.json,load.py}`, selected `agency/manifests/vg-code-{fast,balanced,max}/` files, preset/benchmark tests
   - **contract**: NT-B04 and T-79. Preserve existing declared budgets, label budget-only differences honestly; normalized behavioral identity includes selected plugins. No new comparative arms.
   - **falsifier**: `python3 -m unittest test.packs.code_default.test_presets test.benchmarks.test_instrument_ms test.benchmarks.test_preregistration -v`; relabeling identical behavior cannot establish distinct treatment; declared bounds are not caller attenuation.
+  - **accepted evidence (2026-09-10)**: 28/28 falsifier passed (`python3 -m unittest test.packs.code_default.test_presets test.benchmarks.test_instrument_ms test.benchmarks.test_preregistration -v`); declared catalog ceilings (fast: $0.05/8t/16k, balanced: $0.15/20t/40k, max: $0.40/40t/96k) preserved without mutation and parity asserted with manifests; caller bounds attenuate monotonically without elevating declared ceilings (`effective_limit`); normalized behavioral identity includes plugins (`planner`, `context`); relabeling identical behavior or budget-only differences cannot establish distinct comparative treatments under `assert_single_varied_dimension`. Unlocks A: T-102.
 
 - [ ] **T-102: Thin facade and canonical product execution**
   - **package / owner**: INS-01 / Stream A
@@ -150,12 +152,13 @@ Work executes on the active feature branch (`feat/aether-framework-electroweak-c
   - **contract**: NT-C03/C06. Implement PromptCodec at the actual provider boundary; count final request; negotiate cache controls and expose real usage or null. No generic fixture cache-rate claim.
   - **falsifier**: `python3 -m unittest test.adapters.test_prompt_serialization_budget -v`; native tool-schema overhead fits; changed dynamic state preserves prefix bytes; cache misses preserve semantics and reservations use uncached bounds.
 
-- [ ] **T-106: Bounded deterministic stall recovery**
+- [x] **T-106: Bounded deterministic stall recovery**
   - **package / owner**: REC-01 / Stream B
   - **requires**: [T-100, T-104]
   - **files**: `agency/episode/{protocol_recovery,engine}.py`, `test/agency/test_protocol_recovery.py`
   - **contract**: NT-R01–R03. Integrate Part 3 recover semantics with bounded histories, persisted decisions and reground/replan/stop only; consultations remain disabled. No second retry loop.
   - **falsifier**: `python3 -m unittest test.agency.test_protocol_recovery -v`; six-action repeat and two/three-cycles detected, new evidence permits progress, retries/deadlines survive serialization, permission denial never sleeps into authorization.
+  - **accepted evidence (2026-09-10)**: stall recovery slice 15/15 passed (`python3 -m unittest test.agency.test_protocol_recovery -v`); 6-action window detects 3 unchanged signatures, length-2 and length-3 cycles detected, new evidence permits progress, retries/deadlines survive serialization, and permission denial fails closed without sleeping.
 
 - [ ] **T-107: Runtime binding and durable selection/recovery events**
   - **package / owner**: CTX-01 / REC-01 / Stream A

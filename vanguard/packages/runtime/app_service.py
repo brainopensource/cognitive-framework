@@ -23,6 +23,7 @@ from ..ports.event_store import EventRange
 from .bootstrap import RuntimeBootstrap
 from .compose import TaskContext
 from .model_selection import inspect_model_providers, select_model
+from .pack_catalog import DEFAULT_TURN_CEILING
 from .profiles import ExecutionProfileError, SandboxUnavailable, resolve_profile
 from .root import Runtime
 from .results import RunResult, StatusResult, EvidenceResult, CostResult
@@ -54,6 +55,29 @@ def project_terminal_outcome(terminal: Any) -> str:
     impossible, so surfaces consume it rather than reimplementing it.
     """
     return str(getattr(terminal, "value", terminal))
+
+
+def project_receipts(execution: Any) -> list[dict[str, Any]]:
+    """Project effect receipts onto public projection frames, losslessly.
+
+    T-102. Like :func:`project_terminal_outcome`, this is the *single* rule
+    shared by ``entrypoint.execute`` and :meth:`ApplicationService.run`. A
+    second copy is precisely how the stdio surface and the application
+    service could come to disagree about what a run did.
+    """
+    frames: list[dict[str, Any]] = []
+    for rec in getattr(execution, "receipts", ()) or ():
+        verb = getattr(rec, "verb", "")
+        outcome = getattr(rec, "outcome", "")
+        detail = getattr(rec, "detail", "")
+        if verb == "fs.read":
+            frames.append({"kind": "read", "path": detail or "file"})
+        elif verb in ("patch.apply", "fs.patch", "fs.write"):
+            frames.append({"kind": "write", "path": detail or "patch", "text": outcome})
+        elif verb == "proc.exec":
+            frames.append({"kind": "test", "path": detail or "exec",
+                           "exitCode": 0 if outcome == "ok" else 1})
+    return frames
 
 
 @dataclass(frozen=True, slots=True)
@@ -146,8 +170,9 @@ class ApplicationService:
         if not any(isinstance(item, Mapping) and item.get("verb") == "patch.apply"
                    for item in capabilities):
             return None
-        pack_root = Path(__file__).resolve().parents[3] / "packs" / "code-default"
-        import sys
+        from .pack_catalog import pack_root as resolve_pack_root
+
+        pack_root = resolve_pack_root()
         if str(pack_root) not in sys.path:
             sys.path.insert(0, str(pack_root))
         module = importlib.import_module("middleware.repository.multi_file_completeness")
@@ -165,7 +190,7 @@ class ApplicationService:
         planner_model: str | None = None,
         state_dir: Path | str | None = None,
         interactive: bool = True,
-        max_turns: int = 40,
+        max_turns: int = DEFAULT_TURN_CEILING,
         autonomous_approval: bool = False,
         allow_paid: bool = False,
     ) -> RunResult:
@@ -283,17 +308,7 @@ class ApplicationService:
 
         outcome = project_terminal_outcome(exec_result.terminal)
 
-        projections: list[dict[str, Any]] = []
-        for rec in getattr(exec_result, "receipts", ()) or ():
-            verb = getattr(rec, "verb", "")
-            rec_outcome = getattr(rec, "outcome", "")
-            rec_detail = getattr(rec, "detail", "")
-            if verb == "fs.read":
-                projections.append({"kind": "read", "path": rec_detail or "file"})
-            elif verb in ("patch.apply", "fs.patch", "fs.write"):
-                projections.append({"kind": "write", "path": rec_detail or "patch", "text": rec_outcome})
-            elif verb == "proc.exec":
-                projections.append({"kind": "test", "path": rec_detail or "exec", "exitCode": 0 if rec_outcome == "ok" else 1})
+        projections: list[dict[str, Any]] = project_receipts(exec_result)
 
         projections.append({
             "kind": "complete",

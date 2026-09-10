@@ -44,9 +44,14 @@ from ...kernel import (
     attenuate,
 )
 from .protocol_recovery import (
+    Attempt,
+    FailureClass,
     ProtocolRecoveryState,
     RecoveryDecision,
+    recover,
     recover_proposal,
+    semantic_attempt_fingerprint,
+    semantic_progress_key,
 )
 from .admission_gate import AdmissionVerdict
 from .tool_policy import ToolPolicy, derive_phase, resolve_tool_policy
@@ -79,6 +84,19 @@ _TERMINAL_FOR_FAILURE: Mapping[FailurePath, RunTermination] = {
     FailurePath.COMMIT_FAILED: RunTermination.RUNTIME_ERROR,
     FailurePath.CLASSIFIER_ERROR: RunTermination.RUNTIME_ERROR,
 }
+
+_PERMISSION_FAILURES = frozenset({
+    FailurePath.DENIED_REJECT,
+    FailurePath.DENIED_ASK_FAIL_CLOSED,
+    FailurePath.DENIED_UNTRUSTED_JUSTIFYING,
+    FailurePath.DENIED_SCOPE_ESCALATION,
+})
+
+_TRANSIENT_FAILURES = frozenset({
+    FailurePath.TIMEOUT,
+    FailurePath.ADAPTER_UNAVAILABLE,
+    FailurePath.PERIMETER_UNAVAILABLE,
+})
 
 #: Reservation dimension names as they arrive in a proposal (`CT-06`, `CT-07`).
 _RESERVATION_FIELDS = {
@@ -518,7 +536,17 @@ class EpisodeEngine:
                     # same call; the retry bound catches one that keeps
                     # proposing it after being blocked, which adds nudge turns
                     # but no new dispatches for the window to count.
-                    if (repeat_count >= 2 * self._no_progress_limit
+                    stall_attempt = self._semantic_attempt(
+                        proposal,
+                        outcome=(same[-1].progress_signal if same else "repeated"),
+                        failure=None,
+                    )
+                    semantic, recovery_state = self._run_recover(
+                        episode, recovery_state, stall_attempt, proposal,
+                    )
+                    self._emit_recovery_state(episode, recovery_state)
+                    if (semantic.action == "stop"
+                            or repeat_count >= 2 * self._no_progress_limit
                             or recovery_state.effect_retries
                             >= recovery_state.max_effect_retries):
                         detail = (f"repeated action {proposal.action} over "
@@ -539,6 +567,7 @@ class EpisodeEngine:
                             retry_feedback={
                                 "repeatedAction": proposal.action,
                                 "repeatCount": repeat_count,
+                                "semanticAction": semantic.action,
                                 "lastReceiptDigest": (
                                     episode.turns[-1].receipt_digest
                                     if episode.turns else None),
@@ -724,15 +753,19 @@ class EpisodeEngine:
                     }),
                     progress_signal="scope_escalation_denied",
                 )
-                repeats = episode.repeats(turn, limit=self._no_progress_limit)
                 episode = episode.with_turn(turn)
-                if repeats:
-                    episode = episode.terminated(
-                        RunTermination.ABANDONED,
-                        f"no progress over {self._no_progress_limit} turns",
-                    )
-                    break
-                continue
+                attempt = self._semantic_attempt(
+                    proposal, outcome="scope_escalation_denied",
+                    failure=FailureClass.PERMISSION.value,
+                )
+                semantic, recovery_state = self._run_recover(
+                    episode, recovery_state, attempt, proposal,
+                )
+                self._emit_recovery_state(episode, recovery_state)
+                episode = episode.terminated(
+                    RunTermination.ABANDONED, semantic.reason,
+                )
+                break
 
             # -- authorise + effect + receipt, through the one path ------
             request = self._to_effect_request(episode, proposal, accumulated)
@@ -768,6 +801,38 @@ class EpisodeEngine:
             if terminal is not None:
                 episode = episode.terminated(terminal, outcome.detail)
                 break
+            failure_kind: str | None = None
+            if outcome.failure in _PERMISSION_FAILURES:
+                failure_kind = FailureClass.PERMISSION.value
+            elif outcome.failure in _TRANSIENT_FAILURES:
+                failure_kind = FailureClass.TRANSPORT.value
+            attempt = self._semantic_attempt(
+                proposal,
+                outcome=outcome.failure.name.lower(),
+                failure=failure_kind,
+            )
+            semantic, recovery_state = self._run_recover(
+                episode, recovery_state, attempt, proposal,
+            )
+            self._emit_recovery_state(episode, recovery_state)
+            if semantic.action == "stop" and failure_kind == FailureClass.PERMISSION.value:
+                episode = episode.terminated(RunTermination.ABANDONED, semantic.reason)
+                break
+            if semantic.action == "wait":
+                if not _apply_retry(
+                    RecoveryDecision(
+                        status="retry_model",
+                        retry_reason=semantic.reason,
+                        retry_feedback={
+                            "semanticAction": semantic.action,
+                            "delayMs": semantic.delay_ms,
+                            "message": semantic.reason,
+                        },
+                    ),
+                    base_sampling=turn_sampling,
+                ):
+                    break
+                continue
             if repeats:
                 if recovery_state.effect_retries < recovery_state.max_effect_retries:
                     recovery_state = recovery_state.with_effect_retry()
@@ -851,6 +916,41 @@ class EpisodeEngine:
             principal=episode.principal,
             payload=payload,
         ))
+
+    def _semantic_attempt(
+        self, proposal: Proposal, *, outcome: str, failure: str | None,
+    ) -> Attempt:
+        action = str(proposal.action or "")
+        return Attempt(
+            semantic_attempt_fingerprint(action, proposal.args, ""),
+            outcome,
+            semantic_progress_key({
+                "outcome": outcome,
+                "action": action,
+                "args": dict(proposal.args),
+            }),
+            failure,
+        )
+
+    def _run_recover(
+        self,
+        episode: Episode,
+        recovery_state: ProtocolRecoveryState,
+        attempt: Attempt,
+        proposal: Proposal,
+    ) -> tuple[Any, ProtocolRecoveryState]:
+        remaining_turns = max(self._max_turns - episode.turn_count, 1)
+        remaining_ms = int(proposal.reservation.get("millis") or 1)
+        return recover(
+            recovery_state,
+            attempt,
+            remaining_ms=remaining_ms,
+            remaining_turns=remaining_turns,
+            jitter=0.0,
+            state_digest=episode.state_digest(),
+            remaining_budget_ref=digest_of(dict(proposal.reservation)),
+            deadline=self._clock.now(),
+        )
 
     def _emit_recovery_state(self, episode: Episode,
                              state: ProtocolRecoveryState) -> None:

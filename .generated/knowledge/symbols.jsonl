@@ -63,6 +63,7 @@
 {"symbol": "BudgetLeaseState", "kind": "class", "defined_in": "vanguard/packages/domain/ledger/state.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "BudgetProjection", "kind": "class", "defined_in": "vanguard/packages/runtime/ledger/projections.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "CacheBreakpointCeilingExceeded", "kind": "class", "defined_in": "vanguard/packages/agency/context/compiler.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "CacheObservation", "kind": "class", "defined_in": "vanguard/packages/adapters/models/prompt_codec.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "CalculatorOracle", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/suites/bug-001-single-file/test_oracle.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "CancellationRequested", "kind": "class", "defined_in": "vanguard/packages/runtime/service/service.py", "canonical_owner": "docs/backend/architecture/application-interfaces.md"}
 {"symbol": "CanonicalManifest", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/manifest.py", "canonical_owner": "docs/backend/reference/schemas.md"}
@@ -127,6 +128,7 @@
 {"symbol": "ControllerInputError", "kind": "class", "defined_in": "vanguard/packages/runtime/meta_controller.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ControllerOutputError", "kind": "class", "defined_in": "vanguard/packages/runtime/meta_controller.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ControllerProposal", "kind": "class", "defined_in": "vanguard/packages/runtime/meta_controller.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "CoreDecision", "kind": "class", "defined_in": "vanguard/packages/agency/episode/protocol_recovery.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "CostResult", "kind": "class", "defined_in": "vanguard/packages/runtime/results.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "CostVector", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "DSMLDecoderPlugin", "kind": "class", "defined_in": "vanguard/packages/domain/transforms/protocol/response_wrangler.py", "canonical_owner": "docs/backend/reference/schemas.md"}
@@ -296,6 +298,7 @@
 {"symbol": "IndexPort", "kind": "protocol", "defined_in": "vanguard/packages/ports/index.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "InsecureKeyMaterial", "kind": "class", "defined_in": "vanguard/packages/runtime/keys.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "Interaction", "kind": "class", "defined_in": "vanguard/packages/agency/context/layers.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "InvalidPreset", "kind": "class", "defined_in": "vanguard/packages/runtime/pack_catalog.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "InvalidScopeAttenuation", "kind": "class", "defined_in": "vanguard/packages/domain/execution/scope.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "InvalidationCondition", "kind": "class", "defined_in": "vanguard/packages/domain/evidence/claim.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "IsolatedEvaluator", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/isolated.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -422,6 +425,9 @@
 {"symbol": "PromotionEvidence", "kind": "class", "defined_in": "vanguard/packages/runtime/skill_lifecycle.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "PromotionRefused", "kind": "class", "defined_in": "vanguard/packages/runtime/skill_evaluation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "PromptAssembler", "kind": "class", "defined_in": "vanguard/packages/runtime/prompt_assembler.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "PromptBudget", "kind": "class", "defined_in": "vanguard/packages/adapters/models/prompt_codec.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "PromptBudgetExceeded", "kind": "class", "defined_in": "vanguard/packages/adapters/models/prompt_codec.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "PromptCodec", "kind": "class", "defined_in": "vanguard/packages/adapters/models/prompt_codec.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "Proposal", "kind": "class", "defined_in": "vanguard/packages/agency/episode/state.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "Proposal", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "ProposalDecoderProtocol", "kind": "protocol", "defined_in": "vanguard/packages/domain/transforms/contracts.py", "canonical_owner": "docs/backend/reference/schemas.md"}
@@ -512,6 +518,7 @@
 {"symbol": "SemanticReplayAssessment", "kind": "class", "defined_in": "vanguard/packages/runtime/reproducibility.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "SemanticTaskState", "kind": "class", "defined_in": "vanguard/packages/domain/task_state.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "SequentialScheduler", "kind": "class", "defined_in": "vanguard/packages/runtime/scheduler.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "SerializedRequest", "kind": "class", "defined_in": "vanguard/packages/adapters/models/prompt_codec.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ServiceInboxStore", "kind": "class", "defined_in": "vanguard/packages/runtime/service/inbox.py", "canonical_owner": "docs/backend/architecture/application-interfaces.md"}
 {"symbol": "SessionLog", "kind": "class", "defined_in": "vanguard/packages/runtime/session_log.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "SessionLogEntry", "kind": "class", "defined_in": "vanguard/packages/runtime/session_log.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}

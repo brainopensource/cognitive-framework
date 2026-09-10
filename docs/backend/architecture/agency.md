@@ -244,6 +244,8 @@ NO_PROGRESS             PREMATURE_FINISH
 
 Each class has a bounded retry limit and a recovery action. A retry is admissible only when the failure is retryable, budget remains, and the next action or information state differs materially. Repeating the same action with the same arguments against unchanged state is `NO_PROGRESS`, not recovery. Provider adapters may perform transport retries; the harness separately decides whether a failed turn or task action should be retried.
 
+`EpisodeEngine` applies the NT-R01/R02 detector on the existing recovery branch: it retains at most twelve `(fingerprint, outcome, progress_key)` tuples, treats three unchanged signatures in a six-action window and repeated length-two/three cycles as stall, and allows progress only when the verified progress key changes. The policy emits `continue|wait|reground|replan|stop` (never `consult`); one reground and one replan are reserved per task, then stop. Permission, permanent, and budget failures stop with `delay_ms = 0` and never sleep into authorization. Retry counters, the last decision, deadlines, fingerprints, and remaining-budget references survive `aether.recovery-state/1` serialization.
+
 ### 6.4 Current ownership, remaining integration and falsifiers
 
 - **Generic framework seams (AS_BUILT)**: completion-admission result and typed
@@ -271,7 +273,7 @@ Each class has a bounded retry limit and a recovery action. A retry is admissibl
 - **Episode Engine**: `vanguard/packages/agency/episode/engine.py`, `state.py`, `protocol_recovery.py`.
 - **Context Compiler**: `vanguard/packages/agency/context/compiler.py`, `compaction.py`, `layers.py`.
 - **Harness Session Integration**: `vanguard/packages/runtime/session.py`.
-- **Tests**: `test/agency/test_episode.py`, `test/agency/test_context_compiler.py`, `test/contracts/test_m5a_agent_view.py`.
+- **Tests**: `test/agency/test_episode.py`, `test/agency/test_context_compiler.py`, `test/agency/test_context_packet.py`, `test/agency/test_protocol_recovery.py`, `test/contracts/test_semantic_task_state.py`, `test/contracts/test_m5a_agent_view.py`.
 
 ---
 

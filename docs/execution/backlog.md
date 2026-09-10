@@ -9,8 +9,8 @@ canonical_for:
   - repository-backlog
   - feature-lifecycle-tracking
 version: "0.9.3"
-last_verified: 2026-09-07
-lock_head: "3daa487c0be8"
+last_verified: 2026-09-10
+lock_head: "bf56eea9"
 audience:
   - contributor
   - maintainer

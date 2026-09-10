@@ -14,8 +14,8 @@ audience:
   - contributor
   - release-owner
 version: 0.9.3
-last_verified: 2026-09-07
-lock_head: "66aa7a3c0c31"
+last_verified: 2026-09-10
+lock_head: "bf56eea9"
 normative_authority:
   - docs/execution/spec.md
   - docs/execution/technical.md
@@ -50,10 +50,11 @@ Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technic
 | **T-98** | **Stream C** | GATE-01 | Runner-independent isolation and nonmutation | `[]` (READY) | `python3 -m unittest test.contracts.test_suite_nonmutation test.tools.test_check_test_hygiene -v` |
 | **T-99** | **Stream A** | INS-01 | Lossless terminal projection (fix `abstained` -> `completed` collapse) | `[]` (READY) | `python3 -m unittest test.apps.coding_max.test_coding_max_facade test.falsifiers.test_rf90_generic_entrypoint test.falsifiers.test_completion_gate_scope -v` |
 | **T-100** | **Stream B** | CTX-01 | Canonical working-memory and recovery value contracts | `[]` (READY) | `python3 -m unittest test.contracts.test_semantic_task_state -v` |
+| **T-97** | **Stream A** | INS-01 | CLI product surface: `--help` exit zero & `-m` flag disambiguation | `[]` (READY; T-84 done) | `npm --workspace @vanguard/cli test` |
 
 ### Stream Ownership and Boundaries
 
-The labels **Stream A/B/C** below are current engineering ownership, not the historical `(A)`/`(B)` source-document labels or prior Lane A/B roles. There is no sprint calendar. T-98, T-99 and T-100 are independently ready. T-99 uses an independent disposable repository for targeted reproductions; no broad contributor-tree suite is permitted before T-98. Dependencies are actual prerequisites, not hidden external approvals.
+The labels **Stream A/B/C** below are current engineering ownership, not the historical `(A)`/`(B)` source-document labels or prior Lane A/B roles. There is no sprint calendar. T-98, T-99, T-100 and T-97 are independently ready. T-99 uses an independent disposable repository for targeted reproductions; no broad contributor-tree suite is permitted before T-98. Dependencies are actual prerequisites, not hidden external approvals.
 
 | Stream | Exclusive owned files / exceptions | Integration rule |
 |---|---|---|
@@ -61,7 +62,7 @@ The labels **Stream A/B/C** below are current engineering ownership, not the his
 | B — Pure state, context, recovery and patch correctness | `domain/task_state.py`; `agency/context/`, `agency/episode/`; `adapters/environment/`; `packs/code-default/` except C's `presets.json`/`load.py`; corresponding agency/semantic-state/patch/transaction tests | T-100 -> T-104 -> T-106 within B; no edits to A's `session.py` or provider serializers. |
 | C — Test integrity, configuration and acceptance | `test/__init__.py`, `test/conftest.py`, shared safe fixtures, `test/lab/`, collection/nonmutation meta-tests; benchmarks/tests; tools/linters; CI/lockfiles/package manifests/`justfile`; preset catalog/load/manifests; execution docs and generated knowledge | Sole merge-queue/document owner. Remaining test files are assigned by T-101 before edits; C hands A fixture changes for A-owned tests. |
 
-Work in isolated branches with `main` as serial integration target. Shared-tree concurrent editing is forbidden. An explicit file assignment overrides a directory default; transfer a file only after the prior owner's patch lands. No two active rows may lease the same file. Zero planned file overlap is enforceable; semantic conflicts are resolved by integrated verification, not a promise of conflict-free Git merges. Read-only reviews may cross ownership. Generated files have only the generator as writer. If event/schema tooling needs changes, C lands schema-generator input changes while A owns emission/reducer consumers under T-107.
+Work executes on the active feature branch (`feat/aether-framework-electroweak-canonical-agents`) with strictly disjoint file leases per Stream (zero file-level overlap) and focused test falsifiers to prevent cross-contamination. Shared-tree concurrent editing of the same file is forbidden. An explicit file assignment overrides a directory default; transfer a file only after the prior owner's patch lands. No two active rows may lease the same file. Zero planned file overlap is enforceable; semantic conflicts are resolved by integrated verification. Read-only reviews may cross ownership. Generated files have only the generator as writer. If event/schema tooling needs changes, C lands schema-generator input changes while A owns emission/reducer consumers under T-107.
 
 ### Context: Baseline and truthful product convergence
 
@@ -78,6 +79,13 @@ Work in isolated branches with `main` as serial integration target. Shared-tree 
   - **files**: `runtime/entrypoint.py`, `runtime/app_service.py`, `runtime/child_runtime.py`, app/facade and RF-90 tests; paths are under `vanguard/packages/` unless test-qualified
   - **contract**: NT-B04, EW-9.1; one terminal mapping, separate disposition. Supply real verification in successful T-04 successor fixtures; never weaken the gate.
   - **falsifier**: `python3 -m unittest test.apps.coding_max.test_coding_max_facade test.falsifiers.test_rf90_generic_entrypoint test.falsifiers.test_completion_gate_scope -v`; a mutation collapsing refusal into completion fails at both public surfaces.
+
+- [ ] **T-97: CLI product surface — reproduce then repair**
+  - **package / owner**: INS-01 / Stream A
+  - **requires**: [] (T-84 landed in M-5A)
+  - **files**: `vanguard/clients/cli/src/composition/parse-cli.ts`, `vanguard/clients/cli/src/main.ts`, `vanguard/clients/cli/test/commands.test.ts`
+  - **contract**: Reproduce current `aether code --help` behavior before repair; make it print help and exit zero without a completion frame. Resolve `-m` collision by explicit binding whose losing spelling errors rather than silently winning.
+  - **falsifier**: `npm --workspace @vanguard/cli test` proves help exits zero without model call, conflicting flags cannot resolve ambiguously, and non-success execution returns nonzero; `npm run typecheck` also required.
 
 - [ ] **T-101: Complete collection and current-subject failure inventory**
   - **package / owner**: GATE-01 / Stream C

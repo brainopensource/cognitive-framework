@@ -14,8 +14,8 @@ audience:
   - contributor
   - release-owner
 version: "0.9.3"
-last_verified: 2026-09-07
-lock_head: "3daa487c0be8"
+last_verified: 2026-09-10
+lock_head: "bf56eea9"
 derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN.md
   - .draft/DEVELOPMENT_FINAL_PLAN_B.md

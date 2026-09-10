@@ -11,6 +11,22 @@ import subprocess
 
 DOC_ONLY = re.compile(r"^(?:docs|chore)(?:\([^)]*\))?:", re.IGNORECASE)
 PROTECTED_PREFIXES = ("vanguard/packages/", "schemas/")
+BANNED_VOCABULARY = re.compile(r"\b(?:Wave\s*\d+|Phase\s*\d+|Sprint\s*\d+)\b", re.IGNORECASE)
+BANNED_SCOPE_TAG = re.compile(
+    r"^(?:feat|fix|docs|chore|refactor|test)\s*\((?:W\d+|Wave\d*|Phase\d*|Sprint\d*)\):",
+    re.IGNORECASE,
+)
+TASK_OR_STREAM = re.compile(r"\b(?:T-\d+|Stream\s*[ABC]|NT-1|MS-[A-Z0-9-]+)\b", re.IGNORECASE)
+
+
+def has_banned_vocabulary(subject: str) -> bool:
+    """Detect obsolete historical designations (Wave, Phase, Sprint)."""
+    return bool(BANNED_SCOPE_TAG.search(subject.strip()) or BANNED_VOCABULARY.search(subject.strip()))
+
+
+def references_task_or_stream(subject: str) -> bool:
+    """Check if subject references an authorized task ID, stream, or milestone."""
+    return bool(TASK_OR_STREAM.search(subject))
 
 
 def is_mislabelled(subject: str, paths: list[str]) -> bool:
@@ -34,6 +50,16 @@ def violations(base: str, head: str = "HEAD") -> list[str]:
         if is_mislabelled(subject, paths):
             protected = sorted(path for path in paths if path.startswith(PROTECTED_PREFIXES))
             errors.append(f"{commit} {subject!r} touches {protected}")
+        if has_banned_vocabulary(subject):
+            errors.append(
+                f"{commit} {subject!r} uses deprecated historical vocabulary (Wave/Phase/Sprint). "
+                "Use 'Stream [A|B|C]: T-NN -> MS-*' or standard conventional commits."
+            )
+        if any(path.startswith("docs/execution/") for path in paths) and not references_task_or_stream(subject):
+            errors.append(
+                f"{commit} {subject!r} touches docs/execution/ without referencing an authorized "
+                "Task ID (T-NN), Stream, or Gate (e.g. NT-1, MS-BASELINE)."
+            )
     return errors
 
 

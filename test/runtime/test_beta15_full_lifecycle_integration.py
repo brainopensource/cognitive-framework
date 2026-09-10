@@ -28,7 +28,10 @@ import tempfile
 import unittest
 from pathlib import Path
 
-import setuptools.build_meta as build_meta
+try:
+    import setuptools.build_meta as build_meta
+except ModuleNotFoundError:
+    build_meta = None
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 
@@ -36,6 +39,8 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 class TestBeta15FullLifecycleIntegration(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
+        if build_meta is None:
+            raise unittest.SkipTest("setuptools.build_meta not available in test environment")
         cls.tmp_build = tempfile.mkdtemp(prefix="vg-b15-sdist-build-")
         cls.tmp_install = tempfile.mkdtemp(prefix="vg-b15-sdist-install-")
 

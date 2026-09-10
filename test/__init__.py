@@ -37,3 +37,11 @@ if not os.environ.get("BAAC_RUNS_DIR"):
     _baac_runs.mkdir(parents=True, exist_ok=True)
     os.environ["BAAC_RUNS_DIR"] = str(_baac_runs)
 
+from test.conftest import (
+    probe_bwrap_available,
+    probe_lda_index_available,
+    require_bwrap,
+    require_lda,
+)
+
+

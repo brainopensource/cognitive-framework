@@ -47,3 +47,42 @@ def pytest_configure(config) -> None:
         baac_runs.mkdir(parents=True, exist_ok=True)
         os.environ["BAAC_RUNS_DIR"] = str(baac_runs)
 
+
+def probe_bwrap_available() -> bool:
+    """Check if bubblewrap executable is available on PATH and runnable."""
+    bwrap = shutil.which("bwrap")
+    if not bwrap:
+        return False
+    try:
+        import subprocess
+        res = subprocess.run(
+            [bwrap, "--unshare-user", "--ro-bind", "/usr", "/usr", "--", "/bin/true"],
+            check=False,
+            capture_output=True,
+            timeout=2,
+        )
+        return res.returncode == 0
+    except (OSError, Exception):
+        return False
+
+
+def probe_lda_index_available() -> bool:
+    """Check if LDA SQLite database is initialized and non-empty."""
+    lda_db = _ROOT / ".lda" / "index.db"
+    return lda_db.is_file() and lda_db.stat().st_size > 0
+
+
+def require_bwrap() -> None:
+    """Skip test if bubblewrap containment is absent."""
+    import unittest
+    if not probe_bwrap_available():
+        raise unittest.SkipTest("Bubblewrap (bwrap) not available or user namespaces restricted on host")
+
+
+def require_lda() -> None:
+    """Skip test if LDA index is unbuilt."""
+    import unittest
+    if not probe_lda_index_available():
+        raise unittest.SkipTest("LDA index (.lda/index.db) not built or empty")
+
+

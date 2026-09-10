@@ -3,6 +3,7 @@ from __future__ import annotations
 import tempfile
 import unittest
 import os
+import shutil
 import signal
 from pathlib import Path
 
@@ -26,6 +27,8 @@ class TestRunner(RootlessSandboxRunner):
 
 class SandboxIsolationTest(unittest.TestCase):
     def setUp(self) -> None:
+        if not shutil.which("bwrap"):
+            raise unittest.SkipTest("bwrap executable not found on host PATH")
         self.temp = tempfile.TemporaryDirectory()
         root = Path(self.temp.name)
         self.workspace = root / "workspace"

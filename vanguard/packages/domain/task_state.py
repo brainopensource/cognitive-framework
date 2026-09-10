@@ -3,21 +3,26 @@
 from __future__ import annotations
 
 import dataclasses
+import re
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Mapping, Sequence
 
-from .canonicalisation.digest import digest_of
+from .canonicalisation.digest import digest_bytes, digest_of
+from .canonicalisation.jcs import canonical_bytes, parse_json_text
 
 __all__ = [
     "CodingTaskState",
     "DeadEnd",
     "Discovery",
+    "Evidence",
+    "MemoryView",
     "RouteDecision",
     "SemanticTaskState",
     "StepState",
     "TaskStep",
     "TodoItem",
+    "critical_state",
 ]
 
 
@@ -387,9 +392,193 @@ class SemanticTaskState:
 
 CodingTaskState = SemanticTaskState
 
+MEMORY_VIEW_SCHEMA = "aether.memory-view/1"
+_DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
+
 
 def _optional_str(value: Any) -> str | None:
     if value is None:
         return None
     text = str(value)
     return text if text else None
+
+
+def _natural(value: Any, field: str) -> int:
+    if type(value) is not int or value < 0:
+        raise ValueError(f"invalid {field}")
+    return value
+
+
+def _require_digest(value: Any, field: str) -> str:
+    if not isinstance(value, str) or not _DIGEST.fullmatch(value):
+        raise ValueError(f"malformed {field}")
+    return value
+
+
+def _require_text(value: Any, field: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{field} must be a nonempty string")
+    return value
+
+
+@dataclass(frozen=True, slots=True)
+class Evidence:
+    """One unique, artifact-bound finding in an `aether.memory-view/1` snapshot."""
+
+    key: str
+    subject: str
+    artifact: str
+    finding: str
+    body: str = ""
+
+    def __post_init__(self) -> None:
+        _require_text(self.key, "evidence key")
+        _require_text(self.finding, "evidence finding")
+        _require_digest(self.subject, "evidence subject")
+        _require_digest(self.artifact, "evidence artifact")
+        if not isinstance(self.body, str):
+            raise TypeError("evidence body must be a string")
+
+    def to_dict(self) -> dict[str, str]:
+        return {
+            "key": self.key,
+            "subject": self.subject,
+            "artifact": self.artifact,
+            "finding": self.finding,
+            "body": self.body,
+        }
+
+    @classmethod
+    def from_mapping(cls, raw: Mapping[str, Any]) -> "Evidence":
+        if not isinstance(raw, Mapping):
+            raise TypeError("evidence must be an object")
+        return cls(
+            key=str(raw.get("key", "")),
+            subject=raw.get("subject", ""),
+            artifact=raw.get("artifact", ""),
+            finding=str(raw.get("finding", "")),
+            body=str(raw.get("body", "")),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class MemoryView:
+    """Immutable `aether.memory-view/1` snapshot around a complete SemanticTaskState."""
+
+    task_bytes: bytes
+    cursor: int
+    lineage_id: str
+    reducer_version: str
+    evidence: tuple[Evidence, ...] = ()
+
+    def __post_init__(self) -> None:
+        _natural(self.cursor, "cursor")
+        _require_text(self.lineage_id, "lineage_id")
+        _require_text(self.reducer_version, "reducer_version")
+        if not isinstance(self.task_bytes, (bytes, bytearray)):
+            raise TypeError("task snapshot must be canonical bytes")
+        task_raw = parse_json_text(bytes(self.task_bytes).decode("utf-8"))
+        if not isinstance(task_raw, Mapping):
+            raise TypeError("task snapshot must be an object")
+        task = SemanticTaskState.from_mapping(task_raw)
+        if canonical_bytes(task.to_canonical_dict()) != bytes(self.task_bytes):
+            raise ValueError("task snapshot is not canonical")
+        if len({item.key for item in self.evidence}) != len(self.evidence):
+            raise ValueError("duplicate evidence key")
+        if not all(isinstance(item, Evidence) for item in self.evidence):
+            raise TypeError("evidence must contain Evidence values")
+
+    @property
+    def task(self) -> SemanticTaskState:
+        return SemanticTaskState.from_mapping(parse_json_text(self.task_bytes.decode("utf-8")))
+
+    @classmethod
+    def capture(
+        cls,
+        task: SemanticTaskState,
+        cursor: int,
+        *,
+        lineage_id: str,
+        reducer_version: str,
+        evidence: Sequence[Evidence] = (),
+    ) -> "MemoryView":
+        if not isinstance(task, SemanticTaskState):
+            raise TypeError("memory view requires a SemanticTaskState")
+        return cls(
+            task_bytes=canonical_bytes(task.to_canonical_dict()),
+            cursor=cursor,
+            lineage_id=lineage_id,
+            reducer_version=reducer_version,
+            evidence=tuple(evidence),
+        )
+
+    def encode(self) -> bytes:
+        return canonical_bytes({
+            "schema": MEMORY_VIEW_SCHEMA,
+            "cursor": self.cursor,
+            "lineageId": self.lineage_id,
+            "reducerVersion": self.reducer_version,
+            "task": parse_json_text(self.task_bytes.decode("utf-8")),
+            "evidence": [item.to_dict() for item in self.evidence],
+        })
+
+    def digest(self) -> str:
+        return digest_bytes(self.encode())
+
+    @classmethod
+    def decode(cls, payload: bytes, expected_digest: str) -> "MemoryView":
+        if not isinstance(payload, (bytes, bytearray)):
+            raise TypeError("memory view payload must be bytes")
+        payload_bytes = bytes(payload)
+        _require_digest(expected_digest, "memory digest")
+        if digest_bytes(payload_bytes) != expected_digest:
+            raise ValueError("memory digest mismatch")
+        raw = parse_json_text(payload_bytes.decode("utf-8"))
+        if not isinstance(raw, Mapping):
+            raise TypeError("memory view must be an object")
+        if raw.get("schema") != MEMORY_VIEW_SCHEMA:
+            raise ValueError("unsupported memory schema")
+        task_raw = raw.get("task")
+        if not isinstance(task_raw, Mapping):
+            raise TypeError("task snapshot must be an object")
+        evidence_raw = raw.get("evidence", ())
+        if not isinstance(evidence_raw, Sequence) or isinstance(evidence_raw, (str, bytes)):
+            raise TypeError("evidence must be a sequence")
+        view = cls(
+            task_bytes=canonical_bytes(dict(task_raw)),
+            cursor=raw.get("cursor"),
+            lineage_id=str(raw.get("lineageId", raw.get("lineage_id", ""))),
+            reducer_version=str(raw.get("reducerVersion", raw.get("reducer_version", ""))),
+            evidence=tuple(
+                Evidence.from_mapping(item) for item in evidence_raw if isinstance(item, Mapping)
+            ),
+        )
+        if len(view.evidence) != len(tuple(evidence_raw)):
+            raise TypeError("evidence must contain objects")
+        if view.encode() != payload_bytes:
+            raise ValueError("noncanonical or unknown memory fields")
+        return view
+
+
+def critical_state(view: MemoryView) -> dict[str, Any]:
+    """Projection of durable obligations; not a writeback format."""
+    task = view.task
+    return {
+        "objective": task.objective,
+        "constraints": list(task.constraints),
+        "plan": list(task.plan),
+        "next_action": task.next_action,
+        "modified_files": list(task.modified_files),
+        "failure": task.failure_class,
+        "verification": dict(task.last_verification),
+        "verification_plan": list(task.verification_plan),
+        "settled_effects": list(task.settled_effects),
+        "remaining_budgets": dict(task.remaining_budgets),
+        "requirements": list(task.completion_requirements),
+        "invariants": list(task.settled_invariants),
+        "hypotheses": list(task.hypotheses),
+        "state_ref": digest_bytes(view.encode()),
+        "cursor": view.cursor,
+        "lineage_id": view.lineage_id,
+        "reducer_version": view.reducer_version,
+    }

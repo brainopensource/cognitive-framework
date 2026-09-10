@@ -2,15 +2,22 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field, replace
 from enum import Enum
+from types import MappingProxyType
 from typing import Any, Literal, Mapping, Sequence
 
 from ...domain.canonicalisation.digest import digest_of
+from ...domain.canonicalisation.jcs import canonical_bytes, parse_json_text
 from ...domain.transforms.contracts import ProposalDecoderProtocol
 from .state import Proposal, ProposalKind, ProposalMalformed, parse_proposal
 
 RecoveryStatus = Literal["accept", "retry_model", "fail_instrument"]
+
+RECOVERY_STATE_SCHEMA = "aether.recovery-state/1"
+MAX_DURABLE_ATTEMPTS = 12
+_DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 
 class FailureClass(str, Enum):
@@ -23,6 +30,66 @@ class FailureClass(str, Enum):
     VERIFICATION = "verification"
     PERMISSION = "permission"
     BUDGET = "budget"
+
+
+def _natural(value: Any, field: str) -> int:
+    if type(value) is not int or value < 0:
+        raise ValueError(f"invalid {field}")
+    return value
+
+
+def _require_digest(value: Any, field: str) -> str:
+    if not isinstance(value, str) or not _DIGEST.fullmatch(value):
+        raise ValueError(f"malformed {field}")
+    return value
+
+
+def _require_text(value: Any, field: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{field} must be a nonempty string")
+    return value
+
+
+_FAILURE_VALUES = {kind.value for kind in FailureClass}
+
+
+@dataclass(frozen=True, slots=True)
+class Attempt:
+    """One durable recovery attempt in `aether.recovery-state/1` history."""
+
+    fingerprint: str
+    outcome: str
+    progress_key: str
+    failure: str | None = None
+
+    def __post_init__(self) -> None:
+        _require_digest(self.fingerprint, "attempt fingerprint")
+        _require_text(self.outcome, "attempt outcome")
+        _require_digest(self.progress_key, "attempt progress key")
+        if self.failure is not None and self.failure not in _FAILURE_VALUES:
+            raise ValueError("unknown failure classification")
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "fingerprint": self.fingerprint,
+            "outcome": self.outcome,
+            "progressKey": self.progress_key,
+            "failure": self.failure,
+        }
+
+    @classmethod
+    def from_mapping(cls, raw: Mapping[str, Any]) -> "Attempt":
+        if not isinstance(raw, Mapping):
+            raise TypeError("attempt must be an object")
+        failure = raw.get("failure")
+        if failure == "":
+            failure = None
+        return cls(
+            fingerprint=raw.get("fingerprint", ""),
+            outcome=str(raw.get("outcome", "")),
+            progress_key=raw.get("progressKey", raw.get("progress_key", "")),
+            failure=None if failure is None else str(failure),
+        )
 
 
 def semantic_attempt_fingerprint(
@@ -80,6 +147,53 @@ class ProtocolRecoveryState:
     #: deterministic and prevents an unchanged failed action from repeating.
     attempted_fingerprints: tuple[str, ...] = ()
     spent_decisions: tuple[str, ...] = ()
+    policy_digest: str = ""
+    history: tuple[Attempt, ...] = ()
+    errors: Mapping[str, int] = field(default_factory=dict)
+    interventions: int = 0
+    decisions: int = 0
+    pending_operation: str | None = None
+    deadline: str | None = None
+
+    def __post_init__(self) -> None:
+        for name in (
+            "transport_retries", "protocol_retries", "truncation_retries", "effect_retries",
+            "max_transport_retries", "max_protocol_retries", "max_truncation_retries",
+            "max_effect_retries", "interventions", "decisions",
+        ):
+            _natural(getattr(self, name), name.replace("_", " "))
+        if self.policy_digest:
+            _require_digest(self.policy_digest, "policy digest")
+        if len(self.attempted_fingerprints) > MAX_DURABLE_ATTEMPTS:
+            raise ValueError("durable attempt history exceeds bound")
+        if len(self.history) > MAX_DURABLE_ATTEMPTS:
+            raise ValueError("durable attempt history exceeds bound")
+        for fingerprint in self.attempted_fingerprints:
+            _require_digest(fingerprint, "attempt fingerprint")
+        if not all(isinstance(item, str) and item for item in self.spent_decisions):
+            raise ValueError("spent decisions must be nonempty strings")
+        if not all(isinstance(item, Attempt) for item in self.history):
+            raise TypeError("history must contain Attempt values")
+        errors = {}
+        for key, count in dict(self.errors).items():
+            if key not in _FAILURE_VALUES:
+                raise ValueError("unknown failure classification")
+            errors[key] = _natural(count, "error count")
+        object.__setattr__(self, "errors", MappingProxyType(errors))
+        pending = self.pending_operation
+        deadline = self.deadline
+        if pending == "":
+            pending = None
+            object.__setattr__(self, "pending_operation", None)
+        if deadline == "":
+            deadline = None
+            object.__setattr__(self, "deadline", None)
+        if (pending is None) != (deadline is None):
+            raise ValueError("pending operation requires a deadline")
+        if pending is not None and not isinstance(pending, str):
+            raise TypeError("pending operation must be a string")
+        if deadline is not None and not isinstance(deadline, str):
+            raise TypeError("deadline must be a string")
 
     def with_protocol_retry(self) -> ProtocolRecoveryState:
         return replace(self, protocol_retries=self.protocol_retries + 1)
@@ -96,34 +210,168 @@ class ProtocolRecoveryState:
     def record_attempt(self, fingerprint: str, decision: str = "") -> ProtocolRecoveryState:
         if not fingerprint:
             raise ValueError("attempt fingerprint is required")
+        _require_digest(fingerprint, "attempt fingerprint")
+        if len(self.attempted_fingerprints) >= MAX_DURABLE_ATTEMPTS:
+            raise ValueError("durable attempt history exceeds bound")
+        spent = (self.spent_decisions + (decision,)) if decision else self.spent_decisions
         return replace(
             self,
             attempted_fingerprints=self.attempted_fingerprints + (fingerprint,),
-            spent_decisions=(self.spent_decisions + (decision,)) if decision else self.spent_decisions,
+            spent_decisions=spent,
         )
 
     def has_attempted(self, fingerprint: str) -> bool:
         return fingerprint in self.attempted_fingerprints
 
+    def _policy_digest(self) -> str:
+        if self.policy_digest:
+            return self.policy_digest
+        return digest_of({
+            "maxTransportRetries": self.max_transport_retries,
+            "maxProtocolRetries": self.max_protocol_retries,
+            "maxTruncationRetries": self.max_truncation_retries,
+            "maxEffectRetries": self.max_effect_retries,
+        })
+
+    def _history(self) -> tuple[Attempt, ...]:
+        if self.history:
+            return self.history
+        items: list[Attempt] = []
+        for index, fingerprint in enumerate(self.attempted_fingerprints):
+            outcome = (
+                self.spent_decisions[index]
+                if index < len(self.spent_decisions)
+                else "recorded"
+            )
+            items.append(Attempt(fingerprint, outcome, fingerprint, None))
+        return tuple(items)
+
     def to_dict(self) -> dict[str, Any]:
         return {
+            "schema": RECOVERY_STATE_SCHEMA,
+            "policyDigest": self._policy_digest(),
+            "history": [item.to_dict() for item in self._history()],
+            "errors": dict(self.errors),
+            "interventions": self.interventions,
+            "decisions": self.decisions,
+            "pendingOperation": self.pending_operation,
+            "deadline": self.deadline,
             "transportRetries": self.transport_retries,
             "protocolRetries": self.protocol_retries,
             "truncationRetries": self.truncation_retries,
             "effectRetries": self.effect_retries,
+            "maxTransportRetries": self.max_transport_retries,
+            "maxProtocolRetries": self.max_protocol_retries,
+            "maxTruncationRetries": self.max_truncation_retries,
+            "maxEffectRetries": self.max_effect_retries,
             "attemptedFingerprints": list(self.attempted_fingerprints),
             "spentDecisions": list(self.spent_decisions),
         }
 
+    def encode(self) -> bytes:
+        return canonical_bytes(self.to_dict())
+
+    @classmethod
+    def decode(cls, payload: bytes) -> "ProtocolRecoveryState":
+        if not isinstance(payload, (bytes, bytearray)):
+            raise TypeError("recovery payload must be bytes")
+        payload_bytes = bytes(payload)
+        raw = parse_json_text(payload_bytes.decode("utf-8"))
+        if not isinstance(raw, Mapping):
+            raise TypeError("recovery state must be an object")
+        state = cls.from_dict(raw)
+        if state.encode() != payload_bytes:
+            raise ValueError("noncanonical or unknown recovery fields")
+        return state
+
     @classmethod
     def from_dict(cls, raw: Mapping[str, Any]) -> "ProtocolRecoveryState":
+        if not isinstance(raw, Mapping):
+            raise TypeError("recovery state must be an object")
+        schema = raw.get("schema")
+        if schema is None:
+            return cls._from_legacy(raw)
+        if schema != RECOVERY_STATE_SCHEMA:
+            raise ValueError("unsupported recovery schema")
+        history_raw = raw.get("history", ())
+        if not isinstance(history_raw, Sequence) or isinstance(history_raw, (str, bytes)):
+            raise TypeError("history must be a sequence")
+        errors_raw = raw.get("errors", {})
+        if not isinstance(errors_raw, Mapping):
+            raise TypeError("errors must be an object")
+        fingerprints_raw = raw.get("attemptedFingerprints", raw.get("attempted_fingerprints", ()))
+        decisions_raw = raw.get("spentDecisions", raw.get("spent_decisions", ()))
+        if not isinstance(fingerprints_raw, Sequence) or isinstance(fingerprints_raw, (str, bytes)):
+            raise TypeError("attempted fingerprints must be a sequence")
+        if not isinstance(decisions_raw, Sequence) or isinstance(decisions_raw, (str, bytes)):
+            raise TypeError("spent decisions must be a sequence")
         return cls(
-            transport_retries=int(raw.get("transportRetries", raw.get("transport_retries", 0))),
-            protocol_retries=int(raw.get("protocolRetries", raw.get("protocol_retries", 0))),
-            truncation_retries=int(raw.get("truncationRetries", raw.get("truncation_retries", 0))),
-            effect_retries=int(raw.get("effectRetries", raw.get("effect_retries", 0))),
-            attempted_fingerprints=tuple(str(x) for x in raw.get("attemptedFingerprints", ())),
-            spent_decisions=tuple(str(x) for x in raw.get("spentDecisions", ())),
+            transport_retries=_natural(
+                raw.get("transportRetries", raw.get("transport_retries", 0)), "transport retries",
+            ),
+            protocol_retries=_natural(
+                raw.get("protocolRetries", raw.get("protocol_retries", 0)), "protocol retries",
+            ),
+            truncation_retries=_natural(
+                raw.get("truncationRetries", raw.get("truncation_retries", 0)), "truncation retries",
+            ),
+            effect_retries=_natural(
+                raw.get("effectRetries", raw.get("effect_retries", 0)), "effect retries",
+            ),
+            max_transport_retries=_natural(
+                raw.get("maxTransportRetries", raw.get("max_transport_retries", 2)),
+                "max transport retries",
+            ),
+            max_protocol_retries=_natural(
+                raw.get("maxProtocolRetries", raw.get("max_protocol_retries", 2)),
+                "max protocol retries",
+            ),
+            max_truncation_retries=_natural(
+                raw.get("maxTruncationRetries", raw.get("max_truncation_retries", 1)),
+                "max truncation retries",
+            ),
+            max_effect_retries=_natural(
+                raw.get("maxEffectRetries", raw.get("max_effect_retries", 2)),
+                "max effect retries",
+            ),
+            attempted_fingerprints=tuple(str(item) for item in fingerprints_raw),
+            spent_decisions=tuple(str(item) for item in decisions_raw),
+            policy_digest=raw.get("policyDigest", raw.get("policy_digest", "")),
+            history=tuple(Attempt.from_mapping(item) for item in history_raw),
+            errors={str(key): value for key, value in errors_raw.items()},
+            interventions=_natural(raw.get("interventions", 0), "interventions"),
+            decisions=_natural(raw.get("decisions", 0), "decisions"),
+            pending_operation=raw.get("pendingOperation", raw.get("pending_operation")),
+            deadline=raw.get("deadline"),
+        )
+
+    @classmethod
+    def _from_legacy(cls, raw: Mapping[str, Any]) -> "ProtocolRecoveryState":
+        fingerprints_raw = raw.get("attemptedFingerprints", raw.get("attempted_fingerprints", ()))
+        decisions_raw = raw.get("spentDecisions", raw.get("spent_decisions", ()))
+        if fingerprints_raw in (None, ()):
+            fingerprints_raw = ()
+        if decisions_raw in (None, ()):
+            decisions_raw = ()
+        if not isinstance(fingerprints_raw, Sequence) or isinstance(fingerprints_raw, (str, bytes)):
+            raise TypeError("attempted fingerprints must be a sequence")
+        if not isinstance(decisions_raw, Sequence) or isinstance(decisions_raw, (str, bytes)):
+            raise TypeError("spent decisions must be a sequence")
+        return cls(
+            transport_retries=_natural(
+                raw.get("transportRetries", raw.get("transport_retries", 0)), "transport retries",
+            ),
+            protocol_retries=_natural(
+                raw.get("protocolRetries", raw.get("protocol_retries", 0)), "protocol retries",
+            ),
+            truncation_retries=_natural(
+                raw.get("truncationRetries", raw.get("truncation_retries", 0)), "truncation retries",
+            ),
+            effect_retries=_natural(
+                raw.get("effectRetries", raw.get("effect_retries", 0)), "effect retries",
+            ),
+            attempted_fingerprints=tuple(str(item) for item in fingerprints_raw),
+            spent_decisions=tuple(str(item) for item in decisions_raw),
         )
 
 

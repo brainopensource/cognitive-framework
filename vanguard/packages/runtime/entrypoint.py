@@ -12,6 +12,7 @@ from typing import Any, Mapping
 from ..adapters.models.fake import FakeModel
 from ..adapters.stores.blob_store import FileBlobStore
 from ..adapters.sandbox.platform import discover_platform
+from .app_service import project_terminal_outcome
 from .compose import TaskContext
 from .profiles import SandboxUnavailable, resolve_profile
 from .root import Runtime
@@ -162,8 +163,9 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
         blobs=FileBlobStore(configured_store_path.parent / "blobs"),
         completion_policy=_completion_policy(manifest_path),
     )
-    terminal = str(getattr(result.terminal, "value", result.terminal))
-    outcome = "completed" if terminal in {"completed", "abstained"} else terminal
+    # NT-B04. One projection rule, shared with the application service; this
+    # surface does not own a second copy of it.
+    outcome = project_terminal_outcome(result.terminal)
     projections: list[dict[str, Any]] = []
     for rec in getattr(result, "receipts", ()) or ():
         verb = getattr(rec, "verb", "")

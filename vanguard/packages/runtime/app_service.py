@@ -36,6 +36,26 @@ from .state_contract import (
 )
 
 
+def project_terminal_outcome(terminal: Any) -> str:
+    """Project a run termination onto its public outcome string, losslessly.
+
+    NT-B04 / EW-9.1. Terminal status and task disposition are orthogonal axes.
+    This function normalises an enum-or-string termination to its canonical
+    value and returns it *unchanged*: no terminal is ever relabelled as
+    another, and in particular ``abstained`` -- a refusal -- never becomes
+    ``completed``.  Disposition is never synthesised from a termination here;
+    only ``passed`` satisfies acceptance and it travels on its own axis.
+
+    This is the single terminal projection rule for the product surfaces.
+    ``entrypoint.execute``, :meth:`ApplicationService.run` and
+    :meth:`ApplicationService.resume` all call it, and the Coding Max facade
+    consumes it transitively through the ``RunResult`` those return.  A second
+    copy of this mapping anywhere is precisely the defect it exists to make
+    impossible, so surfaces consume it rather than reimplementing it.
+    """
+    return str(getattr(terminal, "value", terminal))
+
+
 @dataclass(frozen=True, slots=True)
 class DiagnosticCheck:
     name: str
@@ -261,8 +281,7 @@ class ApplicationService:
             **approver_kwargs,
         )
 
-        terminal = str(getattr(exec_result.terminal, "value", exec_result.terminal))
-        outcome = "completed" if terminal in {"completed", "abstained"} else terminal
+        outcome = project_terminal_outcome(exec_result.terminal)
 
         projections: list[dict[str, Any]] = []
         for rec in getattr(exec_result, "receipts", ()) or ():
@@ -441,11 +460,10 @@ class ApplicationService:
             blobs=FileBlobStore(resolved_state_dir / "blobs"),
             completion_policy=completion_policy,
         )
-        terminal = str(getattr(exec_result.terminal, "value", exec_result.terminal))
         resumed_events = list(getattr(exec_result, "events", ()) or ())
         projections = tuple({"kind": "resume", "runId": run_id},)
         return self._result_from_execution(
-            run_id=run_id, outcome=("completed" if terminal in {"completed", "abstained"} else terminal),
+            run_id=run_id, outcome=project_terminal_outcome(exec_result.terminal),
             phase="complete", turns=int(getattr(exec_result.telemetry, "turns", 0)),
             plan_digest=exec_result.run_digest or None, detail=exec_result.detail,
             projections=projections, episode_id=task.episode_id, execution=exec_result,

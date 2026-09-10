@@ -17,15 +17,21 @@ import json
 import os
 import subprocess
 import sys
+import inspect
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[3]
 
 from vanguard.packages.adapters.stores.event_store import SqliteEventStore
+from vanguard.packages.agency.episode.state import RunTermination
+from vanguard.packages.apps.coding_max import facade as facade_module
 from vanguard.packages.apps.coding_max.facade import CodingMaxFacade, InvalidPreset
 from vanguard.packages.ports.event_store import EventRange
+from vanguard.packages.runtime import app_service as app_service_module
+from vanguard.packages.runtime import entrypoint as entrypoint_module
 from vanguard.packages.runtime.app_service import ApplicationService
 from vanguard.packages.runtime.cli import main as cli_main
 from vanguard.packages.runtime.results import RunResult, StatusResult
@@ -312,6 +318,137 @@ print(json.dumps({
             text = source.read_text(encoding="utf-8").lower()
             for token in forbidden:
                 self.assertNotIn(token, text, f"{source.name} contains {token!r}")
+
+
+class _StubTelemetry:
+    """Only the fields the public projection reads."""
+
+    turns = 2
+    prompt_tokens = None
+    completion_tokens = None
+
+
+class _StubExecution:
+    """An execution result whose termination is injected, not scripted."""
+
+    def __init__(self, terminal: RunTermination) -> None:
+        self.terminal = terminal
+        self.receipts = ()
+        self.events = ()
+        self.telemetry = _StubTelemetry()
+        self.run_digest = "sha256:" + "0" * 64
+        self.state_digest = None
+        self.detail = "injected termination"
+        self.trajectory = {}
+        self.composition_digest = None
+
+
+class TestProductTerminalProjection(unittest.TestCase):
+    """NT-B04 / EW-9.1 at the application service and the Coding Max facade.
+
+    The facade is a thin client of ``ApplicationService`` and therefore has no
+    mapping to correct: it inherits truthfulness by consuming the shared rule
+    through the ``RunResult`` it returns. These tests pin exactly that, so a
+    facade that grew its own terminal branch would fail here as loudly as a
+    runtime surface that grew a second copy.
+    """
+
+    def setUp(self) -> None:
+        self.tmp_dir = tempfile.TemporaryDirectory()
+        self.workspace = Path(self.tmp_dir.name).resolve()
+        (self.workspace / "pyproject.toml").touch()
+        self.state_dir = self.workspace / ".vanguard"
+        self.state_dir.mkdir(parents=True, exist_ok=True)
+        (self.state_dir / "blobs").mkdir(parents=True, exist_ok=True)
+
+    def tearDown(self) -> None:
+        self.tmp_dir.cleanup()
+
+    @staticmethod
+    def _injecting(terminal: RunTermination):
+        def _stub(*_args: object, **_kwargs: object) -> _StubExecution:
+            return _StubExecution(terminal)
+
+        return mock.patch.object(
+            app_service_module.Runtime, "execute_profiled", _stub)
+
+    def _service_run(self, terminal: RunTermination, run_id: str) -> RunResult:
+        service = ApplicationService(workspace=self.workspace)
+        with self._injecting(terminal):
+            return service.run(
+                brief="terminal projection brief", profile_id="local",
+                run_id=run_id, model=object(), state_dir=self.state_dir,
+                interactive=False, max_turns=4,
+            )
+
+    def _facade_run(self, terminal: RunTermination, run_id: str) -> RunResult:
+        facade = CodingMaxFacade(workspace=self.workspace)
+        with self._injecting(terminal):
+            return facade.run(
+                "terminal projection brief", preset="fast", run_id=run_id,
+                model=object(), state_dir=self.state_dir, interactive=False,
+                max_turns=4,
+            )
+
+    def test_application_service_never_relabels_abstention_as_completion(self) -> None:
+        result = self._service_run(RunTermination.ABSTAINED, "run-abstain-svc")
+        self.assertEqual(result.outcome, "abstained")
+        self.assertNotEqual(result.outcome, "completed")
+        self.assertEqual(result.terminal_state, "abstained")
+
+    def test_the_facade_inherits_the_truthful_projection(self) -> None:
+        result = self._facade_run(RunTermination.ABSTAINED, "run-abstain-facade")
+        self.assertEqual(result.outcome, "abstained")
+        self.assertNotEqual(result.outcome, "completed")
+
+    def test_an_admitted_completion_remains_successful(self) -> None:
+        """No over-correction: an admitted `completed` is still a success."""
+        self.assertEqual(
+            self._service_run(RunTermination.COMPLETED, "run-done-svc").outcome,
+            "completed")
+        self.assertEqual(
+            self._facade_run(RunTermination.COMPLETED, "run-done-facade").outcome,
+            "completed")
+
+    def test_other_terminals_are_carried_through_unchanged(self) -> None:
+        for index, terminal in enumerate((RunTermination.ESCALATED,
+                                          RunTermination.CANCELLED,
+                                          RunTermination.BUDGET_EXHAUSTED)):
+            with self.subTest(terminal=terminal.value):
+                result = self._service_run(terminal, f"run-terminal-{index}")
+                self.assertEqual(result.outcome, terminal.value)
+
+    def test_the_facade_carries_no_terminal_mapping_or_execution_branch(self) -> None:
+        """The facade stays thin; a third mapping fails this outright."""
+        source = inspect.getsource(facade_module)
+        self.assertNotIn("abstained", source)
+        self.assertNotIn("completed", source)
+        self.assertNotIn("terminal", source)
+        self.assertEqual(source.count("def project_terminal_outcome"), 0)
+
+    def test_exactly_one_projection_rule_serves_every_public_surface(self) -> None:
+        """Objective 2/3: one rule, three consumers, no independent copies."""
+        rule = app_service_module.project_terminal_outcome
+        self.assertIs(entrypoint_module.project_terminal_outcome, rule)
+        sources = {
+            "app_service": inspect.getsource(app_service_module),
+            "entrypoint": inspect.getsource(entrypoint_module),
+            "facade": inspect.getsource(facade_module),
+        }
+        self.assertEqual(
+            sum(text.count("def project_terminal_outcome") for text in sources.values()),
+            1,
+            "the terminal projection rule must be defined exactly once",
+        )
+        for name, text in sources.items():
+            with self.subTest(module=name):
+                self.assertNotIn('{"completed", "abstained"}', text)
+        # Both application-service surfaces consume it by name.
+        for method in (ApplicationService.run, ApplicationService.resume):
+            with self.subTest(method=method.__name__):
+                body = inspect.getsource(method)
+                self.assertIn("project_terminal_outcome(", body)
+                self.assertNotIn('{"completed", "abstained"}', body)
 
 
 if __name__ == "__main__":

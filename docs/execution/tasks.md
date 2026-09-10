@@ -13,9 +13,9 @@ purpose: Flat tasks and subtasks by context. No sprint calendar. Near-term owner
 audience:
   - contributor
   - release-owner
-version: 0.9.3
+version: 0.9.4
 last_verified: 2026-09-10
-lock_head: "bf56eea9"
+lock_head: "1f42de23"
 normative_authority:
   - docs/execution/spec.md
   - docs/execution/technical.md
@@ -34,7 +34,7 @@ Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technic
 
 **No sprints. No waves.** Check boxes as work completes. **Recommended reading order (not a schedule):** MS-SEE A stack T-16/T-15/T-36/T-37/T-45 is MECHANISM this-branch. T-04/T-05/T-07 landed 2026-09-04 (T-04 carries an open successor obligation; see its row). Do not create `progressive.py` (T-15). T-46 ranking stays `[PROPOSAL]`.
 
-**Current handoff (2026-09-07; inspected source `483d99081648a96a31775fa1e310445824cec847`).** NT-1 in [`spec.md`](spec.md#nt-1-near-term-baseline-context-cache-and-recovery-delta) authorizes the near-term rows below. Historical 2026-09-05 counts and the audit's 66/2,855 result belong to their original SHAs, not this subject. Current source still collapses `abstained` into `completed` in entrypoint/app-service projections. Full current-suite disposition is unmeasured pending T-98/T-101; old context summaries are not acceptance evidence. Historical MS-INSTRUMENT/MS-RESUME receipts stand; MS-CONTROL remains OPEN, T-26 UNFROZEN, T-27/T-51/T-52 open. T-97 is now active near-term work. T-77 core caching and T-106 deterministic recovery are authorized before control; T-80/T-96, model consultation, specialists and CAS promotion remain post-control. No task is accepted by this documentation update. Run complete recipe bodies when `just` is unavailable, with broad tests isolated under NT-B02.
+**Current handoff (2026-09-07; inspected source `483d99081648a96a31775fa1e310445824cec847`).** NT-1 in [`spec.md`](spec.md#nt-1-near-term-baseline-context-cache-and-recovery-delta) authorizes the near-term rows below. Historical 2026-09-05 counts and the audit's 66/2,855 result belong to their original SHAs, not this subject. Current source still collapses `abstained` into `completed` in entrypoint/app-service projections. Full current-suite disposition is unmeasured pending T-98/T-101; old context summaries are not acceptance evidence. Historical MS-INSTRUMENT/MS-RESUME receipts stand; MS-CONTROL remains OPEN, T-26 UNFROZEN, T-27/T-51/T-52 open. T-97 is now active near-term work. T-77 core caching and T-106 deterministic recovery are authorized before control; T-80/T-96, model consultation, specialists and CAS promotion remain post-control. This re-pin is a subject re-pin only and accepts no task and no gate. Run complete recipe bodies when `just` is unavailable, with broad tests isolated under NT-B02.
 
 ## Near-term ownership and ready work
 

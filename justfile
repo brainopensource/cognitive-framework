@@ -5,6 +5,7 @@ default: check
 
 # Fast normal development validation loop
 check:
+	python3 tools/linters/check_test_hygiene.py
 	python3 tools/linters/check_boundaries.py
 	python3 tools/linters/check_tcb_budget.py
 	python3 tools/linters/check_domain_blindness.py
@@ -17,7 +18,7 @@ check:
 docs-check:
 	python3 tools/linters/check_doc_metadata.py
 	python3 tools/linters/check_markdown_links.py
-	npx markdownlint-cli2 "docs/**/*.md" "README.md" "AGENTS.md" "VISION.md"
+	npx markdownlint-cli2 "docs/**/*.md" "#docs/reports/**" "#docs/research/**" "README.md" "AGENTS.md" "VISION.md"
 
 # Build documentation site strictly with Material for MkDocs
 docs-build:
@@ -75,6 +76,7 @@ lda-doctor:
 verify:
 	uv lock --check
 	uv sync --frozen
+	python3 tools/linters/check_test_hygiene.py
 	python3 tools/linters/check_boundaries.py
 	python3 tools/linters/check_tcb_budget.py
 	python3 tools/linters/check_domain_blindness.py

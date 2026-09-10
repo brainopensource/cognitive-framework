@@ -46,14 +46,12 @@ def parse_hunk_header(line: str) -> int | None:
 
 
 def collect_hunk_body(lines: Sequence[str], index: int) -> tuple[list[str], int]:
-    """Collect one hunk body. Blank lines end the body; other junk is malformed."""
+    """Collect one hunk body, including standard prefixed blank context lines."""
     body: list[str] = []
     while index < len(lines) and not lines[index].startswith(
         ("@@", "--- ", "diff --git")
     ):
         hline = lines[index]
-        if not hline.strip():
-            break
         if hline[:1] not in ("+", "-", " ", "\\"):
             raise HunkFailure(
                 "invalid_request",

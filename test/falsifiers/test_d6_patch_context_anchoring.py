@@ -214,3 +214,21 @@ class FaultMutation(unittest.TestCase):
         self.assertIn("hunk line count mismatch", result.error.message)
         self.assertEqual(target.read_text(), SRC)
         self.assertEqual(stat.S_IMODE(target.stat().st_mode), 0o640)
+
+    def test_prefixed_blank_context_line_is_part_of_a_complete_hunk(self) -> None:
+        repo, target, env = self._repo()
+        diff = (
+            "--- a/src/calc.py\n+++ b/src/calc.py\n@@ -3,3 +3,3 @@\n"
+            " \n"
+            " def multiply(a: int, b: int) -> int:\n"
+            "-    return 0  # BUG: should multiply\n"
+            "+    return a * b"
+        )
+        result = env.apply(
+            EffectRequest(
+                verb="patch.apply", action="patch",
+                args={"path": "src/calc.py", "diff": diff}, patch=diff,
+            )
+        )
+        self.assertTrue(result.ok)
+        self.assertIn("return a * b", target.read_text())

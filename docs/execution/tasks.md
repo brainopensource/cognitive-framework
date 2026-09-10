@@ -34,7 +34,7 @@ Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technic
 
 **No sprints. No waves.** Check boxes as work completes. **Recommended reading order (not a schedule):** MS-SEE A stack T-16/T-15/T-36/T-37/T-45 is MECHANISM this-branch. T-04/T-05/T-07 landed 2026-09-04 (T-04 carries an open successor obligation; see its row). Do not create `progressive.py` (T-15). T-46 ranking stays `[PROPOSAL]`.
 
-**Current handoff (2026-09-07; inspected source `483d99081648a96a31775fa1e310445824cec847`).** NT-1 in [`spec.md`](spec.md#nt-1-near-term-baseline-context-cache-and-recovery-delta) authorizes the near-term rows below. Historical 2026-09-05 counts and the audit's 66/2,855 result belong to their original SHAs, not this subject. Current source still collapses `abstained` into `completed` in entrypoint/app-service projections. Full current-suite disposition is unmeasured pending T-98/T-101; old context summaries are not acceptance evidence. Historical MS-INSTRUMENT/MS-RESUME receipts stand; MS-CONTROL remains OPEN, T-26 UNFROZEN, T-27/T-51/T-52 open. T-97 is now active near-term work. T-77 core caching and T-106 deterministic recovery are authorized before control; T-80/T-96, model consultation, specialists and CAS promotion remain post-control. This re-pin is a subject re-pin only and accepts no task and no gate. Run complete recipe bodies when `just` is unavailable, with broad tests isolated under NT-B02.
+**Current handoff (2026-09-10; shared-tree subject anchored at `aa93fe72d4a7218ab588900ca5247579b87a36c9` plus reviewed local changes).** Leadership accepted T-98, T-99, T-100, T-104, and T-97 after their named falsifiers, the complete `just check`/`just verify` recipe bodies, Python kernel/agency/contracts slices, TypeScript typecheck, and the full npm workspace suite passed on the same subject. T-98 nonmutation protection preceded broad verification; the two initial contract UDS timeouts and four initial CLI file failures were reproduced as sandbox `EPERM` restrictions and passed unchanged with local subprocess/UDS permission. T-101 still owns complete isolated discovery and exact collection/failure/skip accounting, so MS-BASELINE, MS-CONTEXT, and MS-CONTROL remain OPEN; T-26 remains UNFROZEN and T-27/T-51/T-52 remain open. Historical receipts remain scoped to their original subjects.
 
 ## Near-term ownership and ready work
 
@@ -47,10 +47,10 @@ Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technic
 
 | Task ID | Stream | Package | Subsystem & Task | Prerequisites | Falsifier Command |
 |---|---|---|---|---|---|
-| **T-98** | **Stream C** | GATE-01 | Runner-independent isolation and nonmutation | `[]` (READY) | `python3 -m unittest test.contracts.test_suite_nonmutation test.tools.test_check_test_hygiene -v` |
-| **T-99** | **Stream A** | INS-01 | Lossless terminal projection (fix `abstained` -> `completed` collapse) | `[]` (READY) | `python3 -m unittest test.apps.coding_max.test_coding_max_facade test.falsifiers.test_rf90_generic_entrypoint test.falsifiers.test_completion_gate_scope -v` |
-| **T-100** | **Stream B** | CTX-01 | Canonical working-memory and recovery value contracts | `[]` (READY) | `python3 -m unittest test.contracts.test_semantic_task_state -v` |
-| **T-97** | **Stream A** | INS-01 | CLI product surface: `--help` exit zero & `-m` flag disambiguation | `[]` (READY; T-84 done) | `npm --workspace @vanguard/cli test` |
+| **T-98** | **Stream C** | GATE-01 | Runner-independent isolation and nonmutation | `[]` (`ACCEPTED` 2026-09-10) | `python3 -m unittest test.contracts.test_suite_nonmutation test.tools.test_check_test_hygiene -v` |
+| **T-99** | **Stream A** | INS-01 | Lossless terminal projection (fix `abstained` -> `completed` collapse) | `[]` (`ACCEPTED` 2026-09-10) | `python3 -m unittest test.apps.coding_max.test_coding_max_facade test.falsifiers.test_rf90_generic_entrypoint test.falsifiers.test_completion_gate_scope -v` |
+| **T-100** | **Stream B** | CTX-01 | Canonical working-memory and recovery value contracts | `[]` (`ACCEPTED` 2026-09-10) | `python3 -m unittest test.contracts.test_semantic_task_state -v` |
+| **T-97** | **Stream A** | INS-01 | CLI product surface: `--help` exit zero & `-m` flag disambiguation | `[]` (`ACCEPTED` 2026-09-10; T-84 done) | `npm --workspace @vanguard/cli test` |
 
 ### Stream Ownership and Boundaries
 
@@ -66,26 +66,29 @@ Work executes on the active feature branch (`feat/aether-framework-electroweak-c
 
 ### Context: Baseline and truthful product convergence
 
-- [ ] **T-98: Runner-independent isolation and nonmutation**
+- [x] **T-98: Runner-independent isolation and nonmutation**
   - **package / owner**: GATE-01 / Stream C
   - **requires**: []
   - **files**: `test/__init__.py`, `test/conftest.py`, shared test fixtures, `tools/linters/check_test_hygiene.py`, `justfile`; **[NEW]** `test/contracts/test_suite_nonmutation.py`
   - **contract**: NT-B01–B03. Redirect corpora for unittest; independent Git metadata and no network/credentials. Provision missing declared gate dependencies without relaxing gates.
   - **falsifier**: `python3 -m unittest test.contracts.test_suite_nonmutation test.tools.test_check_test_hygiene -v`; deliberate writes/staging escape fail the meta-test; contributor source/index/corpus digests unchanged.
+  - **accepted evidence (2026-09-10)**: 35 tests passed; complete check/verify recipe bodies passed after this protection, with no gate claim.
 
-- [ ] **T-99: Lossless terminal projection and admission successors**
+- [x] **T-99: Lossless terminal projection and admission successors**
   - **package / owner**: INS-01 / Stream A
   - **requires**: []
   - **files**: `runtime/entrypoint.py`, `runtime/app_service.py`, `runtime/child_runtime.py`, app/facade and RF-90 tests; paths are under `vanguard/packages/` unless test-qualified
   - **contract**: NT-B04, EW-9.1; one terminal mapping, separate disposition. Supply real verification in successful T-04 successor fixtures; never weaken the gate.
   - **falsifier**: `python3 -m unittest test.apps.coding_max.test_coding_max_facade test.falsifiers.test_rf90_generic_entrypoint test.falsifiers.test_completion_gate_scope -v`; a mutation collapsing refusal into completion fails at both public surfaces.
+  - **accepted evidence (2026-09-10)**: named product falsifier 45/45 and trajectory reader/writer slice 22/22; product `abstained` remains exact and frozen trajectory enums narrow it to `aborted`, never success.
 
-- [ ] **T-97: CLI product surface — reproduce then repair**
+- [x] **T-97: CLI product surface — reproduce then repair**
   - **package / owner**: INS-01 / Stream A
   - **requires**: [] (T-84 landed in M-5A)
   - **files**: `vanguard/clients/cli/src/composition/parse-cli.ts`, `vanguard/clients/cli/src/main.ts`, `vanguard/clients/cli/test/commands.test.ts`
   - **contract**: Reproduce current `aether code --help` behavior before repair; make it print help and exit zero without a completion frame. Resolve `-m` collision by explicit binding whose losing spelling errors rather than silently winning.
   - **falsifier**: `npm --workspace @vanguard/cli test` proves help exits zero without model call, conflicting flags cannot resolve ambiguously, and non-success execution returns nonzero; `npm run typecheck` also required.
+  - **accepted evidence (2026-09-10)**: CLI 89/89 and monorepo typecheck passed; help is non-executing and the explicit `-m` binding cannot leak values into the brief.
 
 - [ ] **T-101: Complete collection and current-subject failure inventory**
   - **package / owner**: GATE-01 / Stream C
@@ -124,19 +127,21 @@ Work executes on the active feature branch (`feat/aether-framework-electroweak-c
 
 ### Context: Canonical context, cache and deterministic recovery
 
-- [ ] **T-100: Canonical working-memory and recovery value contracts**
+- [x] **T-100: Canonical working-memory and recovery value contracts**
   - **package / owner**: CTX-01 / Stream B
   - **requires**: []
   - **files**: `domain/task_state.py`, `agency/episode/protocol_recovery.py` value definitions, `test/contracts/test_semantic_task_state.py`
   - **contract**: NT-1.2. Immutable canonical snapshots reuse SemanticTaskState; retain full state and add versioned cursor/lineage/reducer binding. Define bounded recovery serialization and migration before consumers.
   - **falsifier**: `python3 -m unittest test.contracts.test_semantic_task_state -v`; nested-map mutation cannot alter captured bytes; bad versions/digests/counters/duplicate keys fail; old supported state round trips without effect replay.
+  - **accepted evidence (2026-09-10)**: semantic-state/recovery/spawn slice 49/49; construction and decode are deeply immutable, malformed/inconsistent versioned state fails closed, and child abstention is non-success.
 
-- [ ] **T-104: Bounded context selection on the existing compiler**
+- [x] **T-104: Bounded context selection on the existing compiler**
   - **package / owner**: CTX-01 / Stream B
   - **requires**: [T-100]
   - **files**: `agency/context/{compiler,compaction,layers,distiller}.py`, context tests
   - **contract**: NT-C01–C05. Port Prefix/compile_packet behavior into ContextCompiler; preserve mandatory state/newest interaction; bound body/item counts; stable tool ordering; omissions and policy identity.
   - **falsifier**: `python3 -m unittest test.agency.test_context_compiler test.agency.test_context_packet -v`; oversize/stale evidence is elided with artifact identity; irreducible overflow performs no inference; token count fits final hard budget.
+  - **accepted evidence (2026-09-10)**: compiler/packet slice 41/41; implementation extends the existing compiler and introduces no parallel context path.
 
 - [ ] **T-105: Provider serialization and cache observation**
   - **package / owner**: CTX-01 / Stream A
@@ -904,7 +909,7 @@ These leaves refine existing T-17/T-28–T-34/T-49–T-58/T-67/T-80/T-96 familie
   - **specification**: Define each arm as a manifest-digest × model-id × preset triple and require LAM replay regression before live execution. Provider outages, HTTP errors, and zero-model-call runs record `not_run` with explicit missingness and stay outside the denominator.
   - **acceptance_falsifier**: `python3 -m unittest test.benchmarks.test_arm_matrix -v` refuses multi-dimension arm comparisons and excludes every typed `not_run` row.
 
-- [ ] **T-97: CLI product surface — reproduce then repair**
+- [x] **T-97: CLI product surface — reproduce then repair**
   - **package**: INS-01
   - **subsystem**: client
   - **owner**: Stream A (active near-term, NT-1)
@@ -912,7 +917,7 @@ These leaves refine existing T-17/T-28–T-34/T-49–T-58/T-67/T-80/T-96 familie
   - **file_touches**: [`vanguard/clients/cli/src/composition/parse-cli.ts`, `vanguard/clients/cli/src/main.ts`, `vanguard/clients/cli/test/commands.test.ts`]
   - **specification**: Reproduce the current `aether code --help` behavior before repair, then make it print help and exit zero without a completion frame. Resolve the `-m` collision by an explicit binding whose losing spelling errors instead of silently winning.
   - **acceptance_falsifier**: `npm --workspace @vanguard/cli test` proves help exits zero without an episode/model call, conflicting flags cannot resolve ambiguously, and non-success execution returns nonzero; `npm run typecheck` also required.
-  - **status**: Prior 2026-09-05 deferral superseded by NT-1; remains unchecked until executed evidence exists.
+  - **status**: Accepted 2026-09-10 on CLI 89/89, monorepo typecheck, and complete check/verify recipe evidence.
 
 #### Constitutional audit receipt — Prompt 12 (2026-09-04)
 

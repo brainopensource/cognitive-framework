@@ -212,7 +212,7 @@ Keep existing **M-0–M-10**, G-1/G-2/G-3, SWE-P0–P5 rows (they are TARGET, no
 | **MS-OFFICIAL** | SWE-P5 / DeepSWE wrapper; local ≠ official | A §18.8; G-3 |
 | **MS-SENIOR … MS-LEAD** | Copy A §29.1–29.4 verbatim | Profiles |
 
-Remove from the living overlay: “Active in tasks.md” sprint language. Status of MS-* is `OPEN` until receipts exist. Keep W-092-F* table as **historical alias → MS-*** in an appendix so old links still resolve.
+Remove from the living overlay: “Active in tasks.md” sprint language. Status of MS-* is `OPEN` until receipts exist. Keep `W-092-F*` table as **historical alias → `MS-*`** in an appendix so old links still resolve.
 
 Octopus W-OCT-1…4 stay as TARGET rows (already there); add HYDRA TARGET rows from v2 §7 as `[PROPOSAL]` outcomes, not a schedule.
 

@@ -21,13 +21,19 @@ import tempfile
 import unittest
 from pathlib import Path
 from typing import Mapping, Sequence
+from unittest.mock import patch
 
 from test import (
+    ContainmentBlocker,
     build_hermetic_test_env,
     establish_test_environment,
     probe_bwrap_available,
+    probe_bwrap_containment,
     probe_lda_index_available,
+    require_bwrap,
 )
+from vanguard.packages.runtime.app_service import ApplicationService
+from vanguard.packages.runtime.state_contract import resolve_state_directory
 from tools.linters.check_test_hygiene import (
     PROVIDER_KEYS,
     check_test_hygiene,
@@ -178,6 +184,122 @@ def create_disposable_repo_fixture(parent_dir: Path) -> Path:
     return repo_dir
 
 
+def compute_git_metadata_manifest(repo: Path) -> dict[str, str]:
+    """Compute sha256 manifest of essential Git metadata (HEAD, index, refs)."""
+    git_dir = repo / ".git"
+    manifest: dict[str, str] = {}
+    if not git_dir.is_dir():
+        return manifest
+
+    for target in ("HEAD", "index"):
+        p = git_dir / target
+        if p.is_file():
+            manifest[f".git/{target}"] = compute_file_sha256(p)
+
+    refs_dir = git_dir / "refs"
+    if refs_dir.is_dir():
+        for p in refs_dir.rglob("*"):
+            if p.is_file():
+                rel = str(p.relative_to(repo)).replace("\\", "/")
+                manifest[rel] = compute_file_sha256(p)
+
+    return manifest
+
+
+def compute_full_candidate_manifest(repo: Path, include_git: bool = True) -> dict[str, str]:
+    """Compute sha256 manifest of candidate source, index, generated knowledge, corpus, and Git metadata."""
+    subtrees = ("vanguard", ".lda", ".generated", "tools/002_LLM_API_MOCK")
+    manifest = compute_tree_manifest(repo, subtrees)
+    if include_git:
+        git_manifest = compute_git_metadata_manifest(repo)
+        manifest.update(git_manifest)
+    return manifest
+
+
+def create_disposable_candidate_subject(parent_dir: Path) -> Path:
+    """Create a disposable copy of the actual candidate subject with its own Git metadata.
+
+    Copies candidate source lattice (vanguard/), LDA index (.lda/), generated knowledge (.generated/),
+    tracked mock corpus (tools/002_LLM_API_MOCK/), pyproject.toml, and representative tests (test/).
+    Initializes an independent, hermetic Git repository so operations never touch or share host Git state.
+    """
+    repo_dir = parent_dir / "candidate_subject"
+    repo_dir.mkdir(parents=True, exist_ok=True)
+
+    # 1. Copy candidate subject components
+    shutil.copytree(
+        _REPO_ROOT / "vanguard",
+        repo_dir / "vanguard",
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "dist", "node_modules"),
+    )
+    if (_REPO_ROOT / ".lda").is_dir():
+        shutil.copytree(
+            _REPO_ROOT / ".lda",
+            repo_dir / ".lda",
+            ignore=shutil.ignore_patterns("*.tmp"),
+        )
+    if (_REPO_ROOT / ".generated").is_dir():
+        shutil.copytree(
+            _REPO_ROOT / ".generated",
+            repo_dir / ".generated",
+        )
+    if (_REPO_ROOT / "tools" / "002_LLM_API_MOCK").is_dir():
+        shutil.copytree(
+            _REPO_ROOT / "tools" / "002_LLM_API_MOCK",
+            repo_dir / "tools" / "002_LLM_API_MOCK",
+        )
+    if (_REPO_ROOT / "pyproject.toml").is_file():
+        shutil.copy2(_REPO_ROOT / "pyproject.toml", repo_dir / "pyproject.toml")
+
+    # Copy representative tests
+    test_dst = repo_dir / "test"
+    test_dst.mkdir(parents=True, exist_ok=True)
+    if (_REPO_ROOT / "test" / "kernel").is_dir():
+        shutil.copytree(
+            _REPO_ROOT / "test" / "kernel",
+            test_dst / "kernel",
+            ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+        )
+    if (_REPO_ROOT / "test" / "__init__.py").is_file():
+        shutil.copy2(_REPO_ROOT / "test" / "__init__.py", test_dst / "__init__.py")
+    if (_REPO_ROOT / "test" / "conftest.py").is_file():
+        shutil.copy2(_REPO_ROOT / "test" / "conftest.py", test_dst / "conftest.py")
+
+    # 2. Initialize independent git repository
+    git_bin = shutil.which("git") or "/usr/bin/git"
+    git_env = {
+        "GIT_DIR": str(repo_dir / ".git"),
+        "GIT_WORK_TREE": str(repo_dir),
+        "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
+        "HOME": str(parent_dir),
+    }
+    subprocess.run([git_bin, "init"], cwd=repo_dir, env=git_env, check=True, capture_output=True)
+    subprocess.run(
+        [git_bin, "config", "user.name", "Aether Candidate Fixture"],
+        cwd=repo_dir,
+        env=git_env,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        [git_bin, "config", "user.email", "candidate@aether.local"],
+        cwd=repo_dir,
+        env=git_env,
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run([git_bin, "add", "."], cwd=repo_dir, env=git_env, check=True, capture_output=True)
+    subprocess.run(
+        [git_bin, "commit", "-m", "initial candidate snapshot"],
+        cwd=repo_dir,
+        env=git_env,
+        check=True,
+        capture_output=True,
+    )
+
+    return repo_dir
+
+
 class TestDisposableRepositoryIsolation(unittest.TestCase):
     """Test that the disposable fixture resolves inside independent repository metadata (NT-B02)."""
 
@@ -223,6 +345,38 @@ class TestDisposableRepositoryIsolation(unittest.TestCase):
         self.assertTrue((self.repo / ".lda" / "index.db").is_file())
         self.assertTrue((self.repo / ".generated" / "knowledge" / "report.json").is_file())
         self.assertTrue((self.repo / "tools" / "002_LLM_API_MOCK" / "lam.sqlite").is_file())
+
+    def test_candidate_subject_has_independent_git_metadata_and_canonical_files(self) -> None:
+        """The candidate subject fixture contains actual trees and independent Git metadata."""
+        candidate_repo = create_disposable_candidate_subject(self.tmp_path)
+        git_dir = candidate_repo / ".git"
+        self.assertTrue(git_dir.is_dir())
+        self.assertTrue((candidate_repo / "vanguard" / "packages" / "kernel").is_dir())
+        self.assertTrue((candidate_repo / ".lda" / "index.db").is_file())
+        self.assertTrue((candidate_repo / ".generated" / "knowledge" / "report.json").is_file())
+        self.assertTrue((candidate_repo / "tools" / "002_LLM_API_MOCK" / "lam.sqlite").is_file())
+
+        git_bin = shutil.which("git") or "/usr/bin/git"
+        git_env = {
+            "GIT_DIR": str(git_dir),
+            "GIT_WORK_TREE": str(candidate_repo),
+            "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
+            "HOME": str(self.tmp_path),
+        }
+        res = subprocess.run(
+            [git_bin, "rev-parse", "--git-dir"],
+            cwd=candidate_repo,
+            env=git_env,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        resolved_git_dir = Path(res.stdout.strip()).resolve()
+        self.assertEqual(resolved_git_dir, git_dir.resolve())
+        self.assertNotEqual(
+            resolved_git_dir,
+            (_REPO_ROOT / ".git").resolve(),
+        )
 
 
 class TestContentHashingAndNonmutation(unittest.TestCase):
@@ -317,6 +471,19 @@ class TestContentHashingAndNonmutation(unittest.TestCase):
         self.assertTrue(any("DELETED: vanguard/packages/domain/sample.py" in d for d in diffs))
         with self.assertRaises(AssertionError):
             assert_tree_nonmutation(self.baseline, mutated)
+
+    def test_injected_git_metadata_mutation_detected(self) -> None:
+        """Deliberate Git metadata mutation must be detected and fail closed."""
+        baseline_with_git = compute_full_candidate_manifest(self.repo, include_git=True)
+        git_head = self.repo / ".git" / "HEAD"
+        with open(git_head, "a", encoding="utf-8") as f:
+            f.write("# MUTATED HEAD\n")
+
+        mutated = compute_full_candidate_manifest(self.repo, include_git=True)
+        diffs = compare_tree_manifests(baseline_with_git, mutated)
+        self.assertTrue(any(".git/HEAD" in d for d in diffs))
+        with self.assertRaises(AssertionError):
+            assert_tree_nonmutation(baseline_with_git, mutated)
 
 
 class TestChildEnvironmentHermeticity(unittest.TestCase):
@@ -432,36 +599,34 @@ class TestChildEnvironmentHermeticity(unittest.TestCase):
 class TestRepresentativeExecutionNonmutation(unittest.TestCase):
     """Prove that representative test execution preserves byte-identical repository state."""
 
-    def test_representative_execution_in_disposable_repo(self) -> None:
-        """Representative test execution inside disposable repo preserves all file digests."""
-        with tempfile.TemporaryDirectory(prefix="aether_rep_") as tmp:
+    def test_representative_execution_in_disposable_candidate_subject(self) -> None:
+        """Representative test execution inside disposable candidate subject preserves all file digests (NT-B02)."""
+        with tempfile.TemporaryDirectory(prefix="aether_cand_") as tmp:
             tmp_path = Path(tmp)
-            repo = create_disposable_repo_fixture(tmp_path)
-            subtrees = ("vanguard", ".lda", ".generated", "tools/002_LLM_API_MOCK")
-            before = compute_tree_manifest(repo, subtrees)
+            repo = create_disposable_candidate_subject(tmp_path)
+            before = compute_full_candidate_manifest(repo, include_git=True)
 
-            # Establish disposable workspace outside the repo
+            # Establish disposable workspace outside the candidate repo
             ws_root = tmp_path / "disposable_ws"
-            env = establish_test_environment(workspace_root=ws_root)
+            env = build_hermetic_test_env(workspace_root=ws_root)
             env["PYTHONPATH"] = str(repo)
 
-            # Execute sample test within disposable repo
-            test_file = repo / "test" / "test_sample.py"
+            # Execute representative test within candidate repo
             res = subprocess.run(
-                [sys.executable, "-m", "unittest", str(test_file)],
+                [sys.executable, "-m", "unittest", "test.kernel.test_grant_wire_shape"],
                 cwd=repo,
                 env=env,
                 capture_output=True,
                 text=True,
                 check=False,
             )
-            self.assertEqual(res.returncode, 0, f"Sample test failed: {res.stderr}")
+            self.assertEqual(res.returncode, 0, f"Candidate test execution failed: {res.stderr}")
 
-            after = compute_tree_manifest(repo, subtrees)
+            after = compute_full_candidate_manifest(repo, include_git=True)
             assert_tree_nonmutation(before, after)
 
-    def test_contributor_tracked_corpus_and_indexes_unmutated(self) -> None:
-        """Check that contributor repo tracked LAM db and index are byte-identical after test execution."""
+    def test_contributor_tracked_corpus_indexes_and_git_metadata_unmutated(self) -> None:
+        """Check contributor repo tracked corpus, index, generated knowledge, and Git metadata are unmutated."""
         files_to_watch: list[Path] = []
         tracked_lam = _REPO_ROOT / "tools" / "002_LLM_API_MOCK" / "lam.sqlite"
         if tracked_lam.is_file():
@@ -472,6 +637,18 @@ class TestRepresentativeExecutionNonmutation(unittest.TestCase):
         report_json = _REPO_ROOT / ".generated" / "knowledge" / "report.json"
         if report_json.is_file():
             files_to_watch.append(report_json)
+
+        # Track contributor Git metadata
+        git_dir = _REPO_ROOT / ".git"
+        if (git_dir / "HEAD").is_file():
+            files_to_watch.append(git_dir / "HEAD")
+        if (git_dir / "index").is_file():
+            files_to_watch.append(git_dir / "index")
+        refs_dir = git_dir / "refs"
+        if refs_dir.is_dir():
+            for p in refs_dir.rglob("*"):
+                if p.is_file():
+                    files_to_watch.append(p)
 
         before_digests = {str(f): compute_file_sha256(f) for f in files_to_watch}
 
@@ -489,7 +666,7 @@ class TestRepresentativeExecutionNonmutation(unittest.TestCase):
         self.assertEqual(
             before_digests,
             after_digests,
-            "Tracked contributor files mutated during test execution!",
+            "Tracked contributor files or Git metadata mutated during test execution!",
         )
 
 
@@ -533,9 +710,75 @@ class TestWritableStateRedirection(unittest.TestCase):
             self.assertNotEqual(redirected_lam, tracked_lam.resolve())
             self.assertTrue(str(redirected_lam).startswith(str(ws_root.resolve())))
 
-            # BAAC & Vanguard state
+            # BAAC runs redirected
             self.assertEqual(Path(env["BAAC_RUNS_DIR"]).resolve(), (ws_root / "baac_runs").resolve())
-            self.assertEqual(
-                Path(env["VANGUARD_STATE_DIR"]).resolve(),
-                (ws_root / "vanguard_state").resolve(),
-            )
+
+            # VANGUARD_STATE_DIR must NOT be forced in the environment,
+            # ensuring caller/workspace precedence is strictly preserved.
+            self.assertNotIn("VANGUARD_STATE_DIR", env)
+
+
+class TestStateDirectoryPrecedence(unittest.TestCase):
+    """Prove default ApplicationService/CLI state-directory precedence works after importing test (NT-B01)."""
+
+    def setUp(self) -> None:
+        self._temp_dir = tempfile.TemporaryDirectory(prefix="aether_state_prec_")
+        self.tmp_path = Path(self._temp_dir.name)
+        self.workspace = self.tmp_path / "workspace"
+        self.workspace.mkdir(parents=True, exist_ok=True)
+
+    def tearDown(self) -> None:
+        self._temp_dir.cleanup()
+
+    def test_default_workspace_state_directory_precedence_after_test_import(self) -> None:
+        """Importing test must not override default state dir resolution to workspace/.vanguard."""
+        import test  # noqa: F401
+
+        resolved = resolve_state_directory(workspace=self.workspace)
+        expected = (self.workspace / ".vanguard").resolve()
+        self.assertEqual(resolved.resolve(), expected)
+
+    def test_explicit_state_dir_precedence(self) -> None:
+        """Explicit state_dir takes precedence over workspace default."""
+        custom_state = self.tmp_path / "custom_state"
+        resolved = resolve_state_directory(workspace=self.workspace, state_dir=custom_state)
+        self.assertEqual(resolved.resolve(), custom_state.resolve())
+
+    def test_application_service_state_dir_resolution(self) -> None:
+        """ApplicationService resolves state_dir to workspace/.vanguard by default."""
+        svc = ApplicationService(workspace=self.workspace)
+        self.assertEqual(svc.workspace.resolve(), self.workspace.resolve())
+        resolved = resolve_state_directory(svc.workspace)
+        self.assertEqual(resolved.resolve(), (self.workspace / ".vanguard").resolve())
+
+
+class TestContainmentQualification(unittest.TestCase):
+    """Test bubblewrap containment qualification and fail-closed typed blocker (NT-B03)."""
+
+    def test_containment_blocker_is_typed_runtime_error(self) -> None:
+        """ContainmentBlocker must inherit from RuntimeError, not unittest.SkipTest."""
+        self.assertTrue(issubclass(ContainmentBlocker, RuntimeError))
+        self.assertFalse(issubclass(ContainmentBlocker, unittest.SkipTest))
+
+    def test_require_bwrap_raises_containment_blocker_when_unsupported(self) -> None:
+        """require_bwrap must raise ContainmentBlocker if bwrap containment probe fails."""
+        with patch("test.conftest.probe_bwrap_containment", return_value=(False, "mock containment failure")):
+            with self.assertRaises(ContainmentBlocker) as ctx:
+                require_bwrap(allow_skip=False)
+            self.assertIn("mock containment failure", str(ctx.exception))
+
+    def test_require_bwrap_allows_skip_only_when_explicit(self) -> None:
+        """require_bwrap only skips when allow_skip=True is explicitly requested."""
+        with patch("test.conftest.probe_bwrap_containment", return_value=(False, "mock containment failure")):
+            with self.assertRaises(unittest.SkipTest):
+                require_bwrap(allow_skip=True)
+
+    def test_probe_bwrap_containment_qualifies_unshare_all(self) -> None:
+        """probe_bwrap_containment qualifies unshare-all, unshare-user, and ro-bind."""
+        ok, reason = probe_bwrap_containment()
+        if ok:
+            self.assertIsNone(reason)
+            self.assertTrue(probe_bwrap_available())
+        else:
+            self.assertIsInstance(reason, str)
+            self.assertFalse(probe_bwrap_available())

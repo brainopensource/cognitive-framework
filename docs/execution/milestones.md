@@ -41,6 +41,10 @@ Stable release outcomes only. Work tree: [`tasks.md`](tasks.md). Packages: [`bac
 
 No sprint calendar. MS-* is `OPEN` until receipts exist. Package version **0.9.3** is not M-9.
 
+Anything that makes the system's own evidence trustworthy is core to the Beta MVP. Anything that makes the runtime safe for untrusted callers or third parties is post-beta.
+
+The core therefore includes truthful terminal/disposition projection, canonical state and recovery values, test-suite nonmutation and measurement integrity, patch atomicity, context compaction, and process restart/resume. Host sandboxing (`bwrap`, containers, seccomp), production network-policy enforcement, CAS workspaces, specialists, delegation, campaign orchestration, governed memory, and external benchmark claims remain post-beta behind the existing MS-CONTROL/FH-1 horizon; no additional fence is created.
+
 **Project checkpoint (2026-09-07; inspected source `483d99081648a96a31775fa1e310445824cec847`).** NT-1 authorizes near-term baseline/context/recovery integration, not milestone acceptance. Historical Wave 1 mechanism receipts and MS-INSTRUMENT/MS-RESUME subjects remain preserved. MS-CONTROL is OPEN; T-26 remains UNFROZEN and T-27/T-51/T-52 remain open. The audit's 66/2,855 result and older boundary-failure counts describe earlier SHAs; the current full-suite disposition awaits T-98/T-101. Source still exposes lossy terminal projections, so product acceptance is not implied by passing architecture linters. T-97 is active. T-77 and T-106 precede control; specialists, T-80/T-96 treatments and CAS promotion do not. Full gate recipes, not the presence of `just`, define verification.
 
 ### Near-term release predicates (NT-1)

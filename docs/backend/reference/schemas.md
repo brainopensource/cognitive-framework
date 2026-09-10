@@ -78,7 +78,20 @@ exterior verification.
 
 Semantic task state (`vanguard/packages/domain/task_state.py`, `SemanticTaskState` /
 `CodingTaskState`) is a domain value with RFC 8785 JCS digest via `digest_of`. It is not a
-`schemas/` wire family. Runtime `fold_task_state` is the only producer.
+`schemas/` wire family. Runtime `fold_task_state` is the only producer. `aether.memory-view/1`
+wraps the complete state in an immutable `MemoryView`: capture freezes canonical JCS bytes and
+binds cursor, lineage identifier, reducer version, and unique `Evidence` entries whose subject
+and artifact identities are lowercase `sha256:` digests. `Interaction` is the compiler-selection
+value used for bounded recent history. Neither value creates a second state store, and a digest is
+an integrity identity rather than authorization.
+
+`ProtocolRecoveryState` is the domain/agency value contract `aether.recovery-state/1`, not a
+`schemas/` family. Versioned payloads require the complete policy/history/error/intervention/
+decision/pending-operation/deadline shape, bound history is limited to 12 attempts, malformed or
+inconsistent values fail closed, and supported legacy dictionaries migrate without replaying
+effects or resetting explicit retry ceilings. `SemanticRecoveryDecision` carries
+`continue|wait|reground|replan|stop`, reason, delay, state digest, and remaining-budget reference;
+it is distinct from the protocol-parser `RecoveryDecision` (`accept|retry_model|fail_instrument`).
 
 ---
 

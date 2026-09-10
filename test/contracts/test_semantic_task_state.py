@@ -11,6 +11,7 @@ from vanguard.packages.agency.episode.protocol_recovery import (
     ProtocolRecoveryState,
     RecoveryDecision,
     RecoveryState,
+    SemanticRecoveryDecision,
 )
 from vanguard.packages.domain.canonicalisation.digest import digest_bytes, digest_of
 from vanguard.packages.domain.canonicalisation.jcs import canonical_bytes, canonicalise, parse_json_text
@@ -175,6 +176,30 @@ class TestMemoryViewContract(unittest.TestCase):
         with self.assertRaises(ValueError):
             MemoryView.capture(task, True, lineage_id="lin-1", reducer_version="task-fold/1")  # type: ignore[arg-type]
 
+    def test_direct_bytearray_and_list_inputs_are_snapshotted(self) -> None:
+        task = _task()
+        raw_bytes = bytearray(canonical_bytes(task.to_canonical_dict()))
+        evidence = [Evidence("ev-1", _DIGEST_A, _DIGEST_B, "finding")]
+        view = MemoryView(
+            task_bytes=raw_bytes,
+            cursor=2,
+            lineage_id="lin-1",
+            reducer_version="task-fold/1",
+            evidence=evidence,
+        )
+        before = view.encode()
+        identity = digest_bytes(before)
+        raw_bytes[0] ^= 0x01
+        evidence.append(Evidence("ev-2", _DIGEST_B, _DIGEST_C, "other"))
+        self.assertEqual(view.encode(), before)
+        self.assertEqual(digest_bytes(view.encode()), identity)
+        self.assertEqual(len(view.evidence), 1)
+        self.assertIsInstance(view.task_bytes, bytes)
+        payload = bytearray(before)
+        restored = MemoryView.decode(payload, identity)
+        payload[0] ^= 0x01
+        self.assertEqual(restored.encode(), before)
+
 
 class TestRecoveryStateContract(unittest.TestCase):
     def test_versioned_round_trip_is_byte_stable_and_preserves_ceilings(self) -> None:
@@ -242,6 +267,50 @@ class TestRecoveryStateContract(unittest.TestCase):
         self.assertEqual(decision.action, "accept")
         self.assertEqual(decision.reason, "ok")
 
+    def test_legacy_explicit_nondefault_ceilings_are_preserved(self) -> None:
+        fingerprint = digest_of({"action": "patch.apply"})
+        legacy = {
+            "transportRetries": 1,
+            "protocolRetries": 0,
+            "truncationRetries": 0,
+            "effectRetries": 0,
+            "maxTransportRetries": 7,
+            "maxProtocolRetries": 9,
+            "maxTruncationRetries": 4,
+            "maxEffectRetries": 6,
+            "attemptedFingerprints": [fingerprint],
+            "spentDecisions": ["retry"],
+        }
+        migrated = ProtocolRecoveryState.from_dict(legacy)
+        self.assertEqual(migrated.max_transport_retries, 7)
+        self.assertEqual(migrated.max_protocol_retries, 9)
+        self.assertEqual(migrated.max_truncation_retries, 4)
+        self.assertEqual(migrated.max_effect_retries, 6)
+        self.assertEqual(migrated.transport_retries, 1)
+        self.assertEqual(migrated.attempted_fingerprints, (fingerprint,))
+        self.assertEqual(migrated.spent_decisions, ("retry",))
+
+    def test_direct_list_inputs_are_snapshotted(self) -> None:
+        fingerprint = digest_of({"action": "fs.read"})
+        fingerprints = [fingerprint]
+        spent = ["retry"]
+        history = [Attempt(fingerprint, "retry", fingerprint, None)]
+        errors = {FailureClass.TOOL.value: 1}
+        state = ProtocolRecoveryState(
+            attempted_fingerprints=fingerprints,
+            spent_decisions=spent,
+            history=history,
+            errors=errors,
+        )
+        fingerprints.append(digest_of({"action": "other"}))
+        spent.append("stop")
+        history.append(Attempt(digest_of({"action": "other"}), "stop", fingerprint, None))
+        errors[FailureClass.TOOL.value] = 9
+        self.assertEqual(state.attempted_fingerprints, (fingerprint,))
+        self.assertEqual(state.spent_decisions, ("retry",))
+        self.assertEqual(len(state.history), 1)
+        self.assertEqual(state.errors[FailureClass.TOOL.value], 1)
+
     def test_unknown_recovery_schema_fails_closed(self) -> None:
         raw = ProtocolRecoveryState().to_dict()
         raw["schema"] = "aether.recovery-state/2"
@@ -295,6 +364,66 @@ class TestRecoveryStateContract(unittest.TestCase):
             pending_operation="call-1", deadline="2026-09-10T00:00:00.000Z",
         )
         self.assertEqual(held.pending_operation, "call-1")
+
+    def test_incomplete_versioned_payload_fails_closed(self) -> None:
+        raw = ProtocolRecoveryState().to_dict()
+        for key in ("policyDigest", "history", "errors", "interventions", "decisions",
+                    "pendingOperation", "deadline"):
+            incomplete = dict(raw)
+            incomplete.pop(key)
+            with self.subTest(missing=key):
+                with self.assertRaises(ValueError):
+                    ProtocolRecoveryState.from_dict(incomplete)
+
+    def test_inconsistent_history_and_legacy_fields_fail_closed(self) -> None:
+        fingerprint = digest_of({"action": "patch.apply"})
+        other = digest_of({"action": "other"})
+        state = ProtocolRecoveryState(
+            attempted_fingerprints=(fingerprint,),
+            spent_decisions=("retry",),
+            history=(Attempt(fingerprint, "retry", fingerprint, None),),
+        )
+        raw = state.to_dict()
+        mismatched = dict(raw)
+        mismatched["attemptedFingerprints"] = [other]
+        with self.assertRaises(ValueError):
+            ProtocolRecoveryState.from_dict(mismatched)
+        mismatched_spent = dict(raw)
+        mismatched_spent["spentDecisions"] = ["stop"]
+        with self.assertRaises(ValueError):
+            ProtocolRecoveryState.from_dict(mismatched_spent)
+
+    def test_semantic_recovery_decision_round_trips_without_consult(self) -> None:
+        decision = SemanticRecoveryDecision(
+            action="reground",
+            reason="no_progress",
+            delay_ms=250,
+            state_digest=_DIGEST_A,
+            remaining_budget_ref=_DIGEST_B,
+        )
+        restored = SemanticRecoveryDecision.decode(decision.encode())
+        self.assertEqual(restored, decision)
+        self.assertEqual(restored.action, "reground")
+        self.assertEqual(restored.delay_ms, 250)
+        protocol = RecoveryDecision(status="retry_model", retry_reason="OUTPUT_TRUNCATED")
+        self.assertEqual(protocol.action, "retry_model")
+        self.assertNotEqual(protocol.action, restored.action)
+        with self.assertRaises(ValueError):
+            SemanticRecoveryDecision(
+                action="consult",
+                reason="ask-specialist",
+                delay_ms=0,
+                state_digest=_DIGEST_A,
+                remaining_budget_ref=_DIGEST_B,
+            )
+        with self.assertRaises(ValueError):
+            SemanticRecoveryDecision(
+                action="stop",
+                reason="budget",
+                delay_ms=True,  # type: ignore[arg-type]
+                state_digest=_DIGEST_A,
+                remaining_budget_ref=_DIGEST_B,
+            )
 
 
 if __name__ == "__main__":

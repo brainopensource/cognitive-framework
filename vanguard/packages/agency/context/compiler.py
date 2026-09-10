@@ -37,15 +37,20 @@ from typing import Any, Mapping, Sequence
 
 from ...domain.artifacts.skill_index import SkillCard, format_skill_index
 from ...domain.canonicalisation.digest import digest_of
+from ...domain.task_state import MemoryView, critical_state
 from ...kernel import Event
 from .compaction import CompactionStrategy, resolve_compaction_strategy
+from .distiller import distill_tool_output
 from .layers import (
     BREAKPOINT_LAYERS,
+    CAPABILITY_PREFIX_CEILING,
     GOAL_ECHO_SOURCE,
     PINNED_L4_SOURCES,
     Block,
     CompiledContext,
+    ContextBudget,
     Fragment,
+    Interaction,
     Layer,
     blocks_of,
     estimate_tokens,
@@ -55,8 +60,10 @@ __all__ = [
     "CONTEXT_POLICY_VERSION",
     "CacheBreakpointCeilingExceeded",
     "CompetencePriorRecorder",
+    "ContextBudget",
     "ContextBudgetExceeded",
     "ContextCompiler",
+    "Interaction",
 ]
 
 #: How many decimal places of a prior survive to the ledger. Four is well past
@@ -136,8 +143,11 @@ class ContextCompiler:
             rendered.append(Block(layer=Layer.SYSTEM, source=source,
                                   label="system-core", text=system_core))
         if tool_schemas:
-            payload = json.dumps([dict(schema) for schema in tool_schemas],
-                                 sort_keys=True, separators=(",", ":"),
+            ordered = sorted(
+                (dict(schema) for schema in tool_schemas),
+                key=lambda schema: str(schema.get("name") or schema.get("verb") or ""),
+            )
+            payload = json.dumps(ordered, sort_keys=True, separators=(",", ":"),
                                  ensure_ascii=False)
             rendered.append(Block(layer=Layer.TOOLS, source=source,
                                   label="tool-schemas", text=payload))
@@ -262,6 +272,90 @@ class ContextCompiler:
             options=self._compaction_options,
         )
 
+    def compile_packet(
+        self,
+        view: MemoryView,
+        subject: str,
+        turns: Sequence[Interaction] = (),
+        *,
+        budget: ContextBudget | None = None,
+        capability_cards: str = "",
+    ) -> CompiledContext:
+        """NT-C01–C05 selection on the existing compiler. No inference."""
+        if not isinstance(view, MemoryView):
+            raise TypeError("compile_packet requires a MemoryView")
+        if not str(subject).strip():
+            raise ValueError("subject digest is required")
+        if len(capability_cards) > CAPABILITY_PREFIX_CEILING:
+            raise ValueError("capability prefix exceeds W12-A")
+        if len({turn.key for turn in turns}) != len(turns):
+            raise ValueError("duplicate interaction key")
+        policy = budget or ContextBudget(window=self._token_ceiling)
+        usable = policy.usable
+        omissions: list[tuple[str, str]] = []
+
+        notes: list[Fragment] = []
+        for evidence in view.evidence:
+            if evidence.subject != subject:
+                omissions.append((evidence.key, "stale"))
+                continue
+            body = evidence.body
+            text = evidence.finding if not body else f"{evidence.finding}\n{body}"
+            if len(text.encode("utf-8")) > policy.max_body_bytes:
+                distilled = distill_tool_output(body or evidence.finding, cap_chars=policy.max_body_bytes)
+                text = f"{evidence.finding}\nartifact={evidence.artifact}\n{distilled.compact_text}"
+                omissions.append((evidence.key, "body_elided"))
+            notes.append(Fragment(source="evidence", label=evidence.key, text=text, evictable=True))
+
+        dialogue: list[Fragment] = []
+        for turn in turns:
+            text = f"{turn.action}\n{turn.result}"
+            if len(text.encode("utf-8")) > policy.max_body_bytes:
+                distilled = distill_tool_output(turn.result, cap_chars=policy.max_body_bytes)
+                text = f"{turn.action}\nartifact={turn.artifact}\n{distilled.compact_text}"
+                omissions.append((turn.key, "body_elided"))
+            dialogue.append(Fragment(
+                source="interaction", label=turn.key, text=text, evictable=True,
+            ))
+        if len(dialogue) > policy.max_items:
+            extras, dialogue = dialogue[:-policy.max_items], list(dialogue[-policy.max_items:])
+            for fragment in extras:
+                omissions.append((fragment.label, "interaction_dropped"))
+
+        brief = json.dumps(
+            critical_state(view), sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+        )
+        previous_ceiling = self._token_ceiling
+        self._token_ceiling = usable
+        try:
+            compiled = self.compile(brief=brief, notes=tuple(notes), dialogue=tuple(dialogue))
+        except ContextBudgetExceeded as exc:
+            raise ContextBudgetExceeded(f"CONTEXT_BUDGET_EXCEEDED: {exc}") from exc
+        finally:
+            self._token_ceiling = previous_ceiling
+        if compiled.total_tokens > usable:
+            raise ContextBudgetExceeded(
+                f"CONTEXT_BUDGET_EXCEEDED: irreducible state costs "
+                f"{compiled.total_tokens} tokens against usable {usable}"
+            )
+        dropped_reasons = []
+        note_keys = {item.label for item in notes}
+        already = set(omissions)
+        for label in compiled.dropped:
+            reason = "evidence_dropped" if label in note_keys else "interaction_dropped"
+            item = (label, reason)
+            if item not in already:
+                dropped_reasons.append(item)
+        return CompiledContext(
+            blocks=compiled.blocks,
+            breakpoints=compiled.breakpoints,
+            elided=compiled.elided,
+            dropped=compiled.dropped,
+            candidate_digest=compiled.candidate_digest,
+            candidate_tokens=compiled.candidate_tokens,
+            omissions=tuple(omissions) + tuple(dropped_reasons),
+        )
+
 
 def _is_pinned_l4(fragment: Fragment) -> bool:
     return fragment.source in PINNED_L4_SOURCES
@@ -378,4 +472,4 @@ class CompetencePriorRecorder:
 
 
 # Re-exported for callers that only ever import the compiler module.
-__all__ += ["Block", "CompiledContext", "Fragment", "Layer", "estimate_tokens"]
+__all__ += ["Block", "CompiledContext", "ContextBudget", "Fragment", "Interaction", "Layer", "estimate_tokens"]

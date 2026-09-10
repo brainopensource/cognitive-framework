@@ -472,16 +472,18 @@ class MemoryView:
     evidence: tuple[Evidence, ...] = ()
 
     def __post_init__(self) -> None:
+        if not isinstance(self.task_bytes, (bytes, bytearray)):
+            raise TypeError("task snapshot must be canonical bytes")
+        object.__setattr__(self, "task_bytes", bytes(self.task_bytes))
+        object.__setattr__(self, "evidence", tuple(self.evidence))
         _natural(self.cursor, "cursor")
         _require_text(self.lineage_id, "lineage_id")
         _require_text(self.reducer_version, "reducer_version")
-        if not isinstance(self.task_bytes, (bytes, bytearray)):
-            raise TypeError("task snapshot must be canonical bytes")
-        task_raw = parse_json_text(bytes(self.task_bytes).decode("utf-8"))
+        task_raw = parse_json_text(self.task_bytes.decode("utf-8"))
         if not isinstance(task_raw, Mapping):
             raise TypeError("task snapshot must be an object")
         task = SemanticTaskState.from_mapping(task_raw)
-        if canonical_bytes(task.to_canonical_dict()) != bytes(self.task_bytes):
+        if canonical_bytes(task.to_canonical_dict()) != self.task_bytes:
             raise ValueError("task snapshot is not canonical")
         if len({item.key for item in self.evidence}) != len(self.evidence):
             raise ValueError("duplicate evidence key")

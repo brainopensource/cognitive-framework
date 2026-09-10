@@ -28,6 +28,9 @@ ROOT = Path(__file__).resolve().parents[3]
 from vanguard.packages.adapters.stores.event_store import SqliteEventStore
 from vanguard.packages.agency.episode.state import RunTermination
 from vanguard.packages.apps.coding_max import facade as facade_module
+from vanguard.packages.ports.child_runtime import ChildRunPlan
+from vanguard.packages.runtime.child_runtime import RuntimeChildRunner
+from vanguard.packages.runtime.trajectory import assemble_trajectory
 from vanguard.packages.apps.coding_max.facade import CodingMaxFacade, InvalidPreset
 from vanguard.packages.ports.event_store import EventRange
 from vanguard.packages.runtime import app_service as app_service_module
@@ -381,6 +384,19 @@ class TestProductTerminalProjection(unittest.TestCase):
                 interactive=False, max_turns=4,
             )
 
+    def _entrypoint_frame(self, terminal: RunTermination, run_id: str) -> dict:
+        def _stub(*_args: object, **_kwargs: object) -> _StubExecution:
+            return _StubExecution(terminal)
+
+        with mock.patch.object(entrypoint_module.Runtime, "execute_profiled", _stub):
+            return entrypoint_module.execute({
+                "command": "code", "brief": "sweep brief",
+                "workspace": str(self.workspace), "runId": run_id,
+                "storePath": str(self.state_dir / "events.sqlite3"),
+                "injectedModel": object(), "profile": "product",
+                "maxTurnsPerEpisode": 4,
+            })
+
     def _facade_run(self, terminal: RunTermination, run_id: str) -> RunResult:
         facade = CodingMaxFacade(workspace=self.workspace)
         with self._injecting(terminal):
@@ -427,7 +443,14 @@ class TestProductTerminalProjection(unittest.TestCase):
         self.assertEqual(source.count("def project_terminal_outcome"), 0)
 
     def test_exactly_one_projection_rule_serves_every_public_surface(self) -> None:
-        """Objective 2/3: one rule, three consumers, no independent copies."""
+        """One rule, named consumers, no independent copies.
+
+        This is the structural half of the invariant. The behavioural half —
+        which is what actually protects the contract — is
+        ``test_no_product_or_benchmark_surface_reports_a_refusal_as_success``
+        below; this test only pins that the surfaces reach the shared rule by
+        name instead of re-deriving it.
+        """
         rule = app_service_module.project_terminal_outcome
         self.assertIs(entrypoint_module.project_terminal_outcome, rule)
         sources = {
@@ -443,12 +466,101 @@ class TestProductTerminalProjection(unittest.TestCase):
         for name, text in sources.items():
             with self.subTest(module=name):
                 self.assertNotIn('{"completed", "abstained"}', text)
-        # Both application-service surfaces consume it by name.
         for method in (ApplicationService.run, ApplicationService.resume):
             with self.subTest(method=method.__name__):
                 body = inspect.getsource(method)
                 self.assertIn("project_terminal_outcome(", body)
                 self.assertNotIn('{"completed", "abstained"}', body)
+
+    # ------------------------------------------------------------------
+    # The behavioural cross-surface invariant
+    # ------------------------------------------------------------------
+
+    def _child_projection(self, terminal: RunTermination) -> object:
+        plan = ChildRunPlan(
+            child_episode_id="ep-child-1", parent_episode_id="ep-parent-1",
+            run_id="run-1", project_id="project-1", principal="agent-child",
+            composition_digest="sha256:" + "3" * 64,
+            goal_digest="sha256:" + "4" * 64,
+            authority=("fs.read",), resources=(), depth=1, max_depth=2,
+            max_turns=4, budget={}, lineage=("ep-parent-1",),
+            idempotency_key="idem-1",
+        )
+
+        class _ChildResult:
+            def __init__(self) -> None:
+                self.terminal = terminal
+                self.receipts = ()
+                self.events = ()
+                self.run_digest = "sha256:" + "1" * 64
+                self.activation_digest = ""
+                self.state_digest = "sha256:" + "2" * 64
+                self.detail = ""
+                self.trajectory = None
+
+        runner = RuntimeChildRunner.__new__(RuntimeChildRunner)
+        return RuntimeChildRunner._project(runner, plan, _ChildResult())
+
+    def _trajectory_outcome(self, terminal: RunTermination, schema: str) -> str:
+        from vanguard.packages.runtime.root import TaskContext
+
+        return assemble_trajectory(
+            task=TaskContext(brief="x", repo_path=Path(ROOT), run_id="r",
+                             episode_id="e"),
+            harness_digest="sha256:" + "0" * 64, terminal=terminal,
+            receipts=(), contexts=(), events=(), verdict=None,
+            schema_version=schema,
+        )["outcome"]
+
+    def test_no_product_or_benchmark_surface_reports_a_refusal_as_success(self) -> None:
+        """NT-B04 swept behaviourally across every surface it names.
+
+        For every termination in the vocabulary, each surface is executed and
+        its emitted success value is read back. The invariant is one line:
+        a surface reads as success **iff** the run actually completed. A
+        `TaskDisposition` is never consulted or produced anywhere in the
+        sweep, so termination and disposition stay orthogonal by construction.
+        """
+        for index, terminal in enumerate(RunTermination):
+            completed = terminal is RunTermination.COMPLETED
+            with self.subTest(terminal=terminal.value):
+                # 1. stdio entrypoint frame
+                frame = self._entrypoint_frame(terminal, f"run-sweep-e-{index}")
+                self.assertEqual(frame["result"]["outcome"] == "completed", completed)
+                complete_projections = [
+                    p for p in frame["result"]["projections"] if p["kind"] == "complete"]
+                self.assertEqual(
+                    [p["outcome"] == "completed" for p in complete_projections],
+                    [completed])
+
+                # 2. application service
+                svc = self._service_run(terminal, f"run-sweep-s-{index}")
+                self.assertEqual(svc.outcome == "completed", completed)
+                self.assertEqual(svc.terminal_state == "completed", completed)
+
+                # 3. Coding Max facade
+                fac = self._facade_run(terminal, f"run-sweep-f-{index}")
+                self.assertEqual(fac.outcome == "completed", completed)
+
+                # 4. the serialized wire form both the CLI and the API emit
+                self.assertEqual(fac.to_dict()["outcome"] == "completed", completed)
+
+                # 5. child delegation adapter
+                child = self._child_projection(terminal)
+                self.assertEqual(bool(child.ok), completed)
+                self.assertEqual(child.outcome == "completed", completed)
+                self.assertEqual(child.terminal, terminal.value.upper())
+
+                # 6/7. benchmark writer, both frozen schema versions
+                for schema in ("mhf.trajectory/1", "mhf.trajectory/2"):
+                    self.assertEqual(
+                        self._trajectory_outcome(terminal, schema) == "completed",
+                        completed, schema)
+
+    def test_the_refusal_case_is_covered_by_the_sweep(self) -> None:
+        """Guard the guard: the vocabulary must still contain a refusal."""
+        self.assertIn(RunTermination.ABSTAINED, set(RunTermination))
+        self.assertGreater(len(set(RunTermination)), 2)
 
 
 if __name__ == "__main__":

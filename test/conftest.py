@@ -21,33 +21,52 @@ def pytest_configure(config: object = None) -> None:
     establish_test_environment()
 
 
-def probe_bwrap_available() -> bool:
-    """Check if bubblewrap executable is available on PATH and runnable."""
+class ContainmentBlocker(RuntimeError):
+    """Typed blocker raised when required containment or sandbox isolation is unsupported."""
+
+
+def probe_bwrap_containment() -> tuple[bool, str | None]:
+    """Qualify the exact bubblewrap containment operation required by execution.
+
+    Verifies that bubblewrap exists AND can successfully create an unshared
+    user, pid, IPC, and network namespace (including loopback setup via netlink).
+    Returns (True, None) if supported, or (False, failure_reason) if unsupported.
+    """
     bwrap = shutil.which("bwrap")
     if not bwrap:
-        return False
+        return False, "bubblewrap executable (bwrap) not found on PATH"
+
+    true_bin = shutil.which("true") or "/usr/bin/true"
+    # Exact containment operation required: unshare user, network, mounts, and loopback setup
+    cmd = [
+        bwrap,
+        "--unshare-all",
+        "--unshare-user",
+        "--ro-bind", "/", "/",
+        "--",
+        true_bin,
+    ]
     try:
         import subprocess
-        true_bin = shutil.which("true") or "/usr/bin/true"
-        for probe_args in (
-            [bwrap, "--unshare-user", "--ro-bind", "/", "/", "--", true_bin],
-            [bwrap, "--unshare-user", "--ro-bind", "/usr", "/usr", "--", true_bin],
-            [bwrap, "--unshare-user", "--ro-bind", "/usr", "/usr", "--", "/bin/true"],
-        ):
-            try:
-                res = subprocess.run(
-                    probe_args,
-                    check=False,
-                    capture_output=True,
-                    timeout=2,
-                )
-                if res.returncode == 0:
-                    return True
-            except (OSError, Exception):
-                continue
-        return False
-    except (OSError, Exception):
-        return False
+        res = subprocess.run(
+            cmd,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=3,
+        )
+        if res.returncode == 0:
+            return True, None
+        err = res.stderr.strip() or f"exit code {res.returncode}"
+        return False, f"bubblewrap containment failed: {err}"
+    except Exception as exc:
+        return False, f"bubblewrap containment execution error: {exc}"
+
+
+def probe_bwrap_available() -> bool:
+    """Check if bubblewrap containment is fully supported on the current host."""
+    ok, _ = probe_bwrap_containment()
+    return ok
 
 
 def probe_lda_index_available() -> bool:
@@ -57,13 +76,13 @@ def probe_lda_index_available() -> bool:
 
 
 def require_bwrap(*, allow_skip: bool = False) -> None:
-    """Ensure bubblewrap containment is available; fail closed if absent (NT-B03)."""
-    if not probe_bwrap_available():
-        msg = "Bubblewrap (bwrap) not available or user namespaces restricted on host"
+    """Ensure bubblewrap containment is available; fail closed with ContainmentBlocker if absent."""
+    ok, reason = probe_bwrap_containment()
+    if not ok:
         if allow_skip:
             import unittest
-            raise unittest.SkipTest(msg)
-        raise RuntimeError(f"BLOCKER: {msg}")
+            raise unittest.SkipTest(f"Bubblewrap containment unavailable: {reason}")
+        raise ContainmentBlocker(f"BLOCKER: Bubblewrap containment unsupported: {reason}")
 
 
 def require_lda(*, allow_skip: bool = False) -> None:
@@ -74,6 +93,7 @@ def require_lda(*, allow_skip: bool = False) -> None:
             import unittest
             raise unittest.SkipTest(msg)
         raise RuntimeError(f"BLOCKER: {msg}")
+
 
 
 

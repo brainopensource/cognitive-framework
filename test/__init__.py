@@ -14,16 +14,32 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 _TRACKED_LAM_DB = _ROOT / "tools" / "002_LLM_API_MOCK" / "lam.sqlite"
-_CLEANUP_DIRS: list[Path] = []
 
+_DEFAULT_WS = str(Path(tempfile.gettempdir()) / "aether_workspace")
+_WS_ROOT = os.environ.get("AETHER_WORKSPACE_ROOT", _DEFAULT_WS)
+os.environ["AETHER_WORKSPACE_ROOT"] = _WS_ROOT
+_TMP_DIR = Path(_WS_ROOT) / "tmp"
+_TMP_DIR.mkdir(parents=True, exist_ok=True)
+os.environ.setdefault("TMPDIR", str(_TMP_DIR))
+os.environ.setdefault("TMP", str(_TMP_DIR))
+os.environ.setdefault("TEMP", str(_TMP_DIR))
+os.environ.setdefault("XDG_CACHE_HOME", str(Path(_WS_ROOT) / "cache"))
+os.environ.setdefault("XDG_STATE_HOME", str(Path(_WS_ROOT) / "state"))
+os.environ.setdefault("PYTHONPYCACHEPREFIX", str(Path(_WS_ROOT) / "cache" / "python"))
+os.environ.setdefault("npm_config_cache", str(Path(_WS_ROOT) / "cache" / "npm"))
 
-def _cleanup_registered_dirs() -> None:
-    for d in _CLEANUP_DIRS:
-        if d.is_dir():
-            shutil.rmtree(d, ignore_errors=True)
+if not os.environ.get("LAM_DB_PATH"):
+    _lam_dir = _TMP_DIR / "lam-scratch"
+    _lam_dir.mkdir(parents=True, exist_ok=True)
+    _lam_scratch = _lam_dir / "lam.sqlite"
+    if _TRACKED_LAM_DB.is_file() and not _lam_scratch.exists():
+        shutil.copy2(_TRACKED_LAM_DB, _lam_scratch)
+    os.environ["LAM_DB_PATH"] = str(_lam_scratch)
 
-
-atexit.register(_cleanup_registered_dirs)
+if not os.environ.get("BAAC_RUNS_DIR"):
+    _baac_runs = Path(_WS_ROOT) / "baac_runs"
+    _baac_runs.mkdir(parents=True, exist_ok=True)
+    os.environ["BAAC_RUNS_DIR"] = str(_baac_runs)
 
 
 def establish_test_environment(
@@ -33,11 +49,7 @@ def establish_test_environment(
     scrub_credentials: bool = False,
     deny_network: bool = False,
 ) -> dict[str, str]:
-    """Consolidate runner-independent safe temporary and disposable state.
-
-    Redirects LAM, BAAC, Python bytecode cache, npm cache, XDG directories,
-    temporary directories, and runtime state to disposable paths.
-    """
+    """Consolidate runner-independent safe temporary and disposable state without altering product semantics."""
     env = os.environ if target_env is None else target_env
 
     # 1. Determine disposable workspace root
@@ -48,9 +60,7 @@ def establish_test_environment(
         if existing_ws and Path(existing_ws).resolve() != _ROOT.resolve():
             ws = Path(existing_ws).resolve()
         else:
-            ws_tmp = tempfile.mkdtemp(prefix="aether_ws_")
-            ws = Path(ws_tmp).resolve()
-            _CLEANUP_DIRS.append(ws)
+            ws = Path(tempfile.gettempdir()).resolve() / "aether_workspace"
 
     ws.mkdir(parents=True, exist_ok=True)
     env["AETHER_WORKSPACE_ROOT"] = str(ws)
@@ -86,12 +96,13 @@ def establish_test_environment(
     npm_cache_dir.mkdir(parents=True, exist_ok=True)
     env["npm_config_cache"] = str(npm_cache_dir)
 
-    # 5. Redirect LAM database to disposable copy
+    # 5. Redirect LAM database to disposable copy if needed
     current_lam = env.get("LAM_DB_PATH")
     if not current_lam or Path(current_lam).resolve() == _TRACKED_LAM_DB.resolve() or not str(Path(current_lam).resolve()).startswith(str(ws)):
-        lam_scratch_dir = tempfile.mkdtemp(prefix="lam-db-", dir=str(tmp_dir))
-        lam_scratch = Path(lam_scratch_dir) / "lam.sqlite"
-        if _TRACKED_LAM_DB.is_file():
+        lam_scratch_dir = tmp_dir / "lam-scratch"
+        lam_scratch_dir.mkdir(parents=True, exist_ok=True)
+        lam_scratch = lam_scratch_dir / "lam.sqlite"
+        if _TRACKED_LAM_DB.is_file() and not lam_scratch.exists():
             shutil.copy2(_TRACKED_LAM_DB, lam_scratch)
         env["LAM_DB_PATH"] = str(lam_scratch)
 
@@ -100,19 +111,17 @@ def establish_test_environment(
     baac_runs.mkdir(parents=True, exist_ok=True)
     env["BAAC_RUNS_DIR"] = str(baac_runs)
 
-    # 7. Redirect Vanguard runtime state
-    vanguard_state = ws / "vanguard_state"
-    vanguard_state.mkdir(parents=True, exist_ok=True)
-    env["VANGUARD_STATE_DIR"] = str(vanguard_state)
+    # DO NOT set VANGUARD_STATE_DIR: state directory precedence must remain
+    # with the caller (CLI argument, or workspace/.vanguard).
 
-    # 8. Scrub credentials if requested
+    # 7. Scrub credentials if requested
     if scrub_credentials:
         from tools.linters.check_test_hygiene import PROVIDER_KEYS, _GENERIC_KEY_PATTERN
         for k in list(env.keys()):
             if k in PROVIDER_KEYS or (_GENERIC_KEY_PATTERN.match(k) and not k.startswith("VANGUARD_TEST_")):
                 del env[k]
 
-    # 9. Deny network if requested
+    # 8. Deny network if requested
     if deny_network:
         env["http_proxy"] = "http://127.0.0.1:0"
         env["https_proxy"] = "http://127.0.0.1:0"
@@ -129,7 +138,7 @@ def build_hermetic_test_env(
     workspace_root: str | Path | None = None,
     base_env: Mapping[str, str] | None = None,
 ) -> dict[str, str]:
-    """Build an isolated environment with credentials scrubbed and network denied."""
+    """Build an isolated runner environment with credentials scrubbed and network denied."""
     base = dict(os.environ if base_env is None else base_env)
     return establish_test_environment(
         workspace_root=workspace_root,
@@ -138,12 +147,10 @@ def build_hermetic_test_env(
         deny_network=True,
     )
 
-
-# Establish safe environment before test module imports
-establish_test_environment()
-
 from test.conftest import (
+    ContainmentBlocker,
     probe_bwrap_available,
+    probe_bwrap_containment,
     probe_lda_index_available,
     require_bwrap,
     require_lda,

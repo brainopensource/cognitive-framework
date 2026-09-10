@@ -193,6 +193,23 @@ SemanticTaskState / CodingTaskState (`domain/task_state.py`)
 
 This is a coding-pack projection, not a new authoritative state store. Durable facts and referenced artifacts remain in the causal ledger; the value is reconstructed by folding them. Compaction must preserve the goal and constraints, current plan, modified files, latest relevant failure, latest verification, settled effects, next action, and remaining budgets. Raw old observations and duplicate reads may be summarized.
 
+`MemoryView` (`aether.memory-view/1`) is the versioned, deeply immutable snapshot around that full
+state; it binds cursor, lineage, reducer version, and digest-addressed evidence without introducing
+a blackboard or second store. `ProtocolRecoveryState` (`aether.recovery-state/1`) is likewise
+versioned and immutable, retains a maximum of 12 attempts, and explicitly migrates the supported
+legacy dictionary without replaying settled effects. Its semantic policy decision is
+`continue|wait|reground|replan|stop`; it is not the protocol-parser retry decision.
+
+`ContextCompiler.compile_packet()` is the bounded packet path on the existing L1–L5 compiler.
+It keeps the critical state and newest interaction, orders tools by name, omits stale evidence,
+replaces oversize bodies with artifact receipts, and reserves output, safety, and recovery tokens
+from the provider window. Irreducible overflow returns `CONTEXT_BUDGET_EXCEEDED` and performs no
+inference. Provider-specific serialization and cache controls remain outside this compiler.
+
+Child completion is equally strict: `EpisodeEngine.spawn()` sets `SpawnResult.ok` only when the
+child terminal is `completed`. An `abstained` child remains a non-success while preserving its raw
+terminal; no task disposition is inferred from termination.
+
 ### 6.2 Completion admission and verification freshness
 
 The framework may expose a generic completion-admission callback. The code pack supplies the coding policy. For a patch-producing task, the target rule is:
@@ -273,4 +290,3 @@ Each class has a bounded retry limit and a recovery action. A retry is admissibl
 - **Rationale:** Unrestricted concurrency introduces non-determinism, race conditions in budget accounting, replay divergence, and complex recovery semantics without guaranteed performance improvement.
 - **Rejected alternative:** Default asynchronous / multi-threaded turn dispatch across all agent nodes.
 - **Reversal condition:** Preregistered empirical benchmark evidence demonstrating $\ge 20\%$ median wall-time reduction with byte-identical result ordering on disjoint, read-only operations.
-

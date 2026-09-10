@@ -174,6 +174,16 @@ readers remain available only when no current binding is requested.
 
 `D_H` must change when component bindings or durable context/admission policy change. Runtime evidence must retain enough identity to distinguish control and treatment configurations in benchmark comparisons.
 
+### 6.1 Truthful terminal projection
+
+`project_terminal_outcome` in `runtime/app_service.py` is the single product projection used by
+the generic entrypoint and `ApplicationService.run()`/`resume()`; the Coding Max facade receives
+the same value transitively through `RunResult`. It preserves the normalized terminal, including
+`abstained`, so refusal is never presented as completion. `project_trajectory_outcome` in
+`runtime/trajectory.py` is a separate narrowing projection shared by `mhf.trajectory/1` and `/2`:
+because their frozen enum has no `abstained` member, refusal projects to `aborted`, never
+`completed`. Both mappings concern termination only; acceptance/disposition remains on verdict.
+
 ## 7. Semantic Continuation
 
 Cold resume reconstructs safety/accounting state and reconciles effects. `SemanticTaskState` (`CodingTaskState` alias) in `vanguard/packages/domain/task_state.py` is the compact durable continuation value: task class, completion requirements, plan/discoveries/dead ends, implicated and modified files, route decisions, evidence-gated TODOs, latest verification, settled effects, next action, remaining budgets, monotonic revision, and backlog steps. Runtime `fold_task_state` is the only producer. Resume preserves the ledger `episode_id` and compiles σ into L4/L5; it must not dump `resume_state` JSON into frozen L3. This packet is derived state; missing evidence must fail explicitly or trigger regrounding rather than silently invent context.
@@ -186,3 +196,4 @@ Cold resume reconstructs safety/accounting state and reconciles effects. `Semant
 - **Composition Root**: `vanguard/packages/runtime/compose.py` (`compose_harness`, `RunPlan`).
 - **Profile Resolution**: `vanguard/packages/runtime/profiles.py` (`resolve_profile`, `ExecutionProfile`).
 - **Lifecycle Integration Tests**: `test/contracts/test_b2_lifecycle_integration.py`, `test/falsifiers/test_rf94_single_runtime_authority.py`, `test/runtime/test_harness_session.py`.
+- **Terminal Projection Falsifiers**: `test/falsifiers/test_completion_gate_scope.py`, `test/apps/coding_max/test_coding_max_facade.py`, `test/contracts/test_trajectory_v2.py`.

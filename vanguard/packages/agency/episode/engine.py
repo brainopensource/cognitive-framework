@@ -1066,7 +1066,7 @@ class EpisodeEngine:
                 is_cancelled=is_cancelled,
             )
 
-            is_ok = child_outcome.terminal in (RunTermination.COMPLETED, RunTermination.ABSTAINED)
+            is_ok = child_outcome.terminal is RunTermination.COMPLETED
             # Child return payload is value-only text / note
             payload = child_outcome.episode.detail or child_outcome.episode.brief
             # `K-33`: the child's return value re-enters the parent's

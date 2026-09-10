@@ -51,6 +51,11 @@ def _require_text(value: Any, field: str) -> str:
 
 
 _FAILURE_VALUES = {kind.value for kind in FailureClass}
+_RECOVERY_ACTIONS = frozenset({"continue", "wait", "reground", "replan", "stop"})
+_VERSIONED_REQUIRED = (
+    "schema", "policyDigest", "history", "errors",
+    "interventions", "decisions", "pendingOperation", "deadline",
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -92,6 +97,64 @@ class Attempt:
         )
 
 
+@dataclass(frozen=True, slots=True)
+class SemanticRecoveryDecision:
+    """NT-1.2 persisted recovery-policy decision.
+
+    Distinct from the protocol-parser `RecoveryDecision` (`accept` /
+    `retry_model` / `fail_instrument`). This value never consults.
+    """
+
+    action: str
+    reason: str
+    delay_ms: int
+    state_digest: str
+    remaining_budget_ref: str
+
+    def __post_init__(self) -> None:
+        if self.action not in _RECOVERY_ACTIONS:
+            raise ValueError("unsupported recovery action")
+        _require_text(self.reason, "recovery reason")
+        _natural(self.delay_ms, "delay_ms")
+        _require_digest(self.state_digest, "state digest")
+        _require_digest(self.remaining_budget_ref, "remaining budget ref")
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "action": self.action,
+            "reason": self.reason,
+            "delayMs": self.delay_ms,
+            "stateDigest": self.state_digest,
+            "remainingBudgetRef": self.remaining_budget_ref,
+        }
+
+    def encode(self) -> bytes:
+        return canonical_bytes(self.to_dict())
+
+    @classmethod
+    def from_mapping(cls, raw: Mapping[str, Any]) -> "SemanticRecoveryDecision":
+        if not isinstance(raw, Mapping):
+            raise TypeError("recovery decision must be an object")
+        return cls(
+            action=str(raw.get("action", "")),
+            reason=str(raw.get("reason", "")),
+            delay_ms=raw.get("delayMs", raw.get("delay_ms", 0)),
+            state_digest=raw.get("stateDigest", raw.get("state_digest", "")),
+            remaining_budget_ref=raw.get("remainingBudgetRef", raw.get("remaining_budget_ref", "")),
+        )
+
+    @classmethod
+    def decode(cls, payload: bytes) -> "SemanticRecoveryDecision":
+        payload_bytes = bytes(payload)
+        raw = parse_json_text(payload_bytes.decode("utf-8"))
+        if not isinstance(raw, Mapping):
+            raise TypeError("recovery decision must be an object")
+        decision = cls.from_mapping(raw)
+        if decision.encode() != payload_bytes:
+            raise ValueError("noncanonical recovery decision")
+        return decision
+
+
 def semantic_attempt_fingerprint(
     action: str, arguments: Mapping[str, Any] | None = None,
     workspace_digest: str = "",
@@ -115,6 +178,10 @@ class RecoveryDecision:
     continuation: bool = False
     failure_code: str | None = None
     diagnostics: tuple[str, ...] = field(default_factory=tuple)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "retry_feedback", MappingProxyType(dict(self.retry_feedback)))
+        object.__setattr__(self, "diagnostics", tuple(self.diagnostics))
 
     @property
     def action(self) -> str:
@@ -156,6 +223,9 @@ class ProtocolRecoveryState:
     deadline: str | None = None
 
     def __post_init__(self) -> None:
+        object.__setattr__(self, "attempted_fingerprints", tuple(self.attempted_fingerprints))
+        object.__setattr__(self, "spent_decisions", tuple(self.spent_decisions))
+        object.__setattr__(self, "history", tuple(self.history))
         for name in (
             "transport_retries", "protocol_retries", "truncation_retries", "effect_retries",
             "max_transport_retries", "max_protocol_retries", "max_truncation_retries",
@@ -174,6 +244,12 @@ class ProtocolRecoveryState:
             raise ValueError("spent decisions must be nonempty strings")
         if not all(isinstance(item, Attempt) for item in self.history):
             raise TypeError("history must contain Attempt values")
+        if self.history and self.attempted_fingerprints:
+            if tuple(item.fingerprint for item in self.history) != self.attempted_fingerprints:
+                raise ValueError("inconsistent recovery history and fingerprints")
+        if self.history and self.spent_decisions:
+            if tuple(item.outcome for item in self.history) != self.spent_decisions:
+                raise ValueError("inconsistent recovery history and spent decisions")
         errors = {}
         for key, count in dict(self.errors).items():
             if key not in _FAILURE_VALUES:
@@ -293,10 +369,13 @@ class ProtocolRecoveryState:
             return cls._from_legacy(raw)
         if schema != RECOVERY_STATE_SCHEMA:
             raise ValueError("unsupported recovery schema")
-        history_raw = raw.get("history", ())
+        missing = [key for key in _VERSIONED_REQUIRED if key not in raw]
+        if missing:
+            raise ValueError(f"incomplete recovery-state payload: missing {missing[0]}")
+        history_raw = raw["history"]
         if not isinstance(history_raw, Sequence) or isinstance(history_raw, (str, bytes)):
             raise TypeError("history must be a sequence")
-        errors_raw = raw.get("errors", {})
+        errors_raw = raw["errors"]
         if not isinstance(errors_raw, Mapping):
             raise TypeError("errors must be an object")
         fingerprints_raw = raw.get("attemptedFingerprints", raw.get("attempted_fingerprints", ()))
@@ -336,13 +415,13 @@ class ProtocolRecoveryState:
             ),
             attempted_fingerprints=tuple(str(item) for item in fingerprints_raw),
             spent_decisions=tuple(str(item) for item in decisions_raw),
-            policy_digest=raw.get("policyDigest", raw.get("policy_digest", "")),
+            policy_digest=raw["policyDigest"] if "policyDigest" in raw else raw.get("policy_digest", ""),
             history=tuple(Attempt.from_mapping(item) for item in history_raw),
             errors={str(key): value for key, value in errors_raw.items()},
-            interventions=_natural(raw.get("interventions", 0), "interventions"),
-            decisions=_natural(raw.get("decisions", 0), "decisions"),
-            pending_operation=raw.get("pendingOperation", raw.get("pending_operation")),
-            deadline=raw.get("deadline"),
+            interventions=_natural(raw["interventions"], "interventions"),
+            decisions=_natural(raw["decisions"], "decisions"),
+            pending_operation=raw["pendingOperation"],
+            deadline=raw["deadline"],
         )
 
     @classmethod
@@ -370,9 +449,29 @@ class ProtocolRecoveryState:
             effect_retries=_natural(
                 raw.get("effectRetries", raw.get("effect_retries", 0)), "effect retries",
             ),
+            max_transport_retries=_legacy_ceiling(
+                raw, "maxTransportRetries", "max_transport_retries", 2, "max transport retries",
+            ),
+            max_protocol_retries=_legacy_ceiling(
+                raw, "maxProtocolRetries", "max_protocol_retries", 2, "max protocol retries",
+            ),
+            max_truncation_retries=_legacy_ceiling(
+                raw, "maxTruncationRetries", "max_truncation_retries", 1, "max truncation retries",
+            ),
+            max_effect_retries=_legacy_ceiling(
+                raw, "maxEffectRetries", "max_effect_retries", 2, "max effect retries",
+            ),
             attempted_fingerprints=tuple(str(item) for item in fingerprints_raw),
             spent_decisions=tuple(str(item) for item in decisions_raw),
         )
+
+
+def _legacy_ceiling(
+    raw: Mapping[str, Any], camel: str, snake: str, default: int, field: str,
+) -> int:
+    if camel in raw or snake in raw:
+        return _natural(raw.get(camel, raw.get(snake)), field)
+    return default
 
 
 RecoveryState = ProtocolRecoveryState

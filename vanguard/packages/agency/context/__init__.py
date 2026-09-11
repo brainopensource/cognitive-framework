@@ -12,9 +12,15 @@ strings handed to the constructor.
 
 from .compiler import (
     CacheBreakpointCeilingExceeded,
+    CapabilityPrefixExceeded,
     CompetencePriorRecorder,
     ContextBudgetExceeded,
     ContextCompiler,
+)
+from .distiller import (
+    VerificationReceipt,
+    distill_tool_output,
+    verification_receipt_from,
 )
 from .packet import (
     INDEX_PORT_UNBOUND,
@@ -28,7 +34,10 @@ from .packet import (
 )
 from .layers import (
     BREAKPOINT_LAYERS,
+    CAPABILITY_PREFIX_CEILING,
     LAYER_ORDER,
+    NEWEST_INTERACTION_SOURCE,
+    PINNED_L5_SOURCES,
     PREFIX_LAYERS,
     ROLE_FOR_LAYER,
     Block,
@@ -42,8 +51,10 @@ from .layers import (
 
 __all__ = [
     "BREAKPOINT_LAYERS",
+    "CAPABILITY_PREFIX_CEILING",
     "Block",
     "CacheBreakpointCeilingExceeded",
+    "CapabilityPrefixExceeded",
     "CompetencePriorRecorder",
     "CompiledContext",
     "ContextBudgetExceeded",
@@ -57,7 +68,12 @@ __all__ = [
     "Interaction",
     "LAYER_ORDER",
     "Layer",
+    "NEWEST_INTERACTION_SOURCE",
+    "PINNED_L5_SOURCES",
     "PREFIX_LAYERS",
     "ROLE_FOR_LAYER",
+    "VerificationReceipt",
+    "distill_tool_output",
     "estimate_tokens",
+    "verification_receipt_from",
 ]

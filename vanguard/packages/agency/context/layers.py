@@ -30,7 +30,9 @@ __all__ = [
     "GOAL_ECHO_SOURCE",
     "Interaction",
     "Layer",
+    "NEWEST_INTERACTION_SOURCE",
     "PINNED_L4_SOURCES",
+    "PINNED_L5_SOURCES",
     "PREFIX_LAYERS",
     "ROLE_FOR_LAYER",
     "estimate_tokens",
@@ -82,6 +84,21 @@ PINNED_L4_SOURCES: frozenset[str] = frozenset({
 
 #: Short restatement of the brief at the tail of L5 (v2 §15 / T-36).
 GOAL_ECHO_SOURCE = "goal-echo"
+
+#: `NT-C04` — the newest *complete* action/result interaction. Compaction may
+#: elide its body into a receipt, because a receipt still says what ran and
+#: what it produced; it may never remove the interaction, because the newest
+#: result is the only evidence of the state the next action starts from.
+NEWEST_INTERACTION_SOURCE = "newest-interaction"
+
+#: L5 sources compaction may elide but must not drop (`NT-C04`).
+PINNED_L5_SOURCES: frozenset[str] = frozenset({
+    GOAL_ECHO_SOURCE,
+    NEWEST_INTERACTION_SOURCE,
+})
+
+#: `NT-C05` — the capability-card prefix is bounded in *characters*, so a
+#: route with a generous tokenizer cannot quietly enlarge it.
 CAPABILITY_PREFIX_CEILING = 4096
 
 
@@ -246,6 +263,19 @@ class CompiledContext:
     @property
     def total_tokens(self) -> int:
         return sum(block.token_estimate for block in self.blocks)
+
+    @property
+    def goal_echo(self) -> str:
+        """The `L5` trailing goal echo, or empty when none was appended.
+
+        `NT-C05`: the objective and its constraints are restated *after* the
+        dynamic evidence, so no amount of late-turn untrusted text is the last
+        thing the model reads.
+        """
+        for block in reversed(self.blocks):
+            if block.source == GOAL_ECHO_SOURCE:
+                return block.text
+        return ""
 
     @property
     def total_bytes(self) -> int:

@@ -78,11 +78,57 @@ For MS-BASELINE the authoritative subject is the committed tree exercised by eve
 
 MS-CONTROL additionally requires MS-BASELINE and MS-CONTEXT on its candidate subject. Freeze only after all behavior-affecting integration is complete. A valid negative/undeterminable result is published but does not accept a positive gate. Preserve existing n >= 30 / Wilson lower bound >= 0.40 and zero **observed** false completions; report uncertainty and missingness. No universal cache-hit percentage or benchmark score is inferred from compiler tests.
 
+#### MS-CONTROL admission, stopping and acceptance
+
+The accepted NT-1 subject above is historical evidence, not an alias for HEAD.
+The File 1.1 review inspected `5224912f7fb121e0be2b723ffd2a6c605cfa9777`;
+successor documentation and generated-catalog commits do not transfer an exact-SHA
+freeze. T-26 must establish candidate compatibility under NT-I02 and the subject
+rules above. Green prerequisite unit tests demonstrate mechanisms; they do not
+close T-51/T-52, supply a live L0 disposition, freeze T-26 or accept T-27.
+
+These are TARGET acceptance requirements subordinate to [EW-9.3–EW-9.4](spec.md#ew-93-wave-2--frozen-control-honest-instrument--presets).
+The current [control preregistration](../../benchmarks/ladder/control_preregistration.json)
+remains `UNFROZEN`, with null subject, suite and model identities. Refining this
+page neither freezes that artifact nor authorizes measurement.
+
+| Decision boundary | Required evidence / stopping rule |
+|---|---|
+| Admission | MS-BASELINE/MS-CONTEXT compatibility and applicable T-79/T-89/T-92–T-95/T-51/T-52 receipts on the candidate; required L0/L1 dispositions; one clean SHA and frozen task/oracle membership, model/provider, manifest/preset, prompt/tool/sampling and cost identities. Any unresolved prerequisite keeps T-26 unfrozen. |
+| Spending | Zero paid control calls before freeze; T-26 itself makes zero paid calls. Freeze is necessary but does not itself authorize spending. Any required pre-freeze live L0 must use an eligible authorized zero-paid-call route; otherwise admission remains blocked. |
+| Arm | Single-worker `vg-code-balanced`, preset `balanced`, through `vanguard.packages.runtime.entrypoint.execute`; preserve the public $0.15 / 900000 ms / 40000 tokens / 20 turns ceiling and record tighter caller attenuation separately. |
+| Sample and denominator | At least 30 distinct current `LIVE-LOCAL` / `LIVE-HOSTED` tasks with binary exterior outcomes. Freeze finite membership and task order; one qualifying attempt per task. Retries never increase coverage or replace failed attempts. Preserve every missing, undeterminable and not-run outcome with its reason, outside the binary denominator; no full-suite pass-rate claim from partial coverage. |
+| Planned stop | Before measurement, bind the finite task membership, total cost and elapsed-time ceilings and missingness handling. Stop at the preregistered evaluable target (draft: 30), membership exhaustion, or the first resource/integrity stop. Do not extend the sample after inspecting success rates, substitute tasks or stop early for a positive claim. Reconcile the draft stopping text and complete frozen identity at T-26 before running. |
+| Positive result | At the planned stop, `n_evaluable >= 30`, lower endpoint of the two-sided 95% Wilson interval (`z = 1.96`) `>= 0.40`, zero observed false completions and every identity/integrity predicate satisfied. At exactly 30 evaluable tasks, 18 passes meet this statistical threshold; 17 do not. This is qualification on the frozen corpus, not a universal reliability claim. |
+| Nonpositive result | A valid complete sample below the success threshold is `NEGATIVE`; insufficient evaluable evidence is `UNDETERMINABLE`; unfrozen or identity-invalid measurement is `INVALID`. A false-completion veto prevents acceptance regardless of a numeric disposition. Publish the result, missingness, costs and stop reason; all such outcomes leave MS-CONTROL open. |
+| Closure | An independent reviewer accepts the exact-subject evidence digest and repository governance records closure. A helper returning `POSITIVE` is insufficient. Zero observed false completions is a finite-sample observation, not proof of zero population risk. |
+
+**Grounding boundary.** Existing mechanisms are
+[`live_oracle_pass`, `score_metrics`, `canary_disposition`](../../benchmarks/ladder/metrics.py),
+[`wilson_interval`](../../benchmarks/statistics.py), and
+[`require_frozen`](../../benchmarks/ladder/control.py). Their focused falsifiers are
+[`test_metric_veto.py`](../../test/benchmarks/test_metric_veto.py) and
+[`test_preregistration.py`](../../test/benchmarks/test_preregistration.py).
+These helpers do not by themselves enforce the full membership, unique-attempt,
+resource-stop and independent-review requirements above. The production
+[`Preregistration`](../../vanguard/packages/domain/evidence/preregistration.py)
+binds task/oracle/evaluator/subject identities for RF-85; it is a distinct contract
+from `aether.control-preregistration/1`, not an interchangeable freeze API.
+
 Dual mission: (1) Coding Max on one `EpisodeEngine` path; (2) same substrate for other agents. CLI is a client of `ApplicationService`.
 
 ### Post-control horizon release predicates (FH-1)
 
 All rows below are **OPEN [PROPOSAL]**. They define future acceptance, not implementation authorization or a sprint calendar. NT-1 and its control gate remain unchanged. The normative owner is [FH-1](spec.md#fh-1-post-control-backend-horizon-proposal). Existing MS-* rows are extended for these future subjects, not replaced or retrospectively accepted.
+
+Planning inputs are the [measurement and topology review](../reports/reviews/aether_v093_review/part2_benchmark_mastery_and_topologies.md),
+[interface blueprints](../reports/reviews/aether_v093_review/part3_blueprints_and_interface_contracts.md),
+[roadmap and risk review](../reports/reviews/aether_v093_review/part4_roadmap_and_strategic_synthesis.md),
+and [auxiliary execution table](../../.draft/temp_auxiliary_table.md).
+These are non-canonical references: their percentages, phase durations, historical
+defect lists and prototype APIs do not establish completion, dependency edges or
+implementation authority. Promote only reviewed outcomes here; schemas,
+algorithms and atomic task leases belong in the subsequent runway files.
 
 | Gate | Dependencies | Required acceptance evidence | Status |
 |---|---|---|---|
@@ -97,6 +143,59 @@ All rows below are **OPEN [PROPOSAL]**. They define future acceptance, not imple
 | **Release handoff** | T-128; applicable accepted gates; existing M-8/M-9/M-10 | Complete preservation recipes on release subject, independently reviewed evidence digest, migration/rollback and operator claims matched to qualified features. M-9 cannot precede M-8; M-10 retains release_qualify exit-zero predicate. | `OPEN` [PROPOSAL] |
 
 Dependency spine: `MS-BASELINE -> MS-CONTEXT -> MS-CONTROL`; thereafter CAS, delegation, memory and evaluation are conditional branches. No requirement to build campaigns or achieve MS-SOTA before evaluating the single controller. A released profile advertises only its accepted branches. Prototype refinements require updated contracts and leaf falsifiers before implementation, with no weakened gate by silent threshold changes.
+
+The leadership review order is CAS → delegation/specialists → campaign → memory
+→ evaluation; it does not add dependency edges between independent branches.
+CAS-01 owns workspace qualification; DEL-01 owns delegation mechanics and advisory
+specialists; OCT-03 owns the campaign client; MEM-01 retains M-8 governed-learning
+requirements; EVAL-02 qualifies benchmark protocols. Package lifecycles remain
+owned by `backlog.md`, and executable leaf ownership remains in `tasks.md`.
+
+The reference designs sharpen the following acceptance boundaries:
+
+- **CAS:** Failed verification preserves the prior authoritative head; concurrent
+  promotions have one winner; acknowledged promotion survives restart; lost
+  replies reconcile through the original operation identity. Export separately
+  detects newer user edits and quarantines conflicts or unrestorable paths.
+- **Delegation and specialists:** Qualify one bounded advisory reader first.
+  Unknown dispatch outcomes retain their reservation until reconciled; cancellation
+  or restart cannot replenish the aggregate allowance. Any later mutating worker
+  requires an isolated candidate, and the parent verifies the combined result.
+- **Campaign:** The director is a runtime client with zero mutating verbs;
+  qualified child episodes perform edits. Dependency readiness and resume must
+  preserve settled effects. Model votes and worker-local checks cannot replace
+  exterior verification of the integrated candidate.
+- **Evaluation:** Report brownfield repair and greenfield completeness separately.
+  Pin each benchmark's own attempt/edit/feedback rules and include coordination,
+  verification, failed-attempt and recovery costs. Protocol qualification,
+  an official measured score and statistical superiority remain distinct gates.
+
+For every empirical post-control branch, freeze finite sample/resource limits,
+the comparison, missingness policy and statistical decision before measurement.
+Useful-lift and cost-saving/noninferiority alternatives cannot be selected after
+viewing results. MS-MEMORY retains held-out lift `>= 0.05` with `p < 0.05`,
+independent promotion and executed revocation/rollback evidence; its statistical
+protocol belongs in the subsequent specification review. A positive control does
+not supply that evidence. Mechanical fault-injection suites qualify CAS,
+delegation, campaign recovery and evaluation protocols without manufacturing
+performance claims. Negative or inconclusive treatment evidence leaves the
+treatment disabled and the corresponding positive gate open.
+
+#### Invariant release vetoes
+
+Any observed false completion, test/oracle contamination, subject mismatch,
+unaccounted effect, budget overspend, unauthorized grant widening or duplicate
+settled effect prevents acceptance and stops further affected dispatch. Preserve
+the evidence and reconcile pending effects before any new candidate is measured.
+Mandatory gate failure or missing acceptance evidence likewise vetoes release;
+success, cost or latency gains cannot compensate for these failures.
+
+All branches preserve the 1438-LOC kernel ceiling (planned kernel delta: zero),
+hexagonal imports, domain blindness, one ledger writer and N-06: no subprocess
+execution in runtime; effect execution remains in permitted adapters/tools.
+Fault handling must demonstrate the promised recovery or explicit quarantine;
+an untested claim of absolute crash/ABA immunity cannot satisfy a milestone.
+M-8/M-9/M-10 and G-1–G-3 remain binding regardless of which MS-* branch passes.
 
 ## 2. M-0–M-10 and G-1–G-3
 

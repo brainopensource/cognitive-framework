@@ -1,205 +1,475 @@
 {
-  "authority": [],
+  "authority": [
+    "advisory",
+    "architectural-invariants-and-forensics",
+    "descriptive",
+    "execution",
+    "operational-staging"
+  ],
   "budget": 16000,
+  "callers": [],
   "code": [
     {
       "authority": null,
-      "kind": "code",
-      "locator": "vanguard/packages/agency/",
-      "reason": "code-map match",
-      "score": 15,
-      "title": "SUB-B-04 Agency Engine",
-      "tokens": 0
+      "content": null,
+      "kind": "code_topology",
+      "locator": "lang:bash",
+      "provenance_ref": null,
+      "reason": "8 files (39783 bytes)",
+      "representation": "FULL",
+      "score": 15.0,
+      "title": "Language: bash",
+      "tokens": 30
     },
     {
       "authority": null,
-      "kind": "code",
-      "locator": "vanguard/packages/runtime/ledger_emitter.py",
-      "reason": "code-map match",
-      "score": 15,
-      "title": "SUB-B-05 Causal State",
-      "tokens": 0
+      "content": null,
+      "kind": "code_topology",
+      "locator": "lang:javascript",
+      "provenance_ref": null,
+      "reason": "8 files (30887 bytes)",
+      "representation": "FULL",
+      "score": 15.0,
+      "title": "Language: javascript",
+      "tokens": 30
     },
     {
       "authority": null,
-      "kind": "code",
-      "locator": "vanguard/packages/runtime/compose.py",
-      "reason": "code-map match",
-      "score": 15,
-      "title": "SUB-B-06 Composition",
-      "tokens": 0
+      "content": null,
+      "kind": "code_topology",
+      "locator": "lang:markdown",
+      "provenance_ref": null,
+      "reason": "285 files (4931598 bytes)",
+      "representation": "FULL",
+      "score": 15.0,
+      "title": "Language: markdown",
+      "tokens": 30
     },
     {
       "authority": null,
-      "kind": "code",
-      "locator": "vanguard/packages/agency/spawn.py",
-      "reason": "code-map match",
-      "score": 15,
-      "title": "SUB-B-07 Delegation",
-      "tokens": 0
+      "content": null,
+      "kind": "code_topology",
+      "locator": "lang:python",
+      "provenance_ref": null,
+      "reason": "1204 files (7687238 bytes)",
+      "representation": "FULL",
+      "score": 15.0,
+      "title": "Language: python",
+      "tokens": 30
     },
     {
       "authority": null,
-      "kind": "code",
-      "locator": "vanguard/packages/runtime/governance/learning.py",
-      "reason": "code-map match",
-      "score": 15,
-      "title": "SUB-B-08 Governed Memory",
-      "tokens": 0
+      "content": null,
+      "kind": "code_topology",
+      "locator": "lang:rust",
+      "provenance_ref": null,
+      "reason": "1 files (1050 bytes)",
+      "representation": "FULL",
+      "score": 15.0,
+      "title": "Language: rust",
+      "tokens": 30
     },
     {
       "authority": null,
-      "kind": "code",
-      "locator": "vanguard/packages/runtime/evaluator_gateway.py",
-      "reason": "code-map match",
-      "score": 15,
-      "title": "SUB-B-09 Assurance & Evaluation",
-      "tokens": 0
+      "content": null,
+      "kind": "code_topology",
+      "locator": "lang:text",
+      "provenance_ref": null,
+      "reason": "191 files (197873 bytes)",
+      "representation": "FULL",
+      "score": 15.0,
+      "title": "Language: text",
+      "tokens": 30
     },
     {
       "authority": null,
-      "kind": "code",
-      "locator": "vanguard/packages/runtime/service/",
-      "reason": "code-map match",
-      "score": 15,
-      "title": "SUB-B-11 Application Interfaces",
-      "tokens": 0
+      "content": null,
+      "kind": "code_topology",
+      "locator": "lang:typescript",
+      "provenance_ref": null,
+      "reason": "402 files (1650126 bytes)",
+      "representation": "FULL",
+      "score": 15.0,
+      "title": "Language: typescript",
+      "tokens": 30
     }
   ],
   "documents": [
     {
-      "authority": null,
-      "kind": "document",
-      "locator": "docs/research/coding_harness/VANGUARD_FRONTIER_SWE_BENCH_AND_AGENTIC_METAFRAMEWORK_REPORT.md",
-      "reason": "keyword/authority match",
-      "score": 40,
-      "title": "Vanguard Frontier: Architectural Synthesis, SWE-Bench Pro Mastery, and Next-Generation Agentic Coding Meta-Frameworks",
-      "tokens": 11786
+      "authority": "execution",
+      "content": "## 6. Target backend architecture\n",
+      "kind": "doc_section",
+      "locator": "docs/execution/technical.md#L2228-L2239",
+      "provenance_ref": null,
+      "reason": "Matching section in docs/execution/technical.md [PPR Boost: 0.00]",
+      "representation": "SKELETON",
+      "score": 70.84517368348419,
+      "title": "6. Target backend architecture",
+      "tokens": 5
+    },
+    {
+      "authority": "descriptive",
+      "content": "## Non-responsibilities\n- Exact wire event envelope schemas and catalogs (owned by [`ref.events`](../reference/events.md)).\n- Specific model/tool adapter execution logic (owned by [`ref.ports`](../reference/ports.md) and [`guide.add-adapter-provider`](../guides/add-adapter-or-provider.md)).\n- Agent prompt compilation and turn cognition (owned by [`arch.agency.turns`](agency.md)).\n",
+      "kind": "doc_section",
+      "locator": "docs/backend/architecture/kernel.md#L52-L56",
+      "provenance_ref": null,
+      "reason": "Matching section in docs/backend/architecture/kernel.md [PPR Boost: 0.00]",
+      "representation": "SKELETON",
+      "score": 71.9550709170284,
+      "title": "Non-responsibilities",
+      "tokens": 34
+    },
+    {
+      "authority": "descriptive",
+      "content": "## Scope\n- The two-tier extension model: Domain Packs (`packs/`) versus Hexagonal Adapters (`adapters/`).\n- The composition compiler and `FrozenComposition` immutable representation.\n- Component activation lifecycle and security verification (`activation.py`).\n- Hexagonal boundary enforcement rules (`domain <- ports <- kernel <- agency <- runtime -> adapters`).\n",
+      "kind": "doc_section",
+      "locator": "docs/backend/architecture/composition-extensibility.md#L45-L50",
+      "provenance_ref": null,
+      "reason": "Matching section in docs/backend/architecture/composition-extensibility.md [PPR Boost: 0.00]",
+      "representation": "SKELETON",
+      "score": 67.36292341216995,
+      "title": "Scope",
+      "tokens": 46
+    },
+    {
+      "authority": "execution",
+      "content": "### 20.1 Repository-relative\n\n- [`VISION.md`](../../VISION.md)\n- [`AGENTS.md`](../../AGENTS.md)\n- [`README.md`](../../README.md)\n- [`docs/execution/spec.md`](spec.md)\n- [`docs/execution/active.md`](tasks.md)\n- [`docs/execution/milestones.md`](../execution/milestones.md)\n- [`docs/execution/backlog.md`](../execution/backlog.md)\n- [`docs/execution/spec.md`](../execution/spec.md)\n- [`docs/execution/tasks.md`](../execution/tasks.md)\n- [`docs/backend/architecture/agency.md`](../backend/architecture/agency.md)\n- [`docs/architecture/workflows/end-to-end-execution.md`](../architecture/workflows/end-to-end-execution.md)\n- [`vanguard/packages/agency/episode/engine.py`](../../vanguard/packages/agency/episode/engine.py)\n- [`vanguard/packages/agency/episode/admission_gate.py`](../../vanguard/packages/agency/episode/admission_gate.py)\n- [`vanguard/packages/agency/context/compiler.py`](../../vanguard/packages/agency/context/compiler.py)\n- [`vanguard/packages/agency/context/packet.py`](../../vanguard/packages/agency/context/packet.py)\n- [`vanguard/packages/agency/forge/engine.py`](../../vanguard/packages/agency/forge/engine.py)\n- [`vanguard/packages/runtime/session.py`](../../vanguard/packages/runtime/session.py)\n- [`vanguard/packages/runtime/task_state.py`](../../vanguard/packages/runtime/task_state.py)\n- [`vanguard/packages/runtime/app_service.py`](../../vanguard/packages/runtime/app_service.py)\n- [`vanguard/packages/runtime/child_runtime.py`](../../vanguard/packages/runtime/child_runtime.py)\n- [`vanguard/packages/runtime/meta_controller.py`](../../vanguard/packages/runtime/meta_controller.py)\n- [`vanguard/packages/runtime/topology.py`](../../vanguard/packages/runtime/topology.py)\n- [`vanguard/packages/apps/coding_max/facade.py`](../../vanguard/packages/apps/coding_max/facade.py)\n- [`vanguard/packages/adapters/models/models_registry.json`](../../vanguard/packages/adapters/models/models_registry.json)\n- [`vanguard/packages/ports/index.py`](../../vanguard/packages/ports/index.py)\n- [`vanguard/packages/domain/transforms/repository/change_surface.py`](../../vanguard/packages/domain/transforms/repository/change_surface.py)\n- [`benchmarks/protocols.py`](../../benchmarks/protocols.py)\n- [`benchmarks/sota_preregistration.json`](../../benchmarks/sota_preregistration.json)\n- [`benchmarks/sota_spend_ledger.json`](../../benchmarks/sota_spend_ledger.json)\n- [`.draft/DEVELOPMENT_FINAL_PLAN.md`](../reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN.md) (non-authority; different SHA)\n- [`.draft/todo/ELECTROWEAK_SYNTHESIS_SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md`](../../.draft/todo/ELECTROWEAK_SYNTHESIS_SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md)\n- [`.draft/todo/ELECTROWEAK_SYNTHESIS_DEVELOPMENT_PLAN_GUIDELINES_0209.md`](../../.draft/todo/ELECTROWEAK_SYNTHESIS_DEVELOPMENT_PLAN_GUIDELINES_0209.md)\n- [`.draft/HYDRA_MULTI_AGENT_TOPOLOGY_AND_EMERGENT_AGENCY.md`](../research/features/HYDRA_MULTI_AGENT_TOPOLOGY_AND_EMERGENT_AGENCY.md)\n- [`.draft/SONNET_SUPER_AGENT.md`](../research/features/SONNET_SUPER_AGENT.md)\n- [`docs/research/theory/SOTA_AGENTIC_CODING_HARNESS_ENGINEERING_TREATISE.md`](../research/theory/SOTA_AGENTIC_CODING_HARNESS_ENGINEERING_TREATISE.md)\n- [`docs/research/coding_harness/VANGUARD_FRONTIER_SWE_BENCH_AND_AGENTIC_METAFRAMEWORK_REPORT.md`](../research/coding_harness/VANGUARD_FRONTIER_SWE_BENCH_AND_AGENTIC_METAFRAMEWORK_REPORT.md)\n- [`docs/research/coding_harness/VANGUARD_VS_LIM_INSIGHTS_SOTS_TECHNIQUES.md`](../research/coding_harness/VANGUARD_VS_LIM_INSIGHTS_SOTS_TECHNIQUES.md)\n- [`docs/reports/reviews/electroweak_v092/octopus/agents/long-horizon-context-engine.md`](../reports/reviews/electroweak_v092/octopus/agents/long-horizon-context-engine.md)\n- [`docs/reports/reviews/electroweak_v092/octopus/agents/meta-conductor.md`](../reports/reviews/electroweak_v092/octopus/agents/meta-conductor.md)\n- [`docs/reports/reviews/electroweak_v092/octopus/consolidation/outer-loop-orchestrator.md`](../reports/reviews/electroweak_v092/octopus/consolidation/outer-loop-orchestrator.md)\n- [`docs/reports/reviews/electroweak_v092/octopus/consolidation/outer-loop-coding-patterns.md`](../reports/reviews/electroweak_v092/octopus/consolidation/outer-loop-coding-patterns.md)\n- [`.agents/skills/lda-navigator/SKILL.md`](../../.agents/skills/lda-navigator/SKILL.md)\n",
+      "kind": "doc_section",
+      "locator": "docs/execution/technical.md#L2852-L2896",
+      "provenance_ref": null,
+      "reason": "Matching section in docs/execution/technical.md [PPR Boost: 0.00]",
+      "representation": "SKELETON",
+      "score": 87.80935767359853,
+      "title": "20.1 Repository-relative",
+      "tokens": 90
+    },
+    {
+      "authority": "advisory",
+      "content": "### F-D6 \u2014 Confirmed dead code (deletion index)\n\nConsolidated for deletion planning; each row is proved where cited.\n\n| Artefact | LOC | Proved in |\n|---|---|---|\n| `agency/chimera/**` | ~2,000 | F-D3 |\n| `load.compile_preset` / `compile_pack` | \u2014 | F-C3 |\n| `load.budget_policy_document()` | \u2014 | F-C4 |\n| `root.py` Forge re-exports | \u2014 | F-D3 |\n| `packs/code-default/toolkits/composite.py` | \u2014 | here: absent from `plugin.yaml`, no importer |\n| `adapters/bindings/lex_reproducer.py` | \u2014 | here: no importer found |\n| `adapters/models/ollama` | \u2014 | here: referenced by a test, module absent, forbidden by policy |\n",
+      "kind": "doc_section",
+      "locator": ".draft/audit/AUDIT-2026-09-06-wave2-closeout.md#L897-L910",
+      "provenance_ref": null,
+      "reason": "Matching section in .draft/audit/AUDIT-2026-09-06-wave2-closeout.md [PPR Boost: 0.00]",
+      "representation": "SKELETON",
+      "score": 68.39624023219662,
+      "title": "F-D6 \u2014 Confirmed dead code (deletion index)",
+      "tokens": 97
     },
     {
       "authority": null,
-      "kind": "document",
-      "locator": "docs/backend/architecture/runtime-execution.md",
-      "reason": "keyword/authority match",
-      "score": 30,
-      "title": "Runtime Execution Architecture",
-      "tokens": 1152
+      "content": null,
+      "kind": "doc_section",
+      "locator": "docs/reports/reviews/electroweak_v092/plans/PHASE-0_DEVELOPMENT_FINAL_PLAN.md#L669-L683",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "FULL",
+      "score": 70.48567684681386,
+      "title": "7. Present `docs/` updates (only when code is true)",
+      "tokens": 100
+    },
+    {
+      "authority": "operational-staging",
+      "content": "### B. N\u00facleo Vanguard / AETHER\n1. **Cascading ModelPort Adapter** ([`cascade.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/adapters/models/cascade.py)):\n   - Implementa `ModelPort` unindo modelo local prim\u00e1rio e fallback secund\u00e1rio/fronteira com limiar de falhas consecutivas.\n   - Zero depend\u00eancias de `kernel` ou `agency` (100% em conformidade com fronteiras hexagonais).\n2. **F\u00e1brica e Sele\u00e7\u00e3o de Modelos**:\n   - Registrado `\"cascade\"` e `\"tiered\"` em [`factory.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/adapters/models/factory.py) e [`model_selection.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/runtime/model_selection.py).\n3. **Ponte Universal de Sincroniza\u00e7\u00e3o** ([`tools/universal_mcp_sync.py`](file:///home/rock-dev/Coding/cognitive-framework/tools/universal_mcp_sync.py)):\n   - Espelha automaticamente skills, techniques e proficiencies para Claude Code (`~/.claude/`), Cursor (`~/.cursor/`), Codex CLI (`~/.codex/`) e Antigravity (`~/.gemini/`).\n4. **Verifica\u00e7\u00e3o de Regress\u00e3o**:\n   - [`test/runtime/test_techniques_and_proficiencies.py`](file:///home/rock-dev/Coding/cognitive-framework/test/runtime/test_techniques_and_proficiencies.py): 7/7 testes verdes em 0.002s.\n   - TCB do Kernel mantido em 1386 LOC (52 linhas abaixo do teto de 1438).\n\n---\n",
+      "kind": "doc_section",
+      "locator": ".draft/todo/SOTA_SKILLS_TECHNIQUES_PROFICIENCIES_GUIDE.md#L49-L62",
+      "provenance_ref": null,
+      "reason": "Matching section in .draft/todo/SOTA_SKILLS_TECHNIQUES_PROFICIENCIES_GUIDE.md [PPR Boost: 0.00]",
+      "representation": "SKELETON",
+      "score": 68.72876423509281,
+      "title": "B. N\u00facleo Vanguard / AETHER",
+      "tokens": 106
     },
     {
       "authority": null,
-      "kind": "document",
-      "locator": "test/runtime/test_w14_model_ports_and_driver.py",
-      "reason": "keyword/authority match",
-      "score": 30,
-      "title": "test_w14_model_ports_and_driver.py",
-      "tokens": 2939
+      "content": null,
+      "kind": "doc_section",
+      "locator": ".draft/audit/EXHAUSTIVE_ARCHITECTURAL_AUDIT_EXECUTION_VS_CODE.md#L348-L368",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "FULL",
+      "score": 60.816871238475734,
+      "title": "4.1 The Ollama Anachronism (Critical Contradiction)",
+      "tokens": 100
     },
     {
       "authority": null,
-      "kind": "document",
-      "locator": "test/broken/fixtures/benchmarking_adapter_import/vanguard/packages/adapters/models/openrouter.py",
-      "reason": "keyword/authority match",
-      "score": 20,
-      "title": "openrouter.py",
-      "tokens": 8
+      "content": null,
+      "kind": "doc_section",
+      "locator": "docs/execution/technical.md#L2852-L2896",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "FULL",
+      "score": 75.80935767359853,
+      "title": "20.1 Repository-relative",
+      "tokens": 100
     },
     {
       "authority": null,
-      "kind": "document",
-      "locator": "test/broken/fixtures/runtime_evaluator_import/vanguard/packages/adapters/evaluators/client.py",
-      "reason": "keyword/authority match",
-      "score": 20,
-      "title": "client.py",
-      "tokens": 19
+      "content": null,
+      "kind": "doc_section",
+      "locator": "docs/execution/technical.md#L2815-L2847",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "FULL",
+      "score": 59.74578420699277,
+      "title": "17. File-by-file routing",
+      "tokens": 100
     },
     {
       "authority": null,
-      "kind": "document",
-      "locator": "test/broken/fixtures/runtime_evaluator_valid/vanguard/packages/adapters/evaluators/client.py",
-      "reason": "keyword/authority match",
-      "score": 20,
-      "title": "client.py",
-      "tokens": 19
+      "content": null,
+      "kind": "doc_section",
+      "locator": "docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN.md#L78-L86",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "FULL",
+      "score": 61.68422747062887,
+      "title": "Dual mission",
+      "tokens": 100
     },
     {
       "authority": null,
-      "kind": "document",
-      "locator": "test/broken/fixtures/governance_model/vanguard/packages/runtime/governance/process.ts",
-      "reason": "keyword/authority match",
-      "score": 20,
-      "title": "process.ts",
-      "tokens": 30
+      "content": null,
+      "kind": "doc_section",
+      "locator": ".draft/audit/EXHAUSTIVE_ARCHITECTURAL_AUDIT_EXECUTION_VS_CODE.md#L47-L54",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "FULL",
+      "score": 59.3413985544221,
+      "title": "The Primary Theses",
+      "tokens": 100
+    },
+    {
+      "authority": "operational-staging",
+      "content": "### A. Capacidades no Sistema de Arquivos (`.agents/`)\n1. **Skills At\u00f4micas (`.agents/skills/`)**:\n   - `lda-navigator`: Indexa\u00e7\u00e3o e fatiamento simb\u00f3lico de AST em SQLite-WAL ($<25\\text{ms}$ para deltas).\n   - `llama-cpp`: Infer\u00eancia neural local via `llama-server` nativo com acelera\u00e7\u00e3o Vulkan em GPU AMD.\n   - `test-runner`: Executor herm\u00e9tico e isolado de testes unit\u00e1rios com captura de streams e exit codes.\n   - *Bridges*: `.agents/skills/{spec-driven-codegen, tdd-falsifier, autofix-loop}/SKILL.md` para compatibilidade com ferramentas que s\u00f3 descobrem skills.\n2. **Techniques em Malha Aberta (`.agents/techniques/`)**:\n   - `spec-driven-codegen`: Script [`generate_grounded_patch.py`](file:///home/rock-dev/Coding/cognitive-framework/.agents/techniques/spec-driven-codegen/scripts/generate_grounded_patch.py) que compila o contexto de AST e invariantes antes de gerar o c\u00f3digo, eliminando alucina\u00e7\u00f5es.\n   - `tdd-falsifier`: Script [`run_falsifier.py`](file:///home/rock-dev/Coding/cognitive-framework/.agents/techniques/tdd-falsifier/scripts/run_falsifier.py) que mapeia alvos para su\u00edtes de teste via LDA e extrai `DiagnosticReport`.\n3. **Proficiency em Malha Fechada (`.agents/proficiencies/`)**:\n   - `autofix-swe-loop`: Orquestrador [`autofix_harness.py`](file:///home/rock-dev/Coding/cognitive-framework/.agents/proficiencies/autofix-swe-loop/scripts/autofix_harness.py) com ciclo Plan $\\to$ Patch $\\to$ Delta Sync $\\to$ Test $\\to$ Traceback Feedback $\\to$ Verification/Rollback.\n",
+      "kind": "doc_section",
+      "locator": ".draft/todo/SOTA_SKILLS_TECHNIQUES_PROFICIENCIES_GUIDE.md#L37-L48",
+      "provenance_ref": null,
+      "reason": "Matching section in .draft/todo/SOTA_SKILLS_TECHNIQUES_PROFICIENCIES_GUIDE.md [PPR Boost: 0.00]",
+      "representation": "SKELETON",
+      "score": 68.08786371630039,
+      "title": "A. Capacidades no Sistema de Arquivos (`.agents/`)",
+      "tokens": 134
     },
     {
       "authority": null,
-      "kind": "document",
-      "locator": "vanguard/clients/studio/src/ui/AgentBuilder/steps/ModelStep.tsx",
-      "reason": "keyword/authority match",
-      "score": 20,
-      "title": "ModelStep.tsx",
-      "tokens": 30
+      "content": null,
+      "kind": "doc_section",
+      "locator": "docs/backend/architecture/kernel.md#L52-L56",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "FULL",
+      "score": 59.955070917028394,
+      "title": "Non-responsibilities",
+      "tokens": 100
+    },
+    {
+      "authority": "execution",
+      "content": "## 0. Epistemic legend\n\n| Tag | Meaning |\n|---|---|\n| **FACT** | Observed in current source |\n| **MECHANISM** | Code exists with tests; not a product claim |\n| **INFERENCE** | Engineering conclusion from FACT + MECHANISM |\n| **[PROPOSAL]** | Future work; keep the text; do not treat as HEAD |\n| **ASPIRATION** | Competitive position; not a forecast |\n| **CONTRADICTION** | Two authorities disagree; source wins |\n| **MISSING** | Path does not exist at lock HEAD `66aa7a3c` |\n| **SUPERSEDED** | Keep text, mark `[PROPOSAL]`, cite the better location |\n\nPresent docs to open while coding:\n\n| Context | Read first |\n|---|---|\n| Kernel / TCB | `docs/architecture/boundaries.md`, `vanguard/packages/kernel/dispatch.py` |\n| Turn loop | `docs/backend/architecture/agency.md`, `episode/engine.py`, `session.py` |\n| Context | `compiler.py`, `layers.py`, `compaction.py` |\n| Runtime / resume | `docs/backend/architecture/runtime-execution.md`, `app_service.py`, `task_state.py` |\n| Index | `ports/index.py`, `adapters/stores/repo_index.py` |\n| Packs | `packs/code-default/` |\n| Memory | `docs/backend/architecture/memory-learning.md`, `ports/memory.py` |\n| Eval | `docs/backend/architecture/assurance-evaluation.md` |\n\nWave-titled sections copied below are **capability recipes**, not a calendar.\n",
+      "kind": "doc_section",
+      "locator": "docs/execution/technical.md#L508-L535",
+      "provenance_ref": null,
+      "reason": "Matching section in docs/execution/technical.md [PPR Boost: 0.00]",
+      "representation": "SKELETON",
+      "score": 69.2406871973975,
+      "title": "0. Epistemic legend",
+      "tokens": 173
+    },
+    {
+      "authority": "architectural-invariants-and-forensics",
+      "content": "### 4.1 The Ollama Anachronism (Critical Contradiction)\n\nIn commit `6f0de943`, ticket `T-91`, and [`.agents/skills/llama-cpp/SKILL.md`](file:///home/rock-dev/Coding/cognitive-framework/.agents/skills/llama-cpp/SKILL.md), the repository established the law:\n> *\"Ollama is strictly forbidden and deprecated across the repository. Wiped ollama from the project. Native llama.cpp / llama-server is the sole authorized local engine.\"*\n\nDespite this binding law, `docs/backend/` explicitly directs contributors to use Ollama in three separate files:\n1. [`docs/backend/guides/getting-started.md#L67`](file:///home/rock-dev/Coding/cognitive-framework/docs/backend/guides/getting-started.md#L67):\n   ```markdown\n   - **Model API Key**: `OPENROUTER_API_KEY`, `DEEPSEEK_API_KEY`, `OPENAI_API_KEY`, or a running local Ollama daemon (`http://localhost:11434`).\n   ```\n2. [`docs/backend/reference/configuration.md#L112`](file:///home/rock-dev/Coding/cognitive-framework/docs/backend/reference/configuration.md#L112):\n   ```markdown\n   | `OLLAMA_HOST` | `http://localhost:11434` | Endpoint for local Ollama model provider adapter. |\n   ```\n3. [`docs/backend/reference/ports.md#L114`](file:///home/rock-dev/Coding/cognitive-framework/docs/backend/reference/ports.md#L114):\n   ```markdown\n   | `ModelPort` | `models.openrouter.OpenRouterModel`<br>`models.ollama.OllamaModel` |\n   ```\n\n**Theoretical Impact**: Violates the **Single Point of Truth (SPOT)** principle. A developer or autonomous agent relying on `docs/backend/` will fail immediately when attempting to instantiate `models.ollama.OllamaModel`, which was completely purged from [`vanguard/packages/adapters/models/`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/adapters/models).\n",
+      "kind": "doc_section",
+      "locator": ".draft/audit/EXHAUSTIVE_ARCHITECTURAL_AUDIT_EXECUTION_VS_CODE.md#L348-L368",
+      "provenance_ref": null,
+      "reason": "Matching section in .draft/audit/EXHAUSTIVE_ARCHITECTURAL_AUDIT_EXECUTION_VS_CODE.md [PPR Boost: 0.00]",
+      "representation": "SKELETON",
+      "score": 72.81687123847574,
+      "title": "4.1 The Ollama Anachronism (Critical Contradiction)",
+      "tokens": 135
+    },
+    {
+      "authority": "execution",
+      "content": "### 2.2 The current inner loop\n\nThe operational loop is already structurally sound:\n\n```text\nobserve\n  -> compile bounded context\n  -> model proposes\n  -> parse and validate proposal\n  -> authorize through kernel\n  -> execute through adapter\n  -> record receipt\n  -> update projection\n  -> decide continue / suspend / terminate\n  -> evaluate outside cognition\n```\n\n**FACT (HEAD `66aa7a3c`).** Compile is **not** a per-turn stage inside `EpisodeEngine`. `ContextCompiler` freezes L1\u2013L3 at construction (`vanguard/packages/agency/context/compiler.py`). Session owns compiler construction. `EpisodeEngine` is observe \u2192 propose \u2192 `recover_proposal` \u2192 `Kernel.dispatch` \u2192 ingest (`vanguard/packages/agency/episode/engine.py`). The engine consumes an already-constructed compiler; it does not recompile the frozen prefix each turn.\n\n**Historical claim (planning subject `7e08462c`).** The operational-loop diagram above lists `compile bounded context` between observe and propose as if it were an `EpisodeEngine` step. Keep that wording as the product-shape sketch (bounded context still happens). The live split is compiler/session vs engine. See B for the L3 `resume_state` dump gap; target \u03c3 placement is v2 \u00a73 + B \u00a74.4, not a second compiler.\n\nThe `EpisodeEngine` is approximately 1,102 lines.\n\nThe `HarnessSession` is approximately 1,623 lines.\n\n`HarnessSession` currently coordinates:\n\n- context notes;\n- policy swapping;\n- controller consultation;\n- dispatch;\n- checkpointing;\n- reconstruction;\n- completion evidence;\n- evaluation;\n- telemetry;\n- artifact capture;\n- memory facts;\n- approval re-entry.\n\nThis is not automatically wrong.\n\nIt is a change-coupling risk.\n\nFuture work should extract cohesive collaborators without creating a second runtime authority.\n",
+      "kind": "doc_section",
+      "locator": "docs/execution/technical.md#L3175-L3220",
+      "provenance_ref": null,
+      "reason": "Matching section in docs/execution/technical.md [PPR Boost: 0.00]",
+      "representation": "SKELETON",
+      "score": 69.08287681267507,
+      "title": "2.2 The current inner loop",
+      "tokens": 232
+    },
+    {
+      "authority": "architectural-invariants-and-forensics",
+      "content": "### The Primary Theses\n1. **Execution Runway Precision is High but Gate-Blocked**: The execution tickets (T-01 through T-97) accurately reflect implementation reality up to Wave 1 (`MS-TRUTH`), with Wave 2 (`MS-CONTROL`) candidates implemented (31/31 named tests green) but correctly held as *unaccepted* due to five hexagonal boundary violations and four facade/entrypoint surface failures.\n2. **Untracked Production Capability Expansion**: Commits `622131da` and `e4b94e3a` introduced a comprehensive, production-grade **Universal Agent Capability Layer** under [`.agents/`](file:///home/rock-dev/Coding/cognitive-framework/.agents) (Skills, Techniques, Proficiencies), a cascading `ModelPort` adapter ([`cascade.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/adapters/models/cascade.py)), and universal MCP synchronization tooling ([`universal_mcp_sync.py`](file:///home/rock-dev/Coding/cognitive-framework/tools/universal_mcp_sync.py)) which are passing 7/7 unit tests but remain **completely untracked or listed as `[ ] [PROPOSAL]`** in [`tasks.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md).\n3. **Backend Documentation Exhibits Dangerous Staleness**: While [`docs/backend/architecture/`](file:///home/rock-dev/Coding/cognitive-framework/docs/backend/architecture) presents theoretically sound models, [`docs/backend/reference/`](file:///home/rock-dev/Coding/cognitive-framework/docs/backend/reference) and [`docs/backend/guides/`](file:///home/rock-dev/Coding/cognitive-framework/docs/backend/guides) suffer from active anachronisms\u2014most critically instructing users to configure and run the strictly forbidden and purged `Ollama` provider, omitting the entire `vanguard code` CLI command suite, presenting hallucinated manifest structures, and leaving key production modules with `canonical_owner: null`.\n4. **The `.draft/todo/` Dossier is Methodologically Essential**: Far from being disposable notes, the files in [`.draft/todo/`](file:///home/rock-dev/Coding/cognitive-framework/.draft/todo) represent the true *Synthesis of Record*. They successfully corrected 18 fatal draft flaws (C-1 through C-18), established the non-negotiable **Two-Axis Settlement Law**, barred high-entropy fuzzy patchers in favor of 2PC exact replacements, and established the 6-bottleneck SOTA agent harness taxonomy.\n\n---\n",
+      "kind": "doc_section",
+      "locator": ".draft/audit/EXHAUSTIVE_ARCHITECTURAL_AUDIT_EXECUTION_VS_CODE.md#L47-L54",
+      "provenance_ref": null,
+      "reason": "Matching section in .draft/audit/EXHAUSTIVE_ARCHITECTURAL_AUDIT_EXECUTION_VS_CODE.md [PPR Boost: 0.00]",
+      "representation": "SKELETON",
+      "score": 71.3413985544221,
+      "title": "The Primary Theses",
+      "tokens": 214
+    },
+    {
+      "authority": "execution",
+      "content": "## 17. File-by-file routing\n\n| Work | Create / modify | Tests | Canonical docs **after** acceptance (not this draft) |\n|---|---|---|---|\n| SemanticTaskState | `vanguard/packages/domain/task_state.py` | `test/contracts/test_semantic_task_state.py` | `docs/backend/architecture/runtime-execution.md` |\n| Fold | **M** `vanguard/packages/runtime/task_state.py` | `test/agency/test_coding_state.py` | same |\n| Resume identity | **M** `vanguard/packages/runtime/app_service.py` | `test/runtime/test_resume_from_ledger.py`, RF-25 | runtime-execution |\n| Stop L3 dump | **M** `vanguard/packages/runtime/session.py` | `test/runtime/test_context_layer_residency.py` + new | agency.md |\n| Packet identity | **M** `vanguard/packages/agency/context/packet.py` | `test/agency/test_context_packet.py` | agency.md |\n| Progressive policy | **C** `vanguard/packages/agency/context/progressive.py` | **C** `test/agency/test_progressive_context_compiler.py` | agency.md |\n| Admission verbs | **M** `runtime/session.py`, `agency/episode/admission_gate.py` | `test/falsifiers/test_completion_gate_scope.py` | FEATURE_SPEC, agency.md |\n| Forge count | **M** `agency/forge/engine.py` | `test/agency/test_forge.py` | note quarantine in backlog |\n| 2PC | **C** `adapters/environment/transaction.py`; **M** `git.py` | **C** `test/runtime/test_atomic_multi_file_transaction.py` | adapters/environment docs |\n| Tamper | **C** `runtime/governance/tamper_shield.py` | **C** `test/runtime/test_tamper_shield.py` | governance |\n| Dialect | **M** `adapters/models/dialect.py` | **C** `test/contracts/test_dialect_recovery.py` | adapters/models |\n| Index epoch | **M** `ports/index.py`, `adapters/stores/repo_index.py` | adapter index tests | ports ICD |\n| Change surface | **M** `domain/transforms/repository/change_surface.py` | domain/pack tests | domain transforms |\n| Pack policies | **M** `packs/code-default/**` | `test/packs/code_default/` | pack README only if contract |\n| Facade | rarely **M** `apps/coding_max/facade.py` | app tests | product PRD later |\n| Enumerator | **M** `benchmarks/benchmark_20_suite/runner.py` | `test/benchmarks/` | never claim official |\n| Child/topology | **M** only if Wave 7 | existing M-7/RF-101 | topology docs |\n| Memory wiring | **M** `runtime/memory.py` Wave 9 | M-8 suite | ADR-0100 |\n| Campaign | **C** `runtime/campaign/` Wave 8 | new workflow tests | architecture after M-OCT |\n| Kernel | **avoid** | TCB tests | SPEC only if invariant |\n| Clients TUI | **out of scope** | \u2014 | \u2014 |\n\n`docs_rag --file` owners observed: EpisodeEngine/ContextCompiler \u2192 `docs/backend/architecture/agency.md`; HarnessSession/CodingTaskState \u2192 `docs/backend/architecture/runtime-execution.md`.\n\n---\n\n\n---\n",
+      "kind": "doc_section",
+      "locator": "docs/execution/technical.md#L2815-L2847",
+      "provenance_ref": null,
+      "reason": "Matching section in docs/execution/technical.md [PPR Boost: 0.00]",
+      "representation": "SKELETON",
+      "score": 71.74578420699277,
+      "title": "17. File-by-file routing",
+      "tokens": 304
     },
     {
       "authority": null,
-      "kind": "document",
-      "locator": "test/apps/coding/__init__.py",
-      "reason": "keyword/authority match",
-      "score": 10,
-      "title": "__init__.py",
-      "tokens": 1
-    },
-    {
-      "authority": null,
-      "kind": "document",
-      "locator": "test/runtime/__init__.py",
-      "reason": "keyword/authority match",
-      "score": 10,
-      "title": "__init__.py",
-      "tokens": 1
-    },
-    {
-      "authority": null,
-      "kind": "document",
-      "locator": "test/broken/fixtures/benchmarking_valid/vanguard/packages/runtime/root.py",
-      "reason": "keyword/authority match",
-      "score": 10,
-      "title": "root.py",
-      "tokens": 6
-    },
-    {
-      "authority": null,
-      "kind": "document",
-      "locator": "tools/007_LLM_DOCS_ATLAS/commands/__init__.py",
-      "reason": "keyword/authority match",
-      "score": 10,
-      "title": "__init__.py",
-      "tokens": 9
+      "content": "### 1.3 Tabela de Tarefas do Bloco Ativo NT-1 (Status Real de Implementa\u00e7\u00e3o)\n\n| Task ID | Stream | Pacote | Estado | Depend\u00eancias | Arquivos Afetados | Comando Falsificador (Unit/Contract Test) | Objetivo T\u00e9cnico |\n|:---|:---:|:---:|:---:|:---|:---|:---|:---|\n| **T-98** | **C** | `GATE-01` | `ACCEPTED` | `[]` | [`test/__init__.py`](file:///home/rock-dev/Coding/cognitive-framework/test/__init__.py)<br>[`test/conftest.py`](file:///home/rock-dev/Coding/cognitive-framework/test/conftest.py)<br>[`check_test_hygiene.py`](file:///home/rock-dev/Coding/cognitive-framework/tools/linters/check_test_hygiene.py)<br>[`test_suite_nonmutation.py`](file:///home/rock-dev/Coding/cognitive-framework/test/contracts/test_suite_nonmutation.py) | `python3 -m unittest test.contracts.test_suite_nonmutation test.tools.test_check_test_hygiene -v` | Garantir isolamento herm\u00e9tico da su\u00edte, isolar metadados Git e redirecionar diret\u00f3rios grav\u00e1veis sem muta\u00e7\u00e3o da \u00e1rvore. |\n| **T-99** | **A** | `INS-01` | `ACCEPTED` | `[]` | [`entrypoint.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/runtime/entrypoint.py)<br>[`app_service.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/runtime/app_service.py)<br>[`child_runtime.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/runtime/child_runtime.py) | `python3 -m unittest test.apps.coding_max.test_coding_max_facade test.falsifiers.test_rf90_generic_entrypoint test.falsifiers.test_completion_gate_scope -v` | Eliminar o colapso de `abstained` para `completed`. Manter eixos de status terminal e disposi\u00e7\u00e3o desacoplados. |\n| **T-100** | **B** | `CTX-01` | `ACCEPTED` | `[]` | [`task_state.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/domain/task_state.py)<br>[`protocol_recovery.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/agency/episode/protocol_recovery.py) | `python3 -m unittest test.contracts.test_semantic_task_state -v` | Implementar schemas imut\u00e1veis de mem\u00f3ria de trabalho (`aether.memory-view/1`), com cursor, linhagem e valida\u00e7\u00e3o can\u00f4nica JCS. |\n| **T-97** | **A** | `INS-01` | `ACCEPTED` | `[T-84]` | [`parse-cli.ts`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/clients/cli/src/composition/parse-cli.ts)<br>[`main.ts`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/clients/cli/src/main.ts)<br>[`commands.test.ts`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/clients/cli/test/commands.test.ts) | `npm --workspace @vanguard/cli test && npm run typecheck` | Superf\u00edcie CLI: reproduzir e reparar `aether code --help` para sair 0 sem invocar modelo/epis\u00f3dio; resolver colis\u00e3o do flag `-m`. |\n| **T-101** | **C** | `GATE-01` | `ACCEPTED` | `[T-98]` | [`test/lab/`](file:///home/rock-dev/Coding/cognitive-framework/test/lab/)<br>[`test_collection_integrity.py`](file:///home/rock-dev/Coding/cognitive-framework/test/contracts/test_collection_integrity.py) | `python3 -m unittest test.contracts.test_collection_integrity -v` | Invent\u00e1rio completo de coleta da su\u00edte na \u00e1rvore isolada e mapeamento de falhas reais sem supress\u00e3o. |\n| **T-103** | **C** | `CMX-01` | `ACCEPTED` | `[T-98]` | [`presets.json`](file:///home/rock-dev/Coding/cognitive-framework/packs/code-default/presets.json)<br>[`load.py`](file:///home/rock-dev/Coding/cognitive-framework/packs/code-default/load.py) | `python3 -m unittest test.packs.code_default.test_presets test.benchmarks.test_instrument_ms test.benchmarks.test_preregistration -v` | Harmonizar presets (`fast`, `balanced`, `max`) garantindo que diferen\u00e7as de or\u00e7amento sejam declaradas com fidelidade. |\n| **T-102** | **A** | `INS-01` | `ACCEPTED` | `[T-99, T-103]` | [`facade.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/apps/coding_max/facade.py)<br>[`entrypoint.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/runtime/entrypoint.py)<br>[`cli.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/runtime/cli.py) | `python3 -m unittest test.runtime.test_app_service_and_cli test.apps.coding_max.test_facade test.apps.test_preset_budgets -v` | Consolidar a fachada do produto ([`CodingMaxFacade`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/apps/coding_max/facade.py)) sobre o `ApplicationService` sem criar loops ou tetos divergentes. |\n| **T-104** | **B** | `CTX-01` | `ACCEPTED` | `[T-100]` | [`compiler.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/agency/context/compiler.py)<br>[`compaction.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/agency/context/compaction.py)<br>[`layers.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/agency/context/layers.py)<br>[`distiller.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/agency/context/distiller.py) | `python3 -m unittest test.agency.test_context_compiler test.agency.test_context_packet -v` | Integrar sele\u00e7\u00e3o de contexto com limites de or\u00e7amento (80% / 60%), preservando fatos can\u00f4nicos e elidindo bodies em recibos. |\n| **T-108** | **B** | `GATE-01` | `ACCEPTED` | `[T-98, T-101]` | [`ast_patch.py`](file:///home/rock-dev/Coding/cognitive-framework/packs/code-default/toolkits/ast_patch.py)<br>[`transaction.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/adapters/environment/transaction.py) | `python3 -m unittest test.falsifiers.test_d6_patch_context_anchoring test.packs.code_default.test_ast_patch test.runtime.test_atomic_multi_file_transaction -v` | Rejeitar pr\u00e9-imagens amb\u00edguas em patch AST; consolidar sem\u00e2ntica de patch \u00fanico e limpar implementa\u00e7\u00f5es \u00f3rf\u00e3s. |\n| **T-106** | **B** | `REC-01` | `ACCEPTED` | `[T-100, T-104]` | [`protocol_recovery.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/agency/episode/protocol_recovery.py)<br>[`engine.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/agency/episode/engine.py) | `python3 -m unittest test.agency.test_protocol_recovery -v` | Integrar recupera\u00e7\u00e3o determin\u00edstica: detec\u00e7\u00e3o de estagna\u00e7\u00e3o (ciclos de 2-3 a\u00e7\u00f5es repetidas), or\u00e7amentos finitos e a\u00e7\u00f5es `reground`/`replan`/`stop`. |\n| **T-105** | **A** | `CTX-01` | `ACCEPTED` | `[T-102, T-104]` | [`adapters/models/`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/adapters/models/)<br>[`test_prompt_serialization_budget.py`](file:///home/rock-dev/Coding/cognitive-framework/test/adapters/test_prompt_serialization_budget.py) | `python3 -m unittest test.adapters.test_prompt_serialization_budget -v` | Implementar `PromptCodec` com contagem final exata da serializa\u00e7\u00e3o do provedor e observa\u00e7\u00e3o de cache nativa. |\n| **T-77** | **B** | `CTX-01` | `ACCEPTED` | `[T-104, T-105]` | [`compiler.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/agency/context/compiler.py)<br>[`compaction.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/agency/context/compaction.py)<br>[`test_cache_breakpoints.py`](file:///home/rock-dev/Coding/cognitive-framework/test/agency/test_cache_breakpoints.py) | `python3 -m unittest test.agency.test_cache_breakpoints -v` | Cache breakpoints, destila\u00e7\u00e3o CTRF e Trailing Goal Echo em L5; preserva\u00e7\u00e3o de prefixo L1\u2013L3 e estabilidade de ordem de schemas. |\n| **T-107** | **A** | `CTX-01/REC-01` | `ACCEPTED` | `[T-100, T-104, T-105, T-106, T-109]` | [`session.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/runtime/session.py)<br>[`ledger_emitter.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/runtime/ledger_emitter.py)<br>[`task_state.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/runtime/task_state.py) | `python3 -m unittest test.runtime.test_task_state_fold test.runtime.test_resume_identity -v` | Conectar fatos can\u00f4nicos de sele\u00e7\u00e3o e recupera\u00e7\u00e3o no envelope `mhf.event/2` via emissor \u00fanico e persist\u00eancia no ledger SQLite WAL. |\n| **T-109** | **C** | `GATE-01` | `ACCEPTED` | `[T-98, T-99, T-101, T-102, T-103, T-108, T-97]` | Tooling e configura\u00e7\u00f5es de port\u00e3o | `python3 -m unittest discover -s test -t .`<br>`just check && just verify`<br>`npm --workspace @vanguard/cli test && npm run typecheck` | Fechamento formal do marco **MS-BASELINE** com recibo emp\u00edrico completo, suite isolada verde, TypeScript aprovado e sem muta\u00e7\u00e3o. |\n| **T-110** | **A** | `CTX-01/REC-01` | `ACCEPTED` | `[T-107, T-77]` | [`test_long_session_context_recovery.py`](file:///home/rock-dev/Coding/cognitive-framework/test/runtime/test_long_session_context_recovery.py) | `python3 -m unittest test.runtime.test_long_session_context_recovery test.falsifiers.test_rf25_cold_continuation test.falsifiers.test_rf23_trajectory_content -v` | Qualifica\u00e7\u00e3o de sess\u00f5es longas (100+ turnos) sob compacta\u00e7\u00e3o for\u00e7ada e rein\u00edcio de processo frio sem perda de inten\u00e7\u00e3o/recibos. |\n| **T-111** | **C** | `GATE-01/EXP-01` | `ACCEPTED` | `[T-109, T-110]` | Arquivos de execu\u00e7\u00e3o e pr\u00e9-registro de controle | `python3 -m unittest test.benchmarks.test_preregistration test.falsifiers.test_rel02_frozen_canary -v` | Reconcilia\u00e7\u00e3o dos port\u00f5es **MS-BASELINE** e **MS-CONTEXT** no sujeito `2989d57d`, fechando ambos os marcos. |\n| **T-26** | **C/Lideran\u00e7a** | `EXP-01` | `READY (UNFROZEN)` | `[T-111, T-79, T-89, T-92\u2013T-95]` | [`control_preregistration.json`](file:///home/rock-dev/Coding/cognitive-framework/benchmarks/ladder/control_preregistration.json) | `python3 -m unittest test.benchmarks.test_preregistration -v` | Auditar pr\u00e9-requisitos de controle e congelar SHA exato e model_id com 0 chamadas pagas. |\n| **T-27** | **B/Avalia\u00e7\u00e3o** | `EXP-01` | `TODO` | `[T-26]` | [`benchmarks/ladder/`](file:///home/rock-dev/Coding/cognitive-framework/benchmarks/ladder/) | `python3 -m unittest test.benchmarks.test_metric_veto -v` | Execu\u00e7\u00e3o do can\u00e1rio single-agent ($n \\ge 30$, Wilson LB $\\ge 0.40$, 0 false completions) para fechamento de `MS-CONTROL`. |\n\n---\n",
+      "kind": "doc_section",
+      "locator": ".draft/temp_auxiliary_table.md#L43-L67",
+      "provenance_ref": null,
+      "reason": "Matching section in .draft/temp_auxiliary_table.md [PPR Boost: 0.00]",
+      "representation": "SKELETON",
+      "score": 67.91645091411424,
+      "title": "1.3 Tabela de Tarefas do Bloco Ativo NT-1 (Status Real de Implementa\u00e7\u00e3o)",
+      "tokens": 754
     }
   ],
-  "estimated_tokens": 16000,
+  "estimated_tokens": 3504,
+  "invariants": [
+    "Packet facts are bound to provenance.source_head_sha; on workspace HEAD mismatch, recompile the packet or fail closed \u2014 never serve stale line numbers or symbols.",
+    "Never serve stale facts: recompile on any index/workspace mismatch.",
+    "All privileged tool invocations must fail closed on widest authority.",
+    "Modifications must remain scoped strictly to the target modules."
+  ],
+  "omitted": [
+    {
+      "kind": "document",
+      "locator": "docs/backend/architecture/agency.md",
+      "reason": "budget_exhausted",
+      "score": 75.34,
+      "title": "Agency",
+      "tokens": 4965
+    },
+    {
+      "kind": "doc_section",
+      "locator": "docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN_B.md#L1545-L1590",
+      "reason": "budget_exhausted",
+      "score": 75.02,
+      "title": "20.1 Repository-relative",
+      "tokens": 100
+    },
+    {
+      "kind": "document",
+      "locator": "docs/backend/architecture/agency.md",
+      "reason": "budget_exhausted",
+      "score": 69.7,
+      "title": "arch.agency.turns",
+      "tokens": 4965
+    },
+    {
+      "kind": "method",
+      "locator": "vanguard/packages/adapters/context/window.py#L26",
+      "reason": "budget_exhausted",
+      "score": 68.01,
+      "title": "compile",
+      "tokens": 100
+    },
+    {
+      "kind": "doc_section",
+      "locator": "docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN_B.md#L714-L725",
+      "reason": "budget_exhausted",
+      "score": 66.85,
+      "title": "6. Target backend architecture",
+      "tokens": 100
+    },
+    {
+      "kind": "doc_section",
+      "locator": "docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN_B.md#L1299-L1328",
+      "reason": "budget_exhausted",
+      "score": 59.3,
+      "title": "17. File-by-file routing",
+      "tokens": 100
+    }
+  ],
+  "provenance": {
+    "indexer": "LDA Universal SOTA Engine",
+    "profile": "AETHER",
+    "ranking_channels": {
+      "dense_rrf": false,
+      "lexical_bm25": true,
+      "ppr_diffusion": true,
+      "stack_trace_frames": true
+    },
+    "schema_version": "1.2.0",
+    "source_head_sha": "5224912f7fb121e0be2b723ffd2a6c605cfa9777",
+    "strategy": "ppr_submodular",
+    "task_intent": "explain",
+    "total_repo_files": 2099,
+    "total_repo_relations": 91003,
+    "total_repo_symbols": 11306
+  },
   "symbols": [
     {
       "authority": null,
+      "content": "from __future__ import annotations\nimport json\nimport unittest\nfrom vanguard.packages.agency.context import BREAKPOINT_LAYERS, PREFIX_LAYERS, Block, CacheBreakpointCeilingExceeded, CompetencePriorRecorder, CompiledContext, ContextBudget, ContextBudgetExceeded, ContextCompiler, Fragment, Interaction, Layer, estimate_tokens\nfrom vanguard.packages.domain.artifacts.skill_index import SkillCard\nfrom vanguard.packages.domain.task_state import Evidence, MemoryView\nfrom test.kernel import fakes\ndef build(**overrides) -> ContextCompiler: ...\ndef dialogue(count: int, size: int, evictable: bool) -> tuple[Fragment, ...]: ...\nclass LayerOrder(unittest.TestCase):\n    def test_layers_render_in_order_and_only_when_non_empty(self) -> None: ...\n    def test_dialogue_appends_as_the_last_layer(self) -> None: ...\n    def test_an_empty_environment_emits_no_layer_three_message(self) -> None: ...\n    def test_every_block_carries_its_source_and_byte_length(self) -> None: ...\n\nclass SkillIndex(unittest.TestCase):\n    \"\"\"`S050-A-08`/`W12-B`: `format_skill_index` is invoked at composition,\"\"\"\n    def test_no_cards_means_no_layer_three_addition(self) -> None: ...\n    def test_cards_render_into_layer_three(self) -> None: ...\n    def test_cards_join_the_environment_map_rather_than_replacing_it(self) -> None: ...\n    def test_the_index_honours_its_own_ceiling(self) -> None: ...\n\nclass PrefixStability(unittest.TestCase):\n    def test_layers_one_to_three_are_byte_identical_across_ten_turns(self) -> None: ...\n    def test_the_prefix_digest_moves_when_the_prefix_actually_changes(self) -> None: ...\n    def test_tool_schemas_render_canonically_not_in_argument_order(self) -> None: ...\n    def test_tool_list_order_is_stable_by_name(self) -> None: ...\n\nclass CacheBreakpoints(unittest.TestCase):\n    def test_breakpoints_sit_only_at_layer_one_three_and_four(self) -> None: ...\n    def test_layer_five_never_carries_a_breakpoint(self) -> None: ...\n    def test_exceeding_the_breakpoint_ceiling_raises_at_assembly(self) -> None: ...\n\nclass Budget(unittest.TestCase):\n    def test_a_context_within_ceiling_is_untouched(self) -> None: ...\n    def test_result_eviction_takes_the_oldest_body_first(self) -> None: ...\n    def test_truncation_never_touches_the_system_core_or_the_schemas(self) -> None: ...\n    def test_dialogue_is_exhausted_before_a_task_note_is_dropped(self) -> None: ...\n    def test_the_brief_is_exempt_from_compaction(self) -> None: ...\n    def test_a_floor_that_cannot_fit_raises_at_assembly(self) -> None: ...\n\nclass CompetencePrior(unittest.TestCase):\n    \"\"\"`S5-SA-002`. The prior is logged *before* turn 1 reaches the model.\"\"\"\n    def setUp(self) -> None: ...\n    def record(self, prior: float, **overrides) -> bool: ...\n    def test_the_prior_reaches_the_event_sink(self) -> None: ...\n    def test_the_prior_is_recorded_as_a_canonical_decimal_string(self) -> None: ...\n    def test_the_prior_is_bound_to_the_prompt_it_was_a_prior_for(self) -> None: ...\n    def test_the_payload_carries_no_prompt_text(self) -> None: ...\n    def test_a_second_record_for_the_same_episode_is_refused(self) -> None: ...\n    def test_a_second_episode_records_its_own_prior(self) -> None: ...\n    def test_a_value_outside_zero_to_one_is_not_a_probability(self) -> None: ...\n    def test_a_sink_failure_never_fails_the_turn_it_describes(self) -> None: ...\n\nclass Reach(unittest.TestCase):\n    \"\"\"`M11`: the compiler is domain-agnostic data, not a coding-shaped module.\"\"\"\n    def test_the_compiler_holds_no_authority_and_no_kernel(self) -> None: ...\n    def test_compiled_context_is_immutable(self) -> None: ...\n    def test_a_block_is_immutable(self) -> None: ...\n    def test_the_compiled_context_is_what_the_model_port_consumes(self) -> None: ...\n    def test_the_wire_messages_carry_only_role_and_content(self) -> None: ...\n\nclass BoundedSelection(unittest.TestCase):\n    \"\"\"T-104: Prefix/compile_packet semantics on the existing compiler.\"\"\"\n    def _view(self, *evidence: Evidence) -> MemoryView: ...\n    def test_stale_evidence_is_omitted_with_artifact_identity(self) -> None: ...\n    def test_oversize_body_is_elided_to_an_artifact_receipt(self) -> None: ...\n    def test_newest_interaction_is_preserved_and_oldest_may_drop(self) -> None: ...\n    def test_irreducible_overflow_raises_without_inference(self) -> None: ...\n    def test_capability_cards_cannot_exceed_w12a(self) -> None: ...",
       "kind": "symbol",
-      "locator": "vanguard/packages/runtime/service/contract.py",
-      "reason": "symbol match",
-      "score": 20,
-      "title": "RuntimeService",
-      "tokens": 0
+      "locator": "test/agency/test_context_compiler.py#L398",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "SKELETON",
+      "score": 72.70262758226407,
+      "title": "test.agency.test_context_compiler.Reach.test_the_compiled_context_is_what_the_model_port_consumes",
+      "tokens": 318
     },
     {
       "authority": null,
+      "content": "from __future__ import annotations\nimport json\nimport unittest\nfrom vanguard.packages.agency.context import BREAKPOINT_LAYERS, PREFIX_LAYERS, Block, CacheBreakpointCeilingExceeded, CompetencePriorRecorder, CompiledContext, ContextBudget, ContextBudgetExceeded, ContextCompiler, Fragment, Interaction, Layer, estimate_tokens\nfrom vanguard.packages.domain.artifacts.skill_index import SkillCard\nfrom vanguard.packages.domain.task_state import Evidence, MemoryView\nfrom test.kernel import fakes\ndef build(**overrides) -> ContextCompiler: ...\ndef dialogue(count: int, size: int, evictable: bool) -> tuple[Fragment, ...]: ...\nclass LayerOrder(unittest.TestCase):\n    def test_layers_render_in_order_and_only_when_non_empty(self) -> None: ...\n    def test_dialogue_appends_as_the_last_layer(self) -> None: ...\n    def test_an_empty_environment_emits_no_layer_three_message(self) -> None: ...\n    def test_every_block_carries_its_source_and_byte_length(self) -> None: ...\n\nclass SkillIndex(unittest.TestCase):\n    \"\"\"`S050-A-08`/`W12-B`: `format_skill_index` is invoked at composition,\"\"\"\n    def test_no_cards_means_no_layer_three_addition(self) -> None: ...\n    def test_cards_render_into_layer_three(self) -> None: ...\n    def test_cards_join_the_environment_map_rather_than_replacing_it(self) -> None: ...\n    def test_the_index_honours_its_own_ceiling(self) -> None: ...\n\nclass PrefixStability(unittest.TestCase):\n    def test_layers_one_to_three_are_byte_identical_across_ten_turns(self) -> None: ...\n    def test_the_prefix_digest_moves_when_the_prefix_actually_changes(self) -> None: ...\n    def test_tool_schemas_render_canonically_not_in_argument_order(self) -> None: ...\n    def test_tool_list_order_is_stable_by_name(self) -> None: ...\n\nclass CacheBreakpoints(unittest.TestCase):\n    def test_breakpoints_sit_only_at_layer_one_three_and_four(self) -> None: ...\n    def test_layer_five_never_carries_a_breakpoint(self) -> None: ...\n    def test_exceeding_the_breakpoint_ceiling_raises_at_assembly(self) -> None: ...\n\nclass Budget(unittest.TestCase):\n    def test_a_context_within_ceiling_is_untouched(self) -> None: ...\n    def test_result_eviction_takes_the_oldest_body_first(self) -> None: ...\n    def test_truncation_never_touches_the_system_core_or_the_schemas(self) -> None: ...\n    def test_dialogue_is_exhausted_before_a_task_note_is_dropped(self) -> None: ...\n    def test_the_brief_is_exempt_from_compaction(self) -> None: ...\n    def test_a_floor_that_cannot_fit_raises_at_assembly(self) -> None: ...\n\nclass CompetencePrior(unittest.TestCase):\n    \"\"\"`S5-SA-002`. The prior is logged *before* turn 1 reaches the model.\"\"\"\n    def setUp(self) -> None: ...\n    def record(self, prior: float, **overrides) -> bool: ...\n    def test_the_prior_reaches_the_event_sink(self) -> None: ...\n    def test_the_prior_is_recorded_as_a_canonical_decimal_string(self) -> None: ...\n    def test_the_prior_is_bound_to_the_prompt_it_was_a_prior_for(self) -> None: ...\n    def test_the_payload_carries_no_prompt_text(self) -> None: ...\n    def test_a_second_record_for_the_same_episode_is_refused(self) -> None: ...\n    def test_a_second_episode_records_its_own_prior(self) -> None: ...\n    def test_a_value_outside_zero_to_one_is_not_a_probability(self) -> None: ...\n    def test_a_sink_failure_never_fails_the_turn_it_describes(self) -> None: ...\n\nclass Reach(unittest.TestCase):\n    \"\"\"`M11`: the compiler is domain-agnostic data, not a coding-shaped module.\"\"\"\n    def test_the_compiler_holds_no_authority_and_no_kernel(self) -> None: ...\n    def test_compiled_context_is_immutable(self) -> None: ...\n    def test_a_block_is_immutable(self) -> None: ...\n    def test_the_compiled_context_is_what_the_model_port_consumes(self) -> None: ...\n    def test_the_wire_messages_carry_only_role_and_content(self) -> None: ...\n\nclass BoundedSelection(unittest.TestCase):\n    \"\"\"T-104: Prefix/compile_packet semantics on the existing compiler.\"\"\"\n    def _view(self, *evidence: Evidence) -> MemoryView: ...\n    def test_stale_evidence_is_omitted_with_artifact_identity(self) -> None: ...\n    def test_oversize_body_is_elided_to_an_artifact_receipt(self) -> None: ...\n    def test_newest_interaction_is_preserved_and_oldest_may_drop(self) -> None: ...\n    def test_irreducible_overflow_raises_without_inference(self) -> None: ...\n    def test_capability_cards_cannot_exceed_w12a(self) -> None: ...",
       "kind": "symbol",
-      "locator": "vanguard/packages/ports/spi.py",
-      "reason": "symbol match",
-      "score": 20,
-      "title": "IContextManager",
-      "tokens": 0
+      "locator": "test/agency/test_context_compiler.py#L380",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "SKELETON",
+      "score": 67.26842545135263,
+      "title": "test.agency.test_context_compiler.Reach",
+      "tokens": 318
     }
   ],
   "task": "review backend agent framework agency runtime context compiler model adapters and coding agent execution loop",
-  "tests": [],
-  "warnings": [
-    "Excluded authorities are omitted by profile policy."
-  ]
+  "tests": [
+    {
+      "authority": null,
+      "content": null,
+      "kind": "symbol",
+      "locator": "test/agency/test_context_compiler.py#L398",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "FULL",
+      "score": 72.70262758226407,
+      "title": "test.agency.test_context_compiler.Reach.test_the_compiled_context_is_what_the_model_port_consumes",
+      "tokens": 120
+    },
+    {
+      "authority": null,
+      "content": null,
+      "kind": "symbol",
+      "locator": "test/agency/test_context_compiler.py#L380",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "FULL",
+      "score": 67.26842545135263,
+      "title": "test.agency.test_context_compiler.Reach",
+      "tokens": 120
+    }
+  ],
+  "token_accounting": {
+    "budget": 16000,
+    "document_tokens": 3024,
+    "omitted_count": 6,
+    "symbol_tokens": 240,
+    "test_tokens": 240,
+    "used_tokens": 3504
+  },
+  "warnings": []
 }

@@ -30,7 +30,7 @@ superseded_by: null
 
 ## 1. Implementation boundary
 
-These blueprints implement the decisions in [Part 1](part1_modular_hardware_architecture.md) and [Part 2](part2_benchmark_mastery_and_topologies.md): one durable controller, bounded context, immutable evidence, safe candidate edits, and optional attenuated specialists. They are executable reference algorithms, not claims that the integrations are already deployed. The inspected HEAD is `8b7b642cf4d67ea06161590fc9e1af76d2b0cbe2` (reconciled through candidate `2989d57d4d38c01eecdb7a5fbb6f125077f00e59`).
+These blueprints implement the decisions in [Part 1](part1_modular_hardware_architecture.md) and [Part 2](part2_benchmark_mastery_and_topologies.md): one durable controller, bounded context, immutable evidence, safe candidate edits, and optional attenuated specialists. They are executable reference algorithms, not claims that the integrations are already deployed. The inspected HEAD was `8b7b642cf4d67ea06161590fc9e1af76d2b0cbe2` (reconciled through candidate `2989d57d4d38c01eecdb7a5fbb6f125077f00e59`).
 
 All Python fences concatenate in document order into one Python 3.10+ reference module. Imports are shared deliberately. During production integration, split definitions by the ownership table above; do not copy the combined module into a lower layer. Ellipses appear only in abstract protocol methods. External effects are explicit dependencies, not empty implementations disguised as working storage, authorization, or execution.
 
@@ -572,7 +572,7 @@ def transact(branch: str, baseline: str, edits: Sequence[Edit],
 
 Before promotion, exceptions, cancellation, failed assertions, and budget exhaustion leave the active head unchanged; immutable failed candidates can be retained for diagnosis. After successful promotion, a lost reply is reconciled with `committed(transaction)`, not an inverse write. A later rollback is a new compare-and-append operation targeting the old snapshot, preserving history and refusing to overwrite a concurrently advanced head. Process restart never reruns settled effects blindly. This gives a precise fail-closed guarantee while acknowledging that durability, isolated execution, and atomic compare-and-append require qualified concrete adapters.
 
-## 6. Controller FSM and attenuated delegation
+## 6. Controller FSM and attenuated delegation [HYBRID: CONTROLLER DONE; SPECIALISTS PROPOSAL]
 
 Retain the public `IPlanner` SPI. The following coding phase reducer sits behind it: proposals request actions, but only typed, fresh observations advance phases. In the integration, an accepted candidate transaction means all configured targeted and broader checks passed; `COMPLETE` still needs requirement coverage and generic completion admission. Greenfield tasks enter through baseline/harness establishment instead of requiring an invented failing test.
 
@@ -654,7 +654,7 @@ def delegate_readonly(parent: Scope, requested: Scope, role: str,
 
 The parent is the sole mutating controller. Specialists return artifact-bound findings, proposed hypotheses, and limitations; they cannot change the parent task projection, certify completion, or promote snapshots. The existing planner adapter decodes `PlannerPolicy.propose()` through the current proposal dialect, then uses kernel dispatch. JSON bytes are a transport boundary, not an authorization bypass. Preserve complete grant attenuation at dispatch even if the offered tool set was already narrowed in the prompt.
 
-## 7. Integration and falsification obligations
+## 7. Integration and falsification obligations [REFERENCE & VERIFIED STATUS]
 
 These algorithms intentionally separate pure policy from external mechanisms. Integrate memory capture through the existing task-state fold, prompt selection through `ContextCompiler`, recovery through `ProtocolRecoveryState`, transactions through the environment adapter, and phase decisions through the code pack. Preserve existing schema readers when adding fields. Version behavior-affecting policies in the composition identity and record every selection or transition through the runtime's single emitter.
 

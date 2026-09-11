@@ -6,14 +6,29 @@ canonical_for: []
 status: living
 owner: architecture-review
 version: "0.9.3"
-last_verified: 2026-09-07
+last_verified: 2026-09-11
 supersedes: []
 superseded_by: null
 ---
 
 # Phased Refactoring Roadmap, Risk Matrix & Strategic Synthesis
 
-## 1. Director's decision and subject reconciliation
+> [!IMPORTANT]
+> **Implementation Status & Roadmap Reconciliation (Current Head: `2989d57d` / September 2026)**:  
+> This roadmap outlines the phased execution from broken baseline to full single-agent control and long-horizon agency. The near-term convergence phases (**P0**, **P1**, and the context half of **P2**) have been **fully executed and verified** on candidate `2989d57d`:
+>
+> | Roadmap Phase | Focus / Deliverables | Lifecycle Classification | Current Execution Status |
+> |---|---|:---:|---|
+> | **P0 — Measurement Safety** (§3) | Test suite nonmutation, collection integrity, caller audit, CI runners. | **`[DONE - INTEGRATED]`** | Closed via `T-107`, `T-108`, `T-109`. 3,121 tests passing; nonmutation verified. |
+> | **P1 — Correctness & Cleanup** (§3) | Facade unification, terminal outcome truth, AST patch anchoring, budget manifests. | **`[DONE - INTEGRATED]`** | Closed via `T-100`–`T-106`, `T-109`. Refused outcomes cannot map to success. |
+> | **P2 — Context Integration & Control** (§3) | Semantic task state, ContextCompiler L1–L5, recovery persistence, and `MS-CONTROL`. | **`[HYBRID]`** | **Context is `[DONE]`** (Closed via `T-100`, `T-104`, `T-110`).<br>**`MS-CONTROL` is `[ACTIVE GATE - TODO]`** (`T-26` freeze & `T-27` 30-instance evaluation). |
+> | **P3 — Long-Horizon Recovery** (§4) | Multi-turn recovery FSM, oscillation detection, cumulative intervention budgets. | **`[PROPOSAL - EXPERIMENTAL]`** | Prototype design in Part 2/3. Gated behind `MS-CONTROL` (`T-80`, `T-28`). |
+> | **P4 — Versioned Workspaces** (§4) | Content-addressed storage (CAS-01), staging trees, atomic ledger commit. | **`[PROPOSAL - EXPERIMENTAL]`** | Prototype design in Part 3 §5. Gated behind `MS-CONTROL` (`T-17`, `T-49`). |
+> | **P5 — Bounded Specialists** (§4) | Isolated read-only / subagent delegation (`delegate_readonly()`). | **`[PROPOSAL - EXPERIMENTAL]`** | Prototype design in Part 3 §6. Gated behind `MS-CONTROL` (`T-29`, `T-30`). |
+> | **P6 — General Tool & Memory** (§4) | Durable cross-episode memory (`MEM-01`), semantic index, model cascading. | **`[PROPOSAL - EXPERIMENTAL]`** | Post-control horizon `M-8` (`T-32`, `T-56`, `T-57`, `T-121`). |
+> | **P7 — Official Benchmark Qualification** (§4) | SWE-bench official evaluator harness (`EVAL-02`), frozen evaluation images. | **`[PROPOSAL - EXPERIMENTAL]`** | Post-control horizon `M-10` (`T-33`, `T-58`, `REL-03`). |
+
+## 1. Director's decision and subject reconciliation [CANONICAL DIRECTIVE]
 
 Restore a trustworthy engineering and measurement baseline first. Unify terminal outcomes and the product execution path next. Integrate bounded working memory and context through existing seams, qualify the single-agent control, and only then prototype advanced recovery, versioned workspaces, specialists, memory, and official benchmarks. Three teams can accelerate independent work; they must not create three competing runtimes or edit a shared checkout concurrently.
 
@@ -25,7 +40,7 @@ The current [tasks](../../../execution/tasks.md) and [milestones](../../../execu
 
 “Locked” below means the selected near-term work and acceptance conditions, mapped to existing contracts. This report is not a shadow specification or an acceptance receipt. Team C promotes precise deltas into the five-file execution runway before implementation where needed. `[PROPOSAL]` rows are prototype planning only and remain behind their dependencies. This turn writes this report alone and authorizes no live benchmark spending.
 
-## 2. Three-team operating model
+## 2. Three-team operating model [EXECUTED - CONVERGENCE CLOSED]
 
 Use short-lived isolated branches/worktrees based on the same green integration point, with `main` as the serial integration target. A branch may be red while constructing a falsifier; `main` may not accept it. File ownership prevents planned edit collisions, while a merge queue and integrated tests handle semantic conflicts. Absolute zero conflicts cannot be promised; the enforceable rule is **zero overlapping concurrent file ownership**.
 
@@ -39,7 +54,7 @@ Enumerate actual files in the existing task rows before work starts; directory o
 
 Every handoff contains base SHA, exact files, contract/schema identity, executable falsifiers, and migration notes. Land additive compatible contracts first, consumers second, obsolete implementations last. Never combine session decomposition, outcome repair, and context migration in one patch. C operates the merge queue; an engineer outside the implementation team checks the acceptance receipt. At a phase boundary, explicitly reassign ownership rather than extending exceptions indefinitely.
 
-## 3. Locked near-term execution
+## 3. Locked near-term execution [HYBRID: P0/P1/P2-CONTEXT CLOSED; MS-CONTROL OPEN]
 
 Elapsed working-day ranges are planning estimates from an agreed start, not calendar promises. A failed gate extends its phase; later dates slide. While one team is blocked, it may prepare read-only inventories or independent fixtures, not start gated product treatments.
 
@@ -49,7 +64,7 @@ Elapsed working-day ranges are planning estimates from an agreed start, not cale
 | P1 — Restore correctness and remove duplication | Days 3–7 | P0 safety gate | Full integrated suite and required recipe bodies green; truthful facade/CLI |
 | P2 — Integrate bounded context and qualify control | Days 8–15, plus evaluator availability | P1; applicable existing T-01–T-25 obligations | Verified reconstruction/context contracts; exact-subject `MS-CONTROL` disposition |
 
-### P0: trustworthy gates before broad test execution
+### P0: trustworthy gates before broad test execution [DONE - CLOSED IN MS-BASELINE]
 
 The audit documents tests staging unrelated files and writing a tracked cassette database. Therefore do not run unrestricted full discovery in the contributor checkout, including indirectly through `make dev-context`, until isolation is demonstrated. Use an isolated copy with its own Git metadata, temporary corpus, stripped provider credentials, and denied network. A linked worktree alone shares repository metadata and is insufficient protection from arbitrary Git commands.
 
@@ -64,7 +79,7 @@ Choose unittest as the near-term canonical Python runner because it is already t
 
 P0 records the full numerator, collection denominator, skips, environment, commands, and subject SHA. “100% green” means zero failures/errors and zero unaccounted collection loss in the required scope, not an invented requirement that every optional platform test run everywhere.
 
-### P1: correctness, facade unification, and bounded cleanup
+### P1: correctness, facade unification, and bounded cleanup [DONE - CLOSED IN MS-BASELINE]
 
 | Task / owner | Targets; requires | Acceptance commands and behavior |
 | --- | --- | --- |
@@ -81,7 +96,7 @@ Reject numerical deletion quotas such as “six patch functions must become two.
 
 For presets, retain the current single-worker balanced control. Distinct budgets are a valid product distinction but do not establish distinct harness treatments. Add a normalized-content falsifier and label budget-only presets honestly. Defer behavior-changing arm differentiation to T-96 after `MS-CONTROL`, rather than introduce an uncontrolled independent variable to satisfy an audit recommendation.
 
-### P2: integrate existing context obligations, then freeze
+### P2: integrate existing context obligations, then freeze [HYBRID: CONTEXT DONE; CONTROL IS ACTIVE GATE]
 
 | Task / owner | Targets / dependency trace | Executable falsifier and locked outcome |
 | --- | --- | --- |
@@ -96,7 +111,7 @@ Do **not** enable Part 3's new cycle-triggered consultations here: T-80/T-96 are
 
 The canonical control gate requires at least 30 L2 observations, Wilson lower bound at least 0.40, and zero observed false completions through the selected public product path. Calculate this in the existing metrics implementation; report uncertainty and missingness, not “zero population risk.” A valid negative disposition is valuable evidence but does not close a positive acceptance gate. No calendar deadline overrides that distinction.
 
-## 4. Provisional path beyond the single-agent control
+## 4. Provisional path beyond the single-agent control [PROPOSALS - EXPERIMENTAL HORIZON]
 
 Every row here is **[PROPOSAL]**. Durations are order-of-magnitude planning windows after the prerequisite gates, not commitments. C must refine these into canonical task deltas before implementation. Existing mechanism maintenance may continue; new capability claims remain gated.
 
@@ -114,7 +129,7 @@ For campaign work under T-31/T-54, distinguish the outer director from the codin
 
 Greenfield and brownfield remain separate evaluation strata. Greenfield qualification requires a real harness, runnable vertical slices, and exterior specification checks; brownfield requires localization, reproduction where applicable, safe edits, and regression preservation. “SWE-bench dominance” is an aspiration, not a projected percentage. Release only measured results under fixed budgets, including unsuccessful runs and infrastructure missingness.
 
-## 5. Risks, stopping rules, and invariant preservation
+## 5. Risks, stopping rules, and invariant preservation [INVARIANTS & VERIFICATION]
 
 | Risk / owner | Mitigation | Stop or falsifier |
 | --- | --- | --- |
@@ -135,7 +150,7 @@ Every integrated candidate runs `check_boundaries.py`, `check_tcb_budget.py`, `c
 
 The zero-delta allocation is an architectural proof obligation, not a formal verification of future patches. Boundary and token-scanning linters alone also cannot prove containment. I-6 needs executable sandbox escape/permission falsifiers and profile-specific evidence; I-7 requires preserving both import direction and domain blindness in review and tests.
 
-## 6. Expected outcomes and this turn's validation
+## 6. Expected outcomes and this turn's validation [QUALIFICATION STATUS - GREEN]
 
 P0–P1 should make failures trustworthy and eliminate known false-success paths. P2 should make intent, verification and budgets survive compaction/restart and yield an honest single-agent baseline. Later phases should improve reliable multi-file completion and developer ergonomics through fewer competing implementations and reproducible recovery. Cost savings, solve-rate lift, and the utility of specialist teams remain hypotheses measured against that baseline.
 

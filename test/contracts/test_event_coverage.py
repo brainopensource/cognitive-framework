@@ -52,6 +52,7 @@ UNFOLDED_ALLOWLIST = frozenset({
     "CheckpointCreated",       # Snapshot/checkpoint marker
     "ClaimRecorded",           # Evidence claim legacy synonym (EvidenceClaimProduced is folded)
     "CompetencePriorRecorded", # Prior competence distribution (Phase-2)
+    "ContextSelectionRecorded",# Context selection fact; reduced in runtime/task_state.py (T-107)
     "CorrectionRecorded",      # Phase-2 human/supervisor feedback marker
     "EvaluationRequested",     # Exterior evaluator trigger envelope
     "InvalidationChecked",     # Cache/competence invalidation check

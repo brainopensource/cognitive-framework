@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vanguard.dev/schemas/mhf/context_selection_recorded.schema.json",
+  "title": "ContextSelectionRecordedPayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "behaviorIdentity",
+    "contextEpoch",
+    "prefixDigest",
+    "stateDigest",
+    "policyDigest",
+    "requestDigest",
+    "repositorySubject",
+    "cursor",
+    "serializedTokens",
+    "orderedOmissions",
+    "serializerIdentity",
+    "counterIdentity"
+  ],
+  "properties": {
+    "behaviorIdentity": {"type": "object"},
+    "contextEpoch": {"type": "string"},
+    "prefixDigest": {"type": "string"},
+    "stateDigest": {"type": "string"},
+    "policyDigest": {"type": "string"},
+    "requestDigest": {"type": "string"},
+    "repositorySubject": {"type": "string", "minLength": 1},
+    "repositoryIdentity": {"type": ["string", "null"]},
+    "cursor": {"type": "integer", "minimum": 0},
+    "serializedTokens": {"type": "integer", "minimum": 0},
+    "orderedOmissions": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/ContextOmission"}
+    },
+    "serializerIdentity": {"type": "object"},
+    "counterIdentity": {"type": "object"},
+    "selectionPolicyIdentity": {"type": ["object", "null"]},
+    "indexSnapshotDigest": {"type": ["string", "null"]}
+  },
+  "$defs": {
+    "ContextOmission": {
+      "title": "ContextOmission",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identity", "reason"],
+      "properties": {
+        "identity": {"type": "string"},
+        "reason": {"type": "string"}
+      }
+    }
+  }
+}

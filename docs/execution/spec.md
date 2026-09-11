@@ -7,8 +7,8 @@ status: living
 owner: repository-governance
 canonical_for:
   - active-feature-delta-specification
-version: "2.0.2"
-date: "2026-09-05"
+version: "2.1.0"
+date: "2026-09-11"
 last_verified: 2026-09-11
 lock_head: "bf56eea9"
 derived_from:
@@ -152,6 +152,8 @@ assets during the context-convergence batch.
 
 This section defines conditional TARGET contracts for prototype refinement after NT-1. It does not activate implementations, change T-98–T-111, authorize paid runs, or accept milestones. “Sprints 3–5” maps to capability dependencies in tasks, not a calendar. FH-1 governs the future CAS/delegation/evaluation scope where older proposal catalogs differ. Historical accepted subjects remain intact. The reference provenance is [Part 3 §§5–6](../reports/reviews/aether_v093_review/part3_blueprints_and_interface_contracts.md); its Python protocols are illustrative seams, not a requirement for additional public ports. Gate ownership is in [milestones.md](milestones.md#post-control-horizon-release-predicates-fh-1); algorithms are in [technical.md](technical.md#post-control-reference-handbook-fh-1-proposal).
 
+FH-1.1–FH-1.3 state the wire and schema contracts. FH-1.4–FH-1.7 state the normative mathematical, cryptographic and algebraic law those contracts must satisfy — tree identity and preimage matching (CAS-01), envelope conservation and settlement (DEL-01), DAG readiness and lease fencing (OCT-03), and learning lift with revocation (MEM-01/M-8). FH-1.8 maps every violation to a distinct fail-closed outcome. The formal clauses bind values and predicates only: they introduce no new port, no new store, no kernel line, and no second serializer or digest alphabet. Where a formal clause and a prose clause could be read to differ, the formal clause is the narrower one and governs.
+
 ### FH-1.1 Immutable workspace contracts
 
 All proposed schemas use NT-1 digest/type validation and existing JCS encoding. Unknown required versions fail closed. These are domain values with no filesystem access. Exact source bytes are blobs; directories and file modes are part of identity.
@@ -197,7 +199,269 @@ All proposed schemas use NT-1 digest/type validation and existing JCS encoding. 
 
 **FH-E04:** Paired treatments hold tasks and total budgets fixed and vary one declared component. Include coordination, verification, retries and failures in cost/latency. Use prespecified uncertainty estimates and multiplicity/stop handling; do not tune on held-out results. Protocol qualification can close with a valid negative result; treatment promotion requires the predeclared positive predicate. SOTA is a dated, benchmark-specific comparison against a reproducible eligible comparator, with uncertainty and resource differences disclosed. An inconclusive or negative result completes an honest report but does not establish superiority.
 
-### FH-1.4 Failure and compatibility matrix
+### FH-1.4 Tree algebra, preimage law and promotion monotonicity (CAS-01)
+
+These clauses make FH-1.1 computable. Every function below is a pure domain function over values; none reaches a filesystem, clock, process or network. `JCS(.)` is the existing serializer (`domain/canonicalisation/jcs.py::canonical_bytes`) and `H(.)` the existing digest (`domain/canonicalisation/digest.py::digest_bytes`), i.e. `sha256:` followed by 64 lowercase hex (`CT-09`, `SC-2`). No second serializer, digest alphabet or canonical form is introduced.
+
+**FH-C05 (tree identity).** A tree is a flat sorted entry manifest over blob leaves — a depth-2 Merkle structure whose leaves are exact source byte strings:
+
+```text
+H_blob(b)  := H(b)                                    -- b is the exact source byte string
+ent(e)     := {"blob": beta(e), "kind": kappa(e), "mode": mu(e), "path": pi(e)}
+                beta(e)  = H_blob(bytes(e)) if kappa(e) = "file", else null
+                kappa(e) in {"file", "directory"}
+                mu(e)    in [0, 0o777]
+order(T)   := entries of T ascending by UTF-8 byte order of pi(e)   -- total; pi is injective
+H_node(e)  := H(JCS(ent(e)))
+H_tree(T)  := H(JCS({"entries": [ent(e) : e in order(T)], "schema": "aether.tree/1"}))
+```
+
+Recursive per-directory subtree digests are **not** normative: a reader MUST NOT infer subtree identity, structural sharing or rename detection from `H_tree`. The flat manifest costs `O(|T|)` per recomputation, bounded by the capture limits of FH-C01, and is accepted in exchange for exactly one canonical preimage per tree. Consequences that MUST hold: `H_tree(T1) = H_tree(T2)` for `T1 != T2` implies a SHA-256 collision; mode changes and empty directories change `H_tree`; a digest scheme that erases modes or empty directories (git tree semantics) is inadmissible for this profile.
+
+**FH-C06 (capture admissibility).** A captured tree `T` is admissible iff all of:
+
+```text
+P1 path shape     pi(e) = normalise(pi(e)); relative; no "", ".", "..", leading "/" or "\",
+                  no NUL, no backslash, no empty or trailing segment
+P2 reserved       no segment equals ".git"
+P3 uniqueness     pi injective on T
+P4 parent closure every proper directory prefix of pi(e) is in T with kind "directory"
+P5 kind closure   kappa(e) in {"file","directory"}; beta(e) non-null iff kappa(e) = "file"
+P6 case/NF safety fold(p) := join(casefold(NFC(segment)) for segment in p); fold injective on pi(T)
+P7 declared bounds |T| <= max_entries; sum(size(bytes(e))) <= max_bytes; depth(pi(e)) <= max_depth
+```
+
+Violations map to `TREE_PATH_INVALID` (P1–P3), `TREE_PARENT_MISSING` (P4), `TREE_UNSUPPORTED` (P5), `TREE_CASE_COLLISION` (P6) and `CAPTURE_BOUNDS_EXCEEDED` (P7). P6 is what makes a candidate portable to case-insensitive and NFD-normalising hosts: two paths that a target filesystem would merge are rejected at capture, not discovered at export. Symlinks, devices, sockets, FIFOs, hardlink identity, extended attributes and ACLs fail P5 as `TREE_UNSUPPORTED` and MUST NOT be dereferenced — following a link converts a workspace escape into a copied byte string inside the candidate. Capture consistency is proven, not assumed: source identity is recomputed and compared after reading; a mismatch is `CAPTURE_CHANGED`, retried within budget and never partially accepted.
+
+**FH-C07 (exact preimage law).** For edit set `E` over baseline tree `A`:
+
+```text
+nu_A(p)   := ent(e) if exists e in A with pi(e) = p, else BOTTOM
+D(BOTTOM) := null ;  D(ent) := H(JCS(ent))
+admissible(E, A) <=> for all (p, x, r) in E : D(nu_A(p)) = x
+A (+) E   := (A \ {e : pi(e) in paths(E)}) union {r : (p, x, r) in E, r != null}
+```
+
+`expected_node` is the digest of the **entry object**, not of the blob: a mode-only change therefore has a distinct preimage and cannot be applied under a stale expectation. Admissibility is total and evaluated over all of `E` before any effect; a single mismatch rejects the whole set as `PATCH_PREIMAGE_MISMATCH`. No context window, fuzz factor, offset search, whitespace normalisation or anchor heuristic is admissible in the CAS profile — this is the formal reason every legacy patch frontend must converge on one validated edit set. The result `A (+) E` MUST itself satisfy FH-C06 (P4 in particular: creating `a/b/c.py` requires explicit directory entries for `a` and `a/b`), else `EDIT_SET_INCONSISTENT`. Non-idempotence is intended: `apply(apply(A, E), E)` fails because the preimages no longer match. Workspace-layer replay safety is preimage-based and promotion-layer replay safety is transaction-identity-based (FH-C08); they are different mechanisms and neither substitutes for the other. Language-syntax validation of the resulting complete tree belongs to packs/adapters, never to domain.
+
+**FH-C08 (promotion identity, generation monotonicity, ABA immunity).**
+
+```text
+branch state   (head_k, gen_k), with gen_0 = 0
+identity       I(P) := H(JCS(P without "receipts"))   -- every promotion field except the receipt set
+commit k admissible <=> P.expected_head       = head_{k-1}
+                    AND P.expected_generation = gen_{k-1}
+                    AND authorised(P.grant, now)
+                    AND promotable(P.candidate, P.check_plan, P.receipts)
+post-state     head_k = P.candidate ; gen_k = gen_{k-1} + 1
+```
+
+`gen` is a strictly monotone fold over registered `mhf.event/2` facts and never decreases, including on rollback — which is a new forward compare-and-append (FH-C03), never event deletion.
+
+*ABA immunity (theorem).* Let the head traverse `A -> B -> A` at commits `k` and `k+1`. A request prepared at `(A, gen_{k-1})` is refused at the later state `(A, gen_{k+1})` because `gen_{k+1} != gen_{k-1}`. Head equality alone never authorises a commit; the compare key is the pair. The two refusals are reported distinctly — `PROMOTION_CONFLICT` when the head differs, `GENERATION_STALE` when the head matches but the generation does not — so a rebase loop can tell an intervening rollback from an ordinary race.
+
+*Idempotency.* Commit is a partial function of `transaction_id`: replaying a committed transaction returns the recorded original result and original generation with no mutation, even if the branch has since advanced. `receipts` is excluded from `I(P)` so that a retry carrying additional receipts is the same transaction; required-check satisfaction is re-evaluated at commit against the receipt set actually presented. A request bearing a known `transaction_id` but a different `I(P)` is `TRANSACTION_IDENTITY_MISMATCH` — refused, and never served the earlier result. The admissibility test and the append are one critical section inside the existing single-writer boundary: exactly one of a concurrent set wins and every loser mutates nothing.
+
+**FH-C09 (verification sufficiency).** For check plan `C`, candidate tree `candidate` and receipt set `R`:
+
+```text
+satisfied(c, R) <=> exists r in R :
+      r.check_id     = c.id
+  AND r.plan         = H(JCS(C))
+  AND r.candidate    = H_tree(candidate)
+  AND r.environment  = c.environment
+  AND r.command      = H(JCS({"argv": c.argv, "cwd": c.cwd}))
+  AND r.exit_code    = 0
+  AND r.timed_out    = false
+  AND r.cancelled    = false
+  AND trusted(r.verifier_identity) AND attested(r)
+  AND (c.kind = "test" =>
+           r.collected != null AND r.executed != null
+       AND r.collected >= c.minimum_tests AND r.executed >= c.minimum_tests)
+
+promotable(candidate, C, R) <=> for all c in C.checks : satisfied(c, R)
+```
+
+Null counts never coerce to zero and never satisfy a test check (`CHECK_INCOMPLETE`). A receipt bound to a different tree is `VERIFICATION_STALE`, the rebase case included. A model-authored or unattested receipt is `VERIFIER_UNTRUSTED`. Receipt *execution* is an adapter/tool concern under N-06; runtime validates receipts and never spawns processes.
+
+**FH-C10 (retention closure and GC safety).**
+
+```text
+Pins        := live heads U pending-operation candidates U accepted evidence subjects
+                 U authorised retention roots
+reach(X)    := transitive closure of tree -> entry -> blob references from X
+collectable(o) <=> o not in reach(Pins)
+```
+
+The ordering rule is pin-before-write: a pin covering an object is durable **before** the object is first referenced and is released only after its last reference is dropped. A sweep deletes only objects unreachable at a mark epoch taken inside the single-writer boundary, with no pin registered since that epoch. Deleting a reachable object is `GC_PIN_VIOLATION` — a defect, not a recoverable condition. Missing or corrupt blobs stop resume and promotion (`BLOB_MISSING`, `BLOB_CORRUPT`) and never license reconstructed or inferred evidence.
+
+**FH-C11 (export journal ordering).** The journal is a total order on states; backward transitions are forbidden and each transition is durable before the effect it authorises:
+
+```text
+prepared -> publishing -> committed
+prepared -> publishing -> restoring -> restored
+prepared -> publishing -> restoring -> quarantined
+```
+
+Recovery resumes from the recorded state by `operation_id` and is idempotent. Promotion disposition and export disposition are reported separately: a committed promotion with a quarantined export is a truthful pair and MUST NOT be collapsed into a single success or failure.
+
+### FH-1.5 Envelope conservation algebra and settlement lattice (DEL-01)
+
+Grounded in `kernel/budget.py` (`ADDITIVE_DIMENSIONS`, `Reservation`, `Lease`, `Governor`) and `kernel/attenuation.py` (`Scope`, `attenuate`). No second budget accountant is created, and no kernel line is added.
+
+**FH-D04 (additive envelope conservation).** For every additive dimension `d in {usd_micros, millis, tokens, bytes}` and every node `v` of the delegation tree:
+
+```text
+spent_d(v) + unsettled_d(v) + SUM[ reserved_d(v -> c) : c in children(v) ] + recovery_d(v)
+    <= limit_d(v)
+
+limit_d(c) = reserved_d(v -> c)        -- a child's root limit is exactly its parent's reservation
+```
+
+*Aggregate conservation (theorem).* `SUM[ spent_d(w) : w in subtree(v) ] <= limit_d(v)`, by induction on depth: each child's total consumption is bounded by `limit_d(c) = reserved_d(v -> c)`, which is itself a term of the parent's inequality. Because the constraint binds reservations held *simultaneously*, no sibling set can co-consume more than the parent envelope — the cross-sibling overspend defect `F-10` is excluded by construction rather than by sequencing.
+
+Structural ceilings are excluded from the sum: `depth(c) = depth(v) + 1 <= max_depth` and `turns` is a per-episode ceiling. Summing either across siblings is `F-10`.
+
+*Overrun honesty.* An effect may settle above its reservation (`Lease.settlement` is negative in that dimension). The deficit is charged to `recovery_d(v)` first; once `recovery_d(v)` is exhausted, `remaining_d(v) < 0` and `v` is refused every further reservation (`ENVELOPE_OVERCOMMIT`, `BUDGET_DENIED`). The observed overrun is recorded exactly — never clamped to the ceiling, never masked by a compensating refund, and never reported as if the envelope had held.
+
+**FH-D05 (monotone attenuation at dispatch).** For child `c` of `v`, evaluated at dispatch time and not only at issue time:
+
+```text
+actions(c)       subset of actions(v)
+resources(c)     refines resources(v)         -- kernel attenuate(); K-23 / K-25 / K-26
+depth(c)         = depth(v) + 1 <= max_depth
+expiry(c)        <= expiry(v)
+reserved_d(v -> c) <= remaining_d(v)          for all additive d
+```
+
+No dimension may increase after dispatch, and expiry/revocation is re-checked at dispatch. Any fallback path that widens a dimension is `DELEGATION_DENIED` or `SCOPE_ESCALATION_DENIED`; a denial records the requested and grantable sides (`K-25`), never a bare refusal. Refunds are bounded by `refund_d(v -> c) <= reserved_d(v -> c) - settled_d(c)`: a refund is never a source of budget.
+
+**FH-D06 (settlement lattice).** Every delegation call occupies exactly one state, and the order is durable-before-effect, so a crash between any two states is reconcilable by `call_id`:
+
+```text
+RESERVED -> INTENT_RECORDED -> DISPATCHED -> RETURNED -> SETTLED
+```
+
+| State | Durable before entry | Non-zero conservation term | Permitted exits |
+|---|---|---|---|
+| `RESERVED` | governor lease held | `reserved_d(v -> c)` | `INTENT_RECORDED`; `SETTLED` (release, nothing dispatched) |
+| `INTENT_RECORDED` | intent + reservation record | `reserved_d(v -> c)` | `DISPATCHED`; `SETTLED` (abandon) |
+| `DISPATCHED` | child lineage fact | `reserved_d(v -> c)` as `unsettled` | `RETURNED`; `SETTLED` (timeout, at reserved) |
+| `RETURNED` | findings + usage receipt | `reserved` resolving to `observed` | `SETTLED` |
+| `SETTLED` | settlement record | `spent_d` | terminal |
+
+An unknown outcome keeps the reservation held and unsettled; reconciliation is by `call_id` against the durable record, and `CHILD_UNKNOWN` never releases it. A timeout settles at the **reserved** amount, not zero — a deadline proves nothing about effects already performed, and settling a timed-out call at zero is precisely the defect this rule excludes. Cancellation propagates a deadline to descendants but does not retroactively convert their settled spend into refundable budget. `SETTLED` is terminal and idempotent by `call_id`; a second settlement attempt is refused (`SETTLEMENT_UNRECONCILED`) rather than double-credited.
+
+| Schema | Required fields | Constraints |
+|---|---|---|
+| `aether.delegation-settlement/1` | `schema`, `call_id`, `request: Digest`, `state`, `reserved: map[dim, int >= 0]`, `observed: map[dim, int >= 0] or null`, `settled: map[dim, int >= 0]`, `deficit: map[dim, int >= 0]`, `reason` | Dimensions restricted to the four additive dimensions; structural ceilings rejected as dimensions (`C-05`). Null `observed` means unknown, never zero. `settled <= reserved + deficit` per dimension. Exactly one terminal record per `call_id`; the parent is its sole writer. |
+
+**FH-D07 (advisory isolation).** A read-only specialist writes no ledger fact of its own beyond its lineage and usage receipt: `writer(findings) = parent`. `aether.specialist-findings/1` is advisory input to a parent candidate and cannot satisfy a check plan, mark a campaign node `PASSED`, or enter acceptance evidence. Formally, the acceptance predicate `Acc` is a function of exterior verification receipts only; findings are not in its domain. No raw authenticated grant, authenticator key or session handle crosses into the child context — the child receives an attenuated grant, never the parent's credential.
+
+### FH-1.6 Campaign DAG readiness algebra and lease fencing (OCT-03)
+
+**FH-D08 (plan admission).** With `G = (V, E)` and `deps(v) = {u : (u, v) in E}`, a campaign plan is admissible iff `V` is finite, every dependency names a node in `V`, and a topological order exists (acyclicity). A plan failing any of these is `CAMPAIGN_PLAN_INVALID` and is never partially dispatched.
+
+**FH-D09 (dependency readiness).**
+
+```text
+disposition : V -> {PENDING, RUNNING, PASSED, FAILED, BLOCKED, UNDETERMINABLE}
+
+ready(v) <=> disposition(v) = PENDING
+         AND for all u in deps(v):
+                   disposition(u) = PASSED
+               AND artifact(u) != BOTTOM
+               AND validates(artifact(u), Schema_v(u))
+               AND artifact_digest(u) is bound into v's input record
+```
+
+Terminality is not readiness: a child that terminated without an accepted, schema-valid artifact does not release its dependents. Schema validity is checked against the **consumer's** declared `output_schema` for `u`, not against the producer's self-report. Failure closure is monotone — `disposition(u) in {FAILED, BLOCKED, UNDETERMINABLE}` forces `disposition(w) := BLOCKED` for every `w` reachable from `u`, and a `BLOCKED` node is never ready under the same plan version. A failed dependency cannot be argued ready.
+
+**FH-D10 (lease exclusivity and fencing).** At most one active lease per node, enforced by compare-and-append on the existing ledger inside the single-writer boundary:
+
+```text
+count{ l : l.node = v AND l.state = ACTIVE } <= 1
+append admissible <=> l.fence_token = current_fence_token(v)
+```
+
+A lease carries a strictly increasing `fence_token`. An append from a holder whose token is below the node's current token is refused (`NODE_LEASE_CONFLICT`). Fencing is what makes a resumed or partitioned director unable to duplicate effects: the superseded holder cannot write regardless of what it believes about its own liveness.
+
+| Schema | Required fields | Constraints |
+|---|---|---|
+| `aether.campaign-lease/1` | `schema`, `campaign_id`, `node_id`, `attempt: int >= 1`, `fence_token: int >= 1`, `holder_identity`, `state`, `deadline`, `operation_id` | `fence_token` strictly increases per node; at most one `ACTIVE` lease per node. Lease expiry alone settles nothing — the outcome is reconciled by `operation_id` under FH-D06. |
+
+**FH-D11 (zero mutation verbs).** `verbs(director) INTERSECT MutatingVerbs = EMPTY`. The director's admissible verb set is exactly `{compile plan, dispatch node, read artifact digest, record disposition, record lease}`. This is a set-theoretic constraint over the live verb inventory (§22) and is mechanically falsifiable: any filesystem, patch, process or network write verb reachable from the campaign client is a defect, not a configuration choice. Edits are performed only by qualified child episodes through the existing execution path — there is no second `EpisodeEngine`, scheduler or budget accountant.
+
+**FH-D12 (replan monotonicity and termination).** A revision `G'` of plan `G` satisfies:
+
+```text
+objective(G')  =  objective(G)                          -- digest-equal
+grants(G')     subset of grants(G)
+budget_d(G')   <= budget_d(G)                           for all additive d
+{ v : disposition(v) = PASSED } and their artifacts are preserved unchanged
+replans(G')    =  replans(G) + 1  <=  replan_allowance
+```
+
+Replanning cannot silently enlarge objective, authority or budget (`SCOPE_ESCALATION_DENIED`); exhausting the allowance is `REPLAN_EXHAUSTED`, a recorded terminal outcome rather than a retry. *Termination:* `V` is finite, failure closure is monotone, each dispatch consumes a strictly positive amount of a finite envelope, and replans are bounded — so the ready set is eventually empty and every node holds a terminal disposition. `BLOCKED`, `FAILED` and `UNDETERMINABLE` are persisted as outcomes; an unfinished campaign never reports completion.
+
+### FH-1.7 Governed learning, lift predicate and revocation algebra (MEM-01 / M-8)
+
+Grounded in `ports/memory.py` (`MemoryAccess`, `RetrievalProvenance`, `require_retrieval_provenance`, `authorize_memory_action`). This section states MEM-01's measurement and revocation law. It does not accept M-8, whose predicates remain independent obligations.
+
+**FH-M01 (partition and contamination).** Fix disjoint instance sets `S_gen` (lessons may be derived from it) and `S_eval` (held out). Let `prov(l)` be the source-artifact digest set of lesson `l`:
+
+```text
+contaminated(l) <=> prov(l) INTERSECT ( digests(S_eval) U official_tests U holdout_results ) != EMPTY
+```
+
+A contaminated lesson is inadmissible to retrieval, and its presence in any retrieval set of a scored run invalidates that run (`EVALUATION_INVALID`, `LESSON_CONTAMINATED`). The check is mechanical rather than declarative: `RetrievalProvenance.source_record_digests` is joined against the frozen holdout digest set for every admitted retrieval, and a run carrying no retrieval receipts to join is unscored rather than assumed clean. Official test patches, answers and held-out results never enter worker context, generation input, or any cache. Public availability of a corpus is not evidence of uncontaminated training; unknown exposure is disclosed, not omitted.
+
+**FH-M02 (lift predicate).** The study is paired on `S_eval`: treatment `M1` (retrieval enabled at lesson-set version `L`) against control `M0`, identical in every declared component except lesson retrieval, under one frozen `aether.evaluation-manifest/1`.
+
+```text
+mu(M)     := primary success rate of M on S_eval under the frozen manifest
+Delta_mu  := mu(M1) - mu(M0)
+(b, c)    := discordant pair counts (M1 pass / M0 fail, M1 fail / M0 pass)
+p         := exact two-sided McNemar p-value, X ~ Binomial(b + c, 1/2)
+
+promote(L) <=> Delta_mu >= 0.05
+           AND p < 0.05
+           AND false_completion_rate(M1) = 0
+           AND n >= n_min                                 -- preregistered
+           AND lower(CI_95(Delta_mu)) > 0                 -- internal consistency check
+           AND no admitted lesson satisfies contaminated(.)
+```
+
+The test, `n_min`, the primary metric, the missingness policy and the stop rule are preregistered before the first measured attempt; choosing between the useful-lift and the cost-saving/noninferiority alternative after viewing results is forbidden. The exact paired test is required rather than a normal approximation because discordant counts at `n` near 30 are small. *Multiplicity:* comparing `k` lesson-set versions or arms against the same holdout requires family-wise control at `0.05` (Holm–Bonferroni) or a single declared primary comparison; a holdout partition serves at most one preregistered decision, and a further decision requires a fresh partition. Reporting `Delta_mu >= 0.05` with `p < 0.05` while `lower(CI_95(Delta_mu)) <= 0` is internally inconsistent and vetoes acceptance instead of being published as a win. A negative or inconclusive study is a complete, honest result that leaves the treatment disabled (`LIFT_UNPROVEN`) and the positive gate open. Generation, evaluation and promotion remain separately authorised steps: the component that writes a lesson never also decides its promotion.
+
+**FH-M03 (lesson identity and revocation epochs).** Lessons are content-addressed and versioned; supersession mints a new digest and never edits in place.
+
+```text
+L         := H(JCS({"body": body, "provenance": provenance, "scope": scope, "version": version}))
+Revoked_e := set of revoked lesson digests at epoch e
+R_e       := H(JCS(sorted(Revoked_e)))          -- revocation root, a fold of mhf.event/2 facts
+e         strictly increases on every revocation append
+```
+
+| Schema | Required fields | Constraints |
+|---|---|---|
+| `aether.lesson/1` | `schema`, `lesson: Digest`, `version: int >= 1`, `body: Digest`, `provenance: Digest[]`, `scope`, `authority_grant: Digest`, `supersedes: Digest or null` | Identity is the digest over body, provenance, scope and version; in-place edit is forbidden. Empty provenance forbids admission. |
+| `aether.lesson-revocation/1` | `schema`, `lesson: Digest`, `reason`, `epoch: int >= 1`, `authority_grant: Digest`, `revoked_at`, `supersedes: Digest or null` | Appended to the one ledger under the single writer; never rewrites the admission events that preceded it. Epoch strictly monotone. |
+| `aether.retrieval-admission/1` | `schema`, `provenance: Digest`, `revocation_root: Digest`, `epoch: int >= 1`, `records: Digest[]`, `cache_identity: str or null` | A cached or live retrieval enters model context only while `revocation_root` equals the current `R_e`. |
+
+**FH-M04 (immediate cache invalidation).**
+
+```text
+admissible(retrieval) <=> retrieval.revocation_root = R_current
+                      AND records(retrieval) INTERSECT Revoked_current = EMPTY
+                      AND require_retrieval_provenance(result) holds
+```
+
+Advancing the epoch invalidates every cached retrieval globally in constant time without enumerating caches: a stale entry cannot satisfy the root equality and is recomputed or refused (`REVOCATION_ROOT_STALE`). Each revocation append emits a receipt binding `{revocation, epoch_before, epoch_after, revocation_root_after, cache_identities_invalidated, effective_at}`. The falsifier is direct: after the append, no recall returns the revoked record and no cached entry is admitted under a superseded root.
+
+*Non-retroactivity.* Revocation stops future admission and never rewrites past events. Accepted evidence records the lesson digests and the epoch under which they were admitted; an acceptance that depended on a since-revoked lesson is flagged for re-verification (`LESSON_REVOKED`) — never silently reversed and never silently retained. Rollback of a lesson-set promotion is executed revocation evidence, not an assertion that rollback would work.
+
+### FH-1.8 Failure and compatibility matrix
 
 | Failure | Required outcome |
 |---|---|
@@ -209,6 +473,39 @@ All proposed schemas use NT-1 digest/type validation and existing JCS encoding. 
 | `EXPORT_CONFLICT` / `RECOVERY_FAILED` | Stop export; restore only owned changes or quarantine; no false rollback claim. |
 | `DELEGATION_DENIED` / `BUDGET_DENIED` | No child dispatch; scope and budget never enlarged by fallback. |
 | `EVALUATION_INVALID` / `EVALUATION_INCOMPLETE` | Preserve denominator and null metrics; no acceptance. |
+
+The rows below extend the same fail-closed discipline to the formal clauses of FH-1.4–FH-1.7. Every code is a distinct observable outcome: a reader MUST be able to tell which invariant fired, and no code may be widened into a neighbour to make a run look cleaner.
+
+| Failure | Origin clause | Required outcome |
+|---|---|---|
+| `TREE_PATH_INVALID` / `TREE_PARENT_MISSING` / `TREE_CASE_COLLISION` | FH-C06 P1–P4, P6 | Reject at capture before any blob is persisted; report the offending path pair for a collision. Never repair by renaming. |
+| `CAPTURE_BOUNDS_EXCEEDED` | FH-C06 P7 | Refuse the capture; report the declared bound and the observed value. Never truncate the tree and proceed. |
+| `EDIT_SET_INCONSISTENT` | FH-C07 | Reject the whole edit set; the post-application tree violated admissibility. No partial application. |
+| `GENERATION_STALE` | FH-C08 | Keep the current head; report distinctly from `PROMOTION_CONFLICT` so an intervening rollback is distinguishable from a race. |
+| `TRANSACTION_IDENTITY_MISMATCH` | FH-C08 | Refuse; never serve the earlier recorded result to a request whose identity digest differs. |
+| `GC_PIN_VIOLATION` | FH-C10 | Stop collection and quarantine the store; a reachable object was collectable, which is a defect, not a recoverable condition. |
+| `ENVELOPE_OVERCOMMIT` | FH-D04 | Deny the reservation; record the observed overrun exactly. Never clamp to the ceiling or mask it with a refund. |
+| `SCOPE_ESCALATION_DENIED` / `DELEGATION_DEPTH_EXCEEDED` | FH-D05, FH-D12 | No dispatch and no replan; the denial records requested and grantable sides (`K-25`). |
+| `SETTLEMENT_UNRECONCILED` | FH-D06 | Keep the reservation held and unsettled; reconcile by `call_id`. Never double-credit and never settle a timeout at zero. |
+| `CAMPAIGN_PLAN_INVALID` | FH-D08 | Refuse the plan whole; never dispatch a prefix of a cyclic or dangling graph. |
+| `NODE_LEASE_CONFLICT` | FH-D10 | Refuse the append from the superseded fence token; the current holder is unaffected. |
+| `DEPENDENCY_BLOCKED` | FH-D09 | Persist `BLOCKED` for the reachable set; the node is never ready under this plan version. |
+| `REPLAN_EXHAUSTED` | FH-D12 | Terminal recorded outcome; not a retry and not a completion. |
+| `LESSON_CONTAMINATED` | FH-M01 | Refuse admission and invalidate any run that admitted the lesson; preserve the denominator. |
+| `LIFT_UNPROVEN` | FH-M02 | Treatment stays disabled and the positive gate stays open; the honest report still completes. |
+| `LESSON_REVOKED` / `REVOCATION_ROOT_STALE` | FH-M03, FH-M04 | Refuse admission; recompute under the current root. Flag dependent acceptances for re-verification without rewriting past events. |
+| `SCHEMA_UNSUPPORTED` | FH-1.1 preamble | Unknown required schema version fails closed on both read and write paths; no best-effort partial decode. |
+
+**Normative placement.** The formal clauses above change no layer ownership. Placement is itself a falsifiable contract:
+
+| Concern | Owning layer | Forbidden in |
+|---|---|---|
+| Tree, edit-set, promotion, lease, settlement and lesson values; digest and preimage algebra | `domain/` | any filesystem, process, clock or network access |
+| Blob store, snapshot, materialization, export journal I/O | `adapters/` | `runtime/` |
+| Check execution and syntax validation | `adapters/`, `tools/`, packs | `runtime/` — N-06 forbids `import subprocess` there |
+| Grant, budget and attenuation decisions | existing `kernel/` surfaces only | new kernel lines; planned delta is zero against the 1438 ceiling |
+| Composition, receipt validation, `mhf.event/2` emission, campaign client | `runtime/` | any mutating verb reachable from the campaign client (FH-D11) |
+| Protocol and port shapes | `ports/` | concrete I/O or kernel types on the public surface |
 
 Schemas/events need registered readers, version migration and coverage falsifiers before activation. Existing events are never rewritten. All legacy patch frontends must converge on one validated edit set for the CAS profile, with explicit compatibility tests; retain old profiles only where their weaker guarantees are stated. Domain stays pure; syntax/filesystem/process work stays in packs/adapters/tools; runtime composes and emits. Planned kernel delta remains zero LOC, ceiling 1438. M-8 acceptance and M-9/M-10 predicates remain independent obligations.
 

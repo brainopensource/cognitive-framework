@@ -132,7 +132,17 @@ class TestMemoryViewContract(unittest.TestCase):
         last_verification["ok"] = False
         remaining["turns"] = 0
         recovery["inner"]["spent"] = 8
-        task.last_verification["extra"] = "live"  # type: ignore[index]
+        # The captured bytes are stable, and so is the state that produced
+        # them: the constructor detached every nested container, so none of
+        # the edits above reaches the value the digest was taken over.
+        self.assertEqual(task.last_verification["nested"]["count"], 1)
+        self.assertTrue(task.last_verification["ok"])
+        self.assertEqual(task.remaining_budgets["turns"], 4)
+        self.assertEqual(task.recovery_state["inner"]["spent"], 1)
+        # And the top level refuses the write outright rather than accepting
+        # one that silently diverges from the captured identity.
+        with self.assertRaises(TypeError):
+            task.last_verification["extra"] = "live"  # type: ignore[index]
         self.assertEqual(view.encode(), before)
         self.assertEqual(digest_bytes(view.encode()), identity)
         reconstructed = view.task

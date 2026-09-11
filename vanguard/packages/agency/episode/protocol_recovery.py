@@ -307,6 +307,12 @@ class ProtocolRecoveryState:
     max_protocol_retries: int = 2
     max_truncation_retries: int = 1
     max_effect_retries: int = 2
+    #: `NT-R02`: every recovery bound is configurable, versioned and reserved.
+    #: The intervention ceiling was the one bound read from a module constant,
+    #: which made it the one bound a restart could not carry — a resumed task
+    #: would have been measured against the running build's default rather
+    #: than against the ceiling its own run was authorised under.
+    max_interventions: int = MAX_INTERVENTIONS
     #: Durable semantic attempt history. Tuple keeps checkpoint serialization
     #: deterministic and prevents an unchanged failed action from repeating.
     attempted_fingerprints: tuple[str, ...] = ()
@@ -327,7 +333,7 @@ class ProtocolRecoveryState:
         for name in (
             "transport_retries", "protocol_retries", "truncation_retries", "effect_retries",
             "max_transport_retries", "max_protocol_retries", "max_truncation_retries",
-            "max_effect_retries", "interventions", "decisions",
+            "max_effect_retries", "max_interventions", "interventions", "decisions",
         ):
             _natural(getattr(self, name), name.replace("_", " "))
         if self.policy_digest:
@@ -409,7 +415,7 @@ class ProtocolRecoveryState:
             "maxProtocolRetries": self.max_protocol_retries,
             "maxTruncationRetries": self.max_truncation_retries,
             "maxEffectRetries": self.max_effect_retries,
-            "maxInterventions": MAX_INTERVENTIONS,
+            "maxInterventions": self.max_interventions,
             "actions": sorted(_RECOVERY_ACTIONS),
         })
 
@@ -452,6 +458,11 @@ class ProtocolRecoveryState:
             "attemptedFingerprints": list(self.attempted_fingerprints),
             "spentDecisions": list(self.spent_decisions),
         }
+        if self.max_interventions != MAX_INTERVENTIONS:
+            # Serialised only when it departs from the contract default, so a
+            # payload written before this bound was configurable still round
+            # trips byte-for-byte instead of failing its own canonical check.
+            payload["maxInterventions"] = self.max_interventions
         if self.last_decision is not None:
             payload["lastDecision"] = self.last_decision.to_dict()
         return payload
@@ -525,6 +536,10 @@ class ProtocolRecoveryState:
                 raw.get("maxEffectRetries", raw.get("max_effect_retries", 2)),
                 "max effect retries",
             ),
+            max_interventions=_natural(
+                raw.get("maxInterventions", raw.get("max_interventions", MAX_INTERVENTIONS)),
+                "max interventions",
+            ),
             attempted_fingerprints=tuple(str(item) for item in fingerprints_raw),
             spent_decisions=tuple(str(item) for item in decisions_raw),
             policy_digest=raw["policyDigest"] if "policyDigest" in raw else raw.get("policy_digest", ""),
@@ -573,6 +588,10 @@ class ProtocolRecoveryState:
             ),
             max_effect_retries=_legacy_ceiling(
                 raw, "maxEffectRetries", "max_effect_retries", 2, "max effect retries",
+            ),
+            max_interventions=_legacy_ceiling(
+                raw, "maxInterventions", "max_interventions", MAX_INTERVENTIONS,
+                "max interventions",
             ),
             attempted_fingerprints=tuple(str(item) for item in fingerprints_raw),
             spent_decisions=tuple(str(item) for item in decisions_raw),
@@ -625,19 +644,12 @@ def recover(
         remaining_ms=remaining_ms,
         jitter=jitter,
         max_transport_retries=state.max_transport_retries,
-        max_interventions=MAX_INTERVENTIONS,
+        max_interventions=state.max_interventions,
     )
     errors = dict(state.errors)
     if attempt.failure:
         errors[attempt.failure] = errors.get(attempt.failure, 0) + 1
-    pending = state.pending_operation
-    held_deadline = state.deadline
-    if core.action == "wait":
-        pending = attempt.fingerprint
-        held_deadline = deadline if deadline else f"delay-ms:{core.delay_ms}"
-    elif core.action != "continue":
-        pending = None
-        held_deadline = None
+    pending, held_deadline = _reserve(state, attempt, core, deadline)
     decision = SemanticRecoveryDecision(
         action=core.action,
         reason=core.reason,
@@ -660,6 +672,43 @@ def recover(
         policy_digest=state.policy_digest or state._policy_digest(),
     )
     return decision, next_state
+
+
+def _reserve(
+    state: ProtocolRecoveryState, attempt: Attempt, core: CoreDecision,
+    deadline: str | None,
+) -> tuple[str | None, str | None]:
+    """Carry the pending-operation reservation across one decision (`NT-R03`).
+
+    Two rules, and both are about not losing an outcome nobody has observed.
+
+    **A held reservation is never replaced.** "Poll an existing pending
+    operation only under its durable deadline and reservation ... never
+    replaced with a new operation identity." Overwriting `op-A` with the
+    fingerprint of whatever failed next would retarget the poll at an
+    operation that was never dispatched, and `op-A` — which may already have
+    taken effect — would become unreachable, unreconciled and unrefundable.
+
+    **A reservation is not released by giving up.** An exhausted task stops,
+    but "unknown external outcomes remain unsettled and MUST be reconciled
+    before replay/refund": the occurrence outlives the decision to stop
+    chasing it. Only the operation that actually settled — the one whose
+    fingerprint matches the attempt — clears its own reservation.
+    """
+    held, held_deadline = state.pending_operation, state.deadline
+    if core.action == "wait":
+        if held is not None:
+            # Already reserved: keep the original identity and its durable
+            # deadline, and wait under those rather than minting new ones.
+            return held, held_deadline
+        return attempt.fingerprint, deadline or f"delay-ms:{core.delay_ms}"
+    if held is not None and held != attempt.fingerprint:
+        # Some other operation is still outstanding. This decision is not
+        # about it and may not discard it.
+        return held, held_deadline
+    if core.action == "continue":
+        return held, held_deadline
+    return None, None
 
 
 class ProtocolRecoveryPolicy:

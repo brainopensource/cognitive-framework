@@ -6,6 +6,7 @@ import dataclasses
 import re
 from dataclasses import dataclass, field
 from enum import Enum
+from types import MappingProxyType
 from typing import Any, Mapping, Sequence
 
 from .canonicalisation.digest import digest_bytes, digest_of
@@ -24,6 +25,43 @@ __all__ = [
     "TodoItem",
     "critical_state",
 ]
+
+
+def _detached(value: Any) -> Any:
+    """A copy that shares no container with the caller, at any depth.
+
+    A shallow copy stops `state.last_verification["ok"] = False` and nothing
+    else: `state.last_verification["nested"]["count"] = 99` still reaches
+    through, because the inner object was never copied. Since these values are
+    canonicalised and digested whole, a nested edit moves the digest just as
+    surely as a top-level one.
+    """
+    if isinstance(value, Mapping):
+        return {str(key): _detached(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_detached(item) for item in value]
+    return value
+
+
+def _frozen_mapping(value: Any, field: str) -> Mapping[str, Any]:
+    """Copy a caller's mapping behind a read-only view (`I-STATE`).
+
+    A frozen dataclass freezes its *attributes*, not the objects they point
+    at. Holding the caller's `dict` therefore leaves the caller able to edit
+    state that has already been digested, checkpointed or compared — and the
+    edit is invisible, because nothing about it goes through this type. The
+    deep copy is what makes the value immutable; the proxy is what stops the
+    next reader from assuming it can write through the top level.
+
+    The proxy is deliberately only one layer deep. Freezing every nested
+    container would change what `to_canonical_dict` hands to JCS from plain
+    JSON types into proxies and tuples, which is a wire-format change dressed
+    up as a safety fix. The copy already removes every path back to the
+    caller; the proxy only removes the most inviting one.
+    """
+    if not isinstance(value, Mapping):
+        raise TypeError(f"{field} must be a mapping")
+    return MappingProxyType(_detached(value))
 
 
 class StepState(str, Enum):
@@ -122,6 +160,10 @@ class RouteDecision:
     budget_snapshot: Mapping[str, int] = field(default_factory=dict)
     provider_usage_status: str = "unknown"
 
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self, "budget_snapshot", _frozen_mapping(self.budget_snapshot, "budget_snapshot"))
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "route": self.route, "reason": self.reason, "failure": self.failure,
@@ -197,6 +239,14 @@ class SemanticTaskState:
     index_snapshot_digest: str | None = None
 
     def __post_init__(self) -> None:
+        # Before any validation: a mapping validated in place and then kept by
+        # reference is validated against bytes the caller can still change.
+        for name in ("last_verification", "remaining_budgets", "recovery_state"):
+            object.__setattr__(self, name, _frozen_mapping(getattr(self, name), name))
+        if self.selection_policy_identity is not None:
+            object.__setattr__(
+                self, "selection_policy_identity",
+                _frozen_mapping(self.selection_policy_identity, "selection_policy_identity"))
         if not self.objective.strip():
             raise ValueError("objective must be non-empty")
         if self.revision < 0:

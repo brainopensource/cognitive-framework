@@ -119,6 +119,7 @@ class ContextCompiler:
         source: str = "manifest",
         context_policy: Mapping[str, Any] | str | None = None,
         compaction_strategy: CompactionStrategy | None = None,
+        behavior_identity: Mapping[str, Any] | None = None,
     ) -> None:
         if token_ceiling <= 0:
             raise ValueError("token_ceiling must be positive")
@@ -132,6 +133,14 @@ class ContextCompiler:
         self._token_ceiling = token_ceiling
         self._breakpoint_ceiling = breakpoint_ceiling
         self._capability_cards = capability_cards
+        # `NT-1.6`: the members of behavior-affecting identity this object
+        # cannot see for itself — model dialect/route, serializer, token
+        # counter, recovery policy, product preset. The compiler does not
+        # *use* them; it binds them, so that changing one produces a new
+        # epoch instead of silently reusing a freeze taken under the old one.
+        # Empty by default, which leaves the epoch of every existing
+        # composition exactly where it was.
+        self._behavior_identity = _declared_identity(behavior_identity)
         # `W12-B`: the skill index is stable within a task, so it rides `L3`
         # with the environment map -- named/described only, ceiling-bounded
         # (`≤4k` names+descriptions); bodies stay on disk behind `fs.read`.
@@ -281,10 +290,12 @@ class ContextCompiler:
         """The identity of the frozen region (`NT-C01`).
 
         It is a function of the system instructions, the capability-card
-        prefix, the ordered tool schemas, the environment contract and the
-        context policy — and of nothing dynamic. Two runs sharing an epoch
-        share prefix bytes; a changed epoch is the record that an old freeze,
-        and any cache identity derived from it, may not be reused.
+        prefix, the ordered tool schemas, the environment contract, the
+        context policy and any declared behavior identity (`NT-1.6`: model
+        dialect/route, serializer, token counter, recovery policy, product
+        preset) — and of nothing dynamic. Two runs sharing an epoch share
+        prefix bytes; a changed epoch is the record that an old freeze, and
+        any cache identity derived from it, may not be reused.
         """
         return self._composition_epoch
 
@@ -295,6 +306,11 @@ class ContextCompiler:
             "breakpointCeiling": self._breakpoint_ceiling,
             "capabilityPrefixChars": len(self._capability_cards),
         }
+        if self._behavior_identity:
+            # Nested under one key rather than merged, so a declared member
+            # can never collide with — or quietly overwrite — a parameter the
+            # compiler owns itself.
+            parameters["behaviorIdentity"] = dict(self._behavior_identity)
         # Only scalars: an option value that was itself a structure would put
         # unbounded (and possibly sensitive) material into a ledger fact.
         for key in sorted(self._compaction_options):
@@ -472,7 +488,7 @@ class ContextCompiler:
         for evidence in fresh:
             body = evidence.body
             full = evidence.finding if not body else f"{evidence.finding}\n{body}"
-            receipt, text, elided = _bound_result(
+            receipt, text, elided, retains_body = _bound_result(
                 label=evidence.key, header=evidence.finding,
                 body=body or evidence.finding, full=full,
                 artifact=evidence.artifact, subject=subject, policy=policy, fresh=True,
@@ -481,7 +497,7 @@ class ContextCompiler:
             if elided:
                 omissions.append((evidence.key, "body_elided"))
             selected.append(Fragment(source="evidence", label=evidence.key,
-                                     text=text, evictable=True))
+                                     text=text, evictable=retains_body))
         return selected
 
     def _select_interactions(
@@ -512,7 +528,7 @@ class ContextCompiler:
         selected: list[Fragment] = []
         for index, turn in enumerate(complete):
             full = f"{turn.action}\n{turn.result}"
-            receipt, text, elided = _bound_result(
+            receipt, text, elided, retains_body = _bound_result(
                 label=turn.key, header=turn.action, body=turn.result, full=full,
                 artifact=turn.artifact, subject=subject, policy=policy, fresh=True,
             )
@@ -522,7 +538,7 @@ class ContextCompiler:
             newest = index == len(complete) - 1
             selected.append(Fragment(
                 source=NEWEST_INTERACTION_SOURCE if newest else "interaction",
-                label=turn.key, text=text, evictable=True,
+                label=turn.key, text=text, evictable=retains_body,
             ))
         return selected
 
@@ -567,8 +583,11 @@ class ContextCompiler:
                     # Eliding a body into a receipt that costs as much as the
                     # body buys nothing and loses the body.
                     continue
+                # `evictable=False`: the body this fragment carried is now a
+                # receipt, so a downstream compaction pass has nothing left to
+                # reclaim from it and must not overwrite the identity it kept.
                 sequence[index] = Fragment(source=item.source, label=item.label,
-                                           text=receipt, evictable=item.evictable)
+                                           text=receipt, evictable=False)
                 omissions.append((item.label, "body_elided"))
 
         # Step three: drop low-priority evidence, oldest first.
@@ -580,6 +599,30 @@ class ContextCompiler:
         # that it happened is the state the next action starts from.
         while cost() > target and len(dialogue) > 1:
             omissions.append((dialogue.pop(0).label, "interaction_dropped"))
+
+
+def _declared_identity(declared: Mapping[str, Any] | None) -> Mapping[str, Any]:
+    """Canonicalise declared behavior identity, or refuse it (`NT-1.6`).
+
+    Scalars only, for the same reason `_policy_identity` admits only scalars:
+    these values reach a ledger fact, and a structure here would put unbounded
+    — possibly sensitive — material into a record nothing can withdraw. Sorted
+    at the door so two composition roots declaring the same members in
+    different order share an epoch rather than splitting one.
+    """
+    if declared is None:
+        return {}
+    if not isinstance(declared, Mapping):
+        raise TypeError("behavior_identity must be a mapping of scalar identities")
+    canonical: dict[str, Any] = {}
+    for key in sorted(declared):
+        value = declared[key]
+        if not (isinstance(value, (str, int, float, bool)) or value is None):
+            raise TypeError(
+                f"behavior identity {key!r} must be a scalar identity, not "
+                f"{type(value).__name__}")
+        canonical[str(key)] = value
+    return canonical
 
 
 def _is_pinned_l4(fragment: Fragment) -> bool:
@@ -647,12 +690,19 @@ def _bound_result(
     subject: str,
     policy: ContextBudget,
     fresh: bool,
-) -> tuple[str, str, bool]:
+) -> tuple[str, str, bool, bool]:
     """Bound one result at the door, and say what it collapses to later.
 
-    Three values: the *eviction receipt* (`NT-C04` step two leaves this behind
-    when the body goes), the text admitted now, and whether admitting it
-    already omitted the raw body.
+    Four values: the *eviction receipt* (`NT-C04` step two leaves this behind
+    when the body goes), the text admitted now, whether admitting it already
+    omitted the raw body, and whether any raw body survived admission.
+
+    The last one is what keeps a receipt a receipt. `evictable` means "a body
+    is still here and eviction can still reclaim it"; a verification receipt
+    has already replaced its body with identity, so a later pass that treated
+    it as evictable would collapse `command`, `environment`, `subject`,
+    counts, exit status and artifact into a byte count and call that an
+    eviction (`NT-C05`).
 
     A verification body collapses immediately, whatever its size. What the
     working state needs from a suite run is which command ran, where, against
@@ -666,7 +716,9 @@ def _bound_result(
         body, subject=subject, artifact=artifact, fresh=fresh)
     if verification is not None:
         receipt = f"{header}\n{verification.render()}"
-        return receipt, receipt, estimate_tokens(receipt) < estimate_tokens(full)
+        # The body is gone already and what replaced it is pure identity:
+        # there is nothing left for a later eviction pass to reclaim.
+        return receipt, receipt, estimate_tokens(receipt) < estimate_tokens(full), False
 
     # The eviction receipt is identity, not content: after eviction the body
     # is reachable by artifact and nothing else of it is claimed.
@@ -674,8 +726,8 @@ def _bound_result(
                f"[{label}: {len(body.encode('utf-8'))} bytes elided after use]")
     if len(full.encode("utf-8")) > policy.max_body_bytes:
         distilled = distill_tool_output(body, cap_chars=policy.max_body_bytes)
-        return receipt, f"{header}\nartifact={artifact}\n{distilled.compact_text}", True
-    return receipt, full, False
+        return receipt, f"{header}\nartifact={artifact}\n{distilled.compact_text}", True, True
+    return receipt, full, False, True
 
 
 class CompetencePriorRecorder:

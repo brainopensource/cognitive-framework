@@ -8,7 +8,7 @@ status: living
 owner: repository-governance
 canonical_for:
   - execution-technical-handbook
-version: "0.9.4"
+version: "0.9.5"
 purpose: Self-explaining engineering handbook for future work. Present-tense architecture stays in docs/architecture and docs/backend.
 derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN.md
@@ -16,7 +16,7 @@ derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN_v2.md
   - .draft/PHASE-0_DEVELOPMENT_FINAL_PLAN.md
 lock_head: "bf56eea9"
-last_verified: 2026-09-10
+last_verified: 2026-09-11
 relationships:
   - execution.milestones
   - execution.feature_spec
@@ -155,6 +155,43 @@ MS-CONTEXT -> T-26 control-freeze work may begin
 ```
 
 T-77 may be implemented before T-109 because its accepted prerequisites are T-104/T-105. T-107 cannot be enabled before T-109. If A and B work concurrently, use isolated repositories or explicit disjoint file leases: A owns runtime integration and B owns context compiler/compaction. C alone edits execution status and generator inputs. Merge T-107 and T-77 before constructing T-110 so the preservation fixture exercises the actual integrated path.
+
+#### Multi-day autonomous integration recipe
+
+Use a multi-day batch to reduce coordination overhead without weakening acceptance.
+The duration is planning metadata only; task ordering still comes exclusively from
+`requires:` edges.
+
+1. **C establishes the shared subject.** Start from T-107 candidate `cae7c98d`,
+   integrate T-77 candidate `37813a65`, register `ContextSelectionRecorded` through
+   canonical generator inputs, regenerate derived artifacts, and run the combined
+   event/context/runtime gates. C publishes the clean integration SHA to both source
+   owners. A branch-local receipt cannot substitute for this combined receipt.
+2. **A and B work concurrently from that SHA.** A owns T-110 and any runtime,
+   checkpoint, session, product-consumer or provider defects exposed by the fixture.
+   B owns compiler, layer, compaction, receipt-distillation and recovery-policy
+   defects. Each stream may make multiple coherent commits and run its own development
+   loops without an intermediate governance decision. Never share a writable checkout
+   or concurrently lease the same path.
+3. **C prepares evidence in parallel.** C alone audits preset/catalog configuration,
+   corpus manifests, Wilson/cost calculations, evidence-row validation, hypotheses,
+   frozen-canary refusal and the L0 operator recipe for T-51/T-52/T-79/T-89/T-92–T-95.
+   Preparation is hermetic. Keep the control record unfrozen and make no provider call.
+   A supplies fixes to the product path; B does not edit C-owned benchmark assets.
+4. **C serially converges.** Integrate A and B, route a consolidated defect list to the
+   source owner when necessary, and rerun affected focused suites after each repair.
+   Once executable changes stop, execute T-111 and the complete T-109 recipe on one
+   clean subject, regenerate knowledge, reconcile all five execution files and prepare
+   one Leadership package.
+5. **Leadership decides once.** An independent reviewer evaluates the complete subject,
+   receipts and missingness. Acceptance closes MS-CONTEXT and authorizes T-26 work.
+   Rejection returns one consolidated defect inventory. Routine development failures
+   and intermediate commits do not create governance gates.
+
+Commit boundaries should preserve reviewability: keep schema/catalog integration,
+T-110 behavior, B-owned context/recovery repairs, C-owned control-instrument readiness,
+and final evidence reconciliation distinguishable. Do not combine an unrelated session
+decomposition, terminal-outcome rewrite or context migration in one patch.
 
 #### T-109 exact-subject baseline procedure
 

@@ -13,8 +13,8 @@ purpose: Flat tasks and subtasks by context. No sprint calendar. Near-term owner
 audience:
   - contributor
   - release-owner
-version: 0.9.5
-last_verified: 2026-09-10
+version: 0.9.6
+last_verified: 2026-09-11
 lock_head: "1f42de23"
 normative_authority:
   - docs/execution/spec.md
@@ -34,7 +34,7 @@ Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technic
 
 **No sprints. No waves.** Check boxes as work completes. **Recommended reading order (not a schedule):** MS-SEE A stack T-16/T-15/T-36/T-37/T-45 is MECHANISM this-branch. T-04/T-05/T-07 landed 2026-09-04 (T-04 carries an open successor obligation; see its row). Do not create `progressive.py` (T-15). T-46 ranking stays `[PROPOSAL]`.
 
-**Current handoff (2026-09-11; clean baseline subject `f71fca4876fff0104e996cdd01fa85f8ce09c604`).** Stream C has qualified and accepted T-109 under its exact-subject zero-failure receipt across full unittest discovery (3006 collected, 2964 passed, 42 skipped, 0 failed, 0 errors), complete `just check` and `just verify` recipes, and TypeScript gates. This provides operational authorization for Dev A to begin T-107 (`READY`) and Dev B to deliver T-77 (`READY`). MS-CONTEXT requires T-107, T-77, T-110 and T-111. Final Leadership review remains deferred until the final MS-BASELINE + MS-CONTEXT candidate after all three streams finish. MS-CONTROL remains OPEN; T-26 remains UNFROZEN and T-27/T-51/T-52 remain open. Historical counts and receipts remain evidence only for the SHA on which they were produced.
+**Current handoff (2026-09-11; clean baseline subject `f71fca4876fff0104e996cdd01fa85f8ce09c604`).** Stream C accepted T-109 under its exact-subject zero-failure receipt. Stream A has produced T-107 candidate `cae7c98d50ba456b68dfefe22d021e4f88f8c689`; Stream B has produced T-77 candidate `37813a65451f26cdde90695debf30838c52fb7bd`. These candidates are not accepted or integrated merely because their focused and branch-local gates pass. Stream C must combine them, register `ContextSelectionRecorded` through canonical generator inputs, and publish one clean integration SHA before T-110 starts. Final Leadership review remains deferred until T-110 and T-111 produce the complete MS-BASELINE + MS-CONTEXT candidate. MS-CONTROL remains OPEN; T-26 remains UNFROZEN and T-27/T-51/T-52 remain open. Historical counts and receipts remain evidence only for the SHA on which they were produced.
 
 ## Near-term ownership and ready work
 
@@ -50,8 +50,8 @@ This table is a projection of the `requires:` edges below. `READY` authorizes wo
 | Task | Stream | State | Requires | Concrete exit |
 |---|---|---|---|---|
 | **T-109** | C, with A/B defect owners | `ACCEPTED` | T-97/T-98/T-99/T-101/T-102/T-103/T-108 accepted | One clean SHA passes complete Python discovery, full `just check` and `just verify` bodies, TypeScript gates and nonmutation comparison with zero failures/errors. |
-| **T-77** | B | `READY` | T-104/T-105 accepted | Stable L1-L3 bytes, bounded artifact receipts, trailing goal echo and explicit cache missingness pass the named falsifier. |
-| **T-107** | A | `READY` | T-100/T-104/T-105/T-106/T-109 accepted | Registered selection/recovery facts are durable before external calls; cold replay restores identity/counters without repeating effects. |
+| **T-77** | B | `CANDIDATE`; awaits C integration | T-104/T-105 accepted | Candidate `37813a65` is integrated with T-107; stable L1-L3 bytes, bounded artifact receipts, trailing goal echo and explicit cache missingness pass on the combined subject. |
+| **T-107** | A | `CANDIDATE`; event registration incomplete | T-100/T-104/T-105/T-106/T-109 accepted | Candidate `cae7c98d` is integrated with T-77; C registers the selection fact; write-before-use and cold replay pass on the combined subject. |
 | **T-110** | A | `BLOCKED` on T-107/T-77 | T-107 and T-77 | A deterministic 100-or-more-turn fixture survives forced compaction and fresh-process restart without losing critical state or admitting false completion. |
 | **T-111** | C | `BLOCKED` on T-109/T-110 | T-109 and T-110 | Final exact-subject gate reconciles MS-BASELINE/MS-CONTEXT and hands an unfrozen control candidate to T-26. |
 
@@ -66,6 +66,28 @@ The labels **Stream A/B/C** below are current engineering ownership, not the his
 | C — Test integrity, configuration and acceptance | `test/__init__.py`, `test/conftest.py`, shared safe fixtures, `test/lab/`, collection/nonmutation meta-tests; benchmarks/tests; tools/linters; CI/lockfiles/package manifests/`justfile`; preset catalog/load/manifests; execution docs and generated knowledge | Sole merge-queue/document owner. Remaining test files are assigned by T-101 before edits; C hands A fixture changes for A-owned tests. |
 
 Work executes on the active feature branch (`feat/aether-framework-electroweak-canonical-agents`) with strictly disjoint file leases per Stream (zero file-level overlap) and focused test falsifiers to prevent cross-contamination. Shared-tree concurrent editing of the same file is forbidden. An explicit file assignment overrides a directory default; transfer a file only after the prior owner's patch lands. No two active rows may lease the same file. Zero planned file overlap is enforceable; semantic conflicts are resolved by integrated verification. Read-only reviews may cross ownership. Generated files have only the generator as writer. If event/schema tooling needs changes, C lands schema-generator input changes while A owns emission/reducer consumers under T-107.
+
+### Multi-day delivery batch for context convergence
+
+This batch is a coordination timebox, not a new dependency system or a waiver of
+`requires:` edges. Developers work autonomously on isolated branches or repositories
+from the same C-published integration SHA. They may use several coherent commits and
+run focused tests during development; routine red-to-green iterations do not require
+Leadership review. Stream C serializes merges and requests one independent Leadership
+decision only after the final clean candidate and complete receipts exist.
+
+| Order | Owner | Substantial deliverable | Handoff boundary |
+|---|---|---|---|
+| 1 | C | Integrate `cae7c98d` and `37813a65`; register `ContextSelectionRecorded`; run combined T-77/T-107 and event-coverage gates | Publish one clean shared SHA; do not mark T-77/T-107 accepted from branch-local evidence alone. |
+| 2A | A | Build T-110 on the integrated production path; repair runtime/session/checkpoint/provider defects it exposes; audit A-owned product consumers used by T-79/T-89 | Return a clean commit range and uninterrupted/resumed semantic-equivalence receipt. |
+| 2B | B | Harden integrated context and recovery behavior under T-110 fault cases; repair only B-owned compiler/compaction/recovery policy | Return a clean commit range and context/recovery conformance receipt; do not edit benchmark/control evidence assets. |
+| 2C | C | In parallel, audit C-owned preset/catalog and hermetic T-51/T-52/T-92–T-95 corpus, metrics and preregistration readiness | Keep `control_preregistration.json` `UNFROZEN`, `subject_sha: null`; make no paid call or control claim. |
+| 3 | C | Integrate A/B, execute T-111 and all full gates, reconcile the five execution files and prepare the evidence package | Submit one clean exact SHA to Leadership for one consolidated MS-BASELINE/MS-CONTEXT verdict. |
+
+The batch stops at an **unfrozen control candidate**. Leadership acceptance of the
+T-111 package is required before T-26 freezes an exact subject. T-27 and paid L2
+execution remain later control work. T-80, T-96, CAS, specialists, delegation,
+campaigns and memory learning remain outside this batch.
 
 ### Context: Baseline and truthful product convergence
 

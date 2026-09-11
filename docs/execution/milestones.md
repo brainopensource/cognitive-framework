@@ -13,8 +13,8 @@ purpose: Present stable TARGET milestone outcomes, dependencies, and acceptance 
 audience:
   - contributor
   - release-owner
-version: "0.9.4"
-last_verified: 2026-09-10
+version: "0.9.5"
+last_verified: 2026-09-11
 lock_head: "bf56eea9"
 derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN.md
@@ -45,7 +45,7 @@ Anything that makes the system's own evidence trustworthy is core to the Beta MV
 
 The core therefore includes truthful terminal/disposition projection, canonical state and recovery values, test-suite nonmutation and measurement integrity, patch atomicity, context compaction, and process restart/resume. Host sandboxing (`bwrap`, containers, seccomp), production network-policy enforcement, CAS workspaces, specialists, delegation, campaign orchestration, governed memory, and external benchmark claims remain post-beta behind the existing MS-CONTROL/FH-1 horizon; no additional fence is created.
 
-**Project checkpoint (2026-09-11; clean baseline subject `f71fca4876fff0104e996cdd01fa85f8ce09c604`).** T-97/T-98/T-99/T-100/T-101/T-102/T-103/T-104/T-105/T-106/T-108 and T-109 have task-scoped accepted evidence. T-109 produced an accepted zero-failure full-discovery (3006 collected, 2964 passed, 42 skipped, 0 failed/errored) and complete `just check`/`just verify`/TypeScript receipt on clean subject `f71fca4876fff0104e996cdd01fa85f8ce09c604`. MS-BASELINE qualification predicates are met, granting operational authorization for Dev A (T-107) and Dev B (T-77). MS-CONTEXT requires T-107, revised T-77, T-110 and T-111. Formal milestone closure and Leadership review remain deferred until all three streams finish. MS-CONTROL remains OPEN; T-26 remains UNFROZEN and T-27/T-51/T-52 remain open. Specialists, T-80/T-96 treatments and CAS promotion remain outside this near-term authorization.
+**Project checkpoint (2026-09-11; clean baseline subject `f71fca4876fff0104e996cdd01fa85f8ce09c604`).** T-97/T-98/T-99/T-100/T-101/T-102/T-103/T-104/T-105/T-106/T-108 and T-109 have task-scoped accepted evidence. T-109 produced an accepted zero-failure full-discovery (3006 collected, 2964 passed, 42 skipped, 0 failed/errored) and complete `just check`/`just verify`/TypeScript receipt on the baseline subject. T-107 candidate `cae7c98d` and T-77 candidate `37813a65` now await Stream C integration and combined verification; neither is accepted from branch-local evidence alone. MS-CONTEXT still requires accepted T-107, revised T-77, T-110 and T-111. Formal milestone closure and Leadership review remain deferred until the complete three-stream candidate is ready. MS-CONTROL remains OPEN; T-26 remains UNFROZEN and T-27/T-51/T-52 remain open. Specialists, T-80/T-96 treatments and CAS promotion remain outside this authorization.
 
 ### Near-term release predicates (NT-1)
 
@@ -65,6 +65,12 @@ These additive gates do not reopen accepted historical subjects or authorize M-9
 | Context qualification candidate | T-107 and T-77 integrated | T-110 deterministic 100+ turn compaction/restart falsifier | Uninterrupted/resumed semantic vectors match; no replay, lost state or false completion | Enlarging product presets or treating a fixture as model-quality evidence |
 | Context reconciliation | T-109 and T-110 accepted | T-111 final full gate, identity invalidation tests and five-file reconciliation | Independent review accepts compatible final subject and closes MS-CONTEXT | Closing MS-CONTROL or enabling post-control treatments |
 | Control candidate | MS-BASELINE and MS-CONTEXT closed | Audit applicable T-79/T-89/T-92-T-95/T-51/T-52 evidence and prepare T-26 | T-26 freezes an eligible exact subject; T-27 later evaluates it | Reusing a freeze after prompt/tool/model/policy/serializer identity changes |
+
+Streams may prepare a larger integrated delivery between these governance transitions.
+C may assemble hermetic corpus, metric and preregistration readiness while A runs T-110
+and B hardens context/recovery, but preparation does not advance a milestone row.
+Leadership reviews the consolidated T-111 subject once; branch-local commits and
+focused suites are engineering evidence, not additional milestone gates.
 
 Milestone closure is a governance transition, not a checkbox side effect. The task owner produces evidence; Stream C verifies completeness and subject identity; repository governance accepts or rejects the receipt and changes the milestone row. A failed gate leaves the milestone `OPEN`, preserves the diagnostic artifact and routes the defect to its code owner. A valid negative or undeterminable control result remains publishable evidence but does not satisfy a positive gate.
 

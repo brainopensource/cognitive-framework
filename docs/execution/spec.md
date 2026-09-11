@@ -7,9 +7,9 @@ status: living
 owner: repository-governance
 canonical_for:
   - active-feature-delta-specification
-version: "2.0.1"
+version: "2.0.2"
 date: "2026-09-05"
-last_verified: 2026-09-10
+last_verified: 2026-09-11
 lock_head: "bf56eea9"
 derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN.md
@@ -90,7 +90,7 @@ The versioned wrapper adds lineage/reducer validation to Part 3's reference `Mem
 | `PROVIDER_TRANSIENT` | Bounded deadline-aware retry with retained accounting | Unlimited retries or fictitious zero usage |
 | `RECOVERY_FAILED` | Quarantine owned work and report failure | Claim rollback or task success without evidence |
 
-**NT-I01:** Planned kernel delta = 0 LOC; ceiling remains 1438. All additions live above the domain-blind kernel. Ports cannot import agency/kernel; adapters cannot import agency/kernel; runtime cannot execute subprocesses (N-06). Preserve I-6 isolation, I-7 domain blindness, one event writer and grant/budget attenuation. **NT-I02:** New gates `MS-BASELINE` and `MS-CONTEXT` are prerequisites to a new T-26 control freeze, not replacements for historical M-1–M-3/MS-INSTRUMENT/MS-RESUME receipts or M-8–M-10 release predicates. Deterministic 100+ turn fixtures do not change the balanced product ceiling or imply benchmark success.
+**NT-I01:** Planned kernel delta = 0 LOC; ceiling remains 1438. All additions live above the domain-blind kernel. Ports cannot import agency/kernel; adapters cannot import agency/kernel; runtime cannot execute subprocesses (N-06). Preserve I-6 isolation, I-7 domain blindness, one event writer and grant/budget attenuation. **NT-I02:** New gates `MS-BASELINE` and `MS-CONTEXT` are prerequisites to a new T-26 control freeze, not replacements for historical M-1–M-3/MS-INSTRUMENT/MS-RESUME receipts or M-8–M-10 release predicates. Deterministic 100+ turn fixtures do not change the balanced product ceiling or imply benchmark success. **NT-I03:** Concurrent contributors MUST start from one recorded integration subject, use isolated branches/repositories and hold disjoint write leases. A owns runtime/product consumers, B owns pure context/recovery policy, and C owns schema/catalog generator inputs, preset/catalog configuration, benchmarks/corpora/metrics, execution documentation and the serial merge queue. Branch-local success is candidate evidence only. Leadership acceptance occurs once at the final T-111 boundary unless a proposed change exceeds this specification.
 
 ### NT-1.6 Runtime durability and ordering protocol
 
@@ -139,6 +139,14 @@ T-110 establishes semantic equivalence between uninterrupted and cold-resumed ex
 Every field MUST match after canonical encoding except event positions explicitly introduced to record restart/reconciliation. The fixture MUST force compaction and restart, exercise misleading external text, stale verification, pending-operation expiry and exhausted recovery, and prove zero duplicate settled effects. Passing the fixture proves deterministic preservation only; it does not prove provider cache hit rate, model quality, live benchmark success or production sandbox strength.
 
 T-111 closes MS-CONTEXT only when MS-BASELINE and all context tasks are accepted on a compatible integrated subject. Its output is an **unfrozen control candidate**. T-26 remains the sole freeze task and MUST still verify applicable T-79/T-89/T-92–T-95 and T-51/T-52 evidence. T-111 performs no paid call, does not close MS-CONTROL and does not authorize T-80, T-96, specialists, CAS, campaigns or memory learning.
+
+Before T-111, C MAY prepare and falsify the hermetic portions of the control corpus,
+metrics, evidence-row validation, hypothesis registry and L0 operator recipe. Such
+preparation MUST preserve `control_preregistration.json` as `UNFROZEN` with no subject,
+MUST NOT execute a paid provider call, and MUST NOT be reported as T-26/T-27 or
+MS-CONTROL acceptance. A MAY repair the public product consumers that this instrument
+invokes. B MUST NOT own or mutate benchmark, corpus, statistics or preregistration
+assets during the context-convergence batch.
 
 ## FH-1. Post-control backend horizon [PROPOSAL]
 

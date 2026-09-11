@@ -122,6 +122,17 @@ epoch is the record that an earlier freeze — and any cache identity derived fr
 it — may not be reused (`NT-C01`). It is reported by `selection_identity()` as
 `compositionEpoch`.
 
+`NT-1.6` names members of behavior-affecting identity the compiler cannot
+observe for itself: model dialect/route, serializer, token counter, recovery
+policy and product preset. The optional `behavior_identity` constructor
+argument binds them. The compiler never *uses* these values — declaring one
+only makes a change to it produce a new epoch instead of silently reusing a
+freeze taken under the old one. Declared members must be scalars, because they
+reach a ledger fact and a structure would put unbounded material into a record
+nothing can withdraw; they are sorted at the door, so two composition roots
+declaring the same members in a different order share an epoch. Declaring
+nothing leaves the epoch of an existing composition exactly where it was.
+
 Layers L1–L3 are deterministically hashed and remain byte-identical across turns. L4 is stable within the task; L5 is the only layer mutated each turn. Cache participation is observed through digests and receipts rather than assumed from layout alone. Product `ContextPacket` values bind `WorkspaceEpoch` (`tree_hash` ← treeHash, `index_digest` ← indexDigest, `source_revision` ← sourceRevision, `compiled_at_turn` ← compiledAtTurn). Epoch is a new field on the existing packet, not a second compiler; stale or missing epoch cannot admit `completed`.
 
 ### Context Compaction
@@ -239,6 +250,20 @@ Its order of operations is contractual (`NT-C04`):
    usable; an irreducible vector raises `CONTEXT_BUDGET_EXCEEDED` before any
    inference, and the compiler makes no model call of its own.
 
+**Eviction reclaims bodies, never identity.** A fragment carries `evictable`
+to mean "a raw body is still present and eviction can still reclaim it", so a
+fragment whose body has already become a receipt is not evictable: compaction
+running a second time over its own output reclaims nothing further rather than
+overwriting what the first pass promised to keep. Where a body is reclaimed,
+the receipt retains the header line naming the action or finding and any
+`artifact=` binding, each clipped to a bounded width — a receipt that named
+neither what ran nor where the bytes went would make an eviction
+indistinguishable from a deletion (`NT-C05`). A single-line block has no
+header: its one line is the body, and retaining it would retain exactly what
+eviction was asked to reclaim. When nothing remains to reclaim, the answer is
+`CONTEXT_BUDGET_EXCEEDED` rather than a smaller prompt that has lost its
+evidence.
+
 ### Verification receipts (`VerificationReceipt`)
 
 `NT-C05` permits the raw verification log to be omitted and requires what it
@@ -309,6 +334,23 @@ NO_PROGRESS             PREMATURE_FINISH
 Each class has a bounded retry limit and a recovery action. A retry is admissible only when the failure is retryable, budget remains, and the next action or information state differs materially. Repeating the same action with the same arguments against unchanged state is `NO_PROGRESS`, not recovery. Provider adapters may perform transport retries; the harness separately decides whether a failed turn or task action should be retried.
 
 `EpisodeEngine` applies the NT-R01/R02 detector on the existing recovery branch: it retains at most twelve `(fingerprint, outcome, progress_key)` tuples, treats three unchanged signatures in a six-action window and repeated length-two/three cycles as stall, and allows progress only when the verified progress key changes. The policy emits `continue|wait|reground|replan|stop` (never `consult`); one reground and one replan are reserved per task, then stop. Permission, permanent, and budget failures stop with `delay_ms = 0` and never sleep into authorization. Retry counters, the last decision, deadlines, fingerprints, and remaining-budget references survive `aether.recovery-state/1` serialization.
+
+Every recovery bound is configurable, versioned and reserved (`NT-R02`),
+including the intervention ceiling: `ProtocolRecoveryState.max_interventions`
+participates in the policy digest and is carried across restart, so a resumed
+task is measured against the ceiling its own run was authorised under rather
+than the running build's default. It is serialized only when it departs from
+the contract default, so payloads written before the bound was configurable
+still round trip byte-for-byte.
+
+Pending-operation reservations survive the decisions taken around them
+(`NT-R03`). A held reservation is never replaced by a new operation identity —
+retargeting the poll would leave the original operation, which may already
+have taken effect, unreachable and unreconciled — and stopping or intervening
+does not release an unsettled occurrence, because an unknown external outcome
+must be reconciled before replay or refund regardless of whether the task is
+still chasing it. Only the operation whose fingerprint matches the settling
+attempt clears its own reservation.
 
 ### 6.4 Current ownership, remaining integration and falsifiers
 

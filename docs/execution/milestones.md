@@ -13,7 +13,7 @@ purpose: Present stable TARGET milestone outcomes, dependencies, and acceptance 
 audience:
   - contributor
   - release-owner
-version: "0.9.3"
+version: "0.9.4"
 last_verified: 2026-09-10
 lock_head: "bf56eea9"
 derived_from:
@@ -45,7 +45,7 @@ Anything that makes the system's own evidence trustworthy is core to the Beta MV
 
 The core therefore includes truthful terminal/disposition projection, canonical state and recovery values, test-suite nonmutation and measurement integrity, patch atomicity, context compaction, and process restart/resume. Host sandboxing (`bwrap`, containers, seccomp), production network-policy enforcement, CAS workspaces, specialists, delegation, campaign orchestration, governed memory, and external benchmark claims remain post-beta behind the existing MS-CONTROL/FH-1 horizon; no additional fence is created.
 
-**Project checkpoint (2026-09-07; inspected source `483d99081648a96a31775fa1e310445824cec847`).** NT-1 authorizes near-term baseline/context/recovery integration, not milestone acceptance. Historical Wave 1 mechanism receipts and MS-INSTRUMENT/MS-RESUME subjects remain preserved. MS-CONTROL is OPEN; T-26 remains UNFROZEN and T-27/T-51/T-52 remain open. The audit's 66/2,855 result and older boundary-failure counts describe earlier SHAs; the current full-suite disposition awaits T-98/T-101. Source still exposes lossy terminal projections, so product acceptance is not implied by passing architecture linters. T-97 is active. T-77 and T-106 precede control; specialists, T-80/T-96 treatments and CAS promotion do not. Full gate recipes, not the presence of `just`, define verification.
+**Project checkpoint (2026-09-10; clean planning subject `1854bef13acf1b2b279a4e3c03b55a133047740d`).** T-97/T-98/T-99/T-100/T-101/T-102/T-103/T-104/T-105/T-106/T-108 have task-scoped accepted evidence. MS-BASELINE remains OPEN solely because T-109 has not produced an accepted zero-failure full-discovery and complete-recipe receipt on one clean exact subject. A focused dogfood pass does not waive a broad-suite failure. After T-109, MS-CONTEXT still requires T-107, revised T-77, T-110 and T-111. MS-CONTROL remains OPEN; T-26 remains UNFROZEN and T-27/T-51/T-52 remain open. Specialists, T-80/T-96 treatments and CAS promotion remain outside this near-term authorization.
 
 ### Near-term release predicates (NT-1)
 
@@ -55,6 +55,20 @@ These additive gates do not reopen accepted historical subjects or authorize M-9
 |---|---|---|---|
 | **MS-BASELINE** | Reproducible, nonmutating full gate with complete collection; truthful terminal/disposition mapping and one facade/product path; existing patch semantics fail closed; no unaccounted dead-stack/falsifier loss. All required linters, full isolated Python suite, TypeScript and complete check/verify recipes pass on one subject; source/index/corpus unchanged. | T-98/T-99/T-101/T-102/T-103/T-108/T-97; T-109 acceptance receipt with exact counts, skips and environment. Missing commands are blocking, not waivers. | `OPEN` |
 | **MS-CONTEXT** | One canonical state fold/compiler/recovery path; frozen prefix and real serialized token ceiling; explicit cache metrics/missingness; deterministic bounded stall recovery survives restart. At least 100 fixture turns with forced compaction/restart preserve intent, grants, budgets, pending effects, newest result and fresh verification. Dedicated fixture budget does not change product presets. | MS-BASELINE, T-100/T-104/T-105/T-106/T-107/T-77/T-110; T-111 reconciles final integrated receipts. Pure fixture success is not live task or provider-cache performance. | `OPEN` |
+
+#### Near-term gate progression and decision authority
+
+| State | Entrance predicate | Authorized work | Exit predicate | Explicitly still forbidden |
+|---|---|---|---|---|
+| Baseline candidate | T-97/T-98/T-99/T-101/T-102/T-103/T-108 accepted | T-109 full exact-subject qualification; A/B may fix discovered defects | Independent review accepts zero-failure/error full Python, check/verify, TypeScript and nonmutation receipts | Declaring MS-BASELINE closed from focused tests or partial recipe execution |
+| MS-BASELINE closed | T-109 accepted on a clean subject | T-107 runtime binding; T-77 provider-neutral cache/context completion | T-107 and T-77 task receipts accepted and integrated | Control freeze, paid measurement or claims about cache performance |
+| Context qualification candidate | T-107 and T-77 integrated | T-110 deterministic 100+ turn compaction/restart falsifier | Uninterrupted/resumed semantic vectors match; no replay, lost state or false completion | Enlarging product presets or treating a fixture as model-quality evidence |
+| Context reconciliation | T-109 and T-110 accepted | T-111 final full gate, identity invalidation tests and five-file reconciliation | Independent review accepts compatible final subject and closes MS-CONTEXT | Closing MS-CONTROL or enabling post-control treatments |
+| Control candidate | MS-BASELINE and MS-CONTEXT closed | Audit applicable T-79/T-89/T-92-T-95/T-51/T-52 evidence and prepare T-26 | T-26 freezes an eligible exact subject; T-27 later evaluates it | Reusing a freeze after prompt/tool/model/policy/serializer identity changes |
+
+Milestone closure is a governance transition, not a checkbox side effect. The task owner produces evidence; Stream C verifies completeness and subject identity; repository governance accepts or rejects the receipt and changes the milestone row. A failed gate leaves the milestone `OPEN`, preserves the diagnostic artifact and routes the defect to its code owner. A valid negative or undeterminable control result remains publishable evidence but does not satisfy a positive gate.
+
+For MS-BASELINE the authoritative subject is the committed tree exercised by every mandatory command. A later documentation-only receipt commit may cite that subject, but any executable, schema, prompt, corpus, policy, dependency or generated-index change creates a new candidate. For MS-CONTEXT, T-111 additionally proves that all accepted component receipts are compatible with the integrated identity or reruns them on the final subject.
 
 MS-CONTROL additionally requires MS-BASELINE and MS-CONTEXT on its candidate subject. Freeze only after all behavior-affecting integration is complete. A valid negative/undeterminable result is published but does not accept a positive gate. Preserve existing n >= 30 / Wilson lower bound >= 0.40 and zero **observed** false completions; report uncertainty and missingness. No universal cache-hit percentage or benchmark score is inferred from compiler tests.
 

@@ -7,7 +7,7 @@ status: living
 owner: repository-governance
 canonical_for:
   - active-feature-delta-specification
-version: "2.0.0"
+version: "2.0.1"
 date: "2026-09-05"
 last_verified: 2026-09-10
 lock_head: "bf56eea9"
@@ -91,6 +91,54 @@ The versioned wrapper adds lineage/reducer validation to Part 3's reference `Mem
 | `RECOVERY_FAILED` | Quarantine owned work and report failure | Claim rollback or task success without evidence |
 
 **NT-I01:** Planned kernel delta = 0 LOC; ceiling remains 1438. All additions live above the domain-blind kernel. Ports cannot import agency/kernel; adapters cannot import agency/kernel; runtime cannot execute subprocesses (N-06). Preserve I-6 isolation, I-7 domain blindness, one event writer and grant/budget attenuation. **NT-I02:** New gates `MS-BASELINE` and `MS-CONTEXT` are prerequisites to a new T-26 control freeze, not replacements for historical M-1–M-3/MS-INSTRUMENT/MS-RESUME receipts or M-8–M-10 release predicates. Deterministic 100+ turn fixtures do not change the balanced product ceiling or imply benchmark success.
+
+### NT-1.6 Runtime durability and ordering protocol
+
+This protocol governs T-107. An **external boundary** is any model inference, effect dispatch, pending-operation poll, approval request or delay whose repetition or omission changes observable behavior or spends budget. A derived in-memory object is not durable merely because its source events are eventually writable. The fact authorizing the next boundary MUST be accepted by the existing single ledger writer first.
+
+| Transition | Required durable precondition | Required identity/content | Failure disposition |
+|---|---|---|---|
+| Compose or recompose | Composition and epoch identity validated | subject, manifest/composition, prompt, ordered tool schemas, context policy, model route, serializer, counter and recovery-policy digests | Reject stale/unknown identity; perform no inference or effect. |
+| Select context -> infer | Registered `ContextSelectionRecorded` fact appended | `aether.prompt-selection/1`, cursor, prefix/state/policy/request digests, final serialized token count and ordered omissions | `CONTEXT_STALE` or durable-write failure; model call count remains unchanged. |
+| Semantic outcome -> recover | Complete recovery snapshot appended through a registered state/recovery fact | `aether.recovery-state/1`, triggering attempt, chosen action/reason/delay, remaining-budget reference and pending-operation/deadline state | `RECOVERY_FAILED`; do not wait, retry, reground, replan or dispatch. |
+| Effect intent -> execute | Existing `EffectStarted` intent durably appended | descriptor, grant/lease, idempotency identity, resource, action and reservation | Stop before adapter invocation. |
+| Effect settles -> next turn | Existing completion/failure/reconciliation fact durably appended | result or explicit unknown occurrence, actual settlement and artifact/result identity | Keep unknown occurrence unsettled; reconcile before replay or refund. |
+
+`ContextSelectionRecorded` and recovery-carrier payloads are runtime facts, not prompt text. Their payloads MUST contain identities or canonical typed values, not mutable Python objects. `runtime/task_state.py` may recognize compatibility kinds during replay, but recognition alone does not authorize production emission: every emitted kind MUST be registered in the canonical event schema/catalog and covered by `check_event_coverage.py`. `EpisodeStateChanged` remains a permitted carrier where its registered payload can represent the complete recovery state; a distinct `RecoveryStateUpdated` kind requires schema/catalog registration before use.
+
+Cold reconstruction MUST follow this order: verify the event chain; fold semantic task state; validate schema, subject, lineage, reducer and policy identities; reconcile open effect intents and child operations; restore settled descriptors, remaining budgets, recovery counters/history, pending operation/deadline and composition epoch; then compile the next context. It MUST NOT call a model or adapter while reconstructing. A descriptor already settled or occurrence-unknown MUST NOT be dispatched again. An expired pending operation is reconciled or terminated under its original reservation, never replaced with a new operation identity.
+
+Behavior-affecting identity includes at least system instructions, capability-card bytes, ordered tool schemas, model dialect/route, context-selection policy, serializer/counter, recovery policy and product preset. A change to any member creates a new epoch/composition identity and invalidates reuse of an earlier prompt-selection or control-freeze receipt. Telemetry-only fields such as wall-clock observation timestamps do not alter selected bytes or behavior identity.
+
+### NT-1.7 Integrated qualification and control-handoff protocol
+
+T-109 and T-111 are empirical acceptance boundaries. Their receipts MUST be produced on a committed candidate with an empty working tree. Administrative evidence may be recorded in a later documentation-only commit that cites the tested candidate; any executable, schema, prompt, corpus, policy, lockfile or generated-index change creates a new candidate and requires the affected gate to run again.
+
+For every test runner, counts MUST satisfy:
+
+```text
+collected = passed + failed + errors + skipped
+executed  = passed + failed + errors
+failed = 0 and errors = 0
+```
+
+If the runner reports a different counting model, the receipt MUST provide an explicit mapping that reconciles every collected test. Import failures are errors, never skips. Focused reruns are diagnostic supplements. They cannot replace a failing or incomplete broad-discovery receipt. Environmental attribution requires a deterministic reproduction plus a passing unchanged candidate in the qualified environment; prose attribution is not a waiver.
+
+The protected acceptance subject comprises tracked source, tests, fixtures/corpora, lockfiles, manifest/schema inputs and generated knowledge outputs. The verifier records pre/post digests and `git status`; mutation invalidates the run even when tests pass. Required commands are the current literal full unittest discovery, `just check`, `just verify`, TypeScript typecheck and declared npm tests. A missing dependency or command is `not_run` and blocks acceptance.
+
+T-110 establishes semantic equivalence between uninterrupted and cold-resumed execution over at least 100 deterministic turns. The comparison vector is:
+
+```text
+(objective, constraints, plan, next_action, modified_resources,
+ last_material_failure, latest_applicable_verification, settled_effects,
+ remaining_budgets, recovery_history_and_counters, pending_operation,
+ pending_deadline, composition_epoch, serializer_id, counter_id,
+ terminal_status, disposition)
+```
+
+Every field MUST match after canonical encoding except event positions explicitly introduced to record restart/reconciliation. The fixture MUST force compaction and restart, exercise misleading external text, stale verification, pending-operation expiry and exhausted recovery, and prove zero duplicate settled effects. Passing the fixture proves deterministic preservation only; it does not prove provider cache hit rate, model quality, live benchmark success or production sandbox strength.
+
+T-111 closes MS-CONTEXT only when MS-BASELINE and all context tasks are accepted on a compatible integrated subject. Its output is an **unfrozen control candidate**. T-26 remains the sole freeze task and MUST still verify applicable T-79/T-89/T-92–T-95 and T-51/T-52 evidence. T-111 performs no paid call, does not close MS-CONTROL and does not authorize T-80, T-96, specialists, CAS, campaigns or memory learning.
 
 ## FH-1. Post-control backend horizon [PROPOSAL]
 

@@ -8,7 +8,7 @@ owner: repository-governance
 canonical_for:
   - repository-backlog
   - feature-lifecycle-tracking
-version: "0.9.3"
+version: "0.9.4"
 last_verified: 2026-09-10
 lock_head: "bf56eea9"
 audience:
@@ -75,11 +75,25 @@ Accordingly, truthful terminal/disposition projection, canonical state and recov
 
 | Package | Approved scope and owner | Existing capability relationship | Acceptance / lifecycle |
 |---|---|---|---|
-| **GATE-01** | Nonmutating runner, complete collection, current failure inventory, dead-path cleanup and integrated gate; C coordinates, A/B fix their owned surfaces | Additive baseline qualification; preserves MS-INSTRUMENT's historical subject. T-98/T-101/T-108/T-109/T-111 | `APPROVED`; MS-BASELINE requires exact-subject complete Python/TS/recipe receipts, no silent falsifier loss and unchanged contributor state. |
-| **CTX-01** | Canonical working-state snapshots, bounded existing compiler, provider-aware counting/cache telemetry and 100+ turn deterministic preservation; B values/compiler, A codecs/runtime | Successor integration of CMX-03/CMX-10B/CMX-11, not duplicate memory or compiler. T-100/T-104/T-105/T-107/T-110; T-77 moved here from IDX-01 | `APPROVED`; MS-CONTEXT after MS-BASELINE. No new index backend or vector store; cache hits are measured, not guaranteed by fixtures. |
-| **REC-01** | Bounded semantic history, transport backoff, reground/replan/stop, durable decisions/deadlines; B policy, A bindings | Extends ProtocolRecoveryState and existing EpisodeEngine; T-106/T-107/T-110. T-80 consumes the core detector later | `APPROVED`; MS-CONTEXT. No consultation, routing expansion, specialist spawning or new retry loop. |
-| **INS-01 near-term delta** | Truthful terminal projection, thin facade, CLI help/flags/non-success exits; A | T-99/T-102 and active T-97 complete T-04/T-79/T-89 successors | `APPROVED` delta on existing in-progress package; no completed-without-evidence result through any product surface. |
-| **CMX-01 near-term delta** | Single preset catalog, normalized behavioral identity, declared versus effective budgets; C catalog, A consumers | T-103/T-102 integrate T-79; retain existing product ceilings | `APPROVED` delta; budget-only presets labeled honestly. Behavioral arm studies remain ARM-01/T-96 after control. |
+| **GATE-01** | Nonmutating runner, complete collection, current failure inventory, dead-path cleanup and integrated gate; C coordinates, A/B fix their owned surfaces | Additive baseline qualification; preserves MS-INSTRUMENT's historical subject. T-98/T-101/T-108/T-109/T-111 | `REVIEWING`; T-98/T-101/T-108 are accepted. T-109 now owns the complete clean-subject MS-BASELINE receipt; T-111 owns final context reconciliation. |
+| **CTX-01** | Canonical working-state snapshots, bounded existing compiler, provider-aware counting/cache telemetry and 100+ turn deterministic preservation; B values/compiler, A codecs/runtime | Successor integration of CMX-03/CMX-10B/CMX-11, not duplicate memory or compiler. T-100/T-104/T-105/T-107/T-110; T-77 moved here from IDX-01 | `IN_PROGRESS`; T-100/T-104/T-105 are accepted. T-77 is ready; T-107 waits on T-109; T-110 waits on both. No new index backend/vector store and no cache-hit guarantee. |
+| **REC-01** | Bounded semantic history, transport backoff, reground/replan/stop, durable decisions/deadlines; B policy, A bindings | Extends ProtocolRecoveryState and existing EpisodeEngine; T-106/T-107/T-110. T-80 consumes the core detector later | `IN_PROGRESS`; T-106 pure policy is accepted. T-107 durable binding and T-110 restart qualification remain. No consultation, authority expansion, specialist spawning or new retry loop. |
+| **INS-01 near-term delta** | Truthful terminal projection, thin facade, CLI help/flags/non-success exits; A | T-99/T-102/T-97 complete the NT-1 product-surface obligations without accepting broader control evidence | `DONE` for the NT-1 delta; no completed-without-evidence result through any product surface. T-89 remains a distinct MS-CONTROL measurement-path obligation. |
+| **CMX-01 near-term delta** | Single preset catalog, normalized behavioral identity, declared versus effective budgets; C catalog, A consumers | T-103/T-102 integrate the NT-1 catalog/facade obligation; retain existing product ceilings | `DONE` for the NT-1 delta; budget-only presets remain labeled honestly. T-79 retains its distinct MS-CONTROL acceptance obligation and ARM-01/T-96 stays post-control. |
+
+#### Near-term package delivery map
+
+This map explains what each remaining deliverable contributes without creating another task queue. Checkbox status and execution order remain exclusively in `tasks.md`.
+
+| Deliverable | Package responsibility | Inputs already accepted | Output consumed by | Package done condition |
+|---|---|---|---|---|
+| T-109 | GATE-01 proves the repository can be measured without mutation or omission | T-97/T-98/T-99/T-101/T-102/T-103/T-108 | MS-BASELINE and T-107 | Complete clean-subject receipt accepted with zero failures/errors and all required runners executed. |
+| T-77 | CTX-01 completes stable-prefix, bounded receipt and goal-echo behavior | T-104 compiler and T-105 provider codec | T-110 | Existing compiler passes cache-breakpoint falsifier; cache use remains observed or null. |
+| T-107 | CTX-01/REC-01 binds typed state, selection and recovery through the one runtime ledger | T-100/T-104/T-105/T-106 plus MS-BASELINE | T-110 | Write-before-use ordering and cold replay pass event coverage and runtime resume falsifiers. |
+| T-110 | CTX-01/REC-01 qualifies integrated preservation under long deterministic execution | T-107 and T-77 | T-111 | 100+ turn uninterrupted/resumed semantic equivalence with no replay or false completion. |
+| T-111 | GATE-01 reconciles the final subject and guards control identity | T-109 and T-110 | MS-CONTEXT and T-26 | Full gate accepted; five execution files agree; exact unfrozen control candidate handed off. |
+
+Package boundaries are strict. CTX-01 owns context/state preservation, REC-01 owns deterministic recovery semantics, GATE-01 owns evidence integrity, and none of them owns benchmark-quality claims. Completion of these packages authorizes control preparation only. It does not accept the CONTROL package or any FH-1 proposal.
 
 **Release dependency:** MS-BASELINE -> MS-CONTEXT -> new MS-CONTROL freeze/qualification. T-111 reconciles the integrated subject; T-26/T-27 retain their evidence obligations. M-8 empirical acceptance and M-9/M-10 authorization are unchanged. Existing DONE mechanisms retain their historical receipts; richer current product preservation needs the new gates.
 

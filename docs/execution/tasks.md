@@ -13,7 +13,7 @@ purpose: Flat tasks and subtasks by context. No sprint calendar. Near-term owner
 audience:
   - contributor
   - release-owner
-version: 0.9.4
+version: 0.9.5
 last_verified: 2026-09-10
 lock_head: "1f42de23"
 normative_authority:
@@ -34,7 +34,7 @@ Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technic
 
 **No sprints. No waves.** Check boxes as work completes. **Recommended reading order (not a schedule):** MS-SEE A stack T-16/T-15/T-36/T-37/T-45 is MECHANISM this-branch. T-04/T-05/T-07 landed 2026-09-04 (T-04 carries an open successor obligation; see its row). Do not create `progressive.py` (T-15). T-46 ranking stays `[PROPOSAL]`.
 
-**Current handoff (2026-09-10; shared-tree subject anchored at `aa93fe72d4a7218ab588900ca5247579b87a36c9` plus reviewed local changes).** Leadership accepted T-98, T-99, T-100, T-104, and T-97 after their named falsifiers, the complete `just check`/`just verify` recipe bodies, Python kernel/agency/contracts slices, TypeScript typecheck, and the full npm workspace suite passed on the same subject. T-98 nonmutation protection preceded broad verification; the two initial contract UDS timeouts and four initial CLI file failures were reproduced as sandbox `EPERM` restrictions and passed unchanged with local subprocess/UDS permission. T-101 still owns complete isolated discovery and exact collection/failure/skip accounting, so MS-BASELINE, MS-CONTEXT, and MS-CONTROL remain OPEN; T-26 remains UNFROZEN and T-27/T-51/T-52 remain open. Historical receipts remain scoped to their original subjects.
+**Current handoff (2026-09-10; clean planning subject `1854bef13acf1b2b279a4e3c03b55a133047740d`).** Leadership has accepted T-97 through T-106, plus T-108, under their task-scoped receipts. The latest patch/parser and LAM corrections are committed on the planning subject, and the working tree was clean when this handoff was written. T-109 remains OPEN because MS-BASELINE requires a new complete, zero-failure exact-subject receipt: focused dogfood success cannot waive failures in full discovery. MS-CONTEXT then requires T-107, revised T-77, T-110 and T-111. MS-BASELINE, MS-CONTEXT and MS-CONTROL therefore remain OPEN; T-26 remains UNFROZEN and T-27/T-51/T-52 remain open. Historical counts and receipts remain evidence only for the SHA on which they were produced.
 
 ## Near-term ownership and ready work
 
@@ -43,14 +43,17 @@ Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technic
 - Terms such as "sprint", "wave", and "phase" are retired historical designations and carry no operational authority.
 - The `requires:` edges are the sole dependency ordering.
 
-### Active Ready-Work Board (`requires: []`)
+### Active convergence board
 
-| Task ID | Stream | Package | Subsystem & Task | Prerequisites | Falsifier Command |
-|---|---|---|---|---|---|
-| **T-98** | **Stream C** | GATE-01 | Runner-independent isolation and nonmutation | `[]` (`ACCEPTED` 2026-09-10) | `python3 -m unittest test.contracts.test_suite_nonmutation test.tools.test_check_test_hygiene -v` |
-| **T-99** | **Stream A** | INS-01 | Lossless terminal projection (fix `abstained` -> `completed` collapse) | `[]` (`ACCEPTED` 2026-09-10) | `python3 -m unittest test.apps.coding_max.test_coding_max_facade test.falsifiers.test_rf90_generic_entrypoint test.falsifiers.test_completion_gate_scope -v` |
-| **T-100** | **Stream B** | CTX-01 | Canonical working-memory and recovery value contracts | `[]` (`ACCEPTED` 2026-09-10) | `python3 -m unittest test.contracts.test_semantic_task_state -v` |
-| **T-97** | **Stream A** | INS-01 | CLI product surface: `--help` exit zero & `-m` flag disambiguation | `[]` (`ACCEPTED` 2026-09-10; T-84 done) | `npm --workspace @vanguard/cli test` |
+This table is a projection of the `requires:` edges below. `READY` authorizes work; `BLOCKED` means its named predecessor lacks an accepted receipt. A focused-green implementation candidate remains unchecked until independent review accepts its full task contract.
+
+| Task | Stream | State | Requires | Concrete exit |
+|---|---|---|---|---|
+| **T-109** | C, with A/B defect owners | `READY` | T-97/T-98/T-99/T-101/T-102/T-103/T-108 accepted | One clean SHA passes complete Python discovery, full `just check` and `just verify` bodies, TypeScript gates and nonmutation comparison with zero failures/errors. |
+| **T-77** | B | `READY` | T-104/T-105 accepted | Stable L1-L3 bytes, bounded artifact receipts, trailing goal echo and explicit cache missingness pass the named falsifier. |
+| **T-107** | A | `BLOCKED` on T-109 | T-100/T-104/T-105/T-106 accepted; T-109 open | Registered selection/recovery facts are durable before external calls; cold replay restores identity/counters without repeating effects. |
+| **T-110** | A | `BLOCKED` on T-107/T-77 | T-107 and T-77 | A deterministic 100-or-more-turn fixture survives forced compaction and fresh-process restart without losing critical state or admitting false completion. |
+| **T-111** | C | `BLOCKED` on T-109/T-110 | T-109 and T-110 | Final exact-subject gate reconciles MS-BASELINE/MS-CONTEXT and hands an unfrozen control candidate to T-26. |
 
 ### Stream Ownership and Boundaries
 
@@ -128,6 +131,15 @@ Work executes on the active feature branch (`feat/aether-framework-electroweak-c
   - **files**: gate/tooling configuration and existing execution handoffs; defects remain assigned to their source owners
   - **contract**: Close MS-BASELINE only on exact-subject complete receipts. Remaining failures found by T-101 are mandatory, not exclusions from this gate.
   - **falsifier**: `python3 -m unittest discover -s test -t .` in the qualified isolated runner, complete `just check`, `just verify` recipe bodies and TypeScript gates. Zero failures/errors, no unaccounted module loss, source/index/corpus unchanged. Missing commands block acceptance.
+  - **implementation protocol**:
+    1. Start from a committed, clean candidate; record full SHA, branch, Python/uv/Node/npm versions, platform, runner identity, `justfile` digest and LDA identity. A dirty candidate is ineligible rather than “qualified with changes.”
+    2. Execute the nonmutation and collection-integrity falsifiers before broad discovery. The isolated repository has independent Git metadata, redirected writable corpora, provider credentials removed and network denied. Capture protected source/index/corpus digests before the first test.
+    3. Run full unittest discovery once as the authoritative collection. Record collected, executed, passed, failed, errored and skipped as disjoint counts that reconcile arithmetically. Preserve every traceback and import error. A focused rerun may diagnose a failure but cannot replace this receipt.
+    4. Run the literal current `just check` and `just verify` recipes and the declared TypeScript gates. A missing executable or dependency is `not_run` and blocks acceptance. Do not infer recipe success from individually green subsets.
+    5. Recompute protected digests and inspect `git status --porcelain`. Any contributor-source, index-of-record or corpus mutation invalidates the run. Route real defects to the owning stream, produce a new committed candidate and restart the exact-subject gate.
+    6. C independently reviews command completeness, count arithmetic, skips, output digests and candidate identity. Only then may T-109 be checked and MS-BASELINE move to `CLOSED`.
+  - **required evidence fields**: `subject_sha`, `dirty_state`, `runner`, `platform`, `python`, `uv`, `node`, `npm`, `commands[]`, `started_at`, `finished_at`, `collected`, `executed`, `passed`, `failed`, `errors`, `skipped`, `import_failures[]`, `output_digests[]`, `pre_state_digest`, `post_state_digest`, `justfile_digest`, `lda_identity`, `reviewer_disposition`.
+  - **rejection rules**: any nonzero failure/error; unreconciled counts; a focused-test waiver; an unexecuted recipe; changed protected bytes; a SHA different from the tested subject; or prose such as “environment-only” without a reproducible isolation falsifier.
 
 ### Context: Canonical context, cache and deterministic recovery
 
@@ -169,6 +181,14 @@ Work executes on the active feature branch (`feat/aether-framework-electroweak-c
   - **files**: `runtime/{session,task_state,checkpoints,ledger_emitter}.py`, runtime tests; C owns any schema-generator inputs/event registry tooling needed by this handoff
   - **contract**: NT-1.2, NT-C05, NT-R03. Bind values and policies through composition; emit registered mhf.event/2 facts before inference/dispatch; reconstruct state without repeated effects; bump identities when behavior changes.
   - **falsifier**: `python3 -m unittest test.runtime.test_task_state_fold test.runtime.test_resume_identity test.runtime.test_context_layer_residency test.runtime.test_coding_resume -v`; event-write failure blocks next external call, resume preserves counters and prefix epoch. `python3 tools/linters/check_event_coverage.py`.
+  - **implementation checklist**:
+    - Reuse `Session`, `LedgerEmitter`, `fold_task_state`, existing checkpoint/reconstruction code and `ProtocolRecoveryState`; do not add another session loop, event store, checkpoint authority or retry controller.
+    - At composition, bind repository subject, context-policy digest, prompt/tool epoch, model route, serializer and counter identity. Behavior-affecting changes create a new identity; they never reuse an old cache/freeze identity.
+    - Before inference, durably emit a registered `ContextSelectionRecorded` fact containing the selection/prefix/state/policy/request identities, cursor, token count and omissions required by `aether.prompt-selection/1`. Failure to append stops inference.
+    - After each semantic attempt, durably emit the complete recovery snapshot through the registered recovery/state event before wait, retry, reground, replan or another dispatch. Persist the chosen delay and deadline once. Failure to append stops the next external action.
+    - On cold resume, fold the ledger, validate schema/lineage/reducer/subject identities, reconcile open intents and children, and reconstruct counters, attempts, pending operation, deadline, remaining budgets, prefix epoch and settled effects. Never replay a settled or occurrence-unknown effect.
+    - Register every new production-emittable event through C-owned schema/catalog generator inputs and keep `check_event_coverage.py` green. Runtime remains declarative with respect to execution: no `subprocess` import under `vanguard/packages/runtime/`.
+  - **fault injections**: selection append failure before model call; recovery append failure before retry; crash after selection append but before inference; crash after `EffectStarted` but before settlement; restart with wrong subject/policy/reducer; duplicate resume request; expired pending-operation deadline.
 
 - [ ] **T-110: Long-session preservation qualification**
   - **package / owner**: CTX-01 / REC-01 / Stream A
@@ -176,6 +196,13 @@ Work executes on the active feature branch (`feat/aether-framework-electroweak-c
   - **files**: **[NEW]** `test/runtime/test_long_session_context_recovery.py`, existing cold-resume fixtures; no new runtime path
   - **contract**: NT-I02. At least 100 deterministic turns, forced compaction and fresh-process restart, misleading tool output, stale verification, pending-operation deadline and exhausted recovery. Dedicated test budget, unchanged public presets.
   - **falsifier**: `python3 -m unittest test.runtime.test_long_session_context_recovery test.falsifiers.test_rf25_cold_continuation test.falsifiers.test_rf23_trajectory_content -v`; exact intent/constraints, next action, settled effects and accounting preserved; no false completion.
+  - **fixture blueprint**:
+    - Use a deterministic fake clock, deterministic model/operator tape, isolated event store and dedicated test-only context/turn budget. Assert the shipped fast/balanced/max preset bytes and declared ceilings are unchanged.
+    - Drive at least 100 accepted or rejected turns with multiple high-watermark crossings, low-watermark compactions and at least two fresh-process reconstructions at different boundaries.
+    - Include oversized observations, bounded artifact receipts, misleading untrusted text, one stale verification, a repeated-action six-turn window, length-two/three cycles, one pending operation, a persisted transient delay and exhausted reground/replan allowances.
+    - At every checkpoint compare objective, constraints, active plan, next action, modified resources, last material failure, latest applicable verification, settled descriptors, remaining budgets, recovery counters/history, pending operation/deadline and epoch/serializer/counter identities.
+    - Prove that omission affects presentation only: durable task facts remain reconstructable; newest complete interaction remains; stale verification cannot authorize finish; exhausted recovery terminates explicitly; no settled effect executes twice.
+  - **acceptance matrix**: uninterrupted run versus cold-resumed run must yield identical semantic state and terminal disposition; exact event sequence numbers may differ only where the contract explicitly permits recovery facts. Test output must name the first divergent field.
 
 - [ ] **T-111: Near-term gate reconciliation and control handoff**
   - **package / owner**: GATE-01 / EXP-01 / Stream C
@@ -183,6 +210,12 @@ Work executes on the active feature branch (`feat/aether-framework-electroweak-c
   - **files**: existing five execution files; `benchmarks/ladder/control_preregistration.json` validation and receipt references; knowledge regenerated, never hand-edited
   - **contract**: NT-I02. Verify final integrated SHA and MS-BASELINE/MS-CONTEXT predicates; keep T-26 UNFROZEN until all applicable dependencies and live-smoke dispositions are satisfied. This task does not make a paid call or close MS-CONTROL.
   - **falsifier**: `python3 -m unittest test.benchmarks.test_preregistration test.falsifiers.test_rel02_frozen_canary -v`, full isolated gate on final subject; changing context/model/schema/policy identity refuses reuse of an old freeze.
+  - **reconciliation checklist**:
+    1. Verify accepted T-109 and T-110 receipts refer to the integrated candidate or rerun them on the final candidate when any executable, schema, prompt, model, tool, serializer, counter, policy or preset identity changed.
+    2. Run preregistration/frozen-canary falsifiers and the complete T-109 gate again. Confirm all protected bytes and the working tree remain unchanged.
+    3. Reconcile `spec.md`, `technical.md`, `backlog.md`, `tasks.md` and `milestones.md`; regenerate knowledge through its generator. Status prose must agree with checkboxes and milestone rows.
+    4. Mark MS-CONTEXT closed only after independent receipt review. Record the exact subject and explicit missingness; fixture success makes no live provider, cache-rate or benchmark-quality claim.
+    5. Hand the accepted subject to T-26 as an unfrozen control candidate. T-26/T-27/T-51/T-52 and applicable T-79/T-89/T-92–T-95 obligations remain control work.
 
 New test modules above are deliverables of their rows; absence before implementation is not a pass. Existing T-04/T-79/T-89/T-97 IDs retain their contracts; T-99/T-102/T-103 assign the successor integration work, not competing implementations. Historical checked mechanisms stay checked; all new rows remain unchecked until their receipts are accepted.
 
@@ -726,6 +759,12 @@ These leaves refine existing T-17/T-28–T-34/T-49–T-58/T-67/T-80/T-96 familie
   - **file_touches**: [`vanguard/packages/agency/context/compiler.py`, `vanguard/packages/agency/context/compaction.py`, **[NEW]** `test/agency/test_cache_breakpoints.py`]
   - **specification**: NT-C01–C06: preserve L1–L3 bytes, bounded test receipts and goal echo; negotiate cache controls through the provider serializer. Successful verification receipts remain in working state even when their raw passing logs are omitted. T-76 is not a prerequisite for provider-neutral context behavior.
   - **acceptance_falsifier**: `python3 -m unittest test.agency.test_cache_breakpoints -v` proves stable prefix bytes and schema order, bounded artifact-addressed results, L5 tail echo and explicit cache-usage missingness. No universal fixture or live 85% cache-hit threshold.
+  - **implementation checklist**:
+    - Compile only through the existing `ContextCompiler`; retain the frozen L1-L3 prefix and canonical tool-schema order for the composition epoch.
+    - Place provider cache controls only through T-105's `PromptCodec` negotiation. Unsupported routes receive byte-identical unmarked messages.
+    - Convert oversized result bodies into subject-bound artifact receipts before selection; retain verification command, environment, counts, exit status and freshness even when raw output is omitted.
+    - Apply NT-C04 eviction order and preserve the newest complete interaction. Append the complete objective/constraint goal echo at L5 after dynamic evidence so late-turn instructions cannot replace it.
+    - Emit actual provider cache observations or explicit null. Prefix equality proves deterministic bytes, never a hit, speedup, cost reduction or authorized budget widening.
 
 - [ ] **T-78: Exact-match `str_replace` primitive**
   - **package**: CHANGE

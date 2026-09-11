@@ -8,7 +8,7 @@ status: living
 owner: repository-governance
 canonical_for:
   - execution-technical-handbook
-version: "0.9.3"
+version: "0.9.4"
 purpose: Self-explaining engineering handbook for future work. Present-tense architecture stays in docs/architecture and docs/backend.
 derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN.md
@@ -142,6 +142,226 @@ Recovery does not change grants, tool authorization or the parent budget. Near-t
 Pure contracts may land before baseline acceptance, but runtime enablement T-107 requires T-109. C accepts MS-BASELINE from complete integrated receipts; A binds context/recovery only after B's values/algorithms and A's provider codec are ready. B/T-77 then qualifies cache/receipt behavior without assuming a backend hit rate. A/T-110 runs a >=100-turn deterministic scenario with forced compaction, restart, stale verification and pending-operation exhaustion using a dedicated test profile. It MUST NOT enlarge balanced's product turn ceiling.
 
 T-111 reruns all required gates on the final subject, reconciles MS-CONTEXT and hands a clean exact identity to T-26. Register policy, model, prompt, tool and serializer identity before live L0/L2 measurement; changed behavior invalidates an earlier freeze. Neither mock success nor a negative valid control result accepts a positive capability gate. C updates only the existing five execution files and generator-produced knowledge; production changes also update their mapped architecture owners.
+
+### Remaining critical path: implementation runbook
+
+The only near-term dependency path is:
+
+```text
+T-109 -> MS-BASELINE
+MS-BASELINE + T-107 + T-77 -> T-110
+T-109 + T-110 -> T-111 -> MS-CONTEXT
+MS-CONTEXT -> T-26 control-freeze work may begin
+```
+
+T-77 may be implemented before T-109 because its accepted prerequisites are T-104/T-105. T-107 cannot be enabled before T-109. If A and B work concurrently, use isolated repositories or explicit disjoint file leases: A owns runtime integration and B owns context compiler/compaction. C alone edits execution status and generator inputs. Merge T-107 and T-77 before constructing T-110 so the preservation fixture exercises the actual integrated path.
+
+#### T-109 exact-subject baseline procedure
+
+Use an isolated repository with independent `.git`, not a linked worktree that shares the contributor index. Redirect temporary directories, bytecode and test databases into the isolated root or temporary storage. Remove provider keys and block network. Begin from a clean committed subject.
+
+```bash
+git rev-parse HEAD
+git status --porcelain
+sha256sum justfile uv.lock package-lock.json
+UV_CACHE_DIR=/tmp/aether-uv-cache uv run lda identity --json
+UV_CACHE_DIR=/tmp/aether-uv-cache uv run lda doctor --json
+UV_CACHE_DIR=/tmp/aether-uv-cache uv sync --frozen
+
+UV_CACHE_DIR=/tmp/aether-uv-cache uv run python3 -m unittest \
+  test.contracts.test_suite_nonmutation \
+  test.contracts.test_collection_integrity \
+  test.tools.test_check_test_hygiene -v
+
+UV_CACHE_DIR=/tmp/aether-uv-cache uv run python3 \
+  -m unittest discover -s test -t .
+
+UV_CACHE_DIR=/tmp/aether-uv-cache uv run just check
+UV_CACHE_DIR=/tmp/aether-uv-cache uv run just verify
+npm run typecheck
+npm --workspace @vanguard/cli test
+git status --porcelain
+```
+
+The complete discovery command is authoritative. If it fails, preserve its output and run the smallest focused module needed to diagnose the failure. Fix the owning source or test fixture, commit a new candidate and restart the broad gate. A focused pass after a broad failure demonstrates localization only. It does not convert the broad receipt to green. Test counts are accepted only when collected equals passed plus failed plus errors plus skipped and executed equals passed plus failed plus errors.
+
+Record exact commands, exit codes, environment versions, start/end times, output digests and protected pre/post state. Store large raw output in the existing evidence mechanism or an ephemeral CI artifact; do not create a Markdown report. Put only the concise accepted receipt in `tasks.md` and milestone disposition in `milestones.md`.
+
+#### T-107 runtime binding sequence
+
+The runtime integration uses the existing `Session`, `LedgerEmitter`, task-state fold and episode recovery objects. The core rule is write-before-use: any decision that authorizes external work becomes durable before that work occurs.
+
+```python
+def execute_next_turn(session, ledger, model, environment):
+    events = ledger.read_verified(session.episode_id)
+    state = fold_task_state(events, objective=session.objective)
+    state = validate_reconstruction(
+        state,
+        subject=session.subject_digest,
+        lineage=session.lineage_id,
+        reducer=session.reducer_version,
+        composition=session.composition_digest,
+    )
+    reconcile_open_intents_and_children(events, environment)
+
+    epoch = bind_epoch_identity(
+        prompt=session.system_prompt,
+        tools=session.ordered_tool_schemas,
+        context_policy=session.context_policy,
+        model_route=session.model_route,
+        serializer=session.prompt_codec.serializer_id,
+        counter=session.prompt_codec.counter_id,
+        recovery_policy=session.recovery_policy,
+    )
+    selection = session.context_compiler.compile(state, epoch=epoch)
+
+    # Atomic gate: append failure means zero model calls.
+    ledger.emit_registered(
+        "ContextSelectionRecorded",
+        payload=selection.identity_payload(),
+    )
+    proposal = model.infer(selection.final_serialized_request)
+
+    outcome = session.dispatch_or_classify(proposal)
+    recovery = session.recovery_policy.decide(state.recovery_state, outcome)
+
+    # Atomic gate: append failure means zero wait/retry/next dispatch.
+    ledger.emit_registered(
+        recovery.registered_event_kind,
+        payload={"recoveryState": recovery.state.to_dict()},
+    )
+    return apply_durable_recovery_action(recovery)
+```
+
+`identity_payload()` must include the fields required by `aether.prompt-selection/1`, final serialized token count and ordered omission reasons. Do not emit prompt bodies as general ledger metadata; retain authorized prompt bytes through the existing artifact boundary and bind them by digest.
+
+The recovery carrier must be a kind admitted by the event schema. `runtime/task_state.py` currently recognizes compatibility spellings, but a reducer branch is not a registration. If T-107 chooses `RecoveryStateUpdated`, C first adds it to canonical schema/catalog generator input and test vectors. Otherwise extend the registered `EpisodeStateChanged` payload without weakening its existing consumers. In both cases `check_event_coverage.py` must prove every production-emittable kind is registered.
+
+Fresh-process resume follows this pseudocode:
+
+```python
+def resume_without_replay(ledger, task, ports):
+    events = ledger.verify_and_read(task.episode_id)
+    state = fold_task_state(events, objective=task.brief)
+    validate_schema_lineage_subject_and_policy(state, task)
+
+    reconcile_open_intents(events, ports.environment)
+    reconcile_open_children(events, ports.child_runtime)
+    state = fold_task_state(ledger.verify_and_read(task.episode_id), objective=task.brief)
+
+    assert every_settled_descriptor_is_unique(state.settled_effects)
+    assert state.recovery_state.counters_are_monotonic()
+    assert state.remaining_budgets.do_not_exceed_declared_ceiling()
+
+    if state.pending_operation:
+        return reconcile_under_original_deadline_and_reservation(state)
+    return compile_next_turn(state)
+```
+
+Required fault-injection tests interrupt at each boundary:
+
+| Boundary | Injected fault | Required observation |
+|---|---|---|
+| Before selection append | Ledger rejection | Zero model calls; explicit runtime failure. |
+| After selection append, before inference | Process crash | Resume may infer once from the same validated selection identity. |
+| Before recovery append | Ledger rejection | Zero waits, retries or subsequent effects. |
+| After `EffectStarted`, before result | Process crash | Occurrence stays unknown until reconciliation; no blind replay/refund. |
+| After effect settlement | Duplicate resume | Settled descriptor is not executed again. |
+| During pending poll | Deadline expires | Explicit stop/recovery failure under the original reservation. |
+| During reconstruction | Subject/policy/reducer mismatch | Fail closed before prompt compilation. |
+
+#### T-77 provider-neutral cache and context procedure
+
+T-77 changes selection and presentation; it does not add a cache authority. The provider adapter remains responsible for serialization and supported cache controls through T-105.
+
+```python
+def compile_cached_packet(view, policy, codec):
+    prefix = freeze_l1_l3(
+        system=view.system,
+        capability_cards=view.capability_cards,
+        ordered_tools=view.ordered_tools,
+        environment=view.environment_contract,
+    )
+    assert len(prefix.capability_cards) <= 4096
+
+    mandatory = render_critical_state(view.task_state)
+    interactions = correlate_complete_tool_interactions(view.interactions)
+    evidence = bound_bodies_and_create_artifact_receipts(view.evidence, policy)
+    tail = render_complete_goal_echo(view.objective, view.constraints)
+
+    candidate = assemble(prefix, mandatory, evidence, interactions, tail)
+    while codec.count_final(candidate) > policy.low_target:
+        if remove_stale_evidence(candidate):
+            continue
+        if elide_lowest_priority_body(candidate):
+            continue
+        if drop_lowest_priority_evidence(candidate):
+            continue
+        if drop_oldest_complete_interaction_except_newest(candidate):
+            continue
+        break
+
+    request = codec.serialize_final(candidate)
+    if codec.count_serialized(request) > policy.usable:
+        raise ContextBudgetExceeded
+    return request, selection_identity(candidate, request)
+```
+
+Compaction starts above the configured high watermark and targets the low watermark. Mandatory state may finish above low, but never above usable. Each omission has a stable item key and one NT-C04 reason. Successful verification is represented by command, environment, subject, collected/executed counts, exit status, freshness and output artifact even when its raw body is evicted. The newest interaction includes both action and result; never retain an orphan tool result or tool call.
+
+Cache controls are applied only after route capability negotiation. Unsupported routes retain the original serialized messages. Cache observation distinguishes `0` from missing: zero means the provider reported no cached tokens; null means it did not report the metric. Admission always reserves worst-case uncached input.
+
+#### T-110 deterministic 100-turn qualification fixture
+
+Build one test fixture, not a parallel runtime. It uses a deterministic fake clock, scripted model, isolated durable event store and the production composition/session path. Its test-only budget must permit at least 100 turns while assertions prove the shipped preset files and declared ceilings are byte-identical before and after.
+
+Recommended schedule:
+
+| Turn range | Stimulus | Required assertion |
+|---|---|---|
+| 1-20 | Normal observations and effects | Objective, constraints, plan, next action and budgets accumulate monotonically. |
+| 21-35 | Oversized tool/test bodies | Bodies become artifact receipts; newest complete interaction survives. |
+| 36-45 | Stale evidence and misleading tool text | Stale evidence omitted; untrusted text cannot replace goal or expand grants. |
+| 46 | Fresh-process restart | Reconstructed semantic vector equals uninterrupted control. |
+| 47-65 | Repeated failures and two/three cycles | One reground, one replan, then bounded stop unless verified progress changes. |
+| 66-75 | Pending operation and transient retry | One operation identity, persisted delay/deadline and original reservation. |
+| 76 | Crash between intent and settlement | Unknown occurrence reconciled without duplicate execution. |
+| 77-95 | Multiple compaction epochs | Prefix remains stable within epoch; behavior change requires a new epoch. |
+| 96 | Second fresh-process restart | Counters, settlements, budgets, deadline and latest verification match control. |
+| 97-100+ | Stale finish then fresh verification | Stale finish rejected; fresh applicable verification permits only its truthful disposition. |
+
+Run the uninterrupted and resumed variants from the same scripted inputs. Canonically encode and compare the NT-1.7 semantic vector after each restart and at termination. Failure output names the first divergent field and the event prefix that produced it. Assert unique settled descriptors and model/effect call counts so state equality cannot hide duplicated work.
+
+#### T-111 reconciliation and control handoff
+
+T-111 performs no feature development. Freeze executable changes first, then run the preregistration/frozen-canary falsifiers and the entire T-109 recipe on the integrated clean candidate. Any changed prompt, tool schema, model route, serializer/counter, context policy, recovery policy, preset, lockfile, event schema or fixture corpus invalidates the earlier compatible receipt.
+
+Review the five execution files as a single projection:
+
+1. `spec.md` contains normative contracts and forbidden behavior, without status prose.
+2. `technical.md` contains implementation algorithms, operational recipes and fault injection.
+3. `tasks.md` contains checkboxes, exact dependencies, ownership and accepted receipts.
+4. `backlog.md` contains package lifecycle, without becoming another task queue.
+5. `milestones.md` contains stable outcomes and accepted/open dispositions, without implementation detail.
+
+Regenerate knowledge through `just docs-knowledge`; never hand-edit generated output. Run `lda index --delta`, `lda drift --json`, `just docs-check`, `just check` and `just verify`. Zero stale paths are required for touched code/docs; broad pre-existing orphan/undocumented inventory is reported separately and cannot be silently called zero drift.
+
+The accepted handoff records a clean candidate SHA and leaves T-26 `UNFROZEN`. Starting MS-CONTROL means auditing and completing applicable T-79/T-89/T-92-T-95 plus T-51/T-52, then creating the T-26 freeze and running T-27. It does not mean MS-CONTROL is closed, a paid run is authorized, or post-control T-80/T-96/CAS/specialist work may start.
+
+### Near-term review and failure-routing rules
+
+| Finding | Owning stream | Required action |
+|---|---|---|
+| Full discovery, dependency, runner or nonmutation failure | C, then source owner | Preserve receipt; classify exact failure; repair candidate; rerun complete gate. |
+| Provider serialization/count/cache observation defect | A | Fix adapter/codec and adversarial serialization tests; preserve B compiler ownership. |
+| Context selection, compaction or goal-echo defect | B | Fix existing compiler/compaction path; do not add a second compiler. |
+| Recovery decision/cycle detection defect | B | Fix pure recovery/episode policy; preserve bounded action set. |
+| Runtime event ordering, replay or checkpoint defect | A | Fix session/fold/checkpoint/emitter integration; keep one writer/store. |
+| Event schema/catalog coverage defect | C inputs, A consumers | Register via generator inputs, regenerate and rerun event coverage. |
+| Long-session fixture exposes product defect | Owning A/B source stream | Fix production path; the fixture remains a falsifier and is not weakened. |
+| Documentation status contradicts receipts | C | Keep milestone open; reconcile all five files before handoff. |
+
+Stop and return the task to review when a proposed change adds kernel LOC, a second compiler/retry loop/store, runtime subprocess execution, automatic authority expansion, an unregistered event, a silent skip, relaxed collection floor, larger public preset budget, inferred cache metric or a focused-test waiver. Those changes exceed NT-1 or violate its acceptance boundary.
 
 **FACT STORE path:** `adapters/stores/event_store.py`.
 **I-STATE.** Lock `66aa7a3c`: `domain/task_state.py` MISSING. Branch: LIVE `8637db55` (`SemanticTaskState`; fold in `runtime/task_state.py`). MS-RESUME `CLOSED`.

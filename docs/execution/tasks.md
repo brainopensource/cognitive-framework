@@ -13,7 +13,7 @@ purpose: Flat tasks and subtasks by context. No sprint calendar. Near-term owner
 audience:
   - contributor
   - release-owner
-version: 0.9.6
+version: 0.9.7
 last_verified: 2026-09-11
 lock_head: "1f42de23"
 normative_authority:
@@ -55,6 +55,8 @@ This table is a projection of the `requires:` edges below. `READY` authorizes wo
 | **T-110** | A/C | `ACCEPTED` | T-107 and T-77 | The 104-turn fixture crosses four fresh interpreters and preserves the semantic vector on `2989d57d`. |
 | **T-111** | C | `ACCEPTED` | T-109 and T-110 | Exact-subject full gates reconcile and close MS-BASELINE/MS-CONTEXT on `2989d57d`. |
 | **T-26** | C/Leadership | `READY; UNFROZEN` | T-111 plus applicable T-79/T-89/T-92–T-95/T-51/T-52 evidence | Audit the control prerequisites and freeze one eligible exact subject; make no paid call in the freeze task. |
+| **T-27** | B/C | `BLOCKED` | T-26 frozen on an accepted exact subject | Execute the single-agent canary through `CodingMaxFacade` on the frozen subject and publish a disposition in {POSITIVE, NEGATIVE, UNDETERMINABLE, INVALID}. This is the single prerequisite edge for every post-control implementation branch. |
+| **FH-1 tree** | A/B/C | `BLOCKED` | T-27 accepted (MS-CONTROL closed) | 33 atomic subtasks with disjoint file leases and executable falsifiers are staged in the [FH-1 atomic subtask board](#fh-1-atomic-subtask-board-proposal). A negative or undeterminable T-27 disposition does not unlock them. |
 
 ### Stream Ownership and Boundaries
 
@@ -274,7 +276,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 
 ### Context: Post-control horizon (FH-1) [PROPOSAL]
 
-All leaves remain unchecked and provisional. `requires:` edges are the only execution ordering; “Sprints 3–5” is a horizon label, not a schedule. T-27 below means **MS-CONTROL accepted**, including T-111, T-26 and all applicable predecessors; a negative T-27 disposition does not unlock prototypes. Preserve NT-1 Stream A/B/C ownership and scope. Future owner labels below identify subsystems, not assignments to concurrent agents. Before implementation, refine each leaf into exact files, registered schemas, runnable falsifiers, finite budgets and migration obligations using the measured control subject.
+All leaves remain unchecked and provisional. `requires:` edges are the only execution ordering; “Sprints 3–5” is a horizon label, not a schedule. T-27 below means **MS-CONTROL accepted**, including T-111, T-26 and all applicable predecessors; a negative T-27 disposition does not unlock prototypes. Preserve NT-1 Stream A/B/C ownership and scope. Future owner labels below identify subsystems, not assignments to concurrent agents. Before implementation, refine each leaf into exact files, registered schemas, runnable falsifiers, finite budgets and migration obligations using the measured control subject. That refinement is now done: see the [FH-1 atomic subtask board](#fh-1-atomic-subtask-board-proposal) below, which slices these leaves into 33 atomic rows with disjoint file leases and executable falsifiers. The parent rows here remain the acceptance contracts; the subtask board is how they are executed.
 
 These leaves refine existing T-17/T-28–T-34/T-49–T-58/T-67/T-80/T-96 families rather than creating competing implementations. [FH-1](spec.md#fh-1-post-control-backend-horizon-proposal) supplies contracts and [milestones](milestones.md#post-control-horizon-release-predicates-fh-1) supplies acceptance. Official evaluation of the single controller does not require optional CAS/campaign/memory work; any measured arm using those features does require their accepted gates. No paid calls or public submissions are authorized by this tree.
 
@@ -397,6 +399,98 @@ These leaves refine existing T-17/T-28–T-34/T-49–T-58/T-67/T-80/T-96 familie
   - **prototype leaves**: Map accepted profile features to evidence and canonical architecture, migrate/version schemas, retire superseded paths with successor tests.
   - **falsifier / acceptance**: Complete release recipes and independent evidence review; retain M-8/M-9/M-10 predicates. T-127 required only for a SOTA claim; T-116/T-118/T-120/T-121 required when corresponding features ship.
 
+
+#### FH-1 atomic subtask board [PROPOSAL]
+
+Every row below is `[PROPOSAL]` and **BLOCKED on T-27** (MS-CONTROL accepted). This
+board authorizes no implementation; it makes the coarse leaves above executable the
+moment the control edge closes. Each row declares one owning stream, one exclusive
+file lease, its exact predecessor edges, and a copy-paste falsifier. A row whose
+falsifier does not yet exist is not startable — writing the falsifier is the row's
+first act, and it must fail before the implementation lands.
+
+**Stream assignment for post-control work.** `A` = runtime and product composition;
+`B` = pure domain, algorithms and adapters; `C` = integrity, gates, benchmarks and
+the merge queue. This extends the NT-1 Stream table above without re-assigning any
+NT-1 file: `runtime/cas/`, `runtime/campaign/` and `runtime/delegation.py` join A;
+`domain/cas/`, `domain/delegation/`, `domain/campaign/`, `domain/memory/` and
+`adapters/cas/` join B; the cross-layer fault-injection and concurrency suites join C.
+
+| Subtask | Stream -> Gate | Requires | Leased files (exclusive) | Falsifier |
+|---|---|---|---|---|
+| **T-112a** Tree values and `H_tree` | B -> MS-CAS | T-27 | `vanguard/packages/domain/cas/tree.py`; `test/domain/test_cas_tree.py` | `python3 -m unittest test.domain.test_cas_tree -v` |
+| **T-112b** Preimage validator and edit-set apply | B -> MS-CAS | T-112a | `vanguard/packages/domain/cas/edit_set.py`; `test/domain/test_cas_edit_set.py` | `python3 -m unittest test.domain.test_cas_edit_set -v` |
+| **T-113a** Disk blob store with directory fsync | B -> MS-CAS | T-112a | `vanguard/packages/adapters/cas/blob_store.py`; `test/adapters/test_cas_blob_store.py` | `python3 -m unittest test.adapters.test_cas_blob_store -v` |
+| **T-113b** Capture and isolated materialization | B -> MS-CAS | T-113a | `vanguard/packages/adapters/cas/workspace.py`; `test/adapters/test_cas_workspace.py` | `python3 -m unittest test.adapters.test_cas_workspace -v` |
+| **T-114a** Promotion value, `I(P)`, generation algebra | B -> MS-CAS | T-112b | `vanguard/packages/domain/cas/promotion.py`; `test/domain/test_cas_promotion.py` | `python3 -m unittest test.domain.test_cas_promotion -v` |
+| **T-114b** `prepare_and_promote` Phases 0–5 | A -> MS-CAS | T-113b, T-114a | `vanguard/packages/runtime/cas/promote.py`; `test/runtime/test_cas_promote.py` | `python3 -m unittest test.runtime.test_cas_promote -v` |
+| **T-114c** Commit critical section and lost-reply reconcile | A -> MS-CAS | T-114b | `vanguard/packages/runtime/cas/commit.py`; `test/runtime/test_cas_commit.py` | `python3 -m unittest test.runtime.test_cas_commit -v` |
+| **T-114d** Check-plan sufficiency and verifier attestation | B -> MS-CAS | T-114a | `vanguard/packages/adapters/verification/runner.py`; `test/adapters/test_candidate_verifier.py` | `python3 -m unittest test.adapters.test_candidate_verifier -v` |
+| **T-115a** Journaled export and quarantine engine | B -> MS-CAS | T-114c | `vanguard/packages/adapters/cas/export.py`; `test/adapters/test_cas_export.py` | `python3 -m unittest test.adapters.test_cas_export -v` |
+| **T-115b** Pin closure and bounded mark/sweep GC | B -> MS-CAS | T-115a | `vanguard/packages/adapters/cas/retention.py`; `test/adapters/test_cas_retention.py` | `python3 -m unittest test.adapters.test_cas_retention -v` |
+| **T-116a** CAS fault-injection suite (`F1`–`F3`, `X1`–`X2`) | C -> MS-CAS | T-115b | `test/contracts/test_cas_fault_injection.py` | `python3 -m unittest test.contracts.test_cas_fault_injection -v` |
+| **T-116b** Fresh-process concurrency and ABA falsifiers | C -> MS-CAS | T-116a | `test/falsifiers/test_cas_concurrency.py` | `python3 -m unittest test.falsifiers.test_cas_concurrency -v` |
+| **T-116c** Product-profile CAS integration qualification | C -> MS-CAS | T-116b | `test/integration/test_cas_product_profile.py` | `python3 -m unittest test.integration.test_cas_product_profile -v` |
+| **T-117a** Specialist request/findings wire schemas | B -> MS-DELEGATION | T-27 | `vanguard/packages/domain/delegation/specialist.py`; `test/domain/test_specialist_wire.py` | `python3 -m unittest test.domain.test_specialist_wire -v` |
+| **T-117b** Settlement value and conservation predicate | B -> MS-DELEGATION | T-117a | `vanguard/packages/domain/delegation/settlement.py`; `test/domain/test_delegation_settlement.py` | `python3 -m unittest test.domain.test_delegation_settlement -v` |
+| **T-118a** Five-state dispatch/settlement FSM | A -> MS-DELEGATION | T-117b | `vanguard/packages/runtime/delegation.py`; `test/runtime/test_delegation_fsm.py` | `python3 -m unittest test.runtime.test_delegation_fsm -v` |
+| **T-118b** `reconcile_delegation` and cancellation propagation | A -> MS-DELEGATION | T-118a | `vanguard/packages/runtime/delegation_recovery.py`; `test/runtime/test_delegation_recovery.py` | `python3 -m unittest test.runtime.test_delegation_recovery -v` |
+| **T-118c** Delegation fault-injection suite (`D1`–`D2`) | C -> MS-DELEGATION | T-118b | `test/contracts/test_delegation_fault_injection.py` | `python3 -m unittest test.contracts.test_delegation_fault_injection -v` |
+| **T-119a** Paired one-variable specialist study harness | C -> MS-SPECIALIST | T-118c, T-122b | `benchmarks/studies/specialist_paired.py`; `test/benchmarks/test_specialist_paired.py` | `python3 -m unittest test.benchmarks.test_specialist_paired -v` |
+| **T-120a** Campaign plan, Kahn sort, `ready(v)` | B -> MS-CAMPAIGN | T-117b | `vanguard/packages/domain/campaign/plan.py`; `test/domain/test_campaign_plan.py` | `python3 -m unittest test.domain.test_campaign_plan -v` |
+| **T-120b** Director runtime client and lease fencing | A -> MS-CAMPAIGN | T-116c, T-118b, T-120a | `vanguard/packages/runtime/campaign/director.py`; `test/runtime/test_campaign_director.py` | `python3 -m unittest test.runtime.test_campaign_director -v` |
+| **T-120c** Zero-mutating-verb and resume falsifiers (`C1`–`C2`) | C -> MS-CAMPAIGN | T-120b | `test/contracts/test_campaign_isolation.py` | `python3 -m unittest test.contracts.test_campaign_isolation -v` |
+| **T-121a** Lesson values and revocation root `R_e` | B -> MS-MEMORY | T-27 | `vanguard/packages/domain/memory/lesson.py`; `test/domain/test_lesson_revocation.py` | `python3 -m unittest test.domain.test_lesson_revocation -v` |
+| **T-121b** Retrieval admission and epoch cache invalidation | A -> MS-MEMORY | T-121a | `vanguard/packages/runtime/memory/admission.py`; `test/runtime/test_retrieval_admission.py` | `python3 -m unittest test.runtime.test_retrieval_admission -v` |
+| **T-121c** Contamination join and held-out lift study | C -> MS-MEMORY | T-121b, T-122a | `benchmarks/studies/memory_lift.py`; `test/benchmarks/test_memory_lift.py` | `python3 -m unittest test.benchmarks.test_memory_lift -v` |
+| **T-122a** Evaluation manifest/attempt schemas | B -> MS-EVAL | T-27 | `vanguard/packages/domain/evaluation/manifest.py`; `test/domain/test_evaluation_manifest.py` | `python3 -m unittest test.domain.test_evaluation_manifest -v` |
+| **T-122b** Independent evaluator boundary | C -> MS-EVAL | T-122a | `benchmarks/protocols/evaluator_boundary.py`; `test/benchmarks/test_evaluator_boundary.py` | `python3 -m unittest test.benchmarks.test_evaluator_boundary -v` |
+| **T-123a** SWE-bench Verified pinned adapter | C -> MS-EVAL | T-122b | `benchmarks/protocols/swebench_verified.py`; `test/benchmarks/test_swebench_verified.py` | `python3 -m unittest test.benchmarks.test_swebench_verified -v` |
+| **T-124a** Aider polyglot pinned adapter | C -> MS-EVAL | T-122b | `benchmarks/protocols/aider_polyglot.py`; `test/benchmarks/test_aider_polyglot.py` | `python3 -m unittest test.benchmarks.test_aider_polyglot -v` |
+| **T-125a** Greenfield corpus and exterior acceptance | C -> MS-EVAL | T-123a, T-124a | `benchmarks/protocols/greenfield_corpus.py`; `test/benchmarks/test_greenfield_corpus.py` | `python3 -m unittest test.benchmarks.test_greenfield_corpus -v` |
+| **T-126a** Frozen official execution and audit recipe | C -> MS-OFFICIAL | T-125a | `benchmarks/ladder/official_run.py`; `test/benchmarks/test_official_run.py` | `python3 -m unittest test.benchmarks.test_official_run -v` |
+| **T-127a** Dated SOTA comparison disposition | C -> MS-SOTA | T-126a | `benchmarks/ladder/sota_comparison.py`; `test/benchmarks/test_sota_comparison.py` | `python3 -m unittest test.benchmarks.test_sota_comparison -v` |
+| **T-128a** Release reconciliation and schema migration | C -> M-8/M-9/M-10 | T-126a | `tools/release/reconcile_horizon.py`; `test/tools/test_release_reconcile.py` | `python3 -m unittest test.tools.test_release_reconcile -v` |
+
+Parent leaves T-112–T-128 stay unchecked until every one of their subtasks is
+accepted. A subtask closes on its own falsifier plus the parent's stated acceptance
+row; a green focused suite alone never checks a parent box.
+
+**Falsifier obligations by clause.** Each suite must contain at least these
+must-fail cases, taken from the spec clause it defends:
+
+- `test_cas_tree`: mode-only change alters `H_tree`; an empty directory alters `H_tree`; `P1`–`P7` each reject with their own code; a symlink is `TREE_UNSUPPORTED` and is never dereferenced; `casefold(NFC(.))` collision is `TREE_CASE_COLLISION`.
+- `test_cas_edit_set`: one bad preimage rejects the whole set; `expected_node` distinguishes a mode change from a content change; double application fails; post-apply parent closure is enforced.
+- `test_cas_commit`: `n` concurrent promotions admit exactly one winner; `A -> B -> A` with a held stale request returns `GENERATION_STALE`, not success; a replayed `transaction_id` with different fields returns `TRANSACTION_IDENTITY_MISMATCH`; a lost reply adopts the original receipt without a second append.
+- `test_cas_export`: an externally modified path is preserved and quarantines rather than being restored over; `completed_paths` drives resume; a committed promotion with a quarantined export reports both.
+- `test_delegation_fsm`: sibling overreservation is refused; a timeout settles at **reserved**, never zero; `CHILD_UNKNOWN` holds the reservation unsettled; cancel does not replenish the envelope.
+- `test_campaign_isolation`: the director module constructs no `EpisodeEngine` and reaches no mutating verb; a superseded `fence_token` cannot append a disposition; a failed dependency never becomes ready; crash after node K resumes at K+1 without recomputing K.
+- `test_lesson_revocation`: a cached retrieval under a superseded `R_e` is refused; a revoked record never returns from recall; revocation appends no rewrite of prior admission events.
+- `test_memory_lift`: a contaminated provenance digest invalidates the run; `Δμ >= 0.05` with `p < 0.05` but a CI lower bound at or below zero vetoes rather than promotes.
+
+#### Disjoint file-lease matrix (post-control) [PROPOSAL]
+
+Zero file-level overlap across streams and across concurrently active subtasks.
+An explicit row lease overrides any directory default, exactly as under NT-1.
+
+| Stream | Post-control exclusive leases | Rows |
+|---|---|---|
+| **A — Runtime and product** | `vanguard/packages/runtime/cas/`, `vanguard/packages/runtime/campaign/`, `vanguard/packages/runtime/memory/admission.py`, `vanguard/packages/runtime/delegation.py`, `vanguard/packages/runtime/delegation_recovery.py`, and the matching `test/runtime/` suites | T-114b, T-114c, T-118a, T-118b, T-120b, T-121b |
+| **B — Domain, algorithms and adapters** | `vanguard/packages/domain/{cas,delegation,campaign,memory,evaluation}/`, `vanguard/packages/adapters/cas/`, `vanguard/packages/adapters/verification/`, and the matching `test/domain/` and `test/adapters/` suites | T-112a, T-112b, T-113a, T-113b, T-114a, T-114d, T-115a, T-115b, T-117a, T-117b, T-120a, T-121a, T-122a |
+| **C — Integrity, gates and benchmarks** | `test/contracts/`, `test/falsifiers/`, `test/integration/`, `benchmarks/`, `tools/release/`, preset catalogs and manifests, the five execution documents, and the merge queue | T-116a, T-116b, T-116c, T-118c, T-119a, T-120c, T-121c, T-122b, T-123a, T-124a, T-125a, T-126a, T-127a, T-128a |
+
+Verified disjoint: no path appears in two stream rows, and no two subtask rows in
+the board above name the same file. `vanguard/packages/kernel/` appears in no lease —
+planned kernel delta is zero against the 1438-LOC ceiling, and current TCB is 1386.
+`vanguard/packages/runtime/` acquires no `import subprocess`: check execution is
+leased to `adapters/verification/` under B (N-06).
+
+**Three cross-stream handoff edges** are the only synchronization points, and each
+is a completed-patch handoff, never concurrent editing of one file:
+
+1. **B -> A at T-114a -> T-114b.** B lands the pure promotion value and generation algebra; A then composes the phases. A never edits `domain/cas/`.
+2. **B -> A at T-117b -> T-118a.** B lands the settlement value; A then wires the FSM into `runtime/delegation.py`. B never edits that module.
+3. **A -> C at T-120b -> T-120c.** A lands the director; C then writes the isolation falsifier that must prove A's module reaches no mutating verb. C never edits `runtime/campaign/`.
 
 ### Context: Instrument truth
 
@@ -611,6 +705,53 @@ These leaves refine existing T-17/T-28–T-34/T-49–T-58/T-67/T-80/T-96 familie
 **T-27 Single-agent canary (eval)** (B)  
 - [ ] Disposition in {POSITIVE, NEGATIVE, UNDETERMINABLE, INVALID}  
 - Requires: T-26  
+- **prerequisite edge (Wave 4):** T-27 acceptance is the single edge that unlocks the FH-1 atomic subtask board. The canary runs through the public `CodingMaxFacade` with `workers: 1`, preset `balanced`, profile `product`. A negative or undeterminable disposition is a valid published result and leaves both MS-CONTROL and the FH-1 tree closed.  
+
+**Control freeze gate audit (2026-09-11, Wave 4).** Re-measured on the working tree
+rather than quoted from the handoff. The prerequisite slice is **17 tests, all
+passing**, composed exactly as:
+
+```bash
+python3 -m unittest test.benchmarks.test_preregistration \
+                    test.benchmarks.test_metric_veto \
+                    test.benchmarks.test_product_path_subject \
+                    test.lab.test_preregistration
+# Ran 17 tests -- OK   (6 + 4 + 4 + 3)
+```
+
+`benchmarks/ladder/control_preregistration.json` remains `status: UNFROZEN` with
+`subject_sha: null`, `suite_digest: null`, `model_id: null` and `frozen_at: null`;
+the freeze is a documentation act on an accepted exact subject and makes no paid
+call. The arm stays pinned to single-worker `vg-code-balanced` / preset `balanced` /
+`vanguard.packages.runtime.entrypoint.execute`, with `forge`, `chimera`,
+`vg-code-fast` and `vg-code-max` excluded. The published stop rule stands: `n >= 30`
+evaluable `LIVE-*` rows, retries never add tasks, `POSITIVE` only if
+`wilson_lb >= 0.40` **and** `false_completion_rate == 0`; `NEGATIVE` and
+`UNDETERMINABLE` are valid published results that leave MS-CONTROL `OPEN`.
+
+**Gate defect found: the freeze refusal is not wired into the scoring path.**
+`benchmarks/ladder/control.py::require_frozen` raises `ControlNotFrozen` correctly,
+but `uv run lda callers benchmarks.ladder.control.require_frozen` returns exactly one
+caller — `test.benchmarks.test_preregistration.TestPreregistration.test_unfrozen_control_cannot_be_scored`
+— and `grep -rn require_frozen` confirms no production caller. `score_metrics` and
+`canary_disposition` in `benchmarks/ladder/metrics.py` compute a Wilson interval and
+a disposition without consulting the preregistration at all. The guarantee that an
+unfrozen control cannot be scored is therefore asserted by a unit test, not enforced
+at the entrypoint that would actually score it. This does not weaken T-26's stop
+rule; it means the stop rule currently depends on a caller choosing to check.
+
+- [ ] **T-26a: Enforce `require_frozen` at the scoring entrypoint** (C -> MS-CONTROL)
+  - **state**: `READY` — this is control-gate hardening and does not require T-27.
+  - **requires**: [T-111]
+  - **leased files**: `benchmarks/ladder/metrics.py`; `test/benchmarks/test_metric_veto.py`
+  - **contract**: T-26 draft contract; `NT-B04` truthful disposition
+  - **change**: `score_metrics` and `canary_disposition` call `require_frozen()` before
+    producing any rate, interval or disposition, and propagate `ControlNotFrozen`
+    rather than returning a number. Keep the existing veto semantics untouched.
+  - **falsifier / acceptance**: `python3 -m unittest test.benchmarks.test_metric_veto -v` —
+    add a must-fail case asserting that scoring rows against the current `UNFROZEN`
+    record raises `ControlNotFrozen`, and that a single false-completion row still
+    vetoes `POSITIVE` on a frozen record. Both cases must fail before the change lands.
 
 **T-51 Internal multi-class corpus freeze** (A §31.28, B Wave 0 corpus sizes)  
 - [ ] Keep A’s 10×6 class mix as `[PROPOSAL]` size; do not treat as a sprint  

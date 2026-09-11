@@ -506,14 +506,19 @@ class _LayeredOperator:
         return self._artifacts.capture(role, payload, turn=turn, labels=labels)
 
 
-def _route_of(model: Any) -> Mapping[str, Any]:
+def _route_of(model: Any) -> dict[str, Any]:
     """Which provider/model this call actually went to.
 
     Small and identity-only: a route that carried credentials or headers
     would put them in an append-only store.
     """
+    adapter = type(model).__name__
+    for base in type(model).__mro__:
+        if base.__name__ == "FakeModel":
+            adapter = "FakeModel"
+            break
     return {
-        "adapter": type(model).__name__,
+        "adapter": adapter,
         "provider": str(getattr(model, "provider", "")),
         "model": str(getattr(model, "model", getattr(model, "model_name", ""))),
         "mode": str(getattr(model, "mode", getattr(model, "_mode", ""))),
@@ -993,7 +998,10 @@ class HarnessSession:
         crash recovery -- approval suspension is the same mechanism with a
         different trigger, so this is a reuse, not new machinery.
         """
-        read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
+        read = self.ports.store.read(EventRange(
+            episode_id=self.task.episode_id,
+            project_id=self.task.project_id,
+        ))
         envelopes = read.value if read.ok and read.value is not None else ()
         return reconstruct_state(envelopes)
 
@@ -1026,7 +1034,10 @@ class HarnessSession:
         later turns must see what earlier siblings actually spent, or the
         second child is handed a budget the first one already consumed.
         """
-        read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
+        read = self.ports.store.read(EventRange(
+            episode_id=self.task.episode_id,
+            project_id=self.task.project_id,
+        ))
         if not read.ok:
             # Fail closed. A store we cannot read is not a store that says
             # "nothing spent"; reporting the full ceiling here would let an
@@ -1055,7 +1066,10 @@ class HarnessSession:
         projections and B-M65 confidence records. It never receives this
         session, its ports, the model, the store, the emitter, or the Kernel.
         """
-        read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
+        read = self.ports.store.read(EventRange(
+            episode_id=self.task.episode_id,
+            project_id=self.task.project_id,
+        ))
         envelopes = tuple(read.value) if read.ok and read.value is not None else ()
         if not any(
             (event.payload.get("kind") or event.mhf_kind) == "ProposalProduced"
@@ -1142,7 +1156,10 @@ class HarnessSession:
         separates capability from proof and this is where that separation is
         actually enforced on the runtime path.
         """
-        read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
+        read = self.ports.store.read(EventRange(
+            episode_id=self.task.episode_id,
+            project_id=self.task.project_id,
+        ))
         envelopes = list(read.value) if read.ok and read.value is not None else []
         if self.checkpoints is None:
             if not envelopes:
@@ -1178,7 +1195,8 @@ class HarnessSession:
         """
         frozen = self.harness.frozen
         manifest_digest = digest_of(frozen.manifest.identity_preimage())
-        policy = dict(compiler.selection_identity())
+        policy_fn = getattr(compiler, "_policy_identity", compiler.selection_identity)
+        policy = dict(policy_fn())
         recovery = ProtocolRecoveryState().to_dict()
         serializer = {"id": "agency.context.messages", "version": "1"}
         counter = {"id": "agency.context.estimate_tokens", "version": "1"}
@@ -1246,7 +1264,7 @@ class HarnessSession:
         that schema lands this branch remains compatibility-only; once it is
         registered, absence of a successful append is a hard inference gate.
         """
-        guard = self._recovery_guard
+        guard = getattr(self, "_recovery_guard", None)
         if guard is not None and guard.recovery_append_error is not None:
             raise RuntimeError(
                 "recovery snapshot append failed; refusing subsequent inference: "
@@ -1293,7 +1311,18 @@ class HarnessSession:
                 "serializerIdentity": dict(self._behavior_identity["serializerIdentity"]),
                 "counterIdentity": dict(self._behavior_identity["counterIdentity"]),
                 "behaviorIdentity": dict(epoch["identity"]),
-                "selectionPolicyIdentity": policy_identity,
+                # This field is the ContextPacket selector identity consumed
+                # by cold resume. Feeding the compiler identity back into the
+                # next packet would recursively change the frozen prefix and
+                # reject an otherwise identical fresh-process continuation.
+                # The compiler identity remains bound by policyDigest and by
+                # behaviorIdentity.contextPolicyDigest.
+                "selectionPolicyIdentity": (
+                    dict(self.context_packet.selection_policy_identity)
+                    if self.context_packet is not None
+                    and self.context_packet.selection_policy_identity is not None
+                    else None
+                ),
                 "indexSnapshotDigest": (
                     self.context_packet.index_snapshot_digest
                     if self.context_packet is not None else ""
@@ -1305,7 +1334,7 @@ class HarnessSession:
 
     def dispatch(self, request: EffectRequest, **kwargs: Any) -> Any:
         """Forward to the one kernel, remembering the request behind the result."""
-        guard = self._recovery_guard
+        guard = getattr(self, "_recovery_guard", None)
         if guard is not None and guard.recovery_append_error is not None:
             raise RuntimeError("recovery snapshot append failed; refusing dispatch")
         request = _with_diff_headers(request)
@@ -1439,7 +1468,10 @@ class HarnessSession:
                 project_id=task.project_id,
             )
             self.ledger._seq, self.ledger._prev = self.ledger._load_chain(task.project_id)
-            read_events = ports.store.read(EventRange(episode_id=task.episode_id))
+            read_events = ports.store.read(EventRange(
+                episode_id=task.episode_id,
+                project_id=task.project_id,
+            ))
             ev_list = list(read_events.value) if read_events.ok and read_events.value else []
             kinds = [(e.payload.get("kind") if hasattr(e, "payload") and isinstance(e.payload, Mapping) else None) or getattr(e, "mhf_kind", "") for e in ev_list]
             if "RunRecovered" not in kinds:
@@ -1568,7 +1600,10 @@ class HarnessSession:
             if self._on_terminal is not None
             else self._evaluate(terminal_status=str(getattr(terminal, "value", terminal)))
         )
-        read_all = ports.store.read(EventRange(episode_id=task.episode_id))
+        read_all = ports.store.read(EventRange(
+            episode_id=task.episode_id,
+            project_id=task.project_id,
+        ))
         durable_events = list(read_all.value) if read_all.ok and read_all.value else list(self.ledger.events)
         if delayed.pending is None:
             terminal_name = str(getattr(terminal, "value", terminal))
@@ -1843,10 +1878,22 @@ class HarnessSession:
         except ContextPacketError:
             self.context_packet = None
             return self._orientation_view(None, fallback_reason=reason)
-        selection_policy_identity = {
-            "policyId": "agency.context-compiler/default",
-            "policyVersion": CONTEXT_POLICY_VERSION,
-        }
+        prior = self.task.resume_state if isinstance(self.task.resume_state, Mapping) else {}
+        prior_repo = prior.get("repositoryIdentity")
+        prior_policy = prior.get("selectionPolicyIdentity")
+        prior_index = prior.get("indexSnapshotDigest")
+        prior_epoch_raw = prior.get("workspaceEpoch")
+        prior_epoch = (
+            WorkspaceEpoch.from_mapping(prior_epoch_raw)
+            if isinstance(prior_epoch_raw, Mapping) else None
+        )
+        selection_policy_identity = (
+            dict(prior_policy) if isinstance(prior_policy, Mapping)
+            else {
+                "policyId": "agency.context-compiler/default",
+                "policyVersion": CONTEXT_POLICY_VERSION,
+            }
+        )
         packet = build_context_packet(
             task_digest=digest_of({"runId": self.task.run_id, "brief": self.task.brief}),
             repository_snapshot=epoch.source_revision,
@@ -1855,15 +1902,29 @@ class HarnessSession:
             query_digest=digest_of({"brief": self.task.brief}),
             budget_tokens=4000,
             selected=(),
-            index_snapshot_digest=epoch.index_digest,
+            index_snapshot_digest=str(prior_index) if prior_index is not None else epoch.index_digest,
             reserve_tokens=1000,
-            repository_identity=epoch.source_revision,
+            repository_identity=str(prior_repo) if prior_repo is not None else epoch.source_revision,
             selection_policy_identity=selection_policy_identity,
             workspace_epoch=epoch,
             require_epoch=True,
             map_truncated=True,
             extra_omissions=(INDEX_PORT_UNBOUND,),
         )
+        if prior_repo is not None or prior_policy is not None or prior_index is not None:
+            validate_resume_identity(
+                packet,
+                repository_identity=str(prior_repo or packet.repository_identity or ""),
+                index_snapshot_digest=(
+                    str(prior_index) if prior_index is not None
+                    else packet.index_snapshot_digest
+                ),
+                selection_policy_identity=(
+                    dict(prior_policy) if isinstance(prior_policy, Mapping)
+                    else selection_policy_identity
+                ),
+                workspace_epoch=prior_epoch,
+            )
         self.context_packet = packet
         return self._orientation_view(packet, fallback_reason=reason)
 
@@ -1905,26 +1966,6 @@ class HarnessSession:
              "source": item.source_path, "estimated_tokens": 5}
             for item in repo_map.tests
         )
-        selection_policy_identity = {
-            "policyId": "agency.context-compiler/default",
-            "policyVersion": CONTEXT_POLICY_VERSION,
-        }
-        packet = build_context_packet(
-            task_digest=digest_of({"runId": self.task.run_id, "brief": self.task.brief}),
-            repository_snapshot=repo_map.source_revision,
-            provider=repo_map.adapter_id,
-            provider_version="1",
-            query_digest=digest_of({"brief": self.task.brief}),
-            budget_tokens=4000,
-            selected=selected,
-            index_snapshot_digest=repo_map.source_revision,
-            reserve_tokens=1000,
-            repository_identity=repo_map.source_revision,
-            selection_policy_identity=selection_policy_identity,
-            workspace_epoch=epoch,
-            require_epoch=True,
-            map_truncated=bool(repo_map.truncated),
-        )
         prior = self.task.resume_state if isinstance(self.task.resume_state, Mapping) else {}
         prior_repo = prior.get("repositoryIdentity")
         prior_policy = prior.get("selectionPolicyIdentity")
@@ -1933,6 +1974,29 @@ class HarnessSession:
         prior_epoch = (
             WorkspaceEpoch.from_mapping(prior_epoch_raw)
             if isinstance(prior_epoch_raw, Mapping) else None
+        )
+        selection_policy_identity = (
+            dict(prior_policy) if isinstance(prior_policy, Mapping)
+            else {
+                "policyId": "agency.context-compiler/default",
+                "policyVersion": CONTEXT_POLICY_VERSION,
+            }
+        )
+        packet = build_context_packet(
+            task_digest=digest_of({"runId": self.task.run_id, "brief": self.task.brief}),
+            repository_snapshot=repo_map.source_revision,
+            provider=repo_map.adapter_id,
+            provider_version="1",
+            query_digest=digest_of({"brief": self.task.brief}),
+            budget_tokens=4000,
+            selected=selected,
+            index_snapshot_digest=str(prior_index) if prior_index is not None else repo_map.source_revision,
+            reserve_tokens=1000,
+            repository_identity=str(prior_repo) if prior_repo is not None else repo_map.source_revision,
+            selection_policy_identity=selection_policy_identity,
+            workspace_epoch=epoch,
+            require_epoch=True,
+            map_truncated=bool(repo_map.truncated),
         )
         if prior_repo is not None or prior_policy is not None or prior_index is not None:
             validate_resume_identity(
@@ -2094,7 +2158,10 @@ class HarnessSession:
         assembler = getattr(operator, "set_task_state", None)
         if not callable(assembler):
             return
-        read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
+        read = self.ports.store.read(EventRange(
+            episode_id=self.task.episode_id,
+            project_id=self.task.project_id,
+        ))
         events = list(read.value or ()) if getattr(read, "ok", False) else []
         if self.task.resume_state and not events:
             assembler(dict(self.task.resume_state))

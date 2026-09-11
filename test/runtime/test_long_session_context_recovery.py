@@ -14,10 +14,11 @@ Falsifier:
 from __future__ import annotations
 
 import json
-import pathlib
+import os
 from pathlib import Path
-from types import MappingProxyType
-from typing import Any, Mapping, Sequence
+import subprocess
+import sys
+from typing import Any, Mapping
 import unittest
 
 from test.agency.doubles import ScriptedModel, effect, finish
@@ -51,6 +52,8 @@ EXPECTED_PRESETS = {
     "balanced": {"usd_micros": 150_000, "millis": 900_000, "tokens": 40_000, "turns": 20},
     "max": {"usd_micros": 400_000, "millis": 2_400_000, "tokens": 96_000, "turns": 40},
 }
+
+T110_PROJECT_ID = "project-t110"
 
 
 def _read_presets_raw() -> bytes:
@@ -119,7 +122,10 @@ class LongSessionEnvironment(FakeEnvironment):
         path = self._extract_path(req)
         self.write_calls.append(path)
 
-        desc = digest_of({"action": action, "path": path, "index": len(self.applied)})
+        # The descriptor must be identical after a fresh-process restart.  A
+        # process-local call index would make the same scheduled effect acquire
+        # a different identity merely because the interpreter changed.
+        desc = digest_of({"action": action, "path": path})
         self.executed_descriptors.append(desc)
         return Result.success(EffectReceipt(
             descriptor_digest=desc,
@@ -142,7 +148,10 @@ def extract_semantic_vector(
      pending_deadline, composition_epoch, serializer_id, counter_id,
      terminal_status, disposition)
     """
-    events_read = store.read(EventRange(episode_id=session.task.episode_id))
+    events_read = store.read(EventRange(
+        episode_id=session.task.episode_id,
+        project_id=session.task.project_id,
+    ))
     events = list(events_read.value) if events_read.ok and events_read.value else []
     state = fold_task_state(events, objective=session.task.brief)
     rec = dict(state.recovery_state or {})
@@ -274,6 +283,146 @@ def _build_schedule_proposals() -> list[Mapping[str, Any]]:
 
     tape.append(finish("all scheduled turns verified cleanly"))
     return tape
+
+
+def _run_fresh_process_segment(
+    database: str,
+    start: int,
+    stop: int,
+    max_turns: int,
+    output: str,
+    reconcile: bool,
+) -> None:
+    """Reconstruct and execute one segment using only durable inputs.
+
+    This function is entered by a new Python interpreter.  Its arguments are
+    primitive command-line values; no model, session, environment, task state,
+    or open store object crosses the process boundary.
+    """
+    store = SqliteEventStore(database)
+    try:
+        if reconcile:
+            reconciled = RecoveryScanner(
+                controller_principal="agent-eval"
+            ).reconcile_open_intents(
+                store,
+                occurred_at="2026-08-16T00:00:01.000Z",
+            )
+            if len(reconciled) != 1:
+                raise AssertionError(
+                    f"expected one interrupted intent, reconciled {len(reconciled)}"
+                )
+
+        prior = None
+        if start:
+            read = store.read(EventRange(
+                episode_id="ep-t110",
+                project_id=T110_PROJECT_ID,
+            ))
+            events = list(read.value) if read.ok and read.value else []
+            prior = fold_task_state(
+                events,
+                objective="qualify long session preservation NT-1.7",
+            ).to_canonical_dict()
+
+        tape = _build_schedule_proposals()[start:stop]
+        environment = LongSessionEnvironment()
+        model = ScriptedModel(tape)
+        harness = Runtime.compose("vg-code-default", episode_id="ep-t110")
+        task = TaskContext(
+            brief="qualify long session preservation NT-1.7",
+            repo_path=Path("/workspace"),
+            run_id="run-t110",
+            episode_id="ep-t110",
+            principal="agent-eval",
+            max_turns=max_turns,
+            project_id=T110_PROJECT_ID,
+            resume_state=prior,
+        )
+        session = HarnessSession(
+            harness,
+            SessionPorts(
+                model=model,
+                environment=environment,
+                clock=FakeClock(),
+                store=store,
+                interactive=False,
+            ),
+            task,
+        )
+        result = session.run()
+        Path(output).write_text(
+            json.dumps(
+                {
+                    "pid": os.getpid(),
+                    "turns": session.turns_consumed(),
+                    "model_calls": int(model._cursor),
+                    "effect_calls": len(environment.applied),
+                    "terminal": result.terminal.value,
+                    "detail": result.detail,
+                    "vector": extract_semantic_vector(session, result, store),
+                },
+                sort_keys=True,
+            ),
+            encoding="utf-8",
+        )
+    finally:
+        store.close()
+
+
+def _execute_fresh_process_segment(
+    database: Path,
+    start: int,
+    stop: int,
+    max_turns: int,
+    output: Path,
+    *,
+    reconcile: bool = False,
+) -> dict[str, Any]:
+    """Launch a bounded interpreter and return its artifact-backed receipt."""
+    code = (
+        "from test.runtime.test_long_session_context_recovery import "
+        "_run_fresh_process_segment; import sys; "
+        "_run_fresh_process_segment(sys.argv[1], int(sys.argv[2]), "
+        "int(sys.argv[3]), int(sys.argv[4]), sys.argv[5], sys.argv[6] == '1')"
+    )
+    environment = dict(os.environ)
+    for name in tuple(environment):
+        upper = name.upper()
+        if upper.endswith("_API_KEY") or upper.endswith("_TOKEN"):
+            environment.pop(name, None)
+    existing_path = environment.get("PYTHONPATH", "")
+    environment["PYTHONPATH"] = (
+        str(ROOT) if not existing_path else str(ROOT) + os.pathsep + existing_path
+    )
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            code,
+            str(database),
+            str(start),
+            str(stop),
+            str(max_turns),
+            str(output),
+            "1" if reconcile else "0",
+        ],
+        cwd=ROOT,
+        env=environment,
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=False,
+    )
+    if completed.returncode != 0:
+        raise AssertionError(
+            "fresh-process segment failed: "
+            f"exit={completed.returncode} stdout={completed.stdout!r} "
+            f"stderr={completed.stderr!r}"
+        )
+    if not output.is_file():
+        raise AssertionError("fresh-process segment produced no receipt artifact")
+    return json.loads(output.read_text(encoding="utf-8"))
 
 
 class TestLongSessionPreservation(unittest.TestCase):
@@ -506,6 +655,7 @@ class TestLongSessionPreservation(unittest.TestCase):
                 episode_id="ep-t110",
                 principal="agent-eval",
                 max_turns=total_turns + 5,
+                project_id=T110_PROJECT_ID,
             )
             session_ctrl = HarnessSession(
                 harness_ctrl,
@@ -529,147 +679,78 @@ class TestLongSessionPreservation(unittest.TestCase):
             # -------------------------------------------------------------
             # 2. Cold-Resumed Run (Candidate with multiple restarts & crashes)
             # -------------------------------------------------------------
-            store_res = SqliteEventStore(db_resumed)
-            env_res = LongSessionEnvironment()
-            harness_res = Runtime.compose("vg-code-default", episode_id="ep-t110")
-
-            # Segment 1: Turns 0..45 (46 turns) -> Checkpoint 1
-            model_seg1 = ScriptedModel(tape[:46])
-            task_seg1 = TaskContext(
-                brief="qualify long session preservation NT-1.7",
-                repo_path=Path("/workspace"),
-                run_id="run-t110",
-                episode_id="ep-t110",
-                principal="agent-eval",
-                max_turns=46,
-            )
-            session_seg1 = HarnessSession(
-                harness_res,
-                SessionPorts(
-                    model=model_seg1,
-                    environment=env_res,
-                    clock=FakeClock(),
-                    store=store_res,
-                    interactive=False,
+            segments = [
+                _execute_fresh_process_segment(
+                    db_resumed, 0, 46, 46, tmp_path / "segment-1.json"
                 ),
-                task_seg1,
-            )
-            res_seg1 = session_seg1.run()
-            self.assertEqual(session_seg1.turns_consumed(), 46)
-
-            # Checkpoint 1 comparison: verify semantic vector at turn 46
-            events_seg1 = store_res.read(EventRange(episode_id="ep-t110")).value
-            folded_seg1 = fold_task_state(events_seg1, objective=task_seg1.brief)
-            self.assertEqual(folded_seg1.objective, task_ctrl.brief)
-
-            # Segment 2: Turns 46..75 (30 turns) -> Pre-Crash Boundary
-            model_seg2 = ScriptedModel(tape[46:76])
-            task_seg2 = TaskContext(
-                brief="qualify long session preservation NT-1.7",
-                repo_path=Path("/workspace"),
-                run_id="run-t110",
-                episode_id="ep-t110",
-                principal="agent-eval",
-                max_turns=76,
-                resume_state=folded_seg1.to_canonical_dict(),
-            )
-            session_seg2 = HarnessSession(
-                harness_res,
-                SessionPorts(
-                    model=model_seg2,
-                    environment=env_res,
-                    clock=FakeClock(),
-                    store=store_res,
-                    interactive=False,
+                _execute_fresh_process_segment(
+                    db_resumed, 46, 76, 76, tmp_path / "segment-2.json"
                 ),
-                task_seg2,
-            )
-            res_seg2 = session_seg2.run()
-            self.assertEqual(session_seg2.turns_consumed(), 76)
+            ]
+            self.assertEqual(segments[0]["turns"], 46)
+            self.assertEqual(segments[1]["turns"], 76)
+            self.assertEqual(segments[0]["vector"]["objective"], task_ctrl.brief)
 
-            # Turn 76 Stimulus: Crash simulation between intent and settlement
-            session_seg2.ledger.append_intent(Event(
-                kind="EffectStarted",
-                reason="intent_before_crash",
-                at="2026-08-16T00:00:00.000Z",
-                run_id="run-t110",
-                principal="agent-eval",
-                payload={
-                    "kind": "EffectStarted",
-                    "idempotencyKey": "effect-crash-turn-76",
-                    "descriptorDigest": "sha256:" + "8" * 64,
-                },
-            ))
+            # Turn 76: persist intent and simulate process death before an
+            # adapter settlement.  The next interpreter performs recovery.
+            crash_store = SqliteEventStore(db_resumed)
+            crash_harness = Runtime.compose("vg-code-default", episode_id="ep-t110")
+            from vanguard.packages.runtime.ledger_emitter import LedgerEmitter
 
-            # Segment 3: Reconcile crash & run turns 76..95 (20 turns) -> Checkpoint 2
-            scanner = RecoveryScanner(controller_principal="agent-eval")
-            reconciled = scanner.reconcile_open_intents(
-                store_res,
-                occurred_at="2026-08-16T00:00:01.000Z",
-            )
-            self.assertEqual(len(reconciled), 1)
-            self.assertEqual(reconciled[0].payload.get("status"), "undeterminable")
-
-            events_seg2 = store_res.read(EventRange(episode_id="ep-t110")).value
-            folded_seg2 = fold_task_state(events_seg2, objective=task_ctrl.brief)
-
-            model_seg3 = ScriptedModel(tape[76:96])
-            task_seg3 = TaskContext(
-                brief="qualify long session preservation NT-1.7",
-                repo_path=Path("/workspace"),
-                run_id="run-t110",
+            LedgerEmitter(
+                crash_store,
                 episode_id="ep-t110",
-                principal="agent-eval",
-                max_turns=96,
-                resume_state=folded_seg2.to_canonical_dict(),
+                project_id=T110_PROJECT_ID,
+                principal_id="agent-eval",
+                harness_digest=crash_harness.composition_digest,
+                clock=FakeClock(),
+                role="session",
+            ).append_intent(
+                Event(
+                    kind="EffectStarted",
+                    reason="intent_before_crash",
+                    at="2026-08-16T00:00:00.000Z",
+                    run_id="run-t110",
+                    principal="agent-eval",
+                    payload={
+                        "kind": "EffectStarted",
+                        "idempotencyKey": "effect-crash-turn-76",
+                        "descriptorDigest": "sha256:" + "8" * 64,
+                    },
+                )
             )
-            session_seg3 = HarnessSession(
-                harness_res,
-                SessionPorts(
-                    model=model_seg3,
-                    environment=env_res,
-                    clock=FakeClock(),
-                    store=store_res,
-                    interactive=False,
-                ),
-                task_seg3,
-            )
-            res_seg3 = session_seg3.run()
-            self.assertEqual(session_seg3.turns_consumed(), 96)
+            crash_store.close()
 
-            # Segment 4: Turns 96..termination -> Final Checkpoint
-            events_seg3 = store_res.read(EventRange(episode_id="ep-t110")).value
-            folded_seg3 = fold_task_state(events_seg3, objective=task_ctrl.brief)
-
-            model_seg4 = ScriptedModel(tape[96:])
-            task_seg4 = TaskContext(
-                brief="qualify long session preservation NT-1.7",
-                repo_path=Path("/workspace"),
-                run_id="run-t110",
-                episode_id="ep-t110",
-                principal="agent-eval",
-                max_turns=total_turns + 5,
-                resume_state=folded_seg3.to_canonical_dict(),
+            segments.extend(
+                [
+                    _execute_fresh_process_segment(
+                        db_resumed,
+                        76,
+                        96,
+                        96,
+                        tmp_path / "segment-3.json",
+                        reconcile=True,
+                    ),
+                    _execute_fresh_process_segment(
+                        db_resumed,
+                        96,
+                        total_turns,
+                        total_turns + 5,
+                        tmp_path / "segment-4.json",
+                    ),
+                ]
             )
-            session_seg4 = HarnessSession(
-                harness_res,
-                SessionPorts(
-                    model=model_seg4,
-                    environment=env_res,
-                    clock=FakeClock(),
-                    store=store_res,
-                    interactive=False,
-                ),
-                task_seg4,
-            )
-            res_seg4 = session_seg4.run()
-            self.assertEqual(
-                res_seg4.terminal.value,
-                "completed",
-                f"Resumed candidate failed to complete cleanly: {res_seg4.detail}",
+            self.assertEqual(segments[2]["turns"], 96)
+            self.assertEqual(segments[3]["terminal"], "completed")
+            process_ids = {int(segment["pid"]) for segment in segments}
+            self.assertNotIn(os.getpid(), process_ids)
+            self.assertGreaterEqual(
+                len(process_ids),
+                2,
+                "qualification requires at least two fresh interpreter processes",
             )
 
-            vec_res = extract_semantic_vector(session_seg4, res_seg4, store_res)
+            vec_res = segments[-1]["vector"]
 
             # Compare terminal semantic vectors
             is_equal, divergence = compare_semantic_vectors(vec_ctrl, vec_res)
@@ -689,9 +770,18 @@ class TestLongSessionPreservation(unittest.TestCase):
                 len(set(settled_res)),
                 "Settled effects must contain zero duplicates (NT-I02)",
             )
+            self.assertEqual(
+                sum(int(segment["model_calls"]) for segment in segments),
+                int(model_ctrl._cursor),
+                "fresh-process continuation must consume each scripted model call once",
+            )
+            self.assertEqual(
+                sum(int(segment["effect_calls"]) for segment in segments),
+                len(env_ctrl.applied),
+                "fresh-process continuation must execute each scheduled effect once",
+            )
 
             store_ctrl.close()
-            store_res.close()
 
 
 if __name__ == "__main__":

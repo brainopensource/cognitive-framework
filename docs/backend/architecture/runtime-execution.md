@@ -200,6 +200,10 @@ Custom execution-profile overrides accept JSON or YAML mappings. YAML parsing is
 
 Cold resume reconstructs safety/accounting state and reconciles effects. `SemanticTaskState` (`CodingTaskState` alias) in `vanguard/packages/domain/task_state.py` is the compact durable continuation value: task class, completion requirements, plan/discoveries/dead ends, implicated and modified files, route decisions, evidence-gated TODOs, latest verification, settled effects, next action, remaining budgets, monotonic revision, and backlog steps. Runtime `fold_task_state` is the only producer. Resume preserves the ledger `episode_id` and compiles σ into L4/L5; it must not dump `resume_state` JSON into frozen L3. This packet is derived state; missing evidence must fail explicitly or trigger regrounding rather than silently invent context.
 
+Ledger sequence and digest continuity are scoped by `project_id`. Every session projection that reduces an episode therefore queries by both `episode_id` and `project_id`; folding an episode label across independent projects would combine separate sequence-zero events and violate monotonic reconstruction. `ContextSelectionRecorded.selectionPolicyIdentity` carries the stable `ContextPacket` selector identity used by resume. The compiler's richer policy identity remains bound by `policyDigest` and `behaviorIdentity.contextPolicyDigest`; it is not recursively inserted into the next frozen packet prefix.
+
+The integrated long-session falsifier runs 104 scripted turns through the production `HarnessSession` path. Its resumed candidate crosses four separate Python interpreter processes, reconstructs solely from the SQLite ledger, reconciles a persisted open effect intent and compares the final semantic vector with an uninterrupted control. Test-only turn headroom does not alter the shipped fast, balanced or max preset bytes.
+
 ---
 
 ## Implementation Evidence

@@ -100,7 +100,7 @@ An `EventEnvelope` (`vanguard/packages/domain/ledger/events.py`) contains the fo
 |---|---|---|
 | `api` | `string` | Envelope version identifier (`"mhf.event/2"`). |
 | `event_id` | `string` (UUIDv7) | Universally unique, time-ordered identifier for this event. |
-| `sequence` | `integer` ($\ge 0$) | Zero-indexed strictly monotonic event sequence within the run ledger. |
+| `sequence` | `integer` ($\ge 0$) | Zero-indexed strictly monotonic event sequence within the declared `project_id` chain. |
 | `kind` | `string` | Past-tense verb phrase identifying the event kind. |
 | `timestamp` | `string` (RFC 3339) | UTC timestamp of event emission. |
 | `run_id` | `string` (UUIDv7) | Target run identifier. |
@@ -149,6 +149,7 @@ Events must be emitted exclusively through `LedgerEmitter` via role-scoped facad
 | `StrategyChanged` | `session` | `session-policy` | Agent strategy adjusted. |
 | `ProgressAssessed` | `session` | `session-policy` | Goal progress evaluated. |
 | `ContextCompacted` | `session` | `session-policy` | Context window compacted. |
+| `ContextSelectionRecorded` | `session` | `session-policy` | Final prompt-selection identities, serialized token count, cursor and ordered omissions persisted before inference. |
 
 ### Deprecated Historical Kinds (`DEPRECATED_KINDS`)
 The following kinds are frozen historical names from legacy specifications. They remain permanently readable by all readers to ensure past ledgers validate, but new writes are unconditionally rejected with `DeprecatedKindError`:
@@ -160,7 +161,7 @@ The following kinds are frozen historical names from legacy specifications. They
 
 Every event envelope establishes an immutable cryptographic chain:
 
-1. **Monotonic Sequences**: `sequence` begins at `0` for the first event of a run and increments by `1` per event without gaps.
+1. **Monotonic Sequences**: `sequence` begins at `0` for the first event in a `project_id` chain and increments by `1` per event without gaps. Episode projections must retain the project filter; an episode label alone cannot combine independently numbered project chains.
 2. **Hash-Chain Preimage**: For event $N$, `parent_digest` must exactly equal the `digest` of event $N-1$. For event `0`, `parent_digest` is the genesis zero hash (`"0000000000000000000000000000000000000000000000000000000000000000"` or empty digest).
 3. **Digest Canonicalization**: The `digest` is computed via RFC 8785 JSON Canonicalization Scheme (JCS) followed by SHA-256 hashing (`vanguard/packages/domain/canonicalisation/digest.py`).
 

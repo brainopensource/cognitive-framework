@@ -106,6 +106,7 @@ The Modular Harness Framework (MHF) schemas represent core agent and runtime con
 | Schema File | Wire API Version | Primary Producer | Primary Consumer | Purpose |
 |---|---|---|---|---|
 | `event_envelope.schema.json` | `mhf.event/1`, `mhf.event/2` | `LedgerEmitter` | `EventEnvelope`, event stores | Event envelope format and kind enum. |
+| `context_selection_recorded.schema.json` | `aether.prompt-selection/1` payload | `HarnessSession` | event validators, task-state and ledger projections | Write-before-inference selection identity, token count and omission evidence. |
 | `manifest_v2.schema.json` | `mhf.manifest/2` | Pack authors | `ManifestLoader`, `compose.py` | Component declarations, tool packs, bindings. |
 | `execution_profile_v2.schema.json`| `mhf.execution-profile/2` | `profiles.py` | `HarnessSession`, `RunPlan` | Containment, approval, and assurance profiles. |
 | `trajectory_v2.schema.json` | `mhf.trajectory/2` | `EpisodeEngine` | `EvaluatorGateway`, Evaluator | Causal turn trajectory capture format. |

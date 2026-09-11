@@ -1839,7 +1839,7 @@ class HarnessSession:
         reason = f"INDEX_UNBOUND: {cause}"
         try:
             epoch = self._epoch_from_environment_snapshot(
-                compiled_at_turn=self.turns_consumed())
+                compiled_at_turn=0 if self.task.resume_state is not None else self.turns_consumed())
         except ContextPacketError:
             self.context_packet = None
             return self._orientation_view(None, fallback_reason=reason)
@@ -1877,7 +1877,10 @@ class HarnessSession:
             return self._bind_no_index_fallback(cause)
         repo_map = mapped.value
         try:
-            epoch = self._epoch_from_repo_map(repo_map, compiled_at_turn=self.turns_consumed())
+            epoch = self._epoch_from_repo_map(
+                repo_map,
+                compiled_at_turn=0 if self.task.resume_state is not None else self.turns_consumed(),
+            )
         except ContextPacketError as exc:
             return self._bind_no_index_fallback(str(exc))
         selected: list[Mapping[str, Any]] = [

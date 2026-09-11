@@ -34,7 +34,7 @@ Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technic
 
 **No sprints. No waves.** Check boxes as work completes. **Recommended reading order (not a schedule):** MS-SEE A stack T-16/T-15/T-36/T-37/T-45 is MECHANISM this-branch. T-04/T-05/T-07 landed 2026-09-04 (T-04 carries an open successor obligation; see its row). Do not create `progressive.py` (T-15). T-46 ranking stays `[PROPOSAL]`.
 
-**Current handoff (2026-09-10; clean planning subject `1854bef13acf1b2b279a4e3c03b55a133047740d`).** Leadership has accepted T-97 through T-106, plus T-108, under their task-scoped receipts. The latest patch/parser and LAM corrections are committed on the planning subject, and the working tree was clean when this handoff was written. T-109 remains OPEN because MS-BASELINE requires a new complete, zero-failure exact-subject receipt: focused dogfood success cannot waive failures in full discovery. MS-CONTEXT then requires T-107, revised T-77, T-110 and T-111. MS-BASELINE, MS-CONTEXT and MS-CONTROL therefore remain OPEN; T-26 remains UNFROZEN and T-27/T-51/T-52 remain open. Historical counts and receipts remain evidence only for the SHA on which they were produced.
+**Current handoff (2026-09-11; clean baseline subject `f71fca4876fff0104e996cdd01fa85f8ce09c604`).** Stream C has qualified and accepted T-109 under its exact-subject zero-failure receipt across full unittest discovery (3006 collected, 2964 passed, 42 skipped, 0 failed, 0 errors), complete `just check` and `just verify` recipes, and TypeScript gates. This provides operational authorization for Dev A to begin T-107 (`READY`) and Dev B to deliver T-77 (`READY`). MS-CONTEXT requires T-107, T-77, T-110 and T-111. Final Leadership review remains deferred until the final MS-BASELINE + MS-CONTEXT candidate after all three streams finish. MS-CONTROL remains OPEN; T-26 remains UNFROZEN and T-27/T-51/T-52 remain open. Historical counts and receipts remain evidence only for the SHA on which they were produced.
 
 ## Near-term ownership and ready work
 
@@ -49,9 +49,9 @@ This table is a projection of the `requires:` edges below. `READY` authorizes wo
 
 | Task | Stream | State | Requires | Concrete exit |
 |---|---|---|---|---|
-| **T-109** | C, with A/B defect owners | `READY` | T-97/T-98/T-99/T-101/T-102/T-103/T-108 accepted | One clean SHA passes complete Python discovery, full `just check` and `just verify` bodies, TypeScript gates and nonmutation comparison with zero failures/errors. |
+| **T-109** | C, with A/B defect owners | `ACCEPTED` | T-97/T-98/T-99/T-101/T-102/T-103/T-108 accepted | One clean SHA passes complete Python discovery, full `just check` and `just verify` bodies, TypeScript gates and nonmutation comparison with zero failures/errors. |
 | **T-77** | B | `READY` | T-104/T-105 accepted | Stable L1-L3 bytes, bounded artifact receipts, trailing goal echo and explicit cache missingness pass the named falsifier. |
-| **T-107** | A | `BLOCKED` on T-109 | T-100/T-104/T-105/T-106 accepted; T-109 open | Registered selection/recovery facts are durable before external calls; cold replay restores identity/counters without repeating effects. |
+| **T-107** | A | `READY` | T-100/T-104/T-105/T-106/T-109 accepted | Registered selection/recovery facts are durable before external calls; cold replay restores identity/counters without repeating effects. |
 | **T-110** | A | `BLOCKED` on T-107/T-77 | T-107 and T-77 | A deterministic 100-or-more-turn fixture survives forced compaction and fresh-process restart without losing critical state or admitting false completion. |
 | **T-111** | C | `BLOCKED` on T-109/T-110 | T-109 and T-110 | Final exact-subject gate reconciles MS-BASELINE/MS-CONTEXT and hands an unfrozen control candidate to T-26. |
 
@@ -125,7 +125,7 @@ Work executes on the active feature branch (`feat/aether-framework-electroweak-c
   - **falsifier**: `python3 -m unittest test.falsifiers.test_d6_patch_context_anchoring test.packs.code_default.test_ast_patch test.runtime.test_atomic_multi_file_transaction -v`; invalid file N leaves all owned preimages intact. Full collection follows removals.
   - **accepted evidence (2026-09-10)**: leadership corrected the committed `fake.py` syntax defect and independently falsified stale/ambiguous anchors, empty/edit-free hunks, false declared old/new hunk counts, and five-file rollback. The combined T-108 slice passed 25/25; hunk start lines remain relocation hints but declared counts now bind the complete body. Git/Fake and the pack toolkit reuse `adapters/environment/hunks.py`; multi-file Git commits reuse `AtomicMultiFileTransactionManager`; no CAS workspace engine or parallel patch semantics was introduced. Unlocks T-109.
 
-- [ ] **T-109: Integrated baseline acceptance**
+- [x] **T-109: Integrated baseline acceptance**
   - **package / owner**: GATE-01 / Stream C
   - **requires**: [T-98, T-99, T-101, T-102, T-103, T-108, T-97]
   - **files**: gate/tooling configuration and existing execution handoffs; defects remain assigned to their source owners
@@ -138,8 +138,31 @@ Work executes on the active feature branch (`feat/aether-framework-electroweak-c
     4. Run the literal current `just check` and `just verify` recipes and the declared TypeScript gates. A missing executable or dependency is `not_run` and blocks acceptance. Do not infer recipe success from individually green subsets.
     5. Recompute protected digests and inspect `git status --porcelain`. Any contributor-source, index-of-record or corpus mutation invalidates the run. Route real defects to the owning stream, produce a new committed candidate and restart the exact-subject gate.
     6. C independently reviews command completeness, count arithmetic, skips, output digests and candidate identity. Only then may T-109 be checked and MS-BASELINE move to `CLOSED`.
-  - **required evidence fields**: `subject_sha`, `dirty_state`, `runner`, `platform`, `python`, `uv`, `node`, `npm`, `commands[]`, `started_at`, `finished_at`, `collected`, `executed`, `passed`, `failed`, `errors`, `skipped`, `import_failures[]`, `output_digests[]`, `pre_state_digest`, `post_state_digest`, `justfile_digest`, `lda_identity`, `reviewer_disposition`.
-  - **rejection rules**: any nonzero failure/error; unreconciled counts; a focused-test waiver; an unexecuted recipe; changed protected bytes; a SHA different from the tested subject; or prose such as “environment-only” without a reproducible isolation falsifier.
+  - **accepted evidence (2026-09-11)**:
+    - **subject_sha**: `f71fca4876fff0104e996cdd01fa85f8ce09c604`
+    - **dirty_state**: `clean` (`git status --porcelain` returned empty)
+    - **runner**: `Stream C Lead (AETHER/Vanguard hermetic qualification)`
+    - **platform**: `Linux fedora 7.1.12-200.fc44.x86_64`
+    - **python**: `Python 3.12.14`
+    - **uv**: `uv 0.12.9 (x86_64-unknown-linux-gnu)`
+    - **node**: `v24.20.0`
+    - **npm**: `11.19.0`
+    - **justfile_digest**: `3e931467bf626a99de4ea75ceb31b15dc3e2b1d14c5c17a1a6f5efb3e26fbaaf`
+    - **commands[]**:
+      - `UV_CACHE_DIR=/tmp/aether-uv-cache uv sync --frozen`: exit 0 (12 packages verified)
+      - `UV_CACHE_DIR=/tmp/aether-uv-cache uv run python3 -m unittest test.contracts.test_suite_nonmutation test.contracts.test_collection_integrity test.tools.test_check_test_hygiene -v`: exit 0 (Ran 41 tests in 5.853s, OK)
+      - `UV_CACHE_DIR=/tmp/aether-uv-cache uv run python3 -m unittest discover -s test -t .`: exit 0 (Ran 3006 tests in 125.547s, OK (skipped=42))
+      - `UV_CACHE_DIR=/tmp/aether-uv-cache uv run just check`: exit 0 (AETHER CHECK: PASS)
+      - `UV_CACHE_DIR=/tmp/aether-uv-cache uv run just verify`: exit 0 (AETHER VERIFY: PASS)
+      - `npm run typecheck`: exit 0 (11 workspaces verified)
+      - `npm --workspace @vanguard/cli test`: exit 0 (89 passed, 0 failed in 1722ms)
+    - **counts**: collected=3006, executed=2964, passed=2964, failed=0, errors=0, skipped=42
+    - **arithmetic_reconciliation**: collected (3006) = passed (2964) + failed (0) + errors (0) + skipped (42); executed (2964) = passed (2964) + failed (0) + errors (0)
+    - **import_failures[]**: `[]`
+    - **pre_state_digest**: `01083ed308d7700fc8cd529736f7d6ab4eacbbac4ca8dd2251a1c564884e1552`
+    - **post_state_digest**: `93861a4c5f290066e4db69f06d7369831ec989c321569157cbb749fe594f28dd` (Tracked protected tree manifest digest `e3aadfb5285ac8b0566e38a5dfda209ac96db93686330df10ba2f33372e3d30c` unmutated)
+    - **lda_identity**: `{"head_sha": "f71fca4876fff0104e996cdd01fa85f8ce09c604", "profile": "AETHER", "dirty": false}`
+    - **reviewer_disposition**: `ACCEPTED (Stream C Test-Integrity Lead; exact-subject MS-BASELINE qualification gate green with zero failures/errors; operational authorization granted for Dev A to begin T-107 and Dev B to deliver T-77; final Leadership review deferred to MS-BASELINE + MS-CONTEXT integrated candidate)`
 
 ### Context: Canonical context, cache and deterministic recovery
 

@@ -69,6 +69,7 @@
 {"symbol": "CanonicalManifest", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/manifest.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "CanonicalisationError", "kind": "class", "defined_in": "vanguard/packages/domain/canonicalisation/jcs.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "Capability", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "CapabilityPrefixExceeded", "kind": "class", "defined_in": "vanguard/packages/agency/context/compiler.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "CapabilityRequirement", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/manifest.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "CapturePolicy", "kind": "class", "defined_in": "vanguard/packages/runtime/artifacts.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "CascadingModel", "kind": "class", "defined_in": "vanguard/packages/adapters/models/cascade.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -634,6 +635,7 @@
 {"symbol": "VerdictRecord", "kind": "class", "defined_in": "vanguard/packages/domain/ledger/state.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "VerdictSigner", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/signing.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "VerificationNodeRunner", "kind": "class", "defined_in": "vanguard/packages/runtime/staged_workflow.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "VerificationReceipt", "kind": "class", "defined_in": "vanguard/packages/agency/context/distiller.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "VerificationReceipt", "kind": "class", "defined_in": "vanguard/packages/agency/episode/admission_gate.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "VerificationReceipt", "kind": "class", "defined_in": "vanguard/packages/agency/forge/engine.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "VerificationResult", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/suites/formal_sat.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}

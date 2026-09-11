@@ -9,7 +9,13 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Mapping, Protocol, Sequence, runtime_checkable
 
-from .layers import Block, Layer, GOAL_ECHO_SOURCE, PINNED_L4_SOURCES
+from .layers import (
+    Block,
+    Layer,
+    GOAL_ECHO_SOURCE,
+    PINNED_L4_SOURCES,
+    PINNED_L5_SOURCES,
+)
 
 
 def _receipt_for(block: Block) -> Block:
@@ -36,9 +42,16 @@ def _drop_flexible_notes(notes: list[Block], dropped: list[str], total, ceiling:
 
 
 def _drop_flexible_dialogue(dialogue: list[Block], dropped: list[str], elided: list[str], total, ceiling: int) -> None:
-    """T-36: drop L5 under pressure; the goal echo at the tail is not evictable."""
+    """T-36 / `NT-C04`: drop L5 oldest-first under pressure.
+
+    Two L5 sources are exempt. The goal echo at the tail is the objective
+    itself, and the newest complete interaction is the state the next action
+    starts from; dropping either to satisfy a budget buys room by deleting the
+    reason the turn exists. Their *bodies* may still be elided into receipts.
+    """
     while total() > ceiling and dialogue:
-        index = next((i for i, block in enumerate(dialogue) if block.source != GOAL_ECHO_SOURCE), None)
+        index = next((i for i, block in enumerate(dialogue)
+                      if block.source not in PINNED_L5_SOURCES), None)
         if index is None:
             break
         removed = dialogue.pop(index)
@@ -130,9 +143,11 @@ class RecencyWindowStrategy:
         elided: list[str] = []
         dropped: list[str] = []
 
-        # 1. Truncate dialogue to the recency window limit; keep the goal echo.
-        while len([b for b in dialogue if b.source != GOAL_ECHO_SOURCE]) > max_items:
-            index = next((i for i, block in enumerate(dialogue) if block.source != GOAL_ECHO_SOURCE), None)
+        # 1. Truncate dialogue to the recency window limit; keep the goal
+        #    echo and the newest complete interaction (`NT-C04`).
+        while len([b for b in dialogue if b.source not in PINNED_L5_SOURCES]) > max_items:
+            index = next((i for i, block in enumerate(dialogue)
+                          if block.source not in PINNED_L5_SOURCES), None)
             if index is None:
                 break
             removed = dialogue.pop(index)
@@ -212,7 +227,8 @@ class StructuredConsolidateStrategy:
         to_consolidate: list[Block] = []
 
         while total() > ceiling and dialogue:
-            index = next((i for i, block in enumerate(dialogue) if block.source != GOAL_ECHO_SOURCE), None)
+            index = next((i for i, block in enumerate(dialogue)
+                          if block.source not in PINNED_L5_SOURCES), None)
             if index is None:
                 break
             b = dialogue.pop(index)
@@ -239,7 +255,8 @@ class StructuredConsolidateStrategy:
             while total() > ceiling and len(dialogue) > 1:
                 index = next(
                     (i for i, block in enumerate(dialogue)
-                     if block.source != GOAL_ECHO_SOURCE and block.label != "structured_record"),
+                     if block.source not in PINNED_L5_SOURCES
+                     and block.label != "structured_record"),
                     None,
                 )
                 if index is None:

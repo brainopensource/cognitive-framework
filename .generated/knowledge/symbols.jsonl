@@ -123,8 +123,10 @@
 {"symbol": "ContextBundle", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "ContextCompactedPayload", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "ContextCompiler", "kind": "class", "defined_in": "vanguard/packages/agency/context/compiler.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "ContextOmission", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "ContextPacket", "kind": "class", "defined_in": "vanguard/packages/agency/context/packet.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "ContextPacketError", "kind": "class", "defined_in": "vanguard/packages/agency/context/packet.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "ContextSelectionRecordedPayload", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "ContractError", "kind": "class", "defined_in": "vanguard/packages/runtime/service/contract.py", "canonical_owner": "docs/backend/architecture/application-interfaces.md"}
 {"symbol": "ControllerInputError", "kind": "class", "defined_in": "vanguard/packages/runtime/meta_controller.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ControllerOutputError", "kind": "class", "defined_in": "vanguard/packages/runtime/meta_controller.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}

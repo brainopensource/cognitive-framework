@@ -8,7 +8,7 @@ status: living
 owner: repository-governance
 canonical_for:
   - execution-technical-handbook
-version: "0.9.5"
+version: "0.9.6"
 purpose: Self-explaining engineering handbook for future work. Present-tense architecture stays in docs/architecture and docs/backend.
 derived_from:
   - .draft/DEVELOPMENT_FINAL_PLAN.md
@@ -411,6 +411,8 @@ Stop and return the task to review when a proposed change adds kernel LOC, a sec
 
 The normative owner is [spec FH-1](spec.md#fh-1-post-control-backend-horizon-proposal); [tasks](tasks.md#context-post-control-horizon-fh-1-proposal) owns dependencies and prototype leaves. These algorithms refine [Part 3 §§5–6](../reports/reviews/aether_v093_review/part3_blueprints_and_interface_contracts.md). They are conditional reference algorithms, not executed production code. NT-1 compile/recover remains the near-term contract. The references' in-memory tests do not qualify disk durability or aggregate resource accounting.
 
+**Clause binding.** Each algorithm below implements named spec clauses and is read against them, not instead of them: `prepare_and_promote` implements FH-C05–FH-C10, `export` implements FH-C11, `delegate`/`settle`/`reconcile_delegation` implement FH-D04–FH-D07, and `run_campaign`/`acquire_node_lease`/`replan` implement FH-D08–FH-D12. Every failure return names a code from the FH-1.8 matrix. Where an algorithm here and a spec clause could be read to differ, the spec clause governs and this handbook is wrong. Step numbering is a reading aid for review and for the Wave 4 task board; it is not an API.
+
 ### Placement and compatibility decisions
 
 Reuse `domain` canonicalization/artifact values for tree/edit/check/delegation payloads; `ports/environment.py`, blob/event/evaluator ports and `ports/child_runtime.py` for effect seams; `adapters/environment/transaction.py` and `git.py` for capture/staging/export; existing stores for persistence; `runtime/ledger_emitter.py` and registered reducers for admission/projection; `runtime/delegation.py` and agency spawn for child lineage; code-pack planner/completion for domain phases. Benchmark scheduling/reporting belongs in `benchmarks/` and executable runners in `tools/`. Runtime never imports subprocess. The kernel remains unchanged.
@@ -424,35 +426,244 @@ Let `H` be SHA-256 over canonical bytes and `J` the existing JCS encoder. A file
 The active branch is `(tree_id, generation) = fold(commit_events)`. Each successful compare-and-append increases generation, including rollback to an earlier tree. This prevents an old transaction from matching an A->B->A cycle. Linearization occurs at the durable commit event, not at candidate file writes. A pinned reader observes one immutable tree. Ordinary checkout export is intentionally weaker and has a distinct receipt.
 
 ```text
-prepare_and_promote(request):
-  validate request, authority, bounds, baseline and current profile
-  derive transaction ID from task/composition/grant/branch/generation,
-    baseline/candidate/check-plan identities
-  if this transaction is committed: return its original durable receipt
-  fetch and verify baseline blobs; apply exact-preimage edits in isolation
-  validate final tree and applicable syntax; durably persist candidate blobs
-  reserve verification, publication and recovery resources
-  run each composition-required check on the immutable candidate
-  authenticate every receipt; reject incomplete, stale or cancelled checks
-  ask existing emitter's serialized admission to:
-    recheck transaction identity, current grant, head AND generation
-    verify durable blobs and complete required check set
-    append commit fact and update/rebuild the same head projection
-  if reply is lost: reconcile transaction identity; never undo blindly
+prepare_and_promote(request) -> Result[PromotionReceipt]
+
+  # ---- Phase 0: identity (pure; domain/cas/promotion.py; no effect) --------
+  0.1  value <- decode(request) as aether.promotion/1
+         unknown or unsupported schema version      -> fail SCHEMA_UNSUPPORTED
+  0.2  identity <- H(JCS(value without "receipts"))            # FH-C08, I(P)
+  0.3  txn      <- value.transaction_id
+  0.4  reject non-digest fields, negative generation, empty branch
+         -> fail INVALID_REQUEST   # the existing PortFailure kind, not a new one
+
+  # ---- Phase 1: idempotent replay (read-only fold; runtime) ---------------
+  1.1  prior <- promotion_index.lookup(txn)     # projection of commit facts
+  1.2  if prior is not NONE:
+         if prior.identity != identity          -> fail TRANSACTION_IDENTITY_MISMATCH
+         return prior.receipt                   # original generation; NO mutation
+       # Replay is answered before any blob is read. A committed transaction
+       # is never re-executed, even if the branch has advanced since.
+
+  # ---- Phase 2: authority and baseline (runtime; no mutation yet) ---------
+  2.1  grant <- verify_grant(value.grant, now)
+         expired / revoked / wrong subject       -> fail DELEGATION_DENIED
+  2.2  (head, generation) <- branch_head(value.branch)   # fold of mhf.event/2
+  2.3  if value.expected_head != head           -> fail PROMOTION_CONFLICT
+  2.4  if value.expected_generation != generation -> fail GENERATION_STALE
+       # 2.3 and 2.4 are advisory here and authoritative in Phase 6. Checking
+       # early saves the candidate build; checking ONLY here would be the
+       # classic TOCTOU, which is why Phase 6 repeats both under the lock.
+
+  # ---- Phase 3: candidate construction (domain + blob adapter) -----------
+  3.1  baseline <- load_tree(value.expected_head)
+         missing / corrupt blob                  -> fail BLOB_MISSING | BLOB_CORRUPT
+  3.2  edits <- decode(value.edit_set) as aether.edit-set/1
+  3.3  for each (p, x, r) in edits:                          # FH-C07, total
+         if D(nu_baseline(p)) != x               -> fail PATCH_PREIMAGE_MISMATCH
+       # Evaluated over ALL edits before any write. One mismatch rejects the
+       # whole set; no partial application exists at any observable point.
+  3.4  candidate <- baseline (+) edits
+  3.5  assert admissible(candidate)  per FH-C06 P1-P7
+                                     -> fail EDIT_SET_INCONSISTENT | TREE_*
+  3.6  syntax_check(candidate) in packs/adapters, never in domain
+                                                 -> fail SYNTAX_REJECTED
+  3.7  tree_id <- H_tree(candidate)                          # FH-C05
+
+  # ---- Phase 4: durable candidate (adapters/cas/blob_store.py) -----------
+  4.1  pin(operation_id, tree_id)          # pin-before-write; FH-C10 ordering
+  4.2  for each new blob b in candidate: blob_store.put(b)
+  4.3  fsync files, then fsync containing directories       # rename durability
+  4.4  persist candidate manifest; verify read-back digest == tree_id
+                                                 -> fail BLOB_CORRUPT
+       # FAULT INJECTION POINT F1: kill between 4.2 and 4.4.
+       # Recovery: pin survives, blobs are orphaned-but-pinned, no head moved.
+
+  # ---- Phase 5: verification (adapters/tools; N-06 keeps this out of runtime)
+  5.1  plan <- decode(value.check_plan) as aether.check-plan/1
+  5.2  reserve verification + publication + recovery envelopes  # FH-D04
+         insufficient                            -> fail ENVELOPE_OVERCOMMIT
+  5.3  for each check c in plan.checks:
+         receipt <- verifier.run(c, candidate)   # immutable source mount
+         persist receipt durably before use
+  5.4  if not promotable(candidate, plan, receipts)          # FH-C09
+         -> fail CHECK_INCOMPLETE | VERIFIER_UNTRUSTED | VERIFICATION_STALE
+       # FAULT INJECTION POINT F2: kill between 5.3 and 5.4.
+       # Recovery: receipts are durable and candidate-bound; re-entry re-reads
+       # them rather than re-running, and a receipt bound to another tree_id
+       # is VERIFICATION_STALE rather than reusable.
+
+  # ---- Phase 6: commit (single-writer critical section; runtime) ---------
+  6.1  return commit_critical_section(txn, identity, value, tree_id, receipts)
+```
+
+The commit is one serialized section owned by the existing emitter. Nothing inside it performs I/O that can block indefinitely; every expensive step already happened in Phases 3-5.
+
+```text
+commit_critical_section(txn, identity, value, tree_id, receipts)
+  # Entered under the SAME single-writer boundary that serializes mhf.event/2
+  # appends. There is no second lock and no second head.
+
+  6.1  prior <- promotion_index.lookup(txn)          # re-read inside the lock
+       if prior is not NONE:
+         if prior.identity != identity -> return TRANSACTION_IDENTITY_MISMATCH
+         return prior.receipt                        # lost-reply winner
+  6.2  (head, generation) <- branch_head(value.branch)
+  6.3  if value.expected_head       != head        -> return PROMOTION_CONFLICT
+  6.4  if value.expected_generation != generation  -> return GENERATION_STALE
+  6.5  re-verify grant validity at commit time     -> return DELEGATION_DENIED
+  6.6  re-verify blob presence for tree_id         -> return BLOB_MISSING
+  6.7  re-verify promotable(...) against receipts  -> return CHECK_INCOMPLETE
+  6.8  append CasPromoted fact:
+         {txn, identity, branch, head_before: head, head_after: tree_id,
+          generation_after: generation + 1, check_plan, receipts}
+  6.9  update the head projection in the SAME storage transaction as 6.8
+       # If projection and log can diverge, the projection is rebuilt from the
+       # log on read and is never an independent authority (FH-C02).
+  6.10 release the operation pin; retain the candidate pin as the live head
+  6.11 return receipt{txn, head_after: tree_id, generation_after: generation+1}
+       # FAULT INJECTION POINT F3: kill between 6.8 and 6.11 (reply lost).
+       # Recovery: reconcile_unknown_commit below.
+```
+
+**Why every loser mutates nothing.** Steps 6.2-6.7 are re-evaluated inside the lock, so of `n` concurrent requests naming the same `(head, generation)`, exactly one reaches 6.8; the rest observe the advanced generation at 6.4 and return without having written anything since Phase 4 (which writes only content-addressed blobs, never a head).
+
+**ABA immunity, operationally.** Generation is incremented at 6.8 on every commit including rollback, which is itself an ordinary forward promotion to a retained earlier tree. A request prepared at `(A, g)` that arrives after `A -> B -> A` observes `(A, g+2)` and fails at 6.4 with `GENERATION_STALE`, distinct from the `PROMOTION_CONFLICT` it would get from an ordinary race at 6.3. Callers use that distinction: `PROMOTION_CONFLICT` means rebase onto a different tree, `GENERATION_STALE` means the tree looks identical but history moved underneath and prior verification must still be re-run.
+
+```text
+reconcile_unknown_commit(txn, identity) -> Result[PromotionReceipt]
+  # Runs when the commit reply was lost (F3), on retry or on restart.
+  # It NEVER re-applies and NEVER refunds on a guess.
+  R1  prior <- promotion_index.lookup(txn)       # authoritative fold, not cache
+  R2  if prior is not NONE:
+        if prior.identity != identity -> fail TRANSACTION_IDENTITY_MISMATCH
+        return prior.receipt                     # it did commit; adopt it
+  R3  if the log is readable and txn is absent:
+        the commit did NOT occur -> safe to retry prepare_and_promote
+  R4  if the log is unreadable or truncated:
+        -> fail PROMOTION_UNKNOWN; hold reservations unsettled; do not retry
+       # R4 is the honest branch. "Probably did not commit" is the assumption
+       # that duplicates irreversible effects, so it is not available here.
 ```
 
 The adapter's commit boundary must serialize competing appenders in a fresh-process test; a Python lock in one process is insufficient. Do not claim a new atomic event-store API exists before adapter qualification. Storage acknowledgement requires declared durability semantics, including directory synchronization where needed; fsync success is not a backup strategy. Fault-inject before/after blob persistence, verification receipt persistence, event commit and reply delivery. Orphan unpromoted blobs are collectible only after pending-operation pins expire under policy.
 
 ```text
-export(candidate, destination):
-  acquire owned destination lock; validate destination identity and baseline
-  persist complete preimages and export intent before touching paths
-  publish under journal, checking unexpected external edits before each step
-  on completion: verify final bytes/modes/existence and persist receipt
-  on failure/restart: reconcile journal and each observed path digest
-    restore only owned mutations; preserve conflicting external edits
-    verify restoration, or quarantine and report RECOVERY_FAILED
+export(candidate, destination, operation_id) -> Result[ExportDisposition]
+
+  # Export publishes an immutable candidate onto a mutable host directory.
+  # It is a SEPARATE disposition from promotion (FH-C11) and can fail
+  # without invalidating a committed head.
+
+  # ---- E0: ownership --------------------------------------------------
+  E0.1  assert destination is a declared, owned export root
+                                              -> fail EXPORT_UNOWNED
+  E0.2  lock <- acquire_destination_lock(destination)
+          held by another framework writer    -> fail EXPORT_CONFLICT
+        # The lock binds framework writers only. An arbitrary external editor
+        # is NOT excluded, which is exactly why E3.2 rechecks every path and
+        # why no atomic host-checkout guarantee is offered.
+  E0.3  baseline <- scan(destination)         # path -> (digest, mode, exists)
+  E0.4  if baseline.identity != declared destination_baseline
+                                              -> fail EXPORT_CONFLICT
+
+  # ---- E1: plan and preimages (still no mutation) ----------------------
+  E1.1  target  <- materialization_set(candidate)      # paths we will own
+  E1.2  touched <- target UNION {p in baseline : p in candidate_scope}
+  E1.3  preimages <- { p: (digest(p), mode(p), exists(p)) for p in touched }
+        # Existence is recorded, not just content: restoring a file that the
+        # export created means DELETING it, and that is only knowable from a
+        # preimage that says "absent".
+  E1.4  manifest <- H(JCS(preimages))
+
+  # ---- E2: journal before effect ---------------------------------------
+  E2.1  journal.write(operation_id, state=prepared,
+                      candidate=H_tree(candidate),
+                      destination_baseline=baseline.identity,
+                      destination_identity=destination,
+                      preimage_manifest=manifest,
+                      completed_paths=[])
+  E2.2  fsync journal file AND its directory
+        # FAULT INJECTION POINT X1: kill after E2.2. Recovery finds `prepared`
+        # with no completed paths and restores nothing, because nothing moved.
+
+  # ---- E3: publish ------------------------------------------------------
+  E3.1  journal.advance(operation_id, state=publishing)
+  E3.2  for p in deterministic_order(target):
+          observed <- scan_one(destination, p)
+          if observed != preimages[p]:
+            # Someone else wrote here between E1.3 and now.
+            journal.advance(operation_id, state=restoring)
+            return restore_or_quarantine(operation_id) with EXPORT_CONFLICT
+          write_path(destination, p, candidate)     # temp file + atomic rename
+          fsync file, then fsync parent directory
+          journal.append_completed(operation_id, p)  # durable BEFORE next path
+        # FAULT INJECTION POINT X2: kill inside the loop. `completed_paths` is
+        # the resume cursor; recovery knows exactly which paths it owns.
+  E3.3  for p in (touched \ target) where preimages[p].exists and p is deleted
+            by the candidate: delete and record completed
+
+  # ---- E4: verify and commit -------------------------------------------
+  E4.1  final <- scan(destination restricted to touched)
+  E4.2  if final != expected_postimage(candidate, touched)
+          journal.advance(operation_id, state=restoring)
+          return restore_or_quarantine(operation_id) with EXPORT_CONFLICT
+  E4.3  journal.advance(operation_id, state=committed)
+  E4.4  release lock; return EXPORTED{operation_id, paths=|target|}
 ```
+
+```text
+restore_or_quarantine(operation_id) -> ExportDisposition
+  # Dirty-disk restoration. The rule is: restore ONLY what we wrote, and
+  # never overwrite a third party's edit to prove our own cleanliness.
+
+  J   <- journal.read(operation_id)
+  for p in reverse(J.completed_paths):
+    observed <- scan_one(J.destination, p)
+    expected <- expected_postimage(J.candidate, p)   # what WE wrote
+    pre      <- J.preimages[p]
+
+    case observed == expected:                       # untouched since we wrote
+        restore(p, pre)        # rewrite bytes+mode, or delete if pre.absent
+    case observed == pre:                            # already back to preimage
+        continue                                     # idempotent no-op
+    case otherwise:                                  # externally modified
+        record conflict(p); DO NOT WRITE
+        # Restoring here would destroy someone else's work in the name of
+        # cleanup. The honest outcome is quarantine, not a tidy directory.
+
+  if conflicts is empty:
+      verify each restored path against its preimage
+        mismatch -> goto quarantine
+      journal.advance(operation_id, state=restored)
+      release lock
+      return RESTORED{operation_id}                  # reports RECOVERY_FAILED=false
+
+  quarantine:
+      journal.advance(operation_id, state=quarantined,
+                      conflicts=conflicts, evidence=scan_digests(conflicts))
+      retain the lock marker and the journal; do NOT release for reuse
+      return QUARANTINED{operation_id, conflicts}    # RECOVERY_FAILED
+      # A quarantined destination is never silently reused. It requires an
+      # operator decision under separate authority, and the framework reports
+      # the export as failed while the promotion may still be committed.
+```
+
+```text
+recover_export(operation_id)          # runs at startup, before new exports
+  J <- journal.read(operation_id)
+  switch J.state:
+    prepared    -> nothing was written; discard journal; release lock
+    publishing  -> restore_or_quarantine(operation_id)
+    restoring   -> restore_or_quarantine(operation_id)     # idempotent re-entry
+    committed   -> verify final state; already terminal; release lock
+    restored    -> terminal; release lock
+    quarantined -> terminal; stay quarantined; refuse new export to this root
+  # Every branch is idempotent: running recover_export twice yields the same
+  # state, because each case is driven by durable journal state plus observed
+  # disk digests, never by in-memory progress.
+```
+
+**Separation of dispositions.** `export` returns `EXPORTED`, `RESTORED` or `QUARANTINED`. The promotion receipt from `prepare_and_promote` is unaffected by all three. A run that committed a head and quarantined its checkout reports both, truthfully, as a pair. Collapsing that pair into one status is the reporting defect FH-C11 exists to prevent.
 
 A failure before branch promotion leaves the head unchanged. A post-promotion rollback uses a new expected-generation comparison. Export failure cannot erase a successful branch promotion. Mark/sweep retention roots include live heads, suspended branches, open transactions, accepted evidence and explicit user pins; use a consistent root snapshot or generation barrier so concurrent publication cannot race reclamation. Garbage collection remains grant-checked and bounded.
 
@@ -460,21 +671,276 @@ A failure before branch promotion leaves the head unchanged. A post-promotion ro
 
 For each additive dimension `d`, require `spent_d + unsettled_d + sum(child_reserved_d) + recovery_reserved_d <= root_limit_d`; these are disjoint accounting categories, not double-counted costs. Use the existing governor/lease settlement path. Wall-clock deadlines and structural turn/depth ceilings are checked separately; parallel elapsed latency is not the sum of child runtimes. Unknown usage prevents claiming a fully measured cost and does not justify refunding a possibly spent reservation.
 
+The five states of FH-D06 are not new machinery; they name durable points that
+already exist in `runtime/delegation.py::SpawnAdapter.execute` plus the two
+records DEL-01 adds. The mapping is exact:
+
+| State | Today (`HEAD`) | DEL-01 delta |
+|---|---|---|
+| `RESERVED` | kernel `S7` `Governor.reserve` before the adapter runs | unchanged |
+| `INTENT_RECORDED` | *absent* — `_already_settled(intent_key)` reads back only after `ChildSpawned` | durable intent record keyed by `call_id`, written before dispatch |
+| `DISPATCHED` | `ChildSpawned` fact, emitted before `run_child` | unchanged |
+| `RETURNED` | `ChildReturned` fact from `ChildRunResult` | adds bounded `aether.specialist-findings/1` validation |
+| `SETTLED` | kernel `S11` commit/release against the parent lease | adds durable `aether.delegation-settlement/1` |
+
 ```text
-delegate(request):
-  bind identity to parent lineage + call ID + canonical request digest
-  reconcile an existing intent/result under that identity first
-  validate grant expiry/revocation, scope, resources, depth and output schema
-  atomically admit an idempotent reservation/intent through existing machinery
-  dispatch through canonical child runtime under the reserved envelope
-  on uncertain dispatch: retain reservation and reconcile child lineage
-  on return: authenticate bounded findings and settle actual known usage
-  incorporate subject-valid evidence; parent alone owns mutation/admission
+delegate(parent, request) -> DelegationOutcome
+
+  # ---- S->RESERVED ------------------------------------------------------
+  D0.1  req <- decode(request) as aether.specialist-request/1
+                                          -> deny SCHEMA_UNSUPPORTED
+  D0.2  call_id <- req.call_id
+        identity <- H(JCS({parent_lineage, call_id, canonical request}))
+  D0.3  prior <- settlement_index.lookup(call_id)
+        if prior is not NONE:
+          if prior.identity != identity  -> deny TRANSACTION_IDENTITY_MISMATCH
+          return prior.outcome           # idempotent; no second child
+        # This is the existing `_already_settled` check, moved ahead of parse
+        # so a retried spawn cannot re-run a subtree that already happened.
+  D0.4  assert depth(child) = depth(parent) + 1 <= max_depth
+                                          -> deny DELEGATION_DEPTH_EXCEEDED
+  D0.5  granted <- attenuate(parent.scope, requested_scope)      # K-23/K-25
+        not ok                            -> deny SCOPE_ESCALATION_DENIED
+                                               (record requested AND grantable)
+  D0.6  for d in {usd_micros, millis, tokens, bytes}:
+          if req.budget[d] > remaining_d(parent) -> deny ENVELOPE_OVERCOMMIT
+        lease <- Governor.reserve(run_id, Reservation(**req.budget),
+                                  parent_lease_id=parent.lease_id)
+        state := RESERVED
+        # `remaining_d` is read through the existing callable, never a
+        # snapshot: a sibling spawned three turns ago has already spent.
+
+  # ---- RESERVED -> INTENT_RECORDED --------------------------------------
+  D1.1  persist intent{call_id, identity, lease_id, reserved, granted scope,
+                       deadline, parent_lineage, state: INTENT_RECORDED}
+  D1.2  fsync before returning                           # durable-before-effect
+        state := INTENT_RECORDED
+        # FAULT INJECTION POINT D1: kill here. Recovery finds an intent with no
+        # `ChildSpawned` and must PROVE non-dispatch (D-R2) before releasing.
+
+  # ---- INTENT_RECORDED -> DISPATCHED ------------------------------------
+  D2.1  plan <- ChildRunPlan(...)          # existing validated plan value
+  D2.2  emit ChildSpawned(lineage)         # sole legal writer: SpawnAdapter
+        state := DISPATCHED
+  D2.3  result <- child_runtime.run_child(plan)
+          raised exception -> result := ChildRunResult(outcome="undeterminable",
+                                                       terminal="UNDETERMINABLE")
+        # An exception does NOT mean nothing happened. The child may have
+        # completed an irreversible effect before raising, so the occurrence is
+        # UNDETERMINABLE, never DID_NOT_OCCUR (`F-22`).
+
+  # ---- DISPATCHED -> RETURNED -------------------------------------------
+  D3.1  assert isinstance(result, ChildRunResult)   # no handles, no transcripts
+  D3.2  findings <- decode(result.result_digest) as aether.specialist-findings/1
+        verify findings.request == identity
+               findings.child_lineage == plan.child_episode_id
+               findings.subject matches the parent's current subject
+               every claim's evidence digest resolves
+          any failure -> findings are DROPPED, not partially trusted;
+                         the call still settles on observed cost
+  D3.3  emit ChildReturned(result)
+        state := RETURNED
+
+  # ---- RETURNED -> SETTLED ----------------------------------------------
+  D4.1  observed <- result.actual_cost        # may be partial; never negative
+  D4.2  settled  <- settle(call_id, reserved, observed, outcome)   # below
+  D4.3  persist aether.delegation-settlement/1{call_id, request: identity,
+              state: SETTLED, reserved, observed, settled, deficit, reason}
+  D4.4  kernel commits `settled` against the PARENT lease and releases the
+        remainder (`S11`). There is exactly one accountant and it is not the
+        adapter.
+        state := SETTLED     # terminal, idempotent by call_id
+  D4.5  findings are advisory input to a parent candidate only; they cannot
+        satisfy a check plan or mark a campaign node PASSED (FH-D07).
 ```
+
+```text
+settle(call_id, reserved, observed, outcome) -> (settled, deficit, reason)
+  case outcome == "completed" and observed is complete:
+      settled := observed
+      deficit := max(0, observed - reserved)      # overrun is recorded exactly
+  case outcome in {"denied"} and dispatch provably never occurred:
+      settled := 0                                 # the ONLY zero-settle case
+  case outcome == "abandoned":
+      settled := observed if observed is complete else reserved
+  case outcome == "undeterminable" OR observed has any null dimension:
+      settled := reserved                          # worst case, not zero
+      reason  := "unknown_usage"
+  # A timeout or an unknown outcome settles at RESERVED. Settling such a call
+  # at zero asserts that no effect occurred, which the deadline never proved.
+  if deficit > 0:
+      charge deficit to recovery_d(parent) first; if exhausted,
+      remaining_d(parent) < 0 and the parent is refused all further
+      reservations (ENVELOPE_OVERCOMMIT). The overrun is never clamped.
+```
+
+```text
+reconcile_delegation(call_id)        # startup and retry path
+  I <- intent_store.lookup(call_id)
+  D-R1  I absent, lease open      -> release lease; nothing was recorded
+  D-R2  I.state == INTENT_RECORDED, no ChildSpawned in the log
+                                  -> dispatch provably did not occur;
+                                     settle 0 and release
+  D-R3  I.state == INTENT_RECORDED, ChildSpawned present
+                                  -> treat as DISPATCHED; go to D-R4
+  D-R4  ChildSpawned present, no ChildReturned
+                                  -> outcome UNKNOWN; keep the reservation
+                                     HELD and UNSETTLED (CHILD_UNKNOWN);
+                                     poll the child lineage; never refund
+  D-R5  ChildReturned present, no settlement record
+                                  -> replay D4.1-D4.4 (idempotent by call_id)
+  D-R6  settlement record present -> terminal; a second settle attempt is
+                                     refused as SETTLEMENT_UNRECONCILED
+```
+
+```text
+cancel(parent, reason)
+  C1  compute the descendant set from the canonical lineage chain, deepest first
+  C2  for each descendant in that order:
+        propagate a DEADLINE (not a kill): deliver deadline <- now
+  C3  for each call in {DISPATCHED}:
+        wait bounded; on expiry settle per `settle(...)` with outcome
+        "undeterminable" -> settled := reserved
+  C4  for each call in {RESERVED, INTENT_RECORDED} that satisfies D-R2:
+        settle 0 and release
+  C5  cancellation NEVER converts a descendant's settled spend back into
+      available budget. The envelope shrinks monotonically; a cancel that
+      replenished the allowance would make cancel-and-retry a budget exploit.
+```
+
+**Advisory read-only isolation.** The child receives an attenuated `Grant`, never the parent's `HmacAuthenticator` key or a live session handle — `ChildRunResult.__post_init__` already enforces the scalar-only contract that makes a leaked handle a construction error rather than a downstream surprise. The parent remains the sole writer of `ChildSpawned`/`ChildReturned` (`PRIVILEGED_KIND_OWNERS`), so a specialist has no path to append a fact of its own.
 
 If reservation and intent cannot share one storage transaction, define a recoverable admission state machine: `reserved -> intent_recorded -> dispatched -> returned -> settled`. Each transition is idempotent; restart repairs an incomplete transition before dispatch. A reservation without recorded intent may be released only after proving dispatch never occurred. Cancellation propagates through the canonical lineage and reconciles outstanding effects. Do not construct a second governor or refund on arbitrary exceptions.
 
 Campaign readiness is `ready(v) iff every dependency u has an accepted artifact matching v's required interface/version`. A terminal child without that evidence is not ready. The director records a bounded plan revision and uses the current runtime client; each worker has an explicit lease, task, artifact inputs and budget. On restart reconcile leased/running nodes before selecting ready nodes. Merging independent candidates produces a new tree whose whole check plan must run. A read-only specialist treatment and a parallel-mutating treatment are different experiments. Basic DAG fixtures may qualify mechanics without positive specialist lift; full Octopus and recursive tournament treatments remain behind M-OCT.
+
+### Campaign execution and worker coordination (OCT-03)
+
+The director is a runtime **client**. It owns no `EpisodeEngine`, no `Governor`
+and no scheduler accounting of its own: every node is executed by dispatching
+through the canonical delegation path, so exactly one engine exists per running
+node, inside that node's own child lineage. The structural falsifier is direct —
+`grep` the campaign client for an `EpisodeEngine` construction or a mutating
+verb and the count must be zero (FH-D11).
+
+```text
+run_campaign(plan, director_identity) -> CampaignDisposition
+
+  # ---- C0: plan admission (pure; domain) --------------------------------
+  C0.1  G <- decode(plan) as aether.campaign-plan/1
+                                        -> fail SCHEMA_UNSUPPORTED
+  C0.2  assert every u in deps(v) is a node of G  -> fail CAMPAIGN_PLAN_INVALID
+  C0.3  order <- kahn_topological_sort(G)
+          returns fewer than |V| nodes  -> fail CAMPAIGN_PLAN_INVALID (cycle)
+        # Acyclicity is proven once, at admission. A partially dispatched
+        # cyclic plan is never observable.
+  C0.4  assert budget(G) <= campaign envelope; grants(G) subset of director grant
+
+  # ---- C1: restart reconciliation BEFORE any new dispatch ---------------
+  C1.1  for v in V where lease(v).state == ACTIVE:
+          reconcile_delegation(lease(v).operation_id)      # D-R1..D-R6
+          # A node whose child outcome is unknown keeps its reservation and
+          # stays RUNNING. It is NOT re-dispatched: that is how "resume at
+          # K+1 with no duplicate effects" is actually achieved.
+  C1.2  recompute dispositions as a fold of campaign facts, never from memory
+  C1.3  propagate_blocked(G)                                # C4 below
+
+  # ---- C2: traversal ----------------------------------------------------
+  C2.1  while exists v with ready(v) or disposition(v) == RUNNING:
+  C2.2    R <- { v : ready(v) }                             # FH-D09
+            # ready(v) requires every u in deps(v) to be PASSED *and* to have a
+            # schema-valid accepted artifact. Terminality alone is not enough.
+  C2.3    if R is empty and nothing is RUNNING: break       # quiescent
+  C2.4    for v in R (bounded by the declared parallelism ceiling):
+              lease <- acquire_node_lease(v, director_identity)
+              if lease is NONE: continue                    # another holder won
+              inputs <- { u: artifact_digest(u) for u in deps(v) }
+              dispatch_node(v, lease, inputs)
+  C2.5    await at least one node transition; then loop
+
+  # ---- C3: node completion ----------------------------------------------
+  C3.1  on RETURNED(v, result):
+          artifact <- resolve(result.result_digest)
+          if not validates(artifact, output_schema(v)):
+              record disposition(v) := FAILED, reason ARTIFACT_SCHEMA_INVALID
+          else if not accepted_by_exterior_verification(artifact):
+              record disposition(v) := FAILED, reason CHECK_INCOMPLETE
+          else:
+              record disposition(v) := PASSED, artifact(v) := artifact
+          release lease(v) by appending its terminal state
+        # Acceptance is the exterior verdict. A child's self-report, a role
+        # vote and a tournament score are all inadmissible here.
+
+  # ---- C4: monotone failure closure -------------------------------------
+  C4.1  propagate_blocked(G):
+          frontier <- { u : disposition(u) in {FAILED, BLOCKED, UNDETERMINABLE} }
+          for w in reachable_from(frontier):
+              if disposition(w) in {PENDING}:
+                  disposition(w) := BLOCKED            # persisted, not inferred
+        # Once BLOCKED, w is never ready under this plan version. A failed
+        # dependency cannot be re-argued into readiness.
+
+  # ---- C5: termination ---------------------------------------------------
+  C5.1  every node holds a terminal disposition, or the envelope is exhausted
+  C5.2  emit CampaignSettled{per-node dispositions, artifacts, replans, spend}
+  C5.3  a campaign with any BLOCKED/FAILED/UNDETERMINABLE node reports exactly
+        that. It never reports completion.
+```
+
+```text
+acquire_node_lease(v, holder) -> Lease | NONE
+  # Exclusivity comes from compare-and-append inside the SAME single-writer
+  # boundary that serializes every other mhf.event/2 append. There is no
+  # second lock service and no second ledger.
+  L1  (current_token, current_state) <- lease_projection(v)
+  L2  if current_state == ACTIVE and not expired(current_lease):
+        return NONE                                  # NODE_LEASE_CONFLICT
+  L3  next_token <- current_token + 1                # strictly increasing
+  L4  append aether.campaign-lease/1{campaign_id, node_id: v,
+            attempt: current_attempt + 1, fence_token: next_token,
+            holder_identity: holder, state: ACTIVE, deadline, operation_id}
+        compare-and-append fails (someone else advanced the token) -> return NONE
+  L5  return the lease
+  # FENCING: every later append for node v carries `fence_token` and is
+  # refused unless it equals the node's current token. A director that was
+  # partitioned, resumed elsewhere, or simply slow therefore CANNOT write a
+  # disposition for a node that has been re-leased -- regardless of what it
+  # believes about its own liveness. Expiry alone settles nothing; the child's
+  # outcome is still reconciled by `operation_id` through D-R1..D-R6.
+```
+
+```text
+dispatch_node(v, lease, inputs)
+  N1  reserve the node envelope from the campaign envelope (FH-D04)
+        insufficient -> disposition(v) := BLOCKED, reason ENVELOPE_OVERCOMMIT
+  N2  build an aether.specialist-request/1 (or an ordinary task request) whose
+      scope is attenuated from the director's grant and whose inputs are the
+      dependency artifact DIGESTS -- never inline content
+  N3  delegate(director, request)        # the SAME path as FH-D06; one engine
+                                         # is constructed inside the child
+  N4  disposition(v) := RUNNING; the lease's operation_id is the reconciliation
+      key for C1.1
+  # The director never calls an environment adapter, never opens a workspace
+  # and never applies a patch. Edits happen only inside qualified child
+  # episodes, through the existing execution path.
+```
+
+```text
+replan(G, G_prime) -> Result[Plan]
+  P1  assert objective_digest(G_prime) == objective_digest(G)
+  P2  assert grants(G_prime) subset of grants(G)
+  P3  assert budget_d(G_prime) <= budget_d(G) for every additive d
+  P4  assert { v : disposition(v) == PASSED } and their artifacts are carried
+      over byte-identically
+  P5  assert replans(G) + 1 <= replan_allowance   -> fail REPLAN_EXHAUSTED
+  P1-P3 violated                                   -> fail SCOPE_ESCALATION_DENIED
+  P6  append the plan revision as a fact; the old plan version is retained
+  # Replanning is how a campaign adapts. Silently enlarging the objective,
+  # the authority or the budget is how a campaign escapes its authorization,
+  # so each is a separate refusal with its own code.
+```
+
+**Merge is a candidate, not a vote.** Integrating independent node artifacts produces a NEW candidate tree whose complete check plan must run (FH-D02). Passing children, role agreement and tournament ranking are inputs to *which* candidate is built, never evidence that the combined tree is correct.
 
 Memory promotion reuses the existing governed learning path: capture candidate lesson with subject/version/evidence, evaluate on a segregated development holdout, admit through a distinct promoter, and record supersession/rollback. Revocation invalidates materialized retrieval caches as well as future queries. Official evaluation holdouts never become training or adaptive selection data within that study.
 
@@ -504,6 +970,60 @@ Pin SWE-bench code/dataset/environment and export `instance_id`, `model_name_or_
 Pin Aider's polyglot corpus, runner and attempt/feedback protocol separately; report first-attempt and feedback-assisted results independently and identify the AETHER harness substitution. The [Aider benchmark documentation](https://aider.chat/docs/benchmarks.html) and [leaderboard methodology](https://aider.chat/docs/leaderboards/) are protocol sources, not evidence that this backend has achieved their scores (checked 2026-09-07). Do not hard-code leaderboard leaders into acceptance. For greenfield, freeze requirements, negative checks, clean-start/build conditions and evaluator independence; assess completeness/reproducibility separately from repository repair.
 
 Official protocol reproduction, public submission and a SOTA claim have distinct receipts. Public submission requires its existing release/operator authority. Select comparator eligibility and a dated comparison snapshot before running the study; incomparable harness/resource settings forbid a direct superiority claim. Negative or inconclusive results close the reporting task while leaving the performance gate open. Release qualification still requires M-8/M-9/M-10 and complete preservation recipes on the final subject.
+
+### Algorithm-to-file map and fault-injection index (feeds Wave 4)
+
+Single-responsibility placement for the four algorithms above. Every row is a
+disjoint file lease: no two rows may be edited by two developers at once, and
+no row may be widened to absorb a neighbour's responsibility.
+
+| Algorithm | Owning file (new unless noted) | Layer rule |
+|---|---|---|
+| `H_tree`, `ent`, `order`, admissibility P1–P7 | `vanguard/packages/domain/cas/tree.py` | pure; no `os`, no `pathlib`, no clock |
+| `nu_A`, `D`, `admissible`, `(+)` | `vanguard/packages/domain/cas/edit_set.py` | pure; rejects, never repairs |
+| promotion value, `I(P)`, generation algebra | `vanguard/packages/domain/cas/promotion.py` | pure value + predicates |
+| `prepare_and_promote` Phases 0–5 | `vanguard/packages/runtime/cas/promote.py` | composes; **no `import subprocess`** (N-06) |
+| `commit_critical_section`, `reconcile_unknown_commit` | `vanguard/packages/runtime/cas/commit.py` | inside the existing emitter boundary |
+| blob persistence, fsync, pin/sweep | `vanguard/packages/adapters/cas/blob_store.py` | implements `ports/blob_store.py::BlobStorePort` |
+| capture / materialization | `vanguard/packages/adapters/cas/workspace.py` | the only filesystem reader for CAS |
+| `export`, `restore_or_quarantine`, `recover_export` | `vanguard/packages/adapters/cas/export.py` | journal is adapter-owned; intent is runtime-owned |
+| check execution | `vanguard/packages/adapters/verification/runner.py` or `tools/` | the only place a process is spawned |
+| `delegate` D0–D4, `settle`, `reconcile_delegation`, `cancel` | extend `vanguard/packages/runtime/delegation.py` | extend `SpawnAdapter`; do not fork a second adapter |
+| `aether.delegation-settlement/1` value | `vanguard/packages/domain/delegation/settlement.py` | pure; parent is sole writer |
+| `run_campaign`, `acquire_node_lease`, `dispatch_node`, `replan` | `vanguard/packages/runtime/campaign/director.py` | runtime client; zero mutating verbs (FH-D11) |
+| `aether.campaign-plan/1`, `aether.campaign-lease/1` values | `vanguard/packages/domain/campaign/plan.py` | pure; Kahn sort lives here |
+| lesson values, revocation root `R_e` | `vanguard/packages/domain/memory/lesson.py` | pure; admission predicate is a function |
+
+Kernel delta stays zero against the 1438 ceiling: none of these rows touch
+`vanguard/packages/kernel/`. `Governor`, `Reservation`, `Lease`, `Scope`,
+`attenuate` and `Grant` are consumed as they are.
+
+**Fault-injection index.** Each point is a required test, not a suggestion.
+The falsifier must kill the process at the named point and assert the stated
+recovery, because an untested claim of crash or ABA immunity cannot satisfy
+MS-CAS, MS-DELEGATION or MS-CAMPAIGN.
+
+| Point | Kill site | Required post-restart assertion |
+|---|---|---|
+| `F1` | between blob write and manifest read-back (4.2–4.4) | head unmoved; blobs pinned, not orphaned; retry succeeds |
+| `F2` | between receipt execution and sufficiency test (5.3–5.4) | receipts re-read, not re-run; a receipt bound to another `tree_id` reports `VERIFICATION_STALE` |
+| `F3` | between commit append and reply (6.8–6.11) | `reconcile_unknown_commit` adopts the committed receipt; no second append; no refund |
+| `X1` | after journal `prepared` fsync (E2.2) | nothing restored because nothing was written; lock released |
+| `X2` | inside the publish loop (E3.2) | `completed_paths` drives restoration; externally modified paths are preserved and the destination quarantines |
+| `D1` | after intent fsync, before `ChildSpawned` (D1.2) | `D-R2` proves non-dispatch before releasing; no orphan child |
+| `D2` | after `ChildSpawned`, before `ChildReturned` | `D-R4` holds the reservation unsettled as `CHILD_UNKNOWN`; no refund, no re-dispatch |
+| `C1` | after a node lease append, before dispatch | resume reconciles by `operation_id`; the node is not dispatched twice |
+| `C2` | after node K passes, before node K+1 dispatch | resume starts at K+1; node K's artifact is reused, not recomputed |
+
+**Concurrency falsifiers.** A single-process lock proves nothing about the
+commit boundary. Each of these runs fresh OS processes: (a) `n` concurrent
+promotions on one `(head, generation)` — exactly one commits, `n-1` return
+`PROMOTION_CONFLICT` or `GENERATION_STALE` and no loser leaves a trace beyond
+content-addressed blobs; (b) an `A -> B -> A` rollback cycle with a stale
+request held across it — refused with `GENERATION_STALE`, never admitted;
+(c) two directors racing one node lease — the superseded `fence_token` cannot
+append a disposition; (d) a replayed `transaction_id` carrying different
+fields — `TRANSACTION_IDENTITY_MISMATCH`, never the earlier receipt.
 
 ## 0. Epistemic legend
 

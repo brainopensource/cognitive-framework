@@ -495,6 +495,9 @@ The rows below extend the same fail-closed discipline to the formal clauses of F
 | `LIFT_UNPROVEN` | FH-M02 | Treatment stays disabled and the positive gate stays open; the honest report still completes. |
 | `LESSON_REVOKED` / `REVOCATION_ROOT_STALE` | FH-M03, FH-M04 | Refuse admission; recompute under the current root. Flag dependent acceptances for re-verification without rewriting past events. |
 | `SCHEMA_UNSUPPORTED` | FH-1.1 preamble | Unknown required schema version fails closed on both read and write paths; no best-effort partial decode. |
+| `SYNTAX_REJECTED` | FH-C07 | Reject the candidate before verification; unsupported syntax is refused, never routed to a fuzzy fallback. |
+| `ARTIFACT_SCHEMA_INVALID` | FH-D09 | The producer's artifact failed the consumer's declared `output_schema`; the node is `FAILED`, never `PASSED`. |
+| `EXPORT_UNOWNED` | FH-C11 | Refuse before acquiring a lock or writing a journal; an undeclared destination root is never exported to. |
 
 **Normative placement.** The formal clauses above change no layer ownership. Placement is itself a falsifiable contract:
 

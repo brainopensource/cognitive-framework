@@ -34,7 +34,7 @@ Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technic
 
 **No sprints. No waves.** Check boxes as work completes. **Recommended reading order (not a schedule):** MS-SEE A stack T-16/T-15/T-36/T-37/T-45 is MECHANISM this-branch. T-04/T-05/T-07 landed 2026-09-04 (T-04 carries an open successor obligation; see its row). Do not create `progressive.py` (T-15). T-46 ranking stays `[PROPOSAL]`.
 
-**Current handoff (2026-09-11; qualified candidate subject `2989d57d4d38c01eecdb7a5fbb6f125077f00e59`).** Stream C has integrated Dev A candidate `cae7c98d` and Dev B candidate `37813a65`, registered `ContextSelectionRecorded` through canonical generator inputs and domain reducer, resolved all integration defects (including cold-replay parity and fresh-process resume behavior identity), delivered and qualified T-110 deterministic 100-turn preservation fixture (`dbf8144d`), and executed complete discovery (3121 tests passed, 0 failures, 0 errors, 42 skipped) alongside full `just check` and `just verify` pipelines. Public presets remain byte-identical; TCB LOC is 1386 (<= 1438); Invariant N-06 has zero `subprocess` imports in runtime; `control_preregistration.json` remains `UNFROZEN` (`subject_sha: null`) with zero paid calls made. All criteria for T-77, T-107, T-110, and T-111 are qualified and submitted in the consolidated Leadership Review Package for single MS-BASELINE and MS-CONTEXT closure.
+**Current handoff (2026-09-11; accepted integrated subject `2989d57d4d38c01eecdb7a5fbb6f125077f00e59`).** Leadership accepted T-77, T-107, T-110 and T-111 after exact-subject qualification. Full discovery ran 3,121 tests: 3,079 passed, 42 skipped, zero failures/errors. The complete `just check` and `just verify` pipelines, 815-test runtime collection (17 skipped), 38-test focused runtime/RF slice and 20-test preregistration/frozen-canary slice passed. T-110 executed 104 deterministic turns over four fresh Python interpreters and matched the uninterrupted semantic vector without duplicate settled effects. Public presets remain byte-identical; TCB LOC is 1386 (<= 1438); Invariant N-06 has zero `subprocess` imports in runtime; `control_preregistration.json` remains `UNFROZEN` (`subject_sha: null`) with zero paid calls. MS-BASELINE and MS-CONTEXT are CLOSED. MS-CONTROL remains OPEN; T-26 is READY but UNFROZEN, and T-27/T-51/T-52 remain open.
 
 ## Near-term ownership and ready work
 
@@ -50,10 +50,11 @@ This table is a projection of the `requires:` edges below. `READY` authorizes wo
 | Task | Stream | State | Requires | Concrete exit |
 |---|---|---|---|---|
 | **T-109** | C, with A/B defect owners | `ACCEPTED` | T-97/T-98/T-99/T-101/T-102/T-103/T-108 accepted | One clean SHA passes complete Python discovery, full `just check` and `just verify` bodies, TypeScript gates and nonmutation comparison with zero failures/errors. |
-| **T-77** | B | `QUALIFIED (Awaits Leadership Review)` | T-104/T-105 accepted | Candidate integrated on `2989d57d`; stable L1-L3 bytes, bounded artifact receipts, trailing goal echo and explicit cache missingness pass on the combined subject (37/37 tests green). |
-| **T-107** | A | `QUALIFIED (Awaits Leadership Review)` | T-100/T-104/T-105/T-106/T-109 accepted | Integrated on `2989d57d`; `ContextSelectionRecorded` registered and reduced; write-before-use and cold replay pass on the combined subject (42/42 tests green). |
-| **T-110** | A/C | `QUALIFIED (Awaits Leadership Review)` | T-107 and T-77 | A deterministic 100-or-more-turn fixture survives forced compaction and fresh-process restart without losing critical state or admitting false completion (`test_long_session_context_recovery.py` 7/7 tests green in 10.5s; 9/9 combined falsifiers green). |
-| **T-111** | C | `QUALIFIED (Awaits Leadership Review)` | T-109 and T-110 | Complete exact-subject gate (3121 tests green, full `just check`/`just verify`, LDA doctor/drift green) reconciles MS-BASELINE/MS-CONTEXT and hands an unfrozen control candidate to T-26. |
+| **T-77** | B | `ACCEPTED` | T-104/T-105 accepted | Integrated context/cache contracts pass on `2989d57d`; cache usage remains observed or null. |
+| **T-107** | A | `ACCEPTED` | T-100/T-104/T-105/T-106/T-109 accepted | Registered write-before-use selection/recovery and project-scoped cold replay pass on `2989d57d`. |
+| **T-110** | A/C | `ACCEPTED` | T-107 and T-77 | The 104-turn fixture crosses four fresh interpreters and preserves the semantic vector on `2989d57d`. |
+| **T-111** | C | `ACCEPTED` | T-109 and T-110 | Exact-subject full gates reconcile and close MS-BASELINE/MS-CONTEXT on `2989d57d`. |
+| **T-26** | C/Leadership | `READY; UNFROZEN` | T-111 plus applicable T-79/T-89/T-92–T-95/T-51/T-52 evidence | Audit the control prerequisites and freeze one eligible exact subject; make no paid call in the freeze task. |
 
 ### Stream Ownership and Boundaries
 
@@ -220,7 +221,7 @@ campaigns and memory learning remain outside this batch.
   - **falsifier**: `python3 -m unittest test.agency.test_protocol_recovery -v`; six-action repeat and two/three-cycles detected, new evidence permits progress, retries/deadlines survive serialization, permission denial never sleeps into authorization.
   - **accepted evidence (2026-09-10)**: stall recovery slice 15/15 passed (`python3 -m unittest test.agency.test_protocol_recovery -v`); 6-action window detects 3 unchanged signatures, length-2 and length-3 cycles detected, new evidence permits progress, retries/deadlines survive serialization, and permission denial fails closed without sleeping.
 
-- [ ] **T-107: Runtime binding and durable selection/recovery events**
+- [x] **T-107: Runtime binding and durable selection/recovery events**
   - **package / owner**: CTX-01 / REC-01 / Stream A
   - **requires**: [T-100, T-104, T-105, T-106, T-109]
   - **files**: `runtime/{session,task_state,checkpoints,ledger_emitter}.py`, runtime tests; C owns any schema-generator inputs/event registry tooling needed by this handoff
@@ -234,9 +235,9 @@ campaigns and memory learning remain outside this batch.
     - On cold resume, fold the ledger, validate schema/lineage/reducer/subject identities, reconcile open intents and children, and reconstruct counters, attempts, pending operation, deadline, remaining budgets, prefix epoch and settled effects. Never replay a settled or occurrence-unknown effect.
     - Register every new production-emittable event through C-owned schema/catalog generator inputs and keep `check_event_coverage.py` green. Runtime remains declarative with respect to execution: no `subprocess` import under `vanguard/packages/runtime/`.
   - **fault injections**: selection append failure before model call; recovery append failure before retry; crash after selection append but before inference; crash after `EffectStarted` but before settlement; restart with wrong subject/policy/reducer; duplicate resume request; expired pending-operation deadline.
-  - **qualification evidence (2026-09-11; candidate subject 2989d57d)**: candidate `cae7c98d` integrated on `2989d57d4d38c01eecdb7a5fbb6f125077f00e59`. `ContextSelectionRecorded` registered through canonical generator inputs and handled in `reduce_event` (`vanguard/packages/domain/ledger/reducer.py`). Falsifier suite passed 42/42 (`python3 -m unittest test.runtime.test_task_state_fold test.runtime.test_resume_identity test.runtime.test_context_layer_residency test.runtime.test_coding_resume -v`); event coverage passed (`python3 tools/linters/check_event_coverage.py`: `E-COV PASS`); ledger truth passed 15/15 (`test_ledger_truth.py`). Runtime remains purely declarative (zero `subprocess` imports under `vanguard/packages/runtime/`, Invariant N-06 verified). Awaits Leadership review.
+  - **accepted evidence (2026-09-11; subject 2989d57d)**: candidate `cae7c98d` is integrated on `2989d57d4d38c01eecdb7a5fbb6f125077f00e59`. `ContextSelectionRecorded` is registered through canonical generator inputs and handled in the domain reducer. The named falsifier passed 42/42, event coverage passed, ledger truth passed, and the final full discovery/verify gates were green. Runtime retains zero `subprocess` imports. Leadership accepted the row at T-111.
 
-- [ ] **T-110: Long-session preservation qualification**
+- [x] **T-110: Long-session preservation qualification**
   - **package / owner**: CTX-01 / REC-01 / Stream A
   - **requires**: [T-107, T-77]
   - **files**: **[NEW]** `test/runtime/test_long_session_context_recovery.py`, existing cold-resume fixtures; no new runtime path
@@ -249,9 +250,9 @@ campaigns and memory learning remain outside this batch.
     - At every checkpoint compare objective, constraints, active plan, next action, modified resources, last material failure, latest applicable verification, settled descriptors, remaining budgets, recovery counters/history, pending operation/deadline and epoch/serializer/counter identities.
     - Prove that omission affects presentation only: durable task facts remain reconstructable; newest complete interaction remains; stale verification cannot authorize finish; exhausted recovery terminates explicitly; no settled effect executes twice.
   - **acceptance matrix**: uninterrupted run versus cold-resumed run must yield identical semantic state and terminal disposition; exact event sequence numbers may differ only where the contract explicitly permits recovery facts. Test output must name the first divergent field.
-  - **qualification evidence (2026-09-11; candidate subject 2989d57d)**: dedicated long-session qualification fixture committed in `dbf8144d` and qualified on `2989d57d4d38c01eecdb7a5fbb6f125077f00e59`. Combined falsifier passed 9/9 in 12.1s (`python3 -m unittest test.runtime.test_long_session_context_recovery test.falsifiers.test_rf25_cold_continuation test.falsifiers.test_rf23_trajectory_content -v`). Demonstrated deterministic 100+ turn execution across forced compaction, restart, schedule turn 76 crash reconciliation (zero duplicate effects), oversized observation artifact receipts, untrusted tool text containment, stale finish refusal with fresh verification acceptance, and semantic vector divergence reporting. Shipped presets verified byte-identical (`fast` 0.05/8t/16k, `balanced` 0.15/20t/40k, `max` 0.40/40t/96k). Awaits Leadership review.
+  - **accepted evidence (2026-09-11; subject 2989d57d)**: the strengthened fixture passed 7/7 and its combined RF slice passed 9/9 on `2989d57d4d38c01eecdb7a5fbb6f125077f00e59`. It executed 104 deterministic turns over four fresh Python interpreters, reconstructed solely from SQLite, reconciled the turn-76 open intent without duplicate settlement and matched the uninterrupted semantic vector. Shipped presets remained byte-identical. Leadership accepted the row at T-111.
 
-- [ ] **T-111: Near-term gate reconciliation and control handoff**
+- [x] **T-111: Near-term gate reconciliation and control handoff**
   - **package / owner**: GATE-01 / EXP-01 / Stream C
   - **requires**: [T-109, T-110]
   - **files**: existing five execution files; `benchmarks/ladder/control_preregistration.json` validation and receipt references; knowledge regenerated, never hand-edited
@@ -263,7 +264,7 @@ campaigns and memory learning remain outside this batch.
     3. Reconcile `spec.md`, `technical.md`, `backlog.md`, `tasks.md` and `milestones.md`; regenerate knowledge through its generator. Status prose must agree with checkboxes and milestone rows.
     4. Mark MS-CONTEXT closed only after independent receipt review. Record the exact subject and explicit missingness; fixture success makes no live provider, cache-rate or benchmark-quality claim.
     5. Hand the accepted subject to T-26 as an unfrozen control candidate. T-26/T-27/T-51/T-52 and applicable T-79/T-89/T-92–T-95 obligations remain control work.
-  - **qualification evidence (2026-09-11; candidate subject 2989d57d)**: full test discovery passed on `2989d57d4d38c01eecdb7a5fbb6f125077f00e59` (`python3 -m unittest discover -s test -t .`: Ran 3121 tests, 3079 passed, 42 skipped, 0 failures, 0 errors in 145.5s). All linters passed (check_boundaries 833 files, check_tcb_budget 1386 LOC <= 1438, check_domain_blindness, check_isolation_policy, check_duplication --enforce, check_markdown_links, check_stale_paths, check_event_coverage, scan_secrets). `just check` PASS, `just verify` PASS (TypeScript/Ink 89/89, Studio 11/11, markdownlint 133/133, doc metadata 91/91, knowledge base regenerated). `benchmarks/ladder/control_preregistration.json` verified `UNFROZEN` (`subject_sha: null`); zero paid calls made. All 5 execution runway files reconciled. Consolidated candidate prepared for single Leadership Review.
+  - **accepted evidence (2026-09-11; subject 2989d57d)**: full discovery ran 3,121 tests (3,079 passed, 42 skipped, zero failures/errors) on `2989d57d4d38c01eecdb7a5fbb6f125077f00e59`. `just check` and the complete elevated-IPC `just verify` passed, including Python, TypeScript, schema/event coverage, integrity and documentation gates. The preregistration/frozen-canary slice passed 20/20. LDA was healthy and fresh with zero stale paths. Leadership closed MS-BASELINE and MS-CONTEXT and handed this exact subject to T-26 as an unfrozen candidate.
 
 New test modules above are deliverables of their rows; absence before implementation is not a pass. Existing T-04/T-79/T-89/T-97 IDs retain their contracts; T-99/T-102/T-103 assign the successor integration work, not competing implementations. Historical checked mechanisms stay checked; all new rows remain unchecked until their receipts are accepted.
 
@@ -799,7 +800,7 @@ These leaves refine existing T-17/T-28–T-34/T-49–T-58/T-67/T-80/T-96 familie
   - **specification**: Expose `repo.search_symbols`, `repo.get_callers`, `repo.get_dependencies`, and `repo.get_tests` as bounded observations. Their results enter L5 only and cannot perturb the frozen L1–L3 prefix.
   - **acceptance_falsifier**: `python3 -m unittest test.agency.test_l5_only_observations -v` keeps the L1–L3 digest bit-identical across ten turns while retaining all four observations in L5.
 
-- [ ] **T-77: Cache breakpoints, CTRF distillation, and Trailing Goal Echo**
+- [x] **T-77: Cache breakpoints, CTRF distillation, and Trailing Goal Echo**
   - **package**: CTX-01 (IDX-01 remains the optional retrieval consumer)
   - **subsystem**: agency
   - **owner**: Stream B; provider serializer is A/T-105, durable emission A/T-107
@@ -813,7 +814,7 @@ These leaves refine existing T-17/T-28–T-34/T-49–T-58/T-67/T-80/T-96 familie
     - Convert oversized result bodies into subject-bound artifact receipts before selection; retain verification command, environment, counts, exit status and freshness even when raw output is omitted.
     - Apply NT-C04 eviction order and preserve the newest complete interaction. Append the complete objective/constraint goal echo at L5 after dynamic evidence so late-turn instructions cannot replace it.
     - Emit actual provider cache observations or explicit null. Prefix equality proves deterministic bytes, never a hit, speedup, cost reduction or authorized budget widening.
-  - **qualification evidence (2026-09-11; candidate subject 2989d57d)**: candidate `37813a65` integrated on `2989d57d4d38c01eecdb7a5fbb6f125077f00e59`. Falsifier suite passed 37/37 (`python3 -m unittest test.agency.test_cache_breakpoints test.agency.test_context_compiler test.agency.test_compaction -v`). Proved stable L1-L3 prefix bytes and schema order, bounded CTRF receipts, L5 trailing goal echo, and strictly three-valued cache observation (`None`, `0`, or positive integer). Awaits Leadership review.
+  - **accepted evidence (2026-09-11; subject 2989d57d)**: candidate `37813a65` and the B-owned fault hardening are integrated on `2989d57d4d38c01eecdb7a5fbb6f125077f00e59`. The named context slice passed 37/37 and the final discovery/verify gates were green. Stable L1-L3 bytes, bounded artifact receipts, trailing goal echo and three-valued cache observation are preserved. Leadership accepted the row at T-111; no cache-hit-rate claim follows.
 
 - [ ] **T-78: Exact-match `str_replace` primitive**
   - **package**: CHANGE

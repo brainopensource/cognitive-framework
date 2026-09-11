@@ -20,6 +20,8 @@ from vanguard.packages.runtime.app_service import ApplicationService, episode_id
 from vanguard.packages.runtime.compose import TaskContext
 from vanguard.packages.runtime.root import HarnessSession, Runtime
 from vanguard.packages.runtime.task_state import fold_task_state
+from vanguard.packages.ports.event_store import EventRange
+from vanguard.packages.domain.ledger.events import WRITABLE_KINDS
 
 
 def _event(kind: str, *, episode_id: str = "ep-original", **payload: object) -> SimpleNamespace:
@@ -30,6 +32,92 @@ def _event(kind: str, *, episode_id: str = "ep-original", **payload: object) -> 
 
 
 class TestResumeIdentity(unittest.TestCase):
+    def _session(self, model: object, *, episode_id: str = "ep-t107") -> HarnessSession:
+        harness = Runtime.compose("vg-code-default", episode_id=episode_id)
+        return HarnessSession(
+            harness,
+            _ports(model, FakeEnvironment()),
+            TaskContext(
+                brief="durability", repo_path=Path("/workspace"),
+                run_id=f"run-{episode_id}", episode_id=episode_id,
+                principal="agent-1", max_turns=4,
+            ),
+        )
+
+    def test_selection_append_failure_makes_zero_model_calls(self) -> None:
+        """T-107: selection evidence is a write-before-inference gate."""
+        model = ScriptedModel([finish()])
+        session = self._session(model, episode_id="ep-selection-failure")
+        original = session.ledger.emit_kind
+
+        def emit(kind: str, **kwargs: object):
+            if kind == "ContextSelectionRecorded":
+                raise OSError("selection store unavailable")
+            return original(kind, **kwargs)
+
+        with patch("vanguard.packages.runtime.session.WRITABLE_KINDS",
+                   frozenset({"ContextSelectionRecorded"})), \
+             patch.object(session.ledger, "emit_kind", side_effect=emit):
+            session.run()
+        self.assertEqual(model.calls, [])
+
+    def test_selection_is_durable_before_the_first_model_call(self) -> None:
+        """The selection fact carries the identity and final compiler count."""
+        model = ScriptedModel([finish()])
+        session = self._session(model, episode_id="ep-selection-recorded")
+        kinds = WRITABLE_KINDS | frozenset({"ContextSelectionRecorded"})
+        with patch("vanguard.packages.runtime.session.WRITABLE_KINDS", kinds), \
+             patch("vanguard.packages.runtime.ledger_emitter.WRITABLE_KINDS", kinds):
+            session.run()
+        events = session.ports.store.read(EventRange(episode_id=session.task.episode_id))
+        selection = next(
+            item.payload for item in events.value
+            if item.payload.get("kind") == "ContextSelectionRecorded")
+        self.assertEqual(len(model.calls), 1)
+        self.assertTrue(selection["prefixDigest"])
+        self.assertTrue(selection["requestDigest"])
+        self.assertGreaterEqual(selection["serializedTokens"], 0)
+        self.assertEqual(selection["cursor"], 0)
+        self.assertEqual(selection["behaviorIdentity"]["compositionDigest"],
+                         session.harness.composition_digest)
+
+    def test_recovery_append_failure_blocks_next_inference(self) -> None:
+        """T-107: an unpersisted retry decision cannot lead to another call."""
+        model = ScriptedModel(["not a proposal", finish()])
+        session = self._session(model, episode_id="ep-recovery-failure")
+        original = session.ledger.emit
+
+        def emit(event: object):
+            if getattr(event, "kind", "") == "EpisodeStateChanged":
+                return None
+            return original(event)
+
+        with patch.object(session.ledger, "emit", side_effect=emit):
+            session.run()
+        self.assertEqual(len(model.calls), 1)
+
+    def test_resume_rejects_changed_behavior_identity_before_model_call(self) -> None:
+        model = ScriptedModel([finish()])
+        harness = Runtime.compose("vg-code-default", episode_id="ep-identity-reject")
+        session = HarnessSession(
+            harness,
+            _ports(model, FakeEnvironment()),
+            TaskContext(
+                brief="durability", repo_path=Path("/workspace"),
+                run_id="run-identity-reject", episode_id="ep-identity-reject",
+                principal="agent-1", max_turns=4,
+                resume_state={
+                    "recoveryState": {},
+                    "selectionPolicyIdentity": {
+                        "behaviorIdentity": {"compositionDigest": "foreign"},
+                    },
+                },
+            ),
+        )
+        with self.assertRaises(ContextPacketError):
+            session.run()
+        self.assertEqual(model.calls, [])
+
     def test_episode_id_from_events_preserves_ledger_identity(self) -> None:
         events = [
             _event("EpisodeStarted", brief="continue", episodeId="ep-original"),

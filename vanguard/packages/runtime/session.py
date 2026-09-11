@@ -38,6 +38,7 @@ from ..agency.manifests.discovery import WorkspaceDiscovery
 from ..agency.provenance import NullProvenanceSink, ProvenanceSink
 from ..domain.canonicalisation.digest import digest_of
 from ..domain.workspace_epoch import WorkspaceEpoch
+from ..domain.ledger.events import WRITABLE_KINDS
 from ..domain.ledger.agent_view import AgentView, fold_agent_view
 from ..domain.ledger.progress import ConfidenceRecord, ProgressView, fold_progress
 from ..domain.ledger.reducer import compute_state_digest, reconstruct_state
@@ -375,6 +376,7 @@ class _LayeredOperator:
         meta_controller: Callable[[], ControllerProposal | None] | None = None,
         memory: MemoryBinding | None = None,
         capabilities: Sequence[Mapping[str, Any]] = (),
+        before_propose: Callable[[Mapping[str, Any], Any, int, Sequence[Mapping[str, Any]], Mapping[str, Any]], None] | None = None,
     ) -> None:
         self._model = model
         configure_capabilities = getattr(model, "configure_capabilities", None)
@@ -398,6 +400,11 @@ class _LayeredOperator:
         self.contexts: list[Mapping[str, Any]] = []
         self._artifacts = artifacts
         self._meta_controller = meta_controller
+        # The compiler intentionally has no ledger dependency.  This callback
+        # is the runtime-owned write-before-inference boundary: it receives
+        # the final compiled vector, records its selection, and may refuse the
+        # provider call without making context compilation stateful.
+        self._before_propose = before_propose
 
     def set_task_state(self, state: Mapping[str, Any] | None) -> None:
         self._assembler.set_task_state(state)
@@ -441,6 +448,8 @@ class _LayeredOperator:
 
         turn = len(self.contexts)
         bundle, compiled = self._assembler.assemble(view, turn)
+        if self._before_propose is not None:
+            self._before_propose(bundle, compiled, turn, tools, sampling)
         self.contexts.append(bundle)
 
         input_ref = self._capture(
@@ -662,6 +671,53 @@ class _SwappablePolicy:
         return self._current.authorize(request, **kwargs)
 
 
+class _RecoveryGuardedEmitter:
+    """Preserve the engine's event seam while making recovery append failure fatal.
+
+    ``EpisodeEngine`` deliberately treats ordinary observability failures as
+    non-fatal.  Recovery state is different: without its durable snapshot a
+    restart could redraw a delay or repeat an unknown operation.  The engine
+    still owns recovery policy; this runtime boundary merely remembers a
+    failed ``EpisodeStateChanged(recoveryState=...)`` append so the next model
+    call or dispatch is refused before it can become an external action.
+    """
+
+    def __init__(self, inner: Any) -> None:
+        self._inner = inner
+        self.recovery_append_error: str | None = None
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._inner, name)
+
+    @property
+    def pending(self) -> Any:
+        return self._inner.pending
+
+    @pending.setter
+    def pending(self, value: Any) -> None:
+        self._inner.pending = value
+
+    def emit(self, event: Event) -> Any:
+        try:
+            emitted = self._inner.emit(event)
+            if (emitted is None
+                    and event.kind == "EpisodeStateChanged"
+                    and isinstance(event.payload, Mapping)
+                    and isinstance(event.payload.get("recoveryState"), Mapping)):
+                self.recovery_append_error = "recovery snapshot append returned no envelope"
+                raise OSError(self.recovery_append_error)
+            return emitted
+        except Exception as exc:
+            if (event.kind == "EpisodeStateChanged"
+                    and isinstance(event.payload, Mapping)
+                    and isinstance(event.payload.get("recoveryState"), Mapping)):
+                self.recovery_append_error = str(exc) or type(exc).__name__
+            raise
+
+    def append_intent(self, event: Event) -> None:
+        return self._inner.append_intent(event)
+
+
 class HarnessSession:
     """Wiring for one run. `run()` owns the lifecycle, not the wiring.
 
@@ -863,6 +919,8 @@ class HarnessSession:
             skill_cards=harness.skill_cards,
             token_ceiling=max(harness.budget.get("tokens", 0) or 64_000, 4_096),
         )
+        self._behavior_identity = self._composition_identity(compiler)
+        self._recovery_guard: _RecoveryGuardedEmitter | None = None
         # `ADR-0096 §14`. One optional seam, resolved once: either this
         # session captures evidence or it does not. There is no second
         # composition root and no per-call switch -- a capture path that could
@@ -909,6 +967,7 @@ class HarnessSession:
                  "selector": capability.selector}
                 for capability in harness.frozen.capabilities
             ),
+            before_propose=self._record_context_selection,
         )
         # Read-only callback context for completion facts; it is populated
         # exclusively by this session's mediated dispatch path.
@@ -1109,10 +1168,146 @@ class HarnessSession:
         """`T3.6`. The digest a resumed run must reproduce from events alone."""
         return compute_state_digest(self.ledger_state())
 
+    def _composition_identity(self, compiler: ContextCompiler) -> dict[str, Any]:
+        """The immutable inputs that determine runtime behaviour for a session.
+
+        This is deliberately a value assembled at composition, rather than a
+        second configuration object.  The ledger records its digest before a
+        provider sees a prompt and each context epoch extends it with the
+        current repository subject.
+        """
+        frozen = self.harness.frozen
+        manifest_digest = digest_of(frozen.manifest.identity_preimage())
+        policy = dict(compiler.selection_identity())
+        recovery = ProtocolRecoveryState().to_dict()
+        serializer = {"id": "agency.context.messages", "version": "1"}
+        counter = {"id": "agency.context.estimate_tokens", "version": "1"}
+        return {
+            "repositorySubject": (
+                self.context_packet.repository_identity
+                if self.context_packet is not None else ""
+            ),
+            "manifestDigest": manifest_digest,
+            "compositionDigest": self.harness.composition_digest,
+            "systemPromptDigest": digest_of({"systemPrompt": self.harness.system_core}),
+            "toolSchemasDigest": digest_of({"orderedToolSchemas": list(self.harness.tool_schemas)}),
+            "contextPolicyDigest": digest_of(policy),
+            "modelRoute": _route_of(self.ports.model),
+            "serializerIdentity": serializer,
+            "counterIdentity": counter,
+            "recoveryPolicyDigest": str(recovery.get("policyDigest", "")),
+            "productPreset": self.harness.harness,
+        }
+
+    def _context_epoch(self) -> dict[str, Any]:
+        packet = self.context_packet
+        epoch = (
+            packet.workspace_epoch.to_canonical_dict()
+            if packet is not None and packet.workspace_epoch is not None else {}
+        )
+        identity = dict(self._behavior_identity)
+        if packet is not None:
+            identity["repositorySubject"] = packet.repository_identity or packet.repository_snapshot
+        return {
+            "identity": identity,
+            "workspaceEpoch": epoch,
+            "digest": digest_of({"identity": identity, "workspaceEpoch": epoch}),
+        }
+
+    def _assert_resume_behavior_identity(self) -> None:
+        """Reject a continuation under a different immutable behaviour identity."""
+        prior = self.task.resume_state if isinstance(self.task.resume_state, Mapping) else {}
+        policy = prior.get("selectionPolicyIdentity")
+        prior_identity = policy.get("behaviorIdentity") if isinstance(policy, Mapping) else None
+        if prior_identity is None:
+            return
+        if not isinstance(prior_identity, Mapping):
+            raise ContextPacketError("resume behavior identity is malformed")
+        # Repository subject is epoch-scoped: a known, settled write naturally
+        # creates the next epoch.  All other fields are composition inputs and
+        # must be exact on a fresh process.
+        expected = {k: v for k, v in prior_identity.items() if k != "repositorySubject"}
+        actual = {k: v for k, v in self._behavior_identity.items() if k != "repositorySubject"}
+        if expected != actual:
+            raise ContextPacketError("resume behavior identity does not match composition")
+
+    def _record_context_selection(
+        self,
+        bundle: Mapping[str, Any],
+        compiled: Any,
+        cursor: int,
+        tools: Sequence[Mapping[str, Any]],
+        sampling: Mapping[str, Any],
+    ) -> None:
+        """Append selection evidence before a provider call, or make no call.
+
+        The generated kind is intentionally checked at runtime during the
+        short hand-off window in which Stream C owns the schema input.  Before
+        that schema lands this branch remains compatibility-only; once it is
+        registered, absence of a successful append is a hard inference gate.
+        """
+        guard = self._recovery_guard
+        if guard is not None and guard.recovery_append_error is not None:
+            raise RuntimeError(
+                "recovery snapshot append failed; refusing subsequent inference: "
+                f"{guard.recovery_append_error}")
+        if "ContextSelectionRecorded" not in WRITABLE_KINDS:
+            return
+        epoch = self._context_epoch()
+        policy_identity = dict(self.operator._compiler.selection_identity())
+        policy_identity["behaviorIdentity"] = dict(epoch["identity"])
+        policy_identity["contextEpoch"] = epoch["digest"]
+        omissions = [
+            {"identity": str(item), "reason": "elided"}
+            for item in getattr(compiled, "elided", ())
+        ] + [
+            {"identity": str(item), "reason": "dropped"}
+            for item in getattr(compiled, "dropped", ())
+        ]
+        if self.context_packet is not None:
+            omissions.extend(
+                {"identity": str(item), "reason": "packet_omission"}
+                for item in self.context_packet.omissions
+            )
+        request_digest = digest_of({
+            "bundle": bundle,
+            "orderedTools": list(tools),
+            "sampling": dict(sampling),
+        })
+        self.ledger.emit_kind(
+            "ContextSelectionRecorded",
+            run_id=self.task.run_id,
+            principal=self.task.principal,
+            episode_id=self.task.episode_id,
+            payload={
+                "prefixDigest": str(getattr(compiled, "prefix_digest", "")),
+                "stateDigest": digest_of(dict(self.ledger_state().to_canonical_dict())),
+                "policyDigest": digest_of(policy_identity),
+                "requestDigest": request_digest,
+                "repositorySubject": epoch["identity"]["repositorySubject"],
+                "repositoryIdentity": epoch["identity"]["repositorySubject"],
+                "cursor": int(cursor),
+                "serializedTokens": int(getattr(compiled, "total_tokens", 0)),
+                "orderedOmissions": omissions,
+                "contextEpoch": epoch["digest"],
+                "serializerIdentity": dict(self._behavior_identity["serializerIdentity"]),
+                "counterIdentity": dict(self._behavior_identity["counterIdentity"]),
+                "behaviorIdentity": dict(epoch["identity"]),
+                "selectionPolicyIdentity": policy_identity,
+                "indexSnapshotDigest": (
+                    self.context_packet.index_snapshot_digest
+                    if self.context_packet is not None else ""
+                ),
+            },
+        )
+
     # -- the kernel seam --------------------------------------------------
 
     def dispatch(self, request: EffectRequest, **kwargs: Any) -> Any:
         """Forward to the one kernel, remembering the request behind the result."""
+        guard = self._recovery_guard
+        if guard is not None and guard.recovery_append_error is not None:
+            raise RuntimeError("recovery snapshot append failed; refusing dispatch")
         request = _with_diff_headers(request)
         if request.idempotency_key:
             settled = RecoveryScanner.settled_effect(
@@ -1192,6 +1387,8 @@ class HarnessSession:
                     self.run_plan, "preregistration_digest", ""),
                 "maxTurns": int(self.task.max_turns),
                 "interactive": bool(self.ports.interactive),
+                "behaviorIdentity": dict(self._behavior_identity),
+                "contextEpoch": self._context_epoch()["digest"],
                 **self._budget_attenuation_fields(),
             },
         ))
@@ -1207,6 +1404,7 @@ class HarnessSession:
     def run(self) -> RunResult:
         """Run the episode, resolve approvals, evaluate from outside."""
         harness, task, ports = self.harness, self.task, self.ports
+        self._assert_resume_behavior_identity()
         receipts: list[Receipt] = []
         authorization = None
         terminal = RunTermination.ABANDONED
@@ -1266,6 +1464,7 @@ class HarnessSession:
         # Re-entry is now driven by the ledger: `max_turns` bounds the episode,
         # not each segment of it, and an exhausted budget is terminal.
         delayed = DelayedTerminalEmitter(self.ledger)
+        self._recovery_guard = _RecoveryGuardedEmitter(delayed)
         # The episode's turn history spans approval re-entries. Rebuilding the
         # engine with an empty `Episode` discarded it every round-trip, so turn
         # indices restarted at 0 and no-progress detection could never see two
@@ -1289,7 +1488,7 @@ class HarnessSession:
             decoders, patch_detector, truncation_detector = default_protocol_pipeline()
             engine = EpisodeEngine(
                 kernel=self, model=self.operator, clock=ports.clock,
-                events=delayed, scope=self.scope, tools=harness.tool_schemas,
+                events=self._recovery_guard, scope=self.scope, tools=harness.tool_schemas,
                 max_turns=len(prior_turns) + remaining,
                 spawn_dispatcher=self.dispatch,
                 preset_mode=getattr(harness, "tool_policy_preset", None),

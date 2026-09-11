@@ -180,6 +180,14 @@ def fold_task_state(events: Sequence[Any], *, objective: str = "") -> CodingTask
             budgets = payload.get("budgetCeiling") or payload.get("budget")
             if isinstance(budgets, Mapping):
                 state["remainingBudgets"] = {str(k): int(v) for k, v in budgets.items() if isinstance(v, int) and v >= 0}
+            if isinstance(payload.get("behaviorIdentity"), Mapping):
+                # Keep this inside the existing policy-identity field so the
+                # pure domain value remains unchanged while cold continuation
+                # still receives every runtime binding it must validate.
+                state["selectionPolicyIdentity"] = {
+                    "behaviorIdentity": dict(payload["behaviorIdentity"]),
+                    "contextEpoch": payload.get("contextEpoch"),
+                }
         if kind == "ObservationProduced":
             path = payload.get("path")
             if isinstance(path, str) and path:
@@ -262,8 +270,9 @@ def fold_task_state(events: Sequence[Any], *, objective: str = "") -> CodingTask
             if isinstance(action, str):
                 state["nextAction"] = action
         if kind == "ContextSelectionRecorded":
-            if isinstance(payload.get("repositoryIdentity"), str):
-                state["repositoryIdentity"] = payload["repositoryIdentity"]
+            subject = payload.get("repositorySubject", payload.get("repositoryIdentity"))
+            if isinstance(subject, str):
+                state["repositoryIdentity"] = subject
             if isinstance(payload.get("selectionPolicyIdentity"), Mapping):
                 state["selectionPolicyIdentity"] = dict(payload["selectionPolicyIdentity"])
             if "indexSnapshotDigest" in payload:

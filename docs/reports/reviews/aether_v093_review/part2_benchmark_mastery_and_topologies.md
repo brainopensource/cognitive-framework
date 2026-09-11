@@ -6,14 +6,29 @@ canonical_for: []
 status: living
 owner: architecture-review
 version: "0.9.3"
-last_verified: 2026-09-07
+last_verified: 2026-09-11
 supersedes: []
 superseded_by: null
 ---
 
 # SOTA Benchmark Mastery & Autonomous Topologies
 
-## 1. Strategy and measurement discipline
+> [!IMPORTANT]
+> **Implementation Status & Lifecycle Classification (Current Head: `2989d57d` / September 2026)**:  
+> This document specifies benchmark strategy, editing transactions, anti-stall loops, and topologies. The table below classifies each capability into its active implementation state:
+>
+> | Strategy & Engineering Domain | Lifecycle Classification | Current Implementation Truth |
+> |---|:---:|---|
+> | **Measurement & Control Discipline** (§1) | **`[NEXT - ACTIVE GATE]`** | Candidate `2989d57d` is unfrozen; [`T-26`](../../../execution/tasks.md#L605) (Freeze SHA & digests) and [`T-27`](../../../execution/tasks.md#L611) (30+ task live canary, Wilson $\ge 0.40$) are the immediate active gates. |
+> | **Failure Modes & Veto Harness** (§2) | **`[DONE - INTEGRATED]`** | Hard veto on false completions (`fc == 0`) and separation of `abstained` vs `completed` delivered in [`test_metric_veto.py`](../../../../test/benchmarks/test_metric_veto.py) and [`entrypoint.py`](../../../../vanguard/packages/runtime/entrypoint.py) (Closed via `T-94`, `T-99`). |
+> | **Brownfield LDA Localization** (§3) | **`[DONE - INTEGRATED]`** | Revision-bound graph retrieval and AST delta sync delivered via LDA protocol ([`.agents/skills/lda-navigator/`](../../../../.agents/skills/lda-navigator/SKILL.md)). |
+> | **Multi-File Transactions & Patching** (§4) | **`[HYBRID]`** | In-memory atomic 2PC preflight & syntax checks are **`[DONE]`** ([`transaction.py`](../../../../vanguard/packages/adapters/environment/transaction.py)); exact-match `str_replace` (`T-78`) is **`[NEXT - TODO]`**; Virtual CAS workspace (`CAS-01` / `T-112`–`T-116`) is **`[PROPOSAL - EXPERIMENTAL]`**. |
+> | **Verification Ladder & Admission** (§5) | **`[HYBRID]`** | Decoupled terminal states and receipt binding are **`[DONE]`**; reverse-caller admission check (`callers_by_symbol` / `T-83b`) is **`[NEXT - TODO]`**. |
+> | **Greenfield Execution Strategy** (§6) | **`[PROPOSAL - EXPERIMENTAL]`** | Distinct greenfield specification and corpus qualification (`T-125`) remain post-control proposals. |
+> | **Loop Engineering & Anti-Stall FSM** (§7) | **`[DONE - INTEGRATED]`** | Semantic progress tracking, stagnation detection (2-3 repeated actions), and recovery FSM delivered in [`protocol_recovery.py`](../../../../vanguard/packages/agency/episode/protocol_recovery.py) (Closed via `T-106`). |
+> | **Topology: Controller vs Specialists** (§8) | **`[HYBRID]`** | Single receipt-driven controller default is **`[DONE]`**; Attenuated read-only specialists (`DEL-01` / `T-117`–`T-118`) and campaigns (`OCT-03` / `T-120`) are **`[PROPOSAL - EXPERIMENTAL]`**. |
+
+## 1. Strategy and measurement discipline [CANONICAL DIRECTIVE]
 
 Adopt one durable, receipt-driven controller as the default software-engineering topology. Let the model choose hypotheses and edits inside a finite-state workflow, while deterministic tools localize evidence, stage mutations, and run verification. Add bounded specialists only when the work can be separated into explicit artifact contracts. The principal investment is a reliable path from task specification to independently checked output, not a larger population of talking agents.
 
@@ -27,7 +42,7 @@ Freeze task identifiers, repository commits, runtime SHA, model/provider identit
 
 Use independent evaluation against the final patch, with tests unavailable to the agent where the benchmark requires that separation. Follow the official SWE-bench harness and dataset rules, including pinned evaluation environments. Local canaries are engineering evidence, not an official score. Report single-attempt resolve rate, total cost per resolved task, latency distribution, invalid-patch rate, regression rate, and failure attribution. [Official evaluation guide](https://www.swebench.com/SWE-bench/guides/evaluation/).
 
-## 2. Failure modes that the harness must expose
+## 2. Failure modes that the harness must expose [DONE - VETO & RECOVERY WIRED]
 
 Autonomous agents fail through interacting stages. Poor localization yields an irrelevant edit; a weak reproduction makes that edit appear plausible; incomplete verification accepts it; later context loss hides the original requirement. More model tokens do not automatically repair these feedback errors. AETHER should classify failure at the earliest evidenced stage while retaining downstream consequences.
 
@@ -46,7 +61,7 @@ The repository already contains relevant mechanisms. [EpisodeEngine](../../../..
 
 Historical string-frequency tables in development logs are not failure rates. They can include repeated fixtures, generated files, and multiple mentions of one incident. Build failure attribution from one canonical task receipt per attempt, then inspect trajectories for causal diagnosis. This prevents optimization against the most frequently printed message rather than the most costly actual failure.
 
-## 3. Brownfield localization and reproduction
+## 3. Brownfield localization and reproduction [DONE - LDA GRAPH RETRIEVAL]
 
 Start by identifying the repository subject, task intent, applicable constraints, and permitted mutation surface. Preserve existing user modifications in the baseline. An isolated workspace is preferred for repair candidates because it protects the original tree and makes verification subjects unambiguous. Record the dirty baseline explicitly when legitimate; release qualification may separately require a clean subject.
 
@@ -62,7 +77,7 @@ Some tasks are refactors or extensions without an existing failure. Require a be
 
 Keep generated tests separate from protected benchmark oracles. Never weaken assertions, delete failing tests, or alter the evaluator to obtain a pass. Test changes can be legitimate when the requested contract changes, but require an explicit requirement-to-assertion explanation. The patch author may supply operational checks; independent evaluation remains responsible for benchmark acceptance.
 
-## 4. Editing mechanics and multi-file transactions
+## 4. Editing mechanics and multi-file transactions [HYBRID: PREFLIGHT DONE; CAS PROPOSAL]
 
 Choose one strict edit-set representation with interchangeable frontends: digest-bound symbol replacements for precise Python edits, exact unique text replacements for small local changes, and a fully validated unified-diff parser for language-neutral changes. Use whole-file creation for genuinely new files and bounded rewrites where preserving a complicated old structure has no benefit. Do not let the model select a permissive fallback after an anchor failure.
 
@@ -82,7 +97,7 @@ Promotion and rollback need durable preimage artifacts and a journal identifying
 
 On failed falsifiers or exhausted repair budget, retain the failed candidate only as an isolated evidence artifact and restore the owned workspace to its baseline. Verify restoration digests before reporting rollback complete. If recovery cannot restore a path, quarantine the workspace and return an explicit recovery failure; “fail closed” means no further promotion or success claim, not pretending disk failures are impossible. Crash recovery must be idempotent across repeated interruptions.
 
-## 5. Verification and completion admission
+## 5. Verification and completion admission [HYBRID: ADMISSION DONE; CALLER CHECK TODO]
 
 Run verification in a ladder: patch shape and syntax; the reproducer; impacted module tests; then the applicable broader regression and architecture checks. Use caller/import relationships to select the middle tier, but let canonical repository instructions determine mandatory gates. Avoid rerunning an expensive full suite after every inspection-only turn. Conversely, any new edit invalidates verification whose subject no longer matches.
 
@@ -92,7 +107,7 @@ Completion requires all requirements addressed, the intended files present, no u
 
 Reserve resources for verification and restoration before allowing a repair. A task that spends its last token producing an unverified patch has exhausted its usable budget even if the model could write more text. After a failed candidate, preserve its failure evidence before rollback so the next hypothesis benefits from the attempt. Bound repair rounds by both task budget and semantic progress, rather than a fixed count alone.
 
-## 6. Greenfield execution strategy
+## 6. Greenfield execution strategy [PROPOSAL - EXPERIMENTAL CORPUS]
 
 Greenfield work needs an explicit acceptance model because an empty repository offers no inherited tests or architecture. Convert the specification into observable behaviors, interfaces, constraints, and non-goals. Record an initial file/module blueprint and a requirement-to-check matrix. Keep decisions proportional: a small service needs a concise contract and vertical slice, not an invented enterprise architecture.
 
@@ -104,7 +119,7 @@ After each slice, validate imports/build, integration behavior, and requirement 
 
 Qualify greenfield separately from repository bugfixing. A useful frozen corpus varies specification ambiguity, number of modules, persistence, external-tool substitution, and deployment/configuration needs. Score runnable behavior, completeness, reproducibility, and resource use. Preserve failed bootstraps in the denominator. Do not label these results SWE-bench or infer product creation ability from Aider exercise scores.
 
-## 7. Loop engineering and anti-stall policy
+## 7. Loop engineering and anti-stall policy [DONE - PROTOCOL RECOVERY FSM]
 
 Preserve the generic engine and move domain-specific phase interpretation into the code pack. The selected state machine is outcome driven:
 
@@ -133,7 +148,7 @@ Keep retry classes separate. Transient provider errors get bounded exponential b
 
 Track spending velocity, repeated retrieval, invalid patch rate, and compaction frequency as diagnostics. Do not terminate merely because a task has exceeded an average turn count. The real boundaries are authorization, finite budget, evidence of no progress, and recoverability. A 100-turn session should be possible when it makes progress; a ten-turn loop that repeats a settled failure should stop much earlier.
 
-## 8. Topology choice and qualification
+## 8. Topology choice and qualification [HYBRID: CONTROLLER DONE; SPECIALISTS PROPOSAL]
 
 Refactor [DriveUntilGreenPlanner](../../../../packs/code-default/planners/single_planner.py) into the selected pack policy or replace its binding with the real planner implementation after tracing composition. Its fixed repair proposal, four-round default, and verdict-based tier bump do not constitute autonomous localization, multi-file synthesis, or verification. The harness references this planner identifier, but that alone does not prove every application execution uses this demonstration path.
 

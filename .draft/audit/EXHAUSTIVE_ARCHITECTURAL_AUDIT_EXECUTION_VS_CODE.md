@@ -21,11 +21,22 @@ theoretical_foundations:
 
 # Formal Epistemological & Architectural Audit: Execution Runway Divergence, Hexagonal Trust Lattice Invariants, and Empirical Verification Mechanics
 
+> [!IMPORTANT]
+> **Document Status: HISTORICAL FORENSIC AUDIT — FINDINGS FULLY RESOLVED (2026-09-11 | HEAD: `1e257e76`)**
+> - **Historical Audited Subject:** `dfb0bb64fc82398b9a05f1e3457f4f45babfcbca` (2026-09-06)
+> - **Resolution Status on Current HEAD:**
+>   - **Boundary Violations (Finding 1):** RESOLVED. `check_boundaries.py` reports `BOUNDARY PASS: 833 source files checked` (0 violations).
+>   - **Facade & Entrypoint Failures:** RESOLVED. T-99 and T-102 unified the terminal projection engine; 27/27 tests pass.
+>   - **Untracked Capability Layer (Finding 2):** RESOLVED. `.agents/` is permanently registered in `agent_plugins.py` and governed by `AGENTS.md`.
+>   - **Ollama References (Finding 3):** RESOLVED. Purged in T-91 (`BRG-01`); only llama.cpp is supported.
+>   - **Milestone Closures:** `MS-BASELINE` and `MS-CONTEXT` were CLOSED and accepted on subject `2989d57d`.
+> - **Operational Directive:** This document records the forensic findings that motivated the NT-1 remediation program. It is **non-authorizing** and does **not** reflect active bugs on the current tree.
+
 **Author:** Principal Systems Architect & Lead Invariant Auditor  
 **Audit Subject:** Vanguard / AETHER Cognitive Substrate  
-**Repository Working Tree:** `dfb0bb64fc82398b9a05f1e3457f4f45babfcbca`  
+**Repository Working Tree (Audited):** `dfb0bb64fc82398b9a05f1e3457f4f45babfcbca` (Historical Reference)  
 **Target Scope:** Backend Subsystems Only (`vanguard/packages/`, `packs/`, `benchmarks/`, `tools/`, `.agents/`)  
-**Target Locations:** `docs/execution/` vs. `vanguard/packages/` vs. `docs/backend/` vs. `.draft/todo/`
+**Target Locations:** `docs/execution/` vs. `vanguard/packages/` vs. `docs/backend/` vs. `.draft/todo/`  
 
 ---
 

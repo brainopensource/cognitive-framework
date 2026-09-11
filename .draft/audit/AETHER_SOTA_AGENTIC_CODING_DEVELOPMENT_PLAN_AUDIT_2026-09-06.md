@@ -15,6 +15,15 @@ evidence_boundary: audited-source-plus-reproduced-local-gates
 
 # AETHER SOTA Agentic Coding Architecture and Development Plan Audit
 
+> [!IMPORTANT]
+> **Document Status: HISTORICAL REPORT — RECOMENDATIONS REALIZED (2026-09-11 | HEAD: `1e257e76`)**
+> - **Audited Subject:** `dfb0bb64` (2026-09-06)
+> - **Current Implementation Truth:**
+>   - **DONE:** The "next moves" described in §Abstract (restoring product truth boundary, repairing boundary violations, closing gates) are fully delivered. `MS-BASELINE` and `MS-CONTEXT` are closed.
+>   - **ACTIVE RUNWAY:** `MS-CONTROL` (T-26/T-27).
+>   - **PROPOSAL SCOPE:** Topics in this document touching multi-agent swarms, complex delegation, and CAS belong to the post-control horizon (FH-1).
+> - **Authority:** Non-canonical auxiliary report (`authority: non-canonical`).
+
 ## Abstract
 
 This auxiliary report evaluates AETHER/Vanguard's architecture, execution runway, coding-agent product, capability system, verification program, and performance claims against modern agentic-software practice. It then gives a dependency-ordered path from mechanism-rich prototype to empirically qualified coding-agent framework.

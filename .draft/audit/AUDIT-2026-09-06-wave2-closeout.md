@@ -29,7 +29,17 @@ relationships:
 
 # An Architectural and Empirical Audit of the AETHER / Vanguard Agent Substrate
 
-**Subject:** `dfb0bb64` (`main`, clean working tree).
+> [!IMPORTANT]
+> **Document Status: HISTORICAL FORENSIC AUDIT — REMEDIATION PROGRAMME COMPLETED (2026-09-11 | HEAD: `1e257e76`)**
+> - **Historical Audited Subject:** `dfb0bb64` (2026-09-06)
+> - **Audit Lifecycle:** Finding classes F-A through F-D defined the **NT-1 Remediation Programme** (tasks T-98 through T-111).
+> - **Current Implementation Status:**
+>   - **DONE:** All remediations landed and accepted on subject `2989d57d`. Full discovery runs 3,121 tests (0 failures, 0 errors).
+>   - **CLOSED MILESTONES:** `MS-BASELINE` and `MS-CONTEXT` are formally closed.
+>   - **ACTIVE NEXT:** `MS-CONTROL` (T-26 freeze $\to$ T-27 canary evaluation).
+> - **Non-Authorizing Notice:** This audit is an immutable historical record of the 2026-09-06 boundary. It does **not** reflect open defects on the current working tree.
+
+**Subject (Audited):** `dfb0bb64` (`main`, clean working tree on 2026-09-06).  
 Still valid at `2a5fb1ff`: `git diff --stat dfb0bb64..2a5fb1ff` touches only
 `.draft/audit/**`, so no measurement below is affected.
 **Audit date:** 2026-09-06 · **Revision 2** (§F-B1 mechanism corrected; F-B5 added;

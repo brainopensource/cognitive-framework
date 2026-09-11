@@ -1,14 +1,24 @@
 # Electroweak v0.9.2 → Living Execution Runway Transition Blueprint
 
-**Authority**: Planning & Staging Resource (`.draft/`) — not law, not a board
+**Authority**: Non-Canonical Planning & Staging Resource (`.draft/`) — not law, not a board
 **Target Runway**: [`docs/execution/`](../docs/execution/) (`milestones.md`, `backlog.md`, `spec.md`, `technical.md`, `tasks.md`)
 **Source Corpus**: `docs/reports/reviews/electroweak_v092/` — `grok/`, `opus/`, `octopus/`, `gpt/`, `gem/`, **`plans/`**
-**Companion**: `.draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md` (Synthesis of Record, 2026-09-04)
-**Revision**: v4 — re-aligned 2026-09-04 against the 900-line `.draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md`
+**Companion**: `.draft/todo/ELECTROWEAK_SYNTHESIS_FINAL_v093.md` (Synthesis of Record, 2026-09-04)
+**Revision**: v4 — re-aligned 2026-09-04 against the 900-line `.draft/todo/ELECTROWEAK_SYNTHESIS_FINAL_v093.md`
 (7 packages, T-69..T-97, §9 evidence standard). Nine drifts corrected: wave mapping, `gem/` status,
 capability-bound native profiles, read-before-edit as experiment, T-46 narrowed (not superseded),
 MS-TRUTH instrument gating, MS-CONTROL product-path qualification, T-83 split, Defect K precedence.
 **Verification basis**: working tree `feat/strongforce_beta_release_v093`, HEAD `537bdb66`
+
+> [!IMPORTANT]
+> **Document Status: HISTORICAL RUNWAY TRANSITION BLUEPRINT — PROMPTS EXECUTED & LIVING RUNWAY ACTIVE (2026-09-11 | Current HEAD)**
+> - **Authority:** Non-Canonical Planning Resource (All operational tasks are tracked exclusively in [`docs/execution/tasks.md`](../../docs/execution/tasks.md)).
+> - **IMPLEMENTATION DISPOSITION:**
+>   - **DONE / ACCEPTED:** The transition prompts in this blueprint were fully executed to establish the canonical five-file runway in [`docs/execution/`](../../docs/execution/). The underlying tasks T-69 through T-97, as well as subsequent stabilization block NT-1 (T-98 through T-111), are **COMPLETED & ACCEPTED**.
+>   - **CLOSED MILESTONES:** `MS-BASELINE` and `MS-CONTEXT` are closed.
+>   - **ACTIVE NEXT:** Single-agent control preregistration freeze ([T-26](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L605)) and canary run ([T-27](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L611)).
+>   - **PROTOTYPES / EXPERIMENTAL:** Octopus multi-agent orchestrator and post-control capability packages (FH-1: T-112 through T-127) remain non-authorizing proposals.
+> - **Notice:** These prompts represent historical transition instructions. Do not re-run them against HEAD; consult [`docs/execution/`](../../docs/execution/) for current live contracts and task states.
 
 ---
 

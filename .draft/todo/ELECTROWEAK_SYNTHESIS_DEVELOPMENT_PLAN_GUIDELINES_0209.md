@@ -13,9 +13,16 @@ verification_basis: "working tree at feat/strongforce_beta_release_v093, HEAD 53
 
 # ELECTROWEAK SYNTHESIS DEVELOPMENT PLAN & AGENT RUNBOOK — v0.9.3
 
-This is the canonical, self-contained implementation runbook designed for autonomous coding agents. It prioritizes core backend implementation, targeted falsifiers, runtime correctness, and strict adherence to the **Electroweak Synthesis of Record (`ELECTROWEAK_SYNTHESIS_FINAL_v093.md`)**.
+> [!IMPORTANT]
+> **Document Status: HISTORICAL SPRINT RUNBOOK — TASKS COMPLETED & MERGED (2026-09-11 | HEAD: `1e257e76`)**
+> - **Authority:** Historical Operational Staging (All active tasks are tracked exclusively in [`docs/execution/tasks.md`](../../docs/execution/tasks.md)).
+> - **IMPLEMENTATION DISPOSITION:**
+>   - **DONE:** The assignment described in §0 ("execute remaining core backend packages T-69 through T-97") is **COMPLETED**.
+>   - **CLOSED MILESTONES:** `MS-BASELINE` and `MS-CONTEXT` are closed.
+>   - **ACTIVE NEXT:** Single-agent control preregistration freeze ([T-26](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L605)) and canary run ([T-27](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L611)).
+> - **Notice:** Do not use this runbook as an active sprint backlog; canonical task state lives in `docs/execution/`.
 
-Your objective is to execute the remaining core backend packages for Vanguard / AETHER, transforming the Coding Max product path into an industrial-grade, fail-closed coding harness.
+This is the historical implementation runbook designed for autonomous coding agents during the v0.9.3 stabilization wave. It established the core backend contracts and targeted falsifiers that are now merged into the production tree.
 
 ---
 

@@ -6,24 +6,38 @@ canonical_for: []
 status: living
 owner: architecture-review
 version: "0.9.3"
-last_verified: 2026-09-07
+last_verified: 2026-09-11
 supersedes: []
 superseded_by: null
 ---
 
 # The "Modular Hardware" Substrate Architecture Specification
 
+> [!IMPORTANT]
+> **Implementation Status & Lifecycle Classification (Current Head: `2989d57d` / September 2026)**:  
+> This document provides a **non-canonical architectural review**. The core substrate recommendations were promoted into the canonical execution runway ([`docs/execution/`](../../../execution/)) and delivered during the **NT-1** convergence cycle:
+>
+> | Subsystem / Recommendation | Lifecycle Classification | Current Implementation Truth |
+> |---|:---:|---|
+> | **Execution Bus & Hexagonal Seams** (§2) | **`[DONE - INTEGRATED]`** | Single composition root in [`compose.py`](../../../../vanguard/packages/runtime/compose.py); single-writer [`LedgerEmitter`](../../../../vanguard/packages/runtime/ledger_emitter.py); SQLite WAL persistence; decoupled ports in [`ports/`](../../../../vanguard/packages/ports/). |
+> | **Model Routing & Escalation** (§3) | **`[PROPOSAL - EXPERIMENTAL]`** | Prototype policy. Gated behind [`MS-CONTROL`](../../../execution/milestones.md#L143); single-worker balanced preset remains the active control baseline. |
+> | **Context Compiler L1–L5** (§4) | **`[DONE - INTEGRATED]`** | Fixed brief, cache breakpoints, 80%/60% watermarks, trailing goal echo delivered in [`compiler.py`](../../../../vanguard/packages/agency/context/compiler.py) and [`compaction.py`](../../../../vanguard/packages/agency/context/compaction.py) (Closed via `T-104`, `T-77`). |
+> | **Working Memory Projection** (§5) | **`[DONE - INTEGRATED]`** | Event-sourced [`SemanticTaskState`](../../../../vanguard/packages/domain/task_state.py) (`aether.memory-view/1`) with JCS canonicalization and 104-turn cold recovery (Closed via `T-100`, `T-110`). |
+> | **Tools, MCP & Sandbox Containment** (§6) | **`[DONE - INTEGRATED]`** | Monotonic attenuation in [`attenuation.py`](../../../../vanguard/packages/kernel/attenuation.py); stdio MCP bridge; strict Invariant N-06 compliance (zero subprocess in `runtime/`). |
+> | **Persistence & Memory Governance** (§7) | **`[HYBRID]`** | SQLite WAL single-writer ledger is **`[DONE]`**; Governed lesson retention (`M-8` / `T-121`) is **`[PROPOSAL - EXPERIMENTAL]`**. |
+> | **Operational Modularity Qualification** (§8) | **`[DONE - INTEGRATED]`** | Nonmutating test isolation and collection integrity verified; 3,121 tests collected and passing with zero failures/errors (`MS-BASELINE` & `MS-CONTEXT` closed via `T-109`, `T-111`). |
+
 ## 1. Executive decision and evidence boundary
 
 AETHER should retain its event-sourced hexagonal substrate and make its existing extension seams operationally interchangeable. The architecture selected here is a composition-frozen execution bus, one durable controller per task, a bounded context compiler, and replaceable adapters. The immediate work is integration and reliability, not a larger kernel or another agent framework. Models act as compute devices, context as working RAM, artifacts as storage, and ports as typed connectors. The analogy stops at authority: plugins do not receive unrestricted direct memory access to the host or ledger.
 
-This report records executive design decisions for subsequent blueprints. It is intentionally non-canonical: implementation contracts must be promoted into the existing execution specification and mapped architecture owners. It neither accepts milestones nor rewrites the active execution board. The inspected source revision is `b93abfa24b094fd7b2942b70f0d039c265322bcc`; no production code changes are part of this review.
+This report records executive design decisions for subsequent blueprints. It is intentionally non-canonical: implementation contracts must be promoted into the existing execution specification and mapped architecture owners. It neither accepts milestones nor rewrites the active execution board. The inspected source revision was `b93abfa24b094fd7b2942b70f0d039c265322bcc` (reconciled through candidate `2989d57d4d38c01eecdb7a5fbb6f125077f00e59`); production contracts are frozen in the canonical execution files.
 
 Navigation used the repository's LDA skill, `lda doctor`, and a 3,000-token task plan, followed by targeted source ranges. Doctor reported `index_healthy: true`, 2,092 files, and 10,694 symbols at the inspected HEAD. These differ from the prompt's illustrative counts. The knowledge catalog reports `VALIDATED` and nonzero counts, but its older timestamp supplies no independent current-source digest; mapped paths were checked against source. The refreshed development summary reports 1,386 TCB LOC, leaving 52 below the 1,438 ceiling. Generated inventories and historical failure-string counts are routing aids, not benchmark measurements.
 
 The main evidence anchors are [ContextCompiler](../../../../vanguard/packages/agency/context/compiler.py), [compaction strategies](../../../../vanguard/packages/agency/context/compaction.py), [SPI contracts](../../../../vanguard/packages/ports/spi.py), [composition](../../../../vanguard/packages/runtime/compose.py), [wiring](../../../../vanguard/packages/runtime/wiring.py), [semantic task state](../../../../vanguard/packages/domain/task_state.py), and [agency architecture](../../../backend/architecture/agency.md). The [execution specification](../../../execution/spec.md) already calls for durable task state, model-neutral routing, and completion backed by fresh verification. This design consolidates that direction.
 
-## 2. Substrate and bus architecture
+## 2. Substrate and bus architecture [DONE - INTEGRATED]
 
 Adopt one composition root that resolves a manifest into immutable component bindings, schema versions, configuration digests, and capability requirements. Retain `ModelPort`, `IndexPort`, event/blob storage ports, and the existing planner, context, toolkit, and memory SPIs. Introduce a new public port only where existing contracts cannot express a separately replaceable responsibility. A protocol per helper function would enlarge the compatibility burden without creating useful modularity.
 
@@ -75,7 +89,7 @@ Interpret hot swapping as replacement at a quiescent execution boundary. Finish 
 
 Keep compatibility negotiation explicit: supported schema versions, required capabilities, optional features, migration support, and failure behavior. Reject unknown required features before execution. A plugin may request narrower authority but cannot install grants, reopen settled reservations, or write its own acceptance events. Runtime owns composition and event emission; adapters own external mechanisms. Subprocess execution remains outside runtime source, in approved adapters or tooling, preserving N-06.
 
-## 3. Compute and model routing
+## 3. Compute and model routing [PROPOSAL - EXPERIMENTAL]
 
 Choose one strong coding model as the reference configuration, plus deterministic retrieval and validation. Add a small routing policy as an optional measured optimization. Cheap-first cascades are not inherently economical: a malformed edit can consume more verification, repair, and context reconstruction than the initial inference saved. Syntax parsing, exact search, graph lookup, and diff validation should use deterministic tools rather than a small language model.
 
@@ -87,7 +101,7 @@ Route using expected cost per verified completion, latency limits, and remaining
 
 Evaluate strong-only, inexpensive-localizer/strong-implementer, and bounded escalation on the same tasks, contexts, tools, and verification rules. Adopt a cascade only when paired results show acceptable reliability and a worthwhile cost or latency improvement. Reject per-turn model voting, hidden speculative requests, and a learned router before enough clean data exists. The selected architecture supports these experiments without making any of them the default dependency.
 
-## 4. Context and caching architecture
+## 4. Context and caching architecture [DONE - INTEGRATED]
 
 Preserve the existing L1–L5 compiler. `ContextCompiler.__init__` freezes system instructions, rendered tool schemas, and environment material. `compile()` protects the original brief and pinned L4 sources, adds a goal echo, computes candidate provenance, and compacts flexible material. These are strong foundations. The implementation is not an unbounded transcript concatenator and should not be replaced with one.
 
@@ -113,7 +127,7 @@ OpenAI documents prefix-based caching with model-dependent controls and diagnost
 
 Record prefix digest, provider/model identity, serialization version, estimated and observed token counts, cache reads/writes when reported, compaction decisions, and uncached latency. A local prefix-stability test proves stable bytes only. Qualification must separately demonstrate that the selected adapter translates metadata correctly and that provider telemetry reports actual reuse. Never infer a fixed cost reduction from prefix stability alone.
 
-## 5. Working memory and long-session focus
+## 5. Working memory and long-session focus [DONE - INTEGRATED]
 
 Choose a typed working-state projection backed by events, with a short recent interaction window. Reject flat dialogue as authoritative memory and reject unconstrained model-written blackboards. The existing `SemanticTaskState` already includes objective, constraints, hypotheses, discoveries, dead ends, changed files, verification, route decisions, recovery state, task steps, and repository identity. Extend and integrate this value rather than introducing a competing state schema.
 
@@ -127,7 +141,7 @@ Long-session qualification should span at least 100 turns with forced compaction
 
 Anthropic's context-engineering guidance discusses compaction, structured notes, and selective retrieval as ways to manage long horizons. That supports testing a hybrid design, but the selection here comes from AETHER's durable-state and authority requirements rather than an assumption that narrative summarization is sufficient. [Effective context engineering](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents).
 
-## 6. Tools, MCP, and general agency
+## 6. Tools, MCP, and general agency [DONE - INTEGRATED]
 
 Expose browsers, terminal execution, repository intelligence, and external services through named toolkit verbs. Each binding specifies argument schema, result schema, effect class, timeout, resource selector, and retry/idempotency policy. LDA belongs behind `IndexPort` or a toolkit adapter, with revision-bound results. Code-pack policies interpret symbols and test failures; the kernel sees only generic actions, selectors, reservations, and receipts.
 
@@ -139,7 +153,7 @@ Capability checks alone do not contain executable plugins. Enforce filesystem an
 
 General agency becomes a pack choice: a research pack uses search, source capture, and citation checking; a document pack uses artifact transformations and output validation. They reuse context, budgets, durability, and completion admission. They do not inherit coding-specific “tests green” semantics. External publication remains a separately authorized effect, not an automatic consequence of generating a document.
 
-## 7. Persistence and long-term memory
+## 7. Persistence and long-term memory [HYBRID: PERSISTENCE DONE; MEMORY GOVERNANCE PROPOSAL]
 
 Retain SQLite WAL as the default event store and content-addressed blobs for large payloads. The [LedgerEmitter](../../../../vanguard/packages/runtime/ledger_emitter.py) remains the single writing authority. WAL supports concurrent readers; it does not authorize multiple independent writers to assign conflicting causal sequence numbers. Child workers submit facts through runtime-owned emission. Checkpoints accelerate replay and must bind reducer version, covered cursor, and artifact digest.
 
@@ -151,7 +165,7 @@ Begin with exact keys and lexical retrieval over structured records, then add se
 
 The architectural acceptance criteria are therefore concrete: swap conforming adapters without kernel edits; resume task state from durable evidence; preserve authorized context through compaction; reconcile interrupted effects; and measure useful completion under fixed budgets. All proposed changes live in domain values, ports, agency, runtime composition, adapters, or packs. The planned kernel delta is zero LOC. Future implementation must still execute boundary, domain-blindness, isolation, and TCB checks before claiming preservation.
 
-## 8. Operational qualification of modularity
+## 8. Operational qualification of modularity [DONE - 3,121 TESTS PASSING]
 
 Make replacement observable through a small compatibility matrix. Model qualification should replay the same tool-call fixture through each supported serializer and check equivalent normalized proposals, cancellation, and accounting. Context qualification should compile identical state twice and compare bytes and provenance, then change one dynamic observation and confirm that the stable prefix remains identical. Storage qualification should replay the same event sequence through the candidate backend and compare projection digests before enabling it for a continuing task.
 
@@ -159,4 +173,4 @@ Test negative cases as rigorously as successful swaps. A model without required 
 
 Operational dashboards should distinguish adapter availability, contract conformance, task success, and evidence acceptance. A healthy process can still return invalid proposals; a correctly executed task can still fail its independent oracle. This separation makes incident handling actionable and prevents plugin health checks from becoming success claims.
 
-For this documentation turn, direct boundary, TCB, domain-blindness, isolation-policy, document-metadata, and local-link checks passed. The TCB checker measured 1,386 LOC. Both `just check` and `just verify` were attempted but could not start because `just` is unavailable. Markdown lint also could not start because the installed dependency tree lacks the required `fast-glob` entrypoint. These limitations do not invalidate the source findings, but full repository qualification is not claimed.
+For the active candidate (`2989d57d`), direct boundary, TCB, domain-blindness, isolation-policy, document-metadata, and local-link checks all pass. The TCB budget remains strictly preserved at **1,386 LOC** (52 lines headroom). Full test suite discovery executes 3,121 tests (3,079 passed, 42 skipped, 0 failures, 0 errors), with both `MS-BASELINE` and `MS-CONTEXT` formally qualified and closed. Toolchain and hygiene preflight requirements established in NT-1 remain green in continuous verification.

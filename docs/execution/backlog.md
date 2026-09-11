@@ -42,11 +42,13 @@ Every item in this backlog is managed through a strict predicate-driven lifecycl
 
 ```mermaid
 graph LR
-    PROPOSED["PROPOSED<br/>(Candidate Idea / Hypothesis)"] -->|Architectural Review| APPROVED["APPROVED<br/>(Spec Ready / Awaiting WIP)"]
-    APPROVED -->|Lane Capacity Available| IN_PROGRESS["IN_PROGRESS<br/>(Checked in tasks.md)"]
+    PROPOSED["PROPOSED<br/>(Candidate Idea / Hypothesis)"] -->|Predecessors accepted and scope ratified| APPROVED["APPROVED<br/>(Spec Ready / Awaiting Work)"]
+    APPROVED -->|Task ownership recorded| IN_PROGRESS["IN_PROGRESS<br/>(Implementation Active)"]
     IN_PROGRESS -->|Evaluator Audit| REVIEWING["REVIEWING<br/>(Independent Verification)"]
     REVIEWING -->|Receipt Accepted| DONE["DONE<br/>(Verified & Merged)"]
     IN_PROGRESS -->|Unresolved Dependency| BLOCKED["BLOCKED<br/>(Prerequisite Missing)"]
+    APPROVED -->|Prerequisite unavailable| BLOCKED
+    BLOCKED -->|Dependency resolved and scope revalidated| APPROVED
     PROPOSED -->|Negative ROI / Lift| DEFERRED["DEFERRED<br/>(Rejected / Archived)"]
 ```
 
@@ -60,6 +62,20 @@ graph LR
 * **`REOPENED`**: A previously closed package has a current-source or
   exact-subject falsifier that invalidates carrying its old closure forward.
   The earlier receipt remains historical evidence for its own subject.
+
+Lifecycle applies to a **package scope and evidence subject**, not to every future
+use of its ID. `ACCEPTED` is the receipt disposition that supports `DONE`; it is
+not a separate package state. A `DONE` mechanism can have a `PROPOSED` extension
+without being reopened. `APPROVED` requires the applicable predecessor gates and
+implementation scope to be ratified; approval of this inventory alone does not
+approve its proposed packages. `BLOCKED` names a missing prerequisite for already
+authorized work; an unapproved extension stays `PROPOSED` with its blockers named.
+
+`REVIEWING`, `DEFERRED` and `REOPENED` retain the meanings above. Historical
+`PARTIAL` / `TECHNICAL SLICE DONE` qualifiers describe delivered scope, not full
+acceptance; `DEPRECATED` marks retired tooling. They do not silently advance a
+package into `DONE`. Status changes require a scoped receipt, acceptance decision
+and applicable subject identity; mechanism tests alone do not close empirical gates.
 
 ---
 
@@ -75,15 +91,15 @@ Accordingly, truthful terminal/disposition projection, canonical state and recov
 
 | Package | Approved scope and owner | Existing capability relationship | Acceptance / lifecycle |
 |---|---|---|---|
-| **GATE-01** | Nonmutating runner, complete collection, current failure inventory, dead-path cleanup and integrated gate; C coordinates, A/B fix their owned surfaces | Additive baseline qualification; preserves MS-INSTRUMENT's historical subject. T-98/T-101/T-108/T-109/T-111 | `ACCEPTED` on `2989d57d`; exact-subject discovery and verify receipts close MS-BASELINE and reconcile MS-CONTEXT. |
-| **CTX-01** | Canonical working-state snapshots, bounded existing compiler, provider-aware counting/cache telemetry and 100+ turn deterministic preservation; B values/compiler, A codecs/runtime | Successor integration of CMX-03/CMX-10B/CMX-11, not duplicate memory or compiler. T-100/T-104/T-105/T-107/T-110; T-77 moved here from IDX-01 | `ACCEPTED` on `2989d57d`; component contracts and the 104-turn fresh-process qualification are green. No cache-hit or live-quality guarantee. |
-| **REC-01** | Bounded semantic history, transport backoff, reground/replan/stop, durable decisions/deadlines; B policy, A bindings | Extends ProtocolRecoveryState and existing EpisodeEngine; T-106/T-107/T-110. T-80 consumes the core detector later | `ACCEPTED` for core recovery on `2989d57d`; durable binding and fresh-process reconciliation pass. No consultation, authority expansion, specialist spawning or new retry loop. |
+| **GATE-01** | Nonmutating runner, complete collection, current failure inventory, dead-path cleanup and integrated gate; C coordinates, A/B fix their owned surfaces | Additive baseline qualification; preserves MS-INSTRUMENT's historical subject. T-98/T-101/T-108/T-109/T-111 | `DONE`; receipt `ACCEPTED` on `2989d57d`. Exact-subject discovery and verify receipts close MS-BASELINE and reconcile MS-CONTEXT. |
+| **CTX-01** | Canonical working-state snapshots, bounded existing compiler, provider-aware counting/cache telemetry and 100+ turn deterministic preservation; B values/compiler, A codecs/runtime | Successor integration of CMX-03/CMX-10B/CMX-11, not duplicate memory or compiler. T-100/T-104/T-105/T-107/T-110; T-77 moved here from IDX-01 | `DONE`; receipt `ACCEPTED` on `2989d57d`. Component contracts and the 104-turn fresh-process qualification are green. No cache-hit or live-quality guarantee. |
+| **REC-01** | Bounded semantic history, transport backoff, reground/replan/stop, durable decisions/deadlines; B policy, A bindings | Extends ProtocolRecoveryState and existing EpisodeEngine; T-106/T-107/T-110. T-80 consumes the core detector later | `DONE` for core recovery; receipt `ACCEPTED` on `2989d57d`. Durable binding and fresh-process reconciliation pass. No consultation, authority expansion, specialist spawning or new retry loop. |
 | **INS-01 near-term delta** | Truthful terminal projection, thin facade, CLI help/flags/non-success exits; A | T-99/T-102/T-97 complete the NT-1 product-surface obligations without accepting broader control evidence | `DONE` for the NT-1 delta; no completed-without-evidence result through any product surface. T-89 remains a distinct MS-CONTROL measurement-path obligation. |
 | **CMX-01 near-term delta** | Single preset catalog, normalized behavioral identity, declared versus effective budgets; C catalog, A consumers | T-103/T-102 integrate the NT-1 catalog/facade obligation; retain existing product ceilings | `DONE` for the NT-1 delta; budget-only presets remain labeled honestly. T-79 retains its distinct MS-CONTROL acceptance obligation and ARM-01/T-96 stays post-control. |
 
 #### Near-term package delivery map
 
-This map explains what each remaining deliverable contributes without creating another task queue. Checkbox status and execution order remain exclusively in `tasks.md`.
+This map records the accepted NT-1 handoffs on `2989d57d`; these are completed obligations, not a remaining queue. Checkbox status and execution order remain exclusively in `tasks.md`.
 
 | Deliverable | Package responsibility | Inputs already accepted | Output consumed by | Package done condition |
 |---|---|---|---|---|
@@ -95,13 +111,13 @@ This map explains what each remaining deliverable contributes without creating a
 
 Package boundaries are strict. CTX-01 owns context/state preservation, REC-01 owns deterministic recovery semantics, GATE-01 owns evidence integrity, and none of them owns benchmark-quality claims. Completion of these packages authorizes control preparation only. It does not accept the CONTROL package or any FH-1 proposal.
 
-For the current multi-day delivery, A owns runtime/product consumers and T-110,
-B owns context/recovery policy and fault repair, and C owns the serial merge queue,
-event-schema generator inputs, preset/catalog configuration, benchmarks, corpora,
-metrics, preregistration, execution documentation and generated knowledge. C may make
-T-51/T-52/T-79/T-89/T-92–T-95 hermetically ready before T-111, but those packages
-remain open and the control subject remains unfrozen. This preparation cannot produce
-a live score, T-26/T-27 acceptance or an MS-CONTROL disposition.
+The accepted delivery used A for runtime/product binding, B for context/recovery
+policy and C for evidence/catalog integration. Current file leases remain solely
+in `tasks.md`; those historical assignments do not reserve future work. T-111 is
+accepted and T-26 is ready for prerequisite audit, but remains `UNFROZEN`.
+T-51/T-52 and applicable T-79/T-89/T-92–T-95 evidence still require control-subject
+reconciliation. A hermetically ready mechanism is not a live score, T-26/T-27
+acceptance or an MS-CONTROL disposition.
 
 **Release dependency:** MS-BASELINE -> MS-CONTEXT -> new MS-CONTROL freeze/qualification. T-111 reconciles the integrated subject; T-26/T-27 retain their evidence obligations. M-8 empirical acceptance and M-9/M-10 authorization are unchanged. Existing DONE mechanisms retain their historical receipts; richer current product preservation needs the new gates.
 
@@ -111,15 +127,43 @@ a live score, T-26/T-27 acceptance or an MS-CONTROL disposition.
 
 These packages extend existing owners and remain `PROPOSED`; they do not alter approved NT-1 work. Contracts: [spec FH-1](spec.md#fh-1-post-control-backend-horizon-proposal). Acceptance: [horizon gates](milestones.md#post-control-horizon-release-predicates-fh-1). The only work tree is [T-112–T-128](tasks.md#context-post-control-horizon-fh-1-proposal).
 
-| Package | Scope and existing ownership | Gate / work refinement |
-|---|---|---|
-| **CAS-01** | Extend transaction/environment adapters, blob storage and runtime emitter with canonical trees, isolated candidates, compare-and-append promotion, recovery, export and GC | MS-CAS; T-112–T-116 refine T-17/T-30/T-49. T-17's historical preflight guarantee is not durable CAS qualification. |
-| **DEL-01** | Existing spawn/child runtime and governor: bounded read-only specialists, idempotent dispatch and reconciled cancellation | MS-DELEGATION; T-117/T-118 refine T-29/T-34/T-53, preserve accepted M-6 subjects. |
-| **EXP-02** | Optional routing/recovery/specialist experiments; same budget and task conditions, no automatic treatment activation | MS-META/MS-SPECIALIST; T-119 refines T-28/T-29/T-30/T-50/T-80/T-96. |
-| **OCT-03 extension** | Minimal durable campaign client, dependency artifacts, owned integration and bounded replanning | MS-CAMPAIGN; T-120 refines T-31/T-54/T-34. T-55/HYDRA and full Octopus remain post-M-10 horizon, not default dependencies. |
-| **MEM-QUAL** | Existing memory/learning contracts: project-scoped lessons, revocation, independent promotion and measured lift | MS-MEMORY and M-8; T-121 refines T-32/T-56/T-57. No mandatory vector store. |
-| **EVAL-02** | Subject-bound external evaluator, Verified and Aider protocol adapters, distinct greenfield completeness corpus | MS-EVAL; T-122–T-125 refine T-51/T-58; reuse instrument and evaluator seams. DeepSWE T-33 stays separate. |
-| **REL-QUAL extension** | Frozen official runs, statistical comparison, independent evidence review and release claim reconciliation | MS-OFFICIAL/MS-SOTA; T-126–T-128 refine T-33/T-58/T-67 and SWE-P3–P5. No guaranteed score or professional-equivalence claim. |
+| Package / lifecycle | Bounded scope and owner | Upstream acceptance required | Output / downstream consumer |
+|---|---|---|---|
+| **CAS-01 — `PROPOSED`** | Domain tree/edit values; environment/store adapters capture and materialize immutable candidates; existing runtime emitter owns promotion. Includes recovery, journaled export and bounded GC. T-112–T-116 refine T-17/T-30/T-49. | MS-CONTROL; reviewed FH-1 contracts and implementation leaves. Historical T-17 preflight is a reuse seam, not CAS acceptance. | MS-CAS: one winning durable promotion, monotonic generation, lost-reply reconciliation, verified rollback or explicit export quarantine. Required by mutating specialists and OCT-03; no atomic-host-checkout claim. |
+| **DEL-01 extension — `PROPOSED`** | Existing agency spawn, child runtime and governor integration; bounded advisory readers, durable intent, sibling reservations, idempotent dispatch and cancellation reconciliation. T-117/T-118 refine T-29/T-34/T-53. | MS-CONTROL; reviewed FH-1 leaves. MS-CAS is additionally required for mutating workers, not for the initial read-only mechanism. | MS-DELEGATION: canonical lineage, attenuation and aggregate conservation across restart/unknown outcomes. Feeds EXP-02 specialist studies and OCT-03; does not establish useful specialist lift. Historical DEL-01 mechanism remains DONE. |
+| **EXP-02 — `PROPOSED`** | Optional pack/agency routing, recovery and specialist treatments; benchmark owners measure one declared change at fixed task membership and total budget. T-119 refines T-28/T-29/T-30/T-50/T-80/T-96. | MS-CONTROL; MS-DELEGATION for specialist arms; MS-CAS additionally for mutating arms. | MS-META/MS-SPECIALIST: accepted useful-lift or cost-saving/noninferiority evidence before enabling the measured treatment. Coordination, verification, retries and failures count toward cost. A basic campaign does not require positive specialist lift. |
+| **OCT-03 extension — `PROPOSED`** | Minimal durable campaign client above existing runtime; dependency artifacts, node reconciliation, parent-owned integration and bounded replanning. T-120 refines T-31/T-54/T-34. | MS-CAS and MS-DELEGATION, each downstream of MS-CONTROL; reviewed campaign leaves. | MS-CAMPAIGN: dependency readiness from accepted artifacts, restart without duplicate effects and exterior verification of the combined tree. Director has zero mutating verbs. Full OCT-01–OCT-04/HYDRA activation remains post-M-10. |
+| **MEM-01 qualification extension — `PROPOSED`** | Existing runtime memory/governance and store adapters: project-scoped versioned lessons, retrieval/cache revocation, separate generation/evaluation/promotion and rollback. `MEM-QUAL` is this scope's alias; T-121 refines T-32/T-56/T-57 with MEM-02 empirical evidence. | MS-CONTROL for FH-1 activation; applicable existing M-8 obligations and qualified empirical runner. No blanket CAS-01 or campaign dependency. | MS-MEMORY and M-8: authorization/revocation evidence, held-out lift >= 0.05 at p < 0.05 and executed rollback, independently accepted. Feeds M-9 readiness; does not require a vector store or permit learning from the evaluation holdout. |
+| **EVAL-02 — `PROPOSED`** | Benchmark protocol adapters and existing exterior evaluator seams; pinned SWE-bench Verified and Aider protocols, plus a separate greenfield completeness corpus. T-122–T-125 refine T-51/T-58. | MS-CONTROL; reviewed evaluator-separation, manifest and replay leaves. Optional CAS/delegation/memory gates apply only when those capabilities are included in the measured arm. | MS-EVAL qualifies immutable subject/evaluator separation, faithful reference replay and complete failure accounting. Feeds official runs; fixtures produce no live score. DeepSWE T-33 remains separate. |
+| **REL-QUAL extension — `PROPOSED`** | Benchmark/release owners bind official outputs, statistical comparison, independent review, migration/rollback and claims. T-126–T-128 refine T-33/T-58/T-67 and SWE-P3–P5. | MS-EVAL plus SWE-P4/P5 for official runs; MS-OFFICIAL for superiority claims; applicable M-8/M-9/M-10 predicates for release handoff. | Distinct MS-OFFICIAL, MS-SOTA and release-handoff evidence. A valid score does not prove superiority; no guaranteed score or professional-equivalence claim. |
+
+The review order CAS → delegation → campaign → memory → evaluation is not a
+serial implementation dependency. CAS, read-only delegation, memory and evaluation
+are conditional branches after MS-CONTROL. The applicable gate predicates,
+finite statistical stopping rules and invariant vetoes are owned by
+[`milestones.md`](milestones.md#post-control-horizon-release-predicates-fh-1).
+
+**Scope exclusions and reuse.** CTX-01 owns bounded working context; MEM-01 owns
+authorized durable learning. REC-01 owns deterministic recovery; EXP-02 owns new
+measured consultations/routing. DEL-01 owns child mechanics; OCT-03 owns campaign
+coordination; neither introduces a competing episode loop, ledger writer or
+budget accountant. CAS-01 extends the existing transaction/storage seams; memory
+registry compare-and-swap does not qualify workspace CAS. Planned kernel delta is
+zero, N-06 forbids runtime subprocess execution, and new public ports require an
+independently replaceable responsibility rather than a copied reference API.
+
+Existing grounding seams include
+[`ContextCompiler`](../../vanguard/packages/agency/context/compiler.py),
+[`ProtocolRecoveryState`](../../vanguard/packages/agency/episode/protocol_recovery.py),
+[`EpisodeEngine.spawn`](../../vanguard/packages/agency/episode/engine.py),
+[`AtomicMultiFileTransactionManager`](../../vanguard/packages/adapters/environment/transaction.py),
+[`LedgerEmitter`](../../vanguard/packages/runtime/ledger_emitter.py), and
+[`DurableCompositionRegistry`](../../vanguard/packages/runtime/governance/learning.py).
+These identify reuse owners, not proof that the proposed packages already exist.
+The [review series](../reports/reviews/aether_v093_review/part4_roadmap_and_strategic_synthesis.md)
+and [auxiliary table](../../.draft/temp_auxiliary_table.md) remain non-canonical
+planning inputs; their completion percentages and prototype names cannot advance
+these lifecycle states.
 
 Advance packages from PROPOSED only after applicable predecessor acceptance and an implementation-ready leaf review. A valid negative experiment is retained as evidence and leaves its treatment disabled; protocol closure and positive capability acceptance are different dispositions. Larger tree stores, parallel writers, learned routers and semantic memory ranking require measured need and separately pinned treatments. Schema additions reuse existing ports unless an independently replaceable responsibility demonstrably lacks a contract.
 
@@ -136,7 +180,7 @@ Advance packages from PROPOSED only after applicable predecessor acceptance and 
 
 | ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Description & Acceptance Gate |
 |---|---|---|---|---|---|---|
-| **MEM-01** | Governed Memory & Rollback Mechanisms | `runtime` | Lane A | `REVIEWING` | M-8 | Authorization, recovery, and rollback receipts in `governance/learning.py`. |
+| **MEM-01** | Governed Memory & Rollback Mechanisms | `runtime` / stores | Lane A | `REVIEWING` (existing mechanisms); `PROPOSED` (FH-1 extension) | M-8 / MS-MEMORY | Existing authorization, promotion and rollback mechanisms do not close M-8. Qualification extension and dependencies are in §2.0a (`MEM-QUAL` alias); MEM-02 owns empirical proof. |
 | **MEM-02** | M-8 Empirical Held-Out Canary Proof | `benchmarks` | Lane B | `BLOCKED` (on REL-01R/REL-02R) | M-8 | Held-out real-model canary demonstrating $\ge 0.05$ lift without synthetic metrics after the runtime executor and successor canary are qualification-ready. |
 | **MEM-03** | Adaptive Strategy & Meta-Controller | `agency` / `runtime` | Lane A | `APPROVED` | M-6.5 | Higher-order policy adjusting strategy upon failure without modifying history. |
 | **MEM-04** | Trajectory-to-Skill Promotion Pipeline | `runtime` | Lane A | `PROPOSED` | M-8+ | Mining verified traces to propose reusable skills with explicit promotion receipts. |
@@ -145,7 +189,7 @@ Advance packages from PROPOSED only after applicable predecessor acceptance and 
 
 | ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Description & Acceptance Gate |
 |---|---|---|---|---|---|---|
-| **DEL-01** | Monotonic Capability Attenuation | `kernel` / `agency` | Lane A | `DONE` | M-6 | Recursive budget attenuation $\mathcal{A}(B_{\text{parent}}, B_{\text{child}})$ and child spawning. |
+| **DEL-01** | Monotonic Capability Attenuation | `kernel` / `agency`; extension in agency/runtime | Lane A | `DONE` (historical mechanism); `PROPOSED` (FH-1 extension) | M-6 / MS-DELEGATION | Preserve recursive attenuation and child-spawn receipts for their accepted subjects. The §2.0a extension qualifies advisory specialists and durable aggregate accounting after MS-CONTROL, with zero kernel delta; historical DONE does not activate it. |
 | **DEL-02** | Multi-Role Topology Declarations | `runtime` | Lane A | `APPROVED` | M-7 | Declarative multi-agent topologies (debate, critic, swarm) through single runtime. |
 | **DEL-03** | Hardware-Aware Swarm Scheduler | `runtime` | Lane A | `PROPOSED` | M-7+ | VRAM drain scheduling between Architect (DeepSeek) and Worker (Qwen) models. |
 
@@ -220,11 +264,11 @@ composition/lifecycle authority; infrastructure stays behind generic ports.
 
 | ID | Capability package | Primary owner | Status | Dependency | Acceptance gate |
 |---|---|---|---|---|---|
-| **CMX-01** | Current-mechanism delta and three presets | `packs/code-default`, manifests | `IN_PROGRESS` | EWK-Q disposition | T-79 is an implementation candidate with 8/8 focused tests green (declared ceiling ≠ attenuation). Acceptance waits on boundary + related-surface + clean-subject review. |
+| **CMX-01** | Current-mechanism delta and three presets | `packs/code-default`, manifests | `DONE` (NT-1 delta); `REVIEWING` (control obligation) | Accepted NT-1; T-79 candidate reconciliation | T-103/T-102 accepted on `2989d57d`; declared ceilings, caller attenuation and normalized behavioral identity preserved. T-79 still needs applicable control-subject evidence; budget-only presets do not establish distinct treatments. |
 | **CMX-02** | Port-backed repository intelligence | `ports/index.py`, adapters, code-pack bindings | `PARTIAL` | IDX-01 | Public Coding Max presets now declare the shared index and the runtime constructs bounded `ContextPacket` context; staged task-ranked retrieval, epoch refresh and fallback evidence remain. |
-| **CMX-03** | Durable plan/context/recovery loop | code-pack policies + existing projections | `PARTIAL` | CTX-01, REC-01 | Historical resume mechanism retained; NT-1 requires canonical snapshots, actual serialized budgets and persisted recovery decisions with 100+ turn deterministic qualification. |
+| **CMX-03** | Durable plan/context/recovery loop | code-pack policies + existing projections | `DONE` (NT-1 preservation scope) | CTX-01, REC-01 accepted | Canonical snapshots, serialized context budgets and persisted recovery qualified by the accepted 104-turn fresh-process fixture on `2989d57d`. Live task quality remains a CONTROL obligation. |
 | **CMX-04** | Multi-file and greenfield correctness | code-pack policies and fixtures | `REVIEWING` | CMX-10A, CMX-11 | Hermetic policies/fixtures and conservative verification observation exist; task-specific completion and repository-scale change-surface qualification remain. |
-| **CMX-05** | Coding Max application facade | `apps/coding_max`, shared application service, `vg` | `REOPENED` (current-subject product outcome) | INS-01 near-term delta | Historical hermetic receipt retained; present entrypoint/app-service refusal collapse prevents carrying completion equivalence forward. T-99/T-102 must prove one truthful execution path before new acceptance. |
+| **CMX-05** | Coding Max application facade | `apps/coding_max`, shared application service, `vg` | `DONE` (NT-1 facade repair) | INS-01 near-term delta accepted | T-99/T-102 resolve the refusal-collapse reopening on `2989d57d` and establish one truthful product path. Historical broader product claims retain their own acceptance boundaries; this repair does not accept MS-CONTROL or M-9. |
 | **CMX-06** | Conditional review and mediated specialist roles | manifests/topology/child runtime | `BLOCKED` (on CMX-07) | CMX-05 and accepted baseline | Reviewer/localizer/test-investigator roles remain disabled until one-role-at-a-time held-out ablations beat the qualified single-worker control. |
 | **CMX-07** | Repository-scale qualification | benchmark program | `BLOCKED` (on REL-01R, CMX-09..11) | CMX-04, CMX-05 | Re-freeze the exact multi-class subject only after canonical completion, long-session resume and progressive-context gates pass. |
 | **CMX-08** | First-party reference-agent portfolio | apps + independent packs/manifests | `TECHNICAL SLICE DONE` | M-10 and stable public composition contract | Coding Max plus two non-coding supported agents install, run, resume, and emit attributable evidence through the same public framework contract |
@@ -235,13 +279,18 @@ composition/lifecycle authority; infrastructure stays behind generic ports.
 
 ### 2.10 Octopus Meta-Controller & Swarm Topology (VISION.md §12, §16; M-OCT Horizon)
 
-The Octopus / Conductor capability family represents the post-1.0 higher-order orchestration layer for long-horizon multi-day campaigns. It is declared as pure data topologies and content-addressed message exchanges; it does not replace the kernel's S0–S12 execution contracts. Detailed pseudocode is deferred to its dedicated implementation milestone.
+The full Octopus / Conductor capability family retains the M-OCT/post-M-10
+boundary. The smaller OCT-03 FH-1 extension in §2.0a is a conditional campaign
+client after MS-CAS and MS-DELEGATION, not authorization for the full family.
+Neither scope replaces kernel dispatch or the existing episode loop. Subsystem
+labels below describe proposed ownership, not promises that new modules exist;
+exact paths and pseudocode belong to later runway reviews.
 
 | ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Description & Acceptance Gate |
 |---|---|---|---|---|---|---|
 | **OCT-01** | Content-Addressed Mailbox Protocol | `domain/topology` | Lane A | `PROPOSED` | M-OCT / W-OCT-1 | Sub-agents communicate strictly by publishing and reading content-addressed immutable message digests (`digest_of(payload)`); zero shared memory; deterministic replayability. |
 | **OCT-02** | Declarative CoordinationPlan DAG & Merge Policies | `domain/topology` | Lane A | `PROPOSED` | M-OCT / W-OCT-2 | Topology declared as data DAG with per-mille budget shares ($\sum \text{budget\_share} \le 1000$); formal merge policies: `CONCAT`, `FIRST_COMPLETE`, `SYNTHESISE`, `UNANIMOUS`. |
-| **OCT-03** | Outer-Loop Multi-Day Roadmap Director (≡ draft `DIR-01`) | `runtime/outer_loop` | Lane A | `PROPOSED` | M-OCT / W-OCT-3 | **Dependency:** `MS-CONTROL` closed. Persistent director above `EpisodeEngine`; manages multi-episode roadmaps, survives process restarts, and yields verified milestone handoffs without unbounded context saturation. |
+| **OCT-03** | Outer-Loop Multi-Day Roadmap Director (≡ draft `DIR-01`) | runtime client; exact module deferred | Lane A | `PROPOSED` | MS-CAMPAIGN (FH-1); M-OCT (full horizon) | FH-1 requires MS-CAS and MS-DELEGATION after MS-CONTROL. Zero-mutating-verb director coordinates qualified children, accepted dependency artifacts and exterior-verified integration. Full M-OCT remains post-M-10; §2.0a is the extension scope, not a second package. |
 | **OCT-04** | Meta-Conductor & Swarm Goal Algebra | `runtime/outer_loop` | Lane A | `PROPOSED` | M-OCT / W-OCT-4 | Higher-order pilot framework; formal algebraic separation and reconciliation of individual worker objectives under a shared global campaign objective. |
 
 ### 2.11 Electroweak Convergence: Harness Preconditions & Settlement Truth
@@ -260,15 +309,17 @@ its admission route: **Route R** rows repair a defect verified at a named source
 line and close on a regression test; the single **Route L** row (`ARM-01`) claims
 lift and therefore stays `PROPOSED` until a preregistered ablation says otherwise.
 
-**Lifecycle checkpoint (2026-09-05 session stop).** HAR-01 and BRG-01 are `DONE
-(mechanism)`. INS-01 is `IN_PROGRESS`: T-84/T-85 are done, T-89 is a focused-
-green implementation candidate, and **T-97 is deferred this pass** (filed, not
-vanished). CMX-01/T-79 is a focused-green candidate. EXP-01 T-92–T-95 has a
-19-test implementation slice, but no live L0, frozen T-26, or T-27 disposition;
-ARM-01 remains proposed and gated on `MS-CONTROL`. Five boundary violations and
-four related-surface failures block acceptance. These lifecycle facts
-supersede the original admission-state labels retained in the dossier table
-below; task checkboxes remain the completion authority.
+**Lifecycle reconciliation (2026-09-11; accepted NT-1 subject `2989d57d`).**
+The earlier five boundary violations, four related-surface failures and deferred
+T-97 are historical findings, superseded for the accepted NT-1 scope. GATE-01,
+CTX-01, REC-01 and the INS-01/CMX-01 near-term deltas are DONE. HAR-01 and BRG-01
+retain their historical DONE mechanism dispositions. INS-01's broader control
+obligation remains IN_PROGRESS; EXP-01 method preparation is APPROVED, with live
+L0, corpus/metric reconciliation and T-26/T-27 acceptance still outstanding.
+ARM-01 remains PROPOSED. The following dossier table retains original admission
+labels and contract rationale; this reconciliation and §2.0 govern subsequent
+accepted deltas. Task receipts remain in `tasks.md`; old focused-test counts are
+not current gate evidence.
 
 | ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Reconciliation | Description & Acceptance Gate |
 |---|---|---|---|---|---|---|---|
@@ -300,13 +351,13 @@ to fit the current tree.
 | **SEE** | CMX-11, PRG-01, W-092-F4, IDX-01 | T-14–T-16, T-36–T-37, T-45, T-75–T-77 | MS-SEE | T-46 **narrowed**: optional query-local ranking stays in pack policy, never `IndexPort` or the adapter |
 | **CHANGE** | TXN-01, SHD-01, TLS-04/05, *EDT-01* | T-17–T-20, T-47–T-49, T-78, T-83a, T-83b | MS-CHANGE | T-17 `DONE`; TLS-04 mechanism present in `transaction.py`; T-18/T-19/T-20 production mechanisms wired; `str_replace` folds into T-47; T-83 caller admission remains separate |
 | **DIALECT** | WRN-01, TLS-02 | T-21–T-22, T-50 | — | T-21–T-22 `DONE`. T-50 `[PROPOSAL]`. Does not close MS-CHANGE. |
-| **CONTROL** | CMX-07, W-092-F5, CMX-01, EXP-01, *PRF-01*, ALG-03 | T-26–T-27, T-51–T-52, T-79, T-80, T-89, T-92–T-95, T-97 | MS-CONTROL | Wave 2 has 0 accepted tasks. T-79/T-89/T-92–T-95 are focused-green candidates (31 tests), blocked by five boundary violations, four related-surface failures, incomplete full verification and absent live evidence. Next: boundary repair → related-surface repair → T-97 (deferred this pass) → live L0 → T-51/T-52 → T-26 freeze → T-27. **T-80** is post-control. |
+| **CONTROL** | CMX-07, W-092-F5, CMX-01, EXP-01, *PRF-01*, ALG-03 | T-26–T-27, T-51–T-52, T-79, T-89, T-92–T-95, T-97 | MS-CONTROL | `APPROVED` preparation; empirical gate OPEN. MS-BASELINE/MS-CONTEXT and NT-1 product repairs are accepted. T-26 is READY but UNFROZEN, subject to applicable prerequisite and L0/L1 evidence; T-27/T-51/T-52 remain open. Acceptance follows the frozen sample, resource stops and vetoes in milestones.md. **T-80** is an EXP-02 post-control treatment, not a freeze dependency. |
 | **INSTRUMENT (product)** | INS-01, BRG-01, DLG-01 | T-84–T-88, T-90, T-91, T-97 | MS-TRUTH → MS-CONTROL | Distinct subject from the `CLOSED` MS-INSTRUMENT (benchmark harness). Precondition of every `LIVE-*` row |
 | **COMPARISON** | ARM-01 | T-96 | MS-CONTROL → MS-SENIOR | `PROPOSED` (Route L). No arm claim is authorized before MS-CONTROL closes |
 | **META** | MEM-03 | T-28 | MS-META | `[PROPOSAL]` |
 | **SPECIALIST** | CMX-06, W-092-F6 | T-29–T-30, T-53 | MS-SPECIALIST | `[PROPOSAL]` |
 | **CAMPAIGN** | OCT-01…04, HYD-01/02, *DIR-01* | T-31, T-54–T-55, T-34 | MS-CAMPAIGN / MS-HYDRA | `DIR-01` ≡ **OCT-03**; director is a runtime client with zero mutating tools |
-| **MEMORY** | MEM-01, MEM-04 | T-32, T-56–T-57 | MS-MEMORY | `[PROPOSAL]` product wiring; ADR-0100 |
+| **MEMORY** | MEM-01, MEM-02, MEM-04, *MEM-QUAL* | T-32, T-56–T-57, T-121 | MS-MEMORY / M-8 | MEM-QUAL names the MEM-01 FH-1 qualification extension; MEM-02 owns empirical proof. Proposed activation requires MS-CONTROL and applicable M-8 evidence. |
 | **OFFICIAL** | REL-03, SWE-P5 | T-33, T-58 | MS-OFFICIAL | G-3; local ≠ official |
 | **LATTICE** | SUB-01 (live kernel) | T-35, T-64 | — | TCB / boundaries / I-7 AST ban |
 | **CLI** | TUI-01 (related) | T-59–T-60 | — | Facade stays thin |
@@ -335,7 +386,8 @@ to fit the current tree.
 | `OCT-01` / `OCT-02` | T-54 | Keep existing OCT rows above |
 | Draft `SET-01` | T-04/T-05/T-07 + T-18/T-19/T-20 | Not a package. TRUTH + CHANGE settlement half. |
 | Draft `EDT-01` | T-47 (+ T-17 `DONE`, TLS-04/05) | Not a package. `str_replace` is a T-47 strategy. |
-| Draft `PRF-01` | **CMX-01** | Not a package. Same product divergence, already `REOPENED`. |
+| Draft `PRF-01` | **CMX-01** | Not a package. NT-1 preset/facade delta DONE; control-subject obligation remains distinct. |
+| `MEM-QUAL` | **MEM-01** extension + MEM-02; T-121/T-32/T-56/T-57 | Qualification alias, not another memory implementation or independent lifecycle. |
 | Draft `DIR-01` | **OCT-03** + T-31/T-54 | Not a package. Keep the OCT-* rows in §2.10 authoritative. |
 | Draft `HAR-01` | T-69–T-74 | **New package.** Precondition of CMX-09. |
 | Draft `IDX-01` | T-75–T-77 | **New package.** Narrows T-46 to optional query-local ranking in pack policy. |

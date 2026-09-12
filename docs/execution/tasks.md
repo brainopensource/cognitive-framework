@@ -60,9 +60,9 @@ creating no new planning file; at session exhaustion, leave a resumable handoff.
 | Task | Owner / state | requires: | Scope / exit |
 |---|---|---|---|
 | T-26a | C — ACCEPTED (independent review, Dev B 2026-09-12) | T-111 accepted | Validate the complete manifest and publication boundary under RUN-02; preserve pure diagnostic scoring. Detailed row below. |
-| T-51 | C — ACCEPTED (independent review, Dev B 2026-09-12) | T-111 accepted | Freeze a candidate 30-task L2 holdout with explicit strata, task/oracle digests and no L0/L1 overlap; local data preparation only. Detailed row below. |
+| T-51 | C — REOPENED; BLOCKED on oracle integrity and digest reacceptance | T-111 accepted | Restore a truthful 30-task L2 holdout after two bound oracle files changed; current corpus falsifier is red. Detailed row below. |
 | T-52 | A — ACCEPTED (independent review, Dev B 2026-09-12) | T-26a, T-51 | Reconcile binary/missing counts, single attempts, cost provenance and fixed stopping through publication; detailed row below. |
-| T-26b | B — LANDED, awaiting independent review | T-26a, T-51, T-52 | Integrate the report gate into the selected runner, prove product-path and stop/budget behavior hermetically, and reconcile applicable T-79/T-89/T-92–T-95/T-97 receipts. |
+| T-26b | B — BLOCKED; implementation landed, review awaits T-51 reacceptance | T-26a, T-51, T-52 | Integrate the report gate into the selected runner, prove product-path and stop/budget behavior hermetically, and reconcile applicable T-79/T-89/T-92–T-95/T-97 receipts. |
 | T-26 | C / release owner — BLOCKED; UNFROZEN | T-111, T-26b, T-92 live L0 acceptance | Freeze one clean compatible subject and all identities/resources. Missing model, authorized resources or live prerequisite is a named blocker. No paid call in this task. |
 | T-27 | C runs; independent reviewer accepts — BLOCKED | T-26, explicit run authorization | Execute the fixed canary, publish all outcomes, and record independent disposition. A published negative is task reporting completion, not acceptance for dependency edges. |
 | T-129 | C with relevant package owner — BLOCKED | T-27 accepted / MS-CONTROL closed | Refine one selected post-control package, memory/skills first. Ratify scope, paths, schema obligations, budgets and leaf edges before implementation. No automatic FH-1 activation. |
@@ -880,7 +880,8 @@ rule; it means the stop rule currently depends on a caller choosing to check.
     model and freeze timestamp; no paid call was made. T-26a is ACCEPTED.
 
 - [ ] **T-26b: Integrate and qualify the control evidence path**
-  - **owner/state**: B; LANDED, awaiting independent review; A reviewed existing public product identity.
+  - **owner/state**: B; BLOCKED — implementation landed, but independent review
+    awaits T-51 corpus reacceptance; A reviewed existing public product identity.
   - **requires**: [T-26a, T-51, T-52]
   - **leased files**: `benchmarks/agentic_harness_matrix_benchmark.py`,
     `benchmarks/product_path.py`, `benchmarks/ladder/control.py`,
@@ -924,7 +925,7 @@ rule; it means the stop rule currently depends on a caller choosing to check.
     this task; they contaminate the frozen corpus if tested in the shared tree.
 
 **T-51 Internal multi-class corpus freeze** (A §31.28, B Wave 0 corpus sizes)  
-- [x] **state**: ACCEPTED; owner C; **requires**: [T-111 accepted].
+- [ ] **state**: REOPENED / BLOCKED; owner C; **requires**: [T-111 accepted].
 - **leased files**: new `benchmarks/ladder/l2_thirty/suite.json`, new
   `test/benchmarks/test_control_corpus.py`; existing candidate task/oracle files
   read-only. Any needed new task fixture needs a named lease before authoring.
@@ -955,6 +956,15 @@ rule; it means the stop rule currently depends on a caller choosing to check.
     focused receipt above passed all 8 corpus falsifiers (42 tests total, exit 0).
     T-51 is ACCEPTED; this preparation made no paid call and did not freeze the
     preregistration.
+  - **current-subject invalidation 2026-09-12.** At
+    `63881e68caab8a33a4da588718db33fe0fb88706`, two bound oracle files no longer
+    match `l2_thirty/suite.json`. Re-executing
+    `python3 -m unittest test.benchmarks.test_control_corpus -v` ran 8 tests and
+    failed with 1 error plus 1 failure, both rooted in `oracle digest mismatch`.
+    The earlier acceptance remains historical evidence for its exact subject but
+    does not admit the current subject. T-51 requires oracle-integrity review,
+    digest rebinding or member replacement, and independent reacceptance before
+    T-26b review or T-26 freeze may proceed.
 
 **T-52 Wilson intervals + cost κ on control** (A §13.5, B §16)  
 - [x] **state**: ACCEPTED; owner A;

@@ -467,3 +467,26 @@ The concrete, sequential work items for Dev C are:
   - Enforce constitutional invariant: zero paid provider calls during T-26.
 - [ ] **4. Handoff for T-27 Canary Evaluation**:
   - Transmit the authorized, frozen subject to the evaluation runner for live canary execution ($n \ge 30$, Wilson $\ge 0.40$, false completion $== 0.0$).
+
+
+
+
+
+
+
+
+Task / Work Item                                                             │ Assigned Role                                   │               Complexity (0–100)
+  ──────────────────────────────────────────────────────────────────────────────┼─────────────────────────────────────────────────┼─────────────────────────────────────────────────
+   Phase P0: Leadership Decisions A–G in tasks.md                               │ Staff CTO / Principal                           │                       40
+   Phase P1: Suite SHA-256 Digest Sync (benchmarks/ladder/l2_thirty/suite.json) │ Senior Dev                                      │                       15
+   Phase P2: T-26b Independent Code Review & Signoff                            │ Senior Dev / Staff Reviewer                     │                       30
+   Phase P3: Fix Product Write-Landing in entrypoint.py (BLOCK-T27)             │ Principal Architect / Senior Dev                │                       75
+   Phase P4: Non-Control Smoke Verification (Hermetic test fixtures)            │ Senior Dev                                      │                       25
+   Phase P5: T-26 Freeze Candidate Verification & Packaging                     │ Senior Dev / Staff CTO                          │                       30
+   Phase P6: T-27 Budget & Spend Authorization ($0.10 / 150 calls)              │ Director / Principal                            │                       20
+   T-51: Run Blind 30-Benchmark Evaluation (L2_THIRTY)                          │ Senior Dev + AI Agent Harness                   │                       50
+   Model Cascade & Fallback Routing (fast-small → strong-frontier)              │ Senior Dev                                      │                       55
+   FH-1: High-Performance Agentic Frontier (Post-Control)                       │ Principal Architect / Staff+                    │                       85
+   CAS: Isolated Multi-Tenant Autonomous Workspaces                             │ Staff Systems Engineer                          │                       80
+   Multi-Agent Collaborative Campaigns & Swarms                                 │ AI PhD / Principal Engineer                     │                       90
+   ARM-01: Cross-Session Lifelong Memory Engine                                 │ AI PhD / Research Scientist                     │                       95

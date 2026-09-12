@@ -1,7 +1,7 @@
 ---
 id: execution.leadership.director
-class: execution
-authority: execution
+class: standard
+authority: advisory
 canonical_for:
   - director-task-instructions-and-prompts
 status: living
@@ -12,7 +12,7 @@ last_verified: 2026-09-12
 
 # Director Task Instructions & Prompts
 
-Authority: execution. This document carries the standing charter for the
+Authority: advisory. This document carries a reviewed prompt template for the
 Director / CTO role. It is a leadership instrument, not a task board: it says
 what leadership is asked to decide and at what depth, never what a developer
 should implement this week.
@@ -23,6 +23,13 @@ should implement this week.
 charter are transferred into `spec.md`, `technical.md`, `milestones.md`,
 `tasks.md` and `backlog.md` by the Senior; this file holds the *ask*, not the
 *law*.
+
+**Current-charter binding:** task-board blob
+`70bc13257292ab76bcfea976b67457a8adcb6b30`, spec blob
+`f514c28db37ae40652ea98bc8107dcee4da7926f`, and milestones blob
+`d010465eea63bf44898fb36ab7d734388da50f15`. If any corresponding
+`git hash-object` result differs, retain only the standing role and quality bar;
+regenerate every task- or RUN-specific instruction before dispatch.
 
 ## Standing charter
 

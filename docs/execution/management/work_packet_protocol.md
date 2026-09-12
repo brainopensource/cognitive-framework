@@ -17,6 +17,11 @@ It is **generated, bounded and disposable**. It is never authority: when a packe
 disagrees with a canonical document, the canonical document wins and the packet
 is regenerated.
 
+Packets are delivered in agent context or a runtime-provided ephemeral artifact
+store. They are never committed and never placed under `docs/`. Retained evidence
+may bind a packet digest, but retaining the packet body would create a stale
+parallel task board.
+
 ## Why packets rather than more documents
 
 The five canonical documents are a *state* representation — they answer "what is
@@ -31,13 +36,15 @@ not.
 
 | Field | Content |
 |---|---|
+| Packet identity | Stable packet ID, compilation timestamp and digest of the canonical inputs |
 | Task ID and outcome | The row it implements, and the observable end state |
-| Base HEAD and index identity | Exact SHA; LDA index identity if the work uses retrieval |
+| Base HEAD and index identity | Exact SHA and LDA identity; both must be fresh at admission |
+| Authority bindings | Task-board blob plus IDs and content digests of cited normative clauses |
 | Accepted prerequisites | Which `requires:` edges are satisfied, and by which receipt |
 | Owner and reviewer | Named, and the reviewer must not be the author |
 | Exclusive write lease | Exact paths this packet may modify |
 | Read-only surfaces | Paths it may read but not touch |
-| Governing clauses | Specific clause IDs and line ranges — not whole documents |
+| Governing clauses | Stable clause IDs and bounded excerpts; line ranges are navigation hints, not identity |
 | Known evidence | Current failing signature, prior attempts, relevant receipts |
 | Implementation authority | What may be decided alone (see philosophy §2) |
 | Required falsifiers | Positive **and** adversarial, with the expected red control |
@@ -46,10 +53,10 @@ not.
 | Stop and escalation conditions | What ends the session, and what returns to whom |
 | Handoff receipt schema | The exact shape of the evidence to return |
 
-**Size target: roughly 2,000–4,000 tokens.** This is a starting default chosen
-for judgement, not a measured optimum; record the real figure once packets have
-run and adjust. A packet that cannot fit is usually a task row that should be
-split.
+**Size target: roughly 2,000–4,000 tokens.** This is a starting hypothesis, not a
+rule. For each packet record compiled tokens, developer clarification turns,
+recompilations, elapsed lead time and review defects. Adjust only from those
+measurements. A packet that cannot fit is usually a task row that should be split.
 
 ## The falsifier field is the load-bearing one
 
@@ -57,16 +64,19 @@ Every packet names both a positive falsifier (the behaviour must work) and an
 adversarial one (the failure must be caught), and states the **red control**:
 the specific defect that must make the falsifier fail before the fix lands.
 
-A packet whose falsifier has never been observed red is an unverified packet,
-whatever its final exit code says.
+A packet whose falsifier has no retained negative-control provenance is
+unverified, whatever its final exit code says. The control may be the actual
+defect, a deterministic adversarial fixture or an isolated mutation; never damage
+the shared candidate merely to manufacture a red result.
 
 ## Lifecycle
 
 ```text
-compile   canonical law + task row + LDA retrieval -> packet
-admit     check HEAD, dirty state, prerequisites, lease collisions
+compile   canonical law + task row + LDA retrieval -> packet + input digest
+admit     check HEAD, index, input digests, prerequisites and lease collisions
 execute   developer works inside lease and authority until a stop condition
-receipt   structured evidence: commands, exit codes, counts, durations, digests
+resume    repeat admission before any new write; stale packets are regenerated
+receipt   evidence binds packet digest: commands, exits, counts, durations, digests
 verify    independent reviewer reruns the named falsifiers on the exact subject
 promote   durable conclusions into canonical documents; raw logs stay outside
 discard   the packet; regenerate from current truth when work resumes
@@ -75,12 +85,21 @@ discard   the packet; regenerate from current truth when work resumes
 Discarding is deliberate. A retained packet becomes a stale second source of
 truth, which is the failure this protocol exists to prevent.
 
+Admission fails closed when HEAD or the task-board blob changed, a cited clause
+digest changed, a prerequisite receipt was superseded, the index is stale, the
+tree is dirty contrary to the task contract, or a lease collides. A documentation-
+only commit does not silently preserve admission: the compiler either proves its
+inputs unchanged or regenerates the packet cheaply.
+
 ## Receipt requirements
 
-A handoff is rejected without: exact commands, exit codes, test counts,
-durations, changed files, candidate digest, and resource settlement. Self-reported
-prose, or a source string quoted as proof that code runs, is not evidence.
-An unexecuted command is `not_run`, never `passed`.
+A handoff is rejected without: packet digest, exact subject, exact commands, exit
+codes, test counts, durations, changed files, candidate digest, reviewer identity,
+negative-control provenance and resource settlement. Evidence is written only to
+the task's already-authorized ledger or artifact destination; a packet cannot
+invent a new evidence store. Self-reported prose, or a source string quoted as
+proof that code runs, is not evidence. An unexecuted command is `not_run`, never
+`passed`.
 
 ## Implementation vehicle
 

@@ -70,14 +70,22 @@ fortnight of autonomy, so additions are a CEO decision and should be rare.
 
 ## Review independence
 
-Independence is a property of the reviewer, not a label on the review. Concretely:
+Independence is evaluated for the exact change and subject, not granted by a role
+label. Concretely:
 
 - an author never accepts their own implementation;
-- a reviewer who signed a prior acceptance of the same artifact is not
-  independent of it;
-- when the only available reviewers are similar models, the falsifier and its red
-  control carry the evidentiary weight, not the review opinion. See
+- a reviewer who designed, directed or supplied the material repair is not
+  independent of that repair;
+- reviewing an earlier subject does not by itself destroy independence for a new
+  subject, but the earlier receipt cannot be reused as acceptance;
+- model diversity is useful but insufficient: acceptance combines authorship
+  separation with evidence from an independently rerunnable falsifier;
+- when available reviewers share likely model failure modes, adversarial and
+  mutation controls carry more weight than review prose. See
   [`development_philosophy.md`](development_philosophy.md) §6.
+
+The Senior records the independence basis in the handoff: author, reviewer,
+subject, contribution to the repair, and which evidence the reviewer reproduced.
 
 ## Parallelism is capped by lease surface, not by agent count
 
@@ -88,3 +96,8 @@ divides.
 When one stream owns several unrelated surfaces, its work serializes no matter
 how many agents exist. Redrawing ownership is therefore a capacity decision, and
 it belongs to the CEO with the Senior — not to whoever is holding the bottleneck.
+
+Adding another agent without a disjoint lease creates coordination, not capacity.
+Before dispatch, the Senior publishes the lease graph and identifies its critical
+path. Parallel work is admitted only where write surfaces and acceptance authority
+are both disjoint.

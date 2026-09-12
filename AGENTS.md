@@ -306,12 +306,16 @@ When updating documentation, route information to its semantic owner:
 - **`docs/backend/`**: Microkernel, event engine, delegation, memory, and reference schemas/ports/APIs.
 - **`docs/frontend/`**: Frontend client architecture, state management, and design tokens.
 - **`docs/product/`**: Product PRDs, requirements, and user behavior.
-- **`docs/execution/`**: Exactly five authoritative operational runway documents:
+- **`docs/execution/main/`**: Exactly five authoritative operational runway documents:
   - `milestones.md`: Stable TARGET outcomes and release predicates (M-0 to M-10 plus MS-* overlay). No sprint calendar.
   - `backlog.md`: Stable capability package inventory (SUB-*, MEM-*, CMX-*, OCT-*, T-* aliases). No sprint queue.
   - `spec.md`: Feature delta contract (typed schemas, invariants, error matrix).
   - `technical.md`: Self-explaining engineering handbook for remaining work (FACT vs `[PROPOSAL]`).
   - `tasks.md`: Flat tasks and subtasks by context. `requires:` edges only; no waves or WIP calendar.
+- **`docs/execution/{management,guidelines}/`**: The fixed advisory support inventory listed by
+  [`docs/execution/README.md`](docs/execution/README.md). These documents may define operating
+  method and reviewed prompt templates; they cannot define product law, task readiness, leases,
+  milestone status or acceptance. Work packets remain ephemeral and never live under `docs/`.
 - **`docs/theory/` | `docs/research/` | `docs/reports/`**: Non-canonical conceptual theory, research, and audit reports (`authority: non-canonical`).
 
 ---
@@ -320,12 +324,13 @@ When updating documentation, route information to its semantic owner:
 
 > [!CAUTION]
 > **MANDATORY INSTRUCTION FOR ALL AI AGENTS & CONTRIBUTORS:**  
-> AI Agents **MUST NOT** create new Markdown files under `docs/`, `docs/plans/`, or anywhere across the workspace to leave scratch notes, plans, reviews, or summaries.  
+> AI Agents **MUST NOT** create new Markdown files under `docs/`, `docs/plans/`, or anywhere across the workspace to leave scratch notes, plans, reviews, or summaries. The bounded support files already enumerated in [`docs/execution/README.md`](docs/execution/README.md) are durable operating policy, not permission to add more files.
 > 
 > All documentation updates must strictly edit existing canonical files in the documentation hierarchy:
 > 1. **Modifying Normative Law & System Spec** $\to$ Edit [`docs/execution/main/spec.md`](docs/execution/main/spec.md).
 > 2. **Recording Architectural Rationale & Trade-offs** $\to$ Edit corresponding subsystem architecture docs in [`docs/backend/architecture/`](docs/backend/architecture/) or [`docs/architecture/`](docs/architecture/).
 > 3. **Updating Tasks or Execution Progress** $\to$ Edit [`docs/execution/main/tasks.md`](docs/execution/main/tasks.md) and [`docs/execution/main/spec.md`](docs/execution/main/spec.md). Engineering recipes go in [`docs/execution/main/technical.md`](docs/execution/main/technical.md).
+> 4. **Updating multi-agent operating method or reviewed role prompts** $\to$ Edit an existing file listed under [`docs/execution/management/`](docs/execution/management/) or [`docs/execution/guidelines/`](docs/execution/guidelines/). These edits MUST remain advisory and MUST NOT restate or override current task status.
 > 
 > **Invariant on Execution Architecture**: AI agents must never invent parallel architecture documents; all feature extensions must be expressed as delta contracts in `docs/execution/main/spec.md` and promoted to `docs/architecture/` upon milestone gate passage. The fifth execution file `technical.md` is the authorized handbook, not a second architecture plane.
 >

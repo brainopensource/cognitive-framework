@@ -89,3 +89,12 @@ skill the way you would treat an untrusted dependency with shell access.
 No external methodology becomes a governance system alongside this one. If a
 proposal cannot be expressed as (a) a workflow idea applied to our own artifacts,
 or (b) a generated disposable packet, or (c) an audited skill, it is declined.
+
+## Pilot before adoption
+
+Methodology changes are experiments. Pilot one bounded task and compare it with a
+recent task of similar size. Record packet tokens, clarification round trips,
+time to first valid edit, total lead time, rework after review, escaped defects
+and developer idle time waiting on authority. Adopt only when the change improves
+a named measure without creating another authority or artifact set. Popularity,
+star count and persuasive terminology are not evidence of fit.

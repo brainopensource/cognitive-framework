@@ -12,13 +12,14 @@ last_verified: 2026-09-12
 
 # Execution
 
-Three folders. Law, roles, and how we work — in that order of authority.
+Three folders, four information layers. Canonical law, durable operating policy,
+ephemeral work packets, and retained evidence stay distinct.
 
 | Folder | Holds | Authority |
 |---|---|---|
 | [`main/`](main/) | The five canonical execution documents | **Normative.** Wins every conflict. |
-| [`guidelines/`](guidelines/) | Standing instructions per role | Advisory; the *ask*, never the law |
-| [`management/`](management/) | How we develop with several AI agents | Advisory; process, not content |
+| [`guidelines/`](guidelines/) | Reviewed role and dispatch prompt templates | Advisory; the *ask*, never the law |
+| [`management/`](management/) | Durable multi-agent operating method and a descriptive snapshot | Advisory; process, never task authority |
 
 ## `main/` — canonical truth
 
@@ -40,8 +41,9 @@ creates law, a task row, or a status.
 | [Director charter](guidelines/task_instructions_and_prompts_DIRECTOR.md) | Architecture, invariants, public contracts, sequencing, genuine forks |
 | [Developer instructions](guidelines/task_instructions_and_prompts_DEVS.md) | Senior Manager plus Developers A/B/C — assignments, leases, review routing, management loop |
 
-Role-scoped and long-lived. They change when a mandate changes, not when work
-changes. Rulings made under a charter are transferred into `main/` by the Senior.
+The standing portions are role-scoped and durable. A current-assignment overlay
+is a descriptive cache and MUST bind the task-board blob from which it was
+compiled. Rulings made under a charter are transferred into `main/` by the Senior.
 
 ## `management/` — how we work
 
@@ -53,45 +55,68 @@ changes. Rulings made under a charter are transferred into `main/` by the Senior
 | [`state_of_play.md`](management/state_of_play.md) | What is live right now | Start of every session |
 | [`methodology_sources.md`](management/methodology_sources.md) | What we borrow from BMAD, Spec Kit, Agent Skills — and what we refuse | Evaluating an external methodology |
 
-## The three planes
+## The four layers
 
 ```text
-CANONICAL TRUTH          durable, slow-changing, authoritative
-docs/execution/main/     spec · technical · tasks · milestones · backlog
-        |
-        |  compiled down into one bounded slice
+1. CANONICAL AUTHORITY   main/{spec,tasks,milestones,technical,backlog}.md
+        |                durable law, authorization and accepted state
         v
-ACTIVE ORCHESTRATION     disposable, regenerated, never cited as authority
-docs/execution/management/   work packets · state of play
-docs/execution/guidelines/   standing role instructions
-        |
-        |  produces
+2. OPERATING POLICY      management/ + guidelines/
+        |                durable but advisory roles, methods and prompt templates
         v
-EVIDENCE                 machine-readable receipts, commands, digests, costs
-        |
-        |  durable conclusions promoted back up
+3. ACTIVE WORK PACKET    compiled into agent context or an ephemeral store
+        |                generated, subject-bound, disposable and never committed
         v
-CANONICAL TRUTH
+4. EVIDENCE              receipts, commands, digests, timings and costs
+        |                retained outside the packet; conclusions promoted upward
+        +----------------------------------------------------> 1
 ```
 
-A work packet is **generated, disposable and non-canonical**. When a packet and a
-canonical document disagree, the canonical document wins and the packet is
-regenerated. A packet is never the place to record a decision.
+Management documents and prompt templates are not disposable: they are reviewed
+operating policy. A work packet is **generated, disposable and non-canonical**.
+When a packet and a canonical document disagree, the canonical document wins and
+the packet is regenerated. A packet is never the place to record a decision.
 
 ## Where a new agent starts
 
-1. [`management/state_of_play.md`](management/state_of_play.md) — what is live.
-2. Your own row in [`main/tasks.md`](main/tasks.md) — objective, lease, falsifier,
-   stop condition.
-3. A clause in [`main/spec.md`](main/spec.md) **only when your row cites one.**
+1. Verify repository HEAD and LDA identity. Stale generated context is rejected.
+2. Read [`management/state_of_play.md`](management/state_of_play.md) only if its
+   recorded task-board blob matches the current `main/tasks.md` blob.
+3. Read your own row in [`main/tasks.md`](main/tasks.md) — objective, lease,
+   falsifier and stop condition.
+4. Admit the generated packet for that row: verify subject, prerequisites, lease
+   collisions and cited clause digests before the first write and after resume.
+5. Read a clause in [`main/spec.md`](main/spec.md) **only when the row cites one.**
 
 A row that cannot be started without reading all five documents is a malformed
 row. Report it rather than reading around it.
 
 ## Boundaries
 
-- No sixth canonical document. Additional planes are generated and disposable.
+- No sixth canonical document. Operating-policy support is durable and advisory;
+  only active work packets are generated and disposable.
+- The files listed in this README are the complete permitted execution-support
+  inventory. New management or guideline files require a CEO-approved structural
+  change; scratch plans, reviews and session summaries remain forbidden.
 - Law lives in [`main/spec.md`](main/spec.md); work lives in
   [`main/tasks.md`](main/tasks.md). Neither is restated elsewhere.
+- `state_of_play.md` is a fail-closed cache, not a second status board. If stale,
+  skip it and derive current state from `tasks.md`.
+- Work packets never live under `docs/` and are never committed.
 - Raw logs and receipts are not pasted into these documents. Conclusions are
   promoted; evidence stays in its own artifacts.
+- A documentation topology move is isolated from semantic edits. Its receipt
+  compares old and new blobs after normalized link-depth rewrites; a commit that
+  mixes new law, task changes and path migration cannot claim “content untouched.”
+
+## Document lifecycle
+
+- `living` means an owned document is in the active working set and has a defined
+  verification cadence; it does not merely mean “not deleted.”
+- `reference` is useful context that is not required for routine work.
+- `historical` preserves evidence and cannot authorize current work.
+- `proposal` is the single spelling for unaccepted design. `proposed` is legacy
+  vocabulary to be normalized without changing the proposal's substance.
+- A descriptive finding receives evidence, a captured subject, an owner and a
+  disposition deadline. It is then promoted, rejected or removed; it cannot age
+  into a shadow backlog.

@@ -103,31 +103,40 @@ what you may decide alone, stop condition — and cites normative text only when
 the developer genuinely needs it. An agent that must read `spec.md` to *start*
 has been handed a failed row.
 
-## 6. Two AI reviewers are structurally weak
+## 6. AI review is correlated, not worthless
 
 A human architect reviewing a human developer brings independent judgment. Two
-instances of similar models share failure modes: they find the same arguments
-convincing and miss the same gaps. An approval from a peer model is weaker
-evidence than it appears.
+instances of similar models may share failure modes: they can find the same
+arguments convincing and miss the same gaps. A peer-model approval is therefore
+one signal, not the evidence of record.
 
 This is why falsifier discipline matters more here than in a human team. A test
-that reds on the actual defect is independent of both agents' judgment; a review
-that says "this looks correct" is not. It is also why the CEO reading actual
-diffs and red controls periodically is not micromanagement — it is the only
-genuinely independent check in the loop, and it should be spent on evidence
-rather than on prose summaries.
+that reds on the actual defect is stronger than a review that says "this looks
+correct," but a test may still encode the same mistaken specification. High-risk
+acceptance therefore combines several independent modalities where proportionate:
+exterior behavior, adversarial or mutation controls, subject/digest identity,
+static contract checks, a non-author reviewer, and targeted human audit.
+
+The CEO samples milestone evidence and irreversible decisions by risk; the CEO
+does not become the routine diff reviewer. Making executive attention the only
+independence mechanism would recreate the bottleneck this method is designed to
+remove.
 
 ## 7. Findings need a home before they become decisions
 
 Every expensive surprise in this project so far was known-but-homeless: true,
 discoverable, recorded nowhere, surviving only in a chat transcript until it
-cost a day. Observations that are not yet decisions must have a place to sit.
-That place is [`state_of_play.md`](state_of_play.md), and the section that earns
-its existence is *Found, not yet decided*.
+cost a day. Observations that are not yet decisions need a bounded inbox. That
+place is [`state_of_play.md`](state_of_play.md), and the section that earns its
+existence is *Found, not yet decided*. Every entry carries evidence, a captured
+subject, an owner and a disposition deadline. At that deadline it is promoted
+into canonical work, rejected with a reason, or removed. Otherwise the inbox
+becomes a shadow backlog.
 
 ## 8. What we refuse
 
-- No sixth canonical document. Additional planes are generated and disposable.
+- No sixth canonical document. Operating-policy documents are durable and
+  advisory; only active work packets are generated and disposable.
 - No second source of truth. An external methodology may contribute workflow
   ideas; it may not contribute authority. See
   [`methodology_sources.md`](methodology_sources.md).

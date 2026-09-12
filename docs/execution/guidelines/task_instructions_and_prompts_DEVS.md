@@ -1,7 +1,7 @@
 ---
 id: execution.leadership.devs
-class: execution
-authority: execution
+class: standard
+authority: advisory
 canonical_for:
   - developer-task-instructions-and-prompts
 status: living
@@ -12,14 +12,21 @@ last_verified: 2026-09-12
 
 # Developer Task Instructions & Prompts
 
-Authority: execution. This document carries the standing instructions for the
-Senior Engineering Manager and for Developers A, B and C. It is the orchestration
-layer: current slice of work, owners, leases, review routing, integration order
-and the management loop.
+Authority: advisory. This document carries a reviewed prompt template for the
+Senior Engineering Manager and Developers A, B and C. Canonical task rows grant
+authority; this file cannot make a row READY or widen a lease.
 
 **Companion:** [director charter](task_instructions_and_prompts_DIRECTOR.md).
 **Task rows and receipts:** [`tasks.md`](../main/tasks.md) remains canonical. This
 file routes work; it does not restate task contracts.
+
+**Current-assignment binding:** task-board blob
+`70bc13257292ab76bcfea976b67457a8adcb6b30`, spec blob
+`f514c28db37ae40652ea98bc8107dcee4da7926f`, and milestones blob
+`d010465eea63bf44898fb36ab7d734388da50f15`. If any corresponding
+`git hash-object` result differs, treat the named assignment sections as stale and
+regenerate them from canonical authority before dispatch. Standing role,
+management-loop and CEO-escalation rules remain usable.
 
 A developer reading this file should be able to start without reading all five
 execution documents. Read your own assignment and its named falsifier; follow a

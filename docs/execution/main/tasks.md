@@ -17,8 +17,8 @@ version: 0.9.7
 last_verified: 2026-09-12
 lock_head: "1f42de23"
 normative_authority:
-  - docs/execution/spec.md
-  - docs/execution/technical.md
+  - docs/execution/main/spec.md
+  - docs/execution/main/technical.md
 relationships:
   - execution.milestones
   - execution.backlog

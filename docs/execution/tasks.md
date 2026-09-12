@@ -61,8 +61,8 @@ creating no new planning file; at session exhaustion, leave a resumable handoff.
 |---|---|---|---|
 | T-26a | C — ACCEPTED (independent review, Dev B 2026-09-12) | T-111 accepted | Validate the complete manifest and publication boundary under RUN-02; preserve pure diagnostic scoring. Detailed row below. |
 | T-51 | C — ACCEPTED (independent review, Dev B 2026-09-12) | T-111 accepted | Freeze a candidate 30-task L2 holdout with explicit strata, task/oracle digests and no L0/L1 overlap; local data preparation only. Detailed row below. |
-| T-52 | A — LANDED, awaiting independent review by B | T-26a, T-51 | Reconcile binary/missing counts, single attempts, cost provenance and fixed stopping through publication; detailed row below. |
-| T-26b | B, A reviews product identity — BLOCKED | T-26a, T-51, T-52 | Integrate the report gate into the selected runner, prove product-path and stop/budget behavior hermetically, and reconcile applicable T-79/T-89/T-92–T-95/T-97 receipts. |
+| T-52 | A — ACCEPTED (independent review, Dev B 2026-09-12) | T-26a, T-51 | Reconcile binary/missing counts, single attempts, cost provenance and fixed stopping through publication; detailed row below. |
+| T-26b | B — READY | T-26a, T-51, T-52 | Integrate the report gate into the selected runner, prove product-path and stop/budget behavior hermetically, and reconcile applicable T-79/T-89/T-92–T-95/T-97 receipts. |
 | T-26 | C / release owner — BLOCKED; UNFROZEN | T-111, T-26b, T-92 live L0 acceptance | Freeze one clean compatible subject and all identities/resources. Missing model, authorized resources or live prerequisite is a named blocker. No paid call in this task. |
 | T-27 | C runs; independent reviewer accepts — BLOCKED | T-26, explicit run authorization | Execute the fixed canary, publish all outcomes, and record independent disposition. A published negative is task reporting completion, not acceptance for dependency edges. |
 | T-129 | C with relevant package owner — BLOCKED | T-27 accepted / MS-CONTROL closed | Refine one selected post-control package, memory/skills first. Ratify scope, paths, schema obligations, budgets and leaf edges before implementation. No automatic FH-1 activation. |
@@ -880,7 +880,7 @@ rule; it means the stop rule currently depends on a caller choosing to check.
     model and freeze timestamp; no paid call was made. T-26a is ACCEPTED.
 
 - [ ] **T-26b: Integrate and qualify the control evidence path**
-  - **owner/state**: C; BLOCKED; A reviews existing public product identity.
+  - **owner/state**: B; READY; A reviewed existing public product identity.
   - **requires**: [T-26a, T-51, T-52]
   - **leased files**: `benchmarks/agentic_harness_matrix_benchmark.py`,
     `benchmarks/product_path.py`, `benchmarks/ladder/control.py`,
@@ -933,7 +933,7 @@ rule; it means the stop rule currently depends on a caller choosing to check.
     preregistration.
 
 **T-52 Wilson intervals + cost κ on control** (A §13.5, B §16)  
-- [ ] **state**: LANDED, awaiting independent review by B; owner A;
+- [x] **state**: ACCEPTED; owner A;
   **requires**: [T-26a, T-51 accepted].
 - **leased files**: `benchmarks/ladder/metrics.py`, `benchmarks/statistics.py`,
   `test/benchmarks/test_metric_veto.py`; new `test/benchmarks/test_control_accounting.py`.
@@ -967,6 +967,21 @@ rule; it means the stop rule currently depends on a caller choosing to check.
     of the five new guards independently proven to red under mutation).
     `control_preregistration.json` remains `UNFROZEN` (`subject_sha: null`);
     zero paid calls; no product-path file touched.
+  - **independent acceptance 2026-09-12 (Dev B).** Reviewed commit
+    `53e7bf3c8a8bcee1222e07605b73cb41ba7955f6`, preserving its two-sided
+    Wilson calculation and confirming the 17/30 -> NEGATIVE and 18/30 ->
+    POSITIVE boundary. Re-executed the required
+    `python3 -m unittest test.benchmarks.test_metric_veto test.benchmarks.test_control_accounting -v`:
+    38 tests passed in 0.015s (wall 0.15s), exit 0. A detached clean-worktree
+    regression slice of statistics, preregistration, evidence and corpus tests
+    also passed 36 tests in 0.042s (wall 0.56s), exit 0. This review confirmed
+    fixed slots, missingness separation, duplicate/replacement and mixed-evidence
+    refusal, unknown usage/cost preservation, exhaustion accounting and
+    row-order determinism. The shared worktree has separately staged BAAC run
+    artifacts that contaminate the frozen corpus and are preserved for their
+    owner; they are not part of this commit or acceptance. T-52 is ACCEPTED and
+    T-26b is READY. The preregistration remains UNFROZEN and no paid call was
+    made during review.
 
 - [ ] **T-129: Admit one selected post-control package**
   - **owner/state**: C plus package owner; BLOCKED; **requires**: [T-27 accepted].

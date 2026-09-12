@@ -613,7 +613,16 @@ class MemoryView:
 
 
 def critical_state(view: MemoryView) -> dict[str, Any]:
-    """Projection of durable obligations; not a writeback format."""
+    """Projection of durable obligations; not a writeback format.
+
+    `T-131` row 7 / `RUN-09` defect 7. This projection is the mandatory-state
+    brief `ContextCompiler.compile_packet` places *below* the eviction
+    watermark, so anything absent from it is compactable. `changed_files_tree_hash`
+    was absent: compaction could therefore retain the changed-file *list* while
+    dropping the identity of the candidate tree those changes produced, which is
+    exactly the "compaction loses candidate identity" defect. It is carried here
+    so the candidate a turn is reasoning about survives context pressure.
+    """
     task = view.task
     return {
         "objective": task.objective,
@@ -621,6 +630,7 @@ def critical_state(view: MemoryView) -> dict[str, Any]:
         "plan": list(task.plan),
         "next_action": task.next_action,
         "modified_files": list(task.modified_files),
+        "changed_files_tree_hash": task.changed_files_tree_hash,
         "failure": task.failure_class,
         "verification": dict(task.last_verification),
         "verification_plan": list(task.verification_plan),

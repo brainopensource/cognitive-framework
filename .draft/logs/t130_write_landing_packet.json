@@ -1,0 +1,1718 @@
+{
+  "schema": "t130.write-landing-probe/1",
+  "controls": {
+    "positive": {
+      "label": "positive-control",
+      "fixture": "P0-FIB",
+      "runId": "run-af5f447de97f4c0184593843f5e46bbd",
+      "workspace": "/tmp/tmpb68moatm/probe/positive",
+      "preimageTreeDigest": "sha256:c5e5f9ffaa2085470446e604e5cf0fb45535371b642ff8127d195750703f32a8",
+      "candidateTreeDigest": "sha256:c3802ebac139367cca7ae90b136b319be543856eb330f527f03d862ffcb55734",
+      "oracleObservedTreeDigest": "sha256:c3802ebac139367cca7ae90b136b319be543856eb330f527f03d862ffcb55734",
+      "changedFiles": [
+        "fibonacci.py"
+      ],
+      "terminalAdmissionDisposition": "instrument_error",
+      "terminalDetail": "probe tape exhausted: no more recorded provider bodies",
+      "turnsConsumed": 2,
+      "modelTurns": [
+        {
+          "turn": 0,
+          "offeredToolVerbs": [
+            "fs.read",
+            "fs.search",
+            "patch.apply",
+            "proc.exec",
+            "agency.finish"
+          ],
+          "offeredToolNames": [
+            "read",
+            "search",
+            "patch",
+            "test",
+            "finish"
+          ],
+          "toolChoice": null,
+          "raw": {
+            "id": "probe",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "Writing fibonacci.py.",
+                  "tool_calls": [
+                    {
+                      "id": "call_patch",
+                      "type": "function",
+                      "function": {
+                        "name": "patch",
+                        "arguments": "{\"path\": \"fibonacci.py\", \"content\": \"import sys\\n\\n\\ndef fibonacci(n: int) -> int:\\n    if n < 0:\\n        raise ValueError('n must be non-negative')\\n    a, b = 0, 1\\n    for _ in range(n):\\n        a, b = b, a + b\\n    return a\\n\\n\\nif __name__ == '__main__':\\n    print(fibonacci(int(sys.argv[1])))\\n\"}"
+                      }
+                    }
+                  ]
+                },
+                "finish_reason": "tool_calls"
+              }
+            ]
+          },
+          "normalized": {
+            "kind": "effect",
+            "action": "patch.apply",
+            "resource": {
+              "kind": "fs",
+              "root": "/workspace",
+              "paths": [
+                "/workspace/fibonacci.py"
+              ]
+            },
+            "args": {
+              "path": "fibonacci.py",
+              "content": "import sys\n\n\ndef fibonacci(n: int) -> int:\n    if n < 0:\n        raise ValueError('n must be non-negative')\n    a, b = 0, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a\n\n\nif __name__ == '__main__':\n    print(fibonacci(int(sys.argv[1])))\n"
+            },
+            "reservation": null
+          },
+          "normalizationError": null,
+          "emittedKind": "effect",
+          "emittedAction": "patch.apply",
+          "hadProviderToolCall": true
+        },
+        {
+          "turn": 1,
+          "offeredToolVerbs": [
+            "fs.read",
+            "fs.search",
+            "patch.apply",
+            "proc.exec",
+            "agency.finish"
+          ],
+          "offeredToolNames": [
+            "read",
+            "search",
+            "patch",
+            "test",
+            "finish"
+          ],
+          "toolChoice": null,
+          "raw": {
+            "id": "probe",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "tool_calls": [
+                    {
+                      "id": "call_finish",
+                      "type": "function",
+                      "function": {
+                        "name": "finish",
+                        "arguments": "{\"summary\": \"P0-FIB write submitted\"}"
+                      }
+                    }
+                  ]
+                },
+                "finish_reason": "tool_calls"
+              }
+            ]
+          },
+          "normalized": {
+            "kind": "finish",
+            "note": "P0-FIB write submitted"
+          },
+          "normalizationError": null,
+          "emittedKind": "finish",
+          "emittedAction": null,
+          "hadProviderToolCall": true
+        },
+        {
+          "turn": 2,
+          "offeredToolVerbs": [
+            "fs.read",
+            "fs.search",
+            "patch.apply",
+            "proc.exec",
+            "agency.finish"
+          ],
+          "offeredToolNames": [
+            "read",
+            "search",
+            "patch",
+            "test",
+            "finish"
+          ],
+          "toolChoice": null,
+          "raw": null,
+          "normalized": null,
+          "normalizationError": "tape exhausted: no recorded turn remains",
+          "emittedKind": null,
+          "emittedAction": null,
+          "hadProviderToolCall": false
+        }
+      ],
+      "projections": [
+        {
+          "kind": "write",
+          "path": "patch",
+          "text": "ok"
+        },
+        {
+          "kind": "capability",
+          "status": "granted",
+          "capability": "unnamed"
+        },
+        {
+          "kind": "note",
+          "text": "P0-FIB write submitted"
+        },
+        {
+          "kind": "complete",
+          "outcome": "instrument_error",
+          "turns": 2
+        }
+      ],
+      "ledgerKinds": [
+        "EpisodeStarted",
+        "GoalDeclared",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "TurnStarted",
+        "EvidenceClaimProduced",
+        "ContextSelectionRecorded",
+        "ArtifactCreated",
+        "ArtifactCreated",
+        "EvidenceClaimProduced",
+        "ProposalProduced",
+        "EffectStarted",
+        "CapabilityGranted",
+        "BudgetReserved",
+        "BudgetCommitted",
+        "EffectCompleted",
+        "ArtifactCreated",
+        "EpisodeStateChanged",
+        "TurnStarted",
+        "EvidenceClaimProduced",
+        "ContextSelectionRecorded",
+        "ArtifactCreated",
+        "ArtifactCreated",
+        "EvidenceClaimProduced",
+        "ProposalProduced",
+        "EpisodeStateChanged",
+        "TurnStarted",
+        "EvidenceClaimProduced",
+        "ContextSelectionRecorded",
+        "ArtifactCreated",
+        "ArtifactCreated",
+        "EvidenceClaimProduced",
+        "EpisodeCompleted",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired"
+      ],
+      "seam": "NOT_REPRODUCED",
+      "seamEvidence": [
+        "write landed atomically and the oracle observed the identical tree (sha256:c3802ebac139367cca7ae90b136b319be543856eb330f527f03d862ffcb55734); changed=['fibonacci.py']"
+      ],
+      "independentSecondarySeams": [
+        {
+          "seam": "completion_admission_refused_finish",
+          "evidence": "a finish normalized on turn 1 but the run terminated as 'instrument_error' (probe tape exhausted: no more recorded provider bodies); the write itself had already landed"
+        }
+      ]
+    },
+    "positivePassed": true,
+    "negative": [
+      {
+        "injection": "undeclared-verb",
+        "expectedSeam": "undeclared_or_malformed_tool_call",
+        "observedSeam": "undeclared_or_malformed_tool_call",
+        "trace": {
+          "label": "negative-undeclared-verb",
+          "fixture": "P0-FIB",
+          "runId": "run-2be47c71f3f44bd48ae5f65486cba702",
+          "workspace": "/tmp/tmpb68moatm/probe/negative/undeclared-verb",
+          "preimageTreeDigest": "sha256:c5e5f9ffaa2085470446e604e5cf0fb45535371b642ff8127d195750703f32a8",
+          "candidateTreeDigest": "sha256:c5e5f9ffaa2085470446e604e5cf0fb45535371b642ff8127d195750703f32a8",
+          "oracleObservedTreeDigest": "sha256:c5e5f9ffaa2085470446e604e5cf0fb45535371b642ff8127d195750703f32a8",
+          "changedFiles": [],
+          "terminalAdmissionDisposition": "instrument_error",
+          "terminalDetail": "tool is not declared by manifest: fs.write",
+          "turnsConsumed": 0,
+          "modelTurns": [
+            {
+              "turn": 0,
+              "offeredToolVerbs": [
+                "fs.read",
+                "fs.search",
+                "patch.apply",
+                "proc.exec",
+                "agency.finish"
+              ],
+              "offeredToolNames": [
+                "read",
+                "search",
+                "patch",
+                "test",
+                "finish"
+              ],
+              "toolChoice": null,
+              "raw": {
+                "id": "probe",
+                "object": "chat.completion",
+                "choices": [
+                  {
+                    "index": 0,
+                    "message": {
+                      "role": "assistant",
+                      "content": "Injected undeclared-verb write.",
+                      "tool_calls": [
+                        {
+                          "id": "call_fs.write",
+                          "type": "function",
+                          "function": {
+                            "name": "fs.write",
+                            "arguments": "{\"path\": \"fibonacci.py\", \"content\": \"x = 1\\n\"}"
+                          }
+                        }
+                      ]
+                    },
+                    "finish_reason": "tool_calls"
+                  }
+                ]
+              },
+              "normalized": null,
+              "normalizationError": "instrument_error: tool is not declared by manifest: fs.write",
+              "emittedKind": null,
+              "emittedAction": null,
+              "hadProviderToolCall": true
+            }
+          ],
+          "projections": [
+            {
+              "kind": "complete",
+              "outcome": "instrument_error",
+              "turns": 0
+            }
+          ],
+          "ledgerKinds": [
+            "EpisodeStarted",
+            "GoalDeclared",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "TurnStarted",
+            "EvidenceClaimProduced",
+            "ContextSelectionRecorded",
+            "ArtifactCreated",
+            "ArtifactCreated",
+            "EvidenceClaimProduced",
+            "EpisodeCompleted",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired"
+          ],
+          "seam": "undeclared_or_malformed_tool_call",
+          "seamEvidence": [
+            "turn 0 failed dialect normalization: instrument_error: tool is not declared by manifest: fs.write",
+            "offered tool names=['read', 'search', 'patch', 'test', 'finish'] verbs=['fs.read', 'fs.search', 'patch.apply', 'proc.exec', 'agency.finish']"
+          ],
+          "independentSecondarySeams": []
+        }
+      },
+      {
+        "injection": "no-tool-call",
+        "expectedSeam": "no_canonical_tool_emitted",
+        "observedSeam": "no_canonical_tool_emitted",
+        "trace": {
+          "label": "negative-no-tool-call",
+          "fixture": "P0-FIB",
+          "runId": "run-128d23fdf92a448497171b52a41c022b",
+          "workspace": "/tmp/tmpb68moatm/probe/negative/no-tool-call",
+          "preimageTreeDigest": "sha256:c5e5f9ffaa2085470446e604e5cf0fb45535371b642ff8127d195750703f32a8",
+          "candidateTreeDigest": "sha256:c5e5f9ffaa2085470446e604e5cf0fb45535371b642ff8127d195750703f32a8",
+          "oracleObservedTreeDigest": "sha256:c5e5f9ffaa2085470446e604e5cf0fb45535371b642ff8127d195750703f32a8",
+          "changedFiles": [],
+          "terminalAdmissionDisposition": "instrument_error",
+          "terminalDetail": "the manifest declares an explicit finish tool; a text-only response cannot be promoted to completion",
+          "turnsConsumed": 0,
+          "modelTurns": [
+            {
+              "turn": 0,
+              "offeredToolVerbs": [
+                "fs.read",
+                "fs.search",
+                "patch.apply",
+                "proc.exec",
+                "agency.finish"
+              ],
+              "offeredToolNames": [
+                "read",
+                "search",
+                "patch",
+                "test",
+                "finish"
+              ],
+              "toolChoice": null,
+              "raw": {
+                "id": "probe",
+                "object": "chat.completion",
+                "choices": [
+                  {
+                    "index": 0,
+                    "message": {
+                      "role": "assistant",
+                      "content": "I have written fibonacci.py for you."
+                    },
+                    "finish_reason": "tool_calls"
+                  }
+                ]
+              },
+              "normalized": null,
+              "normalizationError": "PREMATURE_FINISH_REJECTED: the manifest declares an explicit finish tool; a text-only response cannot be promoted to completion",
+              "emittedKind": null,
+              "emittedAction": null,
+              "hadProviderToolCall": false
+            }
+          ],
+          "projections": [
+            {
+              "kind": "complete",
+              "outcome": "instrument_error",
+              "turns": 0
+            }
+          ],
+          "ledgerKinds": [
+            "EpisodeStarted",
+            "GoalDeclared",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "TurnStarted",
+            "EvidenceClaimProduced",
+            "ContextSelectionRecorded",
+            "ArtifactCreated",
+            "ArtifactCreated",
+            "EvidenceClaimProduced",
+            "EpisodeCompleted",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired"
+          ],
+          "seam": "no_canonical_tool_emitted",
+          "seamEvidence": [
+            "turn 0 carried no provider tool call; normalization returned PREMATURE_FINISH_REJECTED: the manifest declares an explicit finish tool; a text-only response cannot be promoted to completion",
+            "offered tool names=['read', 'search', 'patch', 'test', 'finish'] verbs=['fs.read', 'fs.search', 'patch.apply', 'proc.exec', 'agency.finish']"
+          ],
+          "independentSecondarySeams": []
+        }
+      },
+      {
+        "injection": "empty-tape",
+        "expectedSeam": "resource_exhaustion_before_first_valid_action",
+        "observedSeam": "resource_exhaustion_before_first_valid_action",
+        "trace": {
+          "label": "negative-empty-tape",
+          "fixture": "P0-FIB",
+          "runId": "run-5bf4f42275ef40ed88ab2df4e53f2658",
+          "workspace": "/tmp/tmpb68moatm/probe/negative/empty-tape",
+          "preimageTreeDigest": "sha256:c5e5f9ffaa2085470446e604e5cf0fb45535371b642ff8127d195750703f32a8",
+          "candidateTreeDigest": "sha256:c5e5f9ffaa2085470446e604e5cf0fb45535371b642ff8127d195750703f32a8",
+          "oracleObservedTreeDigest": "sha256:c5e5f9ffaa2085470446e604e5cf0fb45535371b642ff8127d195750703f32a8",
+          "changedFiles": [],
+          "terminalAdmissionDisposition": "instrument_error",
+          "terminalDetail": "probe tape exhausted: no more recorded provider bodies",
+          "turnsConsumed": 0,
+          "modelTurns": [
+            {
+              "turn": 0,
+              "offeredToolVerbs": [
+                "fs.read",
+                "fs.search",
+                "patch.apply",
+                "proc.exec",
+                "agency.finish"
+              ],
+              "offeredToolNames": [
+                "read",
+                "search",
+                "patch",
+                "test",
+                "finish"
+              ],
+              "toolChoice": null,
+              "raw": null,
+              "normalized": null,
+              "normalizationError": "tape exhausted: no recorded turn remains",
+              "emittedKind": null,
+              "emittedAction": null,
+              "hadProviderToolCall": false
+            }
+          ],
+          "projections": [
+            {
+              "kind": "complete",
+              "outcome": "instrument_error",
+              "turns": 0
+            }
+          ],
+          "ledgerKinds": [
+            "EpisodeStarted",
+            "GoalDeclared",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "PluginDiscovered",
+            "PluginResolved",
+            "PluginVerified",
+            "PluginActivated",
+            "TurnStarted",
+            "EvidenceClaimProduced",
+            "ContextSelectionRecorded",
+            "ArtifactCreated",
+            "ArtifactCreated",
+            "EvidenceClaimProduced",
+            "EpisodeCompleted",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired",
+            "PluginQuiesced",
+            "PluginRetired"
+          ],
+          "seam": "resource_exhaustion_before_first_valid_action",
+          "seamEvidence": [
+            "no valid action reached dispatch; turns=0, terminal='instrument_error'"
+          ],
+          "independentSecondarySeams": []
+        }
+      }
+    ],
+    "negativePassed": true,
+    "bothPassed": true
+  },
+  "traces": [
+    {
+      "label": "L0",
+      "fixture": "P0-FIB",
+      "runId": "run-1ba2743c473c499ca85e4dcce53e9d5c",
+      "workspace": "/tmp/tmpb68moatm/probe/L0",
+      "preimageTreeDigest": "sha256:c5e5f9ffaa2085470446e604e5cf0fb45535371b642ff8127d195750703f32a8",
+      "candidateTreeDigest": "sha256:c3802ebac139367cca7ae90b136b319be543856eb330f527f03d862ffcb55734",
+      "oracleObservedTreeDigest": "sha256:c3802ebac139367cca7ae90b136b319be543856eb330f527f03d862ffcb55734",
+      "changedFiles": [
+        "fibonacci.py"
+      ],
+      "terminalAdmissionDisposition": "instrument_error",
+      "terminalDetail": "probe tape exhausted: no more recorded provider bodies",
+      "turnsConsumed": 2,
+      "modelTurns": [
+        {
+          "turn": 0,
+          "offeredToolVerbs": [
+            "fs.read",
+            "fs.search",
+            "patch.apply",
+            "proc.exec",
+            "agency.finish"
+          ],
+          "offeredToolNames": [
+            "read",
+            "search",
+            "patch",
+            "test",
+            "finish"
+          ],
+          "toolChoice": null,
+          "raw": {
+            "id": "probe",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "Writing fibonacci.py.",
+                  "tool_calls": [
+                    {
+                      "id": "call_patch",
+                      "type": "function",
+                      "function": {
+                        "name": "patch",
+                        "arguments": "{\"path\": \"fibonacci.py\", \"content\": \"import sys\\n\\n\\ndef fibonacci(n: int) -> int:\\n    if n < 0:\\n        raise ValueError('n must be non-negative')\\n    a, b = 0, 1\\n    for _ in range(n):\\n        a, b = b, a + b\\n    return a\\n\\n\\nif __name__ == '__main__':\\n    print(fibonacci(int(sys.argv[1])))\\n\"}"
+                      }
+                    }
+                  ]
+                },
+                "finish_reason": "tool_calls"
+              }
+            ]
+          },
+          "normalized": {
+            "kind": "effect",
+            "action": "patch.apply",
+            "resource": {
+              "kind": "fs",
+              "root": "/workspace",
+              "paths": [
+                "/workspace/fibonacci.py"
+              ]
+            },
+            "args": {
+              "path": "fibonacci.py",
+              "content": "import sys\n\n\ndef fibonacci(n: int) -> int:\n    if n < 0:\n        raise ValueError('n must be non-negative')\n    a, b = 0, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a\n\n\nif __name__ == '__main__':\n    print(fibonacci(int(sys.argv[1])))\n"
+            },
+            "reservation": null
+          },
+          "normalizationError": null,
+          "emittedKind": "effect",
+          "emittedAction": "patch.apply",
+          "hadProviderToolCall": true
+        },
+        {
+          "turn": 1,
+          "offeredToolVerbs": [
+            "fs.read",
+            "fs.search",
+            "patch.apply",
+            "proc.exec",
+            "agency.finish"
+          ],
+          "offeredToolNames": [
+            "read",
+            "search",
+            "patch",
+            "test",
+            "finish"
+          ],
+          "toolChoice": null,
+          "raw": {
+            "id": "probe",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "tool_calls": [
+                    {
+                      "id": "call_finish",
+                      "type": "function",
+                      "function": {
+                        "name": "finish",
+                        "arguments": "{\"summary\": \"P0-FIB write submitted\"}"
+                      }
+                    }
+                  ]
+                },
+                "finish_reason": "tool_calls"
+              }
+            ]
+          },
+          "normalized": {
+            "kind": "finish",
+            "note": "P0-FIB write submitted"
+          },
+          "normalizationError": null,
+          "emittedKind": "finish",
+          "emittedAction": null,
+          "hadProviderToolCall": true
+        },
+        {
+          "turn": 2,
+          "offeredToolVerbs": [
+            "fs.read",
+            "fs.search",
+            "patch.apply",
+            "proc.exec",
+            "agency.finish"
+          ],
+          "offeredToolNames": [
+            "read",
+            "search",
+            "patch",
+            "test",
+            "finish"
+          ],
+          "toolChoice": null,
+          "raw": null,
+          "normalized": null,
+          "normalizationError": "tape exhausted: no recorded turn remains",
+          "emittedKind": null,
+          "emittedAction": null,
+          "hadProviderToolCall": false
+        }
+      ],
+      "projections": [
+        {
+          "kind": "write",
+          "path": "patch",
+          "text": "ok"
+        },
+        {
+          "kind": "capability",
+          "status": "granted",
+          "capability": "unnamed"
+        },
+        {
+          "kind": "note",
+          "text": "P0-FIB write submitted"
+        },
+        {
+          "kind": "complete",
+          "outcome": "instrument_error",
+          "turns": 2
+        }
+      ],
+      "ledgerKinds": [
+        "EpisodeStarted",
+        "GoalDeclared",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "TurnStarted",
+        "EvidenceClaimProduced",
+        "ContextSelectionRecorded",
+        "ArtifactCreated",
+        "ArtifactCreated",
+        "EvidenceClaimProduced",
+        "ProposalProduced",
+        "EffectStarted",
+        "CapabilityGranted",
+        "BudgetReserved",
+        "BudgetCommitted",
+        "EffectCompleted",
+        "ArtifactCreated",
+        "EpisodeStateChanged",
+        "TurnStarted",
+        "EvidenceClaimProduced",
+        "ContextSelectionRecorded",
+        "ArtifactCreated",
+        "ArtifactCreated",
+        "EvidenceClaimProduced",
+        "ProposalProduced",
+        "EpisodeStateChanged",
+        "TurnStarted",
+        "EvidenceClaimProduced",
+        "ContextSelectionRecorded",
+        "ArtifactCreated",
+        "ArtifactCreated",
+        "EvidenceClaimProduced",
+        "EpisodeCompleted",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired"
+      ],
+      "seam": "NOT_REPRODUCED",
+      "seamEvidence": [
+        "write landed atomically and the oracle observed the identical tree (sha256:c3802ebac139367cca7ae90b136b319be543856eb330f527f03d862ffcb55734); changed=['fibonacci.py']"
+      ],
+      "independentSecondarySeams": [
+        {
+          "seam": "completion_admission_refused_finish",
+          "evidence": "a finish normalized on turn 1 but the run terminated as 'instrument_error' (probe tape exhausted: no more recorded provider bodies); the write itself had already landed"
+        }
+      ]
+    },
+    {
+      "label": "multi-file",
+      "fixture": "DX-MULTI",
+      "runId": "run-099084caf0bf4aae8a9a8c107725aa33",
+      "workspace": "/tmp/tmpb68moatm/probe/multi_file",
+      "preimageTreeDigest": "sha256:7a9f90312f9e52862f48d520202de9e1f1a16518ffab8a75c635af173af92bbd",
+      "candidateTreeDigest": "sha256:4c5e306503b23f36567116bfa18116c7db126b4951af512ab382ab8088e4ef72",
+      "oracleObservedTreeDigest": "sha256:4c5e306503b23f36567116bfa18116c7db126b4951af512ab382ab8088e4ef72",
+      "changedFiles": [
+        "formatter.py",
+        "ledger.py"
+      ],
+      "terminalAdmissionDisposition": "instrument_error",
+      "terminalDetail": "probe tape exhausted: no more recorded provider bodies",
+      "turnsConsumed": 3,
+      "modelTurns": [
+        {
+          "turn": 0,
+          "offeredToolVerbs": [
+            "fs.read",
+            "fs.search",
+            "patch.apply",
+            "proc.exec",
+            "agency.finish"
+          ],
+          "offeredToolNames": [
+            "read",
+            "search",
+            "patch",
+            "test",
+            "finish"
+          ],
+          "toolChoice": null,
+          "raw": {
+            "id": "probe",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "Writing formatter.py.",
+                  "tool_calls": [
+                    {
+                      "id": "call_patch",
+                      "type": "function",
+                      "function": {
+                        "name": "patch",
+                        "arguments": "{\"path\": \"formatter.py\", \"content\": \"def format_row(row: dict) -> str:\\n    return f\\\"{row['key']}={row['value']}\\\"\\n\"}"
+                      }
+                    }
+                  ]
+                },
+                "finish_reason": "tool_calls"
+              }
+            ]
+          },
+          "normalized": {
+            "kind": "effect",
+            "action": "patch.apply",
+            "resource": {
+              "kind": "fs",
+              "root": "/workspace",
+              "paths": [
+                "/workspace/formatter.py"
+              ]
+            },
+            "args": {
+              "path": "formatter.py",
+              "content": "def format_row(row: dict) -> str:\n    return f\"{row['key']}={row['value']}\"\n"
+            },
+            "reservation": null
+          },
+          "normalizationError": null,
+          "emittedKind": "effect",
+          "emittedAction": "patch.apply",
+          "hadProviderToolCall": true
+        },
+        {
+          "turn": 1,
+          "offeredToolVerbs": [
+            "fs.read",
+            "fs.search",
+            "patch.apply",
+            "proc.exec",
+            "agency.finish"
+          ],
+          "offeredToolNames": [
+            "read",
+            "search",
+            "patch",
+            "test",
+            "finish"
+          ],
+          "toolChoice": null,
+          "raw": {
+            "id": "probe",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "Writing ledger.py.",
+                  "tool_calls": [
+                    {
+                      "id": "call_patch",
+                      "type": "function",
+                      "function": {
+                        "name": "patch",
+                        "arguments": "{\"path\": \"ledger.py\", \"content\": \"\\\"\\\"\\\"Ledger row parsing (formatter now lives in formatter.py).\\\"\\\"\\\"\\n\\nfrom formatter import format_row\\n\\n__all__ = ['parse_row', 'format_row']\\n\\n\\ndef parse_row(line: str) -> dict:\\n    key, _, value = line.partition('=')\\n    return {'key': key.strip(), 'value': value.strip()}\\n\"}"
+                      }
+                    }
+                  ]
+                },
+                "finish_reason": "tool_calls"
+              }
+            ]
+          },
+          "normalized": {
+            "kind": "effect",
+            "action": "patch.apply",
+            "resource": {
+              "kind": "fs",
+              "root": "/workspace",
+              "paths": [
+                "/workspace/ledger.py"
+              ]
+            },
+            "args": {
+              "path": "ledger.py",
+              "content": "\"\"\"Ledger row parsing (formatter now lives in formatter.py).\"\"\"\n\nfrom formatter import format_row\n\n__all__ = ['parse_row', 'format_row']\n\n\ndef parse_row(line: str) -> dict:\n    key, _, value = line.partition('=')\n    return {'key': key.strip(), 'value': value.strip()}\n"
+            },
+            "reservation": null
+          },
+          "normalizationError": null,
+          "emittedKind": "effect",
+          "emittedAction": "patch.apply",
+          "hadProviderToolCall": true
+        },
+        {
+          "turn": 2,
+          "offeredToolVerbs": [
+            "fs.read",
+            "fs.search",
+            "patch.apply",
+            "proc.exec",
+            "agency.finish"
+          ],
+          "offeredToolNames": [
+            "read",
+            "search",
+            "patch",
+            "test",
+            "finish"
+          ],
+          "toolChoice": null,
+          "raw": {
+            "id": "probe",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "tool_calls": [
+                    {
+                      "id": "call_finish",
+                      "type": "function",
+                      "function": {
+                        "name": "finish",
+                        "arguments": "{\"summary\": \"DX-MULTI write submitted\"}"
+                      }
+                    }
+                  ]
+                },
+                "finish_reason": "tool_calls"
+              }
+            ]
+          },
+          "normalized": {
+            "kind": "finish",
+            "note": "DX-MULTI write submitted"
+          },
+          "normalizationError": null,
+          "emittedKind": "finish",
+          "emittedAction": null,
+          "hadProviderToolCall": true
+        },
+        {
+          "turn": 3,
+          "offeredToolVerbs": [
+            "fs.read",
+            "fs.search",
+            "patch.apply",
+            "proc.exec",
+            "agency.finish"
+          ],
+          "offeredToolNames": [
+            "read",
+            "search",
+            "patch",
+            "test",
+            "finish"
+          ],
+          "toolChoice": null,
+          "raw": null,
+          "normalized": null,
+          "normalizationError": "tape exhausted: no recorded turn remains",
+          "emittedKind": null,
+          "emittedAction": null,
+          "hadProviderToolCall": false
+        }
+      ],
+      "projections": [
+        {
+          "kind": "write",
+          "path": "patch",
+          "text": "ok"
+        },
+        {
+          "kind": "write",
+          "path": "patch",
+          "text": "ok"
+        },
+        {
+          "kind": "capability",
+          "status": "granted",
+          "capability": "unnamed"
+        },
+        {
+          "kind": "capability",
+          "status": "granted",
+          "capability": "unnamed"
+        },
+        {
+          "kind": "note",
+          "text": "DX-MULTI write submitted"
+        },
+        {
+          "kind": "complete",
+          "outcome": "instrument_error",
+          "turns": 3
+        }
+      ],
+      "ledgerKinds": [
+        "EpisodeStarted",
+        "GoalDeclared",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "TurnStarted",
+        "EvidenceClaimProduced",
+        "ContextSelectionRecorded",
+        "ArtifactCreated",
+        "ArtifactCreated",
+        "EvidenceClaimProduced",
+        "ProposalProduced",
+        "EffectStarted",
+        "CapabilityGranted",
+        "BudgetReserved",
+        "BudgetCommitted",
+        "EffectCompleted",
+        "ArtifactCreated",
+        "EpisodeStateChanged",
+        "TurnStarted",
+        "EvidenceClaimProduced",
+        "ContextSelectionRecorded",
+        "ArtifactCreated",
+        "ArtifactCreated",
+        "EvidenceClaimProduced",
+        "ProposalProduced",
+        "EffectStarted",
+        "CapabilityGranted",
+        "BudgetReserved",
+        "BudgetCommitted",
+        "EffectCompleted",
+        "ArtifactCreated",
+        "EpisodeStateChanged",
+        "TurnStarted",
+        "EvidenceClaimProduced",
+        "ContextSelectionRecorded",
+        "ArtifactCreated",
+        "ArtifactCreated",
+        "EvidenceClaimProduced",
+        "ProposalProduced",
+        "EpisodeStateChanged",
+        "TurnStarted",
+        "EvidenceClaimProduced",
+        "ContextSelectionRecorded",
+        "ArtifactCreated",
+        "ArtifactCreated",
+        "EvidenceClaimProduced",
+        "EpisodeCompleted",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired"
+      ],
+      "seam": "NOT_REPRODUCED",
+      "seamEvidence": [
+        "write landed atomically and the oracle observed the identical tree (sha256:4c5e306503b23f36567116bfa18116c7db126b4951af512ab382ab8088e4ef72); changed=['formatter.py', 'ledger.py']"
+      ],
+      "independentSecondarySeams": [
+        {
+          "seam": "completion_admission_refused_finish",
+          "evidence": "a finish normalized on turn 2 but the run terminated as 'instrument_error' (probe tape exhausted: no more recorded provider bodies); the write itself had already landed"
+        }
+      ]
+    },
+    {
+      "label": "greenfield",
+      "fixture": "DX-GREEN",
+      "runId": "run-1636bbcc24954a01a007d4672d2f403a",
+      "workspace": "/tmp/tmpb68moatm/probe/greenfield",
+      "preimageTreeDigest": "sha256:339e36e1062a68c986b47115f7168f152194287032797afdfddd3d15f64d7a63",
+      "candidateTreeDigest": "sha256:3723d08ceaad9f9782820eeaf43aed9500843a49dcb854dfb57dfe565a7dd28f",
+      "oracleObservedTreeDigest": "sha256:3723d08ceaad9f9782820eeaf43aed9500843a49dcb854dfb57dfe565a7dd28f",
+      "changedFiles": [
+        "retry.py"
+      ],
+      "terminalAdmissionDisposition": "instrument_error",
+      "terminalDetail": "probe tape exhausted: no more recorded provider bodies",
+      "turnsConsumed": 2,
+      "modelTurns": [
+        {
+          "turn": 0,
+          "offeredToolVerbs": [
+            "fs.read",
+            "fs.search",
+            "patch.apply",
+            "proc.exec",
+            "agency.finish"
+          ],
+          "offeredToolNames": [
+            "read",
+            "search",
+            "patch",
+            "test",
+            "finish"
+          ],
+          "toolChoice": null,
+          "raw": {
+            "id": "probe",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "Writing retry.py.",
+                  "tool_calls": [
+                    {
+                      "id": "call_patch",
+                      "type": "function",
+                      "function": {
+                        "name": "patch",
+                        "arguments": "{\"path\": \"retry.py\", \"content\": \"def retry(fn, attempts: int = 3):\\n    if attempts < 1:\\n        raise ValueError('attempts must be >= 1')\\n    last = None\\n    for _ in range(attempts):\\n        try:\\n            return fn()\\n        except Exception as exc:\\n            last = exc\\n    raise last\\n\"}"
+                      }
+                    }
+                  ]
+                },
+                "finish_reason": "tool_calls"
+              }
+            ]
+          },
+          "normalized": {
+            "kind": "effect",
+            "action": "patch.apply",
+            "resource": {
+              "kind": "fs",
+              "root": "/workspace",
+              "paths": [
+                "/workspace/retry.py"
+              ]
+            },
+            "args": {
+              "path": "retry.py",
+              "content": "def retry(fn, attempts: int = 3):\n    if attempts < 1:\n        raise ValueError('attempts must be >= 1')\n    last = None\n    for _ in range(attempts):\n        try:\n            return fn()\n        except Exception as exc:\n            last = exc\n    raise last\n"
+            },
+            "reservation": null
+          },
+          "normalizationError": null,
+          "emittedKind": "effect",
+          "emittedAction": "patch.apply",
+          "hadProviderToolCall": true
+        },
+        {
+          "turn": 1,
+          "offeredToolVerbs": [
+            "fs.read",
+            "fs.search",
+            "patch.apply",
+            "proc.exec",
+            "agency.finish"
+          ],
+          "offeredToolNames": [
+            "read",
+            "search",
+            "patch",
+            "test",
+            "finish"
+          ],
+          "toolChoice": null,
+          "raw": {
+            "id": "probe",
+            "object": "chat.completion",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "tool_calls": [
+                    {
+                      "id": "call_finish",
+                      "type": "function",
+                      "function": {
+                        "name": "finish",
+                        "arguments": "{\"summary\": \"DX-GREEN write submitted\"}"
+                      }
+                    }
+                  ]
+                },
+                "finish_reason": "tool_calls"
+              }
+            ]
+          },
+          "normalized": {
+            "kind": "finish",
+            "note": "DX-GREEN write submitted"
+          },
+          "normalizationError": null,
+          "emittedKind": "finish",
+          "emittedAction": null,
+          "hadProviderToolCall": true
+        },
+        {
+          "turn": 2,
+          "offeredToolVerbs": [
+            "fs.read",
+            "fs.search",
+            "patch.apply",
+            "proc.exec",
+            "agency.finish"
+          ],
+          "offeredToolNames": [
+            "read",
+            "search",
+            "patch",
+            "test",
+            "finish"
+          ],
+          "toolChoice": null,
+          "raw": null,
+          "normalized": null,
+          "normalizationError": "tape exhausted: no recorded turn remains",
+          "emittedKind": null,
+          "emittedAction": null,
+          "hadProviderToolCall": false
+        }
+      ],
+      "projections": [
+        {
+          "kind": "write",
+          "path": "patch",
+          "text": "ok"
+        },
+        {
+          "kind": "capability",
+          "status": "granted",
+          "capability": "unnamed"
+        },
+        {
+          "kind": "note",
+          "text": "DX-GREEN write submitted"
+        },
+        {
+          "kind": "complete",
+          "outcome": "instrument_error",
+          "turns": 2
+        }
+      ],
+      "ledgerKinds": [
+        "EpisodeStarted",
+        "GoalDeclared",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "PluginDiscovered",
+        "PluginResolved",
+        "PluginVerified",
+        "PluginActivated",
+        "TurnStarted",
+        "EvidenceClaimProduced",
+        "ContextSelectionRecorded",
+        "ArtifactCreated",
+        "ArtifactCreated",
+        "EvidenceClaimProduced",
+        "ProposalProduced",
+        "EffectStarted",
+        "CapabilityGranted",
+        "BudgetReserved",
+        "BudgetCommitted",
+        "EffectCompleted",
+        "ArtifactCreated",
+        "EpisodeStateChanged",
+        "TurnStarted",
+        "EvidenceClaimProduced",
+        "ContextSelectionRecorded",
+        "ArtifactCreated",
+        "ArtifactCreated",
+        "EvidenceClaimProduced",
+        "ProposalProduced",
+        "EpisodeStateChanged",
+        "TurnStarted",
+        "EvidenceClaimProduced",
+        "ContextSelectionRecorded",
+        "ArtifactCreated",
+        "ArtifactCreated",
+        "EvidenceClaimProduced",
+        "EpisodeCompleted",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired",
+        "PluginQuiesced",
+        "PluginRetired"
+      ],
+      "seam": "NOT_REPRODUCED",
+      "seamEvidence": [
+        "write landed atomically and the oracle observed the identical tree (sha256:3723d08ceaad9f9782820eeaf43aed9500843a49dcb854dfb57dfe565a7dd28f); changed=['retry.py']"
+      ],
+      "independentSecondarySeams": [
+        {
+          "seam": "completion_admission_refused_finish",
+          "evidence": "a finish normalized on turn 1 but the run terminated as 'instrument_error' (probe tape exhausted: no more recorded provider bodies); the write itself had already landed"
+        }
+      ]
+    }
+  ],
+  "attributions": {
+    "L0": "NOT_REPRODUCED",
+    "multi-file": "NOT_REPRODUCED",
+    "greenfield": "NOT_REPRODUCED"
+  },
+  "instrumentStatus": "valid",
+  "providerCalls": 0,
+  "usdSpent": 0.0
+}

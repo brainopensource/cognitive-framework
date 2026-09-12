@@ -1,0 +1,1260 @@
+uv lock --check
+Resolved 21 packages in 0.75ms
+uv sync --frozen
+Checked 12 packages in 0.21ms
+python3 tools/linters/check_test_hygiene.py
+TEST HYGIENE PASS: provider keys and inherited state are clean
+python3 tools/linters/check_boundaries.py
+BOUNDARY PASS: 833 source files checked
+python3 tools/linters/check_tcb_budget.py
+{"alarm_delta_lines": 131, "baseline_logical_loc": 1307, "current_logical_loc": 1386, "files": {"vanguard/packages/kernel/__init__.py": 41, "vanguard/packages/kernel/attenuation.py": 171, "vanguard/packages/kernel/budget.py": 150, "vanguard/packages/kernel/classifier.py": 96, "vanguard/packages/kernel/dispatch.py": 374, "vanguard/packages/kernel/grants.py": 201, "vanguard/packages/kernel/model.py": 137, "vanguard/packages/kernel/policy.py": 106, "vanguard/packages/kernel/provenance.py": 110}, "threshold": 1438}
+TCB PASS: 1386 logical lines across 9 files (alarm above 1438)
+python3 tools/linters/check_domain_blindness.py
+DOMAIN-BLINDNESS WARN: scan target missing (not an error): layer0/
+DOMAIN-BLINDNESS PASS: no coding|pytest|ast tokens in vanguard/packages/domain/, vanguard/packages/kernel/
+python3 tools/linters/check_isolation_policy.py
+ISOLATION POLICY PASS: proc.exec plugins declare container/subprocess
+python3 tools/linters/check_path_hygiene.py
+PATH HYGIENE PASS: no machine-local paths or developer identifiers detected
+python3 tools/linters/check_event_coverage.py
+E-COV PASS: every production-emittable event kind is in the canonical catalog
+python3 tools/linters/check_execution_truth.py
+EXECUTION TRUTH PASS: canonical boards use one supported state model
+python3 tools/linters/check_falsifier_ids.py
+RF ID PASS: allocations are unique and all canonical citations are allocated
+python3 tools/linters/scan_secrets.py
+SECRET SCAN PASS: no blocking secret patterns in scanned surfaces
+python3 -m unittest discover -s test/kernel -t .
+......................................................................................................
+----------------------------------------------------------------------
+Ran 102 tests in 0.446s
+
+OK
+python3 -m unittest discover -s test/agency -t .
+..../home/rock-dev/Coding/cognitive-framework/vanguard/packages/agency/manifests/loader.py:191: DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
+  resolver_type = getattr(jsonschema, "RefResolver", None)
+............................................................................................................................................................................................................................../home/rock-dev/Coding/cognitive-framework/vanguard/packages/agency/manifests/loader.py:191: DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
+  resolver_type = getattr(jsonschema, "RefResolver", None)
+................................................./home/rock-dev/Coding/cognitive-framework/vanguard/packages/agency/manifests/loader.py:191: DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
+  resolver_type = getattr(jsonschema, "RefResolver", None)
+...................................
+----------------------------------------------------------------------
+Ran 310 tests in 2.677s
+
+OK
+python3 -m unittest discover -s test/contracts -t .
+................./home/rock-dev/Coding/cognitive-framework/vanguard/packages/agency/manifests/loader.py:191: DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
+  resolver_type = getattr(jsonschema, "RefResolver", None)
+.............................................................................................................................................s..s..ss...s....ss.............................../home/rock-dev/Coding/cognitive-framework/vanguard/packages/agency/manifests/loader.py:191: DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
+  resolver_type = getattr(jsonschema, "RefResolver", None)
+.....................................................................................2026-09-12 18:03:04,440 [ERROR] Tool execution error: Unknown tool: lda_nonexistent
+Traceback (most recent call last):
+  File "/home/rock-dev/Coding/cognitive-framework/tools/007_LLM_DOCS_ATLAS/server_mcp.py", line 423, in handle_request
+    result_content = self._execute_tool(tool_name, args)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rock-dev/Coding/cognitive-framework/tools/007_LLM_DOCS_ATLAS/server_mcp.py", line 671, in _execute_tool
+    raise ValueError(f"Unknown tool: {name}")
+ValueError: Unknown tool: lda_nonexistent
+...................................................................................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 535 tests in 19.870s
+
+OK (skipped=7)
+npm run typecheck
+
+> typecheck
+> npm run typecheck:contracts && npm run typecheck:projections && npm run typecheck:client && npm run typecheck:tui-core && npm run typecheck:ui-web && npm run typecheck:tui && npm run typecheck:desktop && npm run typecheck:lab && npm --workspace @vanguard/client-core run typecheck && npm --workspace @vanguard/cli run typecheck && npm --workspace @vanguard/studio run typecheck
+
+
+> typecheck:contracts
+> npm --workspace @aether/contracts run typecheck
+
+
+> @aether/contracts@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> typecheck:projections
+> npm --workspace @aether/projections run typecheck
+
+
+> @aether/projections@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> typecheck:client
+> npm --workspace @aether/client run typecheck
+
+
+> @aether/client@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> typecheck:tui-core
+> npm --workspace @aether/tui-core run typecheck
+
+
+> @aether/tui-core@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> typecheck:ui-web
+> npm --workspace @aether/ui-web run typecheck
+
+
+> @aether/ui-web@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> typecheck:tui
+> npm --workspace @aether/tui run typecheck
+
+
+> @aether/tui@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> typecheck:desktop
+> npm --workspace @aether/desktop run typecheck
+
+
+> @aether/desktop@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> typecheck:lab
+> npm --workspace @aether/lab run typecheck
+
+
+> @aether/lab@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @vanguard/client-core@0.4.1-beta pretypecheck
+> npm run build --prefix ../client --silent
+
+
+> @vanguard/client-core@0.4.1-beta typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @vanguard/cli@0.4.1-beta pretypecheck
+> npm run build --prefix ../client-core --silent
+
+
+> @vanguard/cli@0.4.1-beta typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @vanguard/studio@0.4.1-beta pretypecheck
+> npm run build --prefix ../client --silent && npm run build --prefix ../client-core --silent
+
+
+> @vanguard/studio@0.4.1-beta typecheck
+> tsc -p tsconfig.json --noEmit
+
+npm test
+
+> test
+> npm run test:contracts && npm run test:projections && npm run test:client && npm run test:tui-core && npm run test:ui-web && npm run test:tui && npm run test:desktop && npm run test:lab && npm --workspace @vanguard/client-core test && npm --workspace @vanguard/cli test && npm --workspace @vanguard/studio test
+
+
+> test:contracts
+> npm --workspace @aether/contracts test
+
+
+> @aether/contracts@0.1.0 test
+> npm run build --silent && node --test dist/test/*.test.js
+
+▶ @aether/contracts — parsing and validation
+  ✔ parses valid vg.4 event envelope (0.748448ms)
+  ✔ rejects invalid UUID and missing fields (0.20852ms)
+  ✔ parses CommandFrame, ReceiptFrame, EventFrame, and ErrorFrame (0.325799ms)
+  ✔ handles line parsing for NDJSON feeds (0.208869ms)
+✔ @aether/contracts — parsing and validation (2.344804ms)
+▶ @aether/contracts — JCS canonicalization
+  ✔ canonicalizes JSON keys in lexicographical order (0.216109ms)
+  ✔ omits undefined properties (0.1176ms)
+✔ @aether/contracts — JCS canonicalization (0.495848ms)
+▶ @aether/contracts — error mapping
+  ✔ maps canonical error codes faithfully (0.18452ms)
+  ✔ constructs fail results with appropriate retryable defaults (0.131849ms)
+  ✔ validates UUIDs and SHA-256 digests (0.16227ms)
+✔ @aether/contracts — error mapping (0.712388ms)
+▶ RuntimeService vg.4 golden vector corpus (TypeScript reader)
+  ✔ corpus is present and non-trivial (0.901828ms)
+  ✔ every valid vector is accepted (1.058587ms)
+  ✔ every invalid vector is rejected with the declared code (0.849158ms)
+✔ RuntimeService vg.4 golden vector corpus (TypeScript reader) (3.739581ms)
+ℹ tests 12
+ℹ suites 4
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 55.78674
+
+> test:projections
+> npm --workspace @aether/projections test
+
+
+> @aether/projections@0.1.0 test
+> npm run build --silent && node --test dist/test/*.test.js
+
+▶ @aether/projections — Golden Trajectory Fixture Parity
+  ✔ folds successful-episode.jsonl into deterministic satisfied state (1.398997ms)
+  ✔ folds why-typed-tools.jsonl into deterministic state (0.292269ms)
+✔ @aether/projections — Golden Trajectory Fixture Parity (2.492334ms)
+✔ parseUnifiedDiffToFiles splits multi-file git diff accurately (1.510056ms)
+✔ reduceMultiFileDiff resolves 5 canonical mutation states correctly (0.651778ms)
+✔ reduceVerificationSummaries captures test and lint runs accurately (0.25629ms)
+✔ reduceResearchSummary extracts citations and claims without fabrication (0.239249ms)
+✔ reconcileOfflineStream deduplicates events and maintains monotonic sequence (0.231349ms)
+✔ evaluateStartupReadiness detects missing dependencies accurately (0.23651ms)
+▶ @aether/projections — RunSnapshot
+  ✔ folds events deterministically into RunSnapshotModel (0.884498ms)
+✔ @aether/projections — RunSnapshot (1.809026ms)
+▶ @aether/projections — TraceGraph
+  ✔ generates causal DAG linking parents to children (0.30989ms)
+✔ @aether/projections — TraceGraph (0.412398ms)
+▶ @aether/projections — EvidenceGrid
+  ✔ tracks created artifacts and verdicts (0.281979ms)
+✔ @aether/projections — EvidenceGrid (0.408949ms)
+▶ @aether/projections — ConversationTurns
+  ✔ groups prompt and thoughts into structured turns with activity cards (0.779758ms)
+  ✔ folds ProposalProduced note directly into agent turn without requiring ObservationProduced (0.197009ms)
+  ✔ folds EpisodeCompleted instrument_error detail and RunFailed error into visible failure notes (0.294479ms)
+✔ @aether/projections — ConversationTurns (1.551196ms)
+▶ @aether/projections — ConversationTurns (full ledger vocabulary)
+  ✔ renders a revised plan with its ordered steps (0.316109ms)
+  ✔ surfaces reflection as its own card rather than inline prose (0.1137ms)
+  ✔ closes an open tool card as failed on EffectFailed (0.192349ms)
+  ✔ marks a policy-rejected effect rejected, not failed (0.17033ms)
+  ✔ records a rejected approval as rejected rather than completed (0.109419ms)
+  ✔ pairs a returning sub-agent with the card its spawn opened (0.12645ms)
+  ✔ accumulates committed budget onto a single cost card (0.12537ms)
+  ✔ exposes a checkpoint as a branch point (0.097089ms)
+  ✔ reports context compaction with its token delta (0.09637ms)
+  ✔ clears a terminal verdict when the run recovers (0.08863ms)
+  ✔ folds VerdictRecorded, the kind the backend actually writes (0.098449ms)
+  ✔ reports a faulted plugin but stays quiet on healthy lifecycle chatter (0.10669ms)
+  ✔ does not open an empty leading turn for run lifecycle events (0.11559ms)
+  ✔ shows the brief once when GoalDeclared follows the optimistic turn (0.139459ms)
+  ✔ recovers the brief from EpisodeStarted when GoalDeclared is digest-only (0.1014ms)
+  ✔ preserves an unrecognised future kind without throwing (CT-44) (0.0982ms)
+✔ @aether/projections — ConversationTurns (full ledger vocabulary) (2.576274ms)
+▶ @aether/projections — ApprovalState
+  ✔ transitions pending challenge to resolved (0.17849ms)
+✔ @aether/projections — ApprovalState (0.243739ms)
+ℹ tests 31
+ℹ suites 7
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 70.279573
+
+> test:client
+> npm --workspace @aether/client test
+
+
+> @aether/client@0.1.0 test
+> npm run build --silent && node --test dist/test/*.test.js
+
+✔ FrontendAppController manages providers, models, and credentials safely (3.798171ms)
+✔ FrontendAppController auto-saves and restores drafts per conversation (1.825915ms)
+✔ FrontendAppController folds mutation, verification, and research events into state (4.130659ms)
+✔ Product Integration: Clean-Machine First-Run, Persistence, and Coding Flow (10.767673ms)
+▶ @aether/client — ReplayRuntimeClient
+  ✔ streams events and honors afterSeq filter (1.352276ms)
+  ✔ handles lifecycle commands cleanly (0.240459ms)
+✔ @aether/client — ReplayRuntimeClient (2.461234ms)
+▶ @aether/client — SocketRuntimeClient fail-closed behavior
+  ✔ fails closed with not_available when socket is missing (6.446764ms)
+✔ @aether/client — SocketRuntimeClient fail-closed behavior (6.733523ms)
+▶ @aether/client — Signers
+  ✔ OperatorSigner generates valid 128-char hex Ed25519 signature (1.869005ms)
+  ✔ OperatorSigner refuses challenges with missing digests (0.28909ms)
+  ✔ WebCryptoSigner generates valid 128-char hex Ed25519 signature (3.094203ms)
+✔ @aether/client — Signers (5.581446ms)
+▶ @aether/client — corrections (canonical vg.4 shape)
+  ✔ produces a canonical CorrectionRecord and calls recordCorrection with the wrapped request (3.165992ms)
+  ✔ rejects an unknown correction key without calling the client (0.17907ms)
+  ✔ correctionReasonForKey maps interactive keys, including the S/s security_policy alias (0.11632ms)
+✔ @aether/client — corrections (canonical vg.4 shape) (5.072727ms)
+▶ @aether/client — FakeRuntimeClient
+  ✔ replays fixture events and reports run status (0.865328ms)
+  ✔ implements the full RuntimeClient surface, including required listRuns/getCapabilities (0.252529ms)
+  ✔ fails closed with not_found for unknown runs and artifacts (0.261029ms)
+✔ @aether/client — FakeRuntimeClient (2.502934ms)
+✔ coding-agent aliases to the product vg-code-default harness (0.693938ms)
+✔ resolveHarnessManifestPath finds real agency manifests from the repo (0.453809ms)
+✔ executionProfileFor maps plan mode to the plan preset, otherwise local (0.185999ms)
+✔ FrontendAppController.startRun sends a real harness manifestPath, not the workspace, and does not use the agent id as profileId (3.601701ms)
+▶ @aether/client — ManagedRuntimeHost (real daemon spawn)
+  ✔ spawns the real standalone_daemon.py, reaches RUNNING, and shuts down cleanly (724.024814ms)
+  ✔ rejects quickly when the daemon entrypoint does not exist, including stderr in the error (52.298088ms)
+✔ @aether/client — ManagedRuntimeHost (real daemon spawn) (777.4284ms)
+✔ default layout locates standalone_daemon.py at the repo root, not clients/ (1.500336ms)
+✔ ProductPaths: deterministic resolution of platform directories (0.22839ms)
+✔ CompatibilityNegotiator: COMPATIBLE status on matching versions and protocol (0.207099ms)
+✔ CompatibilityNegotiator: INCOMPATIBLE status on protocol or major version mismatch (0.13496ms)
+✔ CompatibilityNegotiator: INCOMPATIBLE when daemon is offline or null (0.12391ms)
+✔ ConfigurationResolver: strict precedence resolution (0.302709ms)
+ℹ tests 28
+ℹ suites 6
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 843.438154
+
+> test:tui-core
+> npm --workspace @aether/tui-core test
+
+
+> @aether/tui-core@0.1.0 test
+> npm run build --silent && node --test dist/test/*.test.js
+
+✔ MOCK_SESSION_TOKEN is unmistakably synthetic (no sk-/or-/AKIA prefix, no PEM, no real-looking entropy) (0.887298ms)
+✔ login persists a session record through the persistence port, logout clears it (1.049367ms)
+✔ resolveManifestsDir finds the in-repo manifest registry (0.815088ms)
+✔ loadAgentCatalog reads real manifests and distinguishes read-only vs write agents (1.019497ms)
+✔ loadAgentCatalog returns empty (not throw) when no manifests dir resolves (0.483879ms)
+✔ resolveHarnessManifestPath maps product aliases onto real Coding Max manifests (0.241179ms)
+✔ resolveModelsRegistryPath finds the in-repo model registry (0.18568ms)
+✔ loadModelCatalog fails closed when the registry cannot be found (0.415038ms)
+✔ loadModelCatalog reads real tiers and aliases (0.2595ms)
+✔ resolveModelSelection rejects unknown ids and fails closed on paid models without the env flag (0.306359ms)
+✔ resolveModelSelection resolves aliases (0.206319ms)
+✔ expandFileReferences inlines the content of an existing @-referenced file (1.548526ms)
+✔ expandFileReferences reports a missing file without throwing (1.055617ms)
+✔ expandFileReferences truncates large files and flags truncation (0.422509ms)
+✔ expandFileReferences leaves plain text with no @refs untouched (0.594248ms)
+✔ every command name and alias is unique across the registry (1.068107ms)
+✔ findCommand resolves by name, alias, and leading slash (0.253849ms)
+✔ executeCommandLine dispatches to the exact command that was picked, no index drift (0.859708ms)
+✔ selecting each palette entry in order invokes the matching context method, not a shifted one (0.705238ms)
+✔ plan mode blocks commands not marked availableInPlanMode (0.196169ms)
+✔ unknown command returns an error instead of throwing (0.14789ms)
+✔ filterCommandsByQuery matches on the first token only, ignoring typed args (0.30064ms)
+✔ filterCommandsByQuery returns the full registry for an empty query (0.12841ms)
+✔ filterCommandsByQuery matches by prefix, including aliases (0.219639ms)
+✔ splitCommandQuery separates the command name from its args (0.30899ms)
+✔ runShellCommand captures stdout and a zero exit code on success (4.676968ms)
+✔ runShellCommand captures a non-zero exit code without throwing (2.212794ms)
+✔ runShellCommand captures stderr separately from stdout (5.260207ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 95.992558
+
+> test:ui-web
+> npm --workspace @aether/ui-web test
+
+
+> @aether/ui-web@0.1.0 test
+> npm run build --silent && node --test dist/test/*.test.js
+
+✔ renderProviderManager renders providers with model dropdown and action buttons (0.977657ms)
+✔ renderStartupReadinessModal renders steps and triggers action (0.23547ms)
+✔ renderMultiFileDiffViewer displays file tree and overall status (0.30704ms)
+✔ renderVerificationCard displays metrics and logs cleanly (0.432478ms)
+✔ renderResearchCitationCard and renderMultiAgentStatusBar render with full metadata (0.297509ms)
+▶ @aether/ui-web — Shared Web UI Components
+  ✔ renders StatusBadge with correct style classes (0.606588ms)
+  ✔ renders ConnectionStatus with badge and reconnect button when offline (0.1821ms)
+  ✔ renders RunStatus badge and seq (0.15804ms)
+  ✔ renders DiffViewer with additions and deletions (0.17244ms)
+  ✔ renders CodeBlock with header and copy button (0.17419ms)
+  ✔ renders ArtifactReference with inspect and lab actions (0.1879ms)
+  ✔ renders ApprovalSummary with approve and reject buttons (0.239229ms)
+  ✔ renders SearchInput with clear button (0.20419ms)
+  ✔ renders EmptyState and LoadingState cleanly (0.224629ms)
+  ✔ renders ErrorState with retry and diagnostic cause (0.318639ms)
+✔ @aether/ui-web — Shared Web UI Components (3.781301ms)
+ℹ tests 15
+ℹ suites 1
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 63.960908
+
+> test:tui
+> npm --workspace @aether/tui test
+
+
+> @aether/tui@0.1.0 test
+> npm run build --silent && node --test dist/test/*.test.js
+
+▶ @aether/tui — Presentation Components
+  ✔ renders header with session metadata and status tag (5.985105ms)
+  ✔ header truncates a long workspace path instead of overflowing into the status tag (2.869902ms)
+  ✔ shortenPath keeps the last N segments and leaves short paths untouched (0.30902ms)
+  ✔ transcript empty state renders a welcome panel with quick-start tips, not a bare one-liner (4.880798ms)
+  ✔ renders composer with placeholder and prompt text (3.453211ms)
+  ✔ renders approval deck with action and buttons (6.473094ms)
+  ✔ renders diff viewer with additions and deletions (3.516831ms)
+  ✔ renders diff card with additions/deletions summary (0.567568ms)
+✔ @aether/tui — Presentation Components (32.036289ms)
+▶ @aether/tui — Select modal windowing
+  ✔ listWindowStart keeps a high selected index inside a short viewport (1.635506ms)
+✔ @aether/tui — Select modal windowing (1.955095ms)
+▶ @aether/tui — End-to-End Simulation
+  ✔ runs full TUI application against replay fixture and projects satisfied state (23.073772ms)
+✔ @aether/tui — End-to-End Simulation (24.334789ms)
+▶ @aether/tui — Keystroke Parser & Keyboard Grammar
+  ✔ parses single characters, return, tabs, and arrows (0.842028ms)
+  ✔ handles bracketed paste mode (0.14379ms)
+  ✔ edits composer text with typing, backspace, and cursor movement (5.040317ms)
+  ✔ cycles focus across regions on Tab / Shift+Tab (1.992115ms)
+  ✔ modal arrow keys write modalSelectedIndex into the store so the UI can re-render (2.542253ms)
+✔ @aether/tui — Keystroke Parser & Keyboard Grammar (12.09662ms)
+✔ TUI daily-use: slash commands execution (/workspace, /agent, /workflow, /provider, /model, /history, /new, /clear) (11.742821ms)
+✔ TUI keyboard grammar: slash command trigger and execution (3.84053ms)
+✔ command palette selection dispatches the command shown at that index, not a shifted one (3.9372ms)
+✔ typing a full command with args at the palette (e.g. '/busy queue') dispatches with the typed args, not empty ones (3.213932ms)
+✔ newly added SOTA slash commands: /status, /context, /cost, /compact, /doctor, /diff, /undo, /init, /title (4.06628ms)
+✔ /compact trims the local transcript view without touching run state (3.740191ms)
+✔ !cmd runs a local shell command and shows its output without invoking the model (6.641863ms)
+✔ @path references expand to inline file content before a prompt reaches expandComposerReferences (3.80904ms)
+✔ /model without arguments opens select-model modal and keyboard selects a model (2.571494ms)
+▶ @aether/tui — Terminal Screen & Cell Geometry
+  ✔ calculates correct unicode character and string widths (1.537646ms)
+  ✔ truncates and pads strings cleanly with width awareness (0.266769ms)
+  ✔ writes strings into virtual double buffer and diffs output (1.360586ms)
+✔ @aether/tui — Terminal Screen & Cell Geometry (4.346599ms)
+▶ @aether/tui — Reactive Store & Ingestion
+  ✔ fine-grained signal reacts to state updates (0.789438ms)
+  ✔ ingests event envelopes and projects turns and status (8.888108ms)
+  ✔ switches focus to approval deck automatically on ApprovalRequested (3.333271ms)
+  ✔ busy mode 'queue' defers a new message while a run is active and flushes it on completion (5.534856ms)
+  ✔ busy mode 'steer' falls back to 'interrupt' rather than faking an unsupported redirect (4.688478ms)
+  ✔ busy mode 'interrupt' (default) sends a new message immediately even while a run is active (3.342451ms)
+  ✔ startRun composes a real agency harness instead of sending the workspace as manifestPath (8.382949ms)
+✔ @aether/tui — Reactive Store & Ingestion (36.417139ms)
+✔ detectColorMode: NO_COLOR and TERM=dumb force plain (1.526446ms)
+✔ detectColorMode: COLORTERM=truecolor wins regardless of TERM (0.12456ms)
+✔ detectColorMode: xterm-256color without COLORTERM is 256color, not truecolor (0.11378ms)
+✔ detectColorMode: kitty/alacritty/wezterm are treated as truecolor even without COLORTERM (0.137969ms)
+✔ detectColorMode: a bare color/ansi/xterm TERM falls back to 16color (0.16177ms)
+✔ detectColorMode: unknown TERM with nothing else set is plain, not a silent 256color guess (0.11425ms)
+✔ styleToAnsi never collapses distinct colors to the same flat fallback in 256color mode (0.359769ms)
+✔ styleToAnsi never collapses distinct colors to the same flat fallback in 16color mode (0.236449ms)
+✔ styleToAnsi plain mode emits no escape codes at all (0.16161ms)
+✔ rgbToAnsi256 maps pure red, green, blue to distinct palette indices (0.227009ms)
+✔ rgbToAnsi16 maps black and white to opposite ends of the palette (0.14086ms)
+✔ hexToRgb parses a 6-digit hex color (0.523068ms)
+✔ computeUsageBar reports the correct tier and textual cue at each threshold (0.16282ms)
+✔ computeUsageBar clamps percent to [0, 100] and handles a zero-size window (0.093169ms)
+✔ tierStyle resolves every tier to a defined theme style (0.13723ms)
+ℹ tests 49
+ℹ suites 6
+ℹ pass 49
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 137.188394
+
+> test:desktop
+> npm --workspace @aether/desktop test
+
+
+> @aether/desktop@0.1.0 test
+> npm run build --silent && node --test dist/test/*.test.js
+
+▶ @aether/desktop — composer draft does not force a re-render
+  ✔ signal setSilent updates the value without notifying (1.032877ms)
+  ✔ signal set still notifies, so ordinary state changes keep rendering (0.232279ms)
+  ✔ typing a word notifies zero times (5.382807ms)
+  ✔ does not persist a draft to the controller on every keystroke (2.356474ms)
+  ✔ flush persists the pending draft to the controller (1.641386ms)
+  ✔ submitting flushes immediately rather than waiting for the debounce (1.538046ms)
+  ✔ a later flush does not resurrect superseded text (1.474266ms)
+✔ @aether/desktop — composer draft does not force a re-render (15.322112ms)
+▶ @aether/desktop — Presentation Components
+  ✔ renders DiffViewer lines with additions and deletions (0.635209ms)
+  ✔ renders Sidebar with brand, new chat button, and session items (3.657471ms)
+  ✔ renders TopBar with agent identity and status badge (1.619376ms)
+  ✔ renders ApprovalBanner when pending approval is present (1.772416ms)
+  ✔ renders ForensicDrawer when opened (1.558726ms)
+  ✔ renders Composer and TranscriptPane cleanly (1.250567ms)
+✔ @aether/desktop — Presentation Components (11.87544ms)
+✔ Desktop daily-use: startup readiness, provider selection, and draft continuity (6.580854ms)
+✔ Desktop mount & unmount with readiness modal rendering (3.141952ms)
+▶ @aether/desktop — Session History & Store
+  ✔ groups sessions by date (Today, Last 7 Days) (0.871668ms)
+  ✔ filters sessions by search query (0.17295ms)
+  ✔ ingests event envelopes and projects conversation turns (4.667068ms)
+  ✔ creates new chat and resets active session state (1.776425ms)
+✔ @aether/desktop — Session History & Store (8.657248ms)
+▶ @aether/desktop — focus survives a full re-render
+  ✔ returns focus to the same keyed field after the tree is replaced (0.856817ms)
+  ✔ restores the caret position, not just the field (0.257319ms)
+  ✔ clamps a caret that outruns a shortened value (0.185249ms)
+  ✔ distinguishes fields, so focus does not jump to the wrong input (0.16089ms)
+  ✔ captures nothing when focus is on an unkeyed element (0.127419ms)
+  ✔ restoring a key that no longer exists reports false and throws nothing (0.14223ms)
+  ✔ restoring null focus is a no-op (0.191729ms)
+✔ @aether/desktop — focus survives a full re-render (6.904733ms)
+▶ @aether/desktop — credential panel reports the runtime's answer
+  ✔ says it is checking before the runtime has answered (4.484789ms)
+  ✔ never claims a key is configured on its own authority (0.868018ms)
+  ✔ surfaces the remedy for an unreadable .env (0.858587ms)
+  ✔ shows a missing key as NO KEY, not as an error state (0.900338ms)
+  ✔ reports a probe failure in full rather than silently (1.224747ms)
+  ✔ says Testing while a probe is in flight (1.010547ms)
+✔ @aether/desktop — credential panel reports the runtime's answer (10.682263ms)
+▶ @aether/desktop — logs pane exposes the raw ledger
+  ✔ explains an empty ledger instead of rendering blank (1.525746ms)
+  ✔ distinguishes an accepted run that has published nothing (1.395407ms)
+  ✔ renders a failure event that the transcript has no projection for (1.272377ms)
+  ✔ keeps events in sequence order (1.413766ms)
+✔ @aether/desktop — logs pane exposes the raw ledger (6.053494ms)
+▶ @aether/desktop — Native Platform Bridge & Keychain Signer
+  ✔ TauriNativeBridge reports non-Tauri in standard node/browser environment (0.877278ms)
+  ✔ DesktopKeychainSigner signs challenge cleanly with web fallback (5.164977ms)
+✔ @aether/desktop — Native Platform Bridge & Keychain Signer (7.250502ms)
+ℹ tests 38
+ℹ suites 7
+ℹ pass 38
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 489.046597
+
+> test:lab
+> npm --workspace @aether/lab test
+
+
+> @aether/lab@0.1.0 test
+> npm run build --silent && node --test dist/test/*.test.js
+
+▶ @aether/lab — Keyboard Navigation Manager
+  ✔ handles number keys 1-6 to switch workbenches (1.019077ms)
+  ✔ handles event ledger navigation (j/k) and jumping to live (l) (1.089497ms)
+  ✔ handles inspector toggle (i, Enter, Escape) (0.26638ms)
+✔ @aether/lab — Keyboard Navigation Manager (3.624321ms)
+▶ @aether/lab — Application Shell & End-to-End Mounting
+  ✔ mounts application shell into root container and unmounts cleanly (3.026643ms)
+✔ @aether/lab — Application Shell & End-to-End Mounting (4.418029ms)
+▶ @aether/lab — LabStore State & Projection Integration
+  ✔ initializes with clean default state (0.891168ms)
+  ✔ ingests envelopes incrementally and reduces snapshot, trace graph, evidence, and approvals (1.151877ms)
+  ✔ filters events by category (errors, approvals, effects, etc.) (0.545478ms)
+  ✔ tracks unseen live count when user is scrolled up or paused (0.25261ms)
+  ✔ loads and folds deterministic replay events (0.362689ms)
+✔ @aether/lab — LabStore State & Projection Integration (4.313459ms)
+▶ @aether/lab — JSON Payload Tree Inspector
+  ✔ renders formatted primitives, objects, arrays, and recognizes cryptographic digests (1.064137ms)
+✔ @aether/lab — JSON Payload Tree Inspector (2.308725ms)
+▶ @aether/lab — Historical Replay Engine
+  ✔ steps forward and backward through recorded events (0.807278ms)
+  ✔ jumps to sequence and beginning/end (0.850678ms)
+  ✔ updates replay speed multiplier cleanly (0.19986ms)
+✔ @aether/lab — Historical Replay Engine (2.772263ms)
+▶ @aether/lab — Cross-Workbench Selection Model
+  ✔ initializes default selection state and switches workbenches (0.957828ms)
+  ✔ selects event and synchronizes trace node and inspector tab (3.90733ms)
+  ✔ selects artifact and opens artifact tab in inspector (0.217339ms)
+  ✔ serializes and deserializes URL hash for deep linking (0.376159ms)
+✔ @aether/lab — Cross-Workbench Selection Model (6.504844ms)
+▶ @aether/lab — Semantic Status Badges (Text + Visual Glyph)
+  ✔ renders RunStatusBadge with text and glyph for all states (0.979378ms)
+  ✔ renders ConnectionStatusBadge for all connection states (0.2401ms)
+  ✔ renders VerdictBadge correctly (0.232809ms)
+  ✔ renders CapabilityStatusBadge with 4 standard states (0.275569ms)
+  ✔ renders EventKindBadge and RiskStateBadge cleanly (0.20942ms)
+✔ @aether/lab — Semantic Status Badges (Text + Visual Glyph) (7.507551ms)
+▶ @aether/lab — Causal Trace Explorer Graph
+  ✔ renders SVG causal graph elements and handles causal edges (2.577133ms)
+✔ @aether/lab — Causal Trace Explorer Graph (4.10247ms)
+▶ @aether/lab — Virtualized List (100k Items Scale)
+  ✔ virtualizes large datasets and only renders bounded window of items (25.708175ms)
+  ✔ updates window when scrolled (0.428499ms)
+✔ @aether/lab — Virtualized List (100k Items Scale) (27.85974ms)
+▶ @aether/lab — Workbench Rendering
+  ✔ renders all 6 workbenches via WorkbenchRegistry without throwing (4.1126ms)
+✔ @aether/lab — Workbench Rendering (5.534936ms)
+ℹ tests 26
+ℹ suites 10
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 99.04266
+
+> @vanguard/client-core@0.4.1-beta test
+> npm run build --silent && node --test dist/test/*.test.js
+
+▶ client-core — parseEventEnvelope
+  ✔ parses valid vg.4 envelope (0.979817ms)
+  ✔ rejects non-object envelope (0.1675ms)
+  ✔ rejects invalid UUID (0.202929ms)
+✔ client-core — parseEventEnvelope (2.546274ms)
+▶ client-core — helpers
+  ✔ isUuid returns true for UUID (0.246089ms)
+  ✔ isDigest returns true for sha256 prefix (0.179679ms)
+  ✔ fail constructs failure Result (0.16614ms)
+✔ client-core — helpers (0.924767ms)
+▶ client-core — run-view reducer
+  ✔ emptyRunView returns initial state (0.294539ms)
+  ✔ reduceRunView tracks thoughts and lastKind (0.293029ms)
+✔ client-core — run-view reducer (0.894448ms)
+▶ client-core — OperatorSigner
+  ✔ generates keypair and signs challenge (1.609826ms)
+✔ client-core — OperatorSigner (1.770176ms)
+▶ client-core — ReplayRuntimeClient
+  ✔ streams events from JSONL text (0.809568ms)
+✔ client-core — ReplayRuntimeClient (0.949187ms)
+▶ F4 Phase 1 — client-core shims resolve to @aether/client (no fork)
+  ✔ run-view: reduceRunView and emptyRunView are identical across both entry points (6.710714ms)
+  ✔ trace-graph: toTraceGraph is identical across both entry points (1.265726ms)
+  ✔ budget, coding-types, graph-model, mcnemar, projection-model, approvals, subscribe-run, selectors, coding-receipts, why modules resolve identically (12.996418ms)
+✔ F4 Phase 1 — client-core shims resolve to @aether/client (no fork) (22.059944ms)
+✔ computeMcNemarTest computes chiSquare, p-value, and odds ratios correctly (0.822288ms)
+✔ computeMcNemarTest handles zero discordant pairs gracefully (0.706988ms)
+▶ FE-1-6 — Selectors & Transcript Windowing
+  ✔ selectStatusBar produces status bar view model (0.800738ms)
+  ✔ windowTranscript defaults height to 16 and clamps cursor (0.402259ms)
+✔ FE-1-6 — Selectors & Transcript Windowing (2.209034ms)
+▶ FE-1-7 — toTraceGraph
+  ✔ projects DAG nodes and edges from fixture envelopes (0.825878ms)
+  ✔ handles explicit parentEventId relationships (0.259469ms)
+✔ FE-1-7 — toTraceGraph (1.305817ms)
+▶ FE-1-8 — subscribeRun
+  ✔ subscribes to stream, invokes handlers, and completes on done (0.35614ms)
+  ✔ handles AbortSignal early termination cleanly (0.30612ms)
+✔ FE-1-8 — subscribeRun (0.863067ms)
+▶ FE-1-9 — Task A1: Resume Helpers
+  ✔ buildResumeRequest refuses empty runId (0.895908ms)
+  ✔ buildResumeRequest builds valid request object (0.17713ms)
+  ✔ describeResumeFailure maps codes to stable verbatim messages (0.209119ms)
+✔ FE-1-9 — Task A1: Resume Helpers (2.462404ms)
+▶ FE-1-10 — Task A2: Why & Artifact Projection
+  ✔ formatExplanation detects empty vs non-empty explanation (0.22258ms)
+  ✔ whyFromResult never synthesizes ActivationChanged on failure (0.141559ms)
+  ✔ golden test: ReplayRuntimeClient whyFromResult on fixture (0.645889ms)
+✔ FE-1-10 — Task A2: Why & Artifact Projection (1.237017ms)
+▶ FE-1-11 — Task A3 & B1: Session Chrome & attachLive Factory
+  ✔ selectSessionChrome combines status bar and session attributes (0.338519ms)
+  ✔ attachLive creates LiveRuntimeClient without spawning child processes (7.666151ms)
+  ✔ streamReconnect respects afterSeq cursor (0.503418ms)
+✔ FE-1-11 — Task A3 & B1: Session Chrome & attachLive Factory (8.810288ms)
+▶ FE-1 Wave 4 — Honest Live Attach & Socket Bounds
+  ✔ attachLive ALWAYS constructs LiveRuntimeClient and NEVER ReplayRuntimeClient (2.369864ms)
+  ✔ missing UDS socket returns typed not_available fail-closed without hanging (5.911795ms)
+  ✔ afterSeq reconnect stream filtering resumes without inventing events (1.034927ms)
+  ✔ selectSessionChrome never invents daemon version or running state without evidence (0.266189ms)
+  ✔ LIVE=1 e2e against pre-started UDS socket (skips if absent) (0.19971ms)
+✔ FE-1 Wave 4 — Honest Live Attach & Socket Bounds (11.247971ms)
+✔ toClientFailureCode passes through canonical codes and defaults unknown ones to internal (0.891418ms)
+✔ parseDaemonFrame carries the daemon's real error code and retryable flag (0.265149ms)
+✔ parseDaemonFrame defaults an unrecognized daemon error code to internal, never invalid_request by default (0.17651ms)
+✔ socket transport preserves the daemon's real error code instead of forcing invalid_request (9.444576ms)
+✔ socket transport preserves a command-level receipt.error.code (not just frame-level errors) (1.282897ms)
+✔ HttpRuntimeClient.getRun parses the real receipt shape instead of returning a placeholder (18.246524ms)
+✔ HttpRuntimeClient.getRun preserves the canonical error code on a not_found receipt (5.897235ms)
+✔ HttpRuntimeClient.requestCancel is a real call, not a hardcoded not_available placeholder (3.682741ms)
+✔ HttpRuntimeClient.resolveApproval refuses without a cached ApprovalRequested challenge (parity with Live) (0.443589ms)
+✔ HttpRuntimeClient.resolveApproval sends a real signed decision once a challenge is loaded from the stream (6.667013ms)
+✔ WebCryptoSigner initializes, signs approval challenge with JCS canonical payload (8.158809ms)
+✔ WebCryptoSigner refuses challenges with missing digests (1.236337ms)
+ℹ tests 47
+ℹ suites 13
+ℹ pass 47
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 156.720265
+
+> @vanguard/cli@0.4.1-beta test
+> npm run build --silent && node --test dist/test/*.test.js
+
+{
+  "api": "aether.cli-outcome/1",
+  "command": "config show",
+  "status": "success",
+  "data": {
+    "settings": {
+      "general": {
+        "defaultRuntime": "/tmp/vanguard-runtime.sock",
+        "defaultWorkspace": ".",
+        "defaultAgent": "coding-agent",
+        "defaultWorkflow": "default-turn-loop",
+        "autoFollowStreaming": true
+      },
+      "runtime": {
+        "socketPath": "/tmp/vanguard-runtime.sock",
+        "httpUrl": "http://127.0.0.1:8000",
+        "reconnectIntervalMs": 2000,
+        "maxReconnectAttempts": 10,
+        "requestTimeoutMs": 10000
+      },
+      "appearance": {
+        "theme": "dark",
+        "density": "comfortable",
+        "reducedMotion": false
+      },
+      "workspace": {
+        "recentWorkspaces": [
+          "."
+        ],
+        "maxRecentWorkspaces": 8
+      },
+      "terminal": {
+        "tuiAnimation": true,
+        "tuiColorMode": "truecolor"
+      },
+      "accessibility": {
+        "highContrast": false,
+        "screenReaderOptimized": false,
+        "fontSize": 14
+      }
+    }
+  }
+}
+{
+  "api": "aether.cli-outcome/1",
+  "command": "config set",
+  "status": "success",
+  "data": {
+    "key": "general.defaultAgent",
+    "value": "coding-agent",
+    "settings": {
+      "general": {
+        "defaultRuntime": "/tmp/vanguard-runtime.sock",
+        "defaultWorkspace": ".",
+        "defaultAgent": "coding-agent",
+        "defaultWorkflow": "default-turn-loop",
+        "autoFollowStreaming": true
+      },
+      "runtime": {
+        "socketPath": "/tmp/vanguard-runtime.sock",
+        "httpUrl": "http://127.0.0.1:8000",
+        "reconnectIntervalMs": 2000,
+        "maxReconnectAttempts": 10,
+        "requestTimeoutMs": 10000
+      },
+      "appearance": {
+        "theme": "dark",
+        "density": "comfortable",
+        "reducedMotion": false
+      },
+      "workspace": {
+        "recentWorkspaces": [
+          "."
+        ],
+        "maxRecentWorkspaces": 8
+      },
+      "terminal": {
+        "tuiAnimation": true,
+        "tuiColorMode": "truecolor"
+      },
+      "accessibility": {
+        "highContrast": false,
+        "screenReaderOptimized": false,
+        "fontSize": 14
+      }
+    }
+  }
+}
+{
+  "api": "aether.cli-outcome/1",
+  "command": "config reset",
+  "status": "success",
+  "data": {
+    "settings": {
+      "general": {
+        "defaultRuntime": "/tmp/vanguard-runtime.sock",
+        "defaultWorkspace": ".",
+        "defaultAgent": "coding-agent",
+        "defaultWorkflow": "default-turn-loop",
+        "autoFollowStreaming": true
+      },
+      "runtime": {
+        "socketPath": "/tmp/vanguard-runtime.sock",
+        "httpUrl": "http://127.0.0.1:8000",
+        "reconnectIntervalMs": 2000,
+        "maxReconnectAttempts": 10,
+        "requestTimeoutMs": 10000
+      },
+      "appearance": {
+        "theme": "dark",
+        "density": "comfortable",
+        "reducedMotion": false
+      },
+      "workspace": {
+        "recentWorkspaces": [
+          "."
+        ],
+        "maxRecentWorkspaces": 8
+      },
+      "terminal": {
+        "tuiAnimation": true,
+        "tuiColorMode": "truecolor"
+      },
+      "accessibility": {
+        "highContrast": false,
+        "screenReaderOptimized": false,
+        "fontSize": 14
+      }
+    }
+  }
+}
+{
+  "api": "aether.cli-outcome/1",
+  "command": "provider list",
+  "status": "success",
+  "data": {
+    "providers": [
+      {
+        "id": "provider-openrouter",
+        "name": "OpenRouter",
+        "type": "openrouter",
+        "isDefault": true,
+        "selectedModel": "openrouter/free",
+        "modelCount": 3,
+        "credentialStatus": "MISSING CREDENTIAL"
+      },
+      {
+        "id": "provider-ollama",
+        "name": "Ollama (Local)",
+        "type": "ollama",
+        "isDefault": false,
+        "selectedModel": "qwen2.5-coder:latest",
+        "modelCount": 2,
+        "credentialStatus": "MISSING CREDENTIAL"
+      },
+      {
+        "id": "provider-anthropic",
+        "name": "Anthropic Direct",
+        "type": "anthropic",
+        "isDefault": false,
+        "selectedModel": "claude-3-5-sonnet-20241022",
+        "modelCount": 2,
+        "credentialStatus": "MISSING CREDENTIAL"
+      }
+    ]
+  }
+}
+{
+  "api": "aether.cli-outcome/1",
+  "command": "provider inspect",
+  "status": "success",
+  "data": {
+    "id": "provider-openrouter",
+    "name": "OpenRouter",
+    "type": "openrouter",
+    "baseUrl": "https://openrouter.ai/api/v1",
+    "isDefault": true,
+    "selectedModel": "openrouter/free",
+    "credentialKeyRef": "cred-openrouter",
+    "credentialStatus": "MISSING CREDENTIAL",
+    "models": [
+      {
+        "id": "openrouter/free",
+        "name": "Free Tier Router",
+        "defaultForRole": "general"
+      },
+      {
+        "id": "deepseek/deepseek-v4-flash-0731",
+        "name": "DeepSeek V4 Flash",
+        "defaultForRole": "coding"
+      },
+      {
+        "id": "anthropic/claude-3.5-sonnet",
+        "name": "Claude 3.5 Sonnet",
+        "defaultForRole": "audit"
+      }
+    ]
+  }
+}
+{
+  "api": "aether.cli-outcome/1",
+  "command": "provider default",
+  "status": "success",
+  "data": {
+    "defaultProviderId": "provider-openrouter"
+  }
+}
+{
+  "api": "aether.cli-outcome/1",
+  "command": "model list",
+  "status": "success",
+  "data": {
+    "providerId": "provider-openrouter",
+    "selectedModel": "openrouter/free",
+    "models": [
+      {
+        "id": "openrouter/free",
+        "name": "Free Tier Router",
+        "defaultForRole": "general"
+      },
+      {
+        "id": "deepseek/deepseek-v4-flash-0731",
+        "name": "DeepSeek V4 Flash",
+        "defaultForRole": "coding"
+      },
+      {
+        "id": "anthropic/claude-3.5-sonnet",
+        "name": "Claude 3.5 Sonnet",
+        "defaultForRole": "audit"
+      }
+    ]
+  }
+}
+{
+  "api": "aether.cli-outcome/1",
+  "command": "model default",
+  "status": "success",
+  "data": {
+    "providerId": "provider-openrouter",
+    "selectedModel": "openrouter/free"
+  }
+}
+{
+  "api": "aether.cli-outcome/1",
+  "command": "workspace current",
+  "status": "success",
+  "data": {
+    "workspace": "/home/rock-dev/Coding/cognitive-framework/vanguard/clients/cli"
+  }
+}
+{
+  "api": "aether.cli-outcome/1",
+  "command": "workspace recent",
+  "status": "success",
+  "data": {
+    "recentWorkspaces": [
+      "/home/rock-dev/Coding/cognitive-framework/vanguard/clients/tui",
+      "/home/user/Coding/cognitive-framework/vanguard/clients/cli",
+      "/home/rock-dev/Coding/cognitive-framework/vanguard/clients/cli",
+      "/tmp/cognitive-framework-t26b-review/vanguard/clients/cli",
+      "/tmp/cognitive-framework-t26b-review/vanguard/clients/tui",
+      "/repo",
+      "/home/rock-dev/Coding/cognitive-framework"
+    ]
+  }
+}
+{
+  "api": "aether.cli-outcome/1",
+  "command": "workspace default",
+  "status": "success",
+  "data": {
+    "defaultWorkspace": "."
+  }
+}
+{
+  "api": "aether.cli-outcome/1",
+  "command": "workspace set",
+  "status": "success",
+  "data": {
+    "workspace": "/home/rock-dev/Coding/cognitive-framework/vanguard/clients/cli",
+    "recentWorkspaces": [
+      "/home/rock-dev/Coding/cognitive-framework/vanguard/clients/cli",
+      "/home/rock-dev/Coding/cognitive-framework/vanguard/clients/tui",
+      "/home/user/Coding/cognitive-framework/vanguard/clients/cli",
+      "/tmp/cognitive-framework-t26b-review/vanguard/clients/cli",
+      "/tmp/cognitive-framework-t26b-review/vanguard/clients/tui",
+      "/repo",
+      "/home/rock-dev/Coding/cognitive-framework"
+    ]
+  }
+}
+{
+  "api": "aether.cli-outcome/1",
+  "command": "agent default",
+  "status": "success",
+  "data": {
+    "defaultAgentId": "coding-agent"
+  }
+}
+{
+  "api": "aether.cli-outcome/1",
+  "command": "workflow default",
+  "status": "success",
+  "data": {
+    "defaultWorkflowId": "default-turn-loop"
+  }
+}
+✔ CLI Daily Use: config show, set, and reset (3.89457ms)
+✔ CLI Daily Use: provider list, inspect, and default (1.608935ms)
+✔ CLI Daily Use: model list and default (0.633259ms)
+✔ CLI Daily Use: workspace current, recent, default, set (1.123917ms)
+✔ CLI Daily Use: agent and workflow default command handling (2.113154ms)
+{
+  "api": "aether.cli-outcome/1",
+  "command": "run",
+  "runId": "replay-run-default",
+  "status": "satisfied",
+  "verdict": "satisfied",
+  "metrics": {
+    "totalTokens": 0,
+    "inTokens": 0,
+    "outTokens": 0,
+    "costMicros": "0",
+    "turns": 0
+  },
+  "artifacts": []
+}
+{
+  "api": "aether.cli-outcome/1",
+  "command": "agent list",
+  "status": "success",
+  "data": {
+    "agents": [
+      {
+        "id": "coding-agent",
+        "name": "AETHER Default Coding Agent",
+        "path": "built-in://coding-agent",
+        "version": "0.9.1",
+        "role": "Software Engineering Substrate"
+      }
+    ]
+  }
+}
+{
+  "api": "aether.cli-outcome/1",
+  "command": "agent inspect",
+  "status": "success",
+  "data": {
+    "id": "coding-agent",
+    "name": "AETHER Default Coding Agent",
+    "path": "built-in://coding-agent",
+    "version": "0.9.1",
+    "role": "Software Engineering Substrate"
+  }
+}
+Agent 'nonexistent-agent-id-xyz' not found
+{
+  "api": "aether.cli-outcome/1",
+  "command": "workflow list",
+  "status": "success",
+  "data": {
+    "workflows": [
+      {
+        "id": "default-turn-loop",
+        "name": "Default Turn Loop Workflow",
+        "path": "built-in://default-turn-loop",
+        "description": "Observe -> Decide -> Authorize -> Execute -> Record loop"
+      }
+    ]
+  }
+}
+{
+  "api": "aether.cli-outcome/1",
+  "command": "workflow inspect",
+  "status": "success",
+  "data": {
+    "id": "default-turn-loop",
+    "name": "Default Turn Loop Workflow",
+    "path": "built-in://default-turn-loop",
+    "description": "Observe -> Decide -> Authorize -> Execute -> Record loop"
+  }
+}
+{
+  "api": "aether.cli-outcome/1",
+  "command": "artifact explain",
+  "status": "success",
+  "data": {
+    "artifactId": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "status": "replay_mock",
+    "prediction": "Artifact recorded in replay fixture"
+  }
+}
+BACKEND-GAP: Direct blob content retrieval for 'sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' is pending RuntimeService BlobStore endpoint. Direct database or filesystem access is forbidden per architecture boundaries.
+{
+  "api": "aether.cli-outcome/1",
+  "command": "artifact get",
+  "status": "error",
+  "error": {
+    "code": "not_available",
+    "message": "BACKEND-GAP: Direct blob content retrieval for 'sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb' is pending RuntimeService BlobStore endpoint. Direct database or filesystem access is forbidden per architecture boundaries.",
+    "retryable": false,
+    "detail": "BACKEND-GAP: BlobStore content route pending"
+  }
+}
+▶ @aether/cli — Vertical Slice & Exit Code Contract
+  ✔ maps all canonical error codes according to the PRD exit code contract (0.858588ms)
+  ✔ executes headless run on replay fixture with clean exit code 0 (3.525091ms)
+  ✔ handles agent list and inspect (0.877567ms)
+  ✔ handles workflow list and inspect (0.713848ms)
+  ✔ handles artifact explain and documents BACKEND-GAP on artifact get (1.118237ms)
+Daemon is unreachable at /tmp/aether-cli-offline-uq7pj1/runtime.sock
+{
+  "api": "aether.cli-outcome/1",
+  "command": "daemon status",
+  "status": "error",
+  "error": {
+    "code": "not_available",
+    "message": "Socket probe failed at /tmp/aether-cli-offline-uq7pj1/runtime.sock: connect ENOENT /tmp/aether-cli-offline-uq7pj1/runtime.sock",
+    "retryable": true
+  }
+}
+  ✔ handles daemon status cleanly (7.345342ms)
+{
+  "api": "aether.cli-outcome/1",
+  "command": "doctor",
+  "status": "error",
+  "data": {
+    "healthy": false,
+    "daemon": {
+      "status": "unreachable",
+      "error": "Socket probe failed at /tmp/aether-cli-doctor-offline-7hXwgu/runtime.sock: connect ENOENT /tmp/aether-cli-doctor-offline-7hXwgu/runtime.sock"
+    },
+    "capabilities": {
+      "error": "RuntimeService unreachable at /tmp/aether-cli-doctor-offline-7hXwgu/runtime.sock: connect ENOENT /tmp/aether-cli-doctor-offline-7hXwgu/runtime.sock"
+    },
+    "provider": {
+      "defaultProviderId": "provider-openrouter",
+      "defaultModel": "openrouter/free",
+      "credentialStatus": "MISSING CREDENTIAL"
+    },
+    "workspace": {
+      "defaultWorkspace": ".",
+      "currentDirectory": "/home/rock-dev/Coding/cognitive-framework/vanguard/clients/cli"
+    },
+    "nodeVersion": "v24.20.0",
+    "platform": "linux",
+    "arch": "x64"
+  }
+}
+  ✔ handles doctor report fail-closed when daemon is offline (2.342034ms)
+✔ @aether/cli — Vertical Slice & Exit Code Contract (18.229354ms)
+✔ parseBudgetUsdToMicros converts once and rejects bad values (1.580436ms)
+✔ parseCliOptions freezes coding flags and budget micros (0.487159ms)
+✔ malformed budget surfaces as budgetError for exit 2 (0.217009ms)
+✔ coding defaults are usable and cost-safe (0.224289ms)
+✔ human receipts cover required transitions without ANSI (0.393279ms)
+✔ exitCodeForOutcome keeps budget and unavailable distinct (0.16357ms)
+✔ TypeScript coding path has no model-routing or effect-dispatch loop (0.729998ms)
+✔ runCodingCommand with fake backend streams clean JSON and green exit (0.381929ms)
+✔ non-green fake backend returns non-zero (0.259829ms)
+✔ python coding backend doctor is real, deterministic and read-only (integration) (308.696041ms)
+✔ vg doctor human line renders host facts without inventing values (0.308019ms)
+✔ python coding backend deterministic fake reaches the runtime and stays fail-closed (1545.550803ms)
+✔ headless run parses live EventEnvelope JSONL without terminal escapes (2.325214ms)
+✔ trace renders a timeline from a golden cassette JSONL without invoking a model (2.308414ms)
+✔ why displays activation evidence projected from recorded JSONL events (0.397279ms)
+✔ jsonLine emits a single parseable object with no escape sequences (0.1891ms)
+✔ LiveRuntimeClient supports startRun and headless prompt stream (0.588818ms)
+✔ LiveRuntimeClient refuses lifecycle stubs when no daemon peer exists (6.247354ms)
+✔ parseEventEnvelope strictly rejects non-UUID, invalid timestamp, and missing fields (0.214489ms)
+✔ LiveRuntimeClient drops duplicate frames and respects afterSeq cursor (0.462749ms)
+✔ LiveRuntimeClient reports daemon unreachable when the socket has no peer (0.978467ms)
+✔ streamRun returns exit code 0 for satisfied outcome (0.365099ms)
+✔ approveDecision fails closed when the live daemon is not on the wire (0.18909ms)
+✔ approveDecision maps approve and reject to stable exit codes on a JSONL feed (0.226739ms)
+✔ manageDaemon fails closed when the daemon socket has no peer (0.946688ms)
+✔ ReplayRuntimeClient rejects recordCorrection with permission_denied (0.205629ms)
+✔ T-97: help exits zero for every subcommand without a completion frame (716.189944ms)
+✔ T-97: help documents every bound short flag and claims no others (76.687027ms)
+✔ T-97: wantsHelp reads a request, not a flag value (0.13841ms)
+✔ T-97: -m binds to --model and its value never leaks into the brief (0.442559ms)
+✔ T-97: a conflicting -m/--model pair is refused, never silently resolved (0.282329ms)
+✔ T-97: an unbound short flag errors instead of swallowing its value (0.211809ms)
+✔ T-97: an ambiguous invocation exits non-zero before any execution (161.163844ms)
+✔ T-97: non-success execution still returns non-zero (383.845462ms)
+✔ JCS matches Python OperatorSigner signed_payload canonical bytes (1.057098ms)
+✔ OperatorSigner persists keys at 0600 (3.259702ms)
+✔ signChallenge refuses empty digests (0.464858ms)
+✔ fixture catalog files exist and soak-reduce without throwing (2.472934ms)
+✔ parseDaemonFrame never accepts unparsed objects as events (1.145877ms)
+✔ socket transport reconnects after drop and resumes afterSeq (31.65224ms)
+✔ live run view reduces thoughts, tool invocations, and token counters (1.729286ms)
+✔ approval modal keys dispatch approve, reject, and correct without mutating domain state (0.134399ms)
+✔ prompt mode does not dispatch approval on y (0.13647ms)
+✔ empty Enter does not start a run (0.181679ms)
+✔ windowTranscript clamps 100 thoughts to height (0.366529ms)
+✔ ctrl+c maps to cancel; Esc in prompt does not (0.18281ms)
+✔ status bar labels mock and never looks live (0.28871ms)
+✔ subscribeRun abort does not throw (0.257439ms)
+✔ resume not_available does not start a mock stream (0.307799ms)
+✔ whyText prints error.code only when explainArtifact fails (0.210479ms)
+✔ help lists resume commands (0.15231ms)
+✔ approve and reject callbacks submit resolveApproval receipts only (0.218519ms)
+✔ interactive y/n with challenge digests attaches an OperatorSigner signature (1.579206ms)
+✔ interactive approval without challenge digests does not fabricate a signature (0.23158ms)
+✔ TUI presentation consumes @aether/client (0.526019ms)
+✔ correction keys map onto VG-04 reason codes including security and architecture (0.10862ms)
+✔ correction capture persists a typed CorrectionRecord through RuntimeClient (0.470908ms)
+✔ style corrections stay local-scoped so they cannot become general competence (0.15745ms)
+✔ unified diff renderer tags additions and deletions without emitting raw CSI in the model (0.219059ms)
+✔ headless command module does not import Ink UI screens (0.20024ms)
+✔ application layer does not import tui presentation (0.264619ms)
+✔ usage documents all flags (1.175777ms)
+✔ normalizeArgv defaults a bare invocation to interactive run in . (0.626429ms)
+✔ vg --help prints every documented flag (87.14273ms)
+✔ parseCliOptions captures --demo scenario (0.617278ms)
+✔ parseCliOptions marks --prompt as explicit for TUI autostart (0.208099ms)
+✔ demo replay labels source mock (1.186897ms)
+✔ manageDaemon start is not_available (Joint J1) (0.312039ms)
+✔ resumeRun without daemon is not_available and does not emit mock events (5.616646ms)
+✔ getDaemonStatus does not invent a version string (0.736738ms)
+✔ socket resolveApproval refuses empty challenge digests (0.833458ms)
+✔ dead scaffold files are gone (0.146659ms)
+✔ clientFor demo is replay/mock; default and --yes are live attach (not Replay) (3.526451ms)
+✔ headless live path without daemon is not_available and never source mock (4.768778ms)
+✔ status bar uses session chrome: not_available is not live and does not invent policy daemon (0.399839ms)
+✔ vg run --demo --headless stays source: mock (84.132798ms)
+✔ vg run --headless without daemon fails honestly (not_available, not mock) (85.736184ms)
+ℹ tests 89
+ℹ suites 1
+ℹ pass 89
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1963.598209
+
+> @vanguard/studio@0.4.1-beta test
+> npm run build --silent && node --test dist/test/*.test.js
+
+▶ Studio Observatory live wiring (F6)
+  ✔ folds a real gateway's live event stream through StudioFoldEngine (197.868272ms)
+✔ Studio Observatory live wiring (F6) (198.751419ms)
+✔ Agent Studio compiles deterministic immutable manifests and safe AaaC source (6.498974ms)
+✔ Agent Studio rejects unsafe policy and binds child deltas to an exact base digest (0.567208ms)
+✔ DEFAULT_DISCOVERED_CAPABILITIES enforces feature gates and disables speculative features (0.13195ms)
+✔ ColumnarEventStore appends events, interns kinds, and maintains idempotency on duplicate seq (0.266239ms)
+✔ ColumnarEventStore records missing cursor ranges instead of silently presenting a contiguous stream (0.207209ms)
+✔ initial evidence is never green without a canonical proof projection (0.15469ms)
+✔ StudioFoldEngine folds deterministically over canonical event stream (0.523699ms)
+✔ StudioFoldEngine preserves unknown future event kinds per CT-44 (0.16898ms)
+✔ 9 Anomaly Detectors identify F-22 undeterminable and fail-closed refusals correctly (0.527679ms)
+✔ computeWaterfallLayout computes non-zero span geometries and bounds correctly (0.255809ms)
+ℹ tests 11
+ℹ suites 1
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 275.385186
+just docs-full
+python3 tools/linters/check_doc_metadata.py
+DOC METADATA PASS: 99 living documents verified with valid, unique metadata
+python3 tools/linters/check_markdown_links.py
+LINK PASS: local markdown links resolve
+npx markdownlint-cli2 "docs/**/*.md" "README.md" "AGENTS.md" "VISION.md"
+markdownlint-cli2 v0.23.2 (markdownlint v0.41.1)
+Finding: docs/**/*.md README.md AGENTS.md VISION.md
+Linting: 141 files
+Summary: 0 issues in 0 files
+python3 tools/generate_knowledge_base.py
+KNOWLEDGE BASE REBUILD PASS: Generated 138 catalog entries, 515 link relationships, 12 code mappings, 667 symbols.
+AETHER VERIFY: PASS

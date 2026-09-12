@@ -60,7 +60,7 @@ _STALE_TOKEN = re.compile(
 
 _ROOT_SENTINELS_LIVE = (
     Path("tools") / "common" / "repo_paths.py",
-    Path("docs") / "execution" / "spec.md",
+    Path("docs") / "execution" / "main" / "spec.md",
     Path(".github") / "workflows" / "ci.yml",
 )
 _ROOT_SENTINELS_ALT = (
@@ -72,7 +72,7 @@ _ROOT_SENTINELS_LEGACY = (
     Path(".github") / "workflows" / "ci.yml",
 )
 _ROOT_SENTINELS_SPEC = (
-    Path("docs") / "execution" / "spec.md",
+    Path("docs") / "execution" / "main" / "spec.md",
     Path(".github") / "workflows" / "ci.yml",
 )
 _ROOT_SENTINELS_PYPROJECT = (

@@ -59,10 +59,10 @@ creating no new planning file; at session exhaustion, leave a resumable handoff.
 
 | Task | Owner / state | requires: | Scope / exit |
 |---|---|---|---|
-| T-26a | C — READY | T-111 accepted | Validate the complete manifest and publication boundary under RUN-02; preserve pure diagnostic scoring. Detailed row below. |
-| T-51 | C — READY | T-111 accepted | Freeze a candidate 30-task L2 holdout with explicit strata, task/oracle digests and no L0/L1 overlap; local data preparation only. Detailed row below. |
-| T-52 | C — BLOCKED | T-26a, T-51 | Reconcile binary/missing counts, single attempts, cost provenance and fixed stopping through publication; detailed row below. |
-| T-26b | C, A reviews product identity — BLOCKED | T-26a, T-51, T-52 | Integrate the report gate into the selected runner, prove product-path and stop/budget behavior hermetically, and reconcile applicable T-79/T-89/T-92–T-95/T-97 receipts. |
+| T-26a | C — ACCEPTED (independent review, Dev B 2026-09-12) | T-111 accepted | Validate the complete manifest and publication boundary under RUN-02; preserve pure diagnostic scoring. Detailed row below. |
+| T-51 | C — ACCEPTED (independent review, Dev B 2026-09-12) | T-111 accepted | Freeze a candidate 30-task L2 holdout with explicit strata, task/oracle digests and no L0/L1 overlap; local data preparation only. Detailed row below. |
+| T-52 | A — READY | T-26a, T-51 | Reconcile binary/missing counts, single attempts, cost provenance and fixed stopping through publication; detailed row below. |
+| T-26b | B, A reviews product identity — BLOCKED | T-26a, T-51, T-52 | Integrate the report gate into the selected runner, prove product-path and stop/budget behavior hermetically, and reconcile applicable T-79/T-89/T-92–T-95/T-97 receipts. |
 | T-26 | C / release owner — BLOCKED; UNFROZEN | T-111, T-26b, T-92 live L0 acceptance | Freeze one clean compatible subject and all identities/resources. Missing model, authorized resources or live prerequisite is a named blocker. No paid call in this task. |
 | T-27 | C runs; independent reviewer accepts — BLOCKED | T-26, explicit run authorization | Execute the fixed canary, publish all outcomes, and record independent disposition. A published negative is task reporting completion, not acceptance for dependency edges. |
 | T-129 | C with relevant package owner — BLOCKED | T-27 accepted / MS-CONTROL closed | Refine one selected post-control package, memory/skills first. Ratify scope, paths, schema obligations, budgets and leaf edges before implementation. No automatic FH-1 activation. |
@@ -834,7 +834,7 @@ at the entrypoint that would actually score it. This does not weaken T-26's stop
 rule; it means the stop rule currently depends on a caller choosing to check.
 
 - [ ] **T-26a: Enforce `require_frozen` at the scoring entrypoint** (C -> MS-CONTROL)
-  - **state**: `READY` — this is control-gate hardening and does not require T-27.
+  - **state**: `ACCEPTED` — independent review recorded below; this control-gate hardening does not require T-27.
   - **requires**: [T-111]
   - **leased files**: `benchmarks/ladder/control.py`, `metrics.py`, `evidence.py`;
     `test/benchmarks/test_preregistration.py`, `test_metric_veto.py`.
@@ -868,6 +868,16 @@ rule; it means the stop rule currently depends on a caller choosing to check.
     checked-in file (`arm.provider`, `arm.*_digest`, `sample.attempts_per_task`,
     `sample.missing_outcomes_retain_slots`, `suite.*`, `resources.*`) are added
     to the record at freeze time by T-26; no schema version was bumped.
+  - **independent acceptance 2026-09-12 (Dev B).** Reviewed the landing diff at
+    `24712896ac1025bbb593791f89070030851465e4` and its executable receipts.
+    `require_frozen` fails closed for `UNFROZEN`, forged, incomplete and empty
+    records without ambient fallback; `publish_control_report` is the sole
+    manifest-and-population admission boundary; and `score_metrics` remains
+    record-free diagnostic scoring. Re-executed
+    `python3 -m unittest test.benchmarks.test_preregistration test.benchmarks.test_metric_veto test.benchmarks.test_control_corpus -v`:
+    42 tests passed in 0.053s (wall 0.18s), exit 0. The checked-in
+    `control_preregistration.json` remains `UNFROZEN`, with null subject, suite,
+    model and freeze timestamp; no paid call was made. T-26a is ACCEPTED.
 
 - [ ] **T-26b: Integrate and qualify the control evidence path**
   - **owner/state**: C; BLOCKED; A reviews existing public product identity.
@@ -890,7 +900,7 @@ rule; it means the stop rule currently depends on a caller choosing to check.
     bypassing the product route. Exit is an eligible local candidate, not live L0.
 
 **T-51 Internal multi-class corpus freeze** (A §31.28, B Wave 0 corpus sizes)  
-- [ ] **state**: READY; owner C; **requires**: [T-111 accepted].
+- [x] **state**: ACCEPTED; owner C; **requires**: [T-111 accepted].
 - **leased files**: new `benchmarks/ladder/l2_thirty/suite.json`, new
   `test/benchmarks/test_control_corpus.py`; existing candidate task/oracle files
   read-only. Any needed new task fixture needs a named lease before authoring.
@@ -912,9 +922,18 @@ rule; it means the stop rule currently depends on a caller choosing to check.
     artifacts, and cache directories strictly excluded. Falsifiers green
     (8 tests in `test_control_corpus.py` falsifying malformed membership, duplicate
     IDs, missing oracles, contamination, and cardinality != 30).
+  - **independent acceptance 2026-09-12 (Dev B).** Inspected the frozen suite
+    and its validator at `24712896ac1025bbb593791f89070030851465e4`: the ordered
+    membership has 30 distinct tasks in five explicit strata (10/11/5/1/3), and
+    each task source tree and oracle resolves and matches its recorded SHA-256.
+    The validator rejects L0/L1 and M-8 contamination, generated/cache/run
+    artifacts, missing oracles, duplicates and class/count drift. The shared
+    focused receipt above passed all 8 corpus falsifiers (42 tests total, exit 0).
+    T-51 is ACCEPTED; this preparation made no paid call and did not freeze the
+    preregistration.
 
 **T-52 Wilson intervals + cost κ on control** (A §13.5, B §16)  
-- [ ] **state**: BLOCKED; owner C; **requires**: [T-26a, T-51].
+- [ ] **state**: READY; owner A; **requires**: [T-26a, T-51 accepted].
 - **leased files**: `benchmarks/ladder/metrics.py`, `benchmarks/statistics.py`,
   `test/benchmarks/test_metric_veto.py`; new `test/benchmarks/test_control_accounting.py`.
 - **contract**: RUN-03; 30 scheduled slots, zero replacement attempts, binary

@@ -14,7 +14,7 @@ audience:
   - contributor
   - release-owner
 version: 0.9.7
-last_verified: 2026-09-11
+last_verified: 2026-09-12
 lock_head: "1f42de23"
 normative_authority:
   - docs/execution/spec.md

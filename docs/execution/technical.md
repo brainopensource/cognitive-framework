@@ -16,7 +16,7 @@ derived_from:
   - docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN_v2.md
   - docs/reports/reviews/electroweak_v092/plans/PHASE-0_DEVELOPMENT_FINAL_PLAN.md
 lock_head: "bf56eea9"
-last_verified: 2026-09-11
+last_verified: 2026-09-12
 relationships:
   - execution.milestones
   - execution.feature_spec
@@ -39,7 +39,9 @@ relationships:
 > `reconcile_delegation`, `cancel`, `run_campaign`, `acquire_node_lease`,
 > `dispatch_node`, `replan`) and the fault-injection index. Leadership should
 > ratify or reverse this breach explicitly; a good outcome does not retroactively
-> authorize bypassing a stop rule.
+> authorize bypassing a stop rule. **Ratified retrospectively on 2026-09-12** — see
+> [milestones.md](milestones.md#ratified--technicalmd-consolidation-2026-09-12). The
+> stop rule stays in force for future passes.
 
 
 Developers SHALL use this file plus [`spec.md`](spec.md), [`tasks.md`](tasks.md), [`milestones.md`](milestones.md), and [`backlog.md`](backlog.md). The originating plan drafts now live under `docs/reports/reviews/electroweak_v092/plans/` and are historical reference, not guidance. Engineering autonomy inside a READY row is governed by [RUN-04](spec.md#run-1-leadership-execution-decision-2026-09-12): choose helpers, fixtures, wording and equivalent algorithms freely; return to leadership before adding a public port or schema, changing presets, widening scope or authority, disabling verification, or altering an acceptance threshold.

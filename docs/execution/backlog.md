@@ -9,7 +9,7 @@ canonical_for:
   - repository-backlog
   - feature-lifecycle-tracking
 version: "0.9.5"
-last_verified: 2026-09-11
+last_verified: 2026-09-12
 lock_head: "bf56eea9"
 audience:
   - contributor

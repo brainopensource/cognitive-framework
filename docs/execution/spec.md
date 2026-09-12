@@ -9,7 +9,7 @@ canonical_for:
   - active-feature-delta-specification
 version: "2.1.0"
 date: "2026-09-11"
-last_verified: 2026-09-11
+last_verified: 2026-09-12
 lock_head: "bf56eea9"
 derived_from:
   - docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN.md

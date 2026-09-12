@@ -62,7 +62,7 @@ creating no new planning file; at session exhaustion, leave a resumable handoff.
 | T-26a | C — ACCEPTED (independent review, Dev B 2026-09-12) | T-111 accepted | Validate the complete manifest and publication boundary under RUN-02; preserve pure diagnostic scoring. Detailed row below. |
 | T-51 | C — ACCEPTED (independent review, Dev B 2026-09-12) | T-111 accepted | Freeze a candidate 30-task L2 holdout with explicit strata, task/oracle digests and no L0/L1 overlap; local data preparation only. Detailed row below. |
 | T-52 | A — ACCEPTED (independent review, Dev B 2026-09-12) | T-26a, T-51 | Reconcile binary/missing counts, single attempts, cost provenance and fixed stopping through publication; detailed row below. |
-| T-26b | B — READY | T-26a, T-51, T-52 | Integrate the report gate into the selected runner, prove product-path and stop/budget behavior hermetically, and reconcile applicable T-79/T-89/T-92–T-95/T-97 receipts. |
+| T-26b | B — LANDED, awaiting independent review | T-26a, T-51, T-52 | Integrate the report gate into the selected runner, prove product-path and stop/budget behavior hermetically, and reconcile applicable T-79/T-89/T-92–T-95/T-97 receipts. |
 | T-26 | C / release owner — BLOCKED; UNFROZEN | T-111, T-26b, T-92 live L0 acceptance | Freeze one clean compatible subject and all identities/resources. Missing model, authorized resources or live prerequisite is a named blocker. No paid call in this task. |
 | T-27 | C runs; independent reviewer accepts — BLOCKED | T-26, explicit run authorization | Execute the fixed canary, publish all outcomes, and record independent disposition. A published negative is task reporting completion, not acceptance for dependency edges. |
 | T-129 | C with relevant package owner — BLOCKED | T-27 accepted / MS-CONTROL closed | Refine one selected post-control package, memory/skills first. Ratify scope, paths, schema obligations, budgets and leaf edges before implementation. No automatic FH-1 activation. |
@@ -880,7 +880,7 @@ rule; it means the stop rule currently depends on a caller choosing to check.
     model and freeze timestamp; no paid call was made. T-26a is ACCEPTED.
 
 - [ ] **T-26b: Integrate and qualify the control evidence path**
-  - **owner/state**: B; READY; A reviewed existing public product identity.
+  - **owner/state**: B; LANDED, awaiting independent review; A reviewed existing public product identity.
   - **requires**: [T-26a, T-51, T-52]
   - **leased files**: `benchmarks/agentic_harness_matrix_benchmark.py`,
     `benchmarks/product_path.py`, `benchmarks/ladder/control.py`,
@@ -898,6 +898,30 @@ rule; it means the stop rule currently depends on a caller choosing to check.
     insufficient. Resolve T-79/T-89/T-92–T-95/T-97 receipt compatibility explicitly.
     If runtime changes are needed, record the exact defect/owner rather than
     bypassing the product route. Exit is an eligible local candidate, not live L0.
+  - **session 2026-09-12 (Dev B) — implementation landed, awaiting independent review.**
+    Commit `2fb7bd58524ce56a0e2646c8eaec60ba229e79cf` changes only
+    `benchmarks/agentic_harness_matrix_benchmark.py` and
+    `test/benchmarks/test_product_path_subject.py` within the T-26b code lease.
+    `run_single_harness_task` now enters a control mode only after
+    `require_frozen` admits the record; it pins `vg-code-balanced` /
+    `balanced` / `product`, validates previously accumulated evidence before
+    dispatch, refuses duplicate/foreign/mismatched/mixed/exhausted populations,
+    binds the returned product frame and exterior oracle verdict to the frozen
+    task, and calls `publish_control_report` from `write_control_report` when
+    the 30th fixed slot is recorded. The new behavioral falsifiers drive the
+    runner through `execute_product` and prove report publication, UNFROZEN or
+    mismatched refusal before dispatch, and exhaustion stopping the next task.
+    Focused gate: 44 tests passed in 0.066s (wall 0.39s), exit 0; LDA-selected
+    compatibility slice: 50 tests passed in 5.445s, exit 0; `just check`, link
+    check and `git diff --check` passed. In a detached clean worktree at the
+    commit, the Python portion of `just verify` passed 535 tests (7 expected
+    skips) in 15.546s after LDA initialization, and all TypeScript typecheck
+    components passed after the declared workspace build. A single foreground
+    `just verify` receipt is not claimed: this harness terminates it at 30s;
+    fresh-worktree failures before setup were an empty LDA index and absent
+    Node build outputs. No paid call, preregistration freeze, or live T-27 run
+    occurred. Shared staged BAAC run artifacts remain user-owned and outside
+    this task; they contaminate the frozen corpus if tested in the shared tree.
 
 **T-51 Internal multi-class corpus freeze** (A §31.28, B Wave 0 corpus sizes)  
 - [x] **state**: ACCEPTED; owner C; **requires**: [T-111 accepted].

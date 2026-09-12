@@ -1,0 +1,69 @@
+{
+  "challengeId": "bench_multi_8K_tier-2_json_todo_store",
+  "tier": "tier-2",
+  "scope": "multi",
+  "contextBracket": "8K",
+  "preset": "vg-code-balanced",
+  "model": "z-ai/glm-5.3-flash",
+  "mode": "live",
+  "status": "FAIL",
+  "disposition": "failed",
+  "attribution": "LLM_COGNITIVE_ERROR",
+  "turns": 8,
+  "promptTokens": 10120,
+  "completionTokens": 1587,
+  "totalTokens": 11707,
+  "costUsd": 0.001698,
+  "durationSeconds": 33.62,
+  "changedFiles": [
+    "src/todo.py",
+    "verify_todo.py"
+  ],
+  "diffPatch": "--- a/todo.py\n+++ b/todo.py\n@@ -1,2 +1,56 @@\n+import json\n+import os\n+\n+\n class TodoStore:\n-    pass\n+    def __init__(self, path=\"todos.json\"):\n+        self.path = path\n+        self.todos = {}\n+        self._next_id = 1\n+        self._load()\n+\n+    def _load(self):\n+        if os.path.exists(self.path):\n+            try:\n+                with open(self.path, \"r\") as f:\n+                    data = json.load(f)\n+                self.todos = {int(k): v for k, v in data.get(\"todos\", {}).items()}\n+                self._next_id = data.get(\"next_id\", max(self.todos, default=0) + 1)\n+            except (json.JSONDecodeError, ValueError):\n+                self.todos = {}\n+                self._next_id = 1\n+\n+    def _save(self):\n+        with open(self.path, \"w\") as f:\n+            json.dump({\"todos\": {str(k): v for k, v in self.todos.items()},\n+                       \"next_id\": self._next_id}, f, indent=2)\n+\n+    def add(self, title, tags=None):\n+        todo = {\n+            \"id\": self._next_id,\n+            \"title\": title,\n+            \"tags\": list(tags or []),\n+            \"completed\": False,\n+        }\n+        self.todos[self._next_id] = todo\n+        self._next_id += 1\n+        self._save()\n+        return todo\n+\n+    def complete(self, todo_id):\n+        if todo_id not in self.todos:\n+            raise KeyError(f\"No todo with id {todo_id}\")\n+        self.todos[todo_id][\"completed\"] = True\n+        self._save()\n+        return self.todos[todo_id]\n+\n+    def get(self, todo_id):\n+        if todo_id not in self.todos:\n+            raise KeyError(f\"No todo with id {todo_id}\")\n+        return self.todos[todo_id]\n+\n+    def list_pending(self):\n+        return [t for t in self.todos.values() if not t[\"completed\"]]\n+\n+    def list_by_tag(self, tag):\n+        return [t for t in self.todos.values() if tag in t[\"tags\"]]\n",
+  "oracle": {
+    "passed": false,
+    "exitCode": 1,
+    "stdout": "",
+    "stderr": "test_todo (__main__.TestTodo.test_todo) ... ERROR\n\n======================================================================\nERROR: test_todo (__main__.TestTodo.test_todo)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/baac/challenges/tier-2/bench_multi_8K_tier-2_json_todo_store/oracle/verify.py\", line 13, in test_todo\n    store.complete(id1)\n  File \"/tmp/baac-scratch-bench_multi_8K_tier-2_json_todo_store-oduu2ze4/src/todo.py\", line 41, in complete\n    if todo_id not in self.todos:\n       ^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: unhashable type: 'dict'\n\n----------------------------------------------------------------------\nRan 1 test in 0.002s\n\nFAILED (errors=1)\n",
+    "durationSeconds": 0.036,
+    "error": "test_todo (__main__.TestTodo.test_todo) ... ERROR\n\n======================================================================\nERROR: test_todo (__main__.TestTodo.test_todo)\n-------------------------------",
+    "assertionCount": 1,
+    "failingAssertions": [
+      "test_todo",
+      "(errors=1)"
+    ]
+  },
+  "aiJudgeScore": null,
+  "diagnosis": "test_todo (__main__.TestTodo.test_todo) ... ERROR\n\n======================================================================\nERROR: test_todo (__main__.TestTodo.test_todo)\n-------------------------------",
+  "metadata": {
+    "id": "bench_multi_8K_tier-2_json_todo_store",
+    "name": "JSON-Backed Todo Store",
+    "scope": "multi",
+    "context_bracket": "8K",
+    "tier": "tier-2",
+    "difficulty": 2,
+    "timeout_seconds": 35,
+    "entrypoint": "src/main.py",
+    "eval_type": "oracle",
+    "tags": [
+      "storage",
+      "json",
+      "multi_file"
+    ],
+    "metadata": {
+      "schema": "aether.baac.challenge/1"
+    },
+    "cli_args": {
+      "command": "run",
+      "preset": "vg-code-balanced",
+      "mode": "live",
+      "model": "z-ai/glm-5.3-flash",
+      "tier": "all",
+      "single": "bench_multi_8K_tier-2_json_todo_store",
+      "max_turns": 8,
+      "max_requests": 40,
+      "budget": 0.04,
+      "keep_scratch": false
+    }
+  }
+}

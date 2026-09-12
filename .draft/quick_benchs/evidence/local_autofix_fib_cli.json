@@ -1,0 +1,20 @@
+{
+  "status": "RESOLVED",
+  "task": "Implement fib(n) iterative Fibonacci: fib(0)=0, fib(1)=1, raise ValueError on n<0, TypeError on non-int. CLI --n.",
+  "target_file": "/tmp/tmp.G5SrIrYjUG/src/fib.py",
+  "test_command": "python3 /tmp/tmp.G5SrIrYjUG/oracle/verify.py --workspace /tmp/tmp.G5SrIrYjUG",
+  "total_turns": 1,
+  "total_tokens": 118,
+  "total_duration_seconds": 1.757,
+  "patch_diff": "--- a//tmp/tmp.G5SrIrYjUG/src/fib.py\n+++ b//tmp/tmp.G5SrIrYjUG/src/fib.py\n@@ -1,2 +1,16 @@\n+import sys\n+\n def fib(n: int) -> int:\n-    pass\n+    if n < 0:\n+        raise ValueError(\"n must be non-negative\")\n+    elif not isinstance(n, int):\n+        raise TypeError(\"n must be an integer\")\n+    elif n == 0:\n+        return 0\n+    elif n == 1:\n+        return 1\n+    else:\n+        a, b = 0, 1\n+        for _ in range(2, n + 1):\n+            a, b = b, a + b\n+        return b",
+  "history": [
+    {
+      "turn": 1,
+      "duration_seconds": 1.713,
+      "lda_delta_seconds": 0.113,
+      "tokens": 118,
+      "falsifier_status": "PASS",
+      "falsifier_summary": "All tests passed successfully"
+    }
+  ]
+}

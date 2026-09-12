@@ -1,0 +1,74 @@
+[
+  {
+    "turn": 1,
+    "request_sha256": "78a408ff013306050a76793c14b669630abb6aa64834cb797e1f40ff31900d0e",
+    "response_sha256": "98f3351a9f48be413014bb64e80a63c30cfd142f70f850ba5270521c6f99aa86",
+    "prompt_tokens": 1163,
+    "completion_tokens": 92,
+    "cost_usd": 5.388e-05,
+    "duration_ms": 2114
+  },
+  {
+    "turn": 2,
+    "request_sha256": "22700ccbda45b1ec94285504bfbf2c1ea59c6dbff9a423112273e0e882a5c455",
+    "response_sha256": "00af403330063736111e0a41ea18daa2d96df299ff40d172f8f5656a33a91134",
+    "prompt_tokens": 1224,
+    "completion_tokens": 89,
+    "cost_usd": 2.3312e-05,
+    "duration_ms": 2936
+  },
+  {
+    "turn": 3,
+    "request_sha256": "8889c21ea7360c4dcaed623d430d962cef7352667c9cd62fd2221f9d6c6685e1",
+    "response_sha256": "3213fb5be4f024a9797bb0952d60e3e169d8d4e773442d42a3c0316c8184bd0c",
+    "prompt_tokens": 1288,
+    "completion_tokens": 97,
+    "cost_usd": 2.6512e-05,
+    "duration_ms": 1968
+  },
+  {
+    "turn": 4,
+    "request_sha256": "f7c16d82d7eeac826ecaf8319d3f20064332ab72c9176a9d844bd7d2bb03cf0d",
+    "response_sha256": "2e3d95b37c536d862dd153fd6522ea9ff05ac17bc2c11ab4a3185a90e79db640",
+    "prompt_tokens": 1416,
+    "completion_tokens": 181,
+    "cost_usd": 7.112e-05,
+    "duration_ms": 3909
+  },
+  {
+    "turn": 5,
+    "request_sha256": "cbe522f7e5fe631b00dfd26828ba53109c832c5a4d2e955a7c8ee942603e41bc",
+    "response_sha256": "a044c4c35ea04fb607aaaca22ecb9483a6956970cf923f693a387299aa2f6f65",
+    "prompt_tokens": 1456,
+    "completion_tokens": 139,
+    "cost_usd": 2.84e-05,
+    "duration_ms": 2983
+  },
+  {
+    "turn": 6,
+    "request_sha256": "a08cd4f865fa3ba10e649c1e3c7e0b042fd31cb5afc7cc7a3a5a6b1e846f6014",
+    "response_sha256": "c5ee90c327422352f0265d267787c722e8cefbb987a5ffe37a5f3952b767118c",
+    "prompt_tokens": 1513,
+    "completion_tokens": 143,
+    "cost_usd": 3.9192e-05,
+    "duration_ms": 4058
+  },
+  {
+    "turn": 7,
+    "request_sha256": "aaf1d794d9b5e413cf53369452e4adb3d2d896ff1e92375ff981862730b1bc13",
+    "response_sha256": "4a8b2f3e38d06ac89125a0bce4af612d1b35bf8ea5eeeb5b9b95c86bc4c47232",
+    "prompt_tokens": 1573,
+    "completion_tokens": 135,
+    "cost_usd": 3.276e-05,
+    "duration_ms": 5307
+  },
+  {
+    "turn": 8,
+    "request_sha256": "86ddff82e6428dc1ee6d54fd69f0edd18d5974c2d47891812cd41bbdd1865aef",
+    "response_sha256": "4d4130641e211fcc9e118080f83f358ab7d62799401612e79ed3c5fa4d8fabc7",
+    "prompt_tokens": 1542,
+    "completion_tokens": 175,
+    "cost_usd": 7.568e-05,
+    "duration_ms": 1179
+  }
+]

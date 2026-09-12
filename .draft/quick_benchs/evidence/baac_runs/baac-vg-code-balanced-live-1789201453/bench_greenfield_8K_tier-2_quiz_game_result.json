@@ -1,0 +1,66 @@
+{
+  "challengeId": "bench_greenfield_8K_tier-2_quiz_game",
+  "tier": "tier-2",
+  "scope": "greenfield",
+  "contextBracket": "8K",
+  "preset": "vg-code-balanced",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "mode": "live",
+  "status": "UNDETERMINABLE",
+  "disposition": "undeterminable",
+  "attribution": "HARNESS_ERROR",
+  "turns": 8,
+  "promptTokens": 11341,
+  "completionTokens": 1080,
+  "totalTokens": 12421,
+  "costUsd": 0.00027,
+  "durationSeconds": 9.84,
+  "changedFiles": [],
+  "diffPatch": "",
+  "oracle": {
+    "passed": false,
+    "exitCode": 1,
+    "stdout": "",
+    "stderr": "test_quiz (__main__.TestQuiz.test_quiz) ... ERROR\n\n======================================================================\nERROR: test_quiz (__main__.TestQuiz.test_quiz)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/baac/challenges/tier-2/bench_greenfield_8K_tier-2_quiz_game/oracle/verify.py\", line 7, in test_quiz\n    from quiz_engine import Question, QuizEngine\nImportError: cannot import name 'Question' from 'quiz_engine' (/tmp/baac-scratch-bench_greenfield_8K_tier-2_quiz_game-fsdphgg5/src/quiz_engine.py)\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n",
+    "durationSeconds": 0.032,
+    "error": "test_quiz (__main__.TestQuiz.test_quiz) ... ERROR\n\n======================================================================\nERROR: test_quiz (__main__.TestQuiz.test_quiz)\n-------------------------------",
+    "assertionCount": 1,
+    "failingAssertions": [
+      "test_quiz",
+      "(errors=1)"
+    ]
+  },
+  "aiJudgeScore": null,
+  "diagnosis": "test_quiz (__main__.TestQuiz.test_quiz) ... ERROR\n\n======================================================================\nERROR: test_quiz (__main__.TestQuiz.test_quiz)\n-------------------------------",
+  "metadata": {
+    "id": "bench_greenfield_8K_tier-2_quiz_game",
+    "name": "Greenfield Quiz Game Engine",
+    "scope": "greenfield",
+    "context_bracket": "8K",
+    "tier": "tier-2",
+    "difficulty": 2,
+    "timeout_seconds": 35,
+    "entrypoint": "src/main.py",
+    "eval_type": "oracle",
+    "tags": [
+      "greenfield",
+      "state_machine",
+      "oop"
+    ],
+    "metadata": {
+      "schema": "aether.baac.challenge/1"
+    },
+    "cli_args": {
+      "command": "run",
+      "preset": "vg-code-balanced",
+      "mode": "live",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "tier": "tier-2",
+      "single": null,
+      "max_turns": 8,
+      "max_requests": 70,
+      "budget": 0.05,
+      "keep_scratch": false
+    }
+  }
+}

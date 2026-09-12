@@ -39,5 +39,17 @@ class TestConcurrentEventStore(unittest.TestCase):
 
             self.assertEqual(len(errors), 0, f"Concurrency failure occurred: {errors}")
 
+    def test_busy_timeout_configured(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            db_path = Path(tmpdir) / "events.db"
+            store = SqliteEventStore(db_path)
+            timeout = store._conn.execute("PRAGMA busy_timeout;").fetchone()[0]
+            store.close()
+            self.assertGreaterEqual(
+                timeout,
+                30000,
+                f"PRAGMA busy_timeout must be at least 30000ms per STO-04 spec, got {timeout}"
+            )
+
 if __name__ == "__main__":
     unittest.main()

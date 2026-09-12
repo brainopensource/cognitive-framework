@@ -1,0 +1,65 @@
+{
+  "challengeId": "bench_single_2K_tier-1_fib_cli",
+  "tier": "tier-1",
+  "scope": "single",
+  "contextBracket": "2K",
+  "preset": "vg-code-balanced",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "mode": "live",
+  "status": "PASS",
+  "disposition": "passed",
+  "attribution": "PASS",
+  "turns": 8,
+  "promptTokens": 11142,
+  "completionTokens": 1109,
+  "totalTokens": 12251,
+  "costUsd": 0.000248,
+  "durationSeconds": 12.04,
+  "changedFiles": [
+    "src/fib.py"
+  ],
+  "diffPatch": "--- a/fib.py\n+++ b/fib.py\n@@ -1,2 +1,22 @@\n+import argparse\n+\n+\n def fib(n: int) -> int:\n-    pass\n+    \"\"\"Return the n-th Fibonacci number (0-based: fib(0) == 0, fib(1) == 1).\"\"\"\n+    if n < 0:\n+        raise ValueError(\"n must be non-negative\")\n+    a, b = 0, 1\n+    for _ in range(n):\n+        a, b = b, a + b\n+    return a\n+\n+\n+def main() -> None:\n+    parser = argparse.ArgumentParser(description=\"Compute the n-th Fibonacci number.\")\n+    parser.add_argument(\"--n\", type=int, required=True, help=\"Non-negative index n\")\n+    args = parser.parse_args()\n+    print(fib(args.n))\n+\n+\n+if __name__ == \"__main__\":\n+    main()",
+  "oracle": {
+    "passed": true,
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "test_fib (__main__.TestFib.test_fib) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+    "durationSeconds": 0.033,
+    "error": null,
+    "assertionCount": 1,
+    "failingAssertions": []
+  },
+  "aiJudgeScore": null,
+  "diagnosis": "All falsifiers green",
+  "metadata": {
+    "id": "bench_single_2K_tier-1_fib_cli",
+    "name": "Fibonacci CLI and Pure Function",
+    "scope": "single",
+    "context_bracket": "2K",
+    "tier": "tier-1",
+    "difficulty": 1,
+    "timeout_seconds": 35,
+    "entrypoint": "src/main.py",
+    "eval_type": "oracle",
+    "tags": [
+      "math",
+      "cli",
+      "basics"
+    ],
+    "metadata": {
+      "schema": "aether.baac.challenge/1"
+    },
+    "cli_args": {
+      "command": "run",
+      "preset": "vg-code-balanced",
+      "mode": "live",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "tier": "tier-1",
+      "single": null,
+      "max_turns": 8,
+      "max_requests": 80,
+      "budget": 0.07,
+      "keep_scratch": false
+    }
+  }
+}

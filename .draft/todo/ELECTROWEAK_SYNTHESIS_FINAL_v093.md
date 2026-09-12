@@ -2,7 +2,7 @@
 
 > [!IMPORTANT]
 > **Document Status: ARCHITECTURAL ANCESTRY — CODIFIED INTO CANONICAL SPEC (2026-09-11 | HEAD: `1e257e76`)**
-> - **Authority:** Foundational Design Directive (Codified normatively in [`docs/execution/spec.md`](../../docs/execution/spec.md) and [`technical.md`](../../docs/execution/technical.md)).
+> - **Authority:** Foundational Design Directive (Codified normatively in [`docs/execution/main/spec.md`](../../docs/execution/main/spec.md) and [`technical.md`](../../docs/execution/main/technical.md)).
 > - **WHAT IS DONE & MERGED IN CODE:**
 >   - **Exact 2PC Edit Primitive (Item 1 / T-78):** Landed in `transaction.py` and `ast_patch.py`.
 >   - **Two-Axis Settlement Law (C-2 / T-72):** Decoupled run termination from task disposition in `domain/evidence/disposition.py`.
@@ -504,7 +504,7 @@ Invariants this buys, stated as commit-ready falsifiers:
 
 ## 4. Hardened backlog inventory additions
 
-**Copy-paste target:** `docs/execution/backlog.md`, new subsection after §2.10.
+**Copy-paste target:** `docs/execution/main/backlog.md`, new subsection after §2.10.
 
 ### 4.1 New section — insert verbatim
 
@@ -573,7 +573,7 @@ lift and therefore stays `PROPOSED` until a preregistered ablation says otherwis
 | `ARM-01` | T-96 | **New package, `PROPOSED`** (GPT PR-3). Gated on a closed MS-CONTROL and a landed EXP-01. |
 ```
 
-### 4.5 New task rows — `docs/execution/tasks.md` (T-69 onward; current max is T-68)
+### 4.5 New task rows — `docs/execution/main/tasks.md` (T-69 onward; current max is T-68)
 
 Every path verified present in this tree. `depends_on` edges live here, per §3's *"`requires:` edges live on tasks."*
 
@@ -662,7 +662,7 @@ vanguard/packages/agency/manifests/
 
 ## 6. Milestone overlay updates
 
-**Copy-paste target:** `docs/execution/milestones.md` §3. Replace these five rows.
+**Copy-paste target:** `docs/execution/main/milestones.md` §3. Replace these five rows.
 
 | ID | TARGET | Acceptance | Status | Evidence |
 |---|---|---|---|---|

@@ -65,6 +65,9 @@ creating no new planning file; at session exhaustion, leave a resumable handoff.
 | T-26b | B — BLOCKED; implementation landed, review awaits T-51 reacceptance | T-26a, T-51, T-52 | Integrate the report gate into the selected runner, prove product-path and stop/budget behavior hermetically, and reconcile applicable T-79/T-89/T-92–T-95/T-97 receipts. |
 | T-26 | C / release owner — BLOCKED; UNFROZEN | T-111, T-26b, T-92 live L0 acceptance | Freeze one clean compatible subject and all identities/resources. Missing model, authorized resources or live prerequisite is a named blocker. No paid call in this task. |
 | T-27 | C runs; independent reviewer accepts — BLOCKED | T-26, explicit run authorization | Execute the fixed canary, publish all outcomes, and record independent disposition. A published negative is task reporting completion, not acceptance for dependency edges. |
+| T-130 | C authors; independent Principal reviews — READY | none | Hermetic, zero-cost diagnostic that attributes the write-landing failure to its first failing seam on the real product route. Detailed row below. |
+| T-131 | A/B by surface; measurement rows C — READY (rows 1/2/5 gated on T-130) | T-130 for rows 1, 2, 5 | Close the eight `BLOCK-T27` pre-measurement defects with product-route positive and adversarial falsifiers. Detailed row below. |
+| T-132 | C — READY | none | Widen gate discovery so the control instrument is protected, with measured cost recorded and a deterministic stale-digest red control. Detailed row below. |
 | T-129 | C with relevant package owner — BLOCKED | T-27 accepted / MS-CONTROL closed | Refine one selected post-control package, memory/skills first. Ratify scope, paths, schema obligations, budgets and leaf edges before implementation. No automatic FH-1 activation. |
 
 **Session rules.** Acquire exact file leases from the task row after inspecting
@@ -965,6 +968,113 @@ rule; it means the stop rule currently depends on a caller choosing to check.
     does not admit the current subject. T-51 requires oracle-integrity review,
     digest rebinding or member replacement, and independent reacceptance before
     T-26b review or T-26 freeze may proceed.
+  - **holdout-exposure finding 2026-09-12 (Director, RUN-07).** The two stale
+    oracles are not the whole defect. The `todo` and `quiz` members were used for
+    live development diagnostics and are also present in this holdout, which
+    violates the RUN-03 rule that L0/L1 development tasks never enter it. The
+    correction is broader than digest repair: audit the exposure of all 30
+    members, remove and replace every exposed member, and preserve cardinality
+    (exactly 30) and the five declared strata counts. Exposure is judged by
+    evidence of prior development or diagnostic execution against the member, not
+    by declaration.
+  - **normative ordering (RUN-08).** The exposure audit runs BEFORE the oracle
+    repair. Do not repair, prove and rebind a member that the audit then removes:
+    a rebound digest with no member behind it is unrecoverable history, and the
+    independent red/green proof would be discarded. Sequence: (1) exposure audit
+    across 30; (2) removal and replacement, strata preserved; (3) REPAIR
+    `04_sqlite_wal_checkpoint_lock` and `05_token_budget_clamping_drift` on the
+    surviving membership; (4) independent proof that each repaired oracle is
+    deterministically red on the intended defect and green on a correct
+    implementation; (5) rebind source/oracle/suite digests; (6) independent
+    reacceptance. Digest synchronization without step (4) is forbidden.
+
+**T-130 Hermetic write-landing seam diagnostic** (RUN-13; Director 2026-09-12)
+- [ ] **state**: READY; owner C authors, independent Principal reviews;
+  **requires**: [none — hermetic, zero cost, no holdout contact].
+- **leased files**: new `benchmarks/diagnostics/write_landing_probe.py`, new
+  `test/benchmarks/test_write_landing_probe.py`, new fixtures under
+  `benchmarks/diagnostics/fixtures/`. Product source is read-only in this row: the
+  probe observes the existing route, it does not repair it.
+- **contract**: RUN-13 and RUN-10. Exercise the real product route
+  `runtime.entrypoint.execute -> runtime.root -> runtime.session.HarnessSession
+  -> agency.episode.EpisodeEngine -> model adapter and dialect normalization ->
+  tool admission and capability grant -> patch transaction and candidate
+  workspace -> completion admission -> exterior oracle -> evidence reconciliation`.
+  Forge and BaaC routes are comparative evidence only and MUST NOT be substituted.
+  Fixture set: `P0-FIB`, one fresh non-control multi-file fixture and one fresh
+  greenfield fixture. Authoring fresh fixtures is in scope precisely so the T-51
+  holdout is never touched; do not run, tune or diagnose against a holdout member.
+  Capture, per turn: raw and normalized model calls, tool declarations offered,
+  capability grants resolved, patch-transaction receipts, candidate tree digest,
+  oracle-observed tree digest and terminal admission disposition.
+- **discrimination classes**: attribute each failure to its FIRST failing seam,
+  choosing among no canonical tool emitted; undeclared or malformed tool call;
+  capability or policy denial; patch-transaction rejection or partial application;
+  wrong candidate workspace; stale tree observed by the oracle; patchless
+  completion admitted; resource exhaustion before the first valid action. Multiple
+  independent causes are permitted and MUST be reported separately rather than
+  collapsed into one narrative.
+- **falsifier**: `python3 -m unittest test.benchmarks.test_write_landing_probe -v`.
+  The probe MUST be provably able to observe a landed write: include a positive
+  control in which a known-good synthetic write lands atomically and the exterior
+  oracle observes the identical submitted tree, and a negative control in which an
+  injected seam failure is attributed to that exact seam. A probe that reports
+  "no seam identified" without passing both controls is an inconclusive instrument,
+  not a finding about the product.
+- **exit**: three traces — L0, multi-file, greenfield — each attributed to its
+  first failing seam, retained as a diagnostic packet. Zero provider calls, zero
+  USD, per RUN-12. The packet returns to the Director for the RUN-13 causal
+  statement and for the only question that can reopen RUN-10: whether the repair
+  crosses a public port or schema boundary.
+
+**T-131 Pre-measurement defect register** (RUN-09; Director 2026-09-12)
+- [ ] **state**: READY; owner A and B by surface, measurement rows to C;
+  **requires**: [T-130 for rows 1, 2 and 5, whose owning seam is unproven].
+- **leased files**: assigned per row after T-130 attribution; no lease is granted
+  by this row alone. Rows 3, 4, 6, 7 and 8 may be leased immediately.
+- **contract**: RUN-09. The eight named defects are `BLOCK-T27`. Each needs a
+  product-route positive falsifier and an adversarial falsifier; a mechanism that
+  exists is not a mechanism that is qualified, and `vanguard/packages/runtime/
+  session.py` completion admission plus the transaction machinery establish
+  mechanism only. Rows 3, 4, 6 and 7 are directly falsifiable today: patchless,
+  test-inlined or unauthorized-extra-file completion must not read green;
+  an episode must stop at a valid admitted completion rather than consume its turn
+  ceiling; evidence identity must equal the submitted product candidate; resume and
+  compaction must preserve task, candidate, plan and budget identity.
+- **falsifier**: per-row focused suites named at lease time, plus the adversarial
+  false-completion set. After row 5 attribution is repaired, an actual malformed
+  response or pre-action exhaustion is recorded `MEASURED-MISSINGNESS` with a typed
+  reason, a retained slot and a non-binary `UNDETERMINABLE` disposition — never
+  silently scored as an ordinary task failure.
+- **exit**: all eight rows closed with retained falsifiers and accurate resource
+  settlement, or an explicit named blocker. T-26 readiness depends on this row.
+
+**T-132 Gate discovery widening and cost disposition** (RUN-07; Director 2026-09-12)
+- [ ] **state**: READY; owner C (sole `justfile` owner);
+  **requires**: [none].
+- **leased files**: `justfile`, `test/contracts/test_collection_integrity.py`.
+- **contract**: RUN-07. `just verify` currently discovers only `test/kernel`,
+  `test/agency` and `test/contracts`, which is approximately 947 of approximately
+  3,171 tests. `test/benchmarks` — which contains the control instrument — and
+  `test/falsifiers` are outside it. This is why the stale oracle digest survived:
+  every "verify passed" receipt in recent handoffs is simultaneously true and
+  silent about the control instrument. Make the corpus, accounting, publication
+  and false-completion suites mandatory in `just verify`, then expand to hermetic
+  full-tree discovery with explicit, individually justified exclusions. `test/e2e`
+  and `test/broken` are not importable as packages; confirm whether that is
+  deliberate and record the justification or fix it — do not leave it unstated.
+  Keep `just check` fast. NT-B03 already requires literal full discovery for an
+  acceptance receipt; this row closes the gap between the acceptance gate and the
+  routine gate, and does not weaken either.
+- **cost disposition**: record measured wall-clock for the narrow gate and the
+  widened gate on the same subject before and after. A widened gate that developers
+  route around is worse than a narrow one they run; if the measured cost forbids
+  full-tree discovery on every invocation, return the exact numbers to leadership
+  rather than silently selecting a convenient subset.
+- **falsifier**: `python3 -m unittest test.contracts.test_collection_integrity -v`
+  plus a deterministic red control — an intentionally stale oracle digest MUST
+  fail `just verify`. Proving the widened gate reds on the exact defect that
+  escaped it is the point of the row; a green widened gate alone proves nothing.
 
 **T-52 Wilson intervals + cost κ on control** (A §13.5, B §16)  
 - [x] **state**: ACCEPTED; owner A;
@@ -1496,7 +1606,7 @@ Dependency key: `requires:`. Status: all `PROPOSED` unless noted.
 - **Files:** create `domain/task_state.py` (**MISSING** in HEAD); FEATURE_SPEC §3
 - **Requires:** none technically; **schedule after** 04 so we do not persist false completes
 - **Falsifier:** `test/contracts/test_semantic_task_state.py` as specified
-- **FACT.** Schema is [`domain/task_state.py`](../../vanguard/packages/domain/task_state.py) (`SemanticTaskState`; `CodingTaskState` alias). Live fold remains [`runtime/task_state.py`](../../vanguard/packages/runtime/task_state.py) `fold_task_state`. A's 17 extra domain types stay `[PROPOSAL]`.
+- **FACT.** Schema is [`domain/task_state.py`](../../../vanguard/packages/domain/task_state.py) (`SemanticTaskState`; `CodingTaskState` alias). Live fold remains [`runtime/task_state.py`](../../../vanguard/packages/runtime/task_state.py) `fold_task_state`. A's 17 extra domain types stay `[PROPOSAL]`.
 
 ### Ticket 10 — Runtime fold of SemanticTaskState
 - **Files:** `runtime/task_state.py`

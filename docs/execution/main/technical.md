@@ -489,6 +489,30 @@ Regenerate knowledge through `just docs-knowledge`; never hand-edit generated ou
 
 The accepted handoff records a clean candidate SHA and leaves T-26 `UNFROZEN`. Starting MS-CONTROL means auditing and completing applicable T-79/T-89/T-92-T-95 plus T-51/T-52, then creating the T-26 freeze and running T-27. It does not mean MS-CONTROL is closed, a paid run is authorized, or post-control T-80/T-96/CAS/specialist work may start.
 
+### Approved architectural boundaries (RUN-10, Director 2026-09-12)
+
+These nine boundaries are approved and binding on every package in RUN-11. They
+describe reuse obligations on existing components, not new construction.
+
+| Boundary | Obligation |
+|---|---|
+| Single episode loop | One canonical `EpisodeEngine`. A second agent loop is a fork, not an optimization. |
+| Atomic multi-file commit | All-or-nothing application carrying a final whole-candidate tree digest. A partially applied change set is a failed change set. |
+| Exterior oracle identity | The oracle evaluates the exact submitted candidate. Same-tree, not equivalent-tree. |
+| Bounded retrieval | Context retrieval is token-bounded and provenance-bound; unbounded or unattributed retrieval cannot enter a scored run. |
+| Compaction preservation | Objective, constraints, unresolved failures, plan state, changed-file identity and the resource ledger survive compaction. |
+| Resume fidelity | Fresh-process resume duplicates no effect and resets no ceiling. |
+| Finite replanning | Replanning is finite; exhaustion is terminal, not a retry signal. |
+| Escalation path | Escalation flows through the existing `ModelPort`, provider factory, credential isolation and evidence accounting. |
+| Single budget identity | Escalation retains one task/slot identity and one aggregate resource budget. |
+
+**No public port or schema change is authorized.** Current public contracts are
+preserved by default, and the absence of a decision is not permission. A
+demonstrated incompatibility — most plausibly surfaced by the T-130 probe — is a
+named leadership-reviewed delta and returns to the Director under RUN-13, not a
+choice available inside a lease. Planned kernel delta remains zero and N-06
+continues to forbid `import subprocess` in runtime.
+
 ### Near-term review and failure-routing rules
 
 | Finding | Owning stream | Required action |
@@ -513,7 +537,7 @@ Stop and return the task to review when a proposed change adds kernel LOC, a sec
 
 ## Post-control reference handbook (FH-1) [PROPOSAL]
 
-The normative owner is [spec FH-1](spec.md#fh-1-post-control-backend-horizon-proposal); [tasks](tasks.md#context-post-control-horizon-fh-1-proposal) owns dependencies and prototype leaves. These algorithms refine [Part 3 §§5–6](../reports/reviews/aether_v093_review/part3_blueprints_and_interface_contracts.md). They are conditional reference algorithms, not executed production code. NT-1 compile/recover remains the near-term contract. The references' in-memory tests do not qualify disk durability or aggregate resource accounting.
+The normative owner is [spec FH-1](spec.md#fh-1-post-control-backend-horizon-proposal); [tasks](tasks.md#context-post-control-horizon-fh-1-proposal) owns dependencies and prototype leaves. These algorithms refine [Part 3 §§5–6](../../reports/reviews/aether_v093_review/part3_blueprints_and_interface_contracts.md). They are conditional reference algorithms, not executed production code. NT-1 compile/recover remains the near-term contract. The references' in-memory tests do not qualify disk durability or aggregate resource accounting.
 
 **Clause binding.** Each algorithm below implements named spec clauses and is read against them, not instead of them: `prepare_and_promote` implements FH-C05–FH-C10, `export` implements FH-C11, `delegate`/`settle`/`reconcile_delegation` implement FH-D04–FH-D07, and `run_campaign`/`acquire_node_lease`/`replan` implement FH-D08–FH-D12. Every failure return names a code from the FH-1.8 matrix. Where an algorithm here and a spec clause could be read to differ, the spec clause governs and this handbook is wrong. Step numbering is a reading aid for review and for the Wave 4 task board; it is not an API.
 

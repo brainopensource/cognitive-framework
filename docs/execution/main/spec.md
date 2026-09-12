@@ -110,6 +110,104 @@ qualification. Empirical M-8 acceptance remains required before M-9/M-10; contro
 qualification is not a renamed beta release. Required containment/authorization
 for a selected execution profile cannot be deferred by calling it post-beta.
 
+## RUN-2. Director causal decision (2026-09-12)
+
+**ACCEPTED decisions; no implementation, freeze, paid call or SOTA claim.**
+Assignment subject `63881e68caab8a33a4da588718db33fe0fb88706`; recorded here on
+`41429f91`. This amendment answers the questions reserved to leadership under
+RUN-01..RUN-06 and supersedes conflicting scheduling statements. It does not
+retroactively accept T-26b, reopen an accepted receipt, or authorize T-26/T-27.
+
+**RUN-07 — Measurement trust and holdout integrity.** The control instrument is
+NOT currently trustworthy. Two defects compound: two bound oracle files changed
+after acceptance, and previously exercised `todo`/`quiz` development tasks are
+present in the T-51 holdout despite having been used for live development
+diagnostics. Corpus reconstitution is therefore broader than digest repair: the
+exposure of all 30 members MUST be audited, every exposed member removed and
+replaced, and cardinality and strata counts preserved. The default escalation
+rule is retained unchanged — three or more toothless or nondeterministic oracles
+means systemic failure and corpus rebuild; fewer permits named repair or
+replacement — and applies to oracle quality independently of the exposure audit.
+Corpus, accounting, publication and false-completion tests MUST become mandatory
+in `just verify`; `just check` remains fast. A measurement instrument that no
+gate protects will drift again, and did.
+
+**RUN-08 — Invalidated oracle treatment.** REPAIR both invalidated members,
+`04_sqlite_wal_checkpoint_lock` and `05_token_budget_clamping_drift`. Rebinding
+the resulting source, oracle and suite digests is explicitly authorized, but only
+after the repaired oracle is independently proven deterministically red on the
+intended defect and green on a correct implementation. Digest synchronization
+alone is forbidden: it would rebind the instrument to whatever the tree currently
+says rather than to the defect the member exists to detect. **Ordering is
+normative.** The RUN-07 exposure audit runs BEFORE this repair. A member that the
+audit removes MUST NOT first be repaired and rebound; repairing then deleting a
+member wastes the independent-proof step and leaves a rebound digest in history
+with no member behind it.
+
+**RUN-09 — Defects that block measurement.** The following are `BLOCK-T27`; none
+may be deferred to post-control, because each can produce a published number that
+does not mean what it claims: (1) valid model writes do not land; (2) multi-file
+application can be partial or invisible to the oracle; (3) patchless, test-inlined
+or unauthorized-extra-file completion can appear green; (4) product episodes
+continue after a valid admitted completion; (5) malformed or undeclared tool
+dialect is not attributed precisely; (6) evidence identity can diverge from the
+submitted product candidate; (7) resume or compaction can lose task, candidate,
+plan or budget identity; (8) model escalation can bypass the aggregate budget or
+provider policy. After attribution in (5) is repaired, an actual malformed
+response or pre-action resource exhaustion MAY be recorded as
+`MEASURED-MISSINGNESS` with a typed reason, a retained slot and a non-binary
+`UNDETERMINABLE` disposition. Neither is ever silently scored as an ordinary task
+failure. New autofix-cascade activation is `POST-CONTROL` and excluded from the
+balanced arm; existing policy and budget bypasses remain pre-control blockers.
+
+**RUN-10 — Approved architectural boundaries.** All nine are approved: one
+canonical `EpisodeEngine` with no second agent loop; atomic all-or-nothing
+multi-file commit carrying a final whole-candidate tree digest; an exterior oracle
+that evaluates the exact submitted candidate; token-bounded and provenance-bound
+context retrieval; compaction preserving objective, constraints, unresolved
+failures, plan state, changed-file identity and the resource ledger; fresh-process
+resume that neither duplicates effects nor resets ceilings; finite replanning with
+terminal exhaustion; escalation through the existing `ModelPort`, provider factory,
+credential isolation and evidence accounting; one task/slot identity and one
+aggregate resource budget across escalation. **No public port or schema change is
+authorized.** Current public contracts MUST be preserved; a demonstrated
+incompatibility is a named leadership-reviewed delta, not a developer's call.
+Planned kernel delta remains zero.
+
+**RUN-11 — Delivery order and permitted parallelism.** Packages and rough sizes:
+P1 measurement and oracle integrity (M); P2 product-path write and change closure
+(M); P3 exterior completion and false-completion resistance (M); P4 large-context,
+compaction and resumable-session qualification (L); P5 budgeted model cascade plus
+comparative evidence (L). P1 and P2 MAY proceed in parallel under separate,
+disjoint leases. P3 falsifier authoring and P4 read-only qualification MAY proceed
+alongside them. P3 integration requires a reviewed P2; final P4 qualification
+requires reviewed P2 and P3. T-26b acceptance requires reaccepted P1 and T-51.
+
+**RUN-12 — Live model authority.** `DEFER — zero calls`. Zero USD, zero provider
+calls, zero tokens, zero turns and zero live wall-clock time are allocated before
+freeze. No model is authorized. The aggregate `$0.10 USD / 150 provider call`
+diagnostic ceiling remains unallocated, and the existence of a credential is not
+authority. Historical usage of unknown cost remains unsettled and MUST NOT be
+reported as zero. Diagnosis before freeze is hermetic. Any later live allocation
+requires a separately pinned authorization naming the exact model ID, task class,
+purpose, USD/call/token/turn/wall-clock sub-ceilings, ledger destination and stop
+condition, granted only after the RUN-13 diagnostic packet is retained.
+
+**RUN-13 — The one open causal question.** The write-landing failure does NOT yet
+have a causal boundary, and this amendment does not invent one. Retained `todo`
+and `quiz` failures reached the harness through `ForgeFacade`
+(`benchmarks/baac/lib/runner.py:213`); their cassettes retain hashes and usage
+counts rather than tool payloads, so they cannot identify the failing product
+seam, and both tasks are additionally inside the RUN-07 holdout. No qualifying
+retained L0 product trace exists. Forge, BaaC and the autofix proficiency are
+comparative evidence only; a repair in one of those paths never closes a
+product-path defect. One hermetic diagnostic set is therefore authorized under
+T-130 at zero cost. Until it returns, an `entrypoint.py` root cause is unproven
+and MUST NOT be assumed. The symptom is stated as: capable models consume turns
+on multi-file and greenfield work while changing zero files; the governing
+invariant is that a valid emitted write lands atomically in the candidate
+workspace and the exterior oracle observes that identical submitted tree.
+
 ## NT-1. Near-term baseline, context, cache and recovery delta
 
 **Authority and scope (2026-09-07).** This executive amendment authorizes T-98–T-111 and the revised T-77 before control qualification. It supersedes earlier EW-9 exclusions only for deterministic context/cache/recovery hardening and baseline remediation. Existing T-09–T-16 mechanisms are extended, not re-created. T-80 remains the later workspace-policy treatment; deterministic semantic stall detection belongs to T-106. Model escalation, consultation, specialists, CAS workspace promotion, memory learning, new index backends and T-96 remain outside this iteration. Historical milestone receipts retain their original subjects. No new milestone is accepted by this amendment.
@@ -228,7 +326,7 @@ assets during the context-convergence batch.
 
 ## FH-1. Post-control backend horizon [PROPOSAL]
 
-This section defines conditional TARGET contracts for prototype refinement after NT-1. It does not activate implementations, change T-98–T-111, authorize paid runs, or accept milestones. “Sprints 3–5” maps to capability dependencies in tasks, not a calendar. FH-1 governs the future CAS/delegation/evaluation scope where older proposal catalogs differ. Historical accepted subjects remain intact. The reference provenance is [Part 3 §§5–6](../reports/reviews/aether_v093_review/part3_blueprints_and_interface_contracts.md); its Python protocols are illustrative seams, not a requirement for additional public ports. Gate ownership is in [milestones.md](milestones.md#post-control-horizon-release-predicates-fh-1); algorithms are in [technical.md](technical.md#post-control-reference-handbook-fh-1-proposal).
+This section defines conditional TARGET contracts for prototype refinement after NT-1. It does not activate implementations, change T-98–T-111, authorize paid runs, or accept milestones. “Sprints 3–5” maps to capability dependencies in tasks, not a calendar. FH-1 governs the future CAS/delegation/evaluation scope where older proposal catalogs differ. Historical accepted subjects remain intact. The reference provenance is [Part 3 §§5–6](../../reports/reviews/aether_v093_review/part3_blueprints_and_interface_contracts.md); its Python protocols are illustrative seams, not a requirement for additional public ports. Gate ownership is in [milestones.md](milestones.md#post-control-horizon-release-predicates-fh-1); algorithms are in [technical.md](technical.md#post-control-reference-handbook-fh-1-proposal).
 
 FH-1.1–FH-1.8 are **PROPOSED contract detail**, retained for branch review. Their
 RFC-2119 language is conditional on adoption; these sections are not accepted law
@@ -1442,7 +1540,7 @@ class TransformResult:
     execution_duration_ms: int
 ```
 
-**FACT — live `TransformSpec` fields** from [`vanguard/packages/domain/transforms/contracts.py`](../../vanguard/packages/domain/transforms/contracts.py) lines 20–31 (HEAD `66aa7a3c`):
+**FACT — live `TransformSpec` fields** from [`vanguard/packages/domain/transforms/contracts.py`](../../../vanguard/packages/domain/transforms/contracts.py) lines 20–31 (HEAD `66aa7a3c`):
 
 ```python
 @dataclass(frozen=True, slots=True)
@@ -1480,7 +1578,7 @@ MECHANISM: `run` / `status` / `resume` / `evidence` / `cost`. `[PROPOSAL]`: `can
 
 Appended at lock; does **not** replace §3. **FACT** from pack YAML and toolkit source on HEAD `66aa7a3c`.
 
-Harness [`packs/code-default/harness.yaml`](../../packs/code-default/harness.yaml) declares:
+Harness [`packs/code-default/harness.yaml`](../../../packs/code-default/harness.yaml) declares:
 
 | Verb | Pack source | Notes (FACT) |
 |---|---|---|
@@ -1490,7 +1588,7 @@ Harness [`packs/code-default/harness.yaml`](../../packs/code-default/harness.yam
 | `patch.apply` | `harness.yaml`; `plugins/ast-patch.yaml`; `toolkits/ast_patch.py` | Sequential `GitEnvironment.apply`; post-write `ast.parse` is observation-only |
 | `proc.exec` | `harness.yaml`; `plugins/terminal.yaml`; `toolkits/terminal_runner.py` | Allowlisted `git,pytest,ruff,python3` |
 
-**Index toolkit.** [`packs/code-default/plugins/index.yaml`](../../packs/code-default/plugins/index.yaml) still declares capability verb **`fs.read`**. `IndexToolkit` in `toolkits/repo_map.py` also exposes `index.refresh`. Ranking stays out of `IndexPort` (observation-only). Pack also has `multi_file_completeness.py` and `GreenfieldPolicy` (MECHANISM; see §3.4).
+**Index toolkit.** [`packs/code-default/plugins/index.yaml`](../../../packs/code-default/plugins/index.yaml) still declares capability verb **`fs.read`**. `IndexToolkit` in `toolkits/repo_map.py` also exposes `index.refresh`. Ranking stays out of `IndexPort` (observation-only). Pack also has `multi_file_completeness.py` and `GreenfieldPolicy` (MECHANISM; see §3.4).
 
 **Facade (MECHANISM).** `CodingMaxFacade`: `run` / `status` / `resume` / `evidence` / `cost`; presets `fast|balanced|max`.
 

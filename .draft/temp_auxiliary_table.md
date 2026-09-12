@@ -22,11 +22,11 @@
 
 Para implementar o sistema de forma segura, determinística e livre de concorrência destrutiva, todo o ciclo de desenvolvimento segue os 5 arquivos canônicos da pista em [`docs/execution/`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution):
 
-1. **[`tasks.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md)**: Quadro operacional de tarefas e grafo de dependências (`requires: [...]`), streams exclusivas de escrita (A, B, C) e comandos falsificadores executáveis.
-2. **[`spec.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/spec.md)**: Especificação normativa e contratos tipados (schemas canônicos como `aether.memory-view/1`, `aether.context-policy/2`, `aether.recovery-state/1`), matriz de erro canônica e invariantes constitucionais.
-3. **[`technical.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/technical.md)**: Manual de engenharia de software com o algoritmo de compactação de contexto em 7 passos, máquina de estados de recuperação determinística e mapeamento de componentes.
-4. **[`milestones.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/milestones.md)**: Portões de aceitação TARGET (`MS-BASELINE`, `MS-CONTEXT`, `MS-CONTROL`, `M-0` a `M-10`).
-5. **[`backlog.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/backlog.md)**: Inventário de pacotes de capacidade e ciclo de vida (`APPROVED`, `IN_PROGRESS`, `DONE`, `BLOCKED`, `PROPOSED`).
+1. **[`tasks.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md)**: Quadro operacional de tarefas e grafo de dependências (`requires: [...]`), streams exclusivas de escrita (A, B, C) e comandos falsificadores executáveis.
+2. **[`spec.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/spec.md)**: Especificação normativa e contratos tipados (schemas canônicos como `aether.memory-view/1`, `aether.context-policy/2`, `aether.recovery-state/1`), matriz de erro canônica e invariantes constitucionais.
+3. **[`technical.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/technical.md)**: Manual de engenharia de software com o algoritmo de compactação de contexto em 7 passos, máquina de estados de recuperação determinística e mapeamento de componentes.
+4. **[`milestones.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/milestones.md)**: Portões de aceitação TARGET (`MS-BASELINE`, `MS-CONTEXT`, `MS-CONTROL`, `M-0` a `M-10`).
+5. **[`backlog.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/backlog.md)**: Inventário de pacotes de capacidade e ciclo de vida (`APPROVED`, `IN_PROGRESS`, `DONE`, `BLOCKED`, `PROPOSED`).
 
 ---
 
@@ -182,15 +182,15 @@ Os desenvolvedores podem avançar com total independência técnica **até a con
 - **Role**: Dev C (Principal Integration, Test-Integrity, Configuration, and Acceptance Engineer)
 - **Current HEAD**: `cognitive-framework` on `feat/aether-framework-electroweak-canonical-agents`
 - **Accepted Integrated Subject**: `2989d57d4d38c01eecdb7a5fbb6f125077f00e59`
-- **Active Milestone Focus**: [`milestones.md:143`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/milestones.md#L143)
+- **Active Milestone Focus**: [`milestones.md:143`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/milestones.md#L143)
 
 ### 3.1 Current Status of the Runway
 
 The multi-day autonomous context convergence batch (Phases C0–C4) is fully completed, qualified, and accepted by Leadership:
 
 - **Completed & Closed Milestones**:
-  - `MS-BASELINE`: CLOSED ([`tasks.md:95–151`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L95-L151)). Full discovery ran 3,121 tests (3,079 passed, 42 skipped, 0 failures, 0 errors).
-  - `MS-CONTEXT`: CLOSED ([`tasks.md:192–255`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L192-L255)). Deterministic 104-turn fresh-process recovery passed across 4 interpreters with zero duplicate settled effects.
+  - `MS-BASELINE`: CLOSED ([`tasks.md:95–151`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L95-L151)). Full discovery ran 3,121 tests (3,079 passed, 42 skipped, 0 failures, 0 errors).
+  - `MS-CONTEXT`: CLOSED ([`tasks.md:192–255`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L192-L255)). Deterministic 104-turn fresh-process recovery passed across 4 interpreters with zero duplicate settled effects.
 - **Architectural Invariants & Budgets**:
   - **TCB Budget**: 1,386 logical LOC in kernel ($\le 1438$ threshold, 52 lines headroom).
   - **Invariant N-06**: Exactly 0 `subprocess` imports in `runtime/`.
@@ -245,7 +245,7 @@ flowchart TD
 
 ### 3.3 Step-by-Step Execution Sequence
 
-The dependency spine in [`milestones.md:99`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/milestones.md#L99) and [`tasks.md:57`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L57) enforces a strict 4-step sequence. No tasks may leapfrog predecessors:
+The dependency spine in [`milestones.md:99`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/milestones.md#L99) and [`tasks.md:57`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L57) enforces a strict 4-step sequence. No tasks may leapfrog predecessors:
 
 $$\text{MS-BASELINE (CLOSED)} \longrightarrow \text{MS-CONTEXT (CLOSED)} \longrightarrow \text{MS-CONTROL (NEXT)} \longrightarrow \text{FH-1 Post-Control Branches}$$
 
@@ -254,12 +254,12 @@ Before T-26 freezes the candidate SHA, all runner contracts, metric vetoes, and 
 
 | Task ID | Package | Scope & Owner | Falsifier Command | Current Status |
 |:---|:---|:---|:---|:---:|
-| **T-79** ([`tasks.md:828`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L828)) | `CMX-01` | Sole budget catalog on `presets.json`; facade `max_turns` default is `None`; declared ceilings (50k/8t, 150k/20t, 400k/40t). | `python3 -m unittest test.apps.test_preset_budgets -v` | **12/12 PASS** |
-| **T-89** ([`tasks.md:930`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L930)) | `INS-01 / EXP-01` | Canary routes through public [`product_path.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/apps/coding_max/product_path.py) $\to$ [`entrypoint.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/runtime/entrypoint.py). Matches CLI manifest & preset identity. | `python3 -m unittest test.benchmarks.test_product_path_subject -v` | **4/4 PASS** |
-| **T-92** ([`tasks.md:958`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L958)) | `EXP-01` | L0 smoke triad (P0-FIB, P0-CSV, P0-BUG) through public CLI; typed terminals or failures; patchless completion rejected. | `python3 -m unittest test.benchmarks.test_l0_triad -v` | **4/4 PASS** |
-| **T-93** ([`tasks.md:968`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L968)) | `EXP-01` | L1 12-task freeze (`suite.json`); evidence row schema; reject mixed REPLAY and LIVE tables. | `python3 -m unittest test.benchmarks.test_evidence_row_schema -v` | **5/5 PASS** |
-| **T-94** ([`tasks.md:978`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L978)) | `EXP-01` | §EW-9.4 metrics; false-completion hard veto (`fc > 0` fails gate); Wilson score calculated solely on `LIVE-*` rows. | `python3 -m unittest test.benchmarks.test_metric_veto -v` | **4/4 PASS** |
-| **T-95** ([`tasks.md:988`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L988)) | `EXP-01` | Preregistered hypothesis registry (`hypotheses.json`); enforce single-varied dimension constraint (`assert_single_varied_dimension`). | `python3 -m unittest test.benchmarks.test_preregistration -v` | **6/6 PASS** |
+| **T-79** ([`tasks.md:828`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L828)) | `CMX-01` | Sole budget catalog on `presets.json`; facade `max_turns` default is `None`; declared ceilings (50k/8t, 150k/20t, 400k/40t). | `python3 -m unittest test.apps.test_preset_budgets -v` | **12/12 PASS** |
+| **T-89** ([`tasks.md:930`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L930)) | `INS-01 / EXP-01` | Canary routes through public [`product_path.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/apps/coding_max/product_path.py) $\to$ [`entrypoint.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/runtime/entrypoint.py). Matches CLI manifest & preset identity. | `python3 -m unittest test.benchmarks.test_product_path_subject -v` | **4/4 PASS** |
+| **T-92** ([`tasks.md:958`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L958)) | `EXP-01` | L0 smoke triad (P0-FIB, P0-CSV, P0-BUG) through public CLI; typed terminals or failures; patchless completion rejected. | `python3 -m unittest test.benchmarks.test_l0_triad -v` | **4/4 PASS** |
+| **T-93** ([`tasks.md:968`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L968)) | `EXP-01` | L1 12-task freeze (`suite.json`); evidence row schema; reject mixed REPLAY and LIVE tables. | `python3 -m unittest test.benchmarks.test_evidence_row_schema -v` | **5/5 PASS** |
+| **T-94** ([`tasks.md:978`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L978)) | `EXP-01` | §EW-9.4 metrics; false-completion hard veto (`fc > 0` fails gate); Wilson score calculated solely on `LIVE-*` rows. | `python3 -m unittest test.benchmarks.test_metric_veto -v` | **4/4 PASS** |
+| **T-95** ([`tasks.md:988`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L988)) | `EXP-01` | Preregistered hypothesis registry (`hypotheses.json`); enforce single-varied dimension constraint (`assert_single_varied_dimension`). | `python3 -m unittest test.benchmarks.test_preregistration -v` | **6/6 PASS** |
 | **T-51 / T-52** | `EXP-01` | Internal multi-class corpus freeze & Wilson interval + cost $\kappa$ calculation on control. | Included in ladder metrics & protocol suite. | **PASS** |
 
 *All 35/35 tests in this prerequisite slice are already green.*
@@ -301,11 +301,11 @@ Tasks below remain provisional and strictly blocked until `MS-CONTROL` is formal
 
 | Horizon Track | Tasks | Gate Predicate | Focus |
 |:---|:---|:---:|:---|
-| **Track 1: CAS Architecture** | [`tasks.md:281–309`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L281-L309) (T-112–T-116) | `MS-CAS` | Tree & edit-set value contracts, durable snapshot adapter, atomic promotion, rollback. |
-| **Track 2: Delegation** | [`tasks.md:316–323`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L316-L323) (T-117–T-118) | `MS-DELEGATION` | Specialist wire contracts, spawn lifecycle, monotonic budget conservation. |
-| **Track 3: Specialists / Meta** | [`tasks.md:330`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L330) (T-119, T-28–T-30, T-53, T-80) | `MS-SPECIALIST / MS-META` | Preregistered paired studies against frozen control; treatment T-TI ablation; anti-thrashing circuit breaker ([`tasks.md:838`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L838)). |
-| **Track 4: Campaigns** | [`tasks.md:337`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L337) (T-120, T-31, T-54) | `MS-CAMPAIGN` | Durable campaign director, CAS mailbox, DAG execution without duplicate writes (requires MS-CAS + MS-DELEGATION). |
-| **Track 5: Memory & Learning** | [`tasks.md:344`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L344) (T-121, T-32, M-8) | `MS-MEMORY / M-8` | Governed memory, project authorization/revocation, held-out lift $\ge 0.05$, rollback receipts. |
+| **Track 1: CAS Architecture** | [`tasks.md:281–309`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L281-L309) (T-112–T-116) | `MS-CAS` | Tree & edit-set value contracts, durable snapshot adapter, atomic promotion, rollback. |
+| **Track 2: Delegation** | [`tasks.md:316–323`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L316-L323) (T-117–T-118) | `MS-DELEGATION` | Specialist wire contracts, spawn lifecycle, monotonic budget conservation. |
+| **Track 3: Specialists / Meta** | [`tasks.md:330`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L330) (T-119, T-28–T-30, T-53, T-80) | `MS-SPECIALIST / MS-META` | Preregistered paired studies against frozen control; treatment T-TI ablation; anti-thrashing circuit breaker ([`tasks.md:838`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L838)). |
+| **Track 4: Campaigns** | [`tasks.md:337`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L337) (T-120, T-31, T-54) | `MS-CAMPAIGN` | Durable campaign director, CAS mailbox, DAG execution without duplicate writes (requires MS-CAS + MS-DELEGATION). |
+| **Track 5: Memory & Learning** | [`tasks.md:344`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L344) (T-121, T-32, M-8) | `MS-MEMORY / M-8` | Governed memory, project authorization/revocation, held-out lift $\ge 0.05$, rollback receipts. |
 | **Track 6: Official Evaluation** | T-122–T-127 | `MS-EVAL / MS-OFFICIAL / MS-SOTA` | Pinned evaluation harnesses, SWE-P5 protocol, official reference replays. |
 | **Track 7: Release** | T-128 | `M-9 -> M-10` | Final qualification, offline-after-install, signed release envelope (strictly blocked on M-8). |
 
@@ -457,9 +457,9 @@ To avoid equal-division bottlenecks and prevent merge thrashing, the team is reo
 The concrete, sequential work items for Dev C are:
 
 - [x] **1. Reconcile Pending Working Tree Diff**:
-  - Land the lifecycle alignment in [`docs/execution/backlog.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/backlog.md) (marking `GATE-01`, `CTX-01`, `REC-01` ACCEPTED on candidate `2989d57d`, exactly matching [`docs/execution/tasks.md:52-56`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L52-L56)).
+  - Land the lifecycle alignment in [`docs/execution/main/backlog.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/backlog.md) (marking `GATE-01`, `CTX-01`, `REC-01` ACCEPTED on candidate `2989d57d`, exactly matching [`docs/execution/main/tasks.md:52-56`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L52-L56)).
 - [x] **2. Formal Audit Check of Control Prerequisites**:
-  - Audit and check off [`tasks.md:828`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L828) (T-79) and [`tasks.md:930`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L930) (T-89) in `tasks.md`, confirming that their falsifiers pass (12/12 and 4/4) and their former boundary/terminal blockers were resolved by T-99 and T-102.
+  - Audit and check off [`tasks.md:828`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L828) (T-79) and [`tasks.md:930`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L930) (T-89) in `tasks.md`, confirming that their falsifiers pass (12/12 and 4/4) and their former boundary/terminal blockers were resolved by T-99 and T-102.
 - [ ] **3. Execute T-26 (Freeze Control Preregistration)**:
   - Inspect the clean candidate commit SHA and target model ID.
   - Populate and freeze `control_preregistration.json`.

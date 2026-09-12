@@ -1,330 +1,172 @@
-# Director Charter — Causal Decisions for the Coding Harness
-
-**To:** CTO / Principal Engineer  
-**From:** CEO  
-**Date:** 2026-09-12  
-**Subject:** `63881e68caab8a33a4da588718db33fe0fb88706`  
-**Authority:** `AGENTS.md`, `docs/execution/spec.md` RUN-01..RUN-06, and the five execution files
-
-> This is a temporary chat directive, not a repository artifact. Keep it
-> untracked and do not commit it. The Senior Developer owns documentation
-> maintenance and will transfer your approved decisions into the canonical
-> execution files.
-
-## 1. Assignment
-
-Use one focused leadership session to answer the questions that require
-architectural judgment. Do not perform the exhaustive audit, write detailed task
-rows, implement product fixes, or run the complete verification matrix yourself.
-
-Your outcome is a compact, decisive handoff from which senior developers can
-implement without returning for routine decisions.
-
-We are building a coding agent that can demonstrate, through the real product
-path:
-
-- atomic multi-file changes;
-- greenfield construction;
-- large-context repository navigation;
-- durable long-session compaction and fresh-process resumption;
-- bounded planning and replanning;
-- truthful exterior-oracle completion;
-- policy-bound local and hosted model escalation.
-
-Mechanism presence is not success. No SOTA claim is permitted without retained,
-comparative evidence against named baselines.
-
-## 2. Verified starting state
-
-Verify these facts briefly; do not repeat the Senior Developer's full audit:
-
-- HEAD at assignment: `63881e68caab8a33a4da588718db33fe0fb88706`.
-- `test.benchmarks.test_control_corpus` currently runs 8 tests and ends with
-  1 error plus 1 failure rooted in `oracle digest mismatch`.
-- The execution board has been truth-synced: T-51 is REOPENED/BLOCKED and T-26b
-  review waits for T-51 reacceptance.
-- Two T-51 oracle files changed after their accepted digest binding.
-- T-26b implementation is landed but not independently accepted.
-- `control_preregistration.json` remains UNFROZEN.
-- T-26 and T-27 remain BLOCKED.
-- The committed autofix cascade is local-only and is not the control subject.
-- The control subject is single-worker `vg-code-balanced`, preset `balanced`,
-  through `vanguard.packages.runtime.entrypoint.execute`.
-
-If any fact is wrong, record the correction and decide from current evidence.
-
-### 2.1 Measured foundation state — run for you on `63881e68`
-
-Executed 2026-09-12 on a clean checkout of the assignment subject, so you need
-not re-run them. Re-run anything you intend to rely on.
-
-| Gate | Command | Result |
-|---|---|---|
-| Full pipeline | `just verify` | **PASS** — 102 + 310 + 535 tests, 7 skipped, typecheck + docs green |
-| Static gates | `just check` | **PASS** — isolation, path hygiene, doc metadata, links, markdownlint (133 files, 0 issues) |
-| Execution board | `check_execution_truth.py` | **PASS** — one supported state model |
-| Links | `check_markdown_links.py` | **PASS** |
-| Whitespace | `git diff --check` | **PASS** |
-| LDA index | `lda identity --json` | **FRESH** at `63881e68`, 11,430 symbols |
-| Doc drift | `lda drift --json` | **0 stale paths**; 391 undocumented symbols, 306 documents without code evidence (pre-existing, non-blocking) |
-| Control slice | `test_metric_veto` + `test_control_accounting` + `test_preregistration` + `test_evidence_row_schema` + `test_product_path_subject` + `test_ladder_runner` | **67 passed** |
-| Corpus gate | `test.benchmarks.test_control_corpus` | **RED — 8 tests, 1 failure, 1 error**, `oracle digest mismatch` |
-
-**Verdict: the foundation is clean.** No stale index, no broken links, no
-outdated references, no flaky suites observed. Exactly one gate is red, it is
-the known T-51 blocker, and its cause is understood. You are not walking into a
-repair job — you are walking into one decision.
-
-### 2.2 One structural finding you should rule on
-
-`just check` and `just verify` discover only `test/kernel`, `test/agency` and
-`test/contracts` (`justfile:80-82`). Measured discovery across the tree:
-
-```
-test/runtime      823        test/packs         92
-test/contracts    535  *     test/security      55
-test/falsifiers   524        test/apps          38
-test/agency       310  *     test/lab           32
-test/tools        200        test/registry      28
-test/adapters     198        test/middleware    23
-test/benchmarks   163        test/trust         22
-test/kernel       102  *     others            <10 each
-                                    * = in the gate
-```
-
-**≈947 of ≈3,171 tests (~30%) run in the standard gates.** `test/benchmarks`
-— which contains the control instrument — and `test/falsifiers` are both
-outside them.
-
-This is why the stale oracle digest survived: `just verify` passed at every
-step while `test_control_corpus` was red, because that suite is never
-discovered. Every "verify passed" receipt in the recent handoffs is true and
-simultaneously silent about the control instrument.
-
-Whether to widen gate discovery is an architectural and cost decision, not a
-developer's call. It also bears directly on D1: a measurement instrument that
-no gate protects will drift again.
-
-`test/e2e` and `test/broken` are not importable as packages; that appears
-deliberate but is unconfirmed.
-
-### 2.3 Working tree at handoff
-
-`docs/execution/tasks.md` (truth-sync) and `.draft/temp_auxiliary_table.md` are
-modified; `.generated/knowledge/catalog.jsonl` was regenerated by `just verify`
-and must not be hand-edited. `director_task_instruction.md` is untracked and
-stays that way.
-
-## 3. The one diagnosis you own
-
-Determine the causal boundary of the write-landing failure. This is the hardest
-and highest-leverage question: capable models have consumed turns on multi-file
-and greenfield work while changing zero files.
-
-Require evidence through the real product route:
-
-```text
-runtime.entrypoint.execute
-  -> runtime.root
-  -> runtime.session.HarnessSession
-  -> agency.episode.EpisodeEngine
-  -> model adapter and dialect normalization
-  -> tool admission and capability grant
-  -> patch transaction and candidate workspace
-  -> completion admission (_admit_completion)
-  -> exterior oracle
-  -> evidence reconciliation and report admission
-```
-
-Forge, BaaC, and the autofix proficiency are comparative evidence only. A fix in
-one of those paths does not close a product-path defect.
-
-Use retained evidence from one L0 case, one non-control multi-file case, and one
-non-control greenfield case. If existing evidence cannot distinguish the seam,
-authorize a small diagnostic probe for the Senior Developer. Do not run or tune
-against the T-51 holdout.
-
-Classify the cause among, at minimum:
-
-- no canonical tool emitted;
-- undeclared or malformed tool call;
-- capability or policy denial;
-- patch transaction rejection or partial application;
-- wrong candidate workspace;
-- stale tree observed by the oracle;
-- patchless completion admitted;
-- resource exhaustion before the first valid action;
-- multiple independent failures.
-
-Return one causal statement:
-
-```text
-Observed symptom -> failing seam -> governing invariant -> smallest valid
-architectural repair boundary -> evidence that will falsify the repair.
-```
-
-You decide whether the repair is local to an existing component or requires a
-separately admitted public contract change. You do not implement it.
-
-## 4. Decisions only the Director makes
-
-Return a ruling for every item. `UNDECIDED` is not an exit state.
-
-### D1 — Measurement trust
-
-Is the control instrument currently trustworthy enough to freeze after T-51 is
-restored, or is a broader corpus rebuild required? The Senior Developer will
-statically audit all 30 oracles and apply this default escalation rule:
-
-- three or more toothless/non-deterministic oracles means systemic failure and
-  corpus rebuild;
-- fewer than three permits named repair or replacement.
-
-You may override the threshold only with a written rationale.
-
-### D2 — T-51 treatment
-
-Choose `REPAIR` or `REPLACE` for the two invalidated members and explicitly
-authorize the Senior Developer to rebind the resulting suite digests after the
-new oracles are independently proven red on the intended defect and green on a
-correct implementation.
-
-### D3 — Fix before measurement
-
-Decide which known product defects must be fixed before T-26/T-27. Classify each:
-
-- `BLOCK-T27`;
-- `MEASURED-MISSINGNESS` with a typed non-binary outcome;
-- `POST-CONTROL` with a reason it cannot invalidate measurement.
-
-Required rows:
-
-1. valid model writes do not land;
-2. multi-file application can be partial or invisible to the oracle;
-3. patchless, test-inlined, or extra-file completion can appear green;
-4. product episodes consume their full turn ceiling after valid completion;
-5. malformed/undeclared tool dialect is not attributed precisely;
-6. evidence identity can diverge from the submitted product candidate;
-7. resume or compaction can lose task, candidate, plan, or budget identity;
-8. model escalation can bypass aggregate budget or provider policy.
-
-### D4 — Target architecture
-
-Approve or reject these architectural boundaries:
-
-- one canonical `EpisodeEngine`; no second agent loop;
-- atomic all-or-nothing multi-file transaction with final tree digest;
-- exterior oracle evaluates the exact submitted candidate;
-- context retrieval is token-bounded and provenance-bound;
-- compaction preserves objective, constraints, unresolved failures, plan state,
-  changed-file identity, and resource ledger;
-- fresh-process resume never duplicates effects or resets ceilings;
-- replanning is finite and exhaustion is terminal;
-- production model escalation flows through existing `ModelPort`, provider
-  factory, credential isolation, and evidence accounting;
-- escalation retains one task/slot identity and one aggregate resource budget.
-
-Name any required public schema or port change explicitly. Absence of such a
-decision means developers must preserve current public contracts.
-
-### D5 — Delivery order
-
-Approve a priority order for five implementation packages:
-
-1. measurement and oracle integrity;
-2. product-path write/change closure;
-3. exterior completion and false-completion resistance;
-4. large-context, compaction, and resumable-session qualification;
-5. budgeted model cascade plus comparative evidence.
-
-State which packages may run in parallel and which require a completed review
-first. Default to the order above unless diagnosis establishes a different
-dependency.
-
-### D6 — Live model authority
-
-The available diagnostic ceiling is aggregate `$0.10 USD / 150 provider calls`.
-Decide how much, if any, may be allocated before freeze. Every allocation must
-name:
-
-- exact pinned model ID;
-- task class and diagnostic purpose;
-- USD, provider-call, token, turn, and wall-clock sub-ceilings;
-- evidence/ledger destination;
-- stop condition.
-
-`openrouter/free` is exploratory only and cannot produce qualification evidence.
-The existence of a credential is not authority. Hosted access must use the
-admitted `ModelPort` path. Unknown cost remains unknown.
-
-This charter does not authorize T-27 or freezing the preregistration.
-
-## 5. Required Director handoff
-
-Return one decision table with these columns:
-
-| Decision | Evidence | Ruling | Blocks | Authorized owner | Review gate |
-|---|---|---|---|---|---|
-
-Then provide:
-
-1. the write-landing causal statement from §3;
-2. D1-D6 with no undecided cells;
-3. the ordered implementation packages and permitted parallelism;
-4. any public-contract escalation requiring leadership approval;
-5. the exact diagnostic spend allocation, or `DEFER — zero calls`;
-6. a rough engineering size for each package: `S`, `M`, or `L`;
-7. the conditions under which T-26 may become freeze-ready.
-
-Keep the handoff short enough to review in one sitting. The Senior Developer
-will translate it into leases, task rows, exact falsifiers, receipts, and the
-five canonical execution documents.
-
-## 6. Delegated Senior work — not Director work
-
-The Senior Developer owns:
-
-- static audit and recorded verdict for all 30 control oracles;
-- validating, repairing/replacing, digest-binding, and independently reviewing
-  the T-51 corpus after D1/D2;
-- independent T-26b review after T-51 reacceptance;
-- detailed implementation task decomposition, leases, `requires:` edges,
-  pseudocode, exact falsifiers, estimates, and stop conditions;
-- compression/supersession of stale execution-document history without adding a
-  sixth execution file;
-- implementation and review assignments;
-- all focused gates, `just check`, `just verify`, LDA synchronization/drift,
-  link checking, execution-truth checking, and final receipts;
-- preparation of the freeze-readiness packet.
-
-The Senior Developer returns to the Director only for a public port/schema
-change, preset or threshold change, holdout-policy change, additional paid
-authority, or a genuine architectural fork not resolved by D1-D6.
-
-## 7. Boundaries
+# Director Charter II — Architecture, Protocol and Horizon
+
+**To:** CTO / Principal Engineer
+**From:** CEO
+**Date:** 2026-09-12
+**Subject:** current `HEAD` on `feat/aether-framework-electroweak-canonical-agents`
+**Authority:** `AGENTS.md`, `docs/execution/main/spec.md` RUN-01..RUN-13, and the five execution files
+
+> Temporary chat directive, not a repository artifact. Keep it untracked and do
+> not commit it. The Senior Developer transfers approved decisions into the
+> canonical execution files.
+
+## 1. What changed since Charter I
+
+Charter I is discharged. Its decisions are now normative and you may not
+relitigate them without new evidence:
+
+- `spec.md` RUN-07..RUN-13 record D1-D6 plus the open causal question.
+- `technical.md` records the nine approved architectural boundaries.
+- `milestones.md` records the RUN-11 package order and freeze predicates.
+- `tasks.md` carries T-130 (hermetic write-landing probe), T-131 (eight
+  `BLOCK-T27` defects), T-132 (gate discovery widening), and the T-51 holdout
+  exposure finding with its normative audit-before-repair ordering.
+
+One thing Charter I did not deliver: the RUN-13 causal statement. T-130 is the
+instrument that produces it, it is hermetic and costs nothing, and it does not
+need you. **Do not spend this session on it.** If T-130 has returned by the time
+you read this, its packet is evidence for §3 below; if it has not, decide §3
+conditionally and name the branch.
+
+## 2. Why this charter is different
+
+Charter I converted a mess into decisions. That was correct and it is done. The
+remaining risk is no longer disorder — it is that we execute a well-governed plan
+toward a target that is merely *correct* rather than *state of the art*.
+
+This session is for the work only a principal can do: the mathematics, the
+protocol design, the architecture that has to be right before it is built, and
+the honest assessment of how far the current design can actually go. You are not
+being asked to approve or schedule. You are being asked to **design and to
+falsify your own design**.
+
+Depth is the deliverable. Where a claim is quantitative, give the equation and
+its domain of validity. Where a mechanism is a protocol, give its state machine,
+its failure modes and its recovery. Where you are guessing, say so and say what
+measurement would settle it. A confident paragraph that cannot be falsified is
+worth less to us than an uncertain one that can.
+
+## 3. Assignments
+
+### A1 — The completion problem, formally
+
+Truthful completion is the invariant the whole instrument rests on, and we
+currently defend it with a veto and a digest. State the problem properly.
+
+Give the formal conditions under which an exterior oracle's verdict on a
+submitted candidate is a sound estimator of task success. Define the adversary:
+an agent optimizing for oracle-pass rather than task completion, with full
+knowledge of the harness. Characterize the gap between `oracle_passes(c)` and
+`task_solved(c)` — false completion, and its neglected dual, false failure, where
+a correct candidate is rejected by an oracle that is wrong or by a harness that
+loses the write. Our RUN-03 acceptance rule uses a two-sided Wilson lower bound
+at 0.40 with zero observed false completions over n = 30; derive what that
+actually bounds, including what "zero observed" is worth at n = 30 (give the
+upper confidence bound on the unobserved rate). State whether our acceptance
+threshold is defensible or merely conventional.
+
+### A2 — Long-horizon context economics
+
+Give the model. Define the state an agent must carry across a 100+ turn episode,
+the rate at which it is generated, and the compaction operator that bounds it.
+Then state the loss: what compaction provably destroys, and which of RUN-10's six
+preserved quantities (objective, constraints, unresolved failures, plan state,
+changed-file identity, resource ledger) are sufficient to reconstruct competent
+behavior versus merely sufficient to avoid crashing.
+
+Derive the relationship between context budget, turn count and task success. If
+the relationship is not derivable, say so and give the experiment that measures
+it. Address the failure we actually observe in the field: an agent that is still
+technically executing at turn 80 but has stopped making progress. Is
+that a context defect, a planning defect or a reward defect, and what
+instrumentation distinguishes them? Bounded replanning with terminal exhaustion
+(RUN-10) is our current answer; argue whether it is adequate or merely safe.
+
+### A3 — The write path, designed rather than repaired
+
+T-130 will tell us where writes are lost. It will not tell us what the write path
+should be. Design it.
+
+Specify the transaction protocol end to end: emission, normalization, admission,
+capability grant, staging, atomic commit, digest sealing, oracle handoff. Give
+the state machine, the invariant at each transition, and the behavior under
+crash, partial write, concurrent mutation and resume. Say precisely what makes a
+multi-file change atomic in a filesystem that offers no such guarantee, and what
+our `CAS-01` proposal buys that the current transaction adapter does not.
+
+Then the harder half: state which failure modes this design makes *impossible*
+versus merely *detectable*, and what it costs. An impossible-by-construction
+failure that doubles latency may be the wrong trade; say which you would take.
+
+### A4 — What SOTA actually requires
+
+We intend to build a state-of-the-art coding agent harness. Assess honestly
+whether the current architecture can get there, or whether it is a well-governed
+local optimum.
+
+Name the specific capabilities that separate a leading harness from a competent
+one, and for each, say whether we have it, can reach it from here, or need a
+design we do not have. Be concrete about where we are behind. Consider at
+minimum: retrieval quality versus context volume; verification strength beyond
+test-passing; recovery from a wrong plan rather than a wrong edit; multi-model
+routing under a budget; whether learned or accumulated task experience is a real
+advantage or a contamination liability we are right to gate hard.
+
+Give a dated, falsifiable claim about what would have to be true for us to
+publish a defensible SOTA result, and what our honest current distance from it
+is. `MS-SOTA`, `FH-E04` and T-127 already gate the claim; this is not about the
+gate, it is about whether the thing behind the gate is achievable.
+
+### A5 — The refactor we are avoiding
+
+Every codebase has one. Identify the structural change that is most expensive to
+make now and most expensive to defer, and rule on it.
+
+RUN-10 approved nine boundaries and authorized no public port or schema change.
+That was the right call for the control arm. State whether it is the right call
+for the next twelve months, and if not, name the delta, its migration path and
+the moment at which deferring costs more than doing it. The `FH-1` proposal tree
+(CAS-01, delegation, memory, evaluation) is the obvious candidate; say whether
+it is one refactor or four independent ones, because we have been treating it as
+a package and that may be the error.
+
+### A6 — Horizon
+
+Sequence the next three to six months at the level of capability, not task rows.
+What must be true in order, what can be built in parallel, what we should refuse
+to build. Include at least one thing we are currently planning that you would
+cancel, and defend the cancellation.
+
+## 4. Required output
+
+For A1-A3 and A5, produce genuine technical content: equations with stated
+domains, protocol state machines, invariants, failure enumerations. Prose that
+restates the assignment is a failed deliverable. For A4 and A6, produce
+judgment with reasons and an explicit statement of what would change your mind.
+
+Close with:
+
+1. any decision that changes RUN-07..RUN-13, stated as a named delta with its
+   justification — silence means those decisions stand;
+2. anything requiring a public port or schema change, which RUN-10 currently
+   forbids and only you can unlock;
+3. the three assumptions in your own analysis most likely to be wrong, and the
+   measurement that would expose each.
+
+## 5. Boundaries
 
 - Read product and benchmark source; do not edit implementation code.
-- Do not run development iterations against T-51.
-- Do not weaken, delete, or silently replace a required falsifier.
+- Do not run development iterations against the T-51 holdout.
+- Do not weaken, delete or silently replace a required falsifier.
 - Do not add a sixth execution document or commit this directive.
-- Do not freeze `control_preregistration.json`.
-- Do not run T-27.
-- Do not claim SOTA from mechanism presence or engineering diagnostics.
-- Stop after the decision handoff; implementation and verification belong to
-  the admitted Senior/Principal task owners and independent reviewers.
+- Do not freeze `control_preregistration.json`; do not run T-27.
+- Zero provider calls. RUN-12 stands: `DEFER — zero calls`.
+- No SOTA claim from mechanism presence, design quality or diagnostics.
+- Do not schedule, decompose into task rows, or assign leases. That is Senior
+  work and doing it here wastes the session.
 
-## 8. Definition of done
+## 6. Definition of done
 
-The Director assignment is complete when:
-
-- the real write-landing failure has a defensible causal boundary;
-- D1-D6 are decided;
-- T-51 repair/replacement and digest authority are explicit;
-- every known defect is classified;
-- target architecture and package order are approved;
-- live diagnostic authority is explicit and bounded;
-- the Senior Developer can construct the detailed implementation charter without
-  another routine leadership meeting.
-
-Nothing is implemented, frozen, or called SOTA by this assignment. It converts
-uncertainty into decisions so the engineering lanes can move quickly and safely.
+The Senior Developer can build against A3, the measurement owner can defend A1
+under review, and the CEO knows from A4 and A6 what we are actually capable of
+and what we have been avoiding. Nothing is implemented, frozen or claimed.

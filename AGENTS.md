@@ -27,7 +27,7 @@ Vanguard / AETHER is a Python-first recursive-agency substrate (`requires-python
 All documentation is partitioned into distinct authority tiers:
 
 ```text
-VISION.md / AGENTS.md / docs/execution/spec.md
+VISION.md / AGENTS.md / docs/execution/main/spec.md
     Vision, Operational Rules, Compact Normative Law & Delta Spec
 
 docs/architecture/ & docs/backend/ & docs/frontend/ & docs/product/
@@ -41,8 +41,8 @@ docs/theory/ | docs/research/ | docs/reports/
 ```
 
 - **Vision & Operational Rules**: [`VISION.md`](VISION.md), [`AGENTS.md`](AGENTS.md).
-- **The Law & Invariants**: [`docs/execution/spec.md`](docs/execution/spec.md).
-- **The Execution Runway**: [`docs/execution/tasks.md`](docs/execution/tasks.md), [`docs/execution/spec.md`](docs/execution/spec.md), [`docs/execution/technical.md`](docs/execution/technical.md), [`docs/execution/milestones.md`](docs/execution/milestones.md), [`docs/execution/backlog.md`](docs/execution/backlog.md).
+- **The Law & Invariants**: [`docs/execution/main/spec.md`](docs/execution/main/spec.md).
+- **The Execution Runway**: [`docs/execution/main/tasks.md`](docs/execution/main/tasks.md), [`docs/execution/main/spec.md`](docs/execution/main/spec.md), [`docs/execution/main/technical.md`](docs/execution/main/technical.md), [`docs/execution/main/milestones.md`](docs/execution/main/milestones.md), [`docs/execution/main/backlog.md`](docs/execution/main/backlog.md).
 
 ### Repository-Intelligence Navigation Protocol
 
@@ -263,7 +263,7 @@ Execution sequence:
 5. **M-4–M-8**: current state, ownership, and authorization live only in the active execution board; mechanism presence never implies acceptance.
 6. **M-9/M-10 (NON-AUTHORIZING)**: compatibility seams only; no implementation before M-8 acceptance.
 
-Current status belongs only in the execution runway: [`docs/execution/tasks.md`](docs/execution/tasks.md) (flat work tree), [`docs/execution/milestones.md`](docs/execution/milestones.md) (TARGET gates), [`docs/execution/spec.md`](docs/execution/spec.md) (typed deltas), [`docs/execution/technical.md`](docs/execution/technical.md) (handbook), [`docs/execution/backlog.md`](docs/execution/backlog.md) (packages). Present-tense HEAD architecture lives in `docs/architecture/`, `docs/backend/`, and `docs/SPEC.md`.
+Current status belongs only in the execution runway: [`docs/execution/main/tasks.md`](docs/execution/main/tasks.md) (flat work tree), [`docs/execution/main/milestones.md`](docs/execution/main/milestones.md) (TARGET gates), [`docs/execution/main/spec.md`](docs/execution/main/spec.md) (typed deltas), [`docs/execution/main/technical.md`](docs/execution/main/technical.md) (handbook), [`docs/execution/main/backlog.md`](docs/execution/main/backlog.md) (packages). Present-tense HEAD architecture lives in `docs/architecture/`, `docs/backend/`, and `docs/SPEC.md`.
 Do not infer authorization from archived proposals, reviews, research, completed sprint records, or unused `.draft/` triad files.
 
 ---
@@ -323,10 +323,10 @@ When updating documentation, route information to its semantic owner:
 > AI Agents **MUST NOT** create new Markdown files under `docs/`, `docs/plans/`, or anywhere across the workspace to leave scratch notes, plans, reviews, or summaries.  
 > 
 > All documentation updates must strictly edit existing canonical files in the documentation hierarchy:
-> 1. **Modifying Normative Law & System Spec** $\to$ Edit [`docs/execution/spec.md`](docs/execution/spec.md).
+> 1. **Modifying Normative Law & System Spec** $\to$ Edit [`docs/execution/main/spec.md`](docs/execution/main/spec.md).
 > 2. **Recording Architectural Rationale & Trade-offs** $\to$ Edit corresponding subsystem architecture docs in [`docs/backend/architecture/`](docs/backend/architecture/) or [`docs/architecture/`](docs/architecture/).
-> 3. **Updating Tasks or Execution Progress** $\to$ Edit [`docs/execution/tasks.md`](docs/execution/tasks.md) and [`docs/execution/spec.md`](docs/execution/spec.md). Engineering recipes go in [`docs/execution/technical.md`](docs/execution/technical.md).
+> 3. **Updating Tasks or Execution Progress** $\to$ Edit [`docs/execution/main/tasks.md`](docs/execution/main/tasks.md) and [`docs/execution/main/spec.md`](docs/execution/main/spec.md). Engineering recipes go in [`docs/execution/main/technical.md`](docs/execution/main/technical.md).
 > 
-> **Invariant on Execution Architecture**: AI agents must never invent parallel architecture documents; all feature extensions must be expressed as delta contracts in `docs/execution/spec.md` and promoted to `docs/architecture/` upon milestone gate passage. The fifth execution file `technical.md` is the authorized handbook, not a second architecture plane.
+> **Invariant on Execution Architecture**: AI agents must never invent parallel architecture documents; all feature extensions must be expressed as delta contracts in `docs/execution/main/spec.md` and promoted to `docs/architecture/` upon milestone gate passage. The fifth execution file `technical.md` is the authorized handbook, not a second architecture plane.
 >
 > Any temporary thinking, scratch notes, or intermediate outputs must be kept in model scratchpads or ephemeral artifact directories—never committed as files in the repository tree.

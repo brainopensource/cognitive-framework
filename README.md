@@ -33,11 +33,11 @@ AETHER is an event-sourced general agentic computation substrate: a bounded doma
 enforces S0–S12 dispatch and typed budgets; a SQLite-WAL ledger makes state a fold over causal facts;
 and composition, recursive delegation, declarative topologies, authorized durable memory, and governed
 learning remain higher-layer capabilities rather than new cores. M-1 through M-3 are preservation
-anchors. The current delivery path is to repair the M-8 empirical-evidence path, issue an independent
-positive/negative/undeterminable disposition, then deliver Coding Max as a thin application over a
-thick declarative code-pack composition. The living package is `0.9.3`. M-9 (historical gate name
-`0.9.0b1`), M-10 `0.9.0`, and the post-M-10 1.0 horizon remain gated by exact-subject evidence;
-mechanism presence and green tests never substitute for independently accepted receipts.
+anchors. Per the 2026-09-12 leadership disposition, the immediate delivery priority is the empirical
+qualification of single-controller Coding Max (`MS-CONTROL`), followed by governed memory and learning
+(M-8). The living package is `0.9.3`. M-9 (historical gate name `0.9.0b1`), M-10 `0.9.0`, and post-M-10
+horizons remain strictly gated by exact-subject evidence; mechanism presence and green tests never
+substitute for independently accepted receipts.
 
 ```text
 observe → propose → authorize → effect → receipt → evaluate
@@ -46,15 +46,15 @@ observe → propose → authorize → effect → receipt → evaluate
 | Dimension | Details |
 |---|---|
 | **Architectural authority** | [`VISION.md`](VISION.md) — constitutional; law and roadmap are subordinate to it |
-| **Normative law** | [`docs/execution/spec.md`](docs/execution/spec.md) (normative clauses, invariants & TCB ceilings; rationale in [`docs/backend/architecture/`](docs/backend/architecture/)) |
+| **Normative law** | [`docs/execution/main/spec.md`](docs/execution/main/spec.md) (normative clauses, invariants & TCB ceilings; rationale in [`docs/backend/architecture/`](docs/backend/architecture/)) |
 | **Development package** | `vanguard-runtime` **0.9.3** (`pyproject.toml` is the version source). That string is not M-9 acceptance. Python `>=3.10` (tested on Python 3.12 in CI) |
-| **Current status** | Execution runway: [`docs/execution/tasks.md`](docs/execution/tasks.md) (work tree), [`docs/execution/milestones.md`](docs/execution/milestones.md) (TARGET gates). Present HEAD architecture is in `docs/execution/spec.md` + `docs/architecture/` + `docs/backend/`. |
+| **Current status** | Execution runway: [`docs/execution/main/tasks.md`](docs/execution/main/tasks.md) (work tree), [`docs/execution/main/milestones.md`](docs/execution/main/milestones.md) (TARGET gates). Present HEAD architecture is in `docs/execution/main/spec.md` + `docs/architecture/` + `docs/backend/`. |
 | **Roadmap** | `0.9.3` Strongforce line → M-8 evidence integrity → Coding Max vertical slice → M-9 installable beta (gate) → M-10 `0.9.0` → non-authorizing 1.0 qualification horizon |
 | **Production truth** | `vanguard/packages/` (`domain` → `ports` → `kernel` → `agency` → `runtime` → `adapters`; `apps` is a runtime client) |
 
 [![Vision](https://img.shields.io/badge/Law_Zero-VISION.md-purple.svg)](VISION.md)
-[![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/execution/spec.md)
-[![Execution](https://img.shields.io/badge/Status-tasks.md-orange.svg)](docs/execution/tasks.md)
+[![Lattice](https://img.shields.io/badge/Production-vanguard%2Fpackages-green.svg)](docs/execution/main/spec.md)
+[![Execution](https://img.shields.io/badge/Status-tasks.md-orange.svg)](docs/execution/main/tasks.md)
 
 ## 1. What exists today vs the locked target
 
@@ -77,28 +77,26 @@ This section is deliberately honest about the gap. The target below is binding a
 | Memory, retrieval, skills, learning | Durable memory ports, CAS storage, and governed learning engine implemented | verified durable memory, lift, CAS promotion/rollback (M-8) |
 | Hermetic assurance (RF-85) | **Available, optional, claims zero rows** | stays optional |
 
-Mechanism presence is not milestone acceptance; [`docs/execution/milestones.md`](docs/execution/milestones.md) cites the evidence gaps.
+Mechanism presence is not milestone acceptance; [`docs/execution/main/milestones.md`](docs/execution/main/milestones.md) cites the evidence gaps.
 
-### Immediate delivery order
+### Immediate delivery order (Leadership Disposition, 2026-09-12)
 
-1. Repair `REL-01/H0`: route empirical runs through official runtime adapters,
-   execute materialized tasks and exterior oracles, and emit no synthetic
-   success/lift/cost from dry-run mode.
-2. Freeze and run the `REL-02/H1` single-attempt canary with content-addressed
-   tasks, strict budgets, explicit missingness, and independent evaluation.
-3. Close the evidence-integrity sprint with an honest M-8 disposition; a valid
-   negative result closes the sprint but does not accept M-8.
-4. Deliver the Coding Max vertical slice: three data-selected presets,
-   port-backed repository intelligence, durable recovery/resume, multi-file and
-   greenfield policies, and one thin CLI/API facade over the shared runtime.
-5. Qualify Coding Max on frozen internal repository-scale tasks before enabling
-   reviewer/specialist roles or experimental SBFL, mutation, branch-search, or
-   ToolScript treatments.
-6. Authorize and qualify M-9 (installable beta), then M-10 `0.9.0`; after M-10, qualify
-   the stable framework plus Coding Max and two non-coding reference agents for
-   the 1.0 horizon.
-7. Run official SWE-bench optimization as a separate preregistered measurement
-   program; local canaries never create an official score.
+1. **MS-BASELINE & MS-CONTEXT (Closed)**: Accepted on `2989d57d` (3,079/3,121 unit tests
+   passing, zero failures/errors; 104-turn compaction/restart verified with semantic parity).
+2. **MS-CONTROL (Immediate Priority)**: Qualify single-controller Coding Max through
+   `entrypoint.execute` under preset `balanced` ($0.15 / 20 turns / 40k tokens ceiling).
+   Acceptance predicate: $n=30$ distinct frozen L2 tasks, two-sided 95% Wilson lower bound
+   $\ge 0.40$ ($\ge 18$ binary passes), zero observed false completions, zero paid calls
+   before freeze. Delivery order follows RUN-11: P1 measurement/oracle integrity $\to$
+   P2 product write closure $\to$ P3 exterior completion verification $\to$ P4 context
+   compaction/recovery qualification $\to$ P5 budgeted model cascade.
+3. **Governed Memory & Reusable Skills**: Next framework priority after MS-CONTROL:
+   refine MEM-01/MEM-02/T-56 for durable authorized retrieval, versioned lessons,
+   held-out empirical lift $\ge 0.05$ ($p < 0.05$), separated promotion authority, and rollback.
+4. **Conditional Follow-on Horizons (FH-1)**: Content-Addressed Storage (`MS-CAS`),
+   bounded advisory delegation (`MS-DELEGATION`), and independent benchmark protocol
+   qualification (`MS-EVAL`) before M-9 (installable operational beta) or M-10 (final release)
+   can be authorized. Official SWE-bench runs require the separate SWE-P5 protocol.
 
 LIM (`tools/006_LLM_INT_MACHINE/`) and LEX research harnesses may assist
 development and research. They never provide Vanguard runtime or acceptance authority; adopted
@@ -120,10 +118,10 @@ All model access across runtime, benchmarks, CLI, and apps is **strictly governe
 | # | Layer | Documents |
 |---|---|---|
 | 0 | **Vision (constitutional)** | [`VISION.md`](VISION.md) — identity, ontology, direction |
-| 1 | **Law & Delta Spec (normative)** | [`docs/execution/spec.md`](docs/execution/spec.md) — normative requirements, TCB ceilings, invariants, and sprint delta |
+| 1 | **Law & Delta Spec (normative)** | [`docs/execution/main/spec.md`](docs/execution/main/spec.md) — normative requirements, TCB ceilings, invariants, and sprint delta |
 | 2 | **Architecture & Reference** | [`docs/architecture/`](docs/architecture/), [`docs/backend/`](docs/backend/), [`docs/frontend/`](docs/frontend/) — system workflows, subsystem design, DEC-01–DEC-11 rationale, wire contracts |
 | 3 | **Product PRDs** | [`docs/product/`](docs/product/) |
-| 4 | **Execution runway** | [`docs/execution/tasks.md`](docs/execution/tasks.md), [`docs/execution/milestones.md`](docs/execution/milestones.md), [`docs/execution/spec.md`](docs/execution/spec.md), [`docs/execution/technical.md`](docs/execution/technical.md), [`docs/execution/backlog.md`](docs/execution/backlog.md) |
+| 4 | **Execution runway** | [`docs/execution/main/tasks.md`](docs/execution/main/tasks.md), [`docs/execution/main/milestones.md`](docs/execution/main/milestones.md), [`docs/execution/main/spec.md`](docs/execution/main/spec.md), [`docs/execution/main/technical.md`](docs/execution/main/technical.md), [`docs/execution/main/backlog.md`](docs/execution/main/backlog.md) |
 | 5 | **Theory & Reports** | [`docs/theory/`](docs/theory/), [`docs/research/`](docs/research/), [`docs/reports/`](docs/reports/) |
 
 A lower document may not be used to reject a Vision concept. This README introduces no architecture
@@ -133,9 +131,9 @@ of its own.
 
 1. [`VISION.md`](VISION.md) — what AETHER is and where it is going.
 2. [`QUICKSTART.md`](QUICKSTART.md) — CLI installation, provider configuration, and practical benchmark tutorial.
-3. [`docs/execution/spec.md`](docs/execution/spec.md) — normative requirements, invariants, and delta contracts.
+3. [`docs/execution/main/spec.md`](docs/execution/main/spec.md) — normative requirements, invariants, and delta contracts.
 4. [`docs/architecture/overview.md`](docs/architecture/overview.md) & [`docs/backend/`](docs/backend/) — as-built architecture and rationale.
-5. [`docs/execution/tasks.md`](docs/execution/tasks.md) & [`docs/execution/milestones.md`](docs/execution/milestones.md) (future work vs TARGET gates).
+5. [`docs/execution/main/tasks.md`](docs/execution/main/tasks.md) & [`docs/execution/main/milestones.md`](docs/execution/main/milestones.md) (future work vs TARGET gates).
 
 ### Fast targeted navigation (LDA SOTA Repository Intelligence)
 
@@ -247,12 +245,12 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 
 ## 5. Roadmap & Execution Status
 
-Sequencing: [`docs/execution/milestones.md`](docs/execution/milestones.md). Work tree:
-[`docs/execution/tasks.md`](docs/execution/tasks.md). Packages: [`docs/execution/backlog.md`](docs/execution/backlog.md). Deltas: [`docs/execution/spec.md`](docs/execution/spec.md). Handbook: [`docs/execution/technical.md`](docs/execution/technical.md).
+Sequencing: [`docs/execution/main/milestones.md`](docs/execution/main/milestones.md). Work tree:
+[`docs/execution/main/tasks.md`](docs/execution/main/tasks.md). Packages: [`docs/execution/main/backlog.md`](docs/execution/main/backlog.md). Deltas: [`docs/execution/main/spec.md`](docs/execution/main/spec.md). Handbook: [`docs/execution/main/technical.md`](docs/execution/main/technical.md).
 
 Stable dependency order is `C0 -> {M-4, M-5a}`, `M-5a -> M-5b`, `M-4 -> M-6`,
 `M-6 -> {M-6.5, M-7}`, and `{M-6.5, M-7} -> M-8`. Exact current state and permitted parallel work
-belong only to [`docs/execution/tasks.md`](docs/execution/tasks.md) and [`docs/execution/milestones.md`](docs/execution/milestones.md).
+belong only to [`docs/execution/main/tasks.md`](docs/execution/main/tasks.md) and [`docs/execution/main/milestones.md`](docs/execution/main/milestones.md).
 
 `M7-01` remains a named parallel measurement lane (`ADR-0092`) and ends in an explicit decision to
 implement, simplify, or cancel advanced scheduling.
@@ -406,7 +404,7 @@ Empirical benchmarks demonstrate that an autonomous closed-loop proficiency (`au
 
 `AGENTS.md` is the single tool-neutral contributor contract for humans and AI agents. There are no
 model-specific instruction files. Future work lives in the five-file execution runway
-([`tasks.md`](docs/execution/tasks.md) and companions). Present HEAD architecture lives in `docs/execution/spec.md` and `docs/architecture/`.
+([`tasks.md`](docs/execution/main/tasks.md) and companions). Present HEAD architecture lives in `docs/execution/main/spec.md` and `docs/architecture/`.
 
 
 ## 10. Mental models worth internalising
@@ -414,7 +412,7 @@ model-specific instruction files. Future work lives in the five-file execution r
 - **The episode is the program.** There is no workflow engine, no topology language, no graph
   validator — there is a loop that observes, proposes, gets authorised, acts, and reduces. If you find
   yourself declaring a shape for the work *before* the work runs, you are building the thing
-  [`docs/execution/spec.md`](docs/execution/spec.md) (loop-over-DAG inversion) rejects.
+  [`docs/execution/main/spec.md`](docs/execution/main/spec.md) (loop-over-DAG inversion) rejects.
 - **The broker grants; the sandbox contains.** Two distinct boundaries. The kernel decides *whether* an
   effect is permitted. The perimeter decides *what an attacker can reach when the kernel was wrong*. A
   logical mediator in the host language is not containment — see [`docs/backend/architecture/kernel.md`](docs/backend/architecture/kernel.md)
@@ -429,7 +427,7 @@ model-specific instruction files. Future work lives in the five-file execution r
   actually deny. A green suite over unwired code is worse than no control — it manufactures false
   assurance.
 - **One document is normative per contract.** If you're about to write a second source of truth for
-  something [`docs/execution/spec.md`](docs/execution/spec.md) already owns, stop — extend the section, don't fork it.
+  something [`docs/execution/main/spec.md`](docs/execution/main/spec.md) already owns, stop — extend the section, don't fork it.
 - **Minimise what must be simultaneously correct.** The kernel has a strict <=1438 LOC target for exactly this reason —
   correctness argument size, not code golf.
 - **Polyglot plugins live outside the trusted computing base.** The wire schema (JSON Schema + JCS) *is*
@@ -455,7 +453,7 @@ shipped with a green suite.
 
 ## Where things live
 
-Read [`docs/execution/spec.md`](docs/execution/spec.md) for normative requirements and the as-built seven-package lattice
+Read [`docs/execution/main/spec.md`](docs/execution/main/spec.md) for normative requirements and the as-built seven-package lattice
 (`domain, ports, kernel, agency, runtime, adapters, apps`) enforced by `tools/linters/check_boundaries.py`.
 Evaluation and measurement rules (paired designs, McNemar, empirical evidence) are specified in
 [`docs/backend/architecture/assurance-evaluation.md`](docs/backend/architecture/assurance-evaluation.md) —

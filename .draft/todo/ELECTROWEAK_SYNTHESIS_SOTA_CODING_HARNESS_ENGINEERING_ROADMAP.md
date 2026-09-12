@@ -23,8 +23,8 @@ verification_basis: "working tree at feat/strongforce_beta_release_v093, HEAD 53
 >   - **Bottleneck 4 (Identity Collisions):** RESOLVED via UUID `runId` binding (T-84) and single preset catalog authority (T-79).
 >   - **Bottleneck 5 (Dialect Degeneration):** RESOLVED via fenced-action recovery (T-82) and native llama.cpp enforcement (T-91).
 >   - **Bottleneck 6 (Test Tampering & Livelocks):** RESOLVED via two-axis orthogonal settlement (T-72) and atomic 2PC rollback (T-78 / T-108).
-> - **ACTIVE RUNWAY FOCUS:** Single-agent control freeze ([T-26](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L605)) and canary verification ([T-27](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L611)).
-> - **PROTOTYPE / PROPOSAL SCOPE:** The Multi-Agent Campaign Director and HYDRA topologies discussed in §4 remain post-control proposals ([T-120](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L337)).
+> - **ACTIVE RUNWAY FOCUS:** Single-agent control freeze ([T-26](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L605)) and canary verification ([T-27](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L611)).
+> - **PROTOTYPE / PROPOSAL SCOPE:** The Multi-Agent Campaign Director and HYDRA topologies discussed in §4 remain post-control proposals ([T-120](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L337)).
 
 ## Executive Summary & Engineering Intent
 

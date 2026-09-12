@@ -4,12 +4,12 @@
 > **Status de Governança e Classificação de Implementação (Atualizado: 2026-09-11 | HEAD: `1e257e76` | Sujeito Qualificado: `2989d57d`)**
 > - **Autoridade:** Informativo / Orientação Estratégica (a autoridade normativa e de execução reside estritamente em [`docs/execution/`](../docs/execution)).
 > - **CONCLUÍDO / ACEITO PELA LIDERANÇA (`DONE`):**
->   - Bloco NT-1 completo ([T-98](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L95) a [T-111](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L255)).
->   - Marco [**`MS-BASELINE`**](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/milestones.md#L138) **`FECHADO`** (3.121 testes verdes, 0 falhas, `just check` & `just verify` aprovados).
->   - Marco [**`MS-CONTEXT`**](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/milestones.md#L83) **`FECHADO`** (T-110 qualificado com 104 turnos determinísticos em 4 interpretadores novos).
+>   - Bloco NT-1 completo ([T-98](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L95) a [T-111](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L255)).
+>   - Marco [**`MS-BASELINE`**](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/milestones.md#L138) **`FECHADO`** (3.121 testes verdes, 0 falhas, `just check` & `just verify` aprovados).
+>   - Marco [**`MS-CONTEXT`**](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/milestones.md#L83) **`FECHADO`** (T-110 qualificado com 104 turnos determinísticos em 4 interpretadores novos).
 >   - Invariantes preservados: TCB em 1.386 LOC ($\le 1.438$), 0 imports de `subprocess` no runtime, presets públicos inalterados.
 > - **PRÓXIMO PASSO ATIVO (`TODO`):**
->   - Marco [**`MS-CONTROL`**](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/milestones.md#L143): Auditoria e congelamento de pré-registro de controle em [T-26](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L605) (0 chamadas pagas) $\to$ Avaliação do canário single-agent em [T-27](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L611) ($n \ge 30$, Wilson LB $\ge 0.40$, 0 falsas conclusões).
+>   - Marco [**`MS-CONTROL`**](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/milestones.md#L143): Auditoria e congelamento de pré-registro de controle em [T-26](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L605) (0 chamadas pagas) $\to$ Avaliação do canário single-agent em [T-27](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L611) ($n \ge 30$, Wilson LB $\ge 0.40$, 0 falsas conclusões).
 > - **PROTÓTIPOS / EXPERIMENTAL / HORIZONTE POST-CONTROL (`FH-1 PROPOSAL`):**
 >   - Estritamente bloqueados até o aceite formal de `MS-CONTROL`: CAS workspace (`MS-CAS`), delegação de subagentes (`MS-DELEGATION`), tratamentos especialistas (`MS-SPECIALIST`), diretor de campanha (`MS-CAMPAIGN`), memória governada (`MS-MEMORY` / `M-8`) e benchmark oficial (`MS-OFFICIAL`).
 
@@ -62,11 +62,11 @@ Para cada implementação, revisão ou correção, a equipe deve seguir esta ord
 
 1. `AGENTS.md` — regras operacionais, arquitetura, anti-sprawl e protocolo de navegação.
 2. `README.md` — mapa inicial do repositório.
-3. `docs/execution/tasks.md` — trabalho autorizado, dependências, streams, arquivos e falsificadores.
-4. `docs/execution/spec.md` — contratos normativos, schemas, invariantes e matriz de falhas.
-5. `docs/execution/technical.md` — algoritmos, integração e receitas de engenharia.
-6. `docs/execution/milestones.md` — gates e critérios de aceite.
-7. `docs/execution/backlog.md` — inventário e lifecycle dos packages; não é uma fila de execução.
+3. `docs/execution/main/tasks.md` — trabalho autorizado, dependências, streams, arquivos e falsificadores.
+4. `docs/execution/main/spec.md` — contratos normativos, schemas, invariantes e matriz de falhas.
+5. `docs/execution/main/technical.md` — algoritmos, integração e receitas de engenharia.
+6. `docs/execution/main/milestones.md` — gates e critérios de aceite.
+7. `docs/execution/main/backlog.md` — inventário e lifecycle dos packages; não é uma fila de execução.
 8. Código e testes diretamente associados à tarefa.
 
 O princípio de autoridade é:

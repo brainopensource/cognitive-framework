@@ -37,11 +37,11 @@ EXEMPT = {
 #: ordinary edits. Lowering a value is always allowed; raising one is a governance
 #: decision and must be justified in the commit that does it.
 CEILINGS = {
-    Path("docs/execution/backlog.md"): 800,
-    Path("docs/execution/milestones.md"): 520,
-    Path("docs/execution/spec.md"): 2150,
-    Path("docs/execution/tasks.md"): 1700,
-    Path("docs/execution/technical.md"): 2300,
+    Path("docs/execution/main/backlog.md"): 800,
+    Path("docs/execution/main/milestones.md"): 520,
+    Path("docs/execution/main/spec.md"): 2150,
+    Path("docs/execution/main/tasks.md"): 1700,
+    Path("docs/execution/main/technical.md"): 2300,
 }
 
 

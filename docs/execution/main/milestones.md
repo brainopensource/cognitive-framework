@@ -171,7 +171,7 @@ rules above. Green prerequisite unit tests demonstrate mechanisms; they do not
 close T-51/T-52, supply a live L0 disposition, freeze T-26 or accept T-27.
 
 These are TARGET acceptance requirements subordinate to [EW-9.3–EW-9.4](spec.md#ew-93-wave-2--frozen-control-honest-instrument--presets).
-The current [control preregistration](../../benchmarks/ladder/control_preregistration.json)
+The current [control preregistration](../../../benchmarks/ladder/control_preregistration.json)
 remains `UNFROZEN`, with null subject, suite and model identities. Refining this
 page neither freezes that artifact nor authorizes measurement.
 
@@ -186,15 +186,31 @@ page neither freezes that artifact nor authorizes measurement.
 | Nonpositive result | A valid complete sample below the success threshold is `NEGATIVE`; insufficient evaluable evidence is `UNDETERMINABLE`; unfrozen or identity-invalid measurement is `INVALID`. A false-completion veto prevents acceptance regardless of a numeric disposition. Publish the result, missingness, costs and stop reason; all such outcomes leave MS-CONTROL open. |
 | Closure | An independent reviewer accepts the exact-subject evidence digest and repository governance records closure. A helper returning `POSITIVE` is insufficient. Zero observed false completions is a finite-sample observation, not proof of zero population risk. |
 
+**Delivery order into MS-CONTROL (RUN-11, Director 2026-09-12).** Five packages
+with rough engineering sizes: P1 measurement and oracle integrity (M, T-51/T-132);
+P2 product-path write and change closure (M, T-130 then its repair); P3 exterior
+completion and false-completion resistance (M, T-131); P4 large-context,
+compaction and resumable-session qualification (L); P5 budgeted model cascade plus
+comparative evidence (L). P1 and P2 may run in parallel under disjoint leases. P3
+falsifier authoring and P4 read-only qualification may run alongside them. P3
+integration requires a reviewed P2; final P4 qualification requires reviewed P2
+and P3. T-26b acceptance requires reaccepted P1 and T-51. Measurement corruption
+and the absent product trace both precede reliable qualification, which is why
+P1 and P2 lead: a number produced before either is closed cannot be trusted even
+if it is favourable. MS-CONTROL is freeze-ready only after corpus reacceptance,
+independent T-26b acceptance, every RUN-09 blocker closed, exact-subject baseline
+and context compatibility, and the required live L0 acceptance under a separate
+authority that RUN-12 does not grant.
+
 **Grounding boundary.** Existing mechanisms are
-[`live_oracle_pass`, `score_metrics`, `canary_disposition`](../../benchmarks/ladder/metrics.py),
-[`wilson_interval`](../../benchmarks/statistics.py), and
-[`require_frozen`](../../benchmarks/ladder/control.py). Their focused falsifiers are
-[`test_metric_veto.py`](../../test/benchmarks/test_metric_veto.py) and
-[`test_preregistration.py`](../../test/benchmarks/test_preregistration.py).
+[`live_oracle_pass`, `score_metrics`, `canary_disposition`](../../../benchmarks/ladder/metrics.py),
+[`wilson_interval`](../../../benchmarks/statistics.py), and
+[`require_frozen`](../../../benchmarks/ladder/control.py). Their focused falsifiers are
+[`test_metric_veto.py`](../../../test/benchmarks/test_metric_veto.py) and
+[`test_preregistration.py`](../../../test/benchmarks/test_preregistration.py).
 These helpers do not by themselves enforce the full membership, unique-attempt,
 resource-stop and independent-review requirements above. The production
-[`Preregistration`](../../vanguard/packages/domain/evidence/preregistration.py)
+[`Preregistration`](../../../vanguard/packages/domain/evidence/preregistration.py)
 binds task/oracle/evaluator/subject identities for RF-85; it is a distinct contract
 from `aether.control-preregistration/1`, not an interchangeable freeze API.
 
@@ -204,10 +220,10 @@ Dual mission: (1) Coding Max on one `EpisodeEngine` path; (2) same substrate for
 
 All rows below are **OPEN [PROPOSAL]**. They define future acceptance, not implementation authorization or a sprint calendar. NT-1 and its control gate remain unchanged. The normative owner is [FH-1](spec.md#fh-1-post-control-backend-horizon-proposal). Existing MS-* rows are extended for these future subjects, not replaced or retrospectively accepted.
 
-Planning inputs are the [measurement and topology review](../reports/reviews/aether_v093_review/part2_benchmark_mastery_and_topologies.md),
-[interface blueprints](../reports/reviews/aether_v093_review/part3_blueprints_and_interface_contracts.md),
-[roadmap and risk review](../reports/reviews/aether_v093_review/part4_roadmap_and_strategic_synthesis.md),
-and [auxiliary execution table](../../.draft/temp_auxiliary_table.md).
+Planning inputs are the [measurement and topology review](../../reports/reviews/aether_v093_review/part2_benchmark_mastery_and_topologies.md),
+[interface blueprints](../../reports/reviews/aether_v093_review/part3_blueprints_and_interface_contracts.md),
+[roadmap and risk review](../../reports/reviews/aether_v093_review/part4_roadmap_and_strategic_synthesis.md),
+and [auxiliary execution table](../../../.draft/temp_auxiliary_table.md).
 These are non-canonical references: their percentages, phase durations, historical
 defect lists and prototype APIs do not establish completion, dependency edges or
 implementation authority. Promote only reviewed outcomes here; schemas,

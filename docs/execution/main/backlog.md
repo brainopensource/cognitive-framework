@@ -211,15 +211,15 @@ zero, N-06 forbids runtime subprocess execution, and new public ports require an
 independently replaceable responsibility rather than a copied reference API.
 
 Existing grounding seams include
-[`ContextCompiler`](../../vanguard/packages/agency/context/compiler.py),
-[`ProtocolRecoveryState`](../../vanguard/packages/agency/episode/protocol_recovery.py),
-[`EpisodeEngine.spawn`](../../vanguard/packages/agency/episode/engine.py),
-[`AtomicMultiFileTransactionManager`](../../vanguard/packages/adapters/environment/transaction.py),
-[`LedgerEmitter`](../../vanguard/packages/runtime/ledger_emitter.py), and
-[`DurableCompositionRegistry`](../../vanguard/packages/runtime/governance/learning.py).
+[`ContextCompiler`](../../../vanguard/packages/agency/context/compiler.py),
+[`ProtocolRecoveryState`](../../../vanguard/packages/agency/episode/protocol_recovery.py),
+[`EpisodeEngine.spawn`](../../../vanguard/packages/agency/episode/engine.py),
+[`AtomicMultiFileTransactionManager`](../../../vanguard/packages/adapters/environment/transaction.py),
+[`LedgerEmitter`](../../../vanguard/packages/runtime/ledger_emitter.py), and
+[`DurableCompositionRegistry`](../../../vanguard/packages/runtime/governance/learning.py).
 These identify reuse owners, not proof that the proposed packages already exist.
-The [review series](../reports/reviews/aether_v093_review/part4_roadmap_and_strategic_synthesis.md)
-and [auxiliary table](../../.draft/temp_auxiliary_table.md) remain non-canonical
+The [review series](../../reports/reviews/aether_v093_review/part4_roadmap_and_strategic_synthesis.md)
+and [auxiliary table](../../../.draft/temp_auxiliary_table.md) remain non-canonical
 planning inputs; their completion percentages and prototype names cannot advance
 these lifecycle states.
 
@@ -733,7 +733,7 @@ Mitigation: reverse-route every production change and regenerate knowledge proje
 
 ## 4. Cross-References
 
-* **Vision (Constitutional Law Zero)**: [`VISION.md`](../../VISION.md)
+* **Vision (Constitutional Law Zero)**: [`VISION.md`](../../../VISION.md)
 * **Target Milestone Gates**: [`milestones.md`](milestones.md)
 * **Flat task tree**: [`tasks.md`](tasks.md)
 * **Feature delta specification**: [`spec.md`](spec.md)

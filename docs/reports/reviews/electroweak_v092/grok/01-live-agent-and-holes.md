@@ -25,7 +25,7 @@ Tests were **not** run. Nothing in this file is `PASS`.
 ## 1. One picture
 
 The product coding agent is not a class hierarchy. It is **pack + profile +
-tools + admission** over one loop (FACT: `docs/execution/spec.md` substrate
+tools + admission** over one loop (FACT: `docs/execution/main/spec.md` substrate
 sentence):
 
 ```text
@@ -98,7 +98,7 @@ def admission_required(harness: Any) -> bool:
 `ADMISSION_GATED_HARNESSES` is defined and **unused**. Product arms **are**
 gated (they are not exempt). `vg-code-default` can `finish` with zero effects.
 T-04 is `[PROPOSAL]` until an RF-25 successor baseline
-(`docs/execution/tasks.md`, `milestones.md` MS-TRUTH still `OPEN` on
+(`docs/execution/main/tasks.md`, `milestones.md` MS-TRUTH still `OPEN` on
 T-04/T-05/T-07).
 
 ## 4. Context and state

@@ -222,7 +222,7 @@ inline in §8.1 and §8.2.
 
 ### F-A1 — The blocking gate was merged past
 
-`docs/execution/milestones.md:44` states, of the subject under audit:
+`docs/execution/main/milestones.md:44` states, of the subject under audit:
 
 > "The tree is **not gate-green**: five `check_boundaries.py` violations, plus four
 > related-surface failures (`coding_max` facade CMX-04 ×2, RF-90 fakeBackend ×2).
@@ -1662,9 +1662,9 @@ remediation ordering in §12 stand.
 - "AI Agent Harness Comparison: DeepSeek Harness vs Pi vs OpenCode vs Hermes vs Claude Code." Tencent Cloud. <https://www.tencentcloud.com/techpedia/147665>
 
 **Repository-internal normative sources**
-- `docs/execution/spec.md` — `TC-E-001` … `TC-E-062`, invariants `I-7`, `I-TCB`, `INV-DELTA-1…5`
-- `docs/execution/milestones.md` — `MS-INSTRUMENT`, `MS-TRUTH`, `MS-RESUME`, `MS-SEE`, `MS-CHANGE`, `MS-CONTROL`, `MS-META`
-- `docs/execution/tasks.md` — T-04, T-26, T-27, T-79, T-89, T-92 … T-97
+- `docs/execution/main/spec.md` — `TC-E-001` … `TC-E-062`, invariants `I-7`, `I-TCB`, `INV-DELTA-1…5`
+- `docs/execution/main/milestones.md` — `MS-INSTRUMENT`, `MS-TRUTH`, `MS-RESUME`, `MS-SEE`, `MS-CHANGE`, `MS-CONTROL`, `MS-META`
+- `docs/execution/main/tasks.md` — T-04, T-26, T-27, T-79, T-89, T-92 … T-97
 - `docs/architecture/boundaries.md` — `INV-B-001` hexagonal dependency lattice
 
 ---

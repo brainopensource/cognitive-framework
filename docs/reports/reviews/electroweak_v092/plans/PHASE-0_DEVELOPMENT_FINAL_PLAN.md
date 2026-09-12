@@ -50,7 +50,7 @@ This file is the **organization plan**. It does not rewrite Vanguard Python. It 
 **Promotion rule.** When a task merges:
 
 1. Implementation lands in `vanguard/` / `packs/` / `test/`.
-2. Typed contracts that are now true move from `docs/execution/spec.md` into `docs/architecture/` / `docs/backend/` / `docs/SPEC.md` (present tense).
+2. Typed contracts that are now true move from `docs/execution/main/spec.md` into `docs/architecture/` / `docs/backend/` / `docs/SPEC.md` (present tense).
 3. The task is checked off in `tasks.md`; the package may move to `DONE` in `backlog.md`.
 4. Present docs are updated (including links). Execution keeps remaining future work.
 
@@ -64,11 +64,11 @@ Do **not** remove current files. Edit in place. Create the fifth file.
 
 | File | Action | Role |
 |---|---|---|
-| [`docs/execution/milestones.md`](../docs/execution/milestones.md) | **Edit** | Stable TARGET outcomes and acceptance predicates. No day-to-day tasks. No sprint calendar. |
-| [`docs/execution/spec.md`](../docs/execution/spec.md) | **Edit** (expand; keep historical CMX-09 delta as a named appendix) | Typed contracts, invariants, error matrices, schemas for **all** future work — not only CMX-09. |
-| [`docs/execution/technical.md`](../docs/execution/technical.md) | **Create** | Self-explaining engineering handbook: patterns, files to read, lattice placement, pseudocode, tool schemas, workflows, `[PROPOSAL]` variants kept in full. |
-| [`docs/execution/backlog.md`](../docs/execution/backlog.md) | **Edit** | Capability packages + lifecycle. Alias table (B `T-NN`, v2 `SUB-*`/`TXN-*`, old `CMX-*`). Research questions, risks, decisions. No sprint queue. |
-| [`docs/execution/tasks.md`](../docs/execution/tasks.md) | **Edit** (replace sprint DAG with flat tree; preserve old CMX-09 DAG as a historical appendix) | Tasks and subtasks by **context**. Checkboxes only. `requires:` edges allowed; no wave/sprint numbering. |
+| [`docs/execution/main/milestones.md`](../docs/execution/main/milestones.md) | **Edit** | Stable TARGET outcomes and acceptance predicates. No day-to-day tasks. No sprint calendar. |
+| [`docs/execution/main/spec.md`](../docs/execution/main/spec.md) | **Edit** (expand; keep historical CMX-09 delta as a named appendix) | Typed contracts, invariants, error matrices, schemas for **all** future work — not only CMX-09. |
+| [`docs/execution/main/technical.md`](../docs/execution/main/technical.md) | **Create** | Self-explaining engineering handbook: patterns, files to read, lattice placement, pseudocode, tool schemas, workflows, `[PROPOSAL]` variants kept in full. |
+| [`docs/execution/main/backlog.md`](../docs/execution/main/backlog.md) | **Edit** | Capability packages + lifecycle. Alias table (B `T-NN`, v2 `SUB-*`/`TXN-*`, old `CMX-*`). Research questions, risks, decisions. No sprint queue. |
+| [`docs/execution/main/tasks.md`](../docs/execution/main/tasks.md) | **Edit** (replace sprint DAG with flat tree; preserve old CMX-09 DAG as a historical appendix) | Tasks and subtasks by **context**. Checkboxes only. `requires:` edges allowed; no wave/sprint numbering. |
 
 When applying, also **edit** (do not delete) [`AGENTS.md`](../AGENTS.md) §6: the “exactly four” execution files become **five**, adding `technical.md`. Fix links that point at `docs/execution/active.md` or `FEATURE_SPEC.md` (see §8).
 
@@ -606,7 +606,7 @@ IDs T-01–T-35 are B §18 **verbatim** (files, requires, falsifiers). Below, ea
 ### Context: Present-docs promotion (after merges)
 
 **T-67 Promote landed contracts**  
-- [ ] Move true schemas from `execution/spec.md` into `docs/architecture/` / `docs/backend/` / `docs/SPEC.md`  
+- [ ] Move true schemas from `execution/main/spec.md` into `docs/architecture/` / `docs/backend/` / `docs/SPEC.md`  
 - [ ] Run `docs_rag_v0.py --file` on every changed production path  
 - [ ] `just docs-knowledge` — never hand-edit `.generated/`  
 
@@ -652,7 +652,7 @@ IDs T-01–T-35 are B §18 **verbatim** (files, requires, falsifiers). Below, ea
 
 Order of file edits when someone executes this PHASE-0:
 
-1. Create `docs/execution/technical.md` with YAML `id: execution.technical`, copy §4.3 contents from triad (full sections).
+1. Create `docs/execution/main/technical.md` with YAML `id: execution.technical`, copy §4.3 contents from triad (full sections).
 2. Expand `spec.md` per §4.2; move current body to appendix.
 3. Rewrite `milestones.md` living overlay per §4.1; keep M-0–M-10 and SWE-P*; appendix alias W-092-*.
 4. Expand `backlog.md` per §4.4; keep all existing package rows.
@@ -687,8 +687,8 @@ Broken or stale references to retarget (do not delete the old documents):
 
 | Current | Target |
 |---|---|
-| `docs/execution/active.md` | `docs/execution/tasks.md` (file absent) |
-| `docs/execution/FEATURE_SPEC.md` | `docs/execution/spec.md` |
+| `docs/execution/active.md` | `docs/execution/main/tasks.md` (file absent) |
+| `docs/execution/FEATURE_SPEC.md` | `docs/execution/main/spec.md` |
 | `backlog.md` relationship `execution.active` | `execution.tasks` |
 | README “sole current-state source = active.md” | five execution files; present docs for HEAD |
 | `AGENTS.md` “exactly four” execution files | five, including `technical.md` |

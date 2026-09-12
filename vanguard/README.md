@@ -15,5 +15,5 @@ Package version is **0.9.3** (`pyproject.toml`). That is not M-9 acceptance.
 Entry points: `packages/runtime/root.py` (composition), `packages/agency/episode/engine.py` (`EpisodeEngine` / `spawn()`), `clients/cli/src/main.tsx` (`vg`), evaluator `packages/adapters/evaluators/daemon.py`.
 
 Current milestone authorization is recorded in
-[`docs/execution/tasks.md`](../docs/execution/tasks.md) and
-[`docs/execution/milestones.md`](../docs/execution/milestones.md). Map: [`../README.md`](../README.md).
+[`docs/execution/main/tasks.md`](../docs/execution/main/tasks.md) and
+[`docs/execution/main/milestones.md`](../docs/execution/main/milestones.md). Map: [`../README.md`](../README.md).

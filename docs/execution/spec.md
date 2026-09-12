@@ -12,10 +12,10 @@ date: "2026-09-11"
 last_verified: 2026-09-11
 lock_head: "bf56eea9"
 derived_from:
-  - .draft/DEVELOPMENT_FINAL_PLAN.md
-  - .draft/DEVELOPMENT_FINAL_PLAN_B.md
-  - .draft/DEVELOPMENT_FINAL_PLAN_v2.md
-  - .draft/PHASE-0_DEVELOPMENT_FINAL_PLAN.md
+  - docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN.md
+  - docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN_B.md
+  - docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN_v2.md
+  - docs/reports/reviews/electroweak_v092/plans/PHASE-0_DEVELOPMENT_FINAL_PLAN.md
 normative_authority:
   - docs/architecture/boundaries.md
 relationships:
@@ -31,6 +31,84 @@ This document is the authoritative specification and typed delta contract for th
 Lock SHA `66aa7a3c` is the forensic baseline. Implementation head for closed instrument work: `63b77116`. Resume closed at `8637db55` (MS-RESUME `CLOSED`).
 
 Companion handbook: [`technical.md`](technical.md). Task IDs: [`tasks.md`](tasks.md).
+
+## RUN-1. Leadership execution decision (2026-09-12)
+
+**ACCEPTED planning requirements; implementation not claimed.** Authority is the
+user's delegation of technical/product/release planning in this session. Inspected
+subject: `001911e3231967cf23e885ce2ea4356083d67d01`. This amendment decides the
+remaining work; it does not retroactively accept the documentation commits
+`faa53259`, `486fb530` or `001911e3`, execute a freeze, spend money or close a gate.
+It supersedes conflicting readiness, placement and scheduling statements in the
+five execution files. VISION, constitutional boundaries and independent empirical
+acceptance remain binding. Earlier `lock_head` metadata identifies historical
+planning subjects, not permanent authority over this amendment.
+
+**RUN-01 — Current outcome.** The next outcome SHALL be a reproducible Coding Max
+single-controller qualification through the shipped product path. Complete the
+control evidence boundary before collecting the canary. Existing context, editing,
+index, recovery and composition mechanisms SHALL be reused. New capability
+activation remains outside this control arm. Negative or undeterminable results
+SHALL preserve evidence and keep the positive gate open; they SHALL NOT trigger
+unbounded repair-and-rescore loops or unlock the post-control tree.
+
+**RUN-02 — Diagnostic versus release scoring.** Pure metric functions MAY compute
+fixture/replay diagnostics without filesystem reads or a frozen production record.
+A publishable control report MUST pass one explicit admission boundary that takes
+the frozen manifest and reconciled evidence; a caller-supplied `frozen=True` is
+insufficient. No fixture diagnostic is a control acceptance receipt. T-26a MUST
+validate schema/version, exact subject, all four control-arm fields, suite/task/
+oracle identities, model/provider/configuration identity, declared attempts,
+resource ceilings, stop/missingness policy and the complete evidence population.
+Empty mappings, missing values, duplicate task attempts, stale or mixed subjects,
+unknown dispositions and mismatched denominators MUST fail closed. Preserve the
+false-completion veto independently of pass rate. The production publication
+caller MUST use this boundary; a new unused helper does not satisfy T-26a.
+
+**RUN-03 — Bounded qualification.** T-51 SHALL freeze exactly 30 distinct L2 tasks,
+in a deterministic order, stratified across the existing coding-task taxonomy
+with explicit class counts. L0/L1 development tasks MUST NOT enter this holdout.
+One measured attempt per task; failures and missing outcomes retain their slots.
+Stop after the 30 scheduled attempts, a resource ceiling, or an integrity veto;
+no replacement, top-up, outcome-dependent early success or best-of-retries claim.
+Positive acceptance requires all 30 binary outcomes and the existing two-sided
+95% Wilson lower bound >= 0.40 plus zero observed false completions. Insufficient
+binary evidence is UNDETERMINABLE. This narrows the former open-ended
+`n_evaluable >= 30` stopping text; T-26 MUST reconcile the frozen artifact first.
+Per-task balanced ceilings remain unchanged. Total attempt, provider-call,
+inference-cost, evaluation-cost and wall-time ceilings MUST be explicit and
+approved for the run; no unspecified resource is unlimited. This amendment grants
+no paid-call allowance. Qualification MUST reserve verification/recovery capacity
+before work, retain unknown usage as unsettled, and never infer a refund from timeout.
+
+**RUN-04 — Autonomous engineering.** A READY row authorizes implementation in a
+subsequent engineering assignment within its lease and accepted contract. The
+developer MAY choose private helpers, test fixtures, error wording, equivalent
+algorithms and bounded fixes to task-introduced failures. They MAY prepare the
+declared new falsifier before implementation; absence of a new test file alone is
+not a blocker. They MUST NOT silently add public ports/schemas, change product
+presets, widen scope/authority, disable verification, alter acceptance thresholds
+or promote an unapproved proposal. Every session SHALL record subject, row,
+remaining work, file ownership, verification disposition and remaining allowance
+using the existing task handoff, without a new planning file. At session exhaustion,
+preserve a resumable handoff; iterative repair obeys the existing rollback contract.
+
+**RUN-05 — Admission depth.** Only the bounded control-hardening and corpus/metric
+work in the active tasks table is ready now. FH-1 remains proposed. Its mathematics
+and pseudocode describe candidate contracts, not ratified schemas or implemented
+APIs. Before a branch becomes READY, T-129 SHALL resolve source-path collisions,
+reuse owners, missing emitter/reducer/composition work, migrations, executable
+falsifiers and the finite session envelope, then seek one package-level decision.
+That decision authorizes ordinary choices within the branch; no per-leaf leadership
+permission is needed thereafter. Passing T-27 alone never approves every branch.
+
+**RUN-06 — Preserved boundaries.** Planned kernel delta remains zero, ceiling 1438;
+N-06 forbids `import subprocess` in runtime. Reuse one ledger writer, governor,
+episode execution path and existing ports. A memory composition registry is not a
+workspace CAS implementation. Static skill discovery is not durable learned-skill
+qualification. Empirical M-8 acceptance remains required before M-9/M-10; control
+qualification is not a renamed beta release. Required containment/authorization
+for a selected execution profile cannot be deferred by calling it post-beta.
 
 ## NT-1. Near-term baseline, context, cache and recovery delta
 
@@ -152,7 +230,12 @@ assets during the context-convergence batch.
 
 This section defines conditional TARGET contracts for prototype refinement after NT-1. It does not activate implementations, change T-98–T-111, authorize paid runs, or accept milestones. “Sprints 3–5” maps to capability dependencies in tasks, not a calendar. FH-1 governs the future CAS/delegation/evaluation scope where older proposal catalogs differ. Historical accepted subjects remain intact. The reference provenance is [Part 3 §§5–6](../reports/reviews/aether_v093_review/part3_blueprints_and_interface_contracts.md); its Python protocols are illustrative seams, not a requirement for additional public ports. Gate ownership is in [milestones.md](milestones.md#post-control-horizon-release-predicates-fh-1); algorithms are in [technical.md](technical.md#post-control-reference-handbook-fh-1-proposal).
 
-FH-1.1–FH-1.3 state the wire and schema contracts. FH-1.4–FH-1.7 state the normative mathematical, cryptographic and algebraic law those contracts must satisfy — tree identity and preimage matching (CAS-01), envelope conservation and settlement (DEL-01), DAG readiness and lease fencing (OCT-03), and learning lift with revocation (MEM-01/M-8). FH-1.8 maps every violation to a distinct fail-closed outcome. The formal clauses bind values and predicates only: they introduce no new port, no new store, no kernel line, and no second serializer or digest alphabet. Where a formal clause and a prose clause could be read to differ, the formal clause is the narrower one and governs.
+FH-1.1–FH-1.8 are **PROPOSED contract detail**, retained for branch review. Their
+RFC-2119 language is conditional on adoption; these sections are not accepted law
+merely because they contain formulas. Formal/prose disagreement is a design defect
+to resolve at T-129, never an automatic license to choose the narrower expression.
+RUN-1 and accepted constitutional invariants govern current work. No schema or
+public port is registered by this document.
 
 ### FH-1.1 Immutable workspace contracts
 

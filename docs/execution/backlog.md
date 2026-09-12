@@ -81,13 +81,52 @@ and applicable subject identity; mechanism tests alone do not close empirical ga
 
 ## 2. Capability Family Backlog
 
+### Leadership priority and evidence reconciliation (2026-09-12)
+
+This decision applies to remaining scope, not historical receipts. It is ratified
+under the current leadership delegation and [RUN-1](spec.md#run-1-leadership-execution-decision-2026-09-12).
+Priority chooses the next eligible work; only task `requires:` edges authorize
+execution. Documentation commits and proposed test commands do not prove acceptance.
+
+| Priority / package | Disposition and planning depth | Next deliverable |
+|---|---|---|
+| P0 — EXP-01 / CONTROL | APPROVED bounded control-hardening and corpus/metric work; detailed tasks now | Publication-level freeze/evidence validation, finite L2 corpus, prerequisite reconciliation and a frozen canary disposition. No new agent capability or paid run authorized here. |
+| Preservation — GATE-01 / CTX-01 / REC-01 | DONE on accepted `2989d57d` scope; reuse and targeted regression evidence | Do not rebuild these packages. Changes affecting their claims require successor qualification. |
+| P1 — MEM-01 / MEM-02 / T-56 | PROPOSED product qualification; first post-control package refinement | Combine catalog invocation, durable authorized retrieval, revocation and signed rollback into one qualification scope; MEM-02 separately measures lift. Existing APIs first, no new memory core. |
+| P2 — CAS-01 / DEL-01 extension | PROPOSED conditional branches; retain outcomes and fault model, defer exact new modules | Use control failure attribution to select recoverable workspace or one advisory reader. Mutating specialists require CAS; advisory readers do not. |
+| P2 — EVAL-02 | PROPOSED independent qualification branch; narrow initial implementation to Verified | Preserve Aider as follow-on scope. Greenfield checks stay separate and are not blocked by benchmark adapters. No official score or publication inferred. |
+| Later — OCT-03 / EXP-02 advanced treatments | DEFERRED implementation selection; existing proposal contracts retained | Campaign requires accepted CAS/delegation and demonstrated multi-episode demand. MCTS, RTV and learned routing require measured need and a separately admitted experiment. |
+| Rejected direction | No implementation authorization | Vote-based merge/acceptance, parallel core ledgers/governors/episode engines, automatic enabling from focused tests, and compulsory new packages copied from reference pseudocode. |
+
+No percentage-complete estimates are used. The inspected source at `001911e3`
+supports the following inventory; test files are falsifier locations, not test
+results from this documentation review.
+
+| Capability | Observed state and evidence | Remaining qualification |
+|---|---|---|
+| Context, compaction and deterministic recovery | Built in `agency/context/compiler.py` and `agency/episode/protocol_recovery.py`; accepted NT-1 integration on its recorded subject | Preserve on the control subject; fixture preservation does not prove model quality. |
+| Search/index, ledger and editing | Built owners in `ports/index.py`, `runtime/ledger_emitter.py`, `adapters/environment/transaction.py`; broader product claims remain partial | End-to-end selected composition and current-subject evidence; transaction preflight is not durable workspace CAS. |
+| Child spawning and roles | Built `EpisodeEngine.spawn` and runtime delegation; specialist product qualification proposed | Aggregate restart/cancellation evidence and a measured advisory treatment. |
+| Memory and learning | Partial product capability: `ports/memory.py`, `runtime/memory.py`, `adapters/stores/memory_engine.py`, `runtime/governance/learning.py` | Public composition, authorization/revocation across restart, independent empirical M-8 receipt. |
+| Skill library | Built static index/catalog in `runtime/skill_index.py` / `agent_plugins.py`; `SkillLibrary` protocol; signed mechanisms in `runtime/skill_evaluation.py`. `skill_lifecycle.CompositionRegistry` is in-memory and refuses unsigned promotion/rollback | Durable product invocation and learned-skill lifecycle are not accepted. Reuse the durable governance owner, not the in-memory registry as persistence. Starting falsifiers: `test.runtime.test_w12_skills_and_sealed_spawn`, `test.falsifiers.test_m8_skill_lifecycle`, `test.adapters.test_durable_memory_port`. |
+| Campaign / MCTS / tournament | No accepted OCT-03 product implementation established; algorithm and task proposals exist | Deferred. Mechanism/proposal presence never authorizes a score or merge. |
+
+The historical family tables below retain their original subject-specific
+dispositions. Where they say APPROVED for a broader or older mechanism, that does
+not supersede this remaining-work selection. A proposed extension is not READY
+until T-129 records its complete package admission; ordinary implementation
+choices then stay with its owner under RUN-04.
+
 ### 2.0 Approved near-term package deltas (NT-1)
 
 This is package scope/lifecycle, not a second task queue. NT-1 in [`spec.md`](spec.md#nt-1-near-term-baseline-context-cache-and-recovery-delta) promotes the core reference decisions into canonical contracts. T-98–T-111 and revised T-77 own work in [`tasks.md`](tasks.md#near-term-ownership-and-ready-work). Stream A/B/C supersede historical lane labels for this scope only. Approval is not implementation or milestone acceptance.
 
-Anything that makes the system's own evidence trustworthy is core to the Beta MVP. Anything that makes the runtime safe for untrusted callers or third parties is post-beta.
+Evidence integrity and required profile safety are core qualification obligations.
 
-Accordingly, truthful terminal/disposition projection, canonical state and recovery values, test-suite nonmutation and measurement integrity, patch atomicity, context compaction, and process restart/resume are core. Host sandboxing (`bwrap`, containers, seccomp), production network-policy enforcement, CAS workspaces, specialists, delegation, campaign orchestration, governed memory, and external benchmark claims are post-beta. The latter capabilities already use the MS-CONTROL and FH-1 fences below; this classification adds no second fence.
+Control uses truthful projection, canonical state/recovery, nonmutating measurement,
+existing patch safety, compaction and restart. New CAS, specialist, campaign,
+learning and benchmark capabilities are post-control. M-8 memory acceptance still
+precedes M-9 beta; deployment-profile safety cannot be waived by this classification.
 
 | Package | Approved scope and owner | Existing capability relationship | Acceptance / lifecycle |
 |---|---|---|---|
@@ -121,7 +160,11 @@ acceptance or an MS-CONTROL disposition.
 
 **Release dependency:** MS-BASELINE -> MS-CONTEXT -> new MS-CONTROL freeze/qualification. T-111 reconciles the integrated subject; T-26/T-27 retain their evidence obligations. M-8 empirical acceptance and M-9/M-10 authorization are unchanged. Existing DONE mechanisms retain their historical receipts; richer current product preservation needs the new gates.
 
-**Post-beta under the Beta MVP boundary:** Part 3 CAS Tree/stage/transact promotion, journaled host export, host sandboxing and production network-policy enforcement, delegate_readonly activation, advanced workspace-policy treatments, specialists and delegation, campaign orchestration, governed semantic memory learning, comparative model routing, new LDA/LSP backends, and external benchmark/release claims. Their existing MS-CONTROL and FH-1 fences remain the sole authorization boundaries; no duplicate fence is introduced here. Existing patch safety defects are core remediation under T-108, not permission to build the CAS substrate.
+**Post-control scope:** CAS, specialist/campaign activation, governed learning,
+comparative routing and external benchmark claims require their named gates.
+Existing profile safety and evidence integrity remain mandatory. M-8 memory
+acceptance precedes M-9 beta. Historical Part 3 prototypes are design references,
+not authorizations to introduce new stores, ports or parallel policy engines.
 
 ### 2.0a Post-control capability packages (FH-1) [PROPOSAL]
 
@@ -137,8 +180,23 @@ These packages extend existing owners and remain `PROPOSED`; they do not alter a
 | **EVAL-02 — `PROPOSED`** | Benchmark protocol adapters and existing exterior evaluator seams; pinned SWE-bench Verified and Aider protocols, plus a separate greenfield completeness corpus. T-122–T-125 refine T-51/T-58. | MS-CONTROL; reviewed evaluator-separation, manifest and replay leaves. Optional CAS/delegation/memory gates apply only when those capabilities are included in the measured arm. | MS-EVAL qualifies immutable subject/evaluator separation, faithful reference replay and complete failure accounting. Feeds official runs; fixtures produce no live score. DeepSWE T-33 remains separate. |
 | **REL-QUAL extension — `PROPOSED`** | Benchmark/release owners bind official outputs, statistical comparison, independent review, migration/rollback and claims. T-126–T-128 refine T-33/T-58/T-67 and SWE-P3–P5. | MS-EVAL plus SWE-P4/P5 for official runs; MS-OFFICIAL for superiority claims; applicable M-8/M-9/M-10 predicates for release handoff. | Distinct MS-OFFICIAL, MS-SOTA and release-handoff evidence. A valid score does not prove superiority; no guaranteed score or professional-equivalence claim. |
 
-The review order CAS → delegation → campaign → memory → evaluation is not a
-serial implementation dependency. CAS, read-only delegation, memory and evaluation
+**Contract traceability (proposal-level).** One index only: it names where each
+package's candidate contracts and decomposition live, and duplicates neither. All
+rows are `PROPOSED`; none is a lease, and T-129 admission may change any of them.
+
+| Package | Candidate clauses in `spec.md` | Root candidate rows in `tasks.md` | Named candidate schemas |
+|---|---|---|---|
+| CAS-01 | FH-C01–FH-C11 | T-112a (tree values), then T-112b/T-113a | `aether.tree/1`, `aether.edit-set/1`, `aether.check-plan/1`, `aether.candidate-check/1`, `aether.promotion/1`, `aether.export-journal/1` |
+| DEL-01 | FH-D01–FH-D07 | T-117a (specialist wire), then T-117b | `aether.specialist-request/1`, `aether.specialist-findings/1`, `aether.delegation-settlement/1` |
+| OCT-03 | FH-D08–FH-D12 | T-120a, gated on T-117b | `aether.campaign-plan/1`, `aether.campaign-lease/1` |
+| MEM-01 | FH-M01–FH-M04 | T-121a (lesson values), then T-121b | `aether.lesson/1`, `aether.lesson-revocation/1`, `aether.retrieval-admission/1` |
+| EVAL-02 | FH-E01–FH-E04 | T-122a (manifest schemas), then T-122b | `aether.evaluation-manifest/1`, `aether.evaluation-attempt/1` |
+
+No schema above is registered, and no clause above is accepted law; FH-1.1–FH-1.8
+is proposed contract detail. Fail-closed outcomes are indexed in the FH-1.8 matrix.
+
+The earlier review order is superseded by the leadership priority table above.
+CAS, read-only delegation, memory and evaluation
 are conditional branches after MS-CONTROL. The applicable gate predicates,
 finite statistical stopping rules and invariant vetoes are owned by
 [`milestones.md`](milestones.md#post-control-horizon-release-predicates-fh-1).
@@ -165,7 +223,13 @@ and [auxiliary table](../../.draft/temp_auxiliary_table.md) remain non-canonical
 planning inputs; their completion percentages and prototype names cannot advance
 these lifecycle states.
 
-Advance packages from PROPOSED only after applicable predecessor acceptance and an implementation-ready leaf review. A valid negative experiment is retained as evidence and leaves its treatment disabled; protocol closure and positive capability acceptance are different dispositions. Larger tree stores, parallel writers, learned routers and semantic memory ranking require measured need and separately pinned treatments. Schema additions reuse existing ports unless an independently replaceable responsibility demonstrably lacks a contract.
+Advance packages from PROPOSED only after applicable predecessor acceptance and
+T-129 package admission. This review defers implementation of OCT-03 and advanced
+EXP-02 treatments even after those predecessors; their rows retain proposal
+detail for possible later selection. A valid negative experiment retains evidence
+and leaves its treatment disabled. Larger stores, parallel writers, learned
+routers and semantic ranking require measured need and separately pinned treatments.
+Reuse existing ports unless a distinct responsibility demonstrably lacks a contract.
 
 ### 2.1 Substrate, Kernel & Event Sourcing (VISION.md §1–6)
 
@@ -240,7 +304,7 @@ Advance packages from PROPOSED only after applicable predecessor acceptance and 
 | **CLI-06** | `vg-tutor` (Evidence-Graph Codebase Guide) | `packs/tutor` | Lane A | `DONE` | M-5a | Dynamic AST traversal $\to$ Socratic interactive codebase explanations with clickable proofs. |
 | **CLI-07** | `vg-research` (Bounded Technical RFC & Web Corroborator)| `packs/research` | Lane A | `PROPOSED` | M-9 | Egress-controlled technical search $\to$ SSRF-safe fetch $\to$ Triangulated RFC generation. |
 | **CLI-08** | `vg-rlvr` (Verifiable Trajectory & Dataset Generator) | `domain/evidence` | Lane B | `PROPOSED` | M-8+ | Mining verified traces (State, Action, Reward, Trace) for RL fine-tuning. |
-| **TUI-01** | `aether` Coding-Agent Terminal (unify `clients/tui` + `clients/cli/src/tui` onto one `@aether/tui-core`-driven cell renderer per the OpenTUI spike's fallback clause; plan mode) | `clients/tui-core` / `clients/tui` / `clients/cli` / `runtime` | Lane A | `REVIEWING` (command registry, plan-mode enforcement, and Ink consolidation done and green; OpenTUI spike closed via fallback, not qualified) | M-9 (`TC-E-047`, currently `BLOCKED` on M-8) | **Definition-of-Ready**: (1) one `@aether/tui-core` command registry replacing the duplicated/index-mismatched palette lists — **done**, `vanguard/clients/tui-core/`, 16 passing `node --test` unit tests, no terminal required; (2) plan mode enforced by grant attenuation at the runtime composition layer, not client-side politeness — **done**, `vanguard/packages/runtime/{profiles,wiring,session}.py`, falsifier in `test/runtime/test_w3_plan_mode.py` (patch.apply/proc.exec denied with the workspace byte-identical afterward, fs.read still succeeds under the same profile); (3) an OpenTUI qualification spike per `PRD_AETHER_TUI.md` §8.1 — **partial**, receipt at `.draft/todo/w0-spike/receipt.json`: first-frame (8.5ms) and event→render P95 (34.0ms) passed budget on Bun 1.4.0/tmux, but RSS (69.2MB vs. 45MB budget) failed, and keystroke→cell latency, a real SIGWINCH resize, the local-emulator/SSH terminals, and the 256-/16-color fallbacks were not exercised (no attached TTY or SSH endpoint in the environment that produced this receipt) — re-run with a human on a real interactive session, or re-scope the transcript's renderable count, before this gate is called closed; (4) the OpenTUI + Solid render layer itself — **not started**, blocked on (3) closing per the plan's `W0 gates W2` rule; the render layer stays the pre-existing hand-rolled `clients/tui/src/terminal` cell renderer (already consuming `@aether/tui-core` per (1)), per the plan's own fallback clause ("swap the view layer back to the existing cell renderer and lose nothing above the driver line") triggered by (3)'s RSS failure; (5) Ink deletion and CLI consolidation — **done**: `clients/cli/src/commands/run.ts`'s interactive path now embeds `@aether/tui`'s `TuiApplication` directly (in-process, no child spawn) instead of Ink's `RunTui`; `clients/cli/src/tui/{components,hooks,screens}` (the Ink-dependent tree) deleted, its React-free pure-logic siblings (`diff.ts`, `focus.ts`, `keys.ts`, `status-bar.ts`, `theme/tokens.ts`, `transcript-window.ts`, `why-display.ts`) kept and still covered by `ui.test.ts`; `legacy.tsx` replaced by a JSX-free `legacy.ts` with its unused (shadowed by `run.ts`/`approve.ts`/`daemon.ts`) `handleRun`/`handleApprove`/`handleDaemon` duplicates dropped; `ink`/`react`/`@types/react` removed from `clients/cli/package.json` and the root `package.json`; a latent bug fixed along the way — `TuiApplication.stop()` never removed its `stdin` `"data"` listener, so an embedding host's process could never exit after Ctrl+D, now fixed with a `TuiAppOptions.onExit` hook. Verified with a real interactive run in a tmux pty (`AETHER_HOME=... node bin/aether run --repo /tmp --demo`, exits 0 on Ctrl+D) and the full monorepo `npm run build`/`npm test` (0 failures). `bin/aether`/`bin/aether-tui` already existed and already forward to the built Node entrypoints — no `bun build --compile` packaging was needed since the Bun-only OpenTUI stack was not adopted; (6) the remainder of W1's "SOTA set" — **done**: `/init` (seeds `AETHER.md`, idempotent), `/title`, `/status`, `/context`, `/cost`, `/compact` (local transcript view only, does not touch run state), `/doctor`, `/diff`, `/undo` (registered but explicitly reports itself unimplemented — no git-backed rollback exists — rather than faking one), `@path` inline file-reference expansion on submit (`tui-core/src/commands/context-refs.ts`), and `!cmd` local zero-cost shell mode that never invokes the model (`tui-core/src/commands/shell.ts`); all covered by unit tests (`tui-core`: 23 passing; `@aether/tui`: 23 passing) and verified with real interactive tmux-pty runs (`!echo`, `/status`, `/doctor`, `/cost` all produced correct live output). Still missing from W1's list: `@file` is submit-time expansion only, not a live fuzzy-search popup (the hand-rolled renderer has no autocomplete surface); W2's leader-key grammar (`ctrl+x`, `<leader> n/l/m/a/e/t`) and colored usage-bar footer remain unbuilt, correctly, since they're OpenTUI-specific per the plan and W2 is not proceeding. (7) W4 polish on the fallback renderer — **partially done**: progressive-disclosure card folding (`▸`/`▾`, expand on Space/Enter) already existed pre-`TUI-01` and was verified rather than rebuilt (`components/turn.ts`, `components/cards/*`); a real ANSI-256/16-color fallback was implemented (`theme.ts`'s `styleToAnsi` previously collapsed every non-truecolor style to flat white-on-black — now does proper hue-based nearest-color quantization, since a raw RGB-distance match puts every pastel theme color nearest white) with a corrected `detectColorMode` (`xterm-256color` was mislabeled as truecolor); the status footer gained a real 4-tier colored context-usage bar with textual cues (`[OK]/[MED]/[HIGH]/[CRIT]`) plus last-event timing and a `[PLAN]` badge (`components/usage-bar.ts`); busy-input modes landed (`/busy queue|steer|interrupt` — `queue` genuinely defers and auto-flushes a follow-up prompt once the active run reaches a terminal status, `steer` honestly falls back to `interrupt` since no in-flight-redirect primitive exists rather than faking one). While implementing `/busy` a second, more consequential index-drift-shaped bug was found and fixed: typing a full command with args at the palette (e.g. `/busy queue`) previously matched nothing (the palette's internal filter substring-matched the *entire* typed string, args included, against each command's name) and, even on a surviving match, always dispatched with `args=""` — silently dropping everything typed after the command name for every argument-taking command reached via the palette. Fixed by exporting `filterCommandsByQuery`/`splitCommandQuery` from `@aether/tui-core` and making both the palette's rendering (`app.ts`, `command-palette.ts`) and its dispatch (`keyboard.ts`) read from those same two functions — the palette component no longer filters internally at all. Zero-input-starvation streaming was reviewed, not rebuilt: keystroke handling and event ingestion are already both synchronous per-tick against the existing signal-based store, so there was no blocking behavior to fix. Not done: an inverse-video focus-border convention (focus is currently indicated by a border *color* change, not video inversion — a real but lower-severity accessibility gap against `PRD_AETHER_TUI.md` §8.2) and `--no-animation` (moot for now: this renderer has no spinners/animation to suppress). Verified with `@aether/tui-core` (27 tests) and `@aether/tui` (42 tests, up from 19 at `TUI-01`'s prior close), all passing, plus live tmux-pty checks of the colored usage bar and the palette-args fix. This epic remains `BLOCKED` on M-8 at the milestone level per `TC-E-047`; the historical TUI lane recorded only the parts above that could proceed under `SUB-01`/`DEL-01`-style pure-package or Python-runtime work not contending for the milestone gate. |
+| **TUI-01** | `aether` Coding-Agent Terminal: one `@aether/tui-core`-driven cell renderer unifying `clients/tui` + `clients/cli/src/tui`, with plan mode | `clients/tui-core` / `clients/tui` / `clients/cli` / `runtime` | Lane A | `REVIEWING` | M-9 (`TC-E-047`), `BLOCKED` on M-8 | **Definition-of-Ready, 5 of 7 met.** Done: single command registry; plan mode enforced by runtime grant attenuation, not client-side politeness (falsifier `test.runtime.test_w3_plan_mode`); Ink removed and the CLI interactive path consolidated in-process; the W1 command set; partial W4 renderer polish. **Not met:** the OpenTUI qualification spike is `PARTIAL` — first-frame and event-to-render P95 passed budget, RSS did not (69.2MB vs 45MB), and keystroke latency, real SIGWINCH, SSH terminals and 256/16-colour fallbacks were never exercised for want of an attached TTY; receipt at `.draft/todo/w0-spike/receipt.json`. The OpenTUI + Solid render layer is therefore **not started** and the pre-existing cell renderer stands under the plan's own fallback clause. **To become READY:** re-run the spike on a real interactive session or re-scope its renderable count, then decide the render layer. Remaining known gaps: `@file` is submit-time expansion, not a live picker; focus is shown by border colour rather than inverse video. Evidence: `@aether/tui-core` 27 tests, `@aether/tui` 42 tests, `node --test`. Milestone-level progress stays blocked on M-8 regardless of this row. |
 
 ### 2.8 Formal Reasoning & Algorithmic Engines (LIM Integration Proposals)
 
@@ -351,7 +415,7 @@ to fit the current tree.
 | **SEE** | CMX-11, PRG-01, W-092-F4, IDX-01 | T-14–T-16, T-36–T-37, T-45, T-75–T-77 | MS-SEE | T-46 **narrowed**: optional query-local ranking stays in pack policy, never `IndexPort` or the adapter |
 | **CHANGE** | TXN-01, SHD-01, TLS-04/05, *EDT-01* | T-17–T-20, T-47–T-49, T-78, T-83a, T-83b | MS-CHANGE | T-17 `DONE`; TLS-04 mechanism present in `transaction.py`; T-18/T-19/T-20 production mechanisms wired; `str_replace` folds into T-47; T-83 caller admission remains separate |
 | **DIALECT** | WRN-01, TLS-02 | T-21–T-22, T-50 | — | T-21–T-22 `DONE`. T-50 `[PROPOSAL]`. Does not close MS-CHANGE. |
-| **CONTROL** | CMX-07, W-092-F5, CMX-01, EXP-01, *PRF-01*, ALG-03 | T-26–T-27, T-51–T-52, T-79, T-89, T-92–T-95, T-97 | MS-CONTROL | `APPROVED` preparation; empirical gate OPEN. MS-BASELINE/MS-CONTEXT and NT-1 product repairs are accepted. T-26 is READY but UNFROZEN, subject to applicable prerequisite and L0/L1 evidence; T-27/T-51/T-52 remain open. Acceptance follows the frozen sample, resource stops and vetoes in milestones.md. **T-80** is an EXP-02 post-control treatment, not a freeze dependency. |
+| **CONTROL** | CMX-07, W-092-F5, CMX-01, EXP-01, *PRF-01*, ALG-03 | T-26–T-27, T-51–T-52, T-79, T-89, T-92–T-95, T-97 | MS-CONTROL | `APPROVED` preparation; empirical gate OPEN. MS-BASELINE/MS-CONTEXT and NT-1 product repairs are accepted. T-26 is BLOCKED and UNFROZEN under RUN-1; T-26a/T-51 are READY, with T-52/T-26b and live prerequisites preceding freeze; T-27/T-51/T-52 remain open. Acceptance follows the frozen sample, resource stops and vetoes in milestones.md. **T-80** is an EXP-02 post-control treatment, not a freeze dependency. |
 | **INSTRUMENT (product)** | INS-01, BRG-01, DLG-01 | T-84–T-88, T-90, T-91, T-97 | MS-TRUTH → MS-CONTROL | Distinct subject from the `CLOSED` MS-INSTRUMENT (benchmark harness). Precondition of every `LIVE-*` row |
 | **COMPARISON** | ARM-01 | T-96 | MS-CONTROL → MS-SENIOR | `PROPOSED` (Route L). No arm claim is authorized before MS-CONTROL closes |
 | **META** | MEM-03 | T-28 | MS-META | `[PROPOSAL]` |

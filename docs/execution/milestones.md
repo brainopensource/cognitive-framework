@@ -17,10 +17,10 @@ version: "0.9.5"
 last_verified: 2026-09-11
 lock_head: "bf56eea9"
 derived_from:
-  - .draft/DEVELOPMENT_FINAL_PLAN.md
-  - .draft/DEVELOPMENT_FINAL_PLAN_B.md
-  - .draft/DEVELOPMENT_FINAL_PLAN_v2.md
-  - .draft/PHASE-0_DEVELOPMENT_FINAL_PLAN.md
+  - docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN.md
+  - docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN_B.md
+  - docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN_v2.md
+  - docs/reports/reviews/electroweak_v092/plans/PHASE-0_DEVELOPMENT_FINAL_PLAN.md
 normative_authority:
   - spec.md#milestone-compatibility
 relationships:
@@ -35,17 +35,84 @@ confidence: high
 
 # TARGET Milestone Gates
 
+## Leadership disposition (2026-09-12)
+
+The next product outcome is **qualified single-controller Coding Max**: an agent
+built through the general framework that can read/localize, edit, verify, recover,
+resume and report attributable outcomes under a finite budget. MS-CONTROL remains
+the immediate empirical gate because adding learning or more workers before a
+credible control would make their contribution unmeasurable. This is a product
+qualification checkpoint, not M-9 beta acceptance. [RUN-1](spec.md#run-1-leadership-execution-decision-2026-09-12)
+ratifies the current planning requirements; `requires:` in tasks owns execution.
+
+**Acceptance provenance.** This session's earlier explicit leadership concurrence
+supports the recorded MS-BASELINE/MS-CONTEXT closures on `2989d57d` and the File 1.1
+planning decision. The source and focused tests alone would not support those
+closures. The later documentation commits show authored plans; no independent
+receipt was found in the evidence inspected that accepts their FH-1 algorithms,
+atomic leases or any new empirical gate. Those remain proposals. Historical
+closures for other subjects are retained as recorded, not re-certified here.
+The present leadership delegation authorizes the decisions below; no historical
+test count is restated as a new run. Control stays UNFROZEN, with no paid calls
+authorized or made by this documentation task and no official score.
+
+| Outcome | Leadership decision | Boundary for completion |
+|---|---|---|
+| Single-controller qualification | First priority; approve control-gate hardening and corpus/metric preparation now | T-26a/T-51/T-52, current-subject prerequisites, T-26 freeze and independently accepted positive T-27. A negative result completes reporting, not MS-CONTROL. |
+| Governed reusable memory and skills | Next framework/product priority after control; refine MEM-01/MEM-02/T-56 first | Durable authorized retrieval, restart, revocation and rollback; separate empirical learning acceptance under M-8. Static skill cards are insufficient. No M-9 bypass. |
+| Recoverable workspace and bounded specialist | Conditional follow-on branches; use control failure attribution to choose CAS or one advisory reader | MS-CAS or MS-DELEGATION, then useful treatment evidence where performance is claimed. Read-only delegation does not require CAS. |
+| External evaluation | Independent post-control branch; qualify one Verified protocol before expanding to Aider | MS-EVAL protocol evidence and separately authorized MS-OFFICIAL runs. Existing local greenfield checks remain required before this branch. |
+| Campaign director | Defer implementation until workspace/delegation are accepted and repeated multi-episode demand is evidenced | MS-CAS + MS-DELEGATION + explicit package admission; combined-tree exterior verification. No MCTS/RTV prerequisite. |
+| MCTS, RTV, standing critic swarms, learned routing and professional-equivalence bands | Defer performance experiments; reject vote-based completion and invented universal scores | A dated, budget-matched, preregistered study is required to reconsider a treatment. No speculative algorithm expansion now. |
+
+Capability completeness is demonstrated by composed behavior: discovery and
+localization, safe changes, exterior verification, bounded state/recovery, durable
+memory/skills and optional bounded delegation. It is not a count of registered
+tools. Product claims name only accepted capabilities in the measured composition.
+
+### Open decision — documentation budget (`check_doc_budgets`)
+
+`tools/linters/check_doc_budgets.py` sets a 200-line ceiling per `docs/execution`
+document and currently exits `1` on all five: backlog 726, milestones 446, spec
+2,016, tasks 1,567, technical 2,150. The 2026-09-12 reconciliation reduced the set
+from 11,216 to ~6,900 lines and cut `technical.md` by roughly 80%, but no execution
+document is near 200 and none plausibly can be while carrying gate predicates,
+normative contracts and a task board.
+
+Three facts bound this decision. The check is invoked by no recipe in `justfile`
+or `ci/`, so it has never gated a merge. The linter already has an `EXEMPT`
+mechanism, used for two compound law anchors under ADR-0087. And a prior review
+(`electroweak_v092/opus/part6` N10) identified this exact linter as an attempt to
+answer a priority problem with a ceiling, while `technical.md` grew past it anyway.
+
+**Leadership must choose one and record it. Until then this is an open failure,
+not a passing check, and it is not to be suppressed or relabelled:**
+
+1. Set a realistic per-class ceiling for `docs/execution` (a calibrated figure,
+   not 200) and enforce the check in `just check`, making it a real gate.
+2. Add the five files to `EXEMPT` with an ADR recording why, as ADR-0087 did.
+3. Retire the check as unenforced, rather than carrying a permanent red.
+
+Adding an exemption merely to turn the output green, without recording the reason,
+is the one disposition that is not available.
+
 ## 1. Scope
 
 Stable release outcomes only. Work tree: [`tasks.md`](tasks.md). Packages: [`backlog.md`](backlog.md). Deltas: [`spec.md`](spec.md). Handbook: [`technical.md`](technical.md).
 
 No sprint calendar. MS-* is `OPEN` until receipts exist. Package version **0.9.3** is not M-9.
 
-Anything that makes the system's own evidence trustworthy is core to the Beta MVP. Anything that makes the runtime safe for untrusted callers or third parties is post-beta.
+Evidence integrity and the safety obligations of the selected profile are core to
+qualification. Additional deployment profiles may be deferred; their required
+containment cannot be waived for runs that claim to use them.
 
-The core therefore includes truthful terminal/disposition projection, canonical state and recovery values, test-suite nonmutation and measurement integrity, patch atomicity, context compaction, and process restart/resume. Host sandboxing (`bwrap`, containers, seccomp), production network-policy enforcement, CAS workspaces, specialists, delegation, campaign orchestration, governed memory, and external benchmark claims remain post-beta behind the existing MS-CONTROL/FH-1 horizon; no additional fence is created.
+The control scope includes truthful disposition, canonical state/recovery,
+nonmutating verification, existing patch safety, context compaction and restart.
+CAS, specialist treatments, campaigns, governed learning and external benchmark
+claims remain conditional post-control work. Calling them post-control does not
+place M-8 memory after the M-9 beta that constitutionally depends on it.
 
-**Project checkpoint (2026-09-11; accepted integrated subject `2989d57d4d38c01eecdb7a5fbb6f125077f00e59`).** Leadership accepted T-77/T-107/T-110/T-111 and closed MS-BASELINE plus MS-CONTEXT. Full discovery ran 3,121 tests (3,079 passed, 42 skipped, zero failures/errors); `just check`, elevated-IPC `just verify`, the 815-test runtime collection and the 20-test preregistration/frozen-canary slice passed. T-110 exercised 104 turns over four fresh interpreters with semantic parity and no duplicate settled effects. Public presets remain byte-identical; TCB LOC is 1386 (<= 1438); Invariant N-06 passed; `control_preregistration.json` remains `UNFROZEN` (`subject_sha: null`) with zero paid calls. MS-CONTROL remains OPEN; T-26 is READY and UNFROZEN, while T-27/T-51/T-52 remain open.
+**Historical project checkpoint (2026-09-11; accepted integrated subject `2989d57d4d38c01eecdb7a5fbb6f125077f00e59`).** Leadership accepted T-77/T-107/T-110/T-111 and closed MS-BASELINE plus MS-CONTEXT. Full discovery ran 3,121 tests (3,079 passed, 42 skipped, zero failures/errors); `just check`, elevated-IPC `just verify`, the 815-test runtime collection and the 20-test preregistration/frozen-canary slice passed. T-110 exercised 104 turns over four fresh interpreters with semantic parity and no duplicate settled effects. Public presets remain byte-identical; TCB LOC is 1386 (<= 1438); Invariant N-06 passed; `control_preregistration.json` remains `UNFROZEN` (`subject_sha: null`) with zero paid calls. MS-CONTROL remains OPEN; T-26 was recorded READY and UNFROZEN; current freeze is blocked on RUN-1 hardening, while T-27/T-51/T-52 remain open.
 
 ### Near-term release predicates (NT-1)
 
@@ -98,8 +165,8 @@ page neither freezes that artifact nor authorizes measurement.
 | Spending | Zero paid control calls before freeze; T-26 itself makes zero paid calls. Freeze is necessary but does not itself authorize spending. Any required pre-freeze live L0 must use an eligible authorized zero-paid-call route; otherwise admission remains blocked. |
 | Arm | Single-worker `vg-code-balanced`, preset `balanced`, through `vanguard.packages.runtime.entrypoint.execute`; preserve the public $0.15 / 900000 ms / 40000 tokens / 20 turns ceiling and record tighter caller attenuation separately. |
 | Sample and denominator | At least 30 distinct current `LIVE-LOCAL` / `LIVE-HOSTED` tasks with binary exterior outcomes. Freeze finite membership and task order; one qualifying attempt per task. Retries never increase coverage or replace failed attempts. Preserve every missing, undeterminable and not-run outcome with its reason, outside the binary denominator; no full-suite pass-rate claim from partial coverage. |
-| Planned stop | Before measurement, bind the finite task membership, total cost and elapsed-time ceilings and missingness handling. Stop at the preregistered evaluable target (draft: 30), membership exhaustion, or the first resource/integrity stop. Do not extend the sample after inspecting success rates, substitute tasks or stop early for a positive claim. Reconcile the draft stopping text and complete frozen identity at T-26 before running. |
-| Positive result | At the planned stop, `n_evaluable >= 30`, lower endpoint of the two-sided 95% Wilson interval (`z = 1.96`) `>= 0.40`, zero observed false completions and every identity/integrity predicate satisfied. At exactly 30 evaluable tasks, 18 passes meet this statistical threshold; 17 do not. This is qualification on the frozen corpus, not a universal reliability claim. |
+| Planned stop | RUN-03: exactly 30 scheduled distinct L2 tasks, one measured attempt per task. Stop at completion of those slots, a resource ceiling or an integrity veto; retain missing slots, never top up to obtain 30 evaluable rows. Freeze all budgets and reconcile the draft artifact at T-26. No outcome-dependent early positive claim. |
+| Positive result | At the planned stop, `n_evaluable = 30` — every one of the 30 scheduled tasks produced a binary outcome, per [RUN-03](spec.md#run-1-leadership-execution-decision-2026-09-12) — with the lower endpoint of the two-sided 95% Wilson interval (`z = 1.96`) `>= 0.40`, zero observed false completions and every identity/integrity predicate satisfied. At 30 evaluable tasks, 18 passes meet this statistical threshold; 17 do not. Fewer than 30 binary outcomes is `UNDETERMINABLE`, never a scaled-down positive: slots are never replaced or topped up. This is qualification on the frozen corpus, not a universal reliability claim. |
 | Nonpositive result | A valid complete sample below the success threshold is `NEGATIVE`; insufficient evaluable evidence is `UNDETERMINABLE`; unfrozen or identity-invalid measurement is `INVALID`. A false-completion veto prevents acceptance regardless of a numeric disposition. Publish the result, missingness, costs and stop reason; all such outcomes leave MS-CONTROL open. |
 | Closure | An independent reviewer accepts the exact-subject evidence digest and repository governance records closure. A helper returning `POSITIVE` is insufficient. Zero observed false completions is a finite-sample observation, not proof of zero population risk. |
 
@@ -144,8 +211,10 @@ algorithms and atomic task leases belong in the subsequent runway files.
 
 Dependency spine: `MS-BASELINE -> MS-CONTEXT -> MS-CONTROL`; thereafter CAS, delegation, memory and evaluation are conditional branches. No requirement to build campaigns or achieve MS-SOTA before evaluating the single controller. A released profile advertises only its accepted branches. Prototype refinements require updated contracts and leaf falsifiers before implementation, with no weakened gate by silent threshold changes.
 
-The leadership review order is CAS → delegation/specialists → campaign → memory
-→ evaluation; it does not add dependency edges between independent branches.
+The prior CAS → delegation → campaign → memory → evaluation review order is
+superseded by the priority decision above. It never constituted dependency edges.
+Memory/skills refinement follows control first; CAS, advisory delegation and
+evaluation remain independent conditional branches, with campaigns deferred.
 CAS-01 owns workspace qualification; DEL-01 owns delegation mechanics and advisory
 specialists; OCT-03 owns the campaign client; MEM-01 retains M-8 governed-learning
 requirements; EVAL-02 qualifies benchmark protocols. Package lifecycles remain

@@ -32,18 +32,71 @@ confidence: high
 
 Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technical.md`](technical.md). Packages: [`backlog.md`](backlog.md). TARGET gates: [`milestones.md`](milestones.md).
 
-**No sprints. No waves.** Check boxes as work completes. **Recommended reading order (not a schedule):** MS-SEE A stack T-16/T-15/T-36/T-37/T-45 is MECHANISM this-branch. T-04/T-05/T-07 landed 2026-09-04 (T-04 carries an open successor obligation; see its row). Do not create `progressive.py` (T-15). T-46 ranking stays `[PROPOSAL]`.
+**Current decision:** [RUN-1](spec.md#run-1-leadership-execution-decision-2026-09-12)
+governs the active work below. Older checklists retain historical obligations but
+cannot add READY work. No sprint/wave ordering. No new compiler or episode loop.
 
-**Current handoff (2026-09-11; accepted integrated subject `2989d57d4d38c01eecdb7a5fbb6f125077f00e59`).** Leadership accepted T-77, T-107, T-110 and T-111 after exact-subject qualification. Full discovery ran 3,121 tests: 3,079 passed, 42 skipped, zero failures/errors. The complete `just check` and `just verify` pipelines, 815-test runtime collection (17 skipped), 38-test focused runtime/RF slice and 20-test preregistration/frozen-canary slice passed. T-110 executed 104 deterministic turns over four fresh Python interpreters and matched the uninterrupted semantic vector without duplicate settled effects. Public presets remain byte-identical; TCB LOC is 1386 (<= 1438); Invariant N-06 has zero `subprocess` imports in runtime; `control_preregistration.json` remains `UNFROZEN` (`subject_sha: null`) with zero paid calls. MS-BASELINE and MS-CONTEXT are CLOSED. MS-CONTROL remains OPEN; T-26 is READY but UNFROZEN, and T-27/T-51/T-52 remain open.
+## Active autonomous work (2026-09-12)
+
+Planning is approved under the present leadership delegation; no implementation
+or test execution is claimed in this review. Start from `001911e3` or an explicitly
+reconciled successor. The historical NT-1 handoff below remains accepted on
+`2989d57d`; its counts are not current measurements. Only the following READY
+rows are authorized for the next engineering assignment. All other unchecked
+historical/proposed rows require reconciliation before activation.
+
+**Autonomy standard for every READY row — [RUN-04](spec.md#run-1-leadership-execution-decision-2026-09-12).**
+A READY row authorizes implementation within its lease and accepted contract. The
+engineer MAY choose private helpers, test fixtures, error wording, equivalent
+algorithms, and bounded fixes to failures the task itself introduces; they MAY
+write the declared falsifier before the implementation, and a missing test file
+is not by itself a blocker. The engineer MUST NOT silently add a public port or
+schema, change product presets, widen scope or authority, disable verification,
+alter an acceptance threshold, or promote an unapproved proposal — each of those
+returns to leadership. Every session records subject, row, remaining work, file
+ownership, verification disposition and remaining allowance in the handoff below,
+creating no new planning file; at session exhaustion, leave a resumable handoff.
+
+| Task | Owner / state | requires: | Scope / exit |
+|---|---|---|---|
+| T-26a | C — READY | T-111 accepted | Validate the complete manifest and publication boundary under RUN-02; preserve pure diagnostic scoring. Detailed row below. |
+| T-51 | C — READY | T-111 accepted | Freeze a candidate 30-task L2 holdout with explicit strata, task/oracle digests and no L0/L1 overlap; local data preparation only. Detailed row below. |
+| T-52 | C — BLOCKED | T-26a, T-51 | Reconcile binary/missing counts, single attempts, cost provenance and fixed stopping through publication; detailed row below. |
+| T-26b | C, A reviews product identity — BLOCKED | T-26a, T-51, T-52 | Integrate the report gate into the selected runner, prove product-path and stop/budget behavior hermetically, and reconcile applicable T-79/T-89/T-92–T-95/T-97 receipts. |
+| T-26 | C / release owner — BLOCKED; UNFROZEN | T-111, T-26b, T-92 live L0 acceptance | Freeze one clean compatible subject and all identities/resources. Missing model, authorized resources or live prerequisite is a named blocker. No paid call in this task. |
+| T-27 | C runs; independent reviewer accepts — BLOCKED | T-26, explicit run authorization | Execute the fixed canary, publish all outcomes, and record independent disposition. A published negative is task reporting completion, not acceptance for dependency edges. |
+| T-129 | C with relevant package owner — BLOCKED | T-27 accepted / MS-CONTROL closed | Refine one selected post-control package, memory/skills first. Ratify scope, paths, schema obligations, budgets and leaf edges before implementation. No automatic FH-1 activation. |
+
+**Session rules.** Acquire exact file leases from the task row after inspecting
+current Git state; proposed directory maps are not active leases. With no overlap,
+READY work may proceed independently; otherwise serialize. Use an isolated test
+repository under NT-B02, preserve user changes, and do not run unbounded repair
+loops. Default to at most three unsuccessful repair cycles per leaf, 120 seconds
+per focused test command and 1800 seconds per full gate command; a timeout is an
+incomplete check, not a pass. A tighter assigned budget wins. Stop with the named
+failure and resumable handoff when exhausted; iterative mutation loops retain the
+required byte-for-byte rollback guarantee. These are developer-session bounds,
+not changes to product presets or empirical-run ceilings.
+
+Each handoff in the existing task row records `subject`, `state`, `lease`,
+`completed`, `next_action`, `verification` (command/result or not_run), `remaining_budget`,
+`blocker` and artifact references. A successor may resume within the same approved
+scope without leadership. Escalate only changed acceptance/authority/public
+contracts, paid resources, unsafe migration or a scope expansion. Missing fixtures
+are authored as the first step of an admitted leaf; missing design decisions are
+resolved at package admission rather than improvised as new architecture.
+
+**Historical handoff (2026-09-11; accepted integrated subject `2989d57d4d38c01eecdb7a5fbb6f125077f00e59`).** Leadership accepted T-77, T-107, T-110 and T-111 after exact-subject qualification. Full discovery ran 3,121 tests: 3,079 passed, 42 skipped, zero failures/errors. The complete `just check` and `just verify` pipelines, 815-test runtime collection (17 skipped), 38-test focused runtime/RF slice and 20-test preregistration/frozen-canary slice passed. T-110 executed 104 deterministic turns over four fresh Python interpreters and matched the uninterrupted semantic vector without duplicate settled effects. Public presets remain byte-identical; TCB LOC is 1386 (<= 1438); Invariant N-06 has zero `subprocess` imports in runtime; `control_preregistration.json` remains `UNFROZEN` (`subject_sha: null`) with zero paid calls. MS-BASELINE and MS-CONTEXT are CLOSED. MS-CONTROL remains OPEN; T-26 was recorded READY but UNFROZEN; current readiness is superseded by RUN-1, and T-27/T-51/T-52 remain open.
 
 ## Near-term ownership and ready work
 
 **Operational Vocabulary Standard:**
 - Execution units are strictly identified by **Stream + Task ID + Milestone Gate** (e.g. `Stream A: T-99 -> MS-BASELINE`).
 - Terms such as "sprint", "wave", and "phase" are retired historical designations and carry no operational authority.
+- Where those words survive below, they are provenance, not ordering: source-document citations (for example "B Wave 0 corpus sizes"), dated session notes, and the verbatim ticket bodies in the appendix are reproduced as written and are never edited to change their historical meaning. No occurrence of "wave", "sprint" or "phase" anywhere in this file schedules, sequences, or authorizes work; only `requires:` does.
 - The `requires:` edges are the sole dependency ordering.
 
-### Active convergence board
+### Accepted convergence handoff (historical)
 
 This table is a projection of the `requires:` edges below. `READY` authorizes work; `BLOCKED` means its named predecessor lacks an accepted receipt. A focused-green implementation candidate remains unchecked until independent review accepts its full task contract.
 
@@ -54,9 +107,9 @@ This table is a projection of the `requires:` edges below. `READY` authorizes wo
 | **T-107** | A | `ACCEPTED` | T-100/T-104/T-105/T-106/T-109 accepted | Registered write-before-use selection/recovery and project-scoped cold replay pass on `2989d57d`. |
 | **T-110** | A/C | `ACCEPTED` | T-107 and T-77 | The 104-turn fixture crosses four fresh interpreters and preserves the semantic vector on `2989d57d`. |
 | **T-111** | C | `ACCEPTED` | T-109 and T-110 | Exact-subject full gates reconcile and close MS-BASELINE/MS-CONTEXT on `2989d57d`. |
-| **T-26** | C/Leadership | `READY; UNFROZEN` | T-111 plus applicable T-79/T-89/T-92–T-95/T-51/T-52 evidence | Audit the control prerequisites and freeze one eligible exact subject; make no paid call in the freeze task. |
-| **T-27** | B/C | `BLOCKED` | T-26 frozen on an accepted exact subject | Execute the single-agent canary through `CodingMaxFacade` on the frozen subject and publish a disposition in {POSITIVE, NEGATIVE, UNDETERMINABLE, INVALID}. This is the single prerequisite edge for every post-control implementation branch. |
-| **FH-1 tree** | A/B/C | `BLOCKED` | T-27 accepted (MS-CONTROL closed) | 33 atomic subtasks with disjoint file leases and executable falsifiers are staged in the [FH-1 atomic subtask board](#fh-1-atomic-subtask-board-proposal). A negative or undeterminable T-27 disposition does not unlock them. |
+| **T-26** | C/Leadership | `BLOCKED; UNFROZEN` | See active work table | The earlier READY label meant preparation, not readiness to freeze before hardening and live prerequisites. |
+| **T-27** | C/reviewer | `BLOCKED` | See active work table | Reporting completion alone does not unlock branch acceptance. |
+| **FH-1 tree** | A/B/C | `PROPOSED; NOT READY` | T-27 accepted and T-129 package admission | Atomic rows are design candidates, not executable leases. |
 
 ### Stream Ownership and Boundaries
 
@@ -71,6 +124,9 @@ The labels **Stream A/B/C** below are current engineering ownership, not the his
 Work executes on the active feature branch (`feat/aether-framework-electroweak-canonical-agents`) with strictly disjoint file leases per Stream (zero file-level overlap) and focused test falsifiers to prevent cross-contamination. Shared-tree concurrent editing of the same file is forbidden. An explicit file assignment overrides a directory default; transfer a file only after the prior owner's patch lands. No two active rows may lease the same file. Zero planned file overlap is enforceable; semantic conflicts are resolved by integrated verification. Read-only reviews may cross ownership. Generated files have only the generator as writer. If event/schema tooling needs changes, C lands schema-generator input changes while A owns emission/reducer consumers under T-107.
 
 ### Multi-day delivery batch for context convergence
+
+Historical NT-1 delivery record only. The active autonomous table supersedes its
+readiness and staffing; completed convergence work is not reactivated here.
 
 This batch is a coordination timebox, not a new dependency system or a waiver of
 `requires:` edges. Developers work autonomously on isolated branches or repositories
@@ -276,7 +332,12 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 
 ### Context: Post-control horizon (FH-1) [PROPOSAL]
 
-All leaves remain unchecked and provisional. `requires:` edges are the only execution ordering; “Sprints 3–5” is a horizon label, not a schedule. T-27 below means **MS-CONTROL accepted**, including T-111, T-26 and all applicable predecessors; a negative T-27 disposition does not unlock prototypes. Preserve NT-1 Stream A/B/C ownership and scope. Future owner labels below identify subsystems, not assignments to concurrent agents. Before implementation, refine each leaf into exact files, registered schemas, runnable falsifiers, finite budgets and migration obligations using the measured control subject. That refinement is now done: see the [FH-1 atomic subtask board](#fh-1-atomic-subtask-board-proposal) below, which slices these leaves into 33 atomic rows with disjoint file leases and executable falsifiers. The parent rows here remain the acceptance contracts; the subtask board is how they are executed.
+All leaves remain unchecked and provisional. T-27 below means accepted positive
+MS-CONTROL, not merely a finished evaluation. Every branch additionally requires
+T-129 package admission. The 33-row board is a candidate decomposition; its exact
+paths and commands are not yet ratified or necessarily present. Parent outcomes
+remain planning requirements; existing code, composition and persistence owners
+must be resolved before the rows can become executable.
 
 These leaves refine existing T-17/T-28–T-34/T-49–T-58/T-67/T-80/T-96 families rather than creating competing implementations. [FH-1](spec.md#fh-1-post-control-backend-horizon-proposal) supplies contracts and [milestones](milestones.md#post-control-horizon-release-predicates-fh-1) supplies acceptance. Official evaluation of the single controller does not require optional CAS/campaign/memory work; any measured arm using those features does require their accepted gates. No paid calls or public submissions are authorized by this tree.
 
@@ -402,12 +463,21 @@ These leaves refine existing T-17/T-28–T-34/T-49–T-58/T-67/T-80/T-96 familie
 
 #### FH-1 atomic subtask board [PROPOSAL]
 
-Every row below is `[PROPOSAL]` and **BLOCKED on T-27** (MS-CONTROL accepted). This
-board authorizes no implementation; it makes the coarse leaves above executable the
-moment the control edge closes. Each row declares one owning stream, one exclusive
-file lease, its exact predecessor edges, and a copy-paste falsifier. A row whose
-falsifier does not yet exist is not startable — writing the falsifier is the row's
-first act, and it must fail before the implementation lands.
+Every row below is `[PROPOSAL]`, requiring accepted T-27 **and T-129 admission for
+its package** in addition to the listed edges. Proposed paths are placeholders,
+not leases. Prospective falsifier commands are not current runnable evidence.
+After admission, writing the missing falsifier is an ordinary first implementation
+step; its expected failure must test behavior rather than only a missing import.
+
+**Known readiness defects to resolve at T-129:** `runtime/memory.py` and
+`benchmarks/protocols.py` already exist, so proposed sibling package directories
+require an explicit compatibility decision. Reuse the existing
+`ports/blob_store.py::BlobStorePort` rather than add a second blob contract. CAS rows omit explicit
+registered-event/reducer and composition integration work. T-114b needs the
+authenticated verifier work T-114d; campaign implementation needs accepted
+T-118c, not only its recovery code. Greenfield protocol work must not depend on
+Verified/Aider adapters merely for scheduling convenience. Resolve these before
+promising autonomous execution; retain existing package owners.
 
 **Stream assignment for post-control work.** `A` = runtime and product composition;
 `B` = pure domain, algorithms and adapters; `C` = integrity, gates, benchmarks and
@@ -696,20 +766,21 @@ is a completed-patch handoff, never concurrent editing of one file:
 
 ### Context: Single-agent qualification
 
-**T-26 Frozen control preregistration** (B; strip “Wave 5” from title)  
+**T-26 Frozen control preregistration** (B)  
 - [ ] n, models, stop rule frozen before first paid call  
 - Requires: T-01–T-25 as applicable  
-- **requires (NT-1 addition)**: [T-111, T-97, T-92, T-51, T-52]; MS-BASELINE and MS-CONTEXT accepted on the candidate subject. No paid execution is implied by a documentation freeze.
+- **requires (RUN-1)**: [T-111, T-26b, T-92 live L0 acceptance]; active table owns readiness. MS-BASELINE and MS-CONTEXT compatible with the candidate; freeze makes no paid call.
 - **draft contract 2026-09-05 (not a freeze):** `benchmarks/ladder/control_preregistration.json` exists with `status: UNFROZEN`, `subject_sha: null`. The L2 arm is pinned to single-worker `vg-code-balanced` / preset `balanced` / `vanguard.packages.runtime.entrypoint.execute` (Forge/Chimera/fast/max excluded). `require_frozen()` refuses scoring. This does not complete T-26 or authorize a paid call.  
 
 **T-27 Single-agent canary (eval)** (B)  
 - [ ] Disposition in {POSITIVE, NEGATIVE, UNDETERMINABLE, INVALID}  
 - Requires: T-26  
-- **prerequisite edge (Wave 4):** T-27 acceptance is the single edge that unlocks the FH-1 atomic subtask board. The canary runs through the public `CodingMaxFacade` with `workers: 1`, preset `balanced`, profile `product`. A negative or undeterminable disposition is a valid published result and leaves both MS-CONTROL and the FH-1 tree closed.  
+- **prerequisite edge (RUN-1):** T-27 accepted positive disposition permits T-129 package admission, not blanket implementation. Run the public product path with one worker and balanced/product composition; negative or undeterminable results leave MS-CONTROL open.
 
-**Control freeze gate audit (2026-09-11, Wave 4).** Re-measured on the working tree
-rather than quoted from the handoff. The prerequisite slice is **17 tests, all
-passing**, composed exactly as:
+**Historical control audit (recorded 2026-09-11; not re-executed here).** The
+documentation recorded the following 17-test slice. No independently bound
+acceptance receipt for this audit was established in the current review; retain
+it as a diagnostic claim, not current qualification or proof of T-26 readiness:
 
 ```bash
 python3 -m unittest test.benchmarks.test_preregistration \
@@ -743,20 +814,76 @@ rule; it means the stop rule currently depends on a caller choosing to check.
 - [ ] **T-26a: Enforce `require_frozen` at the scoring entrypoint** (C -> MS-CONTROL)
   - **state**: `READY` — this is control-gate hardening and does not require T-27.
   - **requires**: [T-111]
-  - **leased files**: `benchmarks/ladder/metrics.py`; `test/benchmarks/test_metric_veto.py`
-  - **contract**: T-26 draft contract; `NT-B04` truthful disposition
-  - **change**: `score_metrics` and `canary_disposition` call `require_frozen()` before
-    producing any rate, interval or disposition, and propagate `ControlNotFrozen`
-    rather than returning a number. Keep the existing veto semantics untouched.
-  - **falsifier / acceptance**: `python3 -m unittest test.benchmarks.test_metric_veto -v` —
-    add a must-fail case asserting that scoring rows against the current `UNFROZEN`
-    record raises `ControlNotFrozen`, and that a single false-completion row still
-    vetoes `POSITIVE` on a frozen record. Both cases must fail before the change lands.
+  - **leased files**: `benchmarks/ladder/control.py`, `metrics.py`, `evidence.py`;
+    `test/benchmarks/test_preregistration.py`, `test_metric_veto.py`.
+  - **contract**: RUN-02/RUN-03; keep the checked-in preregistration UNFROZEN.
+  - **change**: Complete explicit manifest validation and a report admission
+    boundary; retain fixture-compatible pure helpers. Validate every arm field,
+    subject/suite/configuration binding and evidence population. Reject forged
+    frozen flags, empty records and missing required values. No new schema version
+    or filesystem dependency in pure statistics; raise typed refusal at publication.
+  - **falsifier / acceptance**: `python3 -m unittest test.benchmarks.test_preregistration test.benchmarks.test_metric_veto -v`.
+    Add table-driven must-fail manifests/rows and a fully bound positive fixture;
+    prove diagnostics still work without a production freeze. Publication wiring
+    is completed and falsified by T-26b before any real freeze.
+
+- [ ] **T-26b: Integrate and qualify the control evidence path**
+  - **owner/state**: C; BLOCKED; A reviews existing public product identity.
+  - **requires**: [T-26a, T-51, T-52]
+  - **leased files**: `benchmarks/agentic_harness_matrix_benchmark.py`,
+    `benchmarks/product_path.py`, `benchmarks/ladder/control.py`,
+    `test/benchmarks/test_product_path_subject.py`;
+    read-only prerequisite receipts and existing product entrypoint.
+  - **contract**: RUN-02/RUN-03; reuse the runner's existing public composition route.
+  - **falsifier**: `python3 -m unittest test.benchmarks.test_ladder_runner test.benchmarks.test_product_path_subject test.benchmarks.test_preregistration test.benchmarks.test_metric_veto -v`.
+    Drive `run_single_harness_task` and the report writer through `execute_product`
+    with hermetic evidence; the existing source-string checks are not sufficient.
+    Pin balanced/product explicitly rather than inheriting the helper's local/six-turn
+    defaults. Bind exterior results to the final submitted candidate and preserve
+    applicable test protection. UNFROZEN/mismatched data
+    cannot publish; fixed slots, stop before excess dispatch, missingness and
+    false completion survive through the caller. Existing budget tests alone are
+    insufficient. Resolve T-79/T-89/T-92–T-95/T-97 receipt compatibility explicitly.
+    If runtime changes are needed, record the exact defect/owner rather than
+    bypassing the product route. Exit is an eligible local candidate, not live L0.
 
 **T-51 Internal multi-class corpus freeze** (A §31.28, B Wave 0 corpus sizes)  
-- [ ] Keep A’s 10×6 class mix as `[PROPOSAL]` size; do not treat as a sprint  
+- [ ] **state**: READY; owner C; **requires**: [T-111 accepted].
+- **leased files**: new `benchmarks/ladder/l2_thirty/suite.json`, new
+  `test/benchmarks/test_control_corpus.py`; existing candidate task/oracle files
+  read-only. Any needed new task fixture needs a named lease before authoring.
+- **contract**: RUN-03; select exactly 30 distinct held-out executable tasks;
+  freeze membership/order/strata, source and oracle digests; reject L0/L1 overlap,
+  generated cache entries, duplicates, missing oracles and insufficient class mix.
+  No invention of task identifiers or digests to meet cardinality.
+- **falsifier**: prospective `python3 -m unittest test.benchmarks.test_control_corpus -v`;
+  first author the module, then falsify malformed membership and contamination.
+  If eligible source tasks are insufficient, hand off counts and exact missing
+  classes; do not silently tune on or relabel the evaluation holdout.
 
 **T-52 Wilson intervals + cost κ on control** (A §13.5, B §16)  
+- [ ] **state**: BLOCKED; owner C; **requires**: [T-26a, T-51].
+- **leased files**: `benchmarks/ladder/metrics.py`, `benchmarks/statistics.py`,
+  `test/benchmarks/test_metric_veto.py`; new `test/benchmarks/test_control_accounting.py`.
+- **contract**: RUN-03; 30 scheduled slots, zero replacement attempts, binary
+  denominator separate from missingness, cost/usage never fabricated, no rate from
+  a caller-provided inconsistent count. Preserve the two-sided Wilson computation.
+- **falsifier**: `python3 -m unittest test.benchmarks.test_metric_veto test.benchmarks.test_control_accounting -v`
+  (second module new). Cover 17/30 versus 18/30 threshold, a missing slot,
+  duplicate attempt, historical/live mixing, unknown usage and exhausted budget.
+
+- [ ] **T-129: Admit one selected post-control package**
+  - **owner/state**: C plus package owner; BLOCKED; **requires**: [T-27 accepted].
+  - **leased files**: the five existing execution files only; source read-only.
+  - **scope**: memory/skills qualification first; select other branches using
+    measured failures and the priority table. Map existing source/tests, mark each
+    new path, resolve collisions, specify schema/emitter/reducer/composition and
+    migration work, complete leaf dependencies and finite budgets. Keep package
+    authoring, empirical acceptance and paid-run authority separate.
+  - **acceptance**: one reviewed package decision changes selected leaves to READY
+    or BLOCKED by explicit predecessors. All other branches retain their state.
+    LDA plan/resolve and document/path checks substantiate readiness; a list of
+    hypothetical test commands does not. No new implementation in this task.
 
 ### Context: Meta, specialists, merge `[PROPOSAL]`
 

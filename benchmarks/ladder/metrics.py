@@ -6,18 +6,75 @@ from typing import Any, Mapping, Sequence
 
 from benchmarks.ladder.control import ControlAdmissionError, require_frozen
 from benchmarks.ladder.evidence import LIVE_LABELS, reconcile_population
-from benchmarks.statistics import wilson_interval
+from benchmarks.statistics import UsageTotals, usage_rate, wilson_interval
 
 __all__ = [
+    "BUDGET_EXHAUSTED",
     "CANARY_DISPOSITIONS",
     "MetricVeto",
+    "budget_exhausted",
     "false_completion_rate",
     "live_oracle_pass",
     "publish_control_report",
     "score_metrics",
+    "usage_totals",
 ]
 
 CANARY_DISPOSITIONS = frozenset({"POSITIVE", "NEGATIVE", "UNDETERMINABLE", "INVALID"})
+
+#: The canonical marker for an observed resource-ceiling stop
+#: (`benchmarks.protocols._UNDETERMINABLE_MARKERS`). It fills its scheduled
+#: slot: it is neither a binary outcome nor a licence to dispatch a
+#: replacement attempt.
+BUDGET_EXHAUSTED = "budget_exhausted"
+
+
+def _observed_int(value: Any) -> int | None:
+    """An observed integer measurement, or ``None`` when never observed.
+
+    An observed ``0`` is a measurement and is preserved as such; ``bool`` is
+    not an accounting quantity and is refused as unobserved.
+    """
+    if isinstance(value, bool) or not isinstance(value, int):
+        return None
+    return value
+
+
+def usage_totals(rows: Sequence[Mapping[str, Any]], group: str, field: str) -> UsageTotals:
+    """Sum one usage dimension across ``rows``, keeping unknowns unknown."""
+    known = unknown = total = 0
+    for row in rows:
+        observed = _observed_int((row.get(group) or {}).get(field))
+        if observed is None:
+            unknown += 1
+        else:
+            known += 1
+            total += observed
+    return UsageTotals(known=known, unknown=unknown, total=total)
+
+
+def _token_usage(rows: Sequence[Mapping[str, Any]]) -> UsageTotals:
+    """Prompt + completion tokens; a row is unknown if either half is."""
+    known = unknown = total = 0
+    for row in rows:
+        economics = row.get("economics") or {}
+        prompt = _observed_int(economics.get("prompt_tokens"))
+        completion = _observed_int(economics.get("completion_tokens"))
+        if prompt is None or completion is None:
+            unknown += 1
+        else:
+            known += 1
+            total += prompt + completion
+    return UsageTotals(known=known, unknown=unknown, total=total)
+
+
+def budget_exhausted(row: Mapping[str, Any]) -> bool:
+    """The row observed a resource ceiling rather than failing to run."""
+    settlement = row.get("settlement") or {}
+    return BUDGET_EXHAUSTED in {
+        str(settlement.get("terminal_status") or ""),
+        str(settlement.get("undeterminable_reason") or ""),
+    }
 
 
 class MetricVeto(ValueError):
@@ -84,16 +141,14 @@ def score_metrics(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     waste = [
         max(0, turn - call) for turn, call in zip(turns, valid_calls)
     ]
-    tokens = []
-    for row in rows:
-        economics = row.get("economics") or {}
-        prompt = economics.get("prompt_tokens")
-        completion = economics.get("completion_tokens")
-        if isinstance(prompt, int) and isinstance(completion, int) and (prompt + completion) > 0:
-            tokens.append((prompt + completion, int((row.get("execution") or {}).get("turns") or 0)))
-    kappa = None
-    if tokens:
-        kappa = sum(t[0] for t in tokens) / max(1, sum(t[1] for t in tokens))
+    # RUN-03 usage provenance: a rate is only emitted when both dimensions are
+    # settled over the same population. An unobserved value never becomes zero,
+    # and an observed zero never becomes unknown.
+    token_usage = _token_usage(rows)
+    turn_usage = usage_totals(rows, "execution", "turns")
+    cost_usage = usage_totals(rows, "economics", "cost_usd_micros")
+    kappa = usage_rate(token_usage, turn_usage)
+    exhausted = sum(1 for row in rows if budget_exhausted(row))
     first_action = [
         row["execution"]["time_to_first_valid_action_s"]
         for row in rows
@@ -113,6 +168,11 @@ def score_metrics(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
             sum(first_action) / len(first_action) if first_action else None),
         "turn_waste_W": sum(waste) / len(waste) if waste else None,
         "token_efficiency_kappa": kappa,
+        "total_tokens": token_usage.settled_total,
+        "n_usage_unknown": token_usage.unknown,
+        "total_cost_usd_micros": cost_usage.settled_total,
+        "n_cost_unknown": cost_usage.unknown,
+        "n_budget_exhausted": exhausted,
     }
 
 

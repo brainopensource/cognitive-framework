@@ -10,7 +10,10 @@ import math
 from dataclasses import dataclass
 from typing import Sequence
 
-__all__ = ["wilson_interval", "mcnemar_exact", "PairedResult", "cost_adjusted_success"]
+__all__ = [
+    "wilson_interval", "mcnemar_exact", "PairedResult", "cost_adjusted_success",
+    "UsageTotals", "usage_rate",
+]
 
 
 def wilson_interval(passes: int, evaluated: int, *, z: float = 1.96) -> tuple[float, float]:
@@ -79,3 +82,51 @@ def cost_adjusted_success(result: PairedResult, total_usd: float, lambda_usd: fl
     if total_usd < 0 or lambda_usd < 0:
         raise ValueError("cost and lambda must be non-negative")
     return result.rate - lambda_usd * (total_usd / result.evaluated)
+
+
+@dataclass(frozen=True, slots=True)
+class UsageTotals:
+    """One usage dimension summed over a population, unknowns kept unknown.
+
+    ``total`` sums only the rows that actually observed a value. An observed
+    zero is a measurement and lands in ``known``; an absent value lands in
+    ``unknown`` and is never imputed as zero (RUN-03).
+    """
+
+    known: int
+    unknown: int
+    total: int
+
+    def __post_init__(self) -> None:
+        if self.known < 0 or self.unknown < 0:
+            raise ValueError("usage counts must be non-negative")
+
+    @property
+    def population(self) -> int:
+        return self.known + self.unknown
+
+    @property
+    def is_settled(self) -> bool:
+        """Every row in the population observed this dimension."""
+        return self.unknown == 0 and self.known > 0
+
+    @property
+    def settled_total(self) -> int | None:
+        """The total, or ``None`` while any row's value is unobserved."""
+        return self.total if self.is_settled else None
+
+
+def usage_rate(numerator: UsageTotals, denominator: UsageTotals) -> float | None:
+    """Divide two usage dimensions, refusing an inconsistent population.
+
+    Returns ``None`` rather than a fabricated rate when either dimension has
+    an unobserved row, when the two dimensions cover different populations,
+    or when the denominator total is not positive.
+    """
+    if not (numerator.is_settled and denominator.is_settled):
+        return None
+    if numerator.population != denominator.population:
+        return None
+    if denominator.total <= 0:
+        return None
+    return numerator.total / denominator.total

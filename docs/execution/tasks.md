@@ -61,7 +61,7 @@ creating no new planning file; at session exhaustion, leave a resumable handoff.
 |---|---|---|---|
 | T-26a | C — ACCEPTED (independent review, Dev B 2026-09-12) | T-111 accepted | Validate the complete manifest and publication boundary under RUN-02; preserve pure diagnostic scoring. Detailed row below. |
 | T-51 | C — ACCEPTED (independent review, Dev B 2026-09-12) | T-111 accepted | Freeze a candidate 30-task L2 holdout with explicit strata, task/oracle digests and no L0/L1 overlap; local data preparation only. Detailed row below. |
-| T-52 | A — READY | T-26a, T-51 | Reconcile binary/missing counts, single attempts, cost provenance and fixed stopping through publication; detailed row below. |
+| T-52 | A — LANDED, awaiting independent review by B | T-26a, T-51 | Reconcile binary/missing counts, single attempts, cost provenance and fixed stopping through publication; detailed row below. |
 | T-26b | B, A reviews product identity — BLOCKED | T-26a, T-51, T-52 | Integrate the report gate into the selected runner, prove product-path and stop/budget behavior hermetically, and reconcile applicable T-79/T-89/T-92–T-95/T-97 receipts. |
 | T-26 | C / release owner — BLOCKED; UNFROZEN | T-111, T-26b, T-92 live L0 acceptance | Freeze one clean compatible subject and all identities/resources. Missing model, authorized resources or live prerequisite is a named blocker. No paid call in this task. |
 | T-27 | C runs; independent reviewer accepts — BLOCKED | T-26, explicit run authorization | Execute the fixed canary, publish all outcomes, and record independent disposition. A published negative is task reporting completion, not acceptance for dependency edges. |
@@ -933,7 +933,8 @@ rule; it means the stop rule currently depends on a caller choosing to check.
     preregistration.
 
 **T-52 Wilson intervals + cost κ on control** (A §13.5, B §16)  
-- [ ] **state**: READY; owner A; **requires**: [T-26a, T-51 accepted].
+- [ ] **state**: LANDED, awaiting independent review by B; owner A;
+  **requires**: [T-26a, T-51 accepted].
 - **leased files**: `benchmarks/ladder/metrics.py`, `benchmarks/statistics.py`,
   `test/benchmarks/test_metric_veto.py`; new `test/benchmarks/test_control_accounting.py`.
 - **contract**: RUN-03; 30 scheduled slots, zero replacement attempts, binary
@@ -942,6 +943,30 @@ rule; it means the stop rule currently depends on a caller choosing to check.
 - **falsifier**: `python3 -m unittest test.benchmarks.test_metric_veto test.benchmarks.test_control_accounting -v`
   (second module new). Cover 17/30 versus 18/30 threshold, a missing slot,
   duplicate attempt, historical/live mixing, unknown usage and exhausted budget.
+  - **session 2026-09-12 (Dev A) — implementation landed, awaiting independent review.**
+    Subject at start `16827390` (Dev B acceptance of T-26a and T-51). Added
+    `UsageTotals`/`usage_rate` to `benchmarks/statistics.py` and
+    `usage_totals`/`budget_exhausted`/`BUDGET_EXHAUSTED` to
+    `benchmarks/ladder/metrics.py`; new `test/benchmarks/test_control_accounting.py`.
+    `wilson_interval` is unchanged: the preserved two-sided interval already
+    decides the boundary at 17/30 = `(0.39197, 0.72623)` -> NEGATIVE and
+    18/30 = `(0.42320, 0.75410)` -> POSITIVE. Three accounting defects closed:
+    token κ was divided by the turn total of only the rows that happened to
+    report usage (a rate from an inconsistent population, now `None` unless both
+    dimensions are settled over the same population); an observed zero usage was
+    indistinguishable from unknown usage (`_observed_int` now keeps `0` a
+    measurement and refuses `bool`); and `cost_usd_micros` was never accounted
+    at all (now `total_cost_usd_micros`, `None` while any row is unobserved).
+    Budget exhaustion is recorded as the observed terminal outcome
+    `budget_exhausted` (already canonical in `benchmarks/protocols.py`), counted
+    as `n_budget_exhausted`; it fills its scheduled slot, is not a binary
+    outcome, and does not license a replacement dispatch. Fixed-slot,
+    duplicate, mixing and population-mismatch enforcement continues to live in
+    `reconcile_population` (`benchmarks/ladder/evidence.py`, outside this lease)
+    and is unmodified. Falsifiers green (38 tests across the two modules; each
+    of the five new guards independently proven to red under mutation).
+    `control_preregistration.json` remains `UNFROZEN` (`subject_sha: null`);
+    zero paid calls; no product-path file touched.
 
 - [ ] **T-129: Admit one selected post-control package**
   - **owner/state**: C plus package owner; BLOCKED; **requires**: [T-27 accepted].

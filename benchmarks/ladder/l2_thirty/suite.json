@@ -1,0 +1,409 @@
+{
+  "schema": "aether.l2-suite/1",
+  "n": 30,
+  "classes": {
+    "brownfield": [
+      "01_rate_limiter_lease_recovery",
+      "02_ed25519_signature_replay",
+      "03_trait_attenuation_escalation",
+      "04_sqlite_wal_checkpoint_lock",
+      "05_token_budget_clamping_drift",
+      "06_fts5_stale_index_rebuild",
+      "07_context_lost_in_middle_prune",
+      "08_evaluator_oracle_timeout",
+      "09_model_port_streaming_chunk_drop",
+      "10_graph_ppr_dangling_node_sink"
+    ],
+    "greenfield": [
+      "11_kv_lru_ttl_store",
+      "12_finite_state_machine_workflow",
+      "13_semver_dependency_resolver",
+      "14_merkle_tree_ledger",
+      "15_circuit_breaker_proxy",
+      "16_submodular_greedy_packer",
+      "17_json_canonicalizer_jcs",
+      "18_token_bucket_hierarchical",
+      "19_markdown_section_splitter",
+      "20_event_bus_pubsub_channel",
+      "bench_greenfield_8K_tier-2_quiz_game"
+    ],
+    "multi_file": [
+      "bench_multi_8K_tier-2_json_todo_store",
+      "bench_multi_16K_tier-3_event_bus",
+      "bench_multi_32K_tier-4_circuit_breaker",
+      "bench_multi_64K_tier-5_immutable_trie",
+      "bench_multi_128K_tier-6_mvcc_db"
+    ],
+    "multi_turn": [
+      "dogfood-01-multi-turn-file-rollback"
+    ],
+    "single_file": [
+      "bench_single_2K_tier-1_calculator",
+      "bench_single_2K_tier-1_fib_cli",
+      "bench_single_2K_tier-1_string_dedupe"
+    ]
+  },
+  "tasks": [
+    {
+      "id": "01_rate_limiter_lease_recovery",
+      "stratum": "brownfield",
+      "source": {
+        "path": "benchmarks/benchmark_20_suite/01_rate_limiter_lease_recovery",
+        "sha256": "sha256:1a4b5693009ce995ba0519f6794c5d123c94010f60a500a2ce18c6de9ae85b62"
+      },
+      "oracle": {
+        "path": "benchmarks/benchmark_20_suite/01_rate_limiter_lease_recovery/test/test_limiter.py",
+        "sha256": "sha256:0acc0076f80e49b383d86b779f68400f08972a7284cc9f3e13bc223a5795f03e"
+      }
+    },
+    {
+      "id": "02_ed25519_signature_replay",
+      "stratum": "brownfield",
+      "source": {
+        "path": "benchmarks/benchmark_20_suite/02_ed25519_signature_replay",
+        "sha256": "sha256:65346c79898ea638845294f5bc6b837181d3e95e912eb54c09e473d28f4d351a"
+      },
+      "oracle": {
+        "path": "benchmarks/benchmark_20_suite/02_ed25519_signature_replay/test/test_verifier.py",
+        "sha256": "sha256:2f139cd918654a52c096cee37d72dc96e8c447ec2640dd98a5fa96d8918a7a47"
+      }
+    },
+    {
+      "id": "03_trait_attenuation_escalation",
+      "stratum": "brownfield",
+      "source": {
+        "path": "benchmarks/benchmark_20_suite/03_trait_attenuation_escalation",
+        "sha256": "sha256:3410435b84e605ea6543815c41fc7e72bdaf062bd69f1c877154030fba451b20"
+      },
+      "oracle": {
+        "path": "benchmarks/benchmark_20_suite/03_trait_attenuation_escalation/test/test_attenuation.py",
+        "sha256": "sha256:d6b5392f4724fedb2c07f53f495d39cb1f8b325208cb4999c8dd594bab1c5789"
+      }
+    },
+    {
+      "id": "04_sqlite_wal_checkpoint_lock",
+      "stratum": "brownfield",
+      "source": {
+        "path": "benchmarks/benchmark_20_suite/04_sqlite_wal_checkpoint_lock",
+        "sha256": "sha256:b73d55a7387163e609bda2ad78d2983bf0661740253780cee881bf96a7a909dd"
+      },
+      "oracle": {
+        "path": "benchmarks/benchmark_20_suite/04_sqlite_wal_checkpoint_lock/test/test_concurrent_store.py",
+        "sha256": "sha256:bd3c94a2b27eafda0cf1443a8709a156d186161d48b380f2332e52b2fc2099a6"
+      }
+    },
+    {
+      "id": "05_token_budget_clamping_drift",
+      "stratum": "brownfield",
+      "source": {
+        "path": "benchmarks/benchmark_20_suite/05_token_budget_clamping_drift",
+        "sha256": "sha256:a5280a320100ff480c533046d472abe24f53307586ad5446fc815e7bc0544dd3"
+      },
+      "oracle": {
+        "path": "benchmarks/benchmark_20_suite/05_token_budget_clamping_drift/test/test_budget_falsifier.py",
+        "sha256": "sha256:18e8de5108f5f1eaa4cbc1b4f1451c58177fd809f81370baebc3d940ac5cb685"
+      }
+    },
+    {
+      "id": "06_fts5_stale_index_rebuild",
+      "stratum": "brownfield",
+      "source": {
+        "path": "benchmarks/benchmark_20_suite/06_fts5_stale_index_rebuild",
+        "sha256": "sha256:4f456d7336dc0f623623d5959aba7ea2e94ee9301cd1c3d6f4e8148a7de66215"
+      },
+      "oracle": {
+        "path": "benchmarks/benchmark_20_suite/06_fts5_stale_index_rebuild/test/test_indexer_falsifier.py",
+        "sha256": "sha256:3263a2afddb4ebf36bd8fa8382e16de25a00e6aefef27c64951b4ded2738a4dc"
+      }
+    },
+    {
+      "id": "07_context_lost_in_middle_prune",
+      "stratum": "brownfield",
+      "source": {
+        "path": "benchmarks/benchmark_20_suite/07_context_lost_in_middle_prune",
+        "sha256": "sha256:9e8d9d12e0d68ed6cbe65171fa909d6ba7e3f50d20913613a3fe041767fa4f61"
+      },
+      "oracle": {
+        "path": "benchmarks/benchmark_20_suite/07_context_lost_in_middle_prune/test/test_context_allocator.py",
+        "sha256": "sha256:1c76a49187df39301300d51db02dce5b1d3da9b7c142be51326e8dc2d657d7db"
+      }
+    },
+    {
+      "id": "08_evaluator_oracle_timeout",
+      "stratum": "brownfield",
+      "source": {
+        "path": "benchmarks/benchmark_20_suite/08_evaluator_oracle_timeout",
+        "sha256": "sha256:6b31d03663184c8e8773dfcc04d34b2f508598820ca230188a3b88b6c08b22ff"
+      },
+      "oracle": {
+        "path": "benchmarks/benchmark_20_suite/08_evaluator_oracle_timeout/test/test_sandbox_timeout.py",
+        "sha256": "sha256:671e9e4c1d3caff776bccbc160bb752c352b2cf987310080fb87a6b13945080a"
+      }
+    },
+    {
+      "id": "09_model_port_streaming_chunk_drop",
+      "stratum": "brownfield",
+      "source": {
+        "path": "benchmarks/benchmark_20_suite/09_model_port_streaming_chunk_drop",
+        "sha256": "sha256:f78911bfb743428adb10f5974dded376bfb3a0a210f271e2f25f4555d9a0c81f"
+      },
+      "oracle": {
+        "path": "benchmarks/benchmark_20_suite/09_model_port_streaming_chunk_drop/test/test_streaming_falsifier.py",
+        "sha256": "sha256:402c0a2172e48e80043ecb8e7136388266630ba1b7384b5bc3848441bd97845c"
+      }
+    },
+    {
+      "id": "10_graph_ppr_dangling_node_sink",
+      "stratum": "brownfield",
+      "source": {
+        "path": "benchmarks/benchmark_20_suite/10_graph_ppr_dangling_node_sink",
+        "sha256": "sha256:bad2203e7164925e664053603802b62087438d1e0468468aec03f0f5a0694dce"
+      },
+      "oracle": {
+        "path": "benchmarks/benchmark_20_suite/10_graph_ppr_dangling_node_sink/test/test_ppr_falsifier.py",
+        "sha256": "sha256:614baae8b875d0bce3ba2d10f6ca6242e4726f210d629e052ecebabb2c25165a"
+      }
+    },
+    {
+      "id": "11_kv_lru_ttl_store",
+      "stratum": "greenfield",
+      "source": {
+        "path": "benchmarks/benchmark_20_suite/11_kv_lru_ttl_store",
+        "sha256": "sha256:ae9fed58a27027888d494e6d34cde81e52ac1f90c622755dff4c2241fbc51ad9"
+      },
+      "oracle": {
+        "path": "benchmarks/benchmark_20_suite/11_kv_lru_ttl_store/test/test_suite.py",
+        "sha256": "sha256:69e5fd740e993e534e10fba970967733db6eaa6541d4f9f9add4993d074ac98b"
+      }
+    },
+    {
+      "id": "12_finite_state_machine_workflow",
+      "stratum": "greenfield",
+      "source": {
+        "path": "benchmarks/benchmark_20_suite/12_finite_state_machine_workflow",
+        "sha256": "sha256:7f4badb65964684dc65b2d62a1133819d21af2da23871dcc5a0097e8564ea68b"
+      },
+      "oracle": {
+        "path": "benchmarks/benchmark_20_suite/12_finite_state_machine_workflow/test/test_suite.py",
+        "sha256": "sha256:1a9621d0284a6217827f6e1d1f8132aeead8282d1a02657ca8900465152c2ccb"
+      }
+    },
+    {
+      "id": "13_semver_dependency_resolver",
+      "stratum": "greenfield",
+      "source": {
+        "path": "benchmarks/benchmark_20_suite/13_semver_dependency_resolver",
+        "sha256": "sha256:e399b8d2024a6d0a8750eb36655dc9fd29276e50facccc90d009d1f3c2568197"
+      },
+      "oracle": {
+        "path": "benchmarks/benchmark_20_suite/13_semver_dependency_resolver/test/test_suite.py",
+        "sha256": "sha256:c436b7a004bb5b3b3f8f6d56465121b3ec67d4a926b7298bd62a214c43774559"
+      }
+    },
+    {
+      "id": "14_merkle_tree_ledger",
+      "stratum": "greenfield",
+      "source": {
+        "path": "benchmarks/benchmark_20_suite/14_merkle_tree_ledger",
+        "sha256": "sha256:f91d71113f918c1bb2addc5f5bbf532132cdd4fd1364a9c5bf055cb0db2b3078"
+      },
+      "oracle": {
+        "path": "benchmarks/benchmark_20_suite/14_merkle_tree_ledger/test/test_suite.py",
+        "sha256": "sha256:ad514c3646a452cc4c4c243511e8c711dcc8657ba33d2ad4ce4c2a0345af0679"
+      }
+    },
+    {
+      "id": "15_circuit_breaker_proxy",
+      "stratum": "greenfield",
+      "source": {
+        "path": "benchmarks/benchmark_20_suite/15_circuit_breaker_proxy",
+        "sha256": "sha256:d5c162bf873afacb0a5e84dca094076db6596dc604000323f9bf1a76609a6132"
+      },
+      "oracle": {
+        "path": "benchmarks/benchmark_20_suite/15_circuit_breaker_proxy/test/test_suite.py",
+        "sha256": "sha256:ee3e512705c87924920afa44de0cd7c46b117bf96f965856122729fece6becad"
+      }
+    },
+    {
+      "id": "16_submodular_greedy_packer",
+      "stratum": "greenfield",
+      "source": {
+        "path": "benchmarks/benchmark_20_suite/16_submodular_greedy_packer",
+        "sha256": "sha256:a4aeb55dd7a32ddfb24a8e35ad1532a1c73438866b8c2f9ba7e39451c1822b32"
+      },
+      "oracle": {
+        "path": "benchmarks/benchmark_20_suite/16_submodular_greedy_packer/test/test_suite.py",
+        "sha256": "sha256:ac4e16f5031de7e4d4bec367c1c35ee8fd0205ac9f185997060f204ba9e0d46c"
+      }
+    },
+    {
+      "id": "17_json_canonicalizer_jcs",
+      "stratum": "greenfield",
+      "source": {
+        "path": "benchmarks/benchmark_20_suite/17_json_canonicalizer_jcs",
+        "sha256": "sha256:c7abf47bba31ff5a282a0aaa06a24d9113eff6b8872878f53341a7773e918c82"
+      },
+      "oracle": {
+        "path": "benchmarks/benchmark_20_suite/17_json_canonicalizer_jcs/test/test_suite.py",
+        "sha256": "sha256:09a8b089155630322a01e1c9187df14da55a2ac7cd76c3359dbcbaccbd47fe2a"
+      }
+    },
+    {
+      "id": "18_token_bucket_hierarchical",
+      "stratum": "greenfield",
+      "source": {
+        "path": "benchmarks/benchmark_20_suite/18_token_bucket_hierarchical",
+        "sha256": "sha256:9437f6b9ca6e32619a1894eee9b12d56cea7b671f108ebc8a8e19f2d0d870338"
+      },
+      "oracle": {
+        "path": "benchmarks/benchmark_20_suite/18_token_bucket_hierarchical/test/test_suite.py",
+        "sha256": "sha256:11bf89beb4f1edb99240673157b8aca0e57c42e8b6cfd813dcefd72ac02a245e"
+      }
+    },
+    {
+      "id": "19_markdown_section_splitter",
+      "stratum": "greenfield",
+      "source": {
+        "path": "benchmarks/benchmark_20_suite/19_markdown_section_splitter",
+        "sha256": "sha256:43b19de6c0e4ea66b07463ac1abb38d06faf065893bae33264003f36be74d5a4"
+      },
+      "oracle": {
+        "path": "benchmarks/benchmark_20_suite/19_markdown_section_splitter/test/test_suite.py",
+        "sha256": "sha256:f92c73627b877540ba693c620c395ea6a822f4bd0baad00a230df775acd45bdf"
+      }
+    },
+    {
+      "id": "20_event_bus_pubsub_channel",
+      "stratum": "greenfield",
+      "source": {
+        "path": "benchmarks/benchmark_20_suite/20_event_bus_pubsub_channel",
+        "sha256": "sha256:766ba0f86a2b280df747741340530d7719b09c06fdae6a793b6f03f75c49e010"
+      },
+      "oracle": {
+        "path": "benchmarks/benchmark_20_suite/20_event_bus_pubsub_channel/test/test_suite.py",
+        "sha256": "sha256:2555bcd517a2149afea1cdf04304deed9aa5b9c81c767c8e2794f24fe729244d"
+      }
+    },
+    {
+      "id": "bench_single_2K_tier-1_calculator",
+      "stratum": "single_file",
+      "source": {
+        "path": "benchmarks/baac/challenges/tier-1/bench_single_2K_tier-1_calculator",
+        "sha256": "sha256:dfa2d7efdea35ec54cf8131ef236b320803c68bb66da86e7289f148b14424b81"
+      },
+      "oracle": {
+        "path": "benchmarks/baac/challenges/tier-1/bench_single_2K_tier-1_calculator/oracle/verify.py",
+        "sha256": "sha256:7287193ea2692e8d8dd0e65cda20ecf0eb963af80c42659e7e2b3cc895027523"
+      }
+    },
+    {
+      "id": "bench_single_2K_tier-1_fib_cli",
+      "stratum": "single_file",
+      "source": {
+        "path": "benchmarks/baac/challenges/tier-1/bench_single_2K_tier-1_fib_cli",
+        "sha256": "sha256:061ccb001402d55b61294937373dbbdb4851744e06e479d7ee4a965b26ea223e"
+      },
+      "oracle": {
+        "path": "benchmarks/baac/challenges/tier-1/bench_single_2K_tier-1_fib_cli/oracle/verify.py",
+        "sha256": "sha256:563ae37809eb4b549e76d36c6eed1fad73af27a54d0c8cb02d1c3efd00effcd0"
+      }
+    },
+    {
+      "id": "bench_single_2K_tier-1_string_dedupe",
+      "stratum": "single_file",
+      "source": {
+        "path": "benchmarks/baac/challenges/tier-1/bench_single_2K_tier-1_string_dedupe",
+        "sha256": "sha256:483a8eab7c110108791ad5f5201f2882ef02f828ff8bcedf6ac57592505b1c12"
+      },
+      "oracle": {
+        "path": "benchmarks/baac/challenges/tier-1/bench_single_2K_tier-1_string_dedupe/oracle/verify.py",
+        "sha256": "sha256:49f9e51e76c4f6e8bf205239b605ffd6959e43bf7185225c8135324976d644a3"
+      }
+    },
+    {
+      "id": "bench_greenfield_8K_tier-2_quiz_game",
+      "stratum": "greenfield",
+      "source": {
+        "path": "benchmarks/baac/challenges/tier-2/bench_greenfield_8K_tier-2_quiz_game",
+        "sha256": "sha256:c9a6f75ec001051c2e83b13c3a6b0cb520aa5e73315a8964a6005765dfe5e708"
+      },
+      "oracle": {
+        "path": "benchmarks/baac/challenges/tier-2/bench_greenfield_8K_tier-2_quiz_game/oracle/verify.py",
+        "sha256": "sha256:824f318ac88c1340f1012ea1892d08b551ba398c54c2416521373a7de46b8d35"
+      }
+    },
+    {
+      "id": "bench_multi_8K_tier-2_json_todo_store",
+      "stratum": "multi_file",
+      "source": {
+        "path": "benchmarks/baac/challenges/tier-2/bench_multi_8K_tier-2_json_todo_store",
+        "sha256": "sha256:dbc59c7ffb470618622005c2111e066e3e71f9fec722e02ef241e37a84076329"
+      },
+      "oracle": {
+        "path": "benchmarks/baac/challenges/tier-2/bench_multi_8K_tier-2_json_todo_store/oracle/verify.py",
+        "sha256": "sha256:45c589c3580a96e215e7cda31915119c84c55f2b3b28b0068a984f788cf88d9f"
+      }
+    },
+    {
+      "id": "bench_multi_16K_tier-3_event_bus",
+      "stratum": "multi_file",
+      "source": {
+        "path": "benchmarks/baac/challenges/tier-3/bench_multi_16K_tier-3_event_bus",
+        "sha256": "sha256:eb242f2f721ce24f2e73efebf86139991f358d726a349b8911dcb8963c1d16c6"
+      },
+      "oracle": {
+        "path": "benchmarks/baac/challenges/tier-3/bench_multi_16K_tier-3_event_bus/oracle/verify.py",
+        "sha256": "sha256:0655d9f780a941cf39731fac274ae04bd16edf87f8def1f4dd01689aae632f33"
+      }
+    },
+    {
+      "id": "bench_multi_32K_tier-4_circuit_breaker",
+      "stratum": "multi_file",
+      "source": {
+        "path": "benchmarks/baac/challenges/tier-4/bench_multi_32K_tier-4_circuit_breaker",
+        "sha256": "sha256:29ace6cdff1eb06488c73d2fcf8ef6eb2ebe72447b8f12886d3dae978aa9a7fc"
+      },
+      "oracle": {
+        "path": "benchmarks/baac/challenges/tier-4/bench_multi_32K_tier-4_circuit_breaker/oracle/verify.py",
+        "sha256": "sha256:e7f8ad7cd496da599ed4942bd872802ff037e977cbf5bbbe17869b405758b52a"
+      }
+    },
+    {
+      "id": "bench_multi_64K_tier-5_immutable_trie",
+      "stratum": "multi_file",
+      "source": {
+        "path": "benchmarks/baac/challenges/tier-5/bench_multi_64K_tier-5_immutable_trie",
+        "sha256": "sha256:8b00ee517830a9f74d61ac6115958bf43bbe9e7812fb5e78bb873e09626bc6ef"
+      },
+      "oracle": {
+        "path": "benchmarks/baac/challenges/tier-5/bench_multi_64K_tier-5_immutable_trie/oracle/verify.py",
+        "sha256": "sha256:bc5fbc2ac41ac315b5d414ef68b4c597dee5fc8ea99290478b632d4fd593252e"
+      }
+    },
+    {
+      "id": "bench_multi_128K_tier-6_mvcc_db",
+      "stratum": "multi_file",
+      "source": {
+        "path": "benchmarks/baac/challenges/tier-6/bench_multi_128K_tier-6_mvcc_db",
+        "sha256": "sha256:9263974bd9fb69909a27c632a36ce7a0d6f687c5a852d5989be5c1db95565301"
+      },
+      "oracle": {
+        "path": "benchmarks/baac/challenges/tier-6/bench_multi_128K_tier-6_mvcc_db/oracle/verify.py",
+        "sha256": "sha256:d034c1ee2fa92e1a1ca6a2977c58ba26ccb1a47a28928f1529360c97d9403eb3"
+      }
+    },
+    {
+      "id": "dogfood-01-multi-turn-file-rollback",
+      "stratum": "multi_turn",
+      "source": {
+        "path": "benchmarks/greenfield/dogfood-01-multi-turn-file-rollback",
+        "sha256": "sha256:b8047d0db0a68afa2adbfbc2d4361b0d4e57d5ee66944f992d4ad2b18bbcd79c"
+      },
+      "oracle": {
+        "path": "benchmarks/greenfield/dogfood-01-multi-turn-file-rollback/test_calculator.py",
+        "sha256": "sha256:909834da1e5ae7a79b7616064e490a707ba636d88d4b9f544c32885685dba1a3"
+      }
+    }
+  ],
+  "note": "Fixed held-out L2 control membership. Source trees and oracle files are SHA-256 pinned; L0, L1, M-8 memory holdout, run reports, and generated artifacts are excluded."
+}

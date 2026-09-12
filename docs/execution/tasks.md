@@ -848,6 +848,26 @@ rule; it means the stop rule currently depends on a caller choosing to check.
     Add table-driven must-fail manifests/rows and a fully bound positive fixture;
     prove diagnostics still work without a production freeze. Publication wiring
     is completed and falsified by T-26b before any real freeze.
+  - **session 2026-09-12 (Dev A) — implementation landed, awaiting review.**
+    Subject at start `4eca1554`. Changed: `benchmarks/ladder/control.py`,
+    `metrics.py`, `evidence.py`, `test/benchmarks/test_preregistration.py`,
+    `test_metric_veto.py`. `require_frozen` now checks freeze state first
+    (`ControlNotFrozen`), then validates schema, subject digest, model/provider
+    and configuration identity, all four arm fields, sample policy, suite
+    membership/digests and every resource ceiling (`ControlManifestError`; both
+    under a new `ControlAdmissionError`). `record={}` no longer falls back to the
+    ambient file. New `evidence.reconcile_population` joins rows to the frozen
+    manifest; new `metrics.publish_control_report` is the single admission
+    boundary. `canary_disposition` now derives the freeze from `record=` instead
+    of accepting `frozen: bool`. `score_metrics` stays pure — no record, no file.
+    Falsifiers green (34 tests); each guard mutation-checked RED. The checked-in
+    preregistration is untouched and still UNFROZEN with `subject_sha: null`.
+    **Remaining for T-26b:** no production caller invokes
+    `publish_control_report` yet — wiring it into the report writer is T-26b's
+    lease. The manifest keys this boundary requires beyond the current
+    checked-in file (`arm.provider`, `arm.*_digest`, `sample.attempts_per_task`,
+    `sample.missing_outcomes_retain_slots`, `suite.*`, `resources.*`) are added
+    to the record at freeze time by T-26; no schema version was bumped.
 
 - [ ] **T-26b: Integrate and qualify the control evidence path**
   - **owner/state**: C; BLOCKED; A reviews existing public product identity.
@@ -882,6 +902,16 @@ rule; it means the stop rule currently depends on a caller choosing to check.
   first author the module, then falsify malformed membership and contamination.
   If eligible source tasks are insufficient, hand off counts and exact missing
   classes; do not silently tune on or relabel the evaluation holdout.
+  - **session 2026-09-12 (Dev B) — implementation landed, awaiting review.**
+    Subject at start `4eca1554`. Added `benchmarks/ladder/l2_thirty/suite.json`
+    and `test/benchmarks/test_control_corpus.py`. Frozen membership of exactly
+    30 tasks across 5 strata (10 brownfield, 11 greenfield, 5 multi_file,
+    1 multi_turn, 3 single_file) drawn from `benchmark_20_suite/` (20),
+    `baac/challenges/` (9), and `greenfield/` (1). Source trees and oracle paths
+    are SHA-256 digest-bound. Zero overlap with L0/L1; M-8 memory holdout, run
+    artifacts, and cache directories strictly excluded. Falsifiers green
+    (8 tests in `test_control_corpus.py` falsifying malformed membership, duplicate
+    IDs, missing oracles, contamination, and cardinality != 30).
 
 **T-52 Wilson intervals + cost κ on control** (A §13.5, B §16)  
 - [ ] **state**: BLOCKED; owner C; **requires**: [T-26a, T-51].

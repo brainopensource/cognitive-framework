@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Sequence
 
-from benchmarks.ladder.evidence import LIVE_LABELS
+from benchmarks.ladder.control import ControlAdmissionError, require_frozen
+from benchmarks.ladder.evidence import LIVE_LABELS, reconcile_population
 from benchmarks.statistics import wilson_interval
 
 __all__ = [
@@ -12,6 +13,7 @@ __all__ = [
     "MetricVeto",
     "false_completion_rate",
     "live_oracle_pass",
+    "publish_control_report",
     "score_metrics",
 ]
 
@@ -120,10 +122,18 @@ def canary_disposition(
     n_evaluable: int,
     n_min: int = 30,
     wilson_lb_min: float = 0.40,
-    frozen: bool,
+    record: Mapping[str, Any] | None,
 ) -> str:
-    """T-27 closed vocabulary. Does not close MS-CONTROL by itself."""
-    if not frozen:
+    """T-27 closed vocabulary. Does not close MS-CONTROL by itself.
+
+    ``record`` is the preregistration itself: the freeze is derived here through
+    the admission boundary, never accepted as a caller-supplied flag.
+    """
+    if record is None:
+        return "INVALID"
+    try:
+        require_frozen(record)
+    except ControlAdmissionError:
         return "INVALID"
     if n_evaluable <= 0:
         return "UNDETERMINABLE"
@@ -135,3 +145,37 @@ def canary_disposition(
     if wilson[0] >= wilson_lb_min and metrics.get("false_completion_rate") == 0:
         return "POSITIVE"
     return "NEGATIVE"
+
+
+def publish_control_report(
+    *,
+    record: Mapping[str, Any] | None,
+    rows: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """The single admission boundary for a publishable control report (RUN-02).
+
+    Refuses before scoring: an unfrozen or incompletely bound manifest
+    (``ControlNotFrozen`` / ``ControlManifestError``), an evidence population
+    that does not reconcile with that manifest (``EvidenceError``), and any
+    observed false completion (``MetricVeto``). Pure fixture diagnostics stay
+    available through :func:`score_metrics`, which reads no record and no file.
+    """
+    manifest = require_frozen(record)
+    reconciliation = reconcile_population(rows, manifest)
+    metrics = score_metrics(rows)
+    sample = manifest["sample"]
+    disposition = canary_disposition(
+        metrics=metrics,
+        n_evaluable=reconciliation["n_evaluable"],
+        n_min=int(sample["n_min"]),
+        wilson_lb_min=float(sample["wilson_lb_min"]),
+        record=manifest,
+    )
+    return {
+        "subject_sha": manifest["subject_sha"],
+        "suite_digest": manifest["suite_digest"],
+        "model_id": manifest["model_id"],
+        "disposition": disposition,
+        "metrics": metrics,
+        **reconciliation,
+    }

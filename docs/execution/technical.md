@@ -42,7 +42,7 @@ relationships:
 > authorize bypassing a stop rule.
 
 
-Developers SHALL use this file plus [`spec.md`](spec.md), [`tasks.md`](tasks.md), [`milestones.md`](milestones.md), and [`backlog.md`](backlog.md). The originating plan drafts now live under `docs/reports/reviews/electroweak_v092/plans/` and are historical reference, not guidance.
+Developers SHALL use this file plus [`spec.md`](spec.md), [`tasks.md`](tasks.md), [`milestones.md`](milestones.md), and [`backlog.md`](backlog.md). The originating plan drafts now live under `docs/reports/reviews/electroweak_v092/plans/` and are historical reference, not guidance. Engineering autonomy inside a READY row is governed by [RUN-04](spec.md#run-1-leadership-execution-decision-2026-09-12): choose helpers, fixtures, wording and equivalent algorithms freely; return to leadership before adding a public port or schema, changing presets, widening scope or authority, disabling verification, or altering an acceptance threshold.
 
 **Present vs future.** Source implements; accepted specification clauses constrain.
 FH-1 is proposed detail, not HEAD architecture. This handbook is subordinate to
@@ -571,7 +571,7 @@ prepare_and_promote(request) -> Result[PromotionReceipt]
                                                  -> fail SYNTAX_REJECTED
   3.7  tree_id <- H_tree(candidate)                          # FH-C05
 
-  # ---- Phase 4: durable candidate (adapters/cas/blob_store.py) -----------
+  # ---- Phase 4: durable candidate (adapters/stores/blob_store.py) -------
   4.1  pin(operation_id, tree_id)          # pin-before-write; FH-C10 ordering
   4.2  for each new blob b in candidate: blob_store.put(b)
   4.3  fsync files, then fsync containing directories       # rename durability
@@ -1073,11 +1073,64 @@ Pin Aider's polyglot corpus, runner and attempt/feedback protocol separately; re
 
 Official protocol reproduction, public submission and a SOTA claim have distinct receipts. Public submission requires its existing release/operator authority. Select comparator eligibility and a dated comparison snapshot before running the study; incomparable harness/resource settings forbid a direct superiority claim. Negative or inconclusive results close the reporting task while leaving the performance gate open. Release qualification still requires M-8/M-9/M-10 and complete preservation recipes on the final subject.
 
+### T-129 preparation: owner decisions (2026-09-12; NOT admission)
+
+Source inspected at `001911e3` with the working execution-doc delta. These are
+placement decisions for a candidate implementation, not accepted new contracts,
+working APIs or permission to execute. T-129 remains BLOCKED on accepted T-27.
+Do not move the existing `runtime/memory.py` or `benchmarks/protocols.py`: although
+a same-stem directory can coexist on disk, it risks ambiguous/shadowed Python
+imports and would impose an unnecessary compatibility migration.
+
+| Package | Reuse / extend existing owner | Selected new placement and boundary |
+|---|---|---|
+| CAS-01 | `ports/blob_store.py::BlobStorePort` and `adapters/stores/blob_store.py::FileBlobStore`; existing ledger/store/session owners below | `domain/cas/{tree,edit_set,promotion}.py`, `runtime/cas/{promote,commit}.py`, `adapters/cas/{workspace,export,retention}.py`. No second blob port/store and no second ledger. Existing environment transaction support is not durable workspace CAS; retain its public behavior. |
+| DEL-01 | `runtime/delegation.py::SpawnAdapter`, its construction in `runtime/wiring.py`, and existing child execution; no second spawn adapter | `domain/delegation/{specialist,settlement}.py`; `runtime/delegation_recovery.py` is a helper called by the existing lifecycle, never another execution loop. Preserve existing child event folding in `domain/ledger/reducer.py`. |
+| OCT-03 | Existing runtime application composition and episode dispatch; no direct construction of another EpisodeEngine | `domain/campaign/plan.py`, `runtime/campaign/director.py`. Director implementation requires qualified CAS and accepted delegation fault tests (T-118c), not merely recovery code. |
+| MEM-01 | `ports/memory.py` authorization/provenance contracts; `adapters/stores/memory_engine.py` durable storage; `runtime/skill_index.py` static discovery and `runtime/governance/learning.py` durable promotion registry retain distinct responsibilities | `domain/memory/lesson.py`, `runtime/memory_admission.py`, `benchmarks/studies/memory_lift.py`. Admission composes existing authorization, not a replacement memory engine, skill catalog or promotion registry. Public wiring remains an admission obligation, not something proved by existing doubles. |
+| EVAL-02 | `benchmarks/protocols.py::{EvaluatorAdapter,BenchmarkSubmission,BenchmarkReceipt}`, existing statistics and evaluator infrastructure | `benchmarks/evaluation_protocols/{evaluator_boundary,swebench_verified,aider_polyglot,greenfield_corpus}.py`; `domain/evaluation/manifest.py` contains only pure shared values, with no import from benchmarks. Retain protocol imports and receipt identity; no second evaluator authority. Studies remain in `benchmarks/studies/`; official/reporting orchestration remains in `benchmarks/ladder/`. |
+
+All listed new package roots were absent on inspection (including same-stem
+`.py` checks). This establishes placement, not package qualification. Candidate
+verifier orchestration may live in `adapters/verification/runner.py`, but must
+consume existing `adapters/evaluators/{client,gate,signing}.py` authority and
+isolation rather than mint a competing signer or run processes in runtime.
+
+**CAS gaps become explicit leaves.** T-114e owns schema-backed event registration,
+generated wire types, writer-role authorization in `runtime/ledger_emitter.py`,
+and workspace/generation/transaction projections in `domain/ledger/{state,reducer}.py`.
+The event vocabulary in `domain/ledger/events.py` is derived from generated
+types: adding a string to the emitter is not registration. Allocate new events
+only through existing governance; preserve historical readers and golden vectors.
+T-114f extends `ports/event_store.py` and both stores in
+`adapters/stores/event_store.py` through the existing emitter. SQLite's present
+`append()` uses `BEGIN IMMEDIATE`, but exposes no workspace expected-generation
+predicate. Require the comparison, transaction-identity check and append to share
+one durable atomic boundary; an in-process lock or caller-side precheck cannot
+prove this. Exact signatures and migration version require post-gate contract
+review; these are missing obligations, not APIs claimed to exist.
+
+T-116d wires the selected coordinator through `runtime/{session,compose,wiring}.py`,
+including restart/replay and export recovery; T-116c tests that real product path.
+T-113a hardens FileBlobStore instead of duplicating it: current `get()` does not
+rehash, `put()` trusts an existing path, temporary names are shared per target,
+and directory-fsync errors are swallowed. Durable CAS needs explicit corruption,
+concurrent-put and durability-failure tests, while retaining existing callers'
+compatibility. Pin/GC policy belongs in `adapters/cas/retention.py`, not the port.
+
+**Dependency disposition.** T-114b requires T-114d and T-114e; T-114c additionally
+requires T-114f; T-116c additionally requires T-116d; T-120b requires T-118c.
+Memory lift T-121c consumes evaluator boundary T-122b, not just manifest values.
+Greenfield T-125a depends on T-122b independently of Verified/Aider; official
+reconciliation T-126a joins T-123a, T-124a and T-125a explicitly. Shared emitter,
+schema and composition leases are serialized, not assumed disjoint. The board's
+`requires:` edges remain the operational authority after package admission.
+
 ### Algorithm-to-file map and fault-injection index (feeds Wave 4)
 
 Proposed placement for review only. No row grants a lease or establishes a new
-module/API. T-129 must reconcile the source collisions and missing integration
-work listed in the active guide before any of these rows is executable.
+module/API. The preparation decisions above supersede earlier path placeholders;
+T-129 must still admit the selected package before any row is executable.
 
 | Algorithm | Owning file (new unless noted) | Layer rule |
 |---|---|---|
@@ -1086,7 +1139,7 @@ work listed in the active guide before any of these rows is executable.
 | promotion value, `I(P)`, generation algebra | `vanguard/packages/domain/cas/promotion.py` | pure value + predicates |
 | `prepare_and_promote` Phases 0–5 | `vanguard/packages/runtime/cas/promote.py` | composes; **no `import subprocess`** (N-06) |
 | `commit_critical_section`, `reconcile_unknown_commit` | `vanguard/packages/runtime/cas/commit.py` | inside the existing emitter boundary |
-| blob persistence, fsync, pin/sweep | `vanguard/packages/adapters/cas/blob_store.py` (proposed) | reuse `ports/blob_store.py::BlobStorePort`; adapter choice awaits admission |
+| blob persistence and fsync | extend `vanguard/packages/adapters/stores/blob_store.py` | reuse `ports/blob_store.py::BlobStorePort`; pin/sweep belongs in `adapters/cas/retention.py` |
 | capture / materialization | `vanguard/packages/adapters/cas/workspace.py` | the only filesystem reader for CAS |
 | `export`, `restore_or_quarantine`, `recover_export` | `vanguard/packages/adapters/cas/export.py` | journal is adapter-owned; intent is runtime-owned |
 | check execution | `vanguard/packages/adapters/verification/runner.py` or `tools/` | the only place a process is spawned |

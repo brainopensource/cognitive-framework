@@ -334,7 +334,7 @@ Historical CMX-09 sprint DAG is in the [appendix](#appendix-historical-cmx-09-da
 
 All leaves remain unchecked and provisional. T-27 below means accepted positive
 MS-CONTROL, not merely a finished evaluation. Every branch additionally requires
-T-129 package admission. The 33-row board is a candidate decomposition; its exact
+T-129 package admission. The expanded candidate board is a decomposition; its exact
 paths and commands are not yet ratified or necessarily present. Parent outcomes
 remain planning requirements; existing code, composition and persistence owners
 must be resolved before the rows can become executable.
@@ -469,15 +469,13 @@ not leases. Prospective falsifier commands are not current runnable evidence.
 After admission, writing the missing falsifier is an ordinary first implementation
 step; its expected failure must test behavior rather than only a missing import.
 
-**Known readiness defects to resolve at T-129:** `runtime/memory.py` and
-`benchmarks/protocols.py` already exist, so proposed sibling package directories
-require an explicit compatibility decision. Reuse the existing
-`ports/blob_store.py::BlobStorePort` rather than add a second blob contract. CAS rows omit explicit
-registered-event/reducer and composition integration work. T-114b needs the
-authenticated verifier work T-114d; campaign implementation needs accepted
-T-118c, not only its recovery code. Greenfield protocol work must not depend on
-Verified/Aider adapters merely for scheduling convenience. Resolve these before
-promising autonomous execution; retain existing package owners.
+**T-129 preparation disposition (2026-09-12; NOT admission).** Source placement
+and dependency corrections below resolve the known planning defects. T-129 remains
+BLOCKED on accepted T-27; all post-control rows remain PROPOSED/BLOCKED. No lease,
+implementation, schema allocation, paid run or package acceptance is authorized.
+See the technical handbook's “T-129 preparation: owner decisions” for the source
+evidence and compatibility boundaries. Revalidate against the eventual admitted
+subject; do not treat this preparation as a completed T-129 checkbox.
 
 **Stream assignment for post-control work.** `A` = runtime and product composition;
 `B` = pure domain, algorithms and adapters; `C` = integrity, gates, benchmarks and
@@ -490,17 +488,17 @@ NT-1 file: `runtime/cas/`, `runtime/campaign/` and `runtime/delegation.py` join 
 |---|---|---|---|---|
 | **T-112a** Tree values and `H_tree` | B -> MS-CAS | T-27 | `vanguard/packages/domain/cas/tree.py`; `test/domain/test_cas_tree.py` | `python3 -m unittest test.domain.test_cas_tree -v` |
 | **T-112b** Preimage validator and edit-set apply | B -> MS-CAS | T-112a | `vanguard/packages/domain/cas/edit_set.py`; `test/domain/test_cas_edit_set.py` | `python3 -m unittest test.domain.test_cas_edit_set -v` |
-| **T-113a** Disk blob store with directory fsync | B -> MS-CAS | T-112a | `vanguard/packages/adapters/cas/blob_store.py`; `test/adapters/test_cas_blob_store.py` | `python3 -m unittest test.adapters.test_cas_blob_store -v` |
+| **T-113a** Harden existing FileBlobStore durability/integrity | B -> MS-CAS | T-112a | `vanguard/packages/adapters/stores/blob_store.py`; `test/adapters/test_cas_blob_store.py` | `python3 -m unittest test.adapters.test_cas_blob_store -v` |
 | **T-113b** Capture and isolated materialization | B -> MS-CAS | T-113a | `vanguard/packages/adapters/cas/workspace.py`; `test/adapters/test_cas_workspace.py` | `python3 -m unittest test.adapters.test_cas_workspace -v` |
 | **T-114a** Promotion value, `I(P)`, generation algebra | B -> MS-CAS | T-112b | `vanguard/packages/domain/cas/promotion.py`; `test/domain/test_cas_promotion.py` | `python3 -m unittest test.domain.test_cas_promotion -v` |
-| **T-114b** `prepare_and_promote` Phases 0–5 | A -> MS-CAS | T-113b, T-114a | `vanguard/packages/runtime/cas/promote.py`; `test/runtime/test_cas_promote.py` | `python3 -m unittest test.runtime.test_cas_promote -v` |
-| **T-114c** Commit critical section and lost-reply reconcile | A -> MS-CAS | T-114b | `vanguard/packages/runtime/cas/commit.py`; `test/runtime/test_cas_commit.py` | `python3 -m unittest test.runtime.test_cas_commit -v` |
+| **T-114b** `prepare_and_promote` Phases 0–5 | A -> MS-CAS | T-113b, T-114a, T-114d, T-114e | `vanguard/packages/runtime/cas/promote.py`; `test/runtime/test_cas_promote.py` | `python3 -m unittest test.runtime.test_cas_promote -v` |
+| **T-114c** Commit critical section and lost-reply reconcile | A -> MS-CAS | T-114b, T-114f | `vanguard/packages/runtime/cas/commit.py`; `test/runtime/test_cas_commit.py` | `python3 -m unittest test.runtime.test_cas_commit -v` |
 | **T-114d** Check-plan sufficiency and verifier attestation | B -> MS-CAS | T-114a | `vanguard/packages/adapters/verification/runner.py`; `test/adapters/test_candidate_verifier.py` | `python3 -m unittest test.adapters.test_candidate_verifier -v` |
 | **T-115a** Journaled export and quarantine engine | B -> MS-CAS | T-114c | `vanguard/packages/adapters/cas/export.py`; `test/adapters/test_cas_export.py` | `python3 -m unittest test.adapters.test_cas_export -v` |
 | **T-115b** Pin closure and bounded mark/sweep GC | B -> MS-CAS | T-115a | `vanguard/packages/adapters/cas/retention.py`; `test/adapters/test_cas_retention.py` | `python3 -m unittest test.adapters.test_cas_retention -v` |
 | **T-116a** CAS fault-injection suite (`F1`–`F3`, `X1`–`X2`) | C -> MS-CAS | T-115b | `test/contracts/test_cas_fault_injection.py` | `python3 -m unittest test.contracts.test_cas_fault_injection -v` |
 | **T-116b** Fresh-process concurrency and ABA falsifiers | C -> MS-CAS | T-116a | `test/falsifiers/test_cas_concurrency.py` | `python3 -m unittest test.falsifiers.test_cas_concurrency -v` |
-| **T-116c** Product-profile CAS integration qualification | C -> MS-CAS | T-116b | `test/integration/test_cas_product_profile.py` | `python3 -m unittest test.integration.test_cas_product_profile -v` |
+| **T-116c** Product-profile CAS integration qualification | C -> MS-CAS | T-116b, T-116d | `test/integration/test_cas_product_profile.py` | `python3 -m unittest test.integration.test_cas_product_profile -v` |
 | **T-117a** Specialist request/findings wire schemas | B -> MS-DELEGATION | T-27 | `vanguard/packages/domain/delegation/specialist.py`; `test/domain/test_specialist_wire.py` | `python3 -m unittest test.domain.test_specialist_wire -v` |
 | **T-117b** Settlement value and conservation predicate | B -> MS-DELEGATION | T-117a | `vanguard/packages/domain/delegation/settlement.py`; `test/domain/test_delegation_settlement.py` | `python3 -m unittest test.domain.test_delegation_settlement -v` |
 | **T-118a** Five-state dispatch/settlement FSM | A -> MS-DELEGATION | T-117b | `vanguard/packages/runtime/delegation.py`; `test/runtime/test_delegation_fsm.py` | `python3 -m unittest test.runtime.test_delegation_fsm -v` |
@@ -508,19 +506,40 @@ NT-1 file: `runtime/cas/`, `runtime/campaign/` and `runtime/delegation.py` join 
 | **T-118c** Delegation fault-injection suite (`D1`–`D2`) | C -> MS-DELEGATION | T-118b | `test/contracts/test_delegation_fault_injection.py` | `python3 -m unittest test.contracts.test_delegation_fault_injection -v` |
 | **T-119a** Paired one-variable specialist study harness | C -> MS-SPECIALIST | T-118c, T-122b | `benchmarks/studies/specialist_paired.py`; `test/benchmarks/test_specialist_paired.py` | `python3 -m unittest test.benchmarks.test_specialist_paired -v` |
 | **T-120a** Campaign plan, Kahn sort, `ready(v)` | B -> MS-CAMPAIGN | T-117b | `vanguard/packages/domain/campaign/plan.py`; `test/domain/test_campaign_plan.py` | `python3 -m unittest test.domain.test_campaign_plan -v` |
-| **T-120b** Director runtime client and lease fencing | A -> MS-CAMPAIGN | T-116c, T-118b, T-120a | `vanguard/packages/runtime/campaign/director.py`; `test/runtime/test_campaign_director.py` | `python3 -m unittest test.runtime.test_campaign_director -v` |
+| **T-120b** Director runtime client and lease fencing | A -> MS-CAMPAIGN | T-116c, T-118c, T-120a | `vanguard/packages/runtime/campaign/director.py`; `test/runtime/test_campaign_director.py` | `python3 -m unittest test.runtime.test_campaign_director -v` |
 | **T-120c** Zero-mutating-verb and resume falsifiers (`C1`–`C2`) | C -> MS-CAMPAIGN | T-120b | `test/contracts/test_campaign_isolation.py` | `python3 -m unittest test.contracts.test_campaign_isolation -v` |
 | **T-121a** Lesson values and revocation root `R_e` | B -> MS-MEMORY | T-27 | `vanguard/packages/domain/memory/lesson.py`; `test/domain/test_lesson_revocation.py` | `python3 -m unittest test.domain.test_lesson_revocation -v` |
-| **T-121b** Retrieval admission and epoch cache invalidation | A -> MS-MEMORY | T-121a | `vanguard/packages/runtime/memory/admission.py`; `test/runtime/test_retrieval_admission.py` | `python3 -m unittest test.runtime.test_retrieval_admission -v` |
-| **T-121c** Contamination join and held-out lift study | C -> MS-MEMORY | T-121b, T-122a | `benchmarks/studies/memory_lift.py`; `test/benchmarks/test_memory_lift.py` | `python3 -m unittest test.benchmarks.test_memory_lift -v` |
+| **T-121b** Retrieval admission and epoch cache invalidation | A -> MS-MEMORY | T-121a | `vanguard/packages/runtime/memory_admission.py`; `test/runtime/test_retrieval_admission.py` | `python3 -m unittest test.runtime.test_retrieval_admission -v` |
+| **T-121c** Contamination join and held-out lift study | C -> MS-MEMORY | T-121b, T-122b | `benchmarks/studies/memory_lift.py`; `test/benchmarks/test_memory_lift.py` | `python3 -m unittest test.benchmarks.test_memory_lift -v` |
 | **T-122a** Evaluation manifest/attempt schemas | B -> MS-EVAL | T-27 | `vanguard/packages/domain/evaluation/manifest.py`; `test/domain/test_evaluation_manifest.py` | `python3 -m unittest test.domain.test_evaluation_manifest -v` |
-| **T-122b** Independent evaluator boundary | C -> MS-EVAL | T-122a | `benchmarks/protocols/evaluator_boundary.py`; `test/benchmarks/test_evaluator_boundary.py` | `python3 -m unittest test.benchmarks.test_evaluator_boundary -v` |
-| **T-123a** SWE-bench Verified pinned adapter | C -> MS-EVAL | T-122b | `benchmarks/protocols/swebench_verified.py`; `test/benchmarks/test_swebench_verified.py` | `python3 -m unittest test.benchmarks.test_swebench_verified -v` |
-| **T-124a** Aider polyglot pinned adapter | C -> MS-EVAL | T-122b | `benchmarks/protocols/aider_polyglot.py`; `test/benchmarks/test_aider_polyglot.py` | `python3 -m unittest test.benchmarks.test_aider_polyglot -v` |
-| **T-125a** Greenfield corpus and exterior acceptance | C -> MS-EVAL | T-123a, T-124a | `benchmarks/protocols/greenfield_corpus.py`; `test/benchmarks/test_greenfield_corpus.py` | `python3 -m unittest test.benchmarks.test_greenfield_corpus -v` |
-| **T-126a** Frozen official execution and audit recipe | C -> MS-OFFICIAL | T-125a | `benchmarks/ladder/official_run.py`; `test/benchmarks/test_official_run.py` | `python3 -m unittest test.benchmarks.test_official_run -v` |
+| **T-122b** Independent evaluator boundary | C -> MS-EVAL | T-122a | `benchmarks/evaluation_protocols/evaluator_boundary.py`; `test/benchmarks/test_evaluator_boundary.py` | `python3 -m unittest test.benchmarks.test_evaluator_boundary -v` |
+| **T-123a** SWE-bench Verified pinned adapter | C -> MS-EVAL | T-122b | `benchmarks/evaluation_protocols/swebench_verified.py`; `test/benchmarks/test_swebench_verified.py` | `python3 -m unittest test.benchmarks.test_swebench_verified -v` |
+| **T-124a** Aider polyglot pinned adapter | C -> MS-EVAL | T-122b | `benchmarks/evaluation_protocols/aider_polyglot.py`; `test/benchmarks/test_aider_polyglot.py` | `python3 -m unittest test.benchmarks.test_aider_polyglot -v` |
+| **T-125a** Greenfield corpus and exterior acceptance | C -> MS-EVAL | T-122b | `benchmarks/evaluation_protocols/greenfield_corpus.py`; `test/benchmarks/test_greenfield_corpus.py` | `python3 -m unittest test.benchmarks.test_greenfield_corpus -v` |
+| **T-126a** Frozen official execution and audit recipe | C -> MS-OFFICIAL | T-123a, T-124a, T-125a | `benchmarks/ladder/official_run.py`; `test/benchmarks/test_official_run.py` | `python3 -m unittest test.benchmarks.test_official_run -v` |
 | **T-127a** Dated SOTA comparison disposition | C -> MS-SOTA | T-126a | `benchmarks/ladder/sota_comparison.py`; `test/benchmarks/test_sota_comparison.py` | `python3 -m unittest test.benchmarks.test_sota_comparison -v` |
 | **T-128a** Release reconciliation and schema migration | C -> M-8/M-9/M-10 | T-126a | `tools/release/reconcile_horizon.py`; `test/tools/test_release_reconcile.py` | `python3 -m unittest test.tools.test_release_reconcile -v` |
+
+The following three integration leaves supplement the original 33-row board;
+they have the same PROPOSED/BLOCKED admission guard. Shared owners are explicit,
+not covered by a claim of directory-level disjointness.
+
+| Subtask | Stream -> Gate | Requires | Candidate files (not active leases) | Prospective falsifier |
+|---|---|---|---|---|
+| **T-114e** CAS event allocation, writer authority and replay | C -> MS-CAS | T-114a | `schemas/mhf/event_envelope.schema.json`; `schemas/mhf/event_envelope_v2.schema.json`; regenerate `vanguard/packages/domain/wire/types_gen.py` through the existing generator; extend `vanguard/packages/domain/ledger/events.py`, `state.py`, `reducer.py`; extend `vanguard/packages/runtime/ledger_emitter.py`; new `test/contracts/test_cas_event_replay.py` | `python3 -m unittest test.contracts.test_cas_event_replay test.contracts.test_event_coverage -v` |
+| **T-114f** Durable compare-and-append boundary | C -> MS-CAS | T-114e | extend `vanguard/packages/ports/event_store.py`, `vanguard/packages/adapters/stores/event_store.py`, `vanguard/packages/runtime/ledger_emitter.py`; new `test/contracts/test_cas_store_atomicity.py` | `python3 -m unittest test.contracts.test_cas_store_atomicity -v` |
+| **T-116d** CAS composition and restart hookup | A -> MS-CAS | T-115b | extend `vanguard/packages/runtime/session.py`, `compose.py`, `wiring.py`; new `test/runtime/test_cas_composition.py` | `python3 -m unittest test.runtime.test_cas_composition -v` |
+
+T-114e hands the emitter lease to T-114f; T-114c consumes the resulting port, not
+a second store connection. T-116c qualifies T-116d's product wiring, not only a
+fixture-built coordinator. T-114e must preserve old ledger readability and cover
+unauthorized writers, unknown kinds, deterministic replay and restored generation.
+T-114f must falsify two-process stale promotion, conflicting transaction identity
+and lost-reply duplication; ordinary atomic batch append is insufficient evidence.
+At admission, the first leaf creating each new Python package owns its
+`__init__.py` and matching test-package scaffold; later leaves depend on that
+handoff. Shared composition/schema owners across packages require serialized
+leases and explicit edges in the selected package decision.
 
 Parent leaves T-112–T-128 stay unchecked until every one of their subtasks is
 accepted. A subtask closes on its own falsifier plus the parent's stated acceptance
@@ -545,17 +564,20 @@ An explicit row lease overrides any directory default, exactly as under NT-1.
 
 | Stream | Post-control exclusive leases | Rows |
 |---|---|---|
-| **A — Runtime and product** | `vanguard/packages/runtime/cas/`, `vanguard/packages/runtime/campaign/`, `vanguard/packages/runtime/memory/admission.py`, `vanguard/packages/runtime/delegation.py`, `vanguard/packages/runtime/delegation_recovery.py`, and the matching `test/runtime/` suites | T-114b, T-114c, T-118a, T-118b, T-120b, T-121b |
+| **A — Runtime and product** | `vanguard/packages/runtime/cas/`, `vanguard/packages/runtime/campaign/`, `vanguard/packages/runtime/memory_admission.py`, `vanguard/packages/runtime/delegation.py`, `vanguard/packages/runtime/delegation_recovery.py`, and the matching `test/runtime/` suites | T-114b, T-114c, T-118a, T-118b, T-120b, T-121b |
 | **B — Domain, algorithms and adapters** | `vanguard/packages/domain/{cas,delegation,campaign,memory,evaluation}/`, `vanguard/packages/adapters/cas/`, `vanguard/packages/adapters/verification/`, and the matching `test/domain/` and `test/adapters/` suites | T-112a, T-112b, T-113a, T-113b, T-114a, T-114d, T-115a, T-115b, T-117a, T-117b, T-120a, T-121a, T-122a |
 | **C — Integrity, gates and benchmarks** | `test/contracts/`, `test/falsifiers/`, `test/integration/`, `benchmarks/`, `tools/release/`, preset catalogs and manifests, the five execution documents, and the merge queue | T-116a, T-116b, T-116c, T-118c, T-119a, T-120c, T-121c, T-122b, T-123a, T-124a, T-125a, T-126a, T-127a, T-128a |
 
-Verified disjoint: no path appears in two stream rows, and no two subtask rows in
-the board above name the same file. `vanguard/packages/kernel/` appears in no lease —
+Candidate leases require revalidation at admission; shared integration owners are serialized.
+No disjointness or readiness claim follows from this directory summary. Integration
+rows T-114e/f and T-116d explicitly supplement its owner assignments; T-113a
+extends the existing B-owned blob store outside `adapters/cas/`.
+`vanguard/packages/kernel/` appears in no lease —
 planned kernel delta is zero against the 1438-LOC ceiling, and current TCB is 1386.
 `vanguard/packages/runtime/` acquires no `import subprocess`: check execution is
 leased to `adapters/verification/` under B (N-06).
 
-**Three cross-stream handoff edges** are the only synchronization points, and each
+**Illustrative cross-stream handoffs** (the full board's `requires:` edges govern), each
 is a completed-patch handoff, never concurrent editing of one file:
 
 1. **B -> A at T-114a -> T-114b.** B lands the pure promotion value and generation algebra; A then composes the phases. A never edits `domain/cas/`.
@@ -875,6 +897,9 @@ rule; it means the stop rule currently depends on a caller choosing to check.
 - [ ] **T-129: Admit one selected post-control package**
   - **owner/state**: C plus package owner; BLOCKED; **requires**: [T-27 accepted].
   - **leased files**: the five existing execution files only; source read-only.
+  - **early preparation**: source-owner/path and dependency review recorded on
+    2026-09-12 ahead of the gate. This does not satisfy admission acceptance or
+    remove T-27 from `requires:`; implementation and package selection still wait.
   - **scope**: memory/skills qualification first; select other branches using
     measured failures and the priority table. Map existing source/tests, mark each
     new path, resolve collisions, specify schema/emitter/reducer/composition and

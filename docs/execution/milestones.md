@@ -73,15 +73,17 @@ tools. Product claims name only accepted capabilities in the measured compositio
 ### Open decision — documentation budget (`check_doc_budgets`)
 
 `tools/linters/check_doc_budgets.py` sets a 200-line ceiling per `docs/execution`
-document and currently exits `1` on all five: backlog 726, milestones 446, spec
-2,016, tasks 1,567, technical 2,150. The 2026-09-12 reconciliation reduced the set
-from 11,216 to ~6,900 lines and cut `technical.md` by roughly 80%, but no execution
+document and currently exits `1` on all five. The 2026-09-12 reconciliation reduced
+the set from 11,216 lines and cut `technical.md` by roughly 80%, but no execution
 document is near 200 and none plausibly can be while carrying gate predicates,
 normative contracts and a task board.
 
-Three facts bound this decision. The check is invoked by no recipe in `justfile`
-or `ci/`, so it has never gated a merge. The linter already has an `EXEMPT`
-mechanism, used for two compound law anchors under ADR-0087. And a prior review
+**This is a blocking CI gate, not an advisory check.** It runs in
+`.github/workflows/ci.yml` and `.github/workflows/clean-candidate.yml`, so the
+branch cannot go green while these files exceed the ceiling. An earlier draft of
+this section claimed the check gated nothing; that claim was false and is
+corrected here. The linter already has an `EXEMPT` mechanism, used for two
+compound law anchors under ADR-0087. A prior review
 (`electroweak_v092/opus/part6` N10) identified this exact linter as an attempt to
 answer a priority problem with a ceiling, while `technical.md` grew past it anyway.
 

@@ -208,6 +208,122 @@ on multi-file and greenfield work while changing zero files; the governing
 invariant is that a valid emitted write lands atomically in the candidate
 workspace and the exterior oracle observes that identical submitted tree.
 
+## DIR-1. Wave 1 rulings and replacement-corpus quarantine
+
+Accepted Director decisions, 2026-09-12, inspected subject
+`c3d640783e9bfb96e46551c27ebb6336b9d6e461` (successor of requested `da12be3f`).
+The landed T-130/T-131 work is preserved, not independently accepted here.
+This amendment authorizes only the named task leases and contracts below;
+RUN-12 stays zero calls/zero USD, T-26 stays UNFROZEN, and T-27 is not authorized.
+
+**DIR-D1 — REFRAME: durable carriers, not blanket kind activation.** At this
+subject 18 of the fold's 28 recognized kinds are unwritable, not 16; none belongs
+to `DEPRECATED_KINDS`. Shrinking that set cannot repair the gap. `READABLE_KINDS`
+MUST remain derived from generated `EventKind`, and `WRITABLE_KINDS` MUST remain
+its difference with deprecated kinds. The normative kind allocation is
+`schemas/mhf/event_envelope.schema.json#/$defs/EventKind`.
+`schemas/mhf/event_envelope_v2.schema.json` is the normative production `/2`
+envelope and references that allocation; the two `schemas/v4/event-envelope*`
+files are compatibility shapes, not a second allocation authority.
+
+Authorize the narrow public schema addition of `VerificationRecorded` and
+`ChangeSurfaceUpdated` in that shared allocation, with typed payload definitions
+and `/2` payload validation, generated types, sole session-writer ownership,
+real emission, fold handling, golden vectors and event-coverage proof delivered
+together. No envelope-version bump, deprecated-kind revival, kernel change or
+activation of the other 16 compatibility names is authorized. Existing
+`PlanRevised`, `EpisodeStateChanged` and `EffectCompleted` carriers remain in use.
+The new verification fact records observed verification, not an evaluator verdict
+or independent authority to complete; `VerdictRecorded` ownership is unchanged.
+It binds task/composition/workspace/verification-subject digests, argv, exit code,
+observed test count (unknown stays null), and result artifact digest. The surface
+fact binds the task and candidate digests, settled effect descriptor and complete
+sorted changed-path set including deletions. Append through the single writer
+before the next proposal; append failure stops progress. Replay verifies these
+bindings and rejects stale evidence. Reconstruct verification and multi-file
+surface from persisted production facts in a fresh process, without fixtures
+injecting otherwise-unwritable events. The fold's existing generic
+`lastVerification` payload support means "NEVER reconstructible" is too absolute;
+the actual gap is an emitted, validated, qualified durable carrier.
+
+**DIR-D2 — ACCEPT: INDEX_UNBOUND is infrastructure missingness.** Extend RUN-09
+MEASURED-MISSINGNESS to absent required index infrastructure: retain the scheduled
+slot, terminal reason `INDEX_UNBOUND`, and non-binary `UNDETERMINABLE` disposition.
+Keep completion fail-closed and do not consult the pack policy to bypass the
+missing index. Detect absence before inference where knowable; at admission stop
+without spending semantic repair retries. Missing infrastructure is not evidence
+of model reasoning failure. This moves affected observations from abandoned/
+task-failure counts to infrastructure-missing counts, reduces the binary sample,
+and can improve conditional pass rate without improving all-slot coverage.
+Publish both denominators; fewer than 30 binary outcomes cannot qualify. Missing
+index, stale packet, explicit policy rejection and provider failure stay distinct.
+Use existing terminal/disposition axes and reason fields; no new terminal enum.
+
+**DIR-D3 — ACCEPT: remove the false SHA-256 shim.** Authorize removal of the
+zero-padded SHA-1 acceptance in `domain/evidence/baseline.py`. The inspected
+accepted `CONVERGENCE-BASE-v1.json` pin equals SHA-256 of the ASCII Git tree object
+ID and does not equal the padded value; the verifier test constructs that same
+canonical hash. No legitimate padded caller/pin was found in the current tree.
+Retain that established digest algorithm: changing to a hash of tree contents
+would be a separate migration. Reject raw SHA-1 mislabeled `sha256:` as well.
+Never rewrite or re-sign historical baseline evidence as part of this deletion;
+if an external signed padded pin is discovered, quarantine it and return a named
+migration decision, rather than silently converting or accepting it.
+
+**Q-01 — Quarantine invariant (RUN-07/RUN-08).** All 30 old members are exposed
+by solve-attempt-grade evidence and MUST be retired from qualification, including
+the two stale-digest members. Their old bytes/digests stay historical; no repair
+or rebinding of these removed members. Replacement is exactly 30 tasks with
+10 brownfield / 11 greenfield / 5 multi_file / 1 multi_turn / 3 single_file.
+
+Let `D*` be the append-only development/exposure registry, closed under task
+aliases, origin/lineage and content fingerprints; let `H` be the replacement
+holdout registry. Require `closure(H) intersect closure(D*) = empty` at admission
+and on every use. A development exposure is irreversible: neither rename, copy,
+new digest nor new suite revision restores holdout eligibility. Holdout material
+MUST be held in a separate curator-controlled store absent from developer mounts,
+LDA/retrieval, LAM capture, generic glob loaders and training/export paths. The
+repository carries opaque IDs, strata, commitments and curator attestations only,
+never replacement task/oracle/reference-solution plaintext. The existing product
+path receives only the assigned task and source at an authorized measured slot;
+the exterior oracle and reference solution are never mounted for the solver.
+Pre-freeze red/green validation uses isolated curator fixtures, not a solver or
+development model; only signed validation metadata leaves that boundary.
+
+Every development task registration, materialization, capture and export MUST
+fail closed unless its ID/origin/content is registered DEV and absent from H.
+Every evaluation materialization MUST require an admitted frozen manifest and
+separate run authority; default-deny missing role/registry/attestation or store.
+A holdout exposed to development is irrevocably marked EXPOSED and removed before
+freeze; after freeze it invalidates the subject, never triggers slot replacement.
+Exposure history includes LAM prompts, benchmark results, retained patches and
+`DOGFOOD_SET`; deletion of those artifacts does not erase the tombstone.
+
+`tools/linters/check_corpus_quarantine.py` MUST check: exactly 30 unique IDs and
+the exact strata; canonical source/oracle commitments; immutable origin and
+exposure ancestry; DEV/HOLDOUT role separation; forbidden aliases, normalized
+paths, symlink escapes and matching task/source/oracle fingerprints; absence of
+holdout plaintext in tracked files and configured caches/indexes/exports; and
+registered guarded entrypoints for every loader/capture/export. Renamed copies
+and missing registries/attestations MUST fail. Fingerprint matching does not prove
+semantic novelty: an independent curator attests lineage and checks near-duplicate
+candidates; unresolved similarity is excluded, not declared clean by the linter.
+The linter runs metadata/entrypoint checks in `just check`, full admission checks
+in `just verify` and both CI workflows, and at every materialization boundary.
+Offline CI validates immutable curator receipts; freeze admission additionally
+revalidates the sealed store under the curator role. Neither absence of private
+material nor inability to inspect it may be reported as corpus acceptance.
+
+**DIR-P — Approval probe, not an approval repair.** T-130's valid instrument
+returned NOT_REPRODUCED for all three write fixtures; it did not qualify successful
+completion. The absent-approver/suspension path remains cold. Probe the real
+entrypoint with a hermetic approval-requiring composition, missing approver,
+explicit denial, valid descriptor-bound approval and invalid/stale approval.
+Missing approver MUST NOT become default-allow. A valid signed positive control
+may enter at the existing session approval boundary but MUST be labeled as such,
+not misrepresented as public-entrypoint wiring. No production approval injection
+or threshold change is authorized before attribution and independent review.
+
 ## NT-1. Near-term baseline, context, cache and recovery delta
 
 **Authority and scope (2026-09-07).** This executive amendment authorizes T-98–T-111 and the revised T-77 before control qualification. It supersedes earlier EW-9 exclusions only for deterministic context/cache/recovery hardening and baseline remediation. Existing T-09–T-16 mechanisms are extended, not re-created. T-80 remains the later workspace-policy treatment; deterministic semantic stall detection belongs to T-106. Model escalation, consultation, specialists, CAS workspace promotion, memory learning, new index backends and T-96 remain outside this iteration. Historical milestone receipts retain their original subjects. No new milestone is accepted by this amendment.

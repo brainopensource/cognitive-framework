@@ -26,6 +26,130 @@ relationships:
 
 # Technical Specifications (Detailed)
 
+## Director Charter II — A1–A6 (2026-09-12)
+
+Decision subject `c3d64078`; normative repair/quarantine contracts are spec
+DIR-1, executable leases are T-133–T-137 and T-51. This design does not accept
+the landed code, activate new capabilities, freeze T-26 or authorize T-27.
+
+**A1 — Completion formalism and statistical derivation.** Use typed states
+INTAKE, UNDERSTAND, PLAN, EXECUTE, OBSERVE, VERIFY, DIAGNOSE, RECOVER and TERMINAL.
+Legal forward edges are INTAKE→UNDERSTAND→PLAN→EXECUTE→OBSERVE; OBSERVE returns
+to EXECUTE or enters VERIFY. Verification failure enters DIAGNOSE, whose typed
+decision either stops or spends a bounded recovery action before PLAN/UNDERSTAND.
+Verification success enters TERMINAL only after exact-subject admission.
+COMPACT and RESUME are persisted transitions back to the saved nonterminal state,
+not new attempts. Crash recovery first validates/folds/reconciles the ledger;
+unknown effects cannot be replayed. Cancellation, denial and resource exhaustion
+can terminate any active state, preserving separate status/reason/disposition.
+Missing infrastructure terminates UNDETERMINABLE; valid observed task failure
+remains a failure. No retry after admitted completion; infrastructure absence
+does not consume reasoning retries. Each retry increments the existing bounded
+recovery ledger (at most 12 attempts), and all work remains under the original
+slot's turn/token/call/USD/deadline ceilings. No per-resume reset is legal.
+
+Let I mean identity, quarantine, policy and evidence integrity; V mean exterior
+verification of the submitted immutable candidate; C mean authorized complete
+change closure; F count observed false completions. A completion claim is
+admissible only if I∧V∧C. A reported completion without these witnesses increments
+the false-completion instrument or invalidates evidence; it cannot raise success.
+For N=30 scheduled slots let k be binary successes, n binary observations and
+m=N−n missing/not-run slots. With p-hat=k/n, inversion of the binomial score test
+|p-hat−p|/sqrt(p(1−p)/n) ≤ z gives
+(n+z²)p²−(2n*p-hat+z²)p+n*p-hat² ≤ 0.
+Its lower root is
+
+```text
+LB = [p-hat + z²/(2n) − z*sqrt(p-hat*(1−p-hat)/n + z²/(4n²))]
+     / [1 + z²/n],  z = 1.96.
+```
+
+Thus LB(18,30)=0.423200525 and LB(17,30)=0.391970095. The fixed predicate is
+I∧(n≥30)∧(LB≥0.40)∧(F=0); RUN-03's N=30 makes n≥30 equivalent to n=30.
+No top-up/retry can enlarge n; n<30 is UNDETERMINABLE, not a smaller positive.
+A complete valid sample below the bound is NEGATIVE; broken identity is INVALID;
+F>0 vetoes acceptance regardless of LB. These are finite-corpus observations,
+not proof of universal success. At zero false completions in 30 observed trials,
+the two-sided Wilson upper endpoint is z²/(30+z²)=0.113517091. The exact one-sided
+95% binomial upper limit solves (1−q)^30=0.05, giving q=0.095033853. Neither is
+zero; if only c completion claims were observable, use c, not 30, for a conditional
+claim-risk interval (c=0 conveys no such reliability evidence). Binomial coverage
+assumes comparable independent trials; fixed stratified tasks and correlated
+failures limit population extrapolation. Report strata and missingness separately.
+
+**A2 — Context economics and routing.** Optimize a Pareto vector of exterior
+success/coverage, settled USD, tokens, calls, latency and reproducibility, subject
+to the hard F=0 veto and componentwise spent+reserved+new-reservation≤ceiling.
+If a scalar is needed for a preregistered comparison, use
+U=E[success]−λc*cost−λt*latency−λa*tool-actions−λm*missingness, with weights fixed
+before observing results; unknown spend remains an unsettled reservation, not 0.
+Reserve verification and recovery first. For window W require
+instructions+code+history+evidence+working-memory ≤ W−output−safety−recovery.
+Use the existing 80/60 compaction hysteresis, serializer/counter identity and
+4096-character capability-prefix ceiling; measure retrieval cost versus avoided
+tokens and failed actions rather than asserting a universal cache-hit target.
+Each packet binds repository/candidate epoch, task, composition, cursor and source
+provenance; stale or omitted required context cannot support completion.
+Compaction preserves objective, constraints, plan/dependencies, unresolved failures,
+changed-file/candidate identity, evidence references and the resource ledger.
+Route through ModelPort by task topology/context need/typed failure and remaining
+budget. Post-control escalation retains one slot and budget, never retries policy
+denial through another provider. Verification capacity is reserved before routing.
+
+**A3 — Write and planning design.** Reuse the existing transaction boundary:
+bind preimage and authorized path set → stage all changes → validate → commit
+all or restore bytes → bind the entire final candidate → exterior verification
+→ completion admission → evidence publication. Crash/unknown commit requires
+reconciliation, never blind reapplication. Source tests, oracle files, extra files
+and path aliases are part of identity/policy; test-inlined output is not evidence.
+Changed-file subset hashes are not interchangeable with a whole-candidate hash.
+T-130 supports atomic landing in its exercised configuration, not completion or
+the cold approval seam. T-137 must attribute before any approval wiring repair.
+Plans may contain hierarchical steps, dependency edges and critical-path metadata;
+EpisodeEngine executes them. Replan only on typed observations within the existing
+finite recovery budget; no separate plan-execution loop or unlimited search.
+
+**A4 — Honest SOTA distance.** mini-SWE-agent is a named external baseline with
+an executable SWE-bench runner and retained trajectory output; its official
+[runner documentation](https://mini-swe-agent.com/latest/reference/run/swebench_single/)
+exposes that benchmark path. Vanguard's current evidence is weaker: the internal
+holdout is wholly exposed and the product write diagnostic ends without qualified
+completion. This is a measurement/integration gap, not a measured score deficit.
+No score comparison is valid without pinned harness/model versions, the same fresh
+task population, evaluator, budgets, attempts and retained trajectories. Compare
+balanced product, a minimal ModelPort/tool baseline and pinned mini-SWE-agent on
+quality/cost/latency/coverage with paired uncertainty, after separate authority.
+
+**A5 — Avoided refactor.** Reject FH-1 as one mandatory monolithic rewrite.
+Its four independently admissible mechanisms are immutable workspace/CAS,
+delegation/accounting, campaign coordination and governed memory; evaluator
+integration is a shared cross-cutting acceptance boundary. CAS must establish
+candidate identity before promotion consumers; delegation accounting must precede
+parallel campaign execution; memory can be evaluated separately after a stable
+baseline. Each has its own negative controls and review; integration still needs
+whole-system candidate/budget/evidence tests. Cancel the proposal to require the
+post-control campaign director/DAG machinery as the cure for current zero writes:
+the valid T-130 controls land writes without it, and RUN-13 names no such cause.
+Retain campaign capability as gated horizon work, not a pre-control dependency.
+
+**A6 — Horizon, not activation.** Preserve P1–P5/order in RUN-11. Propose P6 (L):
+isolated parallel workers after accepted control and separately reviewed CAS and
+delegation envelopes; disjoint leases with fencing generations, immutable handoffs,
+independent review and exterior-tested integration. Each worker uses the same
+EpisodeEngine implementation under attenuated authority; a deterministic dispatcher
+issues ready work, never a second cognitive loop. Director has no direct mutation
+authority. Propose P7 (L): governed learning and paired external evaluation after
+P6 only where the experiment uses parallelism; otherwise learning evaluation may
+proceed on the accepted single-worker baseline. Both need T-129 package admission;
+neither is a lease, public-port approval or spend allocation.
+
+Three vulnerable assumptions and their falsifiers: (1) historical no-write failure
+is approval-related — T-137's signed/denied/missing-approver matrix can refute it;
+(2) two durable carriers suffice — a real cold-process replay must preserve every
+required semantic dimension, not just synthetic row-7 carriers; (3) quarantine
+covers development exposure — copied/renamed tasks and an unguarded loader must
+trip Q-01, while independent lineage review checks what hashes cannot establish.
+
 > **Scope-breach record (2026-09-12).** The reconciliation that produced this file
 > removed roughly 5,400 of 6,750 lines — far beyond the ~15% stop threshold the
 > assignment set, which required halting for an explicit decision first. That

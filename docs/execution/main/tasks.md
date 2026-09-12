@@ -60,14 +60,19 @@ creating no new planning file; at session exhaustion, leave a resumable handoff.
 | Task | Owner / state | requires: | Scope / exit |
 |---|---|---|---|
 | T-26a | C — ACCEPTED (independent review, Dev B 2026-09-12) | T-111 accepted | Validate the complete manifest and publication boundary under RUN-02; preserve pure diagnostic scoring. Detailed row below. |
-| T-51 | C — REOPENED; BLOCKED on oracle integrity and digest reacceptance | T-111 accepted | Restore a truthful 30-task L2 holdout after two bound oracle files changed; current corpus falsifier is red. Detailed row below. |
+| T-51 | C — REOPENED; replacement acceptance BLOCKED | T-133 | All 30 old members exposed; replace under Q-01, exactly 30 at 10/11/5/1/3. No old-member digest repair. |
 | T-52 | A — ACCEPTED (independent review, Dev B 2026-09-12) | T-26a, T-51 | Reconcile binary/missing counts, single attempts, cost provenance and fixed stopping through publication; detailed row below. |
 | T-26b | B — BLOCKED; implementation landed, review awaits T-51 reacceptance | T-26a, T-51, T-52 | Integrate the report gate into the selected runner, prove product-path and stop/budget behavior hermetically, and reconcile applicable T-79/T-89/T-92–T-95/T-97 receipts. |
 | T-26 | C / release owner — BLOCKED; UNFROZEN | T-111, T-26b, T-92 live L0 acceptance | Freeze one clean compatible subject and all identities/resources. Missing model, authorized resources or live prerequisite is a named blocker. No paid call in this task. |
 | T-27 | C runs; independent reviewer accepts — BLOCKED | T-26, explicit run authorization | Execute the fixed canary, publish all outcomes, and record independent disposition. A published negative is task reporting completion, not acceptance for dependency edges. |
-| T-130 | C authors; independent Principal reviews — READY | none | Hermetic, zero-cost diagnostic that attributes the write-landing failure to its first failing seam on the real product route. Detailed row below. |
+| T-130 | C — LANDED; review pending | none | Valid retained instrument, NOT_REPRODUCED on three write fixtures; approval seam remains cold (T-137). No write repair attributed. |
 | T-131 | A/B by surface; measurement rows C — READY (rows 1/2/5 gated on T-130) | T-130 for rows 1, 2, 5 | Close the eight `BLOCK-T27` pre-measurement defects with product-route positive and adversarial falsifiers. Detailed row below. |
-| T-132 | C — READY | none | Widen gate discovery so the control instrument is protected, with measured cost recorded and a deterministic stale-digest red control. Detailed row below. |
+| T-132 | C — BLOCKED on gate-file transfer | T-133 | Widen gate discovery, record cost and prove deterministic stale-digest red; T-133 owns gate integration first. |
+| T-133 | C — READY | none | Q-01 quarantine registry, guarded materialization and mechanical checks; owns gate files until reviewed transfer to T-132. |
+| T-134 | A — READY | none | DIR-D1 narrow schema allocation and durable verification/change-surface carriers. |
+| T-135 | B — BLOCKED on lease transfer | T-134 | DIR-D2 INDEX_UNBOUND infrastructure missingness without retry burn. |
+| T-136 | B — READY | none | DIR-D3 remove padded/raw SHA-1 acceptance; preserve legitimate canonical baseline pin. |
+| T-137 | C — READY after T-133 lease delivery | T-130 retained packet, T-133 | Approval-path diagnostic only; no production repair authority. |
 | T-129 | C with relevant package owner — BLOCKED | T-27 accepted / MS-CONTROL closed | Refine one selected post-control package, memory/skills first. Ratify scope, paths, schema obligations, budgets and leaf edges before implementation. No automatic FH-1 activation. |
 
 **Session rules.** Acquire exact file leases from the task row after inspecting
@@ -928,10 +933,31 @@ rule; it means the stop rule currently depends on a caller choosing to check.
     this task; they contaminate the frozen corpus if tested in the shared tree.
 
 **T-51 Internal multi-class corpus freeze** (A §31.28, B Wave 0 corpus sizes)  
-- [ ] **state**: REOPENED / BLOCKED; owner C; **requires**: [T-111 accepted].
-- **leased files**: new `benchmarks/ladder/l2_thirty/suite.json`, new
-  `test/benchmarks/test_control_corpus.py`; existing candidate task/oracle files
-  read-only. Any needed new task fixture needs a named lease before authoring.
+- [ ] **state**: REOPENED; replacement implementation BLOCKED on T-133 review;
+  owner C plus independent corpus curator; **requires**: [T-111 accepted, T-133].
+- **leased files**: `benchmarks/ladder/l2_thirty/suite.json`,
+  `test/benchmarks/test_control_corpus.py`; new
+  `benchmarks/ladder/l2_thirty/curator_receipts.json` (commitments only).
+  Replacement plaintext is authored by an independent curator in a separate
+  sealed store, never under the repository or developer mounts. No authority to
+  create/access external infrastructure is implied; absent curator/store blocks
+  material acquisition, not implementation of T-133's hermetic controls.
+- **current ruling (DIR-1/Q-01)**: all 30 old members have solve-attempt exposure
+  (LAM prompts, committed benchmark outcomes, retained RESOLVED patches and
+  DOGFOOD_SET). Retire every old member; historical receipts below do not accept
+  them. Replace exactly 30 with strata 10 brownfield / 11 greenfield / 5 multi_file
+  / 1 multi_turn / 3 single_file. Do not repair/rebind the two removed stale
+  oracles. Reconcile each new origin against the append-only exposure registry;
+  record independent curator red-on-defect, green-on-reference, deterministic
+  timeout-bounded checks without development-model contact. Preserve one-attempt
+  control policy. No provider calls, preregistration freeze or T-27.
+- **replacement falsifiers**: `python3 -m unittest test.benchmarks.test_control_corpus test.tools.test_check_corpus_quarantine -v`;
+  `python3 tools/linters/check_corpus_quarantine.py --admission`.
+  Reject 29/31 members, wrong strata, renamed/copy/lineage exposure, missing
+  receipts and changed commitments; curator proves each oracle's two controls.
+- **exit**: independently accepted sealed-store commitments, exact class counts,
+  exposure/novelty receipts and all new source/oracle/suite bindings. Keep the old
+  red gate visible until replacement lands; no acceptance from metadata alone.
 - **contract**: RUN-03; select exactly 30 distinct held-out executable tasks;
   freeze membership/order/strata, source and oracle digests; reject L0/L1 overlap,
   generated cache entries, duplicates, missing oracles and insufficient class mix.
@@ -940,6 +966,7 @@ rule; it means the stop rule currently depends on a caller choosing to check.
   first author the module, then falsify malformed membership and contamination.
   If eligible source tasks are insufficient, hand off counts and exact missing
   classes; do not silently tune on or relabel the evaluation holdout.
+  - **historical receipts below; superseded by DIR-1/Q-01 above.**
   - **session 2026-09-12 (Dev B) — implementation landed, awaiting review.**
     Subject at start `4eca1554`. Added `benchmarks/ladder/l2_thirty/suite.json`
     and `test/benchmarks/test_control_corpus.py`. Frozen membership of exactly
@@ -989,7 +1016,7 @@ rule; it means the stop rule currently depends on a caller choosing to check.
     reacceptance. Digest synchronization without step (4) is forbidden.
 
 **T-130 Hermetic write-landing seam diagnostic** (RUN-13; Director 2026-09-12)
-- [ ] **state**: READY; owner C authors, independent Principal reviews;
+- [ ] **state**: LANDED, independent review pending; owner C authors, Principal reviews;
   **requires**: [none — hermetic, zero cost, no holdout contact].
 - **leased files**: new `benchmarks/diagnostics/write_landing_probe.py`, new
   `test/benchmarks/test_write_landing_probe.py`, new fixtures under
@@ -1026,6 +1053,11 @@ rule; it means the stop rule currently depends on a caller choosing to check.
   USD, per RUN-12. The packet returns to the Director for the RUN-13 causal
   statement and for the only question that can reopen RUN-10: whether the repair
   crosses a public port or schema boundary.
+- **retained result (c3d64078)**: `.draft/logs/t130_write_landing_packet.json`
+  reports instrument `valid`, both controls passed, zero provider calls/USD,
+  NOT_REPRODUCED for L0/multi-file/greenfield. Terminal `instrument_error` is not
+  successful completion. Accept the bounded negative finding as decision input,
+  not closure of RUN-13. T-137 probes the unexercised approval suspension seam.
 
 **T-131 Pre-measurement defect register** (RUN-09; Director 2026-09-12)
 - [ ] **state**: READY; owner A and B by surface, measurement rows to C;
@@ -1048,10 +1080,125 @@ rule; it means the stop rule currently depends on a caller choosing to check.
   silently scored as an ordinary task failure.
 - **exit**: all eight rows closed with retained falsifiers and accurate resource
   settlement, or an explicit named blocker. T-26 readiness depends on this row.
+- **landed, not accepted (c3d64078)**: rows 4/6/7 falsifiers and supporting
+  implementation are committed and preserved. DIR-D1/D2 identify remaining
+  carrier/admission gaps; T-134/T-135 own their repairs. Rows 1/2/5 acquire no
+  repair lease from NOT_REPRODUCED. An independent reviewer must distinguish
+  synthetic fixture reachability from production emission and cold replay.
+
+**T-133 Q-01 quarantine construction** (C; READY; requires: none)
+
+- **objective/contract**: implement spec DIR-1/Q-01. Development and holdout are
+  separate authorization domains, not two labels on a shared glob pool. Register
+  irreversible DEV/EXPOSED ancestry for all old members; fail closed on missing
+  identity/role/attestation. Public commitments contain no task or solution text.
+- **lease**: new `benchmarks/ladder/quarantine.py`,
+  `benchmarks/ladder/corpus_registry.json`, `tools/linters/check_corpus_quarantine.py`,
+  `test/tools/test_check_corpus_quarantine.py`, `test/benchmarks/test_corpus_quarantine.py`;
+  existing `benchmarks/product_path.py`, `benchmarks/baac/lib/runner.py`,
+  `benchmarks/ladder_runner.py`, `benchmarks/agentic_harness_matrix_benchmark.py`,
+  `tools/002_LLM_API_MOCK/` (capture/materialization/export guard sites only),
+  `vanguard/packages/runtime/task_sets.py` (declarative identity only),
+  `justfile`, `.github/workflows/ci.yml`, `.github/workflows/clean-candidate.yml`.
+  Gate files transfer to T-132 only after T-133 review; no concurrent owner.
+- **implementation boundary**: seal holdout outside all development/retrieval
+  mounts; registry commits origin, aliases, source/oracle/task fingerprints,
+  role, irreversible exposure and curator receipt. Use hermetic synthetic sealed
+  stores for tests. Audit every loader; an uncovered route blocks acceptance,
+  and any additional source file needs a named lease before editing. No product
+  public port change or production model call. Repository-source documentation
+  owner is `docs/architecture/system_composition.md`, edited by Senior only after
+  code review; regenerate docs knowledge then, not by hand.
+- **falsifiers**: `python3 -m unittest test.tools.test_check_corpus_quarantine test.benchmarks.test_corpus_quarantine -v`;
+  `python3 tools/linters/check_corpus_quarantine.py --metadata`.
+  Must reject alias/rename/copied content, symlink escape, role spoofing, removed
+  exposure tombstone, absent receipt, DEV capture of HOLDOUT and unfrozen scoring.
+  Positive control admits a fresh DEV fixture and separately authorized synthetic
+  evaluation; captured development data can never migrate back into HOLDOUT.
+- **exit**: independent reviewer verifies entrypoint inventory, CI integration,
+  no plaintext leakage and negative controls. Old corpus remains unaccepted.
+  C then transfers gates to T-132 and proceeds to T-137/T-51 serially.
+
+**T-134 Durable verification and change-surface carriers** (A; READY; requires: none)
+
+- **objective/contract**: spec DIR-D1 and NT-1.6. Allocate only
+  `VerificationRecorded`/`ChangeSurfaceUpdated` in the normative MHF EventKind;
+  bind typed payloads to `/2`, sole session writer, append-before-next-turn and
+  fresh-process replay. No blanket activation of 18 unwritable fold names.
+- **lease**: `schemas/mhf/event_envelope.schema.json`,
+  `schemas/mhf/event_envelope_v2.schema.json`,
+  `vanguard/packages/runtime/ledger_emitter.py`, `vanguard/packages/runtime/session.py`,
+  `vanguard/packages/runtime/task_state.py`, `test/contracts/test_event_coverage.py`,
+  `test/contracts/test_m5a_schema_vectors.py`, new `test/runtime/test_task_state_durable_carriers.py`.
+  `vanguard/packages/domain/wire/types_gen.py` is generator-only via
+  `python3 tools/codegen/generate_types.py`; the derived catalogs and v4 envelopes
+  remain read-only. Existing domain/task-state landed changes are preserved.
+- **falsifiers**: `python3 -m unittest test.runtime.test_task_state_durable_carriers test.contracts.test_event_coverage test.contracts.test_m5a_schema_vectors test.falsifiers.test_t131_row7_resume_compaction_identity -v`;
+  `python3 tools/linters/check_event_coverage.py`;
+  `python3 tools/codegen/generate_types.py --check`.
+  Prove production verification and multi-file create/modify/delete survive real
+  SQLite close/reopen, no stale receipt admits completion, unauthorized writer
+  fails, append failure prevents the next call, deprecated writes remain denied.
+- **exit**: independent B review of schema/writer/reducer/vectors together;
+  retained old-ledger compatibility and no duplicate effects. Senior synchronizes
+  `docs/backend/reference/events.md` and `docs/architecture/system_composition.md`
+  and generated knowledge after review. Transfer session.py to T-135 afterward.
+
+**T-135 Missing index disposition** (B; BLOCKED until T-134 review/lease transfer)
+
+- **objective/contract**: spec DIR-D2, RUN-09 and NT-B04. index=None is typed
+  infrastructure UNDETERMINABLE with retained slot, not an ordinary failure or
+  retryable semantic rejection. No policy bypass, terminal-enum or preset change.
+- **lease**: `vanguard/packages/runtime/session.py`,
+  `vanguard/packages/agency/episode/engine.py`, `benchmarks/ladder/evidence.py`,
+  `test/falsifiers/test_t131_row4_admitted_completion_stops_episode.py`, new
+  `test/falsifiers/test_index_unbound_disposition.py`.
+- **falsifier**: `python3 -m unittest test.falsifiers.test_index_unbound_disposition test.falsifiers.test_t131_row4_admitted_completion_stops_episode test.benchmarks.test_control_accounting -v`.
+  Assert index=None consults policy zero times, admits no completion, burns no
+  recovery retry, retains reason/slot and lowers binary count; valid bound index
+  reaches policy once, stale packet and policy denial remain distinct.
+- **exit**: independent A review of product-to-evidence projection and unchanged
+  30-slot denominator. Senior synchronizes mapped agency/composition docs and
+  generated knowledge. Existing row-4 green controls must stay meaningful.
+
+**T-136 Baseline digest shim removal** (B; READY; requires: none)
+
+- **objective/contract**: spec DIR-D3. Reject padded/raw SHA-1 pretending to be
+  SHA-256; preserve SHA-256(ASCII Git tree ID), the actual accepted pin algorithm.
+- **lease**: `vanguard/packages/domain/evidence/baseline.py`,
+  `test/contracts/test_baseline_manifest_verifier.py`. Accepted/candidate baseline
+  manifests, signatures and tags are read-only; no network or re-signing.
+- **falsifier**: `python3 -m unittest test.contracts.test_baseline_manifest_verifier -v`.
+  Include padded/raw negatives and canonical positive over a real temporary Git
+  tree; prove the committed accepted manifest's tree pin uses the retained form.
+- **exit**: independent A review; no legitimate current pin changed. External
+  padded signed evidence, if discovered, is a migration escalation, not silently
+  repaired. Senior updates `docs/backend/architecture/domain.md` and knowledge.
+
+**T-137 Approval-path discrimination probe** (C; READY after T-133 delivery)
+
+- **requires**: T-130 retained packet and T-133 (C lease serialization).
+- **contract**: spec DIR-P/RUN-13/RUN-12. Attribute, do not repair, the cold seam
+  where entrypoint supplies no approver and `_resolve(None)` refuses suspension.
+- **lease**: new `benchmarks/diagnostics/approval_path_probe.py`,
+  `test/benchmarks/test_approval_path_probe.py`, fixtures only under
+  `benchmarks/diagnostics/fixtures/dx_approval/`. All product sources and existing
+  presets read-only. Use isolated git/store/workspace and fixture-only policy.
+- **falsifier**: `python3 -m unittest test.benchmarks.test_approval_path_probe -v`.
+  Matrix: interactive false/true, policy allowing/requiring approval, no approver,
+  explicit denial, valid signed descriptor-bound approval, stale/foreign/boolean
+  approval. Exercise entrypoint unchanged; session-bound signed positive control
+  is separately labeled. Verify both instrument controls, no mutation on denial,
+  one effect on valid approval, exact candidate/oracle digest and no duplicate
+  effect on resume. Never lower a production threshold or auto-approve.
+- **exit**: retain packet under `.draft/logs/` with subject/config/trace digests,
+  first seam, separate infrastructure disposition and unresolved observations;
+  zero provider calls/USD. Independent Principal reviews; Director then decides
+  any repair boundary. NOT_REPRODUCED leaves RUN-13 open, not a repair lease.
 
 **T-132 Gate discovery widening and cost disposition** (RUN-07; Director 2026-09-12)
-- [ ] **state**: READY; owner C (sole `justfile` owner);
-  **requires**: [none].
+- [ ] **state**: BLOCKED until T-133 reviewed gate-file transfer; owner C;
+  **requires**: [T-133].
 - **leased files**: `justfile`, `test/contracts/test_collection_integrity.py`.
 - **contract**: RUN-07. `just verify` currently discovers only `test/kernel`,
   `test/agency` and `test/contracts`, which is approximately 947 of approximately

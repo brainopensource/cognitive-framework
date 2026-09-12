@@ -12,68 +12,71 @@ last_verified: 2026-09-12
 
 # State of play
 
-What is live right now. **Rewritten each session, never appended.** Git history
-is the append-only log; this file stays short enough to read in two minutes.
+Descriptive cache only. [Tasks](../main/tasks.md) owns leases and acceptance;
+[spec DIR-1](../main/spec.md#dir-1-wave-1-rulings-and-replacement-corpus-quarantine)
+owns Wave 1 decisions. No statement here grants authority.
 
-Descriptive only. Nothing here is authority — see [`tasks.md`](../main/tasks.md)
-for task truth and [`spec.md`](../main/spec.md) for law.
+**Snapshot binding:** inspected HEAD
+`c3d640783e9bfb96e46551c27ebb6336b9d6e461`, branch
+`feat/aether-framework-electroweak-canonical-agents`. Requested `da12be3f` is its
+parent; the described uncommitted T-130/T-131 work was committed at this HEAD.
+Initial worktree was clean; this handoff edits documentation only.
 
-**Snapshot binding:** captured at `8d3824cbb11061f118412eab37bbb97c8dd12c36`
-from task-board blob `70bc13257292ab76bcfea976b67457a8adcb6b30`,
-spec blob `f514c28db37ae40652ea98bc8107dcee4da7926f`, and milestones blob
-`d010465eea63bf44898fb36ab7d734388da50f15`. Before reading further, run:
+| Live working-file binding | Git blob |
+|---|---|
+| `main/tasks.md` | `4039dedfb81e63f89f681fcacc129d6687404900` |
+| `main/spec.md` | `9d0bdf827f82f1958a791c27d98ec4f2c51affe6` |
+| `main/milestones.md` | `d010465eea63bf44898fb36ab7d734388da50f15` |
+| `main/technical.md` | `77f741673923da5cdd62040883c6e464ffaf847a` |
 
-```bash
-git hash-object docs/execution/main/tasks.md
-git hash-object docs/execution/main/spec.md
-git hash-object docs/execution/main/milestones.md
-```
+Verify with `git hash-object docs/execution/main/{tasks,spec,milestones,technical}.md`.
+Any mismatch invalidates this snapshot; derive state from the board. The director
+charter's older current-assignment blob binding is stale; only its standing role
+and the explicit Wave 1 user assignment informed this handoff.
 
-If any result differs, this snapshot is stale. Skip its Live section and compile
-current state from canonical authority; do not “repair” the mismatch from this
-file.
+## Live dispatch
 
----
-
-## Live
-
-| Stream | Holding | State |
+| Owner | Row | State / dependency |
 |---|---|---|
-| C | T-130 (probe), T-132 (gate widening), T-51 (corpus) | READY; T-51 exposure audit is independent of T-130, but C's three rows serialize |
-| A | T-131 row 6 (evidence identity) | READY now, no attribution needed |
-| B | T-131 rows 4 and 7 (completion stop, compaction/resume) | READY now, no attribution needed |
-| Director | P6/P7 architecture charter | May proceed asynchronously; not blocking current developers |
+| A | T-134 | READY: narrow MHF schema and durable carriers; sole session.py lease |
+| B | T-136 | READY: baseline shim removal; real accepted pin preserved |
+| B | T-135 | BLOCKED until independently reviewed T-134 and session.py transfer |
+| C | T-133 | READY: quarantine guards/registry and gate wiring; sole gate-file lease |
+| C | T-132 | BLOCKED until reviewed T-133 gate-file transfer |
+| C | T-137 | After T-133: approval probe only, no product repair |
+| C + curator | T-51 | All 30 old members retired from eligibility; replacement after T-133, sealed-store/curator availability and independent validation |
 
-## Found, not yet decided
+C serializes its rows; A and B can start their disjoint READY leases concurrently.
+T-130 and T-131 rows 4/6/7 are landed, not independently accepted. T-130 packet
+reports VALID instrument, both controls passed and NOT_REPRODUCED on all three
+write fixtures. Its terminal instrument errors are not completion qualification.
+The approval suspension seam remains unproven. T-26b acceptance waits for T-51;
+T-26 remains UNFROZEN, T-27 unauthorized, RUN-12 zero provider calls/USD.
 
-Observations that have evidence but no canonical disposition. Every entry needs a
-captured subject, decision owner and disposition deadline. At the deadline the
-Senior promotes it into canonical work, records its rejection, or removes it.
+## Evidence and decisions
 
-| Finding and evidence | Impact | Captured subject | Decision owner | Dispose by |
-|---|---|---|---|---|
-| `check_doc_budgets.py`: six current failures, including `tasks.md` at 1,838/1,700; the check is outside `just check` | A permanently red diagnostic is not a useful gate; do not wire it until its baseline is deliberately resolved | `8d3824cb` | Senior; CEO only if ceilings rise | Before the next release-gate change |
-| Stream C owns benchmarks, tests, linters, `justfile`, presets and execution docs | Caps parallelism regardless of agent count | task-board blob above | CEO + Senior | Before issuing another C packet |
-| Metadata audit: 43 of 63 Markdown files explicitly marked `status: living` were last verified on 2026-09-03 or earlier | `living` does not yet identify a trustworthy working set | `8d3824cb` | repository governance | Next documentation audit |
-| Metadata audit: `status: proposal` occurs 13 times and `status: proposed` 11 times | Two spellings of one state invite ambiguous automation | `8d3824cb` | repository governance | Next metadata vocabulary change |
+Retained `.draft/logs/full_discovery.log` reports 3,183 tests in 148.635s,
+one failure, one error and 42 skips; both terminal defects are the T-51 oracle
+digest mismatch. `.draft/logs/just_verify.log` covers the narrow gate. These are
+retained receipts, not tests rerun or new acceptance in this session.
 
-## As-built deltas
+Delta 1 REFRAMED: 18/28 recognized kinds are unwritable, none deprecated; add only
+the two specified MHF carriers with production emission and replay proof.
+Delta 2 ACCEPTED: INDEX_UNBOUND is typed infrastructure missingness with retained
+slot, no policy bypass or semantic retry burn. Delta 3 ACCEPTED: remove padding;
+the accepted baseline uses SHA-256(ASCII tree ID), with no padded pin found.
+Q-01 replaces all 30 exposed members with exactly 10/11/5/1/3 tasks under enforced
+development/holdout isolation. Old oracle repairs remain forbidden by RUN-08.
+Charter II A1–A6, Wilson derivation and P6/P7 proposals are in the technical handbook.
 
-Where implementation diverged from the documents, discovered during work.
+## Explicit outstanding boundaries
 
-| Delta | Detail |
-|---|---|
-| Gate discovery | `just verify` covers ~947 of ~3,171 tests. `NT-B03` already requires full discovery for *acceptance*, so the spec is correct and the routine gate is the gap. T-132 closes it. |
-| Execution doc location | The five canonical documents moved to `docs/execution/main/`; `check_execution_truth.py` was repointed and repo-wide links rewritten. |
-
-## Escalations pending
-
-| Item | Waiting on |
-|---|---|
-| Redrawing stream C's ownership before adding agents | CEO |
-| Public-contract fork, if T-130 falsifies RUN-10 | Director, after T-130 |
-| Raising any documentation ceiling rather than first restoring a green baseline | CEO |
-
----
-
-*Last rewritten: 2026-09-12.*
+- No write-landing repair site attributed; Director rules after T-137 evidence.
+- Private curator/store provisioning and actual fresh corpus availability are not
+  established; metadata checks alone cannot close T-51.
+- New public schema authority is limited to DIR-D1's two kind/payload additions;
+  no other port, preset, terminal-enum, threshold or paid authority is granted.
+- External signed padded baseline pins, if found, require a migration decision.
+- P6/P7 remain proposals behind control and T-129; no implementation lease.
+- Existing documentation-size debt is not a reason to widen ceilings silently;
+  no ceiling change or broad historical-document rewrite is included here.

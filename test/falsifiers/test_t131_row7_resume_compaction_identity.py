@@ -346,11 +346,12 @@ class FreshProcessResumePreservesIdentity(unittest.TestCase):
 
     def test_a_fresh_interpreter_recovers_all_five_dimensions(self) -> None:
         observed, _ = self._run()
-        # `ChangeSurfaceUpdated` is not in `WRITABLE_KINDS`, so no production
-        # writer can originate it and the durable carrier of changed-file
-        # identity is `EffectCompleted.path`. See
-        # `EveryDimensionHasAWritableCarrier` for that boundary stated as a
-        # falsifier rather than as a comment.
+        # This fixture's writer emits no `ChangeSurfaceUpdated`, so the
+        # changed-file identity it recovers comes from `EffectCompleted.path`
+        # and the declared surface is not among the dimensions this run can
+        # observe. DIR-D1 has since made `ChangeSurfaceUpdated` writable and
+        # given it a producer; the surface carrier itself is falsified in
+        # `test/runtime/test_task_state_durable_carriers.py`, not here.
         declared = {k: v for k, v in DECLARED.items() if k != "changeSurface"}
         self.assertEqual(identity_failures(declared, observed["resumeState"]), [])
         self.assertEqual(observed["resumeState"]["modifiedFiles"], ["src/a.py"])
@@ -419,15 +420,42 @@ class EveryDimensionHasAWritableCarrier(unittest.TestCase):
     def test_the_check_reds_on_an_unwritable_carrier(self) -> None:
         """ADVERSARIAL control: the assertion above is not vacuous.
 
-        `ChangeSurfaceUpdated` is read by the fold and is NOT writable. If a
-        dimension were routed through it, the check must red.
+        The control needs a kind the fold reads and no production writer may
+        originate. `ChangeSurfaceUpdated` was that kind until DIR-D1 allocated
+        it a schema kind, a sole session writer and a producer, so naming it
+        here would now assert the opposite of what it did. `PlanDeclared` is
+        narrowed in as its replacement: it is read by `fold_task_state` and is
+        still not writable, so the check is exercised on a real unwritable
+        carrier rather than retired. DIR-D1 authorised exactly two
+        allocations; the remaining sixteen unwritable fold names, this one
+        included, stay unwritable.
         """
         from vanguard.packages.domain.ledger.events import WRITABLE_KINDS
         from vanguard.packages.runtime.task_state import _KNOWN_KINDS
 
-        self.assertIn("ChangeSurfaceUpdated", _KNOWN_KINDS)
+        self.assertIn("PlanDeclared", _KNOWN_KINDS)
         with self.assertRaises(AssertionError):
-            self.assertIn("ChangeSurfaceUpdated", WRITABLE_KINDS)
+            self.assertIn("PlanDeclared", WRITABLE_KINDS)
+
+    def test_exactly_the_two_authorised_kinds_became_writable(self) -> None:
+        """DIR-D1 scope: two allocations, not a blanket activation.
+
+        At the T-131 subject eighteen of the fold's recognised kinds were
+        unwritable. DIR-D1 authorises `VerificationRecorded` and
+        `ChangeSurfaceUpdated` and forbids activating the rest, so the count
+        is pinned: a third activation reds here before it reaches review.
+        """
+        from vanguard.packages.domain.ledger.events import (
+            DEPRECATED_KINDS, WRITABLE_KINDS)
+        from vanguard.packages.runtime.task_state import _KNOWN_KINDS
+
+        unwritable = _KNOWN_KINDS - WRITABLE_KINDS
+        self.assertEqual(len(unwritable), 16, sorted(unwritable))
+        for kind in ("VerificationRecorded", "ChangeSurfaceUpdated"):
+            self.assertIn(kind, WRITABLE_KINDS)
+        # None of the fold's kinds is deprecated, so shrinking
+        # `DEPRECATED_KINDS` could never have closed this gap.
+        self.assertEqual(_KNOWN_KINDS & DEPRECATED_KINDS, frozenset())
 
 
 if __name__ == "__main__":  # pragma: no cover

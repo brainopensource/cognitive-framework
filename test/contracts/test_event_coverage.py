@@ -53,6 +53,15 @@ UNFOLDED_ALLOWLIST = frozenset({
     "ClaimRecorded",           # Evidence claim legacy synonym (EvidenceClaimProduced is folded)
     "CompetencePriorRecorded", # Prior competence distribution (Phase-2)
     "ContextSelectionRecorded",# Context selection fact; reduced in runtime/task_state.py (T-107)
+    # DIR-D1 durable carriers. Both are semantic task facts folded by
+    # `runtime/task_state.fold_task_state`, the same seam as
+    # `ContextSelectionRecorded` above -- `domain/ledger/reducer.py` projects
+    # kernel/episode state and has no verification or change-surface field to
+    # fold them into. `test/runtime/test_task_state_durable_carriers.py` is
+    # where their fold is falsified; this entry is not an excuse for an
+    # unfolded kind.
+    "ChangeSurfaceUpdated",
+    "VerificationRecorded",
     "CorrectionRecorded",      # Phase-2 human/supervisor feedback marker
     "EvaluationRequested",     # Exterior evaluator trigger envelope
     "InvalidationChecked",     # Cache/competence invalidation check

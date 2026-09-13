@@ -44,6 +44,7 @@ from ..domain.ledger.progress import ConfidenceRecord, ProgressView, fold_progre
 from ..domain.ledger.reducer import compute_state_digest, reconstruct_state
 from ..domain.ledger.state import LedgerState
 from ..kernel.attenuation import RISK_ORDER
+from ..kernel.grants import descriptor_of
 from ..kernel import (
     EffectRequest,
     AdapterOutcome,
@@ -80,7 +81,7 @@ from .budget_view import ADDITIVE_DIMENSIONS, remaining_budget
 from .checkpoints import Checkpoint, CheckpointManager, Reconstruction
 from .evaluator_gateway import record_verdict
 from .ledger.recovery import RecoveryScanner
-from .ledger_emitter import LedgerEmitter
+from .ledger_emitter import LedgerEmitter, WriterAuthorityError
 from .meta_controller import ControllerProposal, guarded_consult
 from .provenance import RuntimeProvenanceSink, cache_participation
 from .evidence_capture import capture_evidence as _capture_evidence_pure
@@ -770,6 +771,13 @@ class HarnessSession:
         #: cannot survive the write that invalidated it.
         self._completion_verification_subject: VerificationSubject | None = None
         self._completion_redundant_verifications = 0
+        #: DIR-D1 / NT-1.6. Why the durable carrier append failed, or `None`.
+        #: The in-memory receipt above is not evidence until the fact behind
+        #: it is accepted by the single ledger writer, so this latch gates the
+        #: next external boundary exactly the way `recovery_append_error`
+        #: does. It is never cleared by a later success: the turn that lost
+        #: its carrier stays unrecoverable within this process.
+        self._durable_carrier_append_error: str | None = None
         self._completion_allowed_tools: frozenset[str] | None = None
         self._active_episode_engine: EpisodeEngine | None = None
         self._completion_oracle_failed_on_stub = False
@@ -1269,6 +1277,14 @@ class HarnessSession:
             raise RuntimeError(
                 "recovery snapshot append failed; refusing subsequent inference: "
                 f"{guard.recovery_append_error}")
+        # DIR-D1: append through the single writer BEFORE the next proposal.
+        # A verification or change-surface fact that did not land means the
+        # next proposal would be composed over evidence no fresh process can
+        # read, so there is no next proposal.
+        if self._durable_carrier_append_error is not None:
+            raise RuntimeError(
+                "durable carrier append failed; refusing subsequent inference: "
+                f"{self._durable_carrier_append_error}")
         if "ContextSelectionRecorded" not in WRITABLE_KINDS:
             return
         epoch = self._context_epoch()
@@ -1337,6 +1353,10 @@ class HarnessSession:
         guard = getattr(self, "_recovery_guard", None)
         if guard is not None and guard.recovery_append_error is not None:
             raise RuntimeError("recovery snapshot append failed; refusing dispatch")
+        if self._durable_carrier_append_error is not None:
+            raise RuntimeError(
+                "durable carrier append failed; refusing dispatch: "
+                f"{self._durable_carrier_append_error}")
         request = _with_diff_headers(request)
         if request.idempotency_key:
             settled = RecoveryScanner.settled_effect(
@@ -2058,6 +2078,13 @@ class HarnessSession:
                      "resultDigest": outcome.result_digest},
                     turn=self.turns_consumed(),
                 )
+            # DIR-D1. The settled surface becomes durable here, at the one
+            # mediated boundary that knows the effect actually landed. The
+            # in-memory `_completion_changed_files` set is re-published in
+            # full rather than as a delta: a fresh process folds the LAST
+            # surface fact, so an incremental fact would reconstruct only the
+            # final file of a multi-file candidate.
+            self._append_change_surface(request)
         if not is_verification:
             return
         argv = verification_argv(request.args)
@@ -2116,6 +2143,7 @@ class HarnessSession:
                 ),
                 "errors": 0,
             }
+        self._append_verification_record()
         self._refresh_sigma()
         if previous_verification is not None and self._completion_verification.passed:
             self._completion_redundant_verifications += 1
@@ -2151,6 +2179,108 @@ class HarnessSession:
                         ),
                         evictable=False,
                     )
+
+    def _carrier_bindings_or_latch(self, kind: str, payload: Mapping[str, Any]) -> bool:
+        """Whether every identity binding in a DIR-D1 carrier is bound.
+
+        A carrier whose bindings are unbound is not a weaker fact, it is a
+        different one: replay would accept it and compare it against nothing.
+        Fail closed rather than append a fact whose subject cannot be checked.
+        """
+        unbound = sorted(
+            key for key, value in payload.items()
+            if key.endswith("Digest") and value is not None
+            and not str(value).startswith("sha256:")
+        )
+        if not unbound:
+            return True
+        self._durable_carrier_append_error = (
+            f"{kind}: unbound identity bindings {unbound}")
+        return False
+
+    def _latch_carrier_failure(self, kind: str, exc: BaseException) -> None:
+        """Record why a carrier append failed, so no next boundary proceeds."""
+        self._durable_carrier_append_error = f"{kind}: {exc}"
+
+    def _append_change_surface(self, request: EffectRequest) -> None:
+        """Record the complete settled change surface, deletions included.
+
+        `emit_kind` raises on a rejected store append and on a writer the kind
+        does not belong to. Neither is swallowed: `WriterAuthorityError` is a
+        composition defect and propagates unchanged, while a durable-write
+        failure latches and then re-raises, so the caller's turn cannot report
+        success over a fact the ledger never accepted.
+        """
+        surface = sorted(self._completion_changed_files)
+        if not surface:
+            return
+        deleted = sorted(
+            path for path in surface if not (self.repo / path).exists()
+        )
+        payload = {
+            "taskDigest": self._current_task_digest(),
+            # The postimage this surface describes. A later verification whose
+            # own `workspaceDigest` differs from this is evidence about a
+            # candidate that no longer exists -- which is what the fold uses
+            # to refuse a stale receipt on replay.
+            "candidateDigest": self._workspace_digest(),
+            "effectDescriptorDigest": descriptor_of(request.action, request.args),
+            "changeSurface": surface,
+            "deletedPaths": deleted,
+        }
+        if not self._carrier_bindings_or_latch("ChangeSurfaceUpdated", payload):
+            raise RuntimeError(self._durable_carrier_append_error)
+        try:
+            self.ledger.emit_kind(
+                "ChangeSurfaceUpdated",
+                run_id=self.task.run_id,
+                principal=self.task.principal,
+                episode_id=self.task.episode_id,
+                payload=payload,
+            )
+        except WriterAuthorityError:
+            raise
+        except Exception as exc:
+            self._latch_carrier_failure("ChangeSurfaceUpdated", exc)
+            raise
+
+    def _append_verification_record(self) -> None:
+        """Record the observed verification, never an evaluator verdict."""
+        receipt = self._completion_verification
+        subject = self._completion_verification_subject
+        if receipt is None or subject is None:
+            return
+        # Absent knowledge stays absent. `_observed_test_count` reports 0 both
+        # when a runner printed no count and when it genuinely ran nothing, and
+        # only the first is unknown -- so a missing count is recorded as null
+        # rather than as a zero the completion gate could read as "ran nothing
+        # and passed".
+        observed = receipt.executed_test_count
+        payload = {
+            "taskDigest": receipt.task_digest,
+            "compositionDigest": receipt.composition_digest,
+            "workspaceDigest": receipt.workspace_digest,
+            "verificationSubjectDigest": receipt.verification_subject_digest,
+            "argv": list(subject.argv),
+            "exitCode": int(receipt.exit_code),
+            "observedTestCount": int(observed) if observed else None,
+            "resultArtifactDigest": receipt.receipt_digest or None,
+        }
+        if not self._carrier_bindings_or_latch("VerificationRecorded", payload):
+            raise RuntimeError(self._durable_carrier_append_error)
+        try:
+            self.ledger.emit_kind(
+                "VerificationRecorded",
+                run_id=self.task.run_id,
+                principal=self.task.principal,
+                episode_id=self.task.episode_id,
+                payload=payload,
+            )
+        except WriterAuthorityError:
+            raise
+        except Exception as exc:
+            self._latch_carrier_failure("VerificationRecorded", exc)
+            raise
 
     def _refresh_sigma(self) -> None:
         """Recompile L4 from the live fold after a write or verification."""

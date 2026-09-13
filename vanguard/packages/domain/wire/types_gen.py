@@ -86,6 +86,8 @@ class EventKind(str, Enum):
     PROGRESS_ASSESSED = "ProgressAssessed"
     CONTEXT_COMPACTED = "ContextCompacted"
     CONTEXT_SELECTION_RECORDED = "ContextSelectionRecorded"
+    VERIFICATION_RECORDED = "VerificationRecorded"
+    CHANGE_SURFACE_UPDATED = "ChangeSurfaceUpdated"
 
 class GateDecision(str, Enum):
     PASS = "PASS"
@@ -142,6 +144,17 @@ class Binding:
 class BlobRef:
     digest: Digest
     media_type: str | None = None
+
+@dataclass(frozen=True, slots=True)
+class ChangeSurfaceUpdatedPayload:
+    kind: str
+    taskDigest: str
+    candidateDigest: str
+    effectDescriptorDigest: str
+    changeSurface: tuple[str, ...]
+    deletedPaths: tuple[str, ...]
+    reason: str | None = None
+    alertable: bool | None = None
 
 @dataclass(frozen=True, slots=True)
 class CheckpointPayload:
@@ -477,6 +490,20 @@ class TrajectoryRef:
     schema: str | None = None
 
 @dataclass(frozen=True, slots=True)
+class VerificationRecordedPayload:
+    kind: str
+    taskDigest: str
+    compositionDigest: str
+    workspaceDigest: str
+    verificationSubjectDigest: str
+    argv: tuple[str, ...]
+    exitCode: int
+    observedTestCount: int | None
+    resultArtifactDigest: str | None
+    reason: str | None = None
+    alertable: bool | None = None
+
+@dataclass(frozen=True, slots=True)
 class Capability:
     verb: str
     selector: Selector
@@ -677,6 +704,7 @@ __all__ = [
     "ArtifactRef",
     "Binding",
     "BlobRef",
+    "ChangeSurfaceUpdatedPayload",
     "CheckpointPayload",
     "ClaimRef",
     "CompactionReport",
@@ -715,6 +743,7 @@ __all__ = [
     "TopologyEdge",
     "TopologyRole",
     "TrajectoryRef",
+    "VerificationRecordedPayload",
     "Capability",
     "Component",
     "CostVector",

@@ -91,6 +91,7 @@ class _SessionUnderTest:
         self._completion_verification = None
         self._completion_verification_subject = None
         self._durable_carrier_append_error: str | None = None
+        self._completion_observed_test_count: int | None = 5
         self.task = type("Task", (), {
             "run_id": "run-t134", "principal": "agent-1",
             "episode_id": "ep-t134", "project_id": "project-t134"})()
@@ -325,6 +326,83 @@ class AnAppendFailureStopsProgress(unittest.TestCase):
                       session._durable_carrier_append_error)
         read = self.inner.read(EventRange(run_id="run-t134"))
         self.assertNotIn("ChangeSurfaceUpdated", _kinds(read.value or ()))
+
+
+class ObservedZeroIsNotUnknown(unittest.TestCase):
+    """DIR-D1: the carrier binds the observed count, and null means unknown.
+
+    Reported by Dev C in independent review of T-134. The carrier derived its
+    field from `VerificationReceipt.executed_test_count`, an `int` that reports
+    0 both when the runner printed no count and when it genuinely ran zero
+    tests. Collapsing both to null made "ran zero tests" unrepresentable, so a
+    resumed process could not tell an uninstrumented runner from one that
+    executed nothing. `parse_observed_test_counts` already distinguishes them;
+    the carrier now binds its answer.
+    """
+
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.repo = Path(self.tmp.name)
+        self.store = SqliteEventStore(":memory:")
+
+    def tearDown(self) -> None:
+        self.store.close()
+        self.tmp.cleanup()
+
+    def _emit_with(self, observed: int | None) -> Mapping[str, Any]:
+        # A fresh seed per append: the deterministic event-id source would
+        # otherwise mint the same id twice within one test.
+        self._seed = getattr(self, "_seed", 134) + 1
+        session = _SessionUnderTest(
+            _emitter(self.store, seed=self._seed), self.repo)
+        session._completion_verification, session._completion_verification_subject = _receipt()
+        session._completion_observed_test_count = observed
+        session._append_verification_record()
+        read = self.store.read(EventRange(run_id="run-t134"))
+        return _payload(list(read.value or ()), "VerificationRecorded")
+
+    def test_a_reported_count_is_bound_verbatim(self) -> None:
+        self.assertEqual(self._emit_with(7)["observedTestCount"], 7)
+
+    def test_an_observed_zero_is_recorded_as_zero_not_null(self) -> None:
+        payload = self._emit_with(0)
+        self.assertEqual(payload["observedTestCount"], 0)
+        self.assertIsNotNone(
+            payload["observedTestCount"],
+            "a runner that reported running zero tests is a known fact, not unknown")
+
+    def test_an_unreported_count_is_recorded_as_null(self) -> None:
+        self.assertIsNone(self._emit_with(None)["observedTestCount"])
+
+    def test_the_parser_is_what_separates_the_two(self) -> None:
+        """The distinction is derived from the runner text, not invented."""
+        from vanguard.packages.runtime.session import parse_observed_test_counts
+
+        self.assertEqual(parse_observed_test_counts("Ran 0 tests in 0.000s\nOK").executed, 0)
+        self.assertEqual(parse_observed_test_counts("Ran 7 tests in 0.1s\nOK").executed, 7)
+        # No runner summary at all: unknown, and never invented as zero.
+        self.assertIsNone(parse_observed_test_counts("some unrelated output").executed)
+        self.assertIsNone(parse_observed_test_counts("").executed)
+
+    def test_both_values_validate_against_the_typed_payload(self) -> None:
+        """ADVERSARIAL: zero must be admissible under the schema, not just in
+        Python. A payload def that required a positive integer, or forbade
+        null, would make one of these two facts unrepresentable on the wire."""
+        from jsonschema import Draft202012Validator
+
+        allocation = json.loads(
+            (ROOT / "schemas/mhf/event_envelope.schema.json").read_text())
+        schema = allocation["$defs"]["VerificationRecordedPayload"]
+        for observed in (0, None, 7):
+            with self.subTest(observed=observed):
+                payload = dict(self._emit_with(observed))
+                errors = list(Draft202012Validator(schema).iter_errors(payload))
+                self.assertEqual(errors, [], f"{observed!r}: {errors}")
+        # And a negative count stays invalid.
+        bad = dict(self._emit_with(7))
+        bad["observedTestCount"] = -1
+        self.assertNotEqual(
+            list(Draft202012Validator(schema).iter_errors(bad)), [])
 
 
 class TheEngineSeamDoesNotSwallowTheFailure(unittest.TestCase):

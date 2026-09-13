@@ -771,6 +771,15 @@ class HarnessSession:
         #: cannot survive the write that invalidated it.
         self._completion_verification_subject: VerificationSubject | None = None
         self._completion_redundant_verifications = 0
+        #: DIR-D1. The observed executed count as the runner actually reported
+        #: it: `None` when it reported no count at all, `0` when it reported
+        #: running zero tests. `VerificationReceipt.executed_test_count` is an
+        #: `int` and collapses both to 0 (fail-closed, correct for the
+        #: in-memory admission gate), but the durable carrier must keep them
+        #: distinct -- "the runner printed nothing" and "the runner ran nothing"
+        #: are different facts, and replay cannot re-derive the difference once
+        #: it is gone.
+        self._completion_observed_test_count: int | None = None
         #: DIR-D1 / NT-1.6. Why the durable carrier append failed, or `None`.
         #: The in-memory receipt above is not evidence until the fact behind
         #: it is accepted by the single ledger writer, so this latch gates the
@@ -2103,6 +2112,13 @@ class HarnessSession:
             task_digest=self._current_task_digest(),
         )
         self._completion_verification_subject = subject
+        observed_counts = parse_observed_test_counts(detail)
+        self._completion_observed_test_count = (
+            max(0, observed_counts.executed)
+            if observed_counts.executed is not None
+            else (max(0, observed_counts.collected)
+                  if observed_counts.collected is not None else None)
+        )
         self._completion_verification = VerificationReceipt(
             exit_code=exit_code,
             executed_test_count=_observed_test_count(detail),
@@ -2250,12 +2266,14 @@ class HarnessSession:
         subject = self._completion_verification_subject
         if receipt is None or subject is None:
             return
-        # Absent knowledge stays absent. `_observed_test_count` reports 0 both
-        # when a runner printed no count and when it genuinely ran nothing, and
-        # only the first is unknown -- so a missing count is recorded as null
-        # rather than as a zero the completion gate could read as "ran nothing
-        # and passed".
-        observed = receipt.executed_test_count
+        # Absent knowledge stays absent, and observed zero stays zero.
+        # `receipt.executed_test_count` is deliberately lossy -- it is an `int`
+        # that reports 0 for "no count printed" and for "ran zero tests" alike,
+        # which is the right fail-closed input to the admission gate but the
+        # wrong thing to make durable. `parse_observed_test_counts` is the one
+        # authority that keeps the two apart ("None means unknown, never
+        # invented"), so the carrier binds its answer, not the collapsed one.
+        observed = self._completion_observed_test_count
         payload = {
             "taskDigest": receipt.task_digest,
             "compositionDigest": receipt.composition_digest,
@@ -2263,7 +2281,7 @@ class HarnessSession:
             "verificationSubjectDigest": receipt.verification_subject_digest,
             "argv": list(subject.argv),
             "exitCode": int(receipt.exit_code),
-            "observedTestCount": int(observed) if observed else None,
+            "observedTestCount": observed,
             "resultArtifactDigest": receipt.receipt_digest or None,
         }
         if not self._carrier_bindings_or_latch("VerificationRecorded", payload):

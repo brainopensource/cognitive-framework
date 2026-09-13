@@ -23,6 +23,7 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Sequence
 
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
@@ -333,8 +334,6 @@ class BaselineManifestVerifierContractTests(unittest.TestCase):
 
     def test_committed_accepted_manifest_verifies_against_tree(self) -> None:
         """DIR-D3: Committed accepted CONVERGENCE-BASE-v1.json verifies as ACCEPTED_CONTROL."""
-        from typing import Sequence
-
         manifest_path = ROOT / "evidence" / "baselines" / "CONVERGENCE-BASE-v1.json"
         manifest_data = json.loads(manifest_path.read_text(encoding="utf-8"))
         commit_sha = manifest_data["commit_sha"]

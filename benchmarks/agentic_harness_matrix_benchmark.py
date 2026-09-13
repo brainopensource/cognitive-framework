@@ -39,6 +39,7 @@ from vanguard.packages.ports.event_store import EventRange
 from benchmarks.ladder.control import CONTROL_ARM, ControlManifestError, require_frozen
 from benchmarks.ladder.evidence import append_row
 from benchmarks.ladder.metrics import BUDGET_EXHAUSTED, budget_exhausted, publish_control_report
+from benchmarks.ladder.quarantine import refuse_unfrozen_scoring
 from benchmarks.product_path import PRODUCT_PRESETS, execute_product
 from benchmarks.swe_bench.challenges import CHALLENGES
 
@@ -52,6 +53,12 @@ def write_control_report(
     rows: Sequence[Mapping[str, Any]],
 ) -> dict[str, Any]:
     """Publish one admitted control report at the real benchmark writer boundary."""
+    task_ids = [
+        str((row.get("identity") or {}).get("task_id") or "")
+        for row in rows
+        if isinstance(row, Mapping)
+    ]
+    refuse_unfrozen_scoring(task_ids, record)
     report = publish_control_report(record=record, rows=rows)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")

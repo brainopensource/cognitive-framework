@@ -11,6 +11,7 @@ check:
 	python3 tools/linters/check_domain_blindness.py
 	python3 tools/linters/check_isolation_policy.py
 	python3 tools/linters/check_path_hygiene.py
+	python3 tools/linters/check_corpus_quarantine.py --metadata
 	just docs-check
 	@echo "AETHER CHECK: PASS"
 
@@ -73,6 +74,8 @@ verify:
 	python3 tools/linters/check_domain_blindness.py
 	python3 tools/linters/check_isolation_policy.py
 	python3 tools/linters/check_path_hygiene.py
+	python3 tools/linters/check_corpus_quarantine.py --metadata
+	python3 tools/linters/check_corpus_quarantine.py --admission
 	python3 tools/linters/check_event_coverage.py
 	python3 tools/linters/check_execution_truth.py
 	python3 tools/linters/check_falsifier_ids.py

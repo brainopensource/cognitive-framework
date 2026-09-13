@@ -3,11 +3,17 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Sequence
 
 from schema import validate_scenario
 from vanguard_bridge import translate_vanguard_call_to_lam
+
+_REPO = Path(__file__).resolve().parents[2]
+if str(_REPO) not in sys.path:
+    sys.path.insert(0, str(_REPO))
+from benchmarks.ladder.quarantine import guard_capture
 
 
 def sanitize_secrets(text: str) -> str:
@@ -26,6 +32,7 @@ def trace_to_scenario(
     captures: Sequence[Mapping[str, Any]],
 ) -> Dict[str, Any]:
     """Convert captured turn messages (OpenAI or Ollama wire) into a validated scenario dictionary."""
+    guard_capture(task_id=scenario_id)
     turns: list[dict[str, Any]] = []
 
     for idx, cap in enumerate(captures):

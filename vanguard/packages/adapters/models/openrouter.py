@@ -1010,6 +1010,26 @@ class OpenRouterModel:
                 return result
         return result
 
+    @property
+    def pricing(self) -> tuple[int, int] | None:
+        """Micro-USD per million prompt/completion tokens, or `None` if unknown.
+
+        Read *before* the call so the runtime's inference meter can bound the
+        USD dimension of a reservation instead of discovering the spend after
+        the fact. `None` means the route's price is not known -- it never means
+        free, and this property must not substitute a default price, which is
+        the same rule `_cost_micros` already enforces after the call.
+        """
+        if self._provider != "openrouter":
+            return None
+        try:
+            route = resolve_route(self._model)
+        except Exception:  # noqa: BLE001 -- an unresolvable route is unpriced
+            return None
+        if not route.pricing_known:
+            return None
+        return (int(route.prompt_micros_per_1m), int(route.completion_micros_per_1m))
+
     def _complete_once(
         self,
         context: ContextBundle,

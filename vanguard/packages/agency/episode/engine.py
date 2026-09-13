@@ -458,6 +458,19 @@ class EpisodeEngine:
                 error = getattr(result, "error", None)
                 reason = (getattr(error, "message", "")
                           or "provider returned no proposal")
+                # A refused *spend* is not a provider failure. The runtime's
+                # inference meter denies a reservation with its own typed kind
+                # so a budget stop keeps the budget terminal: folding it into
+                # `instrument_error` would report a ceiling working correctly
+                # as the model misbehaving, and move the observation out of the
+                # budget bucket and into the missingness taxonomy (`DIR-D2`).
+                if str(getattr(error, "kind", "")) == RunTermination.BUDGET_EXHAUSTED.value:
+                    episode = episode.terminated(
+                        RunTermination.BUDGET_EXHAUSTED, reason)
+                    self._emit_terminal(
+                        episode, RunTermination.BUDGET_EXHAUSTED.value, reason,
+                        diagnostics=diagnostics)
+                    break
                 episode = episode.terminated(RunTermination.INSTRUMENT_ERROR, reason)
                 self._emit_terminal(episode, "instrument_error", reason, diagnostics=diagnostics)
                 break

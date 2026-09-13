@@ -1,8 +1,9 @@
 {
   "usdMicros": "50000",
   "wallClockMillis": "240000",
-  "tokens": "16000",
+  "tokens": "262144",
   "effects": "8",
   "evaluations": "4",
-  "depth": "1"
+  "depth": "1",
+  "contextWindowTokens": "16000"
 }

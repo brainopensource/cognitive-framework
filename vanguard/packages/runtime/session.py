@@ -79,6 +79,11 @@ from .compose import (
 from .artifacts import ArtifactWriter, CapturePolicy, resolve_capture_policy
 from .budget_view import ADDITIVE_DIMENSIONS, remaining_budget
 from .checkpoints import Checkpoint, CheckpointManager, Reconstruction
+from .inference_meter import (
+    INFERENCE_DENIED_KIND,
+    BudgetDenied,
+    InferenceMeter,
+)
 from .evaluator_gateway import record_verdict
 from .ledger.recovery import RecoveryScanner
 from .ledger_emitter import LedgerEmitter, WriterAuthorityError
@@ -378,6 +383,7 @@ class _LayeredOperator:
         memory: MemoryBinding | None = None,
         capabilities: Sequence[Mapping[str, Any]] = (),
         before_propose: Callable[[Mapping[str, Any], Any, int, Sequence[Mapping[str, Any]], Mapping[str, Any]], None] | None = None,
+        meter: InferenceMeter | None = None,
     ) -> None:
         self._model = model
         configure_capabilities = getattr(model, "configure_capabilities", None)
@@ -406,6 +412,10 @@ class _LayeredOperator:
         # the final compiled vector, records its selection, and may refuse the
         # provider call without making context compilation stateful.
         self._before_propose = before_propose
+        # Inference accounting (`inference_meter`). Optional so a raw
+        # composition without a governor still constructs; when present, the
+        # provider call is reserved and settled like any other resource.
+        self._meter = meter
 
     def set_task_state(self, state: Mapping[str, Any] | None) -> None:
         self._assembler.set_task_state(state)
@@ -460,9 +470,41 @@ class _LayeredOperator:
             labels={"promptDigest": compiled.digest, "prefixDigest": compiled.prefix_digest},
         )
 
-        answer = self._model.propose(bundle, tools, sampling)
+        # -- inference accounting -----------------------------------------
+        # S7 for the model call. A denied reservation is a *spend* refusal and
+        # carries its own typed kind: collapsing it into `instrument_error`
+        # would move a budget stop into the model-failure bucket and corrupt
+        # the missingness taxonomy (`DIR-D2`).
+        reservation = None
+        if self._meter is not None:
+            try:
+                reservation = self._meter.reserve(
+                    prompt_tokens=int(getattr(compiled, "total_tokens", 0) or 0),
+                    sampling=sampling,
+                )
+            except BudgetDenied as denied:
+                return Result.fail(
+                    kind=INFERENCE_DENIED_KIND,
+                    message=(
+                        f"inference reservation denied on {denied.dimension}: "
+                        f"requested {denied.requested}, remaining {denied.remaining}"
+                    ),
+                )
+
+        try:
+            answer = self._model.propose(bundle, tools, sampling)
+        except BaseException:
+            # The call never settled; the whole reservation comes back. The
+            # provider failure itself keeps its own path.
+            if reservation is not None and self._meter is not None:
+                self._meter.release(reservation)
+            raise
         value = getattr(answer, "value", None)
         raw = value if value is not None else answer
+        if reservation is not None and self._meter is not None:
+            # S10 on every outcome: a call that failed after the tokens were
+            # spent still spent them.
+            self._meter.settle(reservation, raw)
         if isinstance(value, Mapping) and value.get("kind") == "effect":
             action = value.get("action")
             args = value.get("args")
@@ -908,6 +950,14 @@ class HarnessSession:
             governor=governor, issuer=GrantIssuer(),
             clock=ports.clock, ledger=self.ledger, events=self.ledger,
             sinks=harness.sinks)
+        # One governor covers effects *and* inference. The model call used to
+        # be the single unmetered resource in an episode: its usage was
+        # recorded as proposal diagnostics and never debited, so a preset's
+        # declared `tokens`/`usd_micros` ceilings bounded patches and processes
+        # while the dominant cost ran free. `RUN-10` requires one aggregate
+        # budget; this is the seam that makes that true for inference.
+        self._inference_meter = InferenceMeter(
+            governor, task.run_id, pricing=_model_pricing(ports.model))
 
         discovery = WorkspaceDiscovery(repo)
         discovered_env = discovery.render_environment_text()
@@ -939,7 +989,17 @@ class HarnessSession:
             tool_schemas=harness.tool_schemas,
             environment=env_text,
             skill_cards=harness.skill_cards,
-            token_ceiling=max(harness.budget.get("tokens", 0) or 64_000, 4_096),
+            # The *prompt window*, not the episode's conserved token spend.
+            # These were the same key until the inference meter began debiting
+            # `tokens`, at which point one maximal prompt could legally consume
+            # a whole episode's budget. A pack that declares no window falls
+            # back to the legacy reading so older manifests keep working.
+            token_ceiling=max(
+                harness.budget.get("context_window_tokens")
+                or harness.budget.get("tokens", 0)
+                or 64_000,
+                4_096,
+            ),
         )
         self._behavior_identity = self._composition_identity(compiler)
         self._recovery_guard: _RecoveryGuardedEmitter | None = None
@@ -990,6 +1050,7 @@ class HarnessSession:
                 for capability in harness.frozen.capabilities
             ),
             before_propose=self._record_context_selection,
+            meter=self._inference_meter,
         )
         # Read-only callback context for completion facts; it is populated
         # exclusively by this session's mediated dispatch path.
@@ -2649,3 +2710,22 @@ def _with_diff_headers(request: EffectRequest) -> EffectRequest:
         # untouched is correct -- normalisation is a convenience for real
         # proposals, never a precondition of dispatch.
         return request
+
+
+def _model_pricing(model: Any) -> tuple[int, int] | None:
+    """Micro-USD per million prompt/completion tokens, or `None` when unknown.
+
+    `None` is not "free". It means the USD dimension cannot be bounded before
+    the call, so `InferenceMeter` bounds tokens exactly and settles USD from
+    whatever the provider reports afterwards. Representing an unpriced route as
+    zero is precisely the reporting `RUN-12` forbids.
+    """
+    pricing = getattr(model, "pricing", None)
+    if isinstance(pricing, (tuple, list)) and len(pricing) >= 2:
+        try:
+            prompt, completion = int(pricing[0]), int(pricing[1])
+        except (TypeError, ValueError):
+            return None
+        if prompt >= 0 and completion >= 0:
+            return (prompt, completion)
+    return None

@@ -37,6 +37,7 @@ from benchmarks.sota_context import (  # noqa: E402
     TIERS as SOTA_TIERS,
 )
 from benchmarks._env import load_benchmark_env
+from benchmarks.ladder.quarantine import guard_materialization
 from vanguard.packages.runtime.root import (  # noqa: E402
     application_service,
     Cassette,
@@ -128,6 +129,7 @@ def _trajectory(cassette: Cassette) -> list[dict]:
 
 def run_one(key: str, tier: str, model_name: str, max_turns: int,
             manifest: str, *, tag: str, live_budget: LiveBudget) -> dict:
+    guard_materialization(task_id=key, purpose="development")
     challenge = ALL_CHALLENGES[key]
     OUT.mkdir(parents=True, exist_ok=True)
     safe_tag = re.sub(r"[^A-Za-z0-9_.-]+", "_", tag).strip("._") or "run"

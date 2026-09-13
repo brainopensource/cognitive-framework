@@ -1,0 +1,90 @@
+{
+  "runId": "baac-vg-code-balanced-live-1789201493",
+  "timestamp": "2026-09-12T08:24:53Z",
+  "preset": "vg-code-balanced",
+  "model": "z-ai/glm-5.3-flash",
+  "mode": "live",
+  "metadata": {},
+  "summary": {
+    "totalChallenges": 1,
+    "passedCount": 1,
+    "overallPassRatePct": 100.0,
+    "totalTokens": 11299,
+    "totalCostUsd": 0.001099,
+    "totalDurationSeconds": 20.73,
+    "attribution": {
+      "PASS": 1,
+      "LLM_COGNITIVE_ERROR": 0,
+      "HARNESS_ERROR": 0,
+      "BUDGET_EXHAUSTED": 0,
+      "DATASET_INVALID": 0
+    }
+  },
+  "results": [
+    {
+      "challengeId": "bench_single_2K_tier-1_calculator",
+      "tier": "tier-1",
+      "scope": "single",
+      "contextBracket": "2K",
+      "preset": "vg-code-balanced",
+      "model": "z-ai/glm-5.3-flash",
+      "mode": "live",
+      "status": "PASS",
+      "disposition": "passed",
+      "attribution": "PASS",
+      "turns": 8,
+      "promptTokens": 10216,
+      "completionTokens": 1083,
+      "totalTokens": 11299,
+      "costUsd": 0.001099,
+      "durationSeconds": 20.73,
+      "changedFiles": [
+        "src/calculator.py"
+      ],
+      "diffPatch": "--- a/calculator.py\n+++ b/calculator.py\n@@ -1,3 +1,3 @@\n def calculate_value(A: float, B: float) -> float:\n-    resultado = (A + B) + B\n+    resultado = (A + B) * B\n     return resultado\n",
+      "oracle": {
+        "passed": true,
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_calc (__main__.TestCalc.test_calc) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+        "durationSeconds": 0.03,
+        "error": null,
+        "assertionCount": 1,
+        "failingAssertions": []
+      },
+      "aiJudgeScore": null,
+      "diagnosis": "All falsifiers green",
+      "metadata": {
+        "id": "bench_single_2K_tier-1_calculator",
+        "name": "Single-File Formula Repair",
+        "scope": "single",
+        "context_bracket": "2K",
+        "tier": "tier-1",
+        "difficulty": 1,
+        "timeout_seconds": 35,
+        "entrypoint": "src/main.py",
+        "eval_type": "oracle",
+        "tags": [
+          "math",
+          "single_file",
+          "formula"
+        ],
+        "metadata": {
+          "schema": "aether.baac.challenge/1"
+        },
+        "cli_args": {
+          "command": "run",
+          "preset": "vg-code-balanced",
+          "mode": "live",
+          "model": "z-ai/glm-5.3-flash",
+          "tier": "all",
+          "single": "bench_single_2K_tier-1_calculator",
+          "max_turns": 8,
+          "max_requests": 40,
+          "budget": 0.04,
+          "keep_scratch": false
+        }
+      }
+    }
+  ]
+}

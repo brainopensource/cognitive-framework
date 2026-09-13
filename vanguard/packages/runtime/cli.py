@@ -16,6 +16,7 @@ import sys
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from . import pack_catalog
 from .app_service import ApplicationService
 from .keys import (
     KeyMaterialError,
@@ -184,18 +185,16 @@ def cmd_code(args: argparse.Namespace) -> int:
             # this composition boundary.  Use the same service operation the
             # facade delegates to, retaining its manifest and attenuation
             # semantics without creating an outward dependency.
-            from .entrypoint import _manifest, _resolve_turn_ceiling
-
             result = app.run(
                 brief=args.task,
-                manifest_path=_manifest("code", args.preset),
+                manifest_path=pack_catalog.preset_manifest_path(args.preset),
                 profile_id=args.profile,
                 run_id=args.run_id,
                 model_port=args.model_port,
                 planner_model=args.model,
                 state_dir=state_dir,
                 interactive=not args.non_interactive,
-                max_turns=_resolve_turn_ceiling(args.preset, args.max_turns),
+                max_turns=pack_catalog.turn_ceiling(args.preset, args.max_turns),
             )
             print(json.dumps(result.to_dict(), indent=2))
             return EXIT_OK if result.outcome == "completed" else EXIT_TASK_FAILED
@@ -408,7 +407,8 @@ def build_parser() -> argparse.ArgumentParser:
     code_run = code_sub.add_parser("run")
     code_run.add_argument("task")
     code_run.add_argument("-w", "--workspace", default=".")
-    code_run.add_argument("--preset", choices=("fast", "balanced", "max"), default="balanced")
+    # The catalog is the allowlist; the parser does not carry a second one.
+    code_run.add_argument("--preset", choices=pack_catalog.preset_names(), default="balanced")
     code_run.add_argument("--profile", default="local")
     code_run.add_argument("--model", default=None)
     code_run.add_argument("--model-port", default="fake")

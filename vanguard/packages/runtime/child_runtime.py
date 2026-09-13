@@ -208,6 +208,11 @@ class RuntimeChildRunner:
                     evidence_refs.append(digest)
 
         return ChildRunResult(
+            # NT-B04. Success is read off the constrained delegation outcome,
+            # and only `completed` is success. `abstained` maps to `abandoned`
+            # above, so a refusal can never arrive at the parent as `ok`. The
+            # child's exact termination is carried separately in `terminal`,
+            # so nothing about the refusal is lost on the way up.
             ok=outcome == "completed",
             outcome=outcome,
             terminal=terminal.upper(),

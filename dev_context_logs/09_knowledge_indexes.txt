@@ -1,18 +1,18 @@
 === KNOWLEDGE FILES ===
-catalog.jsonl  272619 bytes
+catalog.jsonl  54564 bytes
 code-map.jsonl  1820 bytes
-links.jsonl  48072 bytes
-ownership.jsonl  12631 bytes
-report.json  346 bytes
-symbols.jsonl  1750 bytes
+links.jsonl  122653 bytes
+ownership.jsonl  21798 bytes
+report.json  349 bytes
+symbols.jsonl  113785 bytes
 
 === ROW COUNTS ===
-  1391 .generated/knowledge/catalog.jsonl
+   130 .generated/knowledge/catalog.jsonl
     12 .generated/knowledge/code-map.jsonl
-   225 .generated/knowledge/links.jsonl
-    80 .generated/knowledge/ownership.jsonl
-    11 .generated/knowledge/symbols.jsonl
-  1719 total
+   498 .generated/knowledge/links.jsonl
+   130 .generated/knowledge/ownership.jsonl
+   667 .generated/knowledge/symbols.jsonl
+  1437 total
 
 === CODE MAP SAMPLE ===
 {"subsystem": "SUB-B-01 Domain", "package_path": "vanguard/packages/domain/", "canonical_owner": "docs/backend/reference/schemas.md"}
@@ -29,69 +29,98 @@ symbols.jsonl  1750 bytes
 {"subsystem": "SUB-B-12 Schemas", "package_path": "schemas/", "canonical_owner": "docs/backend/reference/schemas.md"}
 
 === SYMBOL SAMPLE ===
-{"symbol": "Kernel", "kind": "class", "defined_in": "vanguard/packages/kernel/dispatch.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
-{"symbol": "EpisodeEngine", "kind": "class", "defined_in": "vanguard/packages/agency/turns.py", "canonical_owner": "docs/backend/architecture/agency.md"}
-{"symbol": "HarnessSession", "kind": "class", "defined_in": "vanguard/packages/runtime/session.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
-{"symbol": "SqliteEventStore", "kind": "class", "defined_in": "vanguard/packages/adapters/stores/sqlite_store.py", "canonical_owner": "docs/backend/architecture/causal-state.md"}
-{"symbol": "EvidenceCaptureService", "kind": "class", "defined_in": "vanguard/packages/runtime/evidence.py", "canonical_owner": "docs/backend/architecture/assurance-evaluation.md"}
-{"symbol": "RuntimeService", "kind": "class", "defined_in": "vanguard/packages/runtime/service/contract.py", "canonical_owner": "docs/backend/reference/runtime-service.md"}
-{"symbol": "IPlanner", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
-{"symbol": "IContextManager", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
-{"symbol": "IToolkit", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
-{"symbol": "IMemoryEngine", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
-{"symbol": "IEvaluationGate", "kind": "protocol", "defined_in": "vanguard/packages/ports/spi.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "ASTPatcher", "kind": "class", "defined_in": "vanguard/packages/agency/forge/patcher.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "Accumulation", "kind": "class", "defined_in": "vanguard/packages/kernel/provenance.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
+{"symbol": "ActivatedComponent", "kind": "class", "defined_in": "vanguard/packages/runtime/activation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "ActivationError", "kind": "class", "defined_in": "vanguard/packages/runtime/activation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "ActivationPlan", "kind": "class", "defined_in": "vanguard/packages/runtime/activation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "ActivationSession", "kind": "class", "defined_in": "vanguard/packages/runtime/activation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "ActivationStep", "kind": "class", "defined_in": "vanguard/packages/runtime/activation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "ActiveRunContext", "kind": "class", "defined_in": "vanguard/packages/runtime/service/service.py", "canonical_owner": "docs/backend/architecture/application-interfaces.md"}
+{"symbol": "AdapterOutcome", "kind": "class", "defined_in": "vanguard/packages/kernel/model.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
+{"symbol": "AdmissionGate", "kind": "class", "defined_in": "vanguard/packages/agency/episode/admission_gate.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "AdmissionVerdict", "kind": "class", "defined_in": "vanguard/packages/agency/episode/admission_gate.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "AdmissionVerdict", "kind": "class", "defined_in": "vanguard/packages/agency/forge/engine.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "AffectedResource", "kind": "class", "defined_in": "vanguard/packages/ports/environment.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "AgentView", "kind": "class", "defined_in": "vanguard/packages/domain/ledger/agent_view.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "AgentViewCheckpoint", "kind": "class", "defined_in": "vanguard/packages/domain/ledger/agent_view.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "AliasTranslator", "kind": "class", "defined_in": "vanguard/packages/agency/manifests/loader.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "ApplicationService", "kind": "class", "defined_in": "vanguard/packages/runtime/app_service.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "ApprovalAuthority", "kind": "class", "defined_in": "vanguard/packages/runtime/governance/approvals.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "ApprovalAuthorization", "kind": "class", "defined_in": "vanguard/packages/runtime/governance/approvals.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "ApprovalChallenge", "kind": "class", "defined_in": "vanguard/packages/runtime/governance/approvals.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "ApprovalDecision", "kind": "class", "defined_in": "vanguard/packages/runtime/governance/approvals.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "ApprovalFlow", "kind": "class", "defined_in": "vanguard/packages/runtime/governance/approvals.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "ApprovalFormatError", "kind": "class", "defined_in": "vanguard/packages/runtime/governance/approvals.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "ApprovalRecord", "kind": "class", "defined_in": "vanguard/packages/domain/ledger/state.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "ArmScore", "kind": "class", "defined_in": "vanguard/packages/runtime/scoring.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "ArmSummary", "kind": "class", "defined_in": "vanguard/packages/runtime/paired_evaluation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "ArtifactCreatedPayload", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "ArtifactFile", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/graph.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "ArtifactFlow", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "ArtifactGarbageCollector", "kind": "class", "defined_in": "vanguard/packages/runtime/retention.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "ArtifactGraph", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/graph.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "ArtifactIndexEntry", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "ArtifactKind", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/graph.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "ArtifactRecord", "kind": "class", "defined_in": "vanguard/packages/domain/ledger/state.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "ArtifactRef", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "ArtifactRef", "kind": "class", "defined_in": "vanguard/packages/runtime/artifacts.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "ArtifactRegistryProjection", "kind": "class", "defined_in": "vanguard/packages/runtime/ledger/projections.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "ArtifactResult", "kind": "class", "defined_in": "vanguard/packages/runtime/app_service.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "ArtifactTransform", "kind": "protocol", "defined_in": "vanguard/packages/domain/transforms/contracts.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "ArtifactWriter", "kind": "class", "defined_in": "vanguard/packages/runtime/artifacts.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 
 === LINKS SAMPLE ===
 {"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "repo-root-readme", "target_path": "README.md", "relationship_type": "markdown_link"}
 {"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "repo-root-vision", "target_path": "VISION.md", "relationship_type": "markdown_link"}
 {"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "repo-agents-contract", "target_path": "AGENTS.md", "relationship_type": "markdown_link"}
-{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "spec.core", "target_path": "docs/SPEC.md", "relationship_type": "markdown_link"}
-{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "decision.index", "target_path": "docs/decisions.md", "relationship_type": "markdown_link"}
-{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "execution.active", "target_path": "docs/execution/active.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "execution.feature_spec", "target_path": "docs/execution/spec.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "execution.tasks", "target_path": "docs/execution/tasks.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "execution.technical", "target_path": "docs/execution/technical.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "execution.milestones", "target_path": "docs/execution/milestones.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "execution.backlog", "target_path": "docs/execution/backlog.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "SKILL", "target_path": ".agents/skills/lda-navigator/SKILL.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "SKILL", "target_path": ".agents/skills/llama-cpp/SKILL.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "nav.home", "target_path": "docs/README.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "agent_plugins", "target_path": "vanguard/packages/runtime/agent_plugins.py", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "SKILL", "target_path": ".agents/skills/test-runner/SKILL.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "SKILL", "target_path": ".agents/skills/lam-engine/SKILL.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "TECHNIQUE", "target_path": ".agents/techniques/spec-driven-codegen/TECHNIQUE.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "TECHNIQUE", "target_path": ".agents/techniques/tdd-falsifier/TECHNIQUE.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "PROFICIENCY", "target_path": ".agents/proficiencies/autofix-swe-loop/PROFICIENCY.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "architecture", "target_path": "docs/backend/architecture", "relationship_type": "markdown_link"}
+{"source_id": "repo-agents-contract", "source_path": "AGENTS.md", "target_id": "architecture", "target_path": "docs/architecture", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "repo-root-vision", "target_path": "VISION.md", "relationship_type": "markdown_link"}
-{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "spec.core", "target_path": "docs/SPEC.md", "relationship_type": "markdown_link"}
-{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "decision.index", "target_path": "docs/decisions.md", "relationship_type": "markdown_link"}
-{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "execution.active", "target_path": "docs/execution/active.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "execution.feature_spec", "target_path": "docs/execution/spec.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "architecture", "target_path": "docs/backend/architecture", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "execution.tasks", "target_path": "docs/execution/tasks.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "execution.milestones", "target_path": "docs/execution/milestones.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "models_registry", "target_path": "vanguard/packages/adapters/models/models_registry.json", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "architecture", "target_path": "docs/architecture", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "backend", "target_path": "docs/backend", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "frontend", "target_path": "docs/frontend", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "product", "target_path": "docs/product", "relationship_type": "markdown_link"}
-{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "execution.milestones", "target_path": "docs/execution/milestones.md", "relationship_type": "markdown_link"}
-{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "theory", "target_path": "docs/theory", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "execution.technical", "target_path": "docs/execution/technical.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "execution.backlog", "target_path": "docs/execution/backlog.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "theory", "target_path": "docs/research/theory", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "research", "target_path": "docs/research", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "reports", "target_path": "docs/reports", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "QUICKSTART", "target_path": "QUICKSTART.md", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "arch.system.overview", "target_path": "docs/architecture/overview.md", "relationship_type": "markdown_link"}
-{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "README", "target_path": "test/README.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "SKILL", "target_path": ".agents/skills/lda-navigator/SKILL.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "skill-lda-docs-atlas", "target_path": "docs/onboarding/SKILL_LDA_Docs_atlas.md", "relationship_type": "markdown_link"}
+{"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "SKILL", "target_path": ".agents/skills/llama-cpp/SKILL.md", "relationship_type": "markdown_link"}
 {"source_id": "repo-root-readme", "source_path": "README.md", "target_id": "repo-agents-contract", "target_path": "AGENTS.md", "relationship_type": "markdown_link"}
-{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "0095-vision-as-law-zero-and-roadmap-reconciliation", "target_path": "docs/02_decisions/0095-vision-as-law-zero-and-roadmap-reconciliation.md", "relationship_type": "markdown_link"}
-{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "spec.core", "target_path": "docs/SPEC.md", "relationship_type": "markdown_link"}
-{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "01_law", "target_path": "docs/01_law", "relationship_type": "markdown_link"}
-{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "02_decisions", "target_path": "docs/02_decisions", "relationship_type": "markdown_link"}
-{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "05_contracts", "target_path": "docs/05_contracts", "relationship_type": "markdown_link"}
-{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "06_protocols", "target_path": "docs/06_protocols", "relationship_type": "markdown_link"}
-{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "milestones", "target_path": "docs/03_execution/milestones.md", "relationship_type": "markdown_link"}
-{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "backlog", "target_path": "docs/03_execution/backlog.md", "relationship_type": "markdown_link"}
-{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "sprint_active", "target_path": "docs/03_execution/sprint_active.md", "relationship_type": "markdown_link"}
-{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "04_architecture", "target_path": "docs/04_architecture", "relationship_type": "markdown_link"}
-{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "07_engineering", "target_path": "docs/07_engineering", "relationship_type": "markdown_link"}
-{"source_id": "repo-root-vision", "source_path": "VISION.md", "target_id": "08_theory", "target_path": "docs/08_theory", "relationship_type": "markdown_link"}
-{"source_id": "nav.home", "source_path": "docs/README.md", "target_id": "repo-root-vision", "target_path": "VISION.md", "relationship_type": "markdown_link"}
-{"source_id": "nav.home", "source_path": "docs/README.md", "target_id": "repo-agents-contract", "target_path": "AGENTS.md", "relationship_type": "markdown_link"}
-{"source_id": "nav.home", "source_path": "docs/README.md", "target_id": "repo-root-readme", "target_path": "README.md", "relationship_type": "markdown_link"}
-{"source_id": "nav.home", "source_path": "docs/README.md", "target_id": "spec.core", "target_path": "docs/SPEC.md", "relationship_type": "markdown_link"}
-{"source_id": "nav.home", "source_path": "docs/README.md", "target_id": "decision.index", "target_path": "docs/decisions.md", "relationship_type": "markdown_link"}
-{"source_id": "nav.home", "source_path": "docs/README.md", "target_id": "arch.system.overview", "target_path": "docs/architecture/overview.md", "relationship_type": "markdown_link"}
-{"source_id": "nav.home", "source_path": "docs/README.md", "target_id": "arch.runtime.execution", "target_path": "docs/backend/architecture/runtime-execution.md", "relationship_type": "markdown_link"}
 
 === REPORT ===
 {
     "status": "VALIDATED",
     "timestamp": "2026-08-30T01:00:00Z",
-    "total_documents": 80,
-    "canonical_ids_count": 80,
-    "links_count": 225,
+    "total_documents": 130,
+    "canonical_ids_count": 130,
+    "links_count": 498,
     "code_mappings_count": 12,
-    "symbol_index_count": 11,
+    "symbol_index_count": 667,
     "broken_links": 0,
     "stale_paths": 0,
     "validation_summary": "Permanent deterministic knowledge base built directly from repository sources."

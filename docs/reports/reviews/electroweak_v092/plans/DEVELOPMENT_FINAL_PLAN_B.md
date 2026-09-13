@@ -29,7 +29,7 @@ lock_navigation_mode: lda-fresh-plus-source
 paid_usd_this_session: 0.00
 ---
 
-> **Unused reference.** Day-to-day development authority is [`docs/execution/`](../docs/execution/): [`milestones.md`](../docs/execution/milestones.md), [`spec.md`](../docs/execution/spec.md), [`technical.md`](../docs/execution/technical.md), [`backlog.md`](../docs/execution/backlog.md), [`tasks.md`](../docs/execution/tasks.md). This draft remains forensic lock at HEAD `66aa7a3c`. Do not treat it as the work board.
+> **Unused reference.** Day-to-day development authority is [`docs/execution/`](../docs/execution/): [`milestones.md`](../docs/execution/main/milestones.md), [`spec.md`](../docs/execution/main/spec.md), [`technical.md`](../docs/execution/main/technical.md), [`backlog.md`](../docs/execution/main/backlog.md), [`tasks.md`](../docs/execution/main/tasks.md). This draft remains forensic lock at HEAD `66aa7a3c`. Do not treat it as the work board.
 
 # AETHER Plan B — Backend-First Development Program for Long-Horizon Software-Engineering Agents
 
@@ -201,7 +201,7 @@ The user-requested 60–90 band is therefore a **mixture**: 60 is a plausible la
 
 ### 2.2 Navigation health (FACT, degraded mode)
 
-**Lock-time FACT (HEAD `66aa7a3c0c31`, 2026-09-03).** `uv run lda identity --json` reports `index_head_sha=66aa7a3c0c31`, `freshness_vs_head=FRESH`, `dirty=true`. `uv run lda doctor --json` reports `index_healthy=true`, `status=HEALTHY`. [`docs/execution/active.md`](../docs/execution/active.md) is **absent**. Execution runway files present: [`docs/execution/tasks.md`](../docs/execution/tasks.md), [`docs/execution/spec.md`](../docs/execution/spec.md), [`docs/execution/milestones.md`](../docs/execution/milestones.md), [`docs/execution/backlog.md`](../docs/execution/backlog.md). W-092-F0 HEAD-bound LDA is satisfied for this lock worktree. `FEATURE_SPEC.md` remains a historical name in this draft; the current delta file is `spec.md`.
+**Lock-time FACT (HEAD `66aa7a3c0c31`, 2026-09-03).** `uv run lda identity --json` reports `index_head_sha=66aa7a3c0c31`, `freshness_vs_head=FRESH`, `dirty=true`. `uv run lda doctor --json` reports `index_healthy=true`, `status=HEALTHY`. [`docs/execution/active.md`](../docs/execution/active.md) is **absent**. Execution runway files present: [`docs/execution/main/tasks.md`](../docs/execution/main/tasks.md), [`docs/execution/main/spec.md`](../docs/execution/main/spec.md), [`docs/execution/main/milestones.md`](../docs/execution/main/milestones.md), [`docs/execution/main/backlog.md`](../docs/execution/main/backlog.md). W-092-F0 HEAD-bound LDA is satisfied for this lock worktree. `FEATURE_SPEC.md` remains a historical name in this draft; the current delta file is `spec.md`.
 
 **Historical CONTRADICTION (ebad36e).** The following table and two CONTRADICTION paragraphs were true at planning-session HEAD `ebad36e` with LDA `STALE` vs index `7e08462c2cbb`. They are retained as the forensic snapshot. They are **not** current at lock HEAD `66aa7a3c`.
 
@@ -217,9 +217,9 @@ The user-requested 60–90 band is therefore a **mixture**: 60 is a plausible la
 
 **Degraded mode declared.** LDA was **not** rebuilt (would have mutated `.lda/index.db` without being requested). Indexes were used only to pin symbols. All architectural claims below were checked against current source, current tests, or official URLs.
 
-**Historical CONTRADICTION (ebad36e).** [`docs/execution/milestones.md`](../docs/execution/milestones.md) marks **W-092-F0** as `DONE` with predicate “LDA/index health is HEAD-bound”. Current `lda identity` reports `STALE` versus HEAD `ebad36e`. Plan B treats W-092-F0 as **not currently satisfied** for this worktree, regardless of the milestone table.
+**Historical CONTRADICTION (ebad36e).** [`docs/execution/main/milestones.md`](../docs/execution/main/milestones.md) marks **W-092-F0** as `DONE` with predicate “LDA/index health is HEAD-bound”. Current `lda identity` reports `STALE` versus HEAD `ebad36e`. Plan B treats W-092-F0 as **not currently satisfied** for this worktree, regardless of the milestone table.
 
-**Historical CONTRADICTION (ebad36e).** [`README.md`](../README.md) says [`docs/execution/active.md`](../docs/execution/active.md) is the sole current-state source. The file currently contains the same `id: execution.tasks` body as [`docs/execution/tasks.md`](../docs/execution/tasks.md). Plan B treats `tasks.md` + `FEATURE_SPEC.md` as the in-flight delta contract and treats `active.md` as a duplicate, not a second authority.
+**Historical CONTRADICTION (ebad36e).** [`README.md`](../README.md) says [`docs/execution/active.md`](../docs/execution/active.md) is the sole current-state source. The file currently contains the same `id: execution.tasks` body as [`docs/execution/main/tasks.md`](../docs/execution/main/tasks.md). Plan B treats `tasks.md` + `FEATURE_SPEC.md` as the in-flight delta contract and treats `active.md` as a duplicate, not a second authority.
 
 ### 2.3 Commands run this session (FACT)
 
@@ -1550,10 +1550,10 @@ Tickets 01–08 are the true critical path for long-horizon **truth**. Tickets 0
 - [`docs/SPEC.md`](../docs/SPEC.md)
 - [`docs/decisions.md`](../docs/decisions.md)
 - [`docs/execution/active.md`](../docs/execution/active.md)
-- [`docs/execution/milestones.md`](../docs/execution/milestones.md)
-- [`docs/execution/backlog.md`](../docs/execution/backlog.md)
+- [`docs/execution/main/milestones.md`](../docs/execution/main/milestones.md)
+- [`docs/execution/main/backlog.md`](../docs/execution/main/backlog.md)
 - [`docs/execution/FEATURE_SPEC.md`](../docs/execution/FEATURE_SPEC.md)
-- [`docs/execution/tasks.md`](../docs/execution/tasks.md)
+- [`docs/execution/main/tasks.md`](../docs/execution/main/tasks.md)
 - [`docs/backend/architecture/agency.md`](../docs/backend/architecture/agency.md)
 - [`docs/architecture/workflows/end-to-end-execution.md`](../docs/architecture/workflows/end-to-end-execution.md)
 - [`vanguard/packages/agency/episode/engine.py`](../vanguard/packages/agency/episode/engine.py)
@@ -1826,7 +1826,7 @@ Identical appendix in A, B, and v2. Duplication is required so no file is a stub
 
 ## Post-lock addendum (Dev C, 2026-09-03) — not a restamp of the lock body
 
-Tickets 01–35 remain the ID scheme. Checkboxes live only in `docs/execution/tasks.md`.
+Tickets 01–35 remain the ID scheme. Checkboxes live only in `docs/execution/main/tasks.md`.
 
 Drift vs this lock’s “MISSING” / Wave-0 language:
 

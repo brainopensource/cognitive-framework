@@ -32,7 +32,7 @@ relationships:
 
 **Authority:** `non-canonical`. This folder is a design review a CTO can use to
 change the agent. It is **not** the living board. Living truth is
-[`docs/execution/`](../../../execution/tasks.md). `.draft/` is lock, not product.
+[`docs/execution/`](../../../execution/main/tasks.md). `.draft/` is lock, not product.
 Research under `docs/research/` is non-canonical. Sibling octopus notes under
 [`../octopus/`](../octopus/consolidation/outer-loop-orchestrator.md) are
 proposals, not HEAD.

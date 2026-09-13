@@ -23,6 +23,7 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Sequence
 
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
@@ -238,6 +239,127 @@ class BaselineManifestVerifierContractTests(unittest.TestCase):
             any("tree_digest_mismatch" in r for r in result.rejection_reasons),
             result.rejection_reasons,
         )
+
+    def _manifest_with(self, **overrides) -> BaselineManifest:
+        kwargs = dict(
+            baseline_id=self.tag_name,
+            git_tag=self.tag_name,
+            tag_object_sha=self.tag_object_sha,
+            commit_sha=self.commit_sha,
+            tree_digest=self.tree_digest,
+            package_version="0.7.3.dev0",
+            dependency_lock_digest=self.lock_digest,
+            schema_pins=self.schema_pins,
+            reducer_pins=self.reducer_pins,
+            prohibited_treatment_paths=["vanguard/packages/domain", "vanguard/packages/kernel"],
+            required_gates=["RF-86", "RF-98"],
+            creator_key_id="creator-key-01",
+            creator_private_key=self.creator_key_bytes,
+            reviewer_key_id="reviewer-key-01",
+            reviewer_public_key=base64.b64encode(
+                ed25519.Ed25519PrivateKey.from_private_bytes(self.reviewer_key_bytes)
+                .public_key()
+                .public_bytes_raw()
+            ).decode("ascii"),
+            reviewer_private_key=self.reviewer_key_bytes,
+        )
+        kwargs.update(overrides)
+        return create_signed_baseline_manifest(**kwargs)
+
+    def test_padded_sha1_tree_digest_fails_closed(self) -> None:
+        """DIR-D3: Zero-padded 40-character SHA-1 pretending to be SHA-256 is rejected."""
+        manifest = self._manifest_with(
+            tree_digest=f"sha256:{self.tree_sha.ljust(64, '0')}"
+        )
+        result = verify_baseline_manifest(
+            manifest.to_dict(), self.workspace, skip_remote=True, git_runner=self._git
+        )
+        self.assertFalse(result.valid, "Padded SHA-1 must not satisfy SHA-256 tree pin")
+        self.assertTrue(
+            any("tree_digest_mismatch" in r for r in result.rejection_reasons),
+            result.rejection_reasons,
+        )
+
+    def test_raw_sha1_tree_digest_fails_closed(self) -> None:
+        """DIR-D3: Raw 40-character SHA-1 mislabeled as sha256: is rejected."""
+        manifest = self._manifest_with(
+            tree_digest=f"sha256:{self.tree_sha}"
+        )
+        result = verify_baseline_manifest(
+            manifest.to_dict(), self.workspace, skip_remote=True, git_runner=self._git
+        )
+        self.assertFalse(result.valid, "Raw SHA-1 must not satisfy SHA-256 tree pin")
+        self.assertTrue(
+            any("tree_digest_mismatch" in r for r in result.rejection_reasons),
+            result.rejection_reasons,
+        )
+
+    def test_canonical_tree_digest_positive_over_temporary_git_tree(self) -> None:
+        """DIR-D3: Canonical SHA-256 of ASCII Git tree ID verifies successfully."""
+        manifest = self._manifest_with(
+            tree_digest="sha256:" + hashlib.sha256(self.tree_sha.encode("ascii")).hexdigest()
+        )
+        result = verify_baseline_manifest(
+            manifest.to_dict(), self.workspace, skip_remote=True, git_runner=self._git
+        )
+        self.assertTrue(result.valid, result.rejection_reasons)
+        self.assertEqual(result.disposition, BASELINE_DISPOSITION_ACCEPTED_CONTROL)
+        self.assertTrue(result.verified_pins.get("tree"))
+
+    def test_committed_accepted_manifest_tree_pin_uses_retained_form(self) -> None:
+        """DIR-D3: Prove committed accepted manifest tree pin uses SHA-256(ASCII Git tree ID)."""
+        manifest_path = ROOT / "evidence" / "baselines" / "CONVERGENCE-BASE-v1.json"
+        self.assertTrue(manifest_path.is_file(), f"Missing manifest at {manifest_path}")
+        manifest_data = json.loads(manifest_path.read_text(encoding="utf-8"))
+
+        commit_sha = manifest_data["commit_sha"]
+        proc = subprocess.run(
+            ["git", "rev-parse", f"{commit_sha}^{{tree}}"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        git_tree_sha = proc.stdout.strip()
+        self.assertEqual(len(git_tree_sha), 40)
+
+        canonical_hash = "sha256:" + hashlib.sha256(git_tree_sha.encode("ascii")).hexdigest()
+        padded_hash = f"sha256:{git_tree_sha.ljust(64, '0')}"
+        raw_hash = f"sha256:{git_tree_sha}"
+
+        actual_pin = manifest_data["tree_digest"]
+        self.assertEqual(actual_pin, canonical_hash)
+        self.assertNotEqual(actual_pin, padded_hash)
+        self.assertNotEqual(actual_pin, raw_hash)
+
+    def test_committed_accepted_manifest_verifies_against_tree(self) -> None:
+        """DIR-D3: Committed accepted CONVERGENCE-BASE-v1.json verifies as ACCEPTED_CONTROL."""
+        manifest_path = ROOT / "evidence" / "baselines" / "CONVERGENCE-BASE-v1.json"
+        manifest_data = json.loads(manifest_path.read_text(encoding="utf-8"))
+        commit_sha = manifest_data["commit_sha"]
+
+        def repo_git_runner(command: Sequence[str], cwd: Path) -> tuple[int, str]:
+            res = subprocess.run(["git", *command], cwd=ROOT, capture_output=True, text=True)
+            return res.returncode, res.stdout
+
+        with tempfile.TemporaryDirectory() as td:
+            p1 = subprocess.Popen(["git", "archive", commit_sha], cwd=ROOT, stdout=subprocess.PIPE)
+            p2 = subprocess.Popen(["tar", "-x", "-C", td], stdin=p1.stdout)
+            p1.stdout.close()
+            p2.communicate()
+            p1.wait()
+            self.assertEqual(p2.returncode, 0)
+            self.assertEqual(p1.returncode, 0)
+
+            result = verify_baseline_manifest(
+                manifest_data,
+                Path(td),
+                skip_remote=True,
+                git_runner=repo_git_runner,
+            )
+            self.assertTrue(result.valid, f"Verification failed: {result.rejection_reasons}")
+            self.assertEqual(result.disposition, BASELINE_DISPOSITION_ACCEPTED_CONTROL)
+            self.assertTrue(result.verified_pins.get("tree"))
 
     def test_dependency_lock_drift_fails_closed(self) -> None:
         data = copy.deepcopy(self.valid_manifest.to_dict())

@@ -68,6 +68,17 @@ This document is the canonical reference owner for the catalog of JSON Schema fa
 
 ## 1. Schema Authority Caveat
 
+**Baseline tree pins (DIR-D3; reviewed at 63d12d83).** The accepted
+`aether.baseline/1` tree identity is `sha256:` plus the lowercase SHA-256 of the
+ASCII Git tree object ID resolved from the pinned commit. This is the established
+baseline algorithm, not a SHA-256 hash of serialized tree contents. The verifier
+rejects raw Git SHA-1 and SHA-1 zero-padded to 64 characters under a SHA-256 label.
+`evidence/baselines/CONVERGENCE-BASE-v1.json` already uses the retained algorithm;
+no historical pin, signature or tag was rewritten. A discovered external padded
+signed pin needs an explicit migration disposition. Executable controls are in
+`test/contracts/test_baseline_manifest_verifier.py`. This reference is the current
+domain contract owner; the former `domain.md` path is not recreated.
+
 JSON Schemas define external wire formats, serialized validation boundaries, and test vectors. While schemas establish type contracts, execution authority resides in the code and trusted kernel boundaries. The presence of a schema definition does not alone imply that an associated subsystem is active in the production runtime.
 
 Repository change-surface estimates are domain observations rather than wire schemas. The
@@ -78,7 +89,20 @@ exterior verification.
 
 Semantic task state (`vanguard/packages/domain/task_state.py`, `SemanticTaskState` /
 `CodingTaskState`) is a domain value with RFC 8785 JCS digest via `digest_of`. It is not a
-`schemas/` wire family. Runtime `fold_task_state` is the only producer.
+`schemas/` wire family. Runtime `fold_task_state` is the only producer. `aether.memory-view/1`
+wraps the complete state in an immutable `MemoryView`: capture freezes canonical JCS bytes and
+binds cursor, lineage identifier, reducer version, and unique `Evidence` entries whose subject
+and artifact identities are lowercase `sha256:` digests. `Interaction` is the compiler-selection
+value used for bounded recent history. Neither value creates a second state store, and a digest is
+an integrity identity rather than authorization.
+
+`ProtocolRecoveryState` is the domain/agency value contract `aether.recovery-state/1`, not a
+`schemas/` family. Versioned payloads require the complete policy/history/error/intervention/
+decision/pending-operation/deadline shape, bound history is limited to 12 attempts, malformed or
+inconsistent values fail closed, and supported legacy dictionaries migrate without replaying
+effects or resetting explicit retry ceilings. `SemanticRecoveryDecision` carries
+`continue|wait|reground|replan|stop`, reason, delay, state digest, and remaining-budget reference;
+it is distinct from the protocol-parser `RecoveryDecision` (`accept|retry_model|fail_instrument`).
 
 ---
 
@@ -93,6 +117,7 @@ The Modular Harness Framework (MHF) schemas represent core agent and runtime con
 | Schema File | Wire API Version | Primary Producer | Primary Consumer | Purpose |
 |---|---|---|---|---|
 | `event_envelope.schema.json` | `mhf.event/1`, `mhf.event/2` | `LedgerEmitter` | `EventEnvelope`, event stores | Event envelope format and kind enum. |
+| `context_selection_recorded.schema.json` | `aether.prompt-selection/1` payload | `HarnessSession` | event validators, task-state and ledger projections | Write-before-inference selection identity, token count and omission evidence. |
 | `manifest_v2.schema.json` | `mhf.manifest/2` | Pack authors | `ManifestLoader`, `compose.py` | Component declarations, tool packs, bindings. |
 | `execution_profile_v2.schema.json`| `mhf.execution-profile/2` | `profiles.py` | `HarnessSession`, `RunPlan` | Containment, approval, and assurance profiles. |
 | `trajectory_v2.schema.json` | `mhf.trajectory/2` | `EpisodeEngine` | `EvaluatorGateway`, Evaluator | Causal turn trajectory capture format. |

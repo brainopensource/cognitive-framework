@@ -115,6 +115,11 @@ vanguard [-h] [--version] {init,doctor,cassette,run,resume,status,events,artifac
 
 The TypeScript CLI (`vanguard/clients/cli/src/commands/index.ts`) communicates with running services or inspects compiled schemas and lineages.
 
+Help is non-executing on every subcommand: `--help` or `-h` prints usage and exits zero without a
+completion frame or model call. The only bound short flags are `-h = --help`, `-y = --yes`, and
+`-m = --model`; short flags are never inferred, and conflicting or unknown spellings fail before
+dispatch rather than leaking a flag value into the task brief.
+
 ### Command Handlers
 
 | Command | Handler (`vanguard/clients/cli/src/commands/`) | Functionality |

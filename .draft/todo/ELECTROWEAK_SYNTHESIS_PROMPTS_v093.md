@@ -1,14 +1,24 @@
 # Electroweak v0.9.2 → Living Execution Runway Transition Blueprint
 
-**Authority**: Planning & Staging Resource (`.draft/`) — not law, not a board
+**Authority**: Non-Canonical Planning & Staging Resource (`.draft/`) — not law, not a board
 **Target Runway**: [`docs/execution/`](../docs/execution/) (`milestones.md`, `backlog.md`, `spec.md`, `technical.md`, `tasks.md`)
 **Source Corpus**: `docs/reports/reviews/electroweak_v092/` — `grok/`, `opus/`, `octopus/`, `gpt/`, `gem/`, **`plans/`**
-**Companion**: `.draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md` (Synthesis of Record, 2026-09-04)
-**Revision**: v4 — re-aligned 2026-09-04 against the 900-line `.draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md`
+**Companion**: `.draft/todo/ELECTROWEAK_SYNTHESIS_FINAL_v093.md` (Synthesis of Record, 2026-09-04)
+**Revision**: v4 — re-aligned 2026-09-04 against the 900-line `.draft/todo/ELECTROWEAK_SYNTHESIS_FINAL_v093.md`
 (7 packages, T-69..T-97, §9 evidence standard). Nine drifts corrected: wave mapping, `gem/` status,
 capability-bound native profiles, read-before-edit as experiment, T-46 narrowed (not superseded),
 MS-TRUTH instrument gating, MS-CONTROL product-path qualification, T-83 split, Defect K precedence.
 **Verification basis**: working tree `feat/strongforce_beta_release_v093`, HEAD `537bdb66`
+
+> [!IMPORTANT]
+> **Document Status: HISTORICAL RUNWAY TRANSITION BLUEPRINT — PROMPTS EXECUTED & LIVING RUNWAY ACTIVE (2026-09-11 | Current HEAD)**
+> - **Authority:** Non-Canonical Planning Resource (All operational tasks are tracked exclusively in [`docs/execution/main/tasks.md`](../../docs/execution/main/tasks.md)).
+> - **IMPLEMENTATION DISPOSITION:**
+>   - **DONE / ACCEPTED:** The transition prompts in this blueprint were fully executed to establish the canonical five-file runway in [`docs/execution/`](../../docs/execution/). The underlying tasks T-69 through T-97, as well as subsequent stabilization block NT-1 (T-98 through T-111), are **COMPLETED & ACCEPTED**.
+>   - **CLOSED MILESTONES:** `MS-BASELINE` and `MS-CONTEXT` are closed.
+>   - **ACTIVE NEXT:** Single-agent control preregistration freeze ([T-26](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L605)) and canary run ([T-27](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L611)).
+>   - **PROTOTYPES / EXPERIMENTAL:** Octopus multi-agent orchestrator and post-control capability packages (FH-1: T-112 through T-127) remain non-authorizing proposals.
+> - **Notice:** These prompts represent historical transition instructions. Do not re-run them against HEAD; consult [`docs/execution/`](../../docs/execution/) for current live contracts and task states.
 
 ---
 
@@ -133,7 +143,7 @@ prompt now carries it.
 | **9** | Greenfield evidence mapping **aliases** `structural_passed` = `behavioral_passed` = `verification.passed` and never sets `oracle_failed_on_stub`. The system prompt's "do not read first" law *fights* the pack's scaffold + oracle-fail-on-stub policy. | `grok/README.md` hole 4 | Not verified this pass | **07** |
 | **10** | Semantic test-output distillation on `proc.exec` results (~1200→180 tokens/turn) is *"the single highest-leverage unimplemented item."* `parse_test_output` exists in `forge/engine.py`; the distillation filter does not. | `octopus/…evidence-audit.md` §4 | Partially covered by T-36 | **07** |
 | **11** | A **kill list** is normative, not advisory: no second `EpisodeEngine`; no Forge/Chimera product score; no new provider abstraction; no kernel AST; no leaderboard mixing live/replay/error/zero-call rows; and *"AHE-class evidence: tools/middleware/memory beat system prompts — do not spend a quarter on `system-prompt.txt`."* | `gpt/…` "What not to build yet"; `grok/README.md` "What this review is not" | — | **13** |
-| **12** | `plans/` (7,945 lines) is the `derived_from:` authority for `milestones.md` and was never opened. | `docs/execution/milestones.md` frontmatter | — | **00** |
+| **12** | `plans/` (7,945 lines) is the `derived_from:` authority for `milestones.md` and was never opened. | `docs/execution/main/milestones.md` frontmatter | — | **00** |
 
 ---
 
@@ -200,7 +210,7 @@ HEAD is `537bdb66`. Every corpus claim is a hypothesis about a past tree.
 
 1. Read `plans/` in full (6 files, 7,945 lines) — `DEVELOPMENT_FINAL_PLAN.md`,
    `_B`, `_v2`, `PHASE-0_DEVELOPMENT_FINAL_PLAN.md`, `DOCUMENTATION_REFACTOR.md`.
-   `docs/execution/milestones.md` names these in its own `derived_from:`
+   `docs/execution/main/milestones.md` names these in its own `derived_from:`
    frontmatter, so any milestone edit that contradicts them is a silent fork.
    Report contradictions; do not resolve them unilaterally.
 2. For every defect a prompt below will act on, re-run its stated reproduction
@@ -226,13 +236,13 @@ Do not proceed to Prompt 01 until this table exists.
 
 ### Prompt 01: Backlog Registration & Legacy Reconciliation
 
-* **Target File**: `docs/execution/backlog.md`
+* **Target File**: `docs/execution/main/backlog.md`
 * **Corpus anchor**: Synthesis of Record §4; `backlog.md` §2.9/§2.10/§3
 * **Tree status**: four of the six draft package IDs duplicate live rows
 
 ```markdown
 # ASSIGNMENT: Backlog Registration & Legacy Reconciliation
-Target Document: `docs/execution/backlog.md`
+Target Document: `docs/execution/main/backlog.md`
 Authority Tier: Execution Runway (Living Document)
 Source: `.draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md` §4
 
@@ -291,13 +301,13 @@ REQUIREMENTS:
 
 ### Prompt 02: Milestone Overlay Gates & Release Predicates
 
-* **Target File**: `docs/execution/milestones.md`
+* **Target File**: `docs/execution/main/milestones.md`
 * **Corpus anchor**: Synthesis of Record §6; **`opus/part7…` §5–§6**
 * **Tree status**: v1's `MS-TRUTH` predicate contradicted the corpus it cited
 
 ```markdown
 # ASSIGNMENT: Milestone Overlay Gates & Release Predicates
-Target Document: `docs/execution/milestones.md` §3
+Target Document: `docs/execution/main/milestones.md` §3
 Source: `.draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md` §6
 
 Replace five overlay rows: MS-TRUTH, MS-SEE, MS-CHANGE, MS-CONTROL, MS-CAMPAIGN.
@@ -880,14 +890,14 @@ Deliver the four instrument packages:
 
 ### Prompt 11: Atomic Task Work-Tree Deconstruction (T-69 through T-97)
 
-* **Target File**: `docs/execution/tasks.md`
+* **Target File**: `docs/execution/main/tasks.md`
 * **Source**: Synthesis of Record §4.5 (T-69..T-97)
 
 ```markdown
 # ASSIGNMENT: Atomic Task Staging in tasks.md (T-69 through T-97)
 Source: `.draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md` §4.5
 
-Populate `docs/execution/tasks.md` with flat, dependency-ordered tasks covering
+Populate `docs/execution/main/tasks.md` with flat, dependency-ordered tasks covering
 the complete Electroweak v0.9.3 scope (T-69 through T-97).
 
 ID ALLOCATION: current maximum is T-68. Start at T-69. Allocate through T-97.
@@ -1023,7 +1033,7 @@ OUTPUT: formal PASS/FAIL per invariant, with an exact remediation diff on failur
 
 ### Prompt 13: Kill List & Non-Goals Register
 
-* **Target File**: `docs/execution/backlog.md` (§7 Risks / a new Non-Goals block)
+* **Target File**: `docs/execution/main/backlog.md` (§7 Risks / a new Non-Goals block)
 * **Corpus anchor**: `gpt/…` "What not to build yet"; `grok/README.md` "What this review is not"
 
 ```markdown

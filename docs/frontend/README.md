@@ -17,7 +17,7 @@ audience:
 version: 0.9.1a1
 last_verified: 2026-09-03
 normative_authority:
-  - ../execution/spec.md
+  - ../execution/main/spec.md
 relationships:
   - spec.core
   - arch.system.overview

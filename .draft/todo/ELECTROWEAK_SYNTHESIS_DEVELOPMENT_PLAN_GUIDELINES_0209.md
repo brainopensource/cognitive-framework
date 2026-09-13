@@ -13,9 +13,16 @@ verification_basis: "working tree at feat/strongforce_beta_release_v093, HEAD 53
 
 # ELECTROWEAK SYNTHESIS DEVELOPMENT PLAN & AGENT RUNBOOK — v0.9.3
 
-This is the canonical, self-contained implementation runbook designed for autonomous coding agents. It prioritizes core backend implementation, targeted falsifiers, runtime correctness, and strict adherence to the **Electroweak Synthesis of Record (`ELECTROWEAK_SYNTHESIS_FINAL_v093.md`)**.
+> [!IMPORTANT]
+> **Document Status: HISTORICAL SPRINT RUNBOOK — TASKS COMPLETED & MERGED (2026-09-11 | HEAD: `1e257e76`)**
+> - **Authority:** Historical Operational Staging (All active tasks are tracked exclusively in [`docs/execution/main/tasks.md`](../../docs/execution/main/tasks.md)).
+> - **IMPLEMENTATION DISPOSITION:**
+>   - **DONE:** The assignment described in §0 ("execute remaining core backend packages T-69 through T-97") is **COMPLETED**.
+>   - **CLOSED MILESTONES:** `MS-BASELINE` and `MS-CONTEXT` are closed.
+>   - **ACTIVE NEXT:** Single-agent control preregistration freeze ([T-26](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L605)) and canary run ([T-27](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L611)).
+> - **Notice:** Do not use this runbook as an active sprint backlog; canonical task state lives in `docs/execution/`.
 
-Your objective is to execute the remaining core backend packages for Vanguard / AETHER, transforming the Coding Max product path into an industrial-grade, fail-closed coding harness.
+This is the historical implementation runbook designed for autonomous coding agents during the v0.9.3 stabilization wave. It established the core backend contracts and targeted falsifiers that are now merged into the production tree.
 
 ---
 
@@ -47,10 +54,10 @@ Before editing any production code, verify context against:
 2. `dev_context_logs/context_summary.md` (Current gate headroom and test status)
 3. `.draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md` (Authoritative Synthesis of Record)
 4. `.draft/todo/SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md` (Architectural Blueprint)
-5. `docs/execution/spec.md` (The Law & delta contracts)
-6. `docs/execution/tasks.md` (Tasks T-69 through T-97)
-7. `docs/execution/milestones.md` (Target outcomes and release gates)
-8. `docs/execution/backlog.md` (Package inventory)
+5. `docs/execution/main/spec.md` (The Law & delta contracts)
+6. `docs/execution/main/tasks.md` (Tasks T-69 through T-97)
+7. `docs/execution/main/milestones.md` (Target outcomes and release gates)
+8. `docs/execution/main/backlog.md` (Package inventory)
 
 Reverse-route documentation obligations for modified files using:
 ```bash
@@ -238,6 +245,6 @@ python3 -m unittest test.adapters.test_live_alias_validation -v
 A wave or task is complete only when:
 1. Production code strictly respects the hexagonal lattice and kernel LOC budget ($\le 1438$ lines).
 2. Corresponding unit and contract test falsifiers pass hermetically.
-3. Relevant task IDs in `docs/execution/tasks.md` and gates in `milestones.md` are marked updated with exact SHA evidence.
+3. Relevant task IDs in `docs/execution/main/tasks.md` and gates in `milestones.md` are marked updated with exact SHA evidence.
 4. No Git command was executed.
 5. No unsupported SOTA or benchmark claim was made.

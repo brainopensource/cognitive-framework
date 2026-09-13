@@ -39,12 +39,78 @@ def run_lda_delta() -> float:
         pass
     return round(time.time() - t0, 3)
 
+
+def _normalise_local_model_config(config: Dict[str, Any]) -> Dict[str, Any]:
+    """Validate one local inference tier without ever enabling a remote provider."""
+    if not isinstance(config, dict):
+        raise ValueError("each model cascade entry must be a mapping")
+
+    provider = config.get("provider", "local")
+    if provider != "local":
+        raise ValueError("autofix model cascades support only the local provider")
+
+    model_path = config.get("model_path")
+    if not isinstance(model_path, str) or not model_path.strip():
+        raise ValueError("each local model cascade entry needs a non-empty model_path")
+
+    port = config.get("port", 8080)
+    if isinstance(port, bool) or not isinstance(port, int) or not 1 <= port <= 65535:
+        raise ValueError("each local model cascade entry needs a TCP port from 1 to 65535")
+
+    return {
+        "provider": "local",
+        "model_path": str(Path(model_path).expanduser()),
+        "port": port,
+    }
+
+
+def _model_configs(
+    model_path: str,
+    port: int,
+    model_cascade: Optional[List[Dict[str, Any]]],
+) -> List[Dict[str, Any]]:
+    """Return validated local tiers, retaining the last tier after escalation.
+
+    A healthy server identifies only its port, not the GGUF it loaded.  Two
+    different model paths on the same port would therefore make model identity
+    unverifiable, so that configuration is refused before a test or model call.
+    """
+    fallback = _normalise_local_model_config(
+        {"provider": "local", "model_path": model_path, "port": port}
+    )
+    if model_cascade is None:
+        return [fallback]
+    if not isinstance(model_cascade, list) or not model_cascade:
+        raise ValueError("model_cascade must be a non-empty list of local model entries")
+
+    tiers = [_normalise_local_model_config(config) for config in model_cascade]
+    paths_by_port: Dict[int, str] = {}
+    for tier in tiers:
+        existing_path = paths_by_port.setdefault(tier["port"], tier["model_path"])
+        if existing_path != tier["model_path"]:
+            raise ValueError(
+                "different local model paths cannot share a cascade port; "
+                "use one port per model"
+            )
+    return tiers
+
+
+def _stop_owned_server(server_proc: Optional[subprocess.Popen]) -> None:
+    if server_proc is None:
+        return
+    try:
+        server_proc.kill()
+        server_proc.wait(timeout=2.0)
+    except Exception:
+        pass
+
 def execute_autofix_loop(
     task: str,
     target_file: str,
     test_cmd: Optional[str] = None,
     max_turns: int = 3,
     model_path: Optional[str] = None,
+    model_cascade: Optional[List[Dict[str, Any]]] = None,
     port: int = 8080,
     timeout: float = 15.0,
     budget: int = 2500
@@ -55,7 +121,7 @@ def execute_autofix_loop(
             "LOCAL_MODEL_PATH",
             str(Path.home() / "Models" / "Qwen2.5-Coder-1.5B-Instruct-Q4_K_M.gguf"),
         )
-    
+
     if not os.path.exists(target_file):
         return {
             "status": "ERROR",
@@ -63,26 +129,24 @@ def execute_autofix_loop(
             "turns": 0
         }
 
+    try:
+        cascade = _model_configs(model_path, port, model_cascade)
+    except ValueError as exc:
+        return {
+            "status": "CONFIGURATION_ERROR",
+            "message": str(exc),
+            "target_file": target_file,
+            "turns": 0,
+        }
+
     # Backup original file for fail-closed rollback
     with open(target_file, "r", encoding="utf-8") as f:
         original_code = f.read()
 
-    # Step 0: Ensure local model server is online
-    server_proc = None
-    try:
-        server_proc = ensure_server(model_path, port)
-    except Exception as exc:
-        return {
-            "status": "SERVER_ERROR",
-            "message": f"Could not launch llama-server: {exc}",
-            "turns": 0
-        }
-
-    # Step 1: Initial Baseline Falsification (Technique 2)
+    # Step 0: Initial Baseline Falsification (Technique 2).  Do not launch a
+    # model until a reproducible failing test proves a repair is needed.
     initial_diag = run_falsifier(target_path=target_file, explicit_cmd=test_cmd, timeout=timeout)
     if initial_diag.get("status") == "PASS":
-        if server_proc:
-            server_proc.kill()
         return {
             "status": "ALREADY_PASSING",
             "message": "Tests are already passing; no repair needed.",
@@ -103,25 +167,81 @@ def execute_autofix_loop(
     resolved = False
     final_code = original_code
     total_tokens = 0
+    owned_server: Optional[subprocess.Popen] = None
+    active_server_key: Optional[tuple[str, int]] = None
 
     try:
         for turn in range(1, max_turns + 1):
             turn_start = time.time()
-            
+            # Tiers are selected by attempt.  Once escalated, retries stay at
+            # the highest configured local tier instead of silently downgrading.
+            active_config = cascade[min(turn - 1, len(cascade) - 1)]
+            server_key = (active_config["model_path"], active_config["port"])
+
+            if active_server_key != server_key:
+                _stop_owned_server(owned_server)
+                owned_server = None
+                active_server_key = None
+                try:
+                    owned_server = ensure_server(
+                        active_config["model_path"], active_config["port"]
+                    )
+                    active_server_key = server_key
+                except Exception as exc:
+                    history.append({
+                        "turn": turn,
+                        "duration_seconds": round(time.time() - turn_start, 3),
+                        "model": dict(active_config),
+                        "generation_status": "SERVER_ERROR",
+                        "falsifier_status": None,
+                        "falsifier_summary": None,
+                        "error": str(exc),
+                    })
+                    last_error_feedback = f"Local model server failed: {exc}"
+                    continue
+
             # 1. Spec-Driven CodeGen (Technique 1) with error feedback against pristine baseline
-            gen_result = generate_patch(
-                task=task,
-                target_file=target_file,
-                target_code=original_code,
-                error_feedback=last_error_feedback,
-                model_path=model_path,
-                port=port,
-                budget=budget,
-                auto_manage_server=False
-            )
-            
-            total_tokens += gen_result.get("completion_tokens", 0)
+            try:
+                gen_result = generate_patch(
+                    task=task,
+                    target_file=target_file,
+                    target_code=original_code,
+                    error_feedback=last_error_feedback,
+                    model_path=active_config["model_path"],
+                    port=active_config["port"],
+                    budget=budget,
+                    auto_manage_server=False,
+                )
+            except Exception as exc:
+                history.append({
+                    "turn": turn,
+                    "duration_seconds": round(time.time() - turn_start, 3),
+                    "model": dict(active_config),
+                    "generation_status": "ERROR",
+                    "falsifier_status": None,
+                    "falsifier_summary": None,
+                    "error": str(exc),
+                })
+                last_error_feedback = f"Patch generation failed: {exc}"
+                continue
+
+            completion_tokens = gen_result.get("completion_tokens", 0)
+            if isinstance(completion_tokens, bool) or not isinstance(completion_tokens, int):
+                completion_tokens = 0
+            total_tokens += completion_tokens
             candidate_code = gen_result.get("generated_code", "")
+            if not isinstance(candidate_code, str) or not candidate_code.strip():
+                history.append({
+                    "turn": turn,
+                    "duration_seconds": round(time.time() - turn_start, 3),
+                    "model": dict(active_config),
+                    "tokens": completion_tokens,
+                    "generation_status": "EMPTY_OUTPUT",
+                    "falsifier_status": None,
+                    "falsifier_summary": None,
+                })
+                last_error_feedback = "Patch generator returned no candidate code"
+                continue
 
             # Apply candidate code to target file
             with open(target_file, "w", encoding="utf-8") as f:
@@ -138,7 +258,9 @@ def execute_autofix_loop(
                 "turn": turn,
                 "duration_seconds": turn_duration,
                 "lda_delta_seconds": t_delta,
-                "tokens": gen_result.get("completion_tokens", 0),
+                "model": dict(active_config),
+                "tokens": completion_tokens,
+                "generation_status": "OK",
                 "falsifier_status": diag.get("status"),
                 "falsifier_summary": diag.get("failure_summary")
             }
@@ -164,12 +286,7 @@ def execute_autofix_loop(
                     last_error_feedback += "\n" + diag["raw_stderr"][-800:]
 
     finally:
-        if server_proc:
-            try:
-                server_proc.kill()
-                server_proc.wait(timeout=2.0)
-            except Exception:
-                pass
+        _stop_owned_server(owned_server)
 
         if not resolved:
             # Fail-closed rollback
@@ -206,6 +323,9 @@ def main():
     parser.add_argument("--test-cmd", help="Explicit test command to verify fix")
     parser.add_argument("--max-turns", type=int, default=3, help="Maximum repair turns")
     parser.add_argument("--model-path", default=None, help="Model GGUF file path (defaults to Qwen2.5-Coder-1.5B in ~/Models)")
+    parser.add_argument("--cascade", action="store_true", help="Escalate to an explicitly configured second local model after a failed turn")
+    parser.add_argument("--fallback-model-path", help="GGUF path for the second local cascade tier (required with --cascade)")
+    parser.add_argument("--fallback-port", type=int, default=8081, help="llama-server port for --fallback-model-path")
     parser.add_argument("--port", type=int, default=8080)
     parser.add_argument("--timeout", type=float, default=15.0)
     parser.add_argument("--budget", type=int, default=2500)
@@ -213,12 +333,26 @@ def main():
 
     args = parser.parse_args()
 
+    model_cascade = None
+    if args.cascade:
+        if not args.fallback_model_path:
+            parser.error("--cascade requires --fallback-model-path; remote providers are not supported")
+        primary_model_path = args.model_path or os.environ.get(
+            "LOCAL_MODEL_PATH",
+            str(Path.home() / "Models" / "Qwen2.5-Coder-1.5B-Instruct-Q4_K_M.gguf"),
+        )
+        model_cascade = [
+            {"provider": "local", "model_path": primary_model_path, "port": args.port},
+            {"provider": "local", "model_path": args.fallback_model_path, "port": args.fallback_port},
+        ]
+
     res = execute_autofix_loop(
         task=args.task,
         target_file=args.target_file,
         test_cmd=args.test_cmd,
         max_turns=args.max_turns,
         model_path=args.model_path,
+        model_cascade=model_cascade,
         port=args.port,
         timeout=args.timeout,
         budget=args.budget

@@ -22,7 +22,7 @@ supersedes: []
 superseded_by: docs/execution/
 ---
 
-> **Unused reference.** Day-to-day development authority is [`docs/execution/`](../docs/execution/): [`milestones.md`](../docs/execution/milestones.md), [`spec.md`](../docs/execution/spec.md), [`technical.md`](../docs/execution/technical.md), [`backlog.md`](../docs/execution/backlog.md), [`tasks.md`](../docs/execution/tasks.md). This draft remains forensic lock at HEAD `66aa7a3c`. Do not treat it as the work board.
+> **Unused reference.** Day-to-day development authority is [`docs/execution/`](../docs/execution/): [`milestones.md`](../docs/execution/main/milestones.md), [`spec.md`](../docs/execution/main/spec.md), [`technical.md`](../docs/execution/main/technical.md), [`backlog.md`](../docs/execution/main/backlog.md), [`tasks.md`](../docs/execution/main/tasks.md). This draft remains forensic lock at HEAD `66aa7a3c`. Do not treat it as the work board.
 
 # AETHER SOTA Software-Engineering Agent Development Program
 
@@ -3300,11 +3300,11 @@ The following sources informed this plan but do not all carry equal authority.
 - [`README.md`](../README.md)
 - [`docs/execution/active.md`](../docs/execution/active.md)
   - **FACT (lock `66aa7a3c`):** this path is **missing**. Current execution files are `tasks.md`, `spec.md`, `milestones.md`, and `backlog.md`. Keep the link as the historical execution-board name from the `7e08462c` planning subject.
-- [`docs/execution/milestones.md`](../docs/execution/milestones.md)
-- [`docs/execution/backlog.md`](../docs/execution/backlog.md)
+- [`docs/execution/main/milestones.md`](../docs/execution/main/milestones.md)
+- [`docs/execution/main/backlog.md`](../docs/execution/main/backlog.md)
 - [`docs/execution/FEATURE_SPEC.md`](../docs/execution/FEATURE_SPEC.md)
-  - **FACT (lock `66aa7a3c`):** the current delta-contract file is [`docs/execution/spec.md`](../docs/execution/spec.md). Keep the `FEATURE_SPEC.md` link; it is the historical name used throughout this draft and in B/v2. Do not treat the missing filename as authorization to invent a parallel spec.
-- [`docs/execution/tasks.md`](../docs/execution/tasks.md)
+  - **FACT (lock `66aa7a3c`):** the current delta-contract file is [`docs/execution/main/spec.md`](../docs/execution/main/spec.md). Keep the `FEATURE_SPEC.md` link; it is the historical name used throughout this draft and in B/v2. Do not treat the missing filename as authorization to invent a parallel spec.
+- [`docs/execution/main/tasks.md`](../docs/execution/main/tasks.md)
 - [`docs/backend/architecture/agency.md`](../docs/backend/architecture/agency.md)
 - [`docs/backend/architecture/runtime-execution.md`](../docs/backend/architecture/runtime-execution.md)
 - [`docs/backend/architecture/delegation-topology.md`](../docs/backend/architecture/delegation-topology.md)

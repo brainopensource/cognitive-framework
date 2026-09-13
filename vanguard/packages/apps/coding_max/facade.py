@@ -7,55 +7,36 @@ selection, effect mediation, persistence, and recovery.
 
 from __future__ import annotations
 
-import importlib.util
-import sys
 from pathlib import Path
 from typing import Any
 
+from ...runtime import pack_catalog
 from ...runtime.app_service import ApplicationService
+from ...runtime.pack_catalog import InvalidPreset
 from ...runtime.results import CostResult, EvidenceResult, RunResult, StatusResult
 
 __all__ = ["CodingMax", "CodingMaxFacade", "InvalidPreset"]
 
-_PACK_LOAD = None
 
+class _CatalogPresets:
+    """``PRESETS`` on the class *and* on an instance, read from the catalog.
 
-class InvalidPreset(ValueError):
-    """The caller requested a preset outside the frozen Coding Max catalog."""
+    T-102. The names are a projection of ``presets.json``, resolved lazily so
+    importing the facade does not compile the pack. This class holds no second
+    list of its own.
+    """
 
-
-def _pack_loader() -> Any:
-    """Load ``packs/code-default/load.py`` — the catalog compiler."""
-    global _PACK_LOAD
-    if _PACK_LOAD is None:
-        path = Path(__file__).resolve().parents[4] / "packs" / "code-default" / "load.py"
-        spec = importlib.util.spec_from_file_location("code_default_load", path)
-        if spec is None or spec.loader is None:
-            raise ImportError(f"cannot load preset catalog from {path}")
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[spec.name] = module
-        spec.loader.exec_module(module)
-        _PACK_LOAD = module
-    return _PACK_LOAD
+    def __get__(self, instance: object, owner: type | None = None) -> tuple[str, ...]:
+        return pack_catalog.preset_names()
 
 
 class CodingMaxFacade:
-    PRESETS = ("fast", "balanced", "max")
+    """Request/result ergonomics only. Every decision below is the runtime's."""
+
+    PRESETS = _CatalogPresets()
 
     def __init__(self, workspace: str | Path | None = None, *, service: ApplicationService | None = None) -> None:
         self.service = service or ApplicationService(workspace=workspace)
-
-    @classmethod
-    def _validate_preset(cls, preset: str) -> str:
-        if preset not in cls.PRESETS:
-            raise InvalidPreset(f"unknown Coding Max preset {preset!r}")
-        return preset
-
-    @staticmethod
-    def _manifest(preset: str) -> Path:
-        from importlib.resources import files
-        return Path(str(files("vanguard.packages.agency").joinpath(
-            "manifests", f"vg-code-{preset}", "manifest.json")))
 
     def run(
         self, brief: str, *, preset: str = "balanced", profile_id: str = "local",
@@ -64,14 +45,15 @@ class CodingMaxFacade:
         state_dir: str | Path | None = None, interactive: bool = True,
         max_turns: int | None = None,
     ) -> RunResult:
-        chosen = self._validate_preset(preset)
-        loader = _pack_loader()
-        policy = loader.resolve_preset_policy(chosen)
         # Declared catalog stays on the composed policy. An explicit
-        # ``max_turns`` only attenuates the loop bound.
-        turns = loader.effective_limit(policy.turns, max_turns)
+        # ``max_turns`` only attenuates the loop bound. Both the allowlist and
+        # the attenuation rule live in ``pack_catalog``; this facade owns
+        # neither, so a CLI/API/facade call with the same preset cannot resolve
+        # a different manifest or a different ceiling.
+        manifest = pack_catalog.preset_manifest_path(preset)
+        turns = pack_catalog.turn_ceiling(preset, max_turns)
         return self.service.run(
-            brief=brief, manifest_path=self._manifest(chosen), profile_id=profile_id,
+            brief=brief, manifest_path=manifest, profile_id=profile_id,
             run_id=run_id, model=model, model_port=model_port, planner_model=planner_model, state_dir=state_dir,
             interactive=interactive, max_turns=turns,
         )

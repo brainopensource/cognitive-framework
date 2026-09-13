@@ -1,0 +1,66 @@
+{
+  "challengeId": "bench_single_2K_tier-1_calculator",
+  "tier": "tier-1",
+  "scope": "single",
+  "contextBracket": "2K",
+  "preset": "vg-code-balanced",
+  "model": "local-model",
+  "mode": "ollama",
+  "status": "UNDETERMINABLE",
+  "disposition": "undeterminable",
+  "attribution": "HARNESS_ERROR",
+  "turns": 4,
+  "promptTokens": 7401,
+  "completionTokens": 1455,
+  "totalTokens": 8856,
+  "costUsd": 0.0,
+  "durationSeconds": 8.8,
+  "changedFiles": [],
+  "diffPatch": "",
+  "oracle": {
+    "passed": false,
+    "exitCode": 1,
+    "stdout": "",
+    "stderr": "test_calc (__main__.TestCalc.test_calc) ... FAIL\n\n======================================================================\nFAIL: test_calc (__main__.TestCalc.test_calc)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/baac/challenges/tier-1/bench_single_2K_tier-1_calculator/oracle/verify.py\", line 8, in test_calc\n    self.assertEqual(calculate_value(2, 3), 15)\nAssertionError: 8 != 15\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\n",
+    "durationSeconds": 0.034,
+    "error": "test_calc (__main__.TestCalc.test_calc) ... FAIL\n\n======================================================================\nFAIL: test_calc (__main__.TestCalc.test_calc)\n---------------------------------",
+    "assertionCount": 1,
+    "failingAssertions": [
+      "test_calc",
+      "(failures=1)"
+    ]
+  },
+  "aiJudgeScore": null,
+  "diagnosis": "test_calc (__main__.TestCalc.test_calc) ... FAIL\n\n======================================================================\nFAIL: test_calc (__main__.TestCalc.test_calc)\n---------------------------------",
+  "metadata": {
+    "id": "bench_single_2K_tier-1_calculator",
+    "name": "Single-File Formula Repair",
+    "scope": "single",
+    "context_bracket": "2K",
+    "tier": "tier-1",
+    "difficulty": 1,
+    "timeout_seconds": 35,
+    "entrypoint": "src/main.py",
+    "eval_type": "oracle",
+    "tags": [
+      "math",
+      "single_file",
+      "formula"
+    ],
+    "metadata": {
+      "schema": "aether.baac.challenge/1"
+    },
+    "cli_args": {
+      "command": "run",
+      "preset": "vg-code-balanced",
+      "mode": "ollama",
+      "model": "local-model",
+      "tier": "all",
+      "single": "bench_single_2K_tier-1_calculator",
+      "max_turns": 4,
+      "max_requests": 40,
+      "budget": 0.1,
+      "keep_scratch": false
+    }
+  }
+}

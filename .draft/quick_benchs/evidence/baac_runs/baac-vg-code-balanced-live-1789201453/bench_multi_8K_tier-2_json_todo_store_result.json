@@ -1,0 +1,66 @@
+{
+  "challengeId": "bench_multi_8K_tier-2_json_todo_store",
+  "tier": "tier-2",
+  "scope": "multi",
+  "contextBracket": "8K",
+  "preset": "vg-code-balanced",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "mode": "live",
+  "status": "UNDETERMINABLE",
+  "disposition": "undeterminable",
+  "attribution": "HARNESS_ERROR",
+  "turns": 8,
+  "promptTokens": 11861,
+  "completionTokens": 1781,
+  "totalTokens": 13642,
+  "costUsd": 0.000306,
+  "durationSeconds": 11.34,
+  "changedFiles": [],
+  "diffPatch": "",
+  "oracle": {
+    "passed": false,
+    "exitCode": 1,
+    "stdout": "",
+    "stderr": "test_todo (__main__.TestTodo.test_todo) ... ERROR\n\n======================================================================\nERROR: test_todo (__main__.TestTodo.test_todo)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/baac/challenges/tier-2/bench_multi_8K_tier-2_json_todo_store/oracle/verify.py\", line 9, in test_todo\n    store = TodoStore(tmp.name)\n            ^^^^^^^^^^^^^^^^^^^\nTypeError: TodoStore() takes no arguments\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (errors=1)\n",
+    "durationSeconds": 0.033,
+    "error": "test_todo (__main__.TestTodo.test_todo) ... ERROR\n\n======================================================================\nERROR: test_todo (__main__.TestTodo.test_todo)\n-------------------------------",
+    "assertionCount": 1,
+    "failingAssertions": [
+      "test_todo",
+      "(errors=1)"
+    ]
+  },
+  "aiJudgeScore": null,
+  "diagnosis": "test_todo (__main__.TestTodo.test_todo) ... ERROR\n\n======================================================================\nERROR: test_todo (__main__.TestTodo.test_todo)\n-------------------------------",
+  "metadata": {
+    "id": "bench_multi_8K_tier-2_json_todo_store",
+    "name": "JSON-Backed Todo Store",
+    "scope": "multi",
+    "context_bracket": "8K",
+    "tier": "tier-2",
+    "difficulty": 2,
+    "timeout_seconds": 35,
+    "entrypoint": "src/main.py",
+    "eval_type": "oracle",
+    "tags": [
+      "storage",
+      "json",
+      "multi_file"
+    ],
+    "metadata": {
+      "schema": "aether.baac.challenge/1"
+    },
+    "cli_args": {
+      "command": "run",
+      "preset": "vg-code-balanced",
+      "mode": "live",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "tier": "tier-2",
+      "single": null,
+      "max_turns": 8,
+      "max_requests": 70,
+      "budget": 0.05,
+      "keep_scratch": false
+    }
+  }
+}

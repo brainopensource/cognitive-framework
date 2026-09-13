@@ -118,6 +118,16 @@ class LamModelAdapter:
             "pricing_known": True,
             "usd_micros": 0,
         }
+        # LAM scenarios encode their terminal turn as a tool call so the mock
+        # protocol can count it deterministically.  A generic caller may not
+        # advertise an explicit finish schema, however.  In that case keep the
+        # completion as provider text and let the shared translator produce its
+        # ordinary generic finish proposal; do not invent ``agency.finish``.
+        # When a pack does advertise that schema, preserve the call so its
+        # required arguments are validated by the canonical translator.
+        if (len(calls) == 1 and calls[0].get("name") == "finish"
+                and not _declares_finish(tools)):
+            raw_proposal["toolCalls"] = []
         return ProposalTranslator.translate(
             raw_proposal, tool_schemas=tools, aliases=_DEFAULT_LAM_ALIASES,
             capabilities=self._capabilities)
@@ -136,8 +146,14 @@ def _messages_from_context(context: ContextBundle) -> list[dict[str, str]]:
             fragments = layer.get("fragments")
             if role == "tool" and isinstance(fragments, Sequence):
                 for fragment in fragments:
+                    label = str(fragment.get("label", "")) if isinstance(fragment, Mapping) else ""
                     if (isinstance(fragment, Mapping)
-                            and not str(fragment.get("label", "")).startswith("tool-call-")):
+                            and not label.startswith("tool-call-")
+                            # Goal echo is a user instruction stored in L5 for
+                            # context compaction, not a completed tool call.
+                            # Treating it as one advanced a LAM scenario from
+                            # read directly to patch without a receipt.
+                            and label != "goal-echo"):
                         messages.append({"role": "tool", "content": str(fragment.get("content", ""))})
                 continue
             messages.append({"role": role, "content": str(layer.get("content", ""))})
@@ -171,3 +187,12 @@ def _normalise_capabilities(
         if isinstance(selector, Mapping) and isinstance(item.get("verb"), str):
             rows.append({"verb": item["verb"], "selector": dict(selector)})
     return tuple(rows)
+
+
+def _declares_finish(tools: Sequence[Mapping[str, Any]]) -> bool:
+    """Whether the caller supplied a manifest-owned finish tool schema."""
+    return any(
+        isinstance(tool, Mapping)
+        and (tool.get("verb") == "agency.finish" or tool.get("name") == "finish")
+        for tool in tools
+    )

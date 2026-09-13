@@ -44,6 +44,12 @@ class MockFailingModel:
         return Result.fail("instrument_error", "synthetic provider timeout")
 
 
+class MockAbstainModel:
+    def propose(self, view: Any, tools: Any, sampling: Any) -> Any:
+        from vanguard.packages.ports.event_store import Result
+        return Result.success({"kind": "abstain", "note": "child refused the task"})
+
+
 class TestEpisodeEngineSpawn(unittest.TestCase):
     def setUp(self) -> None:
         self.clock = MockClock()
@@ -223,6 +229,30 @@ class TestEpisodeEngineSpawn(unittest.TestCase):
         )
         self.assertFalse(result.ok)
         self.assertEqual(result.terminal, RunTermination.INSTRUMENT_ERROR)
+
+    def test_abstained_child_is_not_ok(self) -> None:
+        """An ABSTAINED child is a non-success terminal; ok must stay False."""
+        child_scope = Scope(
+            actions=frozenset({"fs.read"}),
+            resources=({"kind": "fs", "root": "/workspace", "paths": ["/workspace"]},),
+            constraints=Constraints(
+                expires_at="2026-08-17T00:00:00Z",
+                max_uses=5,
+                budget_usd_micros=50_000,
+                max_depth=3,
+            ),
+        )
+        result = self.parent_engine.spawn(
+            child_scope=child_scope,
+            brief="refusing child",
+            episode_id="ep-child-abstain",
+            run_id="run-1",
+            principal="child-agent",
+            model=MockAbstainModel(),
+        )
+        self.assertFalse(result.ok)
+        self.assertEqual(result.terminal, RunTermination.ABSTAINED)
+        self.assertNotEqual(result.terminal, RunTermination.COMPLETED)
 
     def test_workspace_destroyed_in_finally_including_on_failure(self) -> None:
         """Per-branch workspace destroyed in finally (N-16)."""

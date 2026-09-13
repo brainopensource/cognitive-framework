@@ -1,0 +1,221 @@
+{
+  "runId": "baac-vg-code-balanced-live-1789201371",
+  "timestamp": "2026-09-12T08:22:51Z",
+  "preset": "vg-code-balanced",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "mode": "live",
+  "metadata": {},
+  "summary": {
+    "totalChallenges": 3,
+    "passedCount": 3,
+    "overallPassRatePct": 100.0,
+    "totalTokens": 37449,
+    "totalCostUsd": 0.001005,
+    "totalDurationSeconds": 61.11,
+    "attribution": {
+      "PASS": 3,
+      "LLM_COGNITIVE_ERROR": 0,
+      "HARNESS_ERROR": 0,
+      "BUDGET_EXHAUSTED": 0,
+      "DATASET_INVALID": 0
+    }
+  },
+  "results": [
+    {
+      "challengeId": "bench_single_2K_tier-1_calculator",
+      "tier": "tier-1",
+      "scope": "single",
+      "contextBracket": "2K",
+      "preset": "vg-code-balanced",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "mode": "live",
+      "status": "PASS",
+      "disposition": "passed",
+      "attribution": "PASS",
+      "turns": 8,
+      "promptTokens": 11688,
+      "completionTokens": 1284,
+      "totalTokens": 12972,
+      "costUsd": 0.000406,
+      "durationSeconds": 24.54,
+      "changedFiles": [
+        "src/calculator.py",
+        "verify_fix.py"
+      ],
+      "diffPatch": "--- a/calculator.py\n+++ b/calculator.py\n@@ -1,3 +1,3 @@\n def calculate_value(A: float, B: float) -> float:\n-    resultado = (A + B) + B\n+    resultado = (A + B) * B\n     return resultado\n",
+      "oracle": {
+        "passed": true,
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_calc (__main__.TestCalc.test_calc) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+        "durationSeconds": 0.034,
+        "error": null,
+        "assertionCount": 1,
+        "failingAssertions": []
+      },
+      "aiJudgeScore": null,
+      "diagnosis": "All falsifiers green",
+      "metadata": {
+        "id": "bench_single_2K_tier-1_calculator",
+        "name": "Single-File Formula Repair",
+        "scope": "single",
+        "context_bracket": "2K",
+        "tier": "tier-1",
+        "difficulty": 1,
+        "timeout_seconds": 35,
+        "entrypoint": "src/main.py",
+        "eval_type": "oracle",
+        "tags": [
+          "math",
+          "single_file",
+          "formula"
+        ],
+        "metadata": {
+          "schema": "aether.baac.challenge/1"
+        },
+        "cli_args": {
+          "command": "run",
+          "preset": "vg-code-balanced",
+          "mode": "live",
+          "model": "deepseek/deepseek-v4-flash-0731",
+          "tier": "tier-1",
+          "single": null,
+          "max_turns": 8,
+          "max_requests": 80,
+          "budget": 0.07,
+          "keep_scratch": false
+        }
+      }
+    },
+    {
+      "challengeId": "bench_single_2K_tier-1_fib_cli",
+      "tier": "tier-1",
+      "scope": "single",
+      "contextBracket": "2K",
+      "preset": "vg-code-balanced",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "mode": "live",
+      "status": "PASS",
+      "disposition": "passed",
+      "attribution": "PASS",
+      "turns": 8,
+      "promptTokens": 11142,
+      "completionTokens": 1109,
+      "totalTokens": 12251,
+      "costUsd": 0.000248,
+      "durationSeconds": 12.04,
+      "changedFiles": [
+        "src/fib.py"
+      ],
+      "diffPatch": "--- a/fib.py\n+++ b/fib.py\n@@ -1,2 +1,22 @@\n+import argparse\n+\n+\n def fib(n: int) -> int:\n-    pass\n+    \"\"\"Return the n-th Fibonacci number (0-based: fib(0) == 0, fib(1) == 1).\"\"\"\n+    if n < 0:\n+        raise ValueError(\"n must be non-negative\")\n+    a, b = 0, 1\n+    for _ in range(n):\n+        a, b = b, a + b\n+    return a\n+\n+\n+def main() -> None:\n+    parser = argparse.ArgumentParser(description=\"Compute the n-th Fibonacci number.\")\n+    parser.add_argument(\"--n\", type=int, required=True, help=\"Non-negative index n\")\n+    args = parser.parse_args()\n+    print(fib(args.n))\n+\n+\n+if __name__ == \"__main__\":\n+    main()",
+      "oracle": {
+        "passed": true,
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_fib (__main__.TestFib.test_fib) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+        "durationSeconds": 0.033,
+        "error": null,
+        "assertionCount": 1,
+        "failingAssertions": []
+      },
+      "aiJudgeScore": null,
+      "diagnosis": "All falsifiers green",
+      "metadata": {
+        "id": "bench_single_2K_tier-1_fib_cli",
+        "name": "Fibonacci CLI and Pure Function",
+        "scope": "single",
+        "context_bracket": "2K",
+        "tier": "tier-1",
+        "difficulty": 1,
+        "timeout_seconds": 35,
+        "entrypoint": "src/main.py",
+        "eval_type": "oracle",
+        "tags": [
+          "math",
+          "cli",
+          "basics"
+        ],
+        "metadata": {
+          "schema": "aether.baac.challenge/1"
+        },
+        "cli_args": {
+          "command": "run",
+          "preset": "vg-code-balanced",
+          "mode": "live",
+          "model": "deepseek/deepseek-v4-flash-0731",
+          "tier": "tier-1",
+          "single": null,
+          "max_turns": 8,
+          "max_requests": 80,
+          "budget": 0.07,
+          "keep_scratch": false
+        }
+      }
+    },
+    {
+      "challengeId": "bench_single_2K_tier-1_string_dedupe",
+      "tier": "tier-1",
+      "scope": "single",
+      "contextBracket": "2K",
+      "preset": "vg-code-balanced",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "mode": "live",
+      "status": "PASS",
+      "disposition": "passed",
+      "attribution": "PASS",
+      "turns": 8,
+      "promptTokens": 11175,
+      "completionTokens": 1051,
+      "totalTokens": 12226,
+      "costUsd": 0.000351,
+      "durationSeconds": 24.53,
+      "changedFiles": [
+        "src/dedupe.py"
+      ],
+      "diffPatch": "--- a/dedupe.py\n+++ b/dedupe.py\n@@ -1,2 +1,8 @@\n def remove_consecutive_duplicates(s: str) -> str:\n-    pass\n+    result = []\n+    prev = None\n+    for ch in s:\n+        if ch != prev:\n+            result.append(ch)\n+            prev = ch\n+    return \"\".join(result)",
+      "oracle": {
+        "passed": true,
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": "test_dedupe (__main__.TestDedupe.test_dedupe) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+        "durationSeconds": 0.032,
+        "error": null,
+        "assertionCount": 1,
+        "failingAssertions": []
+      },
+      "aiJudgeScore": null,
+      "diagnosis": "All falsifiers green",
+      "metadata": {
+        "id": "bench_single_2K_tier-1_string_dedupe",
+        "name": "Consecutive String Deduplication",
+        "scope": "single",
+        "context_bracket": "2K",
+        "tier": "tier-1",
+        "difficulty": 1,
+        "timeout_seconds": 35,
+        "entrypoint": "src/main.py",
+        "eval_type": "oracle",
+        "tags": [
+          "string",
+          "algorithms",
+          "single_file"
+        ],
+        "metadata": {
+          "schema": "aether.baac.challenge/1"
+        },
+        "cli_args": {
+          "command": "run",
+          "preset": "vg-code-balanced",
+          "mode": "live",
+          "model": "deepseek/deepseek-v4-flash-0731",
+          "tier": "tier-1",
+          "single": null,
+          "max_turns": 8,
+          "max_requests": 80,
+          "budget": 0.07,
+          "keep_scratch": false
+        }
+      }
+    }
+  ]
+}

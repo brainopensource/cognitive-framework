@@ -8,9 +8,9 @@ owner: repository-governance
 canonical_for:
   - repository-backlog
   - feature-lifecycle-tracking
-version: "0.9.3"
-last_verified: 2026-09-07
-lock_head: "3daa487c0be8"
+version: "0.9.5"
+last_verified: 2026-09-12
+lock_head: "bf56eea9"
 audience:
   - contributor
   - maintainer
@@ -42,11 +42,13 @@ Every item in this backlog is managed through a strict predicate-driven lifecycl
 
 ```mermaid
 graph LR
-    PROPOSED["PROPOSED<br/>(Candidate Idea / Hypothesis)"] -->|Architectural Review| APPROVED["APPROVED<br/>(Spec Ready / Awaiting WIP)"]
-    APPROVED -->|Lane Capacity Available| IN_PROGRESS["IN_PROGRESS<br/>(Checked in tasks.md)"]
+    PROPOSED["PROPOSED<br/>(Candidate Idea / Hypothesis)"] -->|Predecessors accepted and scope ratified| APPROVED["APPROVED<br/>(Spec Ready / Awaiting Work)"]
+    APPROVED -->|Task ownership recorded| IN_PROGRESS["IN_PROGRESS<br/>(Implementation Active)"]
     IN_PROGRESS -->|Evaluator Audit| REVIEWING["REVIEWING<br/>(Independent Verification)"]
     REVIEWING -->|Receipt Accepted| DONE["DONE<br/>(Verified & Merged)"]
     IN_PROGRESS -->|Unresolved Dependency| BLOCKED["BLOCKED<br/>(Prerequisite Missing)"]
+    APPROVED -->|Prerequisite unavailable| BLOCKED
+    BLOCKED -->|Dependency resolved and scope revalidated| APPROVED
     PROPOSED -->|Negative ROI / Lift| DEFERRED["DEFERRED<br/>(Rejected / Archived)"]
 ```
 
@@ -61,41 +63,173 @@ graph LR
   exact-subject falsifier that invalidates carrying its old closure forward.
   The earlier receipt remains historical evidence for its own subject.
 
+Lifecycle applies to a **package scope and evidence subject**, not to every future
+use of its ID. `ACCEPTED` is the receipt disposition that supports `DONE`; it is
+not a separate package state. A `DONE` mechanism can have a `PROPOSED` extension
+without being reopened. `APPROVED` requires the applicable predecessor gates and
+implementation scope to be ratified; approval of this inventory alone does not
+approve its proposed packages. `BLOCKED` names a missing prerequisite for already
+authorized work; an unapproved extension stays `PROPOSED` with its blockers named.
+
+`REVIEWING`, `DEFERRED` and `REOPENED` retain the meanings above. Historical
+`PARTIAL` / `TECHNICAL SLICE DONE` qualifiers describe delivered scope, not full
+acceptance; `DEPRECATED` marks retired tooling. They do not silently advance a
+package into `DONE`. Status changes require a scoped receipt, acceptance decision
+and applicable subject identity; mechanism tests alone do not close empirical gates.
+
 ---
 
 ## 2. Capability Family Backlog
+
+### Leadership priority and evidence reconciliation (2026-09-12)
+
+This decision applies to remaining scope, not historical receipts. It is ratified
+under the current leadership delegation and [RUN-1](spec.md#run-1-leadership-execution-decision-2026-09-12).
+Priority chooses the next eligible work; only task `requires:` edges authorize
+execution. Documentation commits and proposed test commands do not prove acceptance.
+
+| Priority / package | Disposition and planning depth | Next deliverable |
+|---|---|---|
+| P0 — EXP-01 / CONTROL | APPROVED bounded control-hardening and corpus/metric work; detailed tasks now | Publication-level freeze/evidence validation, finite L2 corpus, prerequisite reconciliation and a frozen canary disposition. No new agent capability or paid run authorized here. |
+| Preservation — GATE-01 / CTX-01 / REC-01 | DONE on accepted `2989d57d` scope; reuse and targeted regression evidence | Do not rebuild these packages. Changes affecting their claims require successor qualification. |
+| P1 — MEM-01 / MEM-02 / T-56 | PROPOSED product qualification; first post-control package refinement | Combine catalog invocation, durable authorized retrieval, revocation and signed rollback into one qualification scope; MEM-02 separately measures lift. Existing APIs first, no new memory core. |
+| P2 — CAS-01 / DEL-01 extension | PROPOSED conditional branches; retain outcomes and fault model, defer exact new modules | Use control failure attribution to select recoverable workspace or one advisory reader. Mutating specialists require CAS; advisory readers do not. |
+| P2 — EVAL-02 | PROPOSED independent qualification branch; narrow initial implementation to Verified | Preserve Aider as follow-on scope. Greenfield checks stay separate and are not blocked by benchmark adapters. No official score or publication inferred. |
+| Later — OCT-03 / EXP-02 advanced treatments | DEFERRED implementation selection; existing proposal contracts retained | Campaign requires accepted CAS/delegation and demonstrated multi-episode demand. MCTS, RTV and learned routing require measured need and a separately admitted experiment. |
+| Rejected direction | No implementation authorization | Vote-based merge/acceptance, parallel core ledgers/governors/episode engines, automatic enabling from focused tests, and compulsory new packages copied from reference pseudocode. |
+
+No percentage-complete estimates are used. The inspected source at `001911e3`
+supports the following inventory; test files are falsifier locations, not test
+results from this documentation review.
+
+| Capability | Observed state and evidence | Remaining qualification |
+|---|---|---|
+| Context, compaction and deterministic recovery | Built in `agency/context/compiler.py` and `agency/episode/protocol_recovery.py`; accepted NT-1 integration on its recorded subject | Preserve on the control subject; fixture preservation does not prove model quality. |
+| Search/index, ledger and editing | Built owners in `ports/index.py`, `runtime/ledger_emitter.py`, `adapters/environment/transaction.py`; broader product claims remain partial | End-to-end selected composition and current-subject evidence; transaction preflight is not durable workspace CAS. |
+| Child spawning and roles | Built `EpisodeEngine.spawn` and runtime delegation; specialist product qualification proposed | Aggregate restart/cancellation evidence and a measured advisory treatment. |
+| Memory and learning | Partial product capability: `ports/memory.py`, `runtime/memory.py`, `adapters/stores/memory_engine.py`, `runtime/governance/learning.py` | Public composition, authorization/revocation across restart, independent empirical M-8 receipt. |
+| Skill library | Built static index/catalog in `runtime/skill_index.py` / `agent_plugins.py`; `SkillLibrary` protocol; signed mechanisms in `runtime/skill_evaluation.py`. `skill_lifecycle.CompositionRegistry` is in-memory and refuses unsigned promotion/rollback | Durable product invocation and learned-skill lifecycle are not accepted. Reuse the durable governance owner, not the in-memory registry as persistence. Starting falsifiers: `test.runtime.test_w12_skills_and_sealed_spawn`, `test.falsifiers.test_m8_skill_lifecycle`, `test.adapters.test_durable_memory_port`. |
+| Campaign / MCTS / tournament | No accepted OCT-03 product implementation established; algorithm and task proposals exist | Deferred. Mechanism/proposal presence never authorizes a score or merge. |
+
+The historical family tables below retain their original subject-specific
+dispositions. Where they say APPROVED for a broader or older mechanism, that does
+not supersede this remaining-work selection. A proposed extension is not READY
+until T-129 records its complete package admission; ordinary implementation
+choices then stay with its owner under RUN-04.
 
 ### 2.0 Approved near-term package deltas (NT-1)
 
 This is package scope/lifecycle, not a second task queue. NT-1 in [`spec.md`](spec.md#nt-1-near-term-baseline-context-cache-and-recovery-delta) promotes the core reference decisions into canonical contracts. T-98–T-111 and revised T-77 own work in [`tasks.md`](tasks.md#near-term-ownership-and-ready-work). Stream A/B/C supersede historical lane labels for this scope only. Approval is not implementation or milestone acceptance.
 
+Evidence integrity and required profile safety are core qualification obligations.
+
+Control uses truthful projection, canonical state/recovery, nonmutating measurement,
+existing patch safety, compaction and restart. New CAS, specialist, campaign,
+learning and benchmark capabilities are post-control. M-8 memory acceptance still
+precedes M-9 beta; deployment-profile safety cannot be waived by this classification.
+
 | Package | Approved scope and owner | Existing capability relationship | Acceptance / lifecycle |
 |---|---|---|---|
-| **GATE-01** | Nonmutating runner, complete collection, current failure inventory, dead-path cleanup and integrated gate; C coordinates, A/B fix their owned surfaces | Additive baseline qualification; preserves MS-INSTRUMENT's historical subject. T-98/T-101/T-108/T-109/T-111 | `APPROVED`; MS-BASELINE requires exact-subject complete Python/TS/recipe receipts, no silent falsifier loss and unchanged contributor state. |
-| **CTX-01** | Canonical working-state snapshots, bounded existing compiler, provider-aware counting/cache telemetry and 100+ turn deterministic preservation; B values/compiler, A codecs/runtime | Successor integration of CMX-03/CMX-10B/CMX-11, not duplicate memory or compiler. T-100/T-104/T-105/T-107/T-110; T-77 moved here from IDX-01 | `APPROVED`; MS-CONTEXT after MS-BASELINE. No new index backend or vector store; cache hits are measured, not guaranteed by fixtures. |
-| **REC-01** | Bounded semantic history, transport backoff, reground/replan/stop, durable decisions/deadlines; B policy, A bindings | Extends ProtocolRecoveryState and existing EpisodeEngine; T-106/T-107/T-110. T-80 consumes the core detector later | `APPROVED`; MS-CONTEXT. No consultation, routing expansion, specialist spawning or new retry loop. |
-| **INS-01 near-term delta** | Truthful terminal projection, thin facade, CLI help/flags/non-success exits; A | T-99/T-102 and active T-97 complete T-04/T-79/T-89 successors | `APPROVED` delta on existing in-progress package; no completed-without-evidence result through any product surface. |
-| **CMX-01 near-term delta** | Single preset catalog, normalized behavioral identity, declared versus effective budgets; C catalog, A consumers | T-103/T-102 integrate T-79; retain existing product ceilings | `APPROVED` delta; budget-only presets labeled honestly. Behavioral arm studies remain ARM-01/T-96 after control. |
+| **GATE-01** | Nonmutating runner, complete collection, current failure inventory, dead-path cleanup and integrated gate; C coordinates, A/B fix their owned surfaces | Additive baseline qualification; preserves MS-INSTRUMENT's historical subject. T-98/T-101/T-108/T-109/T-111 | `DONE`; receipt `ACCEPTED` on `2989d57d`. Exact-subject discovery and verify receipts close MS-BASELINE and reconcile MS-CONTEXT. |
+| **CTX-01** | Canonical working-state snapshots, bounded existing compiler, provider-aware counting/cache telemetry and 100+ turn deterministic preservation; B values/compiler, A codecs/runtime | Successor integration of CMX-03/CMX-10B/CMX-11, not duplicate memory or compiler. T-100/T-104/T-105/T-107/T-110; T-77 moved here from IDX-01 | `DONE`; receipt `ACCEPTED` on `2989d57d`. Component contracts and the 104-turn fresh-process qualification are green. No cache-hit or live-quality guarantee. |
+| **REC-01** | Bounded semantic history, transport backoff, reground/replan/stop, durable decisions/deadlines; B policy, A bindings | Extends ProtocolRecoveryState and existing EpisodeEngine; T-106/T-107/T-110. T-80 consumes the core detector later | `DONE` for core recovery; receipt `ACCEPTED` on `2989d57d`. Durable binding and fresh-process reconciliation pass. No consultation, authority expansion, specialist spawning or new retry loop. |
+| **INS-01 near-term delta** | Truthful terminal projection, thin facade, CLI help/flags/non-success exits; A | T-99/T-102/T-97 complete the NT-1 product-surface obligations without accepting broader control evidence | `DONE` for the NT-1 delta; no completed-without-evidence result through any product surface. T-89 remains a distinct MS-CONTROL measurement-path obligation. |
+| **CMX-01 near-term delta** | Single preset catalog, normalized behavioral identity, declared versus effective budgets; C catalog, A consumers | T-103/T-102 integrate the NT-1 catalog/facade obligation; retain existing product ceilings | `DONE` for the NT-1 delta; budget-only presets remain labeled honestly. T-79 retains its distinct MS-CONTROL acceptance obligation and ARM-01/T-96 stays post-control. |
+
+#### Near-term package delivery map
+
+This map records the accepted NT-1 handoffs on `2989d57d`; these are completed obligations, not a remaining queue. Checkbox status and execution order remain exclusively in `tasks.md`.
+
+| Deliverable | Package responsibility | Inputs already accepted | Output consumed by | Package done condition |
+|---|---|---|---|---|
+| T-109 | GATE-01 proves the repository can be measured without mutation or omission | T-97/T-98/T-99/T-101/T-102/T-103/T-108 | MS-BASELINE and T-107 | Complete clean-subject receipt accepted with zero failures/errors and all required runners executed. |
+| T-77 | CTX-01 completes stable-prefix, bounded receipt and goal-echo behavior | T-104 compiler and T-105 provider codec | T-110 | Existing compiler passes cache-breakpoint falsifier; cache use remains observed or null. |
+| T-107 | CTX-01/REC-01 binds typed state, selection and recovery through the one runtime ledger | T-100/T-104/T-105/T-106 plus MS-BASELINE | T-110 | Write-before-use ordering and cold replay pass event coverage and runtime resume falsifiers. |
+| T-110 | CTX-01/REC-01 qualifies integrated preservation under long deterministic execution | T-107 and T-77 | T-111 | 100+ turn uninterrupted/resumed semantic equivalence with no replay or false completion. |
+| T-111 | GATE-01 reconciles the final subject and guards control identity | T-109 and T-110 | MS-CONTEXT and T-26 | Full gate accepted; five execution files agree; exact unfrozen control candidate handed off. |
+
+Package boundaries are strict. CTX-01 owns context/state preservation, REC-01 owns deterministic recovery semantics, GATE-01 owns evidence integrity, and none of them owns benchmark-quality claims. Completion of these packages authorizes control preparation only. It does not accept the CONTROL package or any FH-1 proposal.
+
+The accepted delivery used A for runtime/product binding, B for context/recovery
+policy and C for evidence/catalog integration. Current file leases remain solely
+in `tasks.md`; those historical assignments do not reserve future work. T-111 is
+accepted and T-26 is ready for prerequisite audit, but remains `UNFROZEN`.
+T-51/T-52 and applicable T-79/T-89/T-92–T-95 evidence still require control-subject
+reconciliation. A hermetically ready mechanism is not a live score, T-26/T-27
+acceptance or an MS-CONTROL disposition.
 
 **Release dependency:** MS-BASELINE -> MS-CONTEXT -> new MS-CONTROL freeze/qualification. T-111 reconciles the integrated subject; T-26/T-27 retain their evidence obligations. M-8 empirical acceptance and M-9/M-10 authorization are unchanged. Existing DONE mechanisms retain their historical receipts; richer current product preservation needs the new gates.
 
-**Excluded from Iteration 1:** Part 3 CAS Tree/stage/transact promotion, journaled host export, delegate_readonly activation, advanced workspace-policy treatments, semantic memory learning, comparative model routing, new LDA/LSP backends and official benchmark/release execution. Their existing proposal packages remain recorded without new implementation authorization. Existing patch safety defects are remediation under T-108, not permission to build the CAS substrate.
+**Post-control scope:** CAS, specialist/campaign activation, governed learning,
+comparative routing and external benchmark claims require their named gates.
+Existing profile safety and evidence integrity remain mandatory. M-8 memory
+acceptance precedes M-9 beta. Historical Part 3 prototypes are design references,
+not authorizations to introduce new stores, ports or parallel policy engines.
 
 ### 2.0a Post-control capability packages (FH-1) [PROPOSAL]
 
 These packages extend existing owners and remain `PROPOSED`; they do not alter approved NT-1 work. Contracts: [spec FH-1](spec.md#fh-1-post-control-backend-horizon-proposal). Acceptance: [horizon gates](milestones.md#post-control-horizon-release-predicates-fh-1). The only work tree is [T-112–T-128](tasks.md#context-post-control-horizon-fh-1-proposal).
 
-| Package | Scope and existing ownership | Gate / work refinement |
-|---|---|---|
-| **CAS-01** | Extend transaction/environment adapters, blob storage and runtime emitter with canonical trees, isolated candidates, compare-and-append promotion, recovery, export and GC | MS-CAS; T-112–T-116 refine T-17/T-30/T-49. T-17's historical preflight guarantee is not durable CAS qualification. |
-| **DEL-01** | Existing spawn/child runtime and governor: bounded read-only specialists, idempotent dispatch and reconciled cancellation | MS-DELEGATION; T-117/T-118 refine T-29/T-34/T-53, preserve accepted M-6 subjects. |
-| **EXP-02** | Optional routing/recovery/specialist experiments; same budget and task conditions, no automatic treatment activation | MS-META/MS-SPECIALIST; T-119 refines T-28/T-29/T-30/T-50/T-80/T-96. |
-| **OCT-03 extension** | Minimal durable campaign client, dependency artifacts, owned integration and bounded replanning | MS-CAMPAIGN; T-120 refines T-31/T-54/T-34. T-55/HYDRA and full Octopus remain post-M-10 horizon, not default dependencies. |
-| **MEM-QUAL** | Existing memory/learning contracts: project-scoped lessons, revocation, independent promotion and measured lift | MS-MEMORY and M-8; T-121 refines T-32/T-56/T-57. No mandatory vector store. |
-| **EVAL-02** | Subject-bound external evaluator, Verified and Aider protocol adapters, distinct greenfield completeness corpus | MS-EVAL; T-122–T-125 refine T-51/T-58; reuse instrument and evaluator seams. DeepSWE T-33 stays separate. |
-| **REL-QUAL extension** | Frozen official runs, statistical comparison, independent evidence review and release claim reconciliation | MS-OFFICIAL/MS-SOTA; T-126–T-128 refine T-33/T-58/T-67 and SWE-P3–P5. No guaranteed score or professional-equivalence claim. |
+| Package / lifecycle | Bounded scope and owner | Upstream acceptance required | Output / downstream consumer |
+|---|---|---|---|
+| **CAS-01 — `PROPOSED`** | Domain tree/edit values; environment/store adapters capture and materialize immutable candidates; existing runtime emitter owns promotion. Includes recovery, journaled export and bounded GC. T-112–T-116 refine T-17/T-30/T-49. | MS-CONTROL; reviewed FH-1 contracts and implementation leaves. Historical T-17 preflight is a reuse seam, not CAS acceptance. | MS-CAS: one winning durable promotion, monotonic generation, lost-reply reconciliation, verified rollback or explicit export quarantine. Required by mutating specialists and OCT-03; no atomic-host-checkout claim. |
+| **DEL-01 extension — `PROPOSED`** | Existing agency spawn, child runtime and governor integration; bounded advisory readers, durable intent, sibling reservations, idempotent dispatch and cancellation reconciliation. T-117/T-118 refine T-29/T-34/T-53. | MS-CONTROL; reviewed FH-1 leaves. MS-CAS is additionally required for mutating workers, not for the initial read-only mechanism. | MS-DELEGATION: canonical lineage, attenuation and aggregate conservation across restart/unknown outcomes. Feeds EXP-02 specialist studies and OCT-03; does not establish useful specialist lift. Historical DEL-01 mechanism remains DONE. |
+| **EXP-02 — `PROPOSED`** | Optional pack/agency routing, recovery and specialist treatments; benchmark owners measure one declared change at fixed task membership and total budget. T-119 refines T-28/T-29/T-30/T-50/T-80/T-96. | MS-CONTROL; MS-DELEGATION for specialist arms; MS-CAS additionally for mutating arms. | MS-META/MS-SPECIALIST: accepted useful-lift or cost-saving/noninferiority evidence before enabling the measured treatment. Coordination, verification, retries and failures count toward cost. A basic campaign does not require positive specialist lift. |
+| **OCT-03 extension — `PROPOSED`** | Minimal durable campaign client above existing runtime; dependency artifacts, node reconciliation, parent-owned integration and bounded replanning. T-120 refines T-31/T-54/T-34. | MS-CAS and MS-DELEGATION, each downstream of MS-CONTROL; reviewed campaign leaves. | MS-CAMPAIGN: dependency readiness from accepted artifacts, restart without duplicate effects and exterior verification of the combined tree. Director has zero mutating verbs. Full OCT-01–OCT-04/HYDRA activation remains post-M-10. |
+| **MEM-01 qualification extension — `PROPOSED`** | Existing runtime memory/governance and store adapters: project-scoped versioned lessons, retrieval/cache revocation, separate generation/evaluation/promotion and rollback. `MEM-QUAL` is this scope's alias; T-121 refines T-32/T-56/T-57 with MEM-02 empirical evidence. | MS-CONTROL for FH-1 activation; applicable existing M-8 obligations and qualified empirical runner. No blanket CAS-01 or campaign dependency. | MS-MEMORY and M-8: authorization/revocation evidence, held-out lift >= 0.05 at p < 0.05 and executed rollback, independently accepted. Feeds M-9 readiness; does not require a vector store or permit learning from the evaluation holdout. |
+| **EVAL-02 — `PROPOSED`** | Benchmark protocol adapters and existing exterior evaluator seams; pinned SWE-bench Verified and Aider protocols, plus a separate greenfield completeness corpus. T-122–T-125 refine T-51/T-58. | MS-CONTROL; reviewed evaluator-separation, manifest and replay leaves. Optional CAS/delegation/memory gates apply only when those capabilities are included in the measured arm. | MS-EVAL qualifies immutable subject/evaluator separation, faithful reference replay and complete failure accounting. Feeds official runs; fixtures produce no live score. DeepSWE T-33 remains separate. |
+| **REL-QUAL extension — `PROPOSED`** | Benchmark/release owners bind official outputs, statistical comparison, independent review, migration/rollback and claims. T-126–T-128 refine T-33/T-58/T-67 and SWE-P3–P5. | MS-EVAL plus SWE-P4/P5 for official runs; MS-OFFICIAL for superiority claims; applicable M-8/M-9/M-10 predicates for release handoff. | Distinct MS-OFFICIAL, MS-SOTA and release-handoff evidence. A valid score does not prove superiority; no guaranteed score or professional-equivalence claim. |
 
-Advance packages from PROPOSED only after applicable predecessor acceptance and an implementation-ready leaf review. A valid negative experiment is retained as evidence and leaves its treatment disabled; protocol closure and positive capability acceptance are different dispositions. Larger tree stores, parallel writers, learned routers and semantic memory ranking require measured need and separately pinned treatments. Schema additions reuse existing ports unless an independently replaceable responsibility demonstrably lacks a contract.
+**Contract traceability (proposal-level).** One index only: it names where each
+package's candidate contracts and decomposition live, and duplicates neither. All
+rows are `PROPOSED`; none is a lease, and T-129 admission may change any of them.
+
+| Package | Candidate clauses in `spec.md` | Root candidate rows in `tasks.md` | Named candidate schemas |
+|---|---|---|---|
+| CAS-01 | FH-C01–FH-C11 | T-112a (tree values), then T-112b/T-113a | `aether.tree/1`, `aether.edit-set/1`, `aether.check-plan/1`, `aether.candidate-check/1`, `aether.promotion/1`, `aether.export-journal/1` |
+| DEL-01 | FH-D01–FH-D07 | T-117a (specialist wire), then T-117b | `aether.specialist-request/1`, `aether.specialist-findings/1`, `aether.delegation-settlement/1` |
+| OCT-03 | FH-D08–FH-D12 | T-120a, gated on T-117b | `aether.campaign-plan/1`, `aether.campaign-lease/1` |
+| MEM-01 | FH-M01–FH-M04 | T-121a (lesson values), then T-121b | `aether.lesson/1`, `aether.lesson-revocation/1`, `aether.retrieval-admission/1` |
+| EVAL-02 | FH-E01–FH-E04 | T-122a (manifest schemas), then T-122b | `aether.evaluation-manifest/1`, `aether.evaluation-attempt/1` |
+
+No schema above is registered, and no clause above is accepted law; FH-1.1–FH-1.8
+is proposed contract detail. Fail-closed outcomes are indexed in the FH-1.8 matrix.
+
+The earlier review order is superseded by the leadership priority table above.
+CAS, read-only delegation, memory and evaluation
+are conditional branches after MS-CONTROL. The applicable gate predicates,
+finite statistical stopping rules and invariant vetoes are owned by
+[`milestones.md`](milestones.md#post-control-horizon-release-predicates-fh-1).
+
+**Scope exclusions and reuse.** CTX-01 owns bounded working context; MEM-01 owns
+authorized durable learning. REC-01 owns deterministic recovery; EXP-02 owns new
+measured consultations/routing. DEL-01 owns child mechanics; OCT-03 owns campaign
+coordination; neither introduces a competing episode loop, ledger writer or
+budget accountant. CAS-01 extends the existing transaction/storage seams; memory
+registry compare-and-swap does not qualify workspace CAS. Planned kernel delta is
+zero, N-06 forbids runtime subprocess execution, and new public ports require an
+independently replaceable responsibility rather than a copied reference API.
+
+Existing grounding seams include
+[`ContextCompiler`](../../../vanguard/packages/agency/context/compiler.py),
+[`ProtocolRecoveryState`](../../../vanguard/packages/agency/episode/protocol_recovery.py),
+[`EpisodeEngine.spawn`](../../../vanguard/packages/agency/episode/engine.py),
+[`AtomicMultiFileTransactionManager`](../../../vanguard/packages/adapters/environment/transaction.py),
+[`LedgerEmitter`](../../../vanguard/packages/runtime/ledger_emitter.py), and
+[`DurableCompositionRegistry`](../../../vanguard/packages/runtime/governance/learning.py).
+These identify reuse owners, not proof that the proposed packages already exist.
+The [review series](../../reports/reviews/aether_v093_review/part4_roadmap_and_strategic_synthesis.md)
+and [auxiliary table](../../../.draft/temp_auxiliary_table.md) remain non-canonical
+planning inputs; their completion percentages and prototype names cannot advance
+these lifecycle states.
+
+Advance packages from PROPOSED only after applicable predecessor acceptance and
+T-129 package admission. This review defers implementation of OCT-03 and advanced
+EXP-02 treatments even after those predecessors; their rows retain proposal
+detail for possible later selection. A valid negative experiment retains evidence
+and leaves its treatment disabled. Larger stores, parallel writers, learned
+routers and semantic ranking require measured need and separately pinned treatments.
+Reuse existing ports unless a distinct responsibility demonstrably lacks a contract.
 
 ### 2.1 Substrate, Kernel & Event Sourcing (VISION.md §1–6)
 
@@ -110,7 +244,7 @@ Advance packages from PROPOSED only after applicable predecessor acceptance and 
 
 | ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Description & Acceptance Gate |
 |---|---|---|---|---|---|---|
-| **MEM-01** | Governed Memory & Rollback Mechanisms | `runtime` | Lane A | `REVIEWING` | M-8 | Authorization, recovery, and rollback receipts in `governance/learning.py`. |
+| **MEM-01** | Governed Memory & Rollback Mechanisms | `runtime` / stores | Lane A | `REVIEWING` (existing mechanisms); `PROPOSED` (FH-1 extension) | M-8 / MS-MEMORY | Existing authorization, promotion and rollback mechanisms do not close M-8. Qualification extension and dependencies are in §2.0a (`MEM-QUAL` alias); MEM-02 owns empirical proof. |
 | **MEM-02** | M-8 Empirical Held-Out Canary Proof | `benchmarks` | Lane B | `BLOCKED` (on REL-01R/REL-02R) | M-8 | Held-out real-model canary demonstrating $\ge 0.05$ lift without synthetic metrics after the runtime executor and successor canary are qualification-ready. |
 | **MEM-03** | Adaptive Strategy & Meta-Controller | `agency` / `runtime` | Lane A | `APPROVED` | M-6.5 | Higher-order policy adjusting strategy upon failure without modifying history. |
 | **MEM-04** | Trajectory-to-Skill Promotion Pipeline | `runtime` | Lane A | `PROPOSED` | M-8+ | Mining verified traces to propose reusable skills with explicit promotion receipts. |
@@ -119,7 +253,7 @@ Advance packages from PROPOSED only after applicable predecessor acceptance and 
 
 | ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Description & Acceptance Gate |
 |---|---|---|---|---|---|---|
-| **DEL-01** | Monotonic Capability Attenuation | `kernel` / `agency` | Lane A | `DONE` | M-6 | Recursive budget attenuation $\mathcal{A}(B_{\text{parent}}, B_{\text{child}})$ and child spawning. |
+| **DEL-01** | Monotonic Capability Attenuation | `kernel` / `agency`; extension in agency/runtime | Lane A | `DONE` (historical mechanism); `PROPOSED` (FH-1 extension) | M-6 / MS-DELEGATION | Preserve recursive attenuation and child-spawn receipts for their accepted subjects. The §2.0a extension qualifies advisory specialists and durable aggregate accounting after MS-CONTROL, with zero kernel delta; historical DONE does not activate it. |
 | **DEL-02** | Multi-Role Topology Declarations | `runtime` | Lane A | `APPROVED` | M-7 | Declarative multi-agent topologies (debate, critic, swarm) through single runtime. |
 | **DEL-03** | Hardware-Aware Swarm Scheduler | `runtime` | Lane A | `PROPOSED` | M-7+ | VRAM drain scheduling between Architect (DeepSeek) and Worker (Qwen) models. |
 
@@ -139,10 +273,10 @@ Advance packages from PROPOSED only after applicable predecessor acceptance and 
 
 | ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Description & Acceptance Gate |
 |---|---|---|---|---|---|---|
-| **DOC-01** | MkDocs + Native Mermaid + Strict Gate | `docs` | Lane A | `DONE` | P0 | `pymdownx.superfences` Mermaid rendering and MkDocs strict build. |
+| **DOC-01** | MkDocs HTML Generator (Deprecated) | `docs` | Lane A | `DEPRECATED` | P0 | Deprecated in favor of raw Markdown docs and fast AST/JSONL knowledge retrieval. |
 | **DOC-02** | Deterministic Knowledge Base (.jsonl) | `tools` | Lane A | `DONE` | P0 | Machine-generated `catalog`, `code-map`, `symbols`, and `ownership` files. |
 | **DOC-03** | Structured RAG V0 (Deterministic) | `tools` | Lane A | `DONE` | P0 | Exact-ID and authority-weighted context query tool (`tools/docs_rag_v0.py`). |
-| **DOC-04** | Griffe & mkdocstrings Python API Docs | `docs` / `tools` | Lane A | `APPROVED` | P1 | Auto-generated API documentation for ports and public runtime contracts. |
+| **DOC-04** | Griffe & mkdocstrings API Docs (Deprecated) | `docs` / `tools` | Lane A | `DEPRECATED` | P1 | Deprecated in favor of LDA AST indexing and symbols knowledge base. |
 | **DOC-05** | AST-Grep Structural Repository Indexer | `tools` | Lane B | `PROPOSED` | P1 | Structural AST queries for callers, adapters, and deprecated APIs. |
 | **DOC-06** | SCIP Language-Agnostic Symbol Index | `tools` | Lane B | `PROPOSED` | P1 | SCIP indexer generating full cross-language symbol maps for Python & TS. |
 
@@ -170,7 +304,7 @@ Advance packages from PROPOSED only after applicable predecessor acceptance and 
 | **CLI-06** | `vg-tutor` (Evidence-Graph Codebase Guide) | `packs/tutor` | Lane A | `DONE` | M-5a | Dynamic AST traversal $\to$ Socratic interactive codebase explanations with clickable proofs. |
 | **CLI-07** | `vg-research` (Bounded Technical RFC & Web Corroborator)| `packs/research` | Lane A | `PROPOSED` | M-9 | Egress-controlled technical search $\to$ SSRF-safe fetch $\to$ Triangulated RFC generation. |
 | **CLI-08** | `vg-rlvr` (Verifiable Trajectory & Dataset Generator) | `domain/evidence` | Lane B | `PROPOSED` | M-8+ | Mining verified traces (State, Action, Reward, Trace) for RL fine-tuning. |
-| **TUI-01** | `aether` Coding-Agent Terminal (unify `clients/tui` + `clients/cli/src/tui` onto one `@aether/tui-core`-driven cell renderer per the OpenTUI spike's fallback clause; plan mode) | `clients/tui-core` / `clients/tui` / `clients/cli` / `runtime` | Lane A | `REVIEWING` (command registry, plan-mode enforcement, and Ink consolidation done and green; OpenTUI spike closed via fallback, not qualified) | M-9 (`TC-E-047`, currently `BLOCKED` on M-8) | **Definition-of-Ready**: (1) one `@aether/tui-core` command registry replacing the duplicated/index-mismatched palette lists — **done**, `vanguard/clients/tui-core/`, 16 passing `node --test` unit tests, no terminal required; (2) plan mode enforced by grant attenuation at the runtime composition layer, not client-side politeness — **done**, `vanguard/packages/runtime/{profiles,wiring,session}.py`, falsifier in `test/runtime/test_w3_plan_mode.py` (patch.apply/proc.exec denied with the workspace byte-identical afterward, fs.read still succeeds under the same profile); (3) an OpenTUI qualification spike per `PRD_AETHER_TUI.md` §8.1 — **partial**, receipt at `.draft/todo/w0-spike/receipt.json`: first-frame (8.5ms) and event→render P95 (34.0ms) passed budget on Bun 1.4.0/tmux, but RSS (69.2MB vs. 45MB budget) failed, and keystroke→cell latency, a real SIGWINCH resize, the local-emulator/SSH terminals, and the 256-/16-color fallbacks were not exercised (no attached TTY or SSH endpoint in the environment that produced this receipt) — re-run with a human on a real interactive session, or re-scope the transcript's renderable count, before this gate is called closed; (4) the OpenTUI + Solid render layer itself — **not started**, blocked on (3) closing per the plan's `W0 gates W2` rule; the render layer stays the pre-existing hand-rolled `clients/tui/src/terminal` cell renderer (already consuming `@aether/tui-core` per (1)), per the plan's own fallback clause ("swap the view layer back to the existing cell renderer and lose nothing above the driver line") triggered by (3)'s RSS failure; (5) Ink deletion and CLI consolidation — **done**: `clients/cli/src/commands/run.ts`'s interactive path now embeds `@aether/tui`'s `TuiApplication` directly (in-process, no child spawn) instead of Ink's `RunTui`; `clients/cli/src/tui/{components,hooks,screens}` (the Ink-dependent tree) deleted, its React-free pure-logic siblings (`diff.ts`, `focus.ts`, `keys.ts`, `status-bar.ts`, `theme/tokens.ts`, `transcript-window.ts`, `why-display.ts`) kept and still covered by `ui.test.ts`; `legacy.tsx` replaced by a JSX-free `legacy.ts` with its unused (shadowed by `run.ts`/`approve.ts`/`daemon.ts`) `handleRun`/`handleApprove`/`handleDaemon` duplicates dropped; `ink`/`react`/`@types/react` removed from `clients/cli/package.json` and the root `package.json`; a latent bug fixed along the way — `TuiApplication.stop()` never removed its `stdin` `"data"` listener, so an embedding host's process could never exit after Ctrl+D, now fixed with a `TuiAppOptions.onExit` hook. Verified with a real interactive run in a tmux pty (`AETHER_HOME=... node bin/aether run --repo /tmp --demo`, exits 0 on Ctrl+D) and the full monorepo `npm run build`/`npm test` (0 failures). `bin/aether`/`bin/aether-tui` already existed and already forward to the built Node entrypoints — no `bun build --compile` packaging was needed since the Bun-only OpenTUI stack was not adopted; (6) the remainder of W1's "SOTA set" — **done**: `/init` (seeds `AETHER.md`, idempotent), `/title`, `/status`, `/context`, `/cost`, `/compact` (local transcript view only, does not touch run state), `/doctor`, `/diff`, `/undo` (registered but explicitly reports itself unimplemented — no git-backed rollback exists — rather than faking one), `@path` inline file-reference expansion on submit (`tui-core/src/commands/context-refs.ts`), and `!cmd` local zero-cost shell mode that never invokes the model (`tui-core/src/commands/shell.ts`); all covered by unit tests (`tui-core`: 23 passing; `@aether/tui`: 23 passing) and verified with real interactive tmux-pty runs (`!echo`, `/status`, `/doctor`, `/cost` all produced correct live output). Still missing from W1's list: `@file` is submit-time expansion only, not a live fuzzy-search popup (the hand-rolled renderer has no autocomplete surface); W2's leader-key grammar (`ctrl+x`, `<leader> n/l/m/a/e/t`) and colored usage-bar footer remain unbuilt, correctly, since they're OpenTUI-specific per the plan and W2 is not proceeding. (7) W4 polish on the fallback renderer — **partially done**: progressive-disclosure card folding (`▸`/`▾`, expand on Space/Enter) already existed pre-`TUI-01` and was verified rather than rebuilt (`components/turn.ts`, `components/cards/*`); a real ANSI-256/16-color fallback was implemented (`theme.ts`'s `styleToAnsi` previously collapsed every non-truecolor style to flat white-on-black — now does proper hue-based nearest-color quantization, since a raw RGB-distance match puts every pastel theme color nearest white) with a corrected `detectColorMode` (`xterm-256color` was mislabeled as truecolor); the status footer gained a real 4-tier colored context-usage bar with textual cues (`[OK]/[MED]/[HIGH]/[CRIT]`) plus last-event timing and a `[PLAN]` badge (`components/usage-bar.ts`); busy-input modes landed (`/busy queue|steer|interrupt` — `queue` genuinely defers and auto-flushes a follow-up prompt once the active run reaches a terminal status, `steer` honestly falls back to `interrupt` since no in-flight-redirect primitive exists rather than faking one). While implementing `/busy` a second, more consequential index-drift-shaped bug was found and fixed: typing a full command with args at the palette (e.g. `/busy queue`) previously matched nothing (the palette's internal filter substring-matched the *entire* typed string, args included, against each command's name) and, even on a surviving match, always dispatched with `args=""` — silently dropping everything typed after the command name for every argument-taking command reached via the palette. Fixed by exporting `filterCommandsByQuery`/`splitCommandQuery` from `@aether/tui-core` and making both the palette's rendering (`app.ts`, `command-palette.ts`) and its dispatch (`keyboard.ts`) read from those same two functions — the palette component no longer filters internally at all. Zero-input-starvation streaming was reviewed, not rebuilt: keystroke handling and event ingestion are already both synchronous per-tick against the existing signal-based store, so there was no blocking behavior to fix. Not done: an inverse-video focus-border convention (focus is currently indicated by a border *color* change, not video inversion — a real but lower-severity accessibility gap against `PRD_AETHER_TUI.md` §8.2) and `--no-animation` (moot for now: this renderer has no spinners/animation to suppress). Verified with `@aether/tui-core` (27 tests) and `@aether/tui` (42 tests, up from 19 at `TUI-01`'s prior close), all passing, plus live tmux-pty checks of the colored usage bar and the palette-args fix. This epic remains `BLOCKED` on M-8 at the milestone level per `TC-E-047`; the historical TUI lane recorded only the parts above that could proceed under `SUB-01`/`DEL-01`-style pure-package or Python-runtime work not contending for the milestone gate. |
+| **TUI-01** | `aether` Coding-Agent Terminal: one `@aether/tui-core`-driven cell renderer unifying `clients/tui` + `clients/cli/src/tui`, with plan mode | `clients/tui-core` / `clients/tui` / `clients/cli` / `runtime` | Lane A | `REVIEWING` | M-9 (`TC-E-047`), `BLOCKED` on M-8 | **Definition-of-Ready, 5 of 7 met.** Done: single command registry; plan mode enforced by runtime grant attenuation, not client-side politeness (falsifier `test.runtime.test_w3_plan_mode`); Ink removed and the CLI interactive path consolidated in-process; the W1 command set; partial W4 renderer polish. **Not met:** the OpenTUI qualification spike is `PARTIAL` — first-frame and event-to-render P95 passed budget, RSS did not (69.2MB vs 45MB), and keystroke latency, real SIGWINCH, SSH terminals and 256/16-colour fallbacks were never exercised for want of an attached TTY; receipt at `.draft/todo/w0-spike/receipt.json`. The OpenTUI + Solid render layer is therefore **not started** and the pre-existing cell renderer stands under the plan's own fallback clause. **To become READY:** re-run the spike on a real interactive session or re-scope its renderable count, then decide the render layer. Remaining known gaps: `@file` is submit-time expansion, not a live picker; focus is shown by border colour rather than inverse video. Evidence: `@aether/tui-core` 27 tests, `@aether/tui` 42 tests, `node --test`. Milestone-level progress stays blocked on M-8 regardless of this row. |
 
 ### 2.8 Formal Reasoning & Algorithmic Engines (LIM Integration Proposals)
 
@@ -194,11 +328,11 @@ composition/lifecycle authority; infrastructure stays behind generic ports.
 
 | ID | Capability package | Primary owner | Status | Dependency | Acceptance gate |
 |---|---|---|---|---|---|
-| **CMX-01** | Current-mechanism delta and three presets | `packs/code-default`, manifests | `IN_PROGRESS` | EWK-Q disposition | T-79 is an implementation candidate with 8/8 focused tests green (declared ceiling ≠ attenuation). Acceptance waits on boundary + related-surface + clean-subject review. |
+| **CMX-01** | Current-mechanism delta and three presets | `packs/code-default`, manifests | `DONE` (NT-1 delta); `REVIEWING` (control obligation) | Accepted NT-1; T-79 candidate reconciliation | T-103/T-102 accepted on `2989d57d`; declared ceilings, caller attenuation and normalized behavioral identity preserved. T-79 still needs applicable control-subject evidence; budget-only presets do not establish distinct treatments. |
 | **CMX-02** | Port-backed repository intelligence | `ports/index.py`, adapters, code-pack bindings | `PARTIAL` | IDX-01 | Public Coding Max presets now declare the shared index and the runtime constructs bounded `ContextPacket` context; staged task-ranked retrieval, epoch refresh and fallback evidence remain. |
-| **CMX-03** | Durable plan/context/recovery loop | code-pack policies + existing projections | `PARTIAL` | CTX-01, REC-01 | Historical resume mechanism retained; NT-1 requires canonical snapshots, actual serialized budgets and persisted recovery decisions with 100+ turn deterministic qualification. |
+| **CMX-03** | Durable plan/context/recovery loop | code-pack policies + existing projections | `DONE` (NT-1 preservation scope) | CTX-01, REC-01 accepted | Canonical snapshots, serialized context budgets and persisted recovery qualified by the accepted 104-turn fresh-process fixture on `2989d57d`. Live task quality remains a CONTROL obligation. |
 | **CMX-04** | Multi-file and greenfield correctness | code-pack policies and fixtures | `REVIEWING` | CMX-10A, CMX-11 | Hermetic policies/fixtures and conservative verification observation exist; task-specific completion and repository-scale change-surface qualification remain. |
-| **CMX-05** | Coding Max application facade | `apps/coding_max`, shared application service, `vg` | `REOPENED` (current-subject product outcome) | INS-01 near-term delta | Historical hermetic receipt retained; present entrypoint/app-service refusal collapse prevents carrying completion equivalence forward. T-99/T-102 must prove one truthful execution path before new acceptance. |
+| **CMX-05** | Coding Max application facade | `apps/coding_max`, shared application service, `vg` | `DONE` (NT-1 facade repair) | INS-01 near-term delta accepted | T-99/T-102 resolve the refusal-collapse reopening on `2989d57d` and establish one truthful product path. Historical broader product claims retain their own acceptance boundaries; this repair does not accept MS-CONTROL or M-9. |
 | **CMX-06** | Conditional review and mediated specialist roles | manifests/topology/child runtime | `BLOCKED` (on CMX-07) | CMX-05 and accepted baseline | Reviewer/localizer/test-investigator roles remain disabled until one-role-at-a-time held-out ablations beat the qualified single-worker control. |
 | **CMX-07** | Repository-scale qualification | benchmark program | `BLOCKED` (on REL-01R, CMX-09..11) | CMX-04, CMX-05 | Re-freeze the exact multi-class subject only after canonical completion, long-session resume and progressive-context gates pass. |
 | **CMX-08** | First-party reference-agent portfolio | apps + independent packs/manifests | `TECHNICAL SLICE DONE` | M-10 and stable public composition contract | Coding Max plus two non-coding supported agents install, run, resume, and emit attributable evidence through the same public framework contract |
@@ -209,13 +343,18 @@ composition/lifecycle authority; infrastructure stays behind generic ports.
 
 ### 2.10 Octopus Meta-Controller & Swarm Topology (VISION.md §12, §16; M-OCT Horizon)
 
-The Octopus / Conductor capability family represents the post-1.0 higher-order orchestration layer for long-horizon multi-day campaigns. It is declared as pure data topologies and content-addressed message exchanges; it does not replace the kernel's S0–S12 execution contracts. Detailed pseudocode is deferred to its dedicated implementation milestone.
+The full Octopus / Conductor capability family retains the M-OCT/post-M-10
+boundary. The smaller OCT-03 FH-1 extension in §2.0a is a conditional campaign
+client after MS-CAS and MS-DELEGATION, not authorization for the full family.
+Neither scope replaces kernel dispatch or the existing episode loop. Subsystem
+labels below describe proposed ownership, not promises that new modules exist;
+exact paths and pseudocode belong to later runway reviews.
 
 | ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Description & Acceptance Gate |
 |---|---|---|---|---|---|---|
 | **OCT-01** | Content-Addressed Mailbox Protocol | `domain/topology` | Lane A | `PROPOSED` | M-OCT / W-OCT-1 | Sub-agents communicate strictly by publishing and reading content-addressed immutable message digests (`digest_of(payload)`); zero shared memory; deterministic replayability. |
 | **OCT-02** | Declarative CoordinationPlan DAG & Merge Policies | `domain/topology` | Lane A | `PROPOSED` | M-OCT / W-OCT-2 | Topology declared as data DAG with per-mille budget shares ($\sum \text{budget\_share} \le 1000$); formal merge policies: `CONCAT`, `FIRST_COMPLETE`, `SYNTHESISE`, `UNANIMOUS`. |
-| **OCT-03** | Outer-Loop Multi-Day Roadmap Director (≡ draft `DIR-01`) | `runtime/outer_loop` | Lane A | `PROPOSED` | M-OCT / W-OCT-3 | **Dependency:** `MS-CONTROL` closed. Persistent director above `EpisodeEngine`; manages multi-episode roadmaps, survives process restarts, and yields verified milestone handoffs without unbounded context saturation. |
+| **OCT-03** | Outer-Loop Multi-Day Roadmap Director (≡ draft `DIR-01`) | runtime client; exact module deferred | Lane A | `PROPOSED` | MS-CAMPAIGN (FH-1); M-OCT (full horizon) | FH-1 requires MS-CAS and MS-DELEGATION after MS-CONTROL. Zero-mutating-verb director coordinates qualified children, accepted dependency artifacts and exterior-verified integration. Full M-OCT remains post-M-10; §2.0a is the extension scope, not a second package. |
 | **OCT-04** | Meta-Conductor & Swarm Goal Algebra | `runtime/outer_loop` | Lane A | `PROPOSED` | M-OCT / W-OCT-4 | Higher-order pilot framework; formal algebraic separation and reconciliation of individual worker objectives under a shared global campaign objective. |
 
 ### 2.11 Electroweak Convergence: Harness Preconditions & Settlement Truth
@@ -234,15 +373,17 @@ its admission route: **Route R** rows repair a defect verified at a named source
 line and close on a regression test; the single **Route L** row (`ARM-01`) claims
 lift and therefore stays `PROPOSED` until a preregistered ablation says otherwise.
 
-**Lifecycle checkpoint (2026-09-05 session stop).** HAR-01 and BRG-01 are `DONE
-(mechanism)`. INS-01 is `IN_PROGRESS`: T-84/T-85 are done, T-89 is a focused-
-green implementation candidate, and **T-97 is deferred this pass** (filed, not
-vanished). CMX-01/T-79 is a focused-green candidate. EXP-01 T-92–T-95 has a
-19-test implementation slice, but no live L0, frozen T-26, or T-27 disposition;
-ARM-01 remains proposed and gated on `MS-CONTROL`. Five boundary violations and
-four related-surface failures block acceptance. These lifecycle facts
-supersede the original admission-state labels retained in the dossier table
-below; task checkboxes remain the completion authority.
+**Lifecycle reconciliation (2026-09-11; accepted NT-1 subject `2989d57d`).**
+The earlier five boundary violations, four related-surface failures and deferred
+T-97 are historical findings, superseded for the accepted NT-1 scope. GATE-01,
+CTX-01, REC-01 and the INS-01/CMX-01 near-term deltas are DONE. HAR-01 and BRG-01
+retain their historical DONE mechanism dispositions. INS-01's broader control
+obligation remains IN_PROGRESS; EXP-01 method preparation is APPROVED, with live
+L0, corpus/metric reconciliation and T-26/T-27 acceptance still outstanding.
+ARM-01 remains PROPOSED. The following dossier table retains original admission
+labels and contract rationale; this reconciliation and §2.0 govern subsequent
+accepted deltas. Task receipts remain in `tasks.md`; old focused-test counts are
+not current gate evidence.
 
 | ID | Title & Focus | Subsystem | Lane | Status | Target Milestone | Reconciliation | Description & Acceptance Gate |
 |---|---|---|---|---|---|---|---|
@@ -274,13 +415,13 @@ to fit the current tree.
 | **SEE** | CMX-11, PRG-01, W-092-F4, IDX-01 | T-14–T-16, T-36–T-37, T-45, T-75–T-77 | MS-SEE | T-46 **narrowed**: optional query-local ranking stays in pack policy, never `IndexPort` or the adapter |
 | **CHANGE** | TXN-01, SHD-01, TLS-04/05, *EDT-01* | T-17–T-20, T-47–T-49, T-78, T-83a, T-83b | MS-CHANGE | T-17 `DONE`; TLS-04 mechanism present in `transaction.py`; T-18/T-19/T-20 production mechanisms wired; `str_replace` folds into T-47; T-83 caller admission remains separate |
 | **DIALECT** | WRN-01, TLS-02 | T-21–T-22, T-50 | — | T-21–T-22 `DONE`. T-50 `[PROPOSAL]`. Does not close MS-CHANGE. |
-| **CONTROL** | CMX-07, W-092-F5, CMX-01, EXP-01, *PRF-01*, ALG-03 | T-26–T-27, T-51–T-52, T-79, T-80, T-89, T-92–T-95, T-97 | MS-CONTROL | Wave 2 has 0 accepted tasks. T-79/T-89/T-92–T-95 are focused-green candidates (31 tests), blocked by five boundary violations, four related-surface failures, incomplete full verification and absent live evidence. Next: boundary repair → related-surface repair → T-97 (deferred this pass) → live L0 → T-51/T-52 → T-26 freeze → T-27. **T-80** is post-control. |
+| **CONTROL** | CMX-07, W-092-F5, CMX-01, EXP-01, *PRF-01*, ALG-03 | T-26–T-27, T-51–T-52, T-79, T-89, T-92–T-95, T-97 | MS-CONTROL | `APPROVED` preparation; empirical gate OPEN. MS-BASELINE/MS-CONTEXT and NT-1 product repairs are accepted. T-26 is BLOCKED and UNFROZEN under RUN-1; T-26a/T-51 are READY, with T-52/T-26b and live prerequisites preceding freeze; T-27/T-51/T-52 remain open. Acceptance follows the frozen sample, resource stops and vetoes in milestones.md. **T-80** is an EXP-02 post-control treatment, not a freeze dependency. |
 | **INSTRUMENT (product)** | INS-01, BRG-01, DLG-01 | T-84–T-88, T-90, T-91, T-97 | MS-TRUTH → MS-CONTROL | Distinct subject from the `CLOSED` MS-INSTRUMENT (benchmark harness). Precondition of every `LIVE-*` row |
 | **COMPARISON** | ARM-01 | T-96 | MS-CONTROL → MS-SENIOR | `PROPOSED` (Route L). No arm claim is authorized before MS-CONTROL closes |
 | **META** | MEM-03 | T-28 | MS-META | `[PROPOSAL]` |
 | **SPECIALIST** | CMX-06, W-092-F6 | T-29–T-30, T-53 | MS-SPECIALIST | `[PROPOSAL]` |
 | **CAMPAIGN** | OCT-01…04, HYD-01/02, *DIR-01* | T-31, T-54–T-55, T-34 | MS-CAMPAIGN / MS-HYDRA | `DIR-01` ≡ **OCT-03**; director is a runtime client with zero mutating tools |
-| **MEMORY** | MEM-01, MEM-04 | T-32, T-56–T-57 | MS-MEMORY | `[PROPOSAL]` product wiring; ADR-0100 |
+| **MEMORY** | MEM-01, MEM-02, MEM-04, *MEM-QUAL* | T-32, T-56–T-57, T-121 | MS-MEMORY / M-8 | MEM-QUAL names the MEM-01 FH-1 qualification extension; MEM-02 owns empirical proof. Proposed activation requires MS-CONTROL and applicable M-8 evidence. |
 | **OFFICIAL** | REL-03, SWE-P5 | T-33, T-58 | MS-OFFICIAL | G-3; local ≠ official |
 | **LATTICE** | SUB-01 (live kernel) | T-35, T-64 | — | TCB / boundaries / I-7 AST ban |
 | **CLI** | TUI-01 (related) | T-59–T-60 | — | Facade stays thin |
@@ -309,7 +450,8 @@ to fit the current tree.
 | `OCT-01` / `OCT-02` | T-54 | Keep existing OCT rows above |
 | Draft `SET-01` | T-04/T-05/T-07 + T-18/T-19/T-20 | Not a package. TRUTH + CHANGE settlement half. |
 | Draft `EDT-01` | T-47 (+ T-17 `DONE`, TLS-04/05) | Not a package. `str_replace` is a T-47 strategy. |
-| Draft `PRF-01` | **CMX-01** | Not a package. Same product divergence, already `REOPENED`. |
+| Draft `PRF-01` | **CMX-01** | Not a package. NT-1 preset/facade delta DONE; control-subject obligation remains distinct. |
+| `MEM-QUAL` | **MEM-01** extension + MEM-02; T-121/T-32/T-56/T-57 | Qualification alias, not another memory implementation or independent lifecycle. |
 | Draft `DIR-01` | **OCT-03** + T-31/T-54 | Not a package. Keep the OCT-* rows in §2.10 authoritative. |
 | Draft `HAR-01` | T-69–T-74 | **New package.** Precondition of CMX-09. |
 | Draft `IDX-01` | T-75–T-77 | **New package.** Narrows T-46 to optional query-local ranking in pack policy. |
@@ -591,7 +733,7 @@ Mitigation: reverse-route every production change and regenerate knowledge proje
 
 ## 4. Cross-References
 
-* **Vision (Constitutional Law Zero)**: [`VISION.md`](../../VISION.md)
+* **Vision (Constitutional Law Zero)**: [`VISION.md`](../../../VISION.md)
 * **Target Milestone Gates**: [`milestones.md`](milestones.md)
 * **Flat task tree**: [`tasks.md`](tasks.md)
 * **Feature delta specification**: [`spec.md`](spec.md)

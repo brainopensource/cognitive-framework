@@ -1,0 +1,1115 @@
+{
+  "summary": {
+    "total": 37,
+    "by_suite": {
+      "baac": 9,
+      "benchmark_20_suite": 20,
+      "greenfield": 8
+    },
+    "by_color": {
+      "RED": 33,
+      "GREEN": 2,
+      "TIMEOUT": 1,
+      "NO_ORACLE": 1
+    },
+    "by_gate": {
+      "PASS": 34,
+      "WARN": 2,
+      "STATIC": 1
+    },
+    "duration_s": 5.935
+  },
+  "challenges": [
+    {
+      "id": "bench_single_2K_tier-1_calculator",
+      "suite": "baac",
+      "stratum": "tier-1",
+      "files": 6,
+      "file_list": [
+        "TASK.md",
+        "challenge.yaml",
+        "manifest.sha256",
+        "oracle/verify.py",
+        "src/__init__.py",
+        "src/calculator.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "manifest_present": true,
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.033,
+        "stdout_tail": "",
+        "stderr_tail": "test_calc (__main__.TestCalc.test_calc) ... FAIL\n\n======================================================================\nFAIL: test_calc (__main__.TestCalc.test_calc)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/baac/challenges/tier-1/bench_single_2K_tier-1_calculator/oracle/verify.py\", line 8, in test_calc\n    self.assertEqual(calculate_value(2, 3), 15)\nAssertionError: 8 != 15\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\n"
+      }
+    },
+    {
+      "id": "bench_single_2K_tier-1_fib_cli",
+      "suite": "baac",
+      "stratum": "tier-1",
+      "files": 6,
+      "file_list": [
+        "TASK.md",
+        "challenge.yaml",
+        "manifest.sha256",
+        "oracle/verify.py",
+        "src/__init__.py",
+        "src/fib.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "manifest_present": true,
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.034,
+        "stdout_tail": "",
+        "stderr_tail": "test_fib (__main__.TestFib.test_fib) ... FAIL\n\n======================================================================\nFAIL: test_fib (__main__.TestFib.test_fib)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/baac/challenges/tier-1/bench_single_2K_tier-1_fib_cli/oracle/verify.py\", line 8, in test_fib\n    self.assertEqual(fib(0), 0)\nAssertionError: None != 0\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\n"
+      }
+    },
+    {
+      "id": "bench_single_2K_tier-1_string_dedupe",
+      "suite": "baac",
+      "stratum": "tier-1",
+      "files": 6,
+      "file_list": [
+        "TASK.md",
+        "challenge.yaml",
+        "manifest.sha256",
+        "oracle/verify.py",
+        "src/__init__.py",
+        "src/dedupe.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "manifest_present": true,
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.033,
+        "stdout_tail": "",
+        "stderr_tail": "test_dedupe (__main__.TestDedupe.test_dedupe) ... FAIL\n\n======================================================================\nFAIL: test_dedupe (__main__.TestDedupe.test_dedupe)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/baac/challenges/tier-1/bench_single_2K_tier-1_string_dedupe/oracle/verify.py\", line 8, in test_dedupe\n    self.assertEqual(remove_consecutive_duplicates('aaabbcddd'), 'abcd')\nAssertionError: None != 'abcd'\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\n"
+      }
+    },
+    {
+      "id": "bench_greenfield_8K_tier-2_quiz_game",
+      "suite": "baac",
+      "stratum": "tier-2",
+      "files": 6,
+      "file_list": [
+        "TASK.md",
+        "challenge.yaml",
+        "manifest.sha256",
+        "oracle/verify.py",
+        "src/__init__.py",
+        "src/quiz_engine.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "manifest_present": true,
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.033,
+        "stdout_tail": "",
+        "stderr_tail": "test_quiz (__main__.TestQuiz.test_quiz) ... ERROR\n\n======================================================================\nERROR: test_quiz (__main__.TestQuiz.test_quiz)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/baac/challenges/tier-2/bench_greenfield_8K_tier-2_quiz_game/oracle/verify.py\", line 7, in test_quiz\n    from quiz_engine import Question, QuizEngine\nImportError: cannot import name 'Question' from 'quiz_engine' (/tmp/gate-baac-mmhlqh5g/src/quiz_engine.py)\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+      }
+    },
+    {
+      "id": "bench_multi_8K_tier-2_json_todo_store",
+      "suite": "baac",
+      "stratum": "tier-2",
+      "files": 6,
+      "file_list": [
+        "TASK.md",
+        "challenge.yaml",
+        "manifest.sha256",
+        "oracle/verify.py",
+        "src/__init__.py",
+        "src/todo.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "manifest_present": true,
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.035,
+        "stdout_tail": "",
+        "stderr_tail": "test_todo (__main__.TestTodo.test_todo) ... ERROR\n\n======================================================================\nERROR: test_todo (__main__.TestTodo.test_todo)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/baac/challenges/tier-2/bench_multi_8K_tier-2_json_todo_store/oracle/verify.py\", line 9, in test_todo\n    store = TodoStore(tmp.name)\n            ^^^^^^^^^^^^^^^^^^^\nTypeError: TodoStore() takes no arguments\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (errors=1)\n"
+      }
+    },
+    {
+      "id": "bench_multi_16K_tier-3_event_bus",
+      "suite": "baac",
+      "stratum": "tier-3",
+      "files": 6,
+      "file_list": [
+        "TASK.md",
+        "challenge.yaml",
+        "manifest.sha256",
+        "oracle/verify.py",
+        "src/__init__.py",
+        "src/event_bus.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "manifest_present": true,
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.033,
+        "stdout_tail": "",
+        "stderr_tail": "test_bus (__main__.TestEventBus.test_bus) ... ERROR\n\n======================================================================\nERROR: test_bus (__main__.TestEventBus.test_bus)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/baac/challenges/tier-3/bench_multi_16K_tier-3_event_bus/oracle/verify.py\", line 10, in test_bus\n    sub_id = bus.subscribe('user.created', lambda p: received.append(p))\n             ^^^^^^^^^^^^^\nAttributeError: 'EventBus' object has no attribute 'subscribe'\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (errors=1)\n"
+      }
+    },
+    {
+      "id": "bench_multi_32K_tier-4_circuit_breaker",
+      "suite": "baac",
+      "stratum": "tier-4",
+      "files": 6,
+      "file_list": [
+        "TASK.md",
+        "challenge.yaml",
+        "manifest.sha256",
+        "oracle/verify.py",
+        "src/__init__.py",
+        "src/circuit.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "manifest_present": true,
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.033,
+        "stdout_tail": "",
+        "stderr_tail": "test_circuit (__main__.TestCircuit.test_circuit) ... ERROR\n\n======================================================================\nERROR: test_circuit (__main__.TestCircuit.test_circuit)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/baac/challenges/tier-4/bench_multi_32K_tier-4_circuit_breaker/oracle/verify.py\", line 8, in test_circuit\n    cb = CircuitBreaker(threshold=2)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: CircuitBreaker() takes no arguments\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+      }
+    },
+    {
+      "id": "bench_multi_64K_tier-5_immutable_trie",
+      "suite": "baac",
+      "stratum": "tier-5",
+      "files": 6,
+      "file_list": [
+        "TASK.md",
+        "challenge.yaml",
+        "manifest.sha256",
+        "oracle/verify.py",
+        "src/__init__.py",
+        "src/trie.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "manifest_present": true,
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.034,
+        "stdout_tail": "",
+        "stderr_tail": "test_trie (__main__.TestTrie.test_trie) ... ERROR\n\n======================================================================\nERROR: test_trie (__main__.TestTrie.test_trie)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/baac/challenges/tier-5/bench_multi_64K_tier-5_immutable_trie/oracle/verify.py\", line 7, in test_trie\n    from trie import TrieNode, insert\nImportError: cannot import name 'insert' from 'trie' (/tmp/gate-baac-lhq9_fw_/src/trie.py)\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+      }
+    },
+    {
+      "id": "bench_multi_128K_tier-6_mvcc_db",
+      "suite": "baac",
+      "stratum": "tier-6",
+      "files": 6,
+      "file_list": [
+        "TASK.md",
+        "challenge.yaml",
+        "manifest.sha256",
+        "oracle/verify.py",
+        "src/__init__.py",
+        "src/mvcc.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "manifest_present": true,
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.033,
+        "stdout_tail": "",
+        "stderr_tail": "test_mvcc (__main__.TestMVCC.test_mvcc) ... ERROR\n\n======================================================================\nERROR: test_mvcc (__main__.TestMVCC.test_mvcc)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/baac/challenges/tier-6/bench_multi_128K_tier-6_mvcc_db/oracle/verify.py\", line 9, in test_mvcc\n    db.put('k1', 'v1', tx_id=10)\n    ^^^^^^\nAttributeError: 'MVCCStore' object has no attribute 'put'\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+      }
+    },
+    {
+      "id": "01_rate_limiter_lease_recovery",
+      "suite": "benchmark_20_suite",
+      "stratum": "brownfield",
+      "files": 5,
+      "file_list": [
+        "docs/SPEC.md",
+        "initial_state.sha256",
+        "src/governor.py",
+        "src/rate_limiter.py",
+        "test/test_limiter.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.038,
+        "stdout_tail": "",
+        "stderr_tail": "refunds_tokens) ... FAIL\n\n======================================================================\nFAIL: test_clean_expired_refunds_tokens (test.test_limiter.TestRateLimiter.test_clean_expired_refunds_tokens)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/benchmark_20_suite/01_rate_limiter_lease_recovery/test/test_limiter.py\", line 24, in test_clean_expired_refunds_tokens\n    self.assertEqual(limiter.available, 100, f\"Leakage detected: expected 100 available, got {limiter.available}\")\nAssertionError: 60 != 100 : Leakage detected: expected 100 available, got 60\n\n----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nFAILED (failures=1)\n"
+      },
+      "falsifier_command": "PYTHONPATH=. python3 -m unittest test/test_limiter.py -v"
+    },
+    {
+      "id": "02_ed25519_signature_replay",
+      "suite": "benchmark_20_suite",
+      "stratum": "brownfield",
+      "files": 5,
+      "file_list": [
+        "docs/SPEC.md",
+        "initial_state.sha256",
+        "src/signer.py",
+        "src/verifier.py",
+        "test/test_verifier.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.047,
+        "stdout_tail": "",
+        "stderr_tail": "cted\n    self.assertFalse(\nAssertionError: True is not false : FALSIFIER: Replayed nonce must be rejected\n\n======================================================================\nFAIL: test_expired_timestamp_rejected (test.test_verifier.TestApprovalVerifier.test_expired_timestamp_rejected)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/benchmark_20_suite/02_ed25519_signature_replay/test/test_verifier.py\", line 24, in test_expired_timestamp_rejected\n    self.assertFalse(\nAssertionError: True is not false : FALSIFIER: Expired approval timestamp must be rejected\n\n----------------------------------------------------------------------\nRan 3 tests in 0.002s\n\nFAILED (failures=2)\n"
+      },
+      "falsifier_command": "PYTHONPATH=. python3 -m unittest test/test_verifier.py -v"
+    },
+    {
+      "id": "03_trait_attenuation_escalation",
+      "suite": "benchmark_20_suite",
+      "stratum": "brownfield",
+      "files": 5,
+      "file_list": [
+        "docs/SPEC.md",
+        "initial_state.sha256",
+        "src/agent_node.py",
+        "src/traits.py",
+        "test/test_attenuation.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.04,
+        "stdout_tail": "",
+        "stderr_tail": "=============\nFAIL: test_child_cannot_escalate_capabilities (test.test_attenuation.TestTraitAttenuation.test_child_cannot_escalate_capabilities)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/benchmark_20_suite/03_trait_attenuation_escalation/test/test_attenuation.py\", line 21, in test_child_cannot_escalate_capabilities\n    self.assertEqual(\nAssertionError: Items in the first set but not the second:\n'admin:all'\n'write:modify' : Escalation detected: child scopes frozenset({'read:view', 'admin:all', 'write:modify'}) exceed parent scopes frozenset({'read:view'})\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\n"
+      },
+      "falsifier_command": "PYTHONPATH=. python3 -m unittest test/test_attenuation.py -v"
+    },
+    {
+      "id": "04_sqlite_wal_checkpoint_lock",
+      "suite": "benchmark_20_suite",
+      "stratum": "brownfield",
+      "files": 5,
+      "file_list": [
+        "docs/SPEC.md",
+        "initial_state.sha256",
+        "src/db_pool.py",
+        "src/event_store.py",
+        "test/test_concurrent_store.py"
+      ],
+      "gate_check": "WARN",
+      "notes": [
+        "baseline already passes (premature green / toothless oracle risk)"
+      ],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "GREEN",
+      "oracle_run": {
+        "exit_code": 0,
+        "timed_out": false,
+        "duration_s": 0.044,
+        "stdout_tail": "",
+        "stderr_tail": "test_concurrent_append_and_checkpoint (test.test_concurrent_store.TestConcurrentEventStore.test_concurrent_append_and_checkpoint) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.002s\n\nOK\n"
+      },
+      "falsifier_command": "PYTHONPATH=. python3 -m unittest test/test_concurrent_store.py -v"
+    },
+    {
+      "id": "05_token_budget_clamping_drift",
+      "suite": "benchmark_20_suite",
+      "stratum": "brownfield",
+      "files": 5,
+      "file_list": [
+        "docs/SPEC.md",
+        "initial_state.sha256",
+        "src/budget.py",
+        "src/pricing.py",
+        "test/test_budget_falsifier.py"
+      ],
+      "gate_check": "WARN",
+      "notes": [
+        "baseline already passes (premature green / toothless oracle risk)"
+      ],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "GREEN",
+      "oracle_run": {
+        "exit_code": 0,
+        "timed_out": false,
+        "duration_s": 0.038,
+        "stdout_tail": "",
+        "stderr_tail": "test_repeated_micro_transactions_zero_drift (test.test_budget_falsifier.TestBudgetGovernorDrift.test_repeated_micro_transactions_zero_drift) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n"
+      },
+      "falsifier_command": "PYTHONPATH=. python3 -m unittest test/test_budget_falsifier.py -v"
+    },
+    {
+      "id": "06_fts5_stale_index_rebuild",
+      "suite": "benchmark_20_suite",
+      "stratum": "brownfield",
+      "files": 4,
+      "file_list": [
+        "docs/SPEC.md",
+        "initial_state.sha256",
+        "src/symbol_indexer.py",
+        "test/test_indexer_falsifier.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.043,
+        "stdout_tail": "",
+        "stderr_tail": "==========================\nFAIL: test_delete_file_purges_fts_symbols (test.test_indexer_falsifier.TestSymbolIndexer.test_delete_file_purges_fts_symbols)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/benchmark_20_suite/06_fts5_stale_index_rebuild/test/test_indexer_falsifier.py\", line 20, in test_delete_file_purges_fts_symbols\n    self.assertEqual(\nAssertionError: 1 != 0 : FTS Zombie Hit: Deleted file symbols still present in search results: [{'file_path': 'kernel/dispatch.py', 'symbol_name': 'DispatchPipeline', 'docstring': 'Core 13-stage dispatch pipeline'}]\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)\n"
+      },
+      "falsifier_command": "PYTHONPATH=. python3 -m unittest test/test_indexer_falsifier.py -v"
+    },
+    {
+      "id": "07_context_lost_in_middle_prune",
+      "suite": "benchmark_20_suite",
+      "stratum": "brownfield",
+      "files": 4,
+      "file_list": [
+        "docs/SPEC.md",
+        "initial_state.sha256",
+        "src/context_allocator.py",
+        "test/test_context_allocator.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.039,
+        "stdout_tail": "",
+        "stderr_tail": "--------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/benchmark_20_suite/07_context_lost_in_middle_prune/test/test_context_allocator.py\", line 13, in test_preserves_module_docstring_and_top_signatures\n    self.assertIn(\"class KernelDispatch:\", pruned)\nAssertionError: 'class KernelDispatch:' not found in '    def step_0(self): pass\\n    def step_1(self): pass\\n    def step_2(self): pass\\n    def step_3(self): pass\\n    def step_4(self): pass\\n# ... [pruned] ...\\n    def step_45(self): pass\\n    def step_46(self): pass\\n    def step_47(self): pass\\n    def step_48(self): pass\\n    def step_49(self): pass'\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\n"
+      },
+      "falsifier_command": "PYTHONPATH=. python3 -m unittest test/test_context_allocator.py -v"
+    },
+    {
+      "id": "08_evaluator_oracle_timeout",
+      "suite": "benchmark_20_suite",
+      "stratum": "brownfield",
+      "files": 4,
+      "file_list": [
+        "docs/SPEC.md",
+        "initial_state.sha256",
+        "src/sandbox_runner.py",
+        "test/test_sandbox_timeout.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.543,
+        "stdout_tail": "",
+        "stderr_tail": "ports_proper_status_and_code) ... FAIL\n\n======================================================================\nFAIL: test_timeout_reports_proper_status_and_code (test.test_sandbox_timeout.TestSandboxTimeout.test_timeout_reports_proper_status_and_code)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/benchmark_20_suite/08_evaluator_oracle_timeout/test/test_sandbox_timeout.py\", line 12, in test_timeout_reports_proper_status_and_code\n    self.assertEqual(\nAssertionError: 'ERROR' != 'TIMEOUT'\n- ERROR\n+ TIMEOUT\n : Falsifier failed: Expected status TIMEOUT, got ERROR\n\n----------------------------------------------------------------------\nRan 1 test in 0.502s\n\nFAILED (failures=1)\n"
+      },
+      "falsifier_command": "PYTHONPATH=. python3 -m unittest test/test_sandbox_timeout.py -v"
+    },
+    {
+      "id": "09_model_port_streaming_chunk_drop",
+      "suite": "benchmark_20_suite",
+      "stratum": "brownfield",
+      "files": 4,
+      "file_list": [
+        "docs/SPEC.md",
+        "initial_state.sha256",
+        "src/sse_decoder.py",
+        "test/test_streaming_falsifier.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.039,
+        "stdout_tail": "",
+        "stderr_tail": "EDecoder.test_flushes_final_chunk_on_close) ... FAIL\n\n======================================================================\nFAIL: test_flushes_final_chunk_on_close (test.test_streaming_falsifier.TestSSEDecoder.test_flushes_final_chunk_on_close)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/benchmark_20_suite/09_model_port_streaming_chunk_drop/test/test_streaming_falsifier.py\", line 17, in test_flushes_final_chunk_on_close\n    self.assertEqual(\nAssertionError: 1 != 2 : Chunk dropped: expected 2 events, got 1 ([{'choices': [{'delta': {'content': 'Hello'}}]}])\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\n"
+      },
+      "falsifier_command": "PYTHONPATH=. python3 -m unittest test/test_streaming_falsifier.py -v"
+    },
+    {
+      "id": "10_graph_ppr_dangling_node_sink",
+      "suite": "benchmark_20_suite",
+      "stratum": "brownfield",
+      "files": 4,
+      "file_list": [
+        "docs/SPEC.md",
+        "initial_state.sha256",
+        "src/ppr.py",
+        "test/test_ppr_falsifier.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.039,
+        "stdout_tail": "",
+        "stderr_tail": "=====================================================\nFAIL: test_ppr_conserves_probability_with_dangling_nodes (test.test_ppr_falsifier.TestPPR.test_ppr_conserves_probability_with_dangling_nodes)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/benchmark_20_suite/10_graph_ppr_dangling_node_sink/test/test_ppr_falsifier.py\", line 16, in test_ppr_conserves_probability_with_dangling_nodes\n    self.assertAlmostEqual(\nAssertionError: 0.434442401761439 != 1.0 within 3 places (0.565557598238561 difference) : Probability mass lost: sum is 0.434442401761439, expected 1.0\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)\n"
+      },
+      "falsifier_command": "PYTHONPATH=. python3 -m unittest test/test_ppr_falsifier.py -v"
+    },
+    {
+      "id": "11_kv_lru_ttl_store",
+      "suite": "benchmark_20_suite",
+      "stratum": "greenfield",
+      "files": 3,
+      "file_list": [
+        "README.md",
+        "src/__init__.py",
+        "test/test_suite.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.037,
+        "stdout_tail": "",
+        "stderr_tail": "===================\nERROR: test_suite (unittest.loader._FailedTest.test_suite)\n----------------------------------------------------------------------\nImportError: Failed to import test module: test_suite\nTraceback (most recent call last):\n  File \"/home/rock-dev/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/unittest/loader.py\", line 137, in loadTestsFromName\n    module = __import__(module_name)\n             ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/benchmark_20_suite/11_kv_lru_ttl_store/test/test_suite.py\", line 3, in <module>\n    from src.store import LRUTTLStore\nModuleNotFoundError: No module named 'src.store'\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+      },
+      "falsifier_command": "PYTHONPATH=. python3 -m unittest test/test_suite.py -v"
+    },
+    {
+      "id": "12_finite_state_machine_workflow",
+      "suite": "benchmark_20_suite",
+      "stratum": "greenfield",
+      "files": 3,
+      "file_list": [
+        "README.md",
+        "src/__init__.py",
+        "test/test_suite.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.035,
+        "stdout_tail": "",
+        "stderr_tail": "ite (unittest.loader._FailedTest.test_suite)\n----------------------------------------------------------------------\nImportError: Failed to import test module: test_suite\nTraceback (most recent call last):\n  File \"/home/rock-dev/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/unittest/loader.py\", line 137, in loadTestsFromName\n    module = __import__(module_name)\n             ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/benchmark_20_suite/12_finite_state_machine_workflow/test/test_suite.py\", line 2, in <module>\n    from src.fsm import StateMachine, InvalidTransitionError\nModuleNotFoundError: No module named 'src.fsm'\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+      },
+      "falsifier_command": "PYTHONPATH=. python3 -m unittest test/test_suite.py -v"
+    },
+    {
+      "id": "13_semver_dependency_resolver",
+      "suite": "benchmark_20_suite",
+      "stratum": "greenfield",
+      "files": 3,
+      "file_list": [
+        "README.md",
+        "src/__init__.py",
+        "test/test_suite.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.037,
+        "stdout_tail": "",
+        "stderr_tail": "ite (unittest.loader._FailedTest.test_suite)\n----------------------------------------------------------------------\nImportError: Failed to import test module: test_suite\nTraceback (most recent call last):\n  File \"/home/rock-dev/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/unittest/loader.py\", line 137, in loadTestsFromName\n    module = __import__(module_name)\n             ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/benchmark_20_suite/13_semver_dependency_resolver/test/test_suite.py\", line 2, in <module>\n    from src.resolver import SemverResolver, ConflictError\nModuleNotFoundError: No module named 'src.resolver'\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+      },
+      "falsifier_command": "PYTHONPATH=. python3 -m unittest test/test_suite.py -v"
+    },
+    {
+      "id": "14_merkle_tree_ledger",
+      "suite": "benchmark_20_suite",
+      "stratum": "greenfield",
+      "files": 3,
+      "file_list": [
+        "README.md",
+        "src/__init__.py",
+        "test/test_suite.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.036,
+        "stdout_tail": "",
+        "stderr_tail": "================\nERROR: test_suite (unittest.loader._FailedTest.test_suite)\n----------------------------------------------------------------------\nImportError: Failed to import test module: test_suite\nTraceback (most recent call last):\n  File \"/home/rock-dev/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/unittest/loader.py\", line 137, in loadTestsFromName\n    module = __import__(module_name)\n             ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/benchmark_20_suite/14_merkle_tree_ledger/test/test_suite.py\", line 2, in <module>\n    from src.merkle import MerkleTree\nModuleNotFoundError: No module named 'src.merkle'\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+      },
+      "falsifier_command": "PYTHONPATH=. python3 -m unittest test/test_suite.py -v"
+    },
+    {
+      "id": "15_circuit_breaker_proxy",
+      "suite": "benchmark_20_suite",
+      "stratum": "greenfield",
+      "files": 3,
+      "file_list": [
+        "README.md",
+        "src/__init__.py",
+        "test/test_suite.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.037,
+        "stdout_tail": "",
+        "stderr_tail": "_suite)\n----------------------------------------------------------------------\nImportError: Failed to import test module: test_suite\nTraceback (most recent call last):\n  File \"/home/rock-dev/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/unittest/loader.py\", line 137, in loadTestsFromName\n    module = __import__(module_name)\n             ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/benchmark_20_suite/15_circuit_breaker_proxy/test/test_suite.py\", line 3, in <module>\n    from src.circuit_breaker import CircuitBreaker, CircuitState, CircuitBreakerOpenException\nModuleNotFoundError: No module named 'src.circuit_breaker'\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+      },
+      "falsifier_command": "PYTHONPATH=. python3 -m unittest test/test_suite.py -v"
+    },
+    {
+      "id": "16_submodular_greedy_packer",
+      "suite": "benchmark_20_suite",
+      "stratum": "greenfield",
+      "files": 3,
+      "file_list": [
+        "README.md",
+        "src/__init__.py",
+        "test/test_suite.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.038,
+        "stdout_tail": "",
+        "stderr_tail": ": test_suite (unittest.loader._FailedTest.test_suite)\n----------------------------------------------------------------------\nImportError: Failed to import test module: test_suite\nTraceback (most recent call last):\n  File \"/home/rock-dev/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/unittest/loader.py\", line 137, in loadTestsFromName\n    module = __import__(module_name)\n             ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/benchmark_20_suite/16_submodular_greedy_packer/test/test_suite.py\", line 2, in <module>\n    from src.packer import SubmodularPacker, PackItem\nModuleNotFoundError: No module named 'src.packer'\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+      },
+      "falsifier_command": "PYTHONPATH=. python3 -m unittest test/test_suite.py -v"
+    },
+    {
+      "id": "17_json_canonicalizer_jcs",
+      "suite": "benchmark_20_suite",
+      "stratum": "greenfield",
+      "files": 3,
+      "file_list": [
+        "README.md",
+        "src/__init__.py",
+        "test/test_suite.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.037,
+        "stdout_tail": "",
+        "stderr_tail": "RROR: test_suite (unittest.loader._FailedTest.test_suite)\n----------------------------------------------------------------------\nImportError: Failed to import test module: test_suite\nTraceback (most recent call last):\n  File \"/home/rock-dev/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/unittest/loader.py\", line 137, in loadTestsFromName\n    module = __import__(module_name)\n             ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/benchmark_20_suite/17_json_canonicalizer_jcs/test/test_suite.py\", line 2, in <module>\n    from src.jcs import canonicalize, canonical_digest\nModuleNotFoundError: No module named 'src.jcs'\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+      },
+      "falsifier_command": "PYTHONPATH=. python3 -m unittest test/test_suite.py -v"
+    },
+    {
+      "id": "18_token_bucket_hierarchical",
+      "suite": "benchmark_20_suite",
+      "stratum": "greenfield",
+      "files": 3,
+      "file_list": [
+        "README.md",
+        "src/__init__.py",
+        "test/test_suite.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.036,
+        "stdout_tail": "",
+        "stderr_tail": "te (unittest.loader._FailedTest.test_suite)\n----------------------------------------------------------------------\nImportError: Failed to import test module: test_suite\nTraceback (most recent call last):\n  File \"/home/rock-dev/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/unittest/loader.py\", line 137, in loadTestsFromName\n    module = __import__(module_name)\n             ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/benchmark_20_suite/18_token_bucket_hierarchical/test/test_suite.py\", line 3, in <module>\n    from src.token_bucket import HierarchicalTokenBucket\nModuleNotFoundError: No module named 'src.token_bucket'\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+      },
+      "falsifier_command": "PYTHONPATH=. python3 -m unittest test/test_suite.py -v"
+    },
+    {
+      "id": "19_markdown_section_splitter",
+      "suite": "benchmark_20_suite",
+      "stratum": "greenfield",
+      "files": 3,
+      "file_list": [
+        "README.md",
+        "src/__init__.py",
+        "test/test_suite.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.036,
+        "stdout_tail": "",
+        "stderr_tail": "test_suite (unittest.loader._FailedTest.test_suite)\n----------------------------------------------------------------------\nImportError: Failed to import test module: test_suite\nTraceback (most recent call last):\n  File \"/home/rock-dev/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/unittest/loader.py\", line 137, in loadTestsFromName\n    module = __import__(module_name)\n             ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/benchmark_20_suite/19_markdown_section_splitter/test/test_suite.py\", line 2, in <module>\n    from src.splitter import MarkdownSectionSplitter\nModuleNotFoundError: No module named 'src.splitter'\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+      },
+      "falsifier_command": "PYTHONPATH=. python3 -m unittest test/test_suite.py -v"
+    },
+    {
+      "id": "20_event_bus_pubsub_channel",
+      "suite": "benchmark_20_suite",
+      "stratum": "greenfield",
+      "files": 3,
+      "file_list": [
+        "README.md",
+        "src/__init__.py",
+        "test/test_suite.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.038,
+        "stdout_tail": "",
+        "stderr_tail": "st_suite (unittest.loader._FailedTest.test_suite)\n----------------------------------------------------------------------\nImportError: Failed to import test module: test_suite\nTraceback (most recent call last):\n  File \"/home/rock-dev/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/unittest/loader.py\", line 137, in loadTestsFromName\n    module = __import__(module_name)\n             ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/benchmark_20_suite/20_event_bus_pubsub_channel/test/test_suite.py\", line 2, in <module>\n    from src.event_bus import EventBus, DeadLetterItem\nModuleNotFoundError: No module named 'src.event_bus'\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n"
+      },
+      "falsifier_command": "PYTHONPATH=. python3 -m unittest test/test_suite.py -v"
+    },
+    {
+      "id": "dogfood-01-multi-turn-file-rollback",
+      "suite": "greenfield",
+      "stratum": "greenfield",
+      "files": 4,
+      "file_list": [
+        "AGENTS.md",
+        "TASK.md",
+        "src/calculator.py",
+        "test_calculator.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.036,
+        "stdout_tail": "",
+        "stderr_tail": "test_add (test_calculator.TestCalculator.test_add) ... ok\ntest_divide (test_calculator.TestCalculator.test_divide) ... FAIL\n\n======================================================================\nFAIL: test_divide (test_calculator.TestCalculator.test_divide)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/greenfield/dogfood-01-multi-turn-file-rollback/test_calculator.py\", line 9, in test_divide\n    self.assertEqual(divide(10, 2), 5.0)\nAssertionError: 0.2 != 5.0\n\n----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nFAILED (failures=1)\n"
+      },
+      "falsifier_command": "python3 -m unittest discover -s . -p 'test*.py' -v"
+    },
+    {
+      "id": "dogfood-02-subprocess-timeout-censoring",
+      "suite": "greenfield",
+      "stratum": "greenfield",
+      "files": 4,
+      "file_list": [
+        "AGENTS.md",
+        "TASK.md",
+        "src/worker.py",
+        "test_worker.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [
+        "designed hang or unbounded loop suspected"
+      ],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "TIMEOUT",
+      "oracle_run": {
+        "exit_code": 124,
+        "timed_out": true,
+        "duration_s": 4.078,
+        "stdout_tail": "",
+        "stderr_tail": "TIMEOUT"
+      },
+      "falsifier_command": "python3 -m unittest discover -s . -p 'test*.py' -v"
+    },
+    {
+      "id": "dogfood-03-manifest-alias-shadowing",
+      "suite": "greenfield",
+      "stratum": "greenfield",
+      "files": 4,
+      "file_list": [
+        "AGENTS.md",
+        "TASK.md",
+        "src/service.py",
+        "test_service.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.038,
+        "stdout_tail": "",
+        "stderr_tail": " execute_service_action(\"run\")\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/greenfield/dogfood-03-manifest-alias-shadowing/src/service.py\", line 17, in execute_service_action\n    canonical = resolve_verb_alias(\"shadowed_raw_exec\", aliases)\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/greenfield/dogfood-03-manifest-alias-shadowing/src/service.py\", line 10, in resolve_verb_alias\n    raise UnresolvableVerbError(f\"Ungranted or unresolvable alias: {alias!r}\")\nsrc.service.UnresolvableVerbError: Ungranted or unresolvable alias: 'shadowed_raw_exec'\n\n----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nFAILED (errors=1)\n"
+      },
+      "falsifier_command": "python3 -m unittest discover -s . -p 'test*.py' -v"
+    },
+    {
+      "id": "greenfield-api-html",
+      "suite": "greenfield",
+      "stratum": "greenfield",
+      "files": 3,
+      "file_list": [
+        "AGENTS.md",
+        "TASK.md",
+        "test_app.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.038,
+        "stdout_tail": "",
+        "stderr_tail": " self.assertTrue(server_path.exists(), \"app/server.py does not exist\")\nAssertionError: False is not true : app/server.py does not exist\n\n======================================================================\nFAIL: test_static_html_exists (test_app.TestGreenfieldApp.test_static_html_exists)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/greenfield/greenfield-api-html/test_app.py\", line 11, in test_static_html_exists\n    self.assertTrue(index_path.exists(), \"static/index.html does not exist\")\nAssertionError: False is not true : static/index.html does not exist\n\n----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nFAILED (failures=2)\n"
+      },
+      "falsifier_command": "python3 -m unittest discover -s . -p 'test*.py' -v"
+    },
+    {
+      "id": "greenfield-v0450-webapp",
+      "suite": "greenfield",
+      "stratum": "greenfield",
+      "files": 2,
+      "file_list": [
+        "AGENTS.md",
+        "TASK.md"
+      ],
+      "gate_check": "STATIC",
+      "notes": [
+        "no executable oracle in-tree"
+      ],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": false,
+      "initial_falsifier": "NO_ORACLE",
+      "oracle_run": null
+    },
+    {
+      "id": "qual-01-token-bucket-rate-limiter",
+      "suite": "greenfield",
+      "stratum": "greenfield",
+      "files": 6,
+      "file_list": [
+        "AGENTS.md",
+        "TASK.md",
+        "src/__init__.py",
+        "src/limiter.py",
+        "src/token_bucket.py",
+        "test_token_bucket.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.036,
+        "stdout_tail": "",
+        "stderr_tail": "\ntest_refill_is_capped_at_capacity (test_token_bucket.TestTokenBucket.test_refill_is_capped_at_capacity) ... FAIL\n\n======================================================================\nFAIL: test_refill_is_capped_at_capacity (test_token_bucket.TestTokenBucket.test_refill_is_capped_at_capacity)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/greenfield/qual-01-token-bucket-rate-limiter/test_token_bucket.py\", line 25, in test_refill_is_capped_at_capacity\n    self.assertLessEqual(bucket.tokens, bucket.capacity)\nAssertionError: 1005.0 not less than or equal to 5\n\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nFAILED (failures=1)\n"
+      },
+      "falsifier_command": "python3 -m unittest discover -s . -p 'test*.py' -v"
+    },
+    {
+      "id": "qual-02-interval-scheduler-conflict",
+      "suite": "greenfield",
+      "stratum": "greenfield",
+      "files": 6,
+      "file_list": [
+        "AGENTS.md",
+        "TASK.md",
+        "src/__init__.py",
+        "src/intervals.py",
+        "src/scheduler.py",
+        "test_scheduler.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.039,
+        "stdout_tail": "",
+        "stderr_tail": "fering element 0:\n(0, 5)\n(0, 8)\n\nFirst list contains 1 additional elements.\nFirst extra element 1:\n(5, 8)\n\n- [(0, 5), (5, 8)]\n+ [(0, 8)]\n\n======================================================================\nFAIL: test_back_to_back_booking_is_a_conflict (test_scheduler.TestScheduler.test_back_to_back_booking_is_a_conflict)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/greenfield/qual-02-interval-scheduler-conflict/test_scheduler.py\", line 22, in test_back_to_back_booking_is_a_conflict\n    self.assertFalse(sched.book(5, 8))\nAssertionError: True is not false\n\n----------------------------------------------------------------------\nRan 5 tests in 0.000s\n\nFAILED (failures=2)\n"
+      },
+      "falsifier_command": "python3 -m unittest discover -s . -p 'test*.py' -v"
+    },
+    {
+      "id": "qual-03-ttl-lru-cache-eviction",
+      "suite": "greenfield",
+      "stratum": "greenfield",
+      "files": 7,
+      "file_list": [
+        "AGENTS.md",
+        "TASK.md",
+        "src/__init__.py",
+        "src/lru.py",
+        "src/ttl.py",
+        "src/ttl_cache.py",
+        "test_ttl_cache.py"
+      ],
+      "gate_check": "PASS",
+      "notes": [],
+      "poison_scan": {
+        "trivial_assert_true": 0,
+        "task_leak_hits": 0,
+        "leak_files": []
+      },
+      "oracle_present": true,
+      "initial_falsifier": "RED",
+      "oracle_run": {
+        "exit_code": 1,
+        "timed_out": false,
+        "duration_s": 0.038,
+        "stdout_tail": "",
+        "stderr_tail": "l-lru-cache-eviction/test_ttl_cache.py\", line 26, in test_get_refreshes_lru_position\n    self.assertEqual(cache.get(\"a\"), 1)\nAssertionError: None != 1\n\n======================================================================\nFAIL: test_key_expires_at_exact_ttl_boundary (test_ttl_cache.TestTTLCache.test_key_expires_at_exact_ttl_boundary)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/greenfield/qual-03-ttl-lru-cache-eviction/test_ttl_cache.py\", line 36, in test_key_expires_at_exact_ttl_boundary\n    self.assertIsNone(cache.get(\"a\"))\nAssertionError: 1 is not None\n\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nFAILED (failures=2)\n"
+      },
+      "falsifier_command": "python3 -m unittest discover -s . -p 'test*.py' -v"
+    }
+  ]
+}

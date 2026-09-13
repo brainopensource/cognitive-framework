@@ -100,7 +100,7 @@ An `EventEnvelope` (`vanguard/packages/domain/ledger/events.py`) contains the fo
 |---|---|---|
 | `api` | `string` | Envelope version identifier (`"mhf.event/2"`). |
 | `event_id` | `string` (UUIDv7) | Universally unique, time-ordered identifier for this event. |
-| `sequence` | `integer` ($\ge 0$) | Zero-indexed strictly monotonic event sequence within the run ledger. |
+| `sequence` | `integer` ($\ge 0$) | Zero-indexed strictly monotonic event sequence within the declared `project_id` chain. |
 | `kind` | `string` | Past-tense verb phrase identifying the event kind. |
 | `timestamp` | `string` (RFC 3339) | UTC timestamp of event emission. |
 | `run_id` | `string` (UUIDv7) | Target run identifier. |
@@ -149,6 +149,23 @@ Events must be emitted exclusively through `LedgerEmitter` via role-scoped facad
 | `StrategyChanged` | `session` | `session-policy` | Agent strategy adjusted. |
 | `ProgressAssessed` | `session` | `session-policy` | Goal progress evaluated. |
 | `ContextCompacted` | `session` | `session-policy` | Context window compacted. |
+| `ContextSelectionRecorded` | `session` | `session-policy` | Final prompt-selection identities, serialized token count, cursor and ordered omissions persisted before inference. |
+| `VerificationRecorded` | `session` only | `kernel-capability` | Observed runner verification with task/composition/workspace/subject bindings; not an exterior verdict. |
+| `ChangeSurfaceUpdated` | `session` only | `kernel-capability` | Complete sorted changed-path surface, including deletions, bound to the candidate and settled effect descriptor. |
+
+**DIR-D1 (T-134, reviewed 63d12d83).** Both kinds are allocated in
+`schemas/mhf/event_envelope.schema.json#/$defs/EventKind`; the `/2` envelope
+references this shared vocabulary and validates the typed payloads in schema
+vectors. Generated `EventKind` supplies READABLE_KINDS; WRITABLE_KINDS remains its
+difference with DEPRECATED_KINDS. No v4 allocation fork or deprecated-kind revival.
+Verification records argv, exit code, result artifact identity and observed test
+count, preserving null versus observed zero. Session emission precedes the next
+proposal; durable append failure latches and refuses further inference/dispatch.
+The fold recovers verification and multi-file surface after SQLite reopen and
+invalidates verification superseded by a different candidate digest. Event
+history is retained; this projection is not independent completion authority.
+The schema-vector validation is distinct from generic store append validation;
+these receipts do not qualify arbitrary untrusted payload ingress.
 
 ### Deprecated Historical Kinds (`DEPRECATED_KINDS`)
 The following kinds are frozen historical names from legacy specifications. They remain permanently readable by all readers to ensure past ledgers validate, but new writes are unconditionally rejected with `DeprecatedKindError`:
@@ -160,7 +177,7 @@ The following kinds are frozen historical names from legacy specifications. They
 
 Every event envelope establishes an immutable cryptographic chain:
 
-1. **Monotonic Sequences**: `sequence` begins at `0` for the first event of a run and increments by `1` per event without gaps.
+1. **Monotonic Sequences**: `sequence` begins at `0` for the first event in a `project_id` chain and increments by `1` per event without gaps. Episode projections must retain the project filter; an episode label alone cannot combine independently numbered project chains.
 2. **Hash-Chain Preimage**: For event $N$, `parent_digest` must exactly equal the `digest` of event $N-1$. For event `0`, `parent_digest` is the genesis zero hash (`"0000000000000000000000000000000000000000000000000000000000000000"` or empty digest).
 3. **Digest Canonicalization**: The `digest` is computed via RFC 8785 JSON Canonicalization Scheme (JCS) followed by SHA-256 hashing (`vanguard/packages/domain/canonicalisation/digest.py`).
 

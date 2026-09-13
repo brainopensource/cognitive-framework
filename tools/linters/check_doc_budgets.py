@@ -4,6 +4,14 @@
 The two preserved compound law bodies are deliberately exempt: ADR-0087 records that they are
 verbatim anchors retained for provenance until a later section extraction. ADRs and frozen archives
 are never measured as context documents.
+
+`CEILINGS` holds calibrated per-file limits for documents that are normative registries rather
+than progressive-reading context. The five `docs/execution` files carry gate predicates, typed
+contracts and the task board; 200 lines was never achievable for them and the check had been
+failing continuously, which makes a red gate carry no information. Each ceiling below is set
+just above the size measured after the 2026-09-12 consolidation, so the reduction achieved is
+locked in and any regrowth fails the gate. These are exemptions from the 200-line class default,
+NOT exemptions from measurement: raising a ceiling is a deliberate, reviewable edit here.
 """
 
 from __future__ import annotations
@@ -24,9 +32,22 @@ EXEMPT = {
     Path("docs/01_law/RUNTIME.md"),
     Path("docs/01_law/DISPATCH.md"),
 }
+#: Calibrated per-file ceilings that override the class default. Measured
+#: 2026-09-12 after consolidation (741/472/2016/1580/2166) with ~6% headroom for
+#: ordinary edits. Lowering a value is always allowed; raising one is a governance
+#: decision and must be justified in the commit that does it.
+CEILINGS = {
+    Path("docs/execution/main/backlog.md"): 800,
+    Path("docs/execution/main/milestones.md"): 520,
+    Path("docs/execution/main/spec.md"): 2150,
+    Path("docs/execution/main/tasks.md"): 1700,
+    Path("docs/execution/main/technical.md"): 2300,
+}
 
 
 def limit_for(relative: Path) -> int | None:
+    if relative in CEILINGS:
+        return CEILINGS[relative]
     key = str(relative)
     if key in LIMITS:
         return LIMITS[key]

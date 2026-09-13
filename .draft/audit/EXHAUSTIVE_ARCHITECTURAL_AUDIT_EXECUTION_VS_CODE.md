@@ -21,11 +21,22 @@ theoretical_foundations:
 
 # Formal Epistemological & Architectural Audit: Execution Runway Divergence, Hexagonal Trust Lattice Invariants, and Empirical Verification Mechanics
 
+> [!IMPORTANT]
+> **Document Status: HISTORICAL FORENSIC AUDIT — FINDINGS FULLY RESOLVED (2026-09-11 | HEAD: `1e257e76`)**
+> - **Historical Audited Subject:** `dfb0bb64fc82398b9a05f1e3457f4f45babfcbca` (2026-09-06)
+> - **Resolution Status on Current HEAD:**
+>   - **Boundary Violations (Finding 1):** RESOLVED. `check_boundaries.py` reports `BOUNDARY PASS: 833 source files checked` (0 violations).
+>   - **Facade & Entrypoint Failures:** RESOLVED. T-99 and T-102 unified the terminal projection engine; 27/27 tests pass.
+>   - **Untracked Capability Layer (Finding 2):** RESOLVED. `.agents/` is permanently registered in `agent_plugins.py` and governed by `AGENTS.md`.
+>   - **Ollama References (Finding 3):** RESOLVED. Purged in T-91 (`BRG-01`); only llama.cpp is supported.
+>   - **Milestone Closures:** `MS-BASELINE` and `MS-CONTEXT` were CLOSED and accepted on subject `2989d57d`.
+> - **Operational Directive:** This document records the forensic findings that motivated the NT-1 remediation program. It is **non-authorizing** and does **not** reflect active bugs on the current tree.
+
 **Author:** Principal Systems Architect & Lead Invariant Auditor  
 **Audit Subject:** Vanguard / AETHER Cognitive Substrate  
-**Repository Working Tree:** `dfb0bb64fc82398b9a05f1e3457f4f45babfcbca`  
+**Repository Working Tree (Audited):** `dfb0bb64fc82398b9a05f1e3457f4f45babfcbca` (Historical Reference)  
 **Target Scope:** Backend Subsystems Only (`vanguard/packages/`, `packs/`, `benchmarks/`, `tools/`, `.agents/`)  
-**Target Locations:** `docs/execution/` vs. `vanguard/packages/` vs. `docs/backend/` vs. `.draft/todo/`
+**Target Locations:** `docs/execution/` vs. `vanguard/packages/` vs. `docs/backend/` vs. `.draft/todo/`  
 
 ---
 
@@ -35,7 +46,7 @@ This audit provides a mathematically rigorous, structurally grounded forensic in
 
 ### The Primary Theses
 1. **Execution Runway Precision is High but Gate-Blocked**: The execution tickets (T-01 through T-97) accurately reflect implementation reality up to Wave 1 (`MS-TRUTH`), with Wave 2 (`MS-CONTROL`) candidates implemented (31/31 named tests green) but correctly held as *unaccepted* due to five hexagonal boundary violations and four facade/entrypoint surface failures.
-2. **Untracked Production Capability Expansion**: Commits `622131da` and `e4b94e3a` introduced a comprehensive, production-grade **Universal Agent Capability Layer** under [`.agents/`](file:///home/rock-dev/Coding/cognitive-framework/.agents) (Skills, Techniques, Proficiencies), a cascading `ModelPort` adapter ([`cascade.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/adapters/models/cascade.py)), and universal MCP synchronization tooling ([`universal_mcp_sync.py`](file:///home/rock-dev/Coding/cognitive-framework/tools/universal_mcp_sync.py)) which are passing 7/7 unit tests but remain **completely untracked or listed as `[ ] [PROPOSAL]`** in [`tasks.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md).
+2. **Untracked Production Capability Expansion**: Commits `622131da` and `e4b94e3a` introduced a comprehensive, production-grade **Universal Agent Capability Layer** under [`.agents/`](file:///home/rock-dev/Coding/cognitive-framework/.agents) (Skills, Techniques, Proficiencies), a cascading `ModelPort` adapter ([`cascade.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/adapters/models/cascade.py)), and universal MCP synchronization tooling ([`universal_mcp_sync.py`](file:///home/rock-dev/Coding/cognitive-framework/tools/universal_mcp_sync.py)) which are passing 7/7 unit tests but remain **completely untracked or listed as `[ ] [PROPOSAL]`** in [`tasks.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md).
 3. **Backend Documentation Exhibits Dangerous Staleness**: While [`docs/backend/architecture/`](file:///home/rock-dev/Coding/cognitive-framework/docs/backend/architecture) presents theoretically sound models, [`docs/backend/reference/`](file:///home/rock-dev/Coding/cognitive-framework/docs/backend/reference) and [`docs/backend/guides/`](file:///home/rock-dev/Coding/cognitive-framework/docs/backend/guides) suffer from active anachronisms—most critically instructing users to configure and run the strictly forbidden and purged `Ollama` provider, omitting the entire `vanguard code` CLI command suite, presenting hallucinated manifest structures, and leaving key production modules with `canonical_owner: null`.
 4. **The `.draft/todo/` Dossier is Methodologically Essential**: Far from being disposable notes, the files in [`.draft/todo/`](file:///home/rock-dev/Coding/cognitive-framework/.draft/todo) represent the true *Synthesis of Record*. They successfully corrected 18 fatal draft flaws (C-1 through C-18), established the non-negotiable **Two-Axis Settlement Law**, barred high-entropy fuzzy patchers in favor of 2PC exact replacements, and established the 6-bottleneck SOTA agent harness taxonomy.
 
@@ -237,7 +248,7 @@ OK (All tests passed: schema conformance, cascading fallback, autofix rollback g
 ```
 
 #### The Documentation Defect
-In [`docs/execution/tasks.md#L300`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md#L300), ticket `T-56` ("Skill catalog progressive disclosure") is marked `[ ]` `[PROPOSAL]`. In reality, the entire system is built, tested, and actively utilized by the agent harness. **The execution runway has fallen behind the physical capability layer.**
+In [`docs/execution/main/tasks.md#L300`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L300), ticket `T-56` ("Skill catalog progressive disclosure") is marked `[ ]` `[PROPOSAL]`. In reality, the entire system is built, tested, and actively utilized by the agent harness. **The execution runway has fallen behind the physical capability layer.**
 
 ---
 
@@ -527,11 +538,11 @@ graph TD
 ### Phase 3: Synchronize the Execution Runway (`docs/execution/`)
 
 1. **Promote Wave 2 Tickets**:
-   - Once Phase 1 clears the boundary and test failures, mark **T-79, T-89, T-92, T-93, T-94, T-95** as `[x]` DONE in [`docs/execution/tasks.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md).
+   - Once Phase 1 clears the boundary and test failures, mark **T-79, T-89, T-92, T-93, T-94, T-95** as `[x]` DONE in [`docs/execution/main/tasks.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md).
 2. **Track the Universal Capability Layer**:
    - Update `T-56` in `tasks.md` from `[ ] [PROPOSAL]` to `[x]` DONE, citing the physical artifacts in `.agents/`, `agent_plugins.py`, and `test_techniques_and_proficiencies.py`.
 3. **Close MS-CONTROL Baseline**:
-   - Update [`docs/execution/milestones.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/milestones.md) to reflect `MS-CONTROL` mechanism closure upon freezing candidate SHA.
+   - Update [`docs/execution/main/milestones.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/milestones.md) to reflect `MS-CONTROL` mechanism closure upon freezing candidate SHA.
 
 ### Phase 4: Advance Wave 3 Implementation (SOTA Coding Capabilities)
 

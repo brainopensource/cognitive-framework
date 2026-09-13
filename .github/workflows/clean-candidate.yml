@@ -71,6 +71,8 @@ jobs:
           python3 tools/linters/check_boundaries.py
           python3 tools/linters/check_tcb_budget.py
           python3 tools/linters/check_event_coverage.py
+          python3 tools/linters/check_corpus_quarantine.py --metadata
+          python3 tools/linters/check_corpus_quarantine.py --admission
           python3 tools/linters/check_falsifier_ids.py
           python3 tools/linters/check_commit_scope.py
           python3 tools/linters/scan_secrets.py

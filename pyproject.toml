@@ -15,6 +15,7 @@ authors = [
 dependencies = [
     "cryptography>=41",
     "jsonschema>=4.23.0",
+    "PyYAML>=6.0",
 ]
 
 classifiers = [
@@ -62,10 +63,5 @@ norecursedirs = ["test/runtime/fixtures", "*.egg-info", "build", "dist", "node_m
 
 [dependency-groups]
 dev = [
-    "griffe>=2.2.0",
-    "mkdocs>=1.6.1",
-    "mkdocs-material>=9.7.7",
-    "mkdocstrings>=1.0.6",
-    "mkdocstrings-python>=2.0.7",
     "rust-just>=1.58.0",
 ]

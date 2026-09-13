@@ -9,19 +9,73 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Mapping, Protocol, Sequence, runtime_checkable
 
-from .layers import Block, Layer, GOAL_ECHO_SOURCE, PINNED_L4_SOURCES
+from .layers import (
+    Block,
+    Layer,
+    GOAL_ECHO_SOURCE,
+    PINNED_L4_SOURCES,
+    PINNED_L5_SOURCES,
+)
+
+
+#: Lines a receipt keeps verbatim when the body around them goes. The header
+#: is the first line — the action that ran or the finding that was made — and
+#: an `artifact=` binding is the only route back to the bytes being dropped.
+#: `NT-C05` requires both to survive the omission of the body they describe.
+_ARTIFACT_LINE = "artifact="
+
+#: A header names an action or a finding; it is not a log line. Clipping at
+#: this width keeps a retained header from smuggling the body back in past the
+#: eviction that was supposed to remove it.
+_RECEIPT_HEADER_CHARS = 160
+
+
+def _clip_line(line: str) -> str:
+    text = " ".join(line.split())
+    if len(text) <= _RECEIPT_HEADER_CHARS:
+        return text
+    return text[: _RECEIPT_HEADER_CHARS - 3] + "..."
+
+
+def _retained_lines(block: Block) -> list[str]:
+    """The identity lines eviction may not take with the body (`NT-C05`).
+
+    A receipt that kept only "N bytes elided" would name neither what ran nor
+    where the bytes went, which turns an eviction into a deletion. So the
+    header and any artifact binding survive — they are identity rather than
+    content, and both are bounded.
+
+    A single-line block has no header: its one line *is* the body, and
+    "retaining the header" there would retain exactly what eviction was asked
+    to reclaim. Structure is the evidence that a header exists, and the clip
+    is the guarantee that a long first line cannot become one.
+    """
+    lines = block.text.split("\n")
+    if len(lines) < 2:
+        return []
+    retained = [_clip_line(lines[0])] if lines[0].strip() else []
+    for line in lines[1:]:
+        clipped = _clip_line(line)
+        if line.startswith(_ARTIFACT_LINE) and clipped not in retained:
+            retained.append(clipped)
+    return retained
 
 
 def _receipt_for(block: Block) -> Block:
     """What `result_eviction` leaves behind: the fact, without the body.
 
     `VG-03 §10.3` — "keep that a file was read; drop the body once superseded".
+    `NT-C05` fixes what "the fact" means: the header that says which action
+    produced the block and the artifact digest that still reaches the bytes.
+    Dropping those alongside the body leaves a block that attests nothing.
     """
+    retained = _retained_lines(block)
+    marker = f"[{block.label} from {block.source}: {block.byte_length} bytes elided after use]"
     return Block(
         layer=block.layer,
         source=block.source,
         label=block.label,
-        text=f"[{block.label} from {block.source}: {block.byte_length} bytes elided after use]",
+        text="\n".join(retained + [marker]),
         evictable=False,
     )
 
@@ -36,9 +90,16 @@ def _drop_flexible_notes(notes: list[Block], dropped: list[str], total, ceiling:
 
 
 def _drop_flexible_dialogue(dialogue: list[Block], dropped: list[str], elided: list[str], total, ceiling: int) -> None:
-    """T-36: drop L5 under pressure; the goal echo at the tail is not evictable."""
+    """T-36 / `NT-C04`: drop L5 oldest-first under pressure.
+
+    Two L5 sources are exempt. The goal echo at the tail is the objective
+    itself, and the newest complete interaction is the state the next action
+    starts from; dropping either to satisfy a budget buys room by deleting the
+    reason the turn exists. Their *bodies* may still be elided into receipts.
+    """
     while total() > ceiling and dialogue:
-        index = next((i for i, block in enumerate(dialogue) if block.source != GOAL_ECHO_SOURCE), None)
+        index = next((i for i, block in enumerate(dialogue)
+                      if block.source not in PINNED_L5_SOURCES), None)
         if index is None:
             break
         removed = dialogue.pop(index)
@@ -130,9 +191,11 @@ class RecencyWindowStrategy:
         elided: list[str] = []
         dropped: list[str] = []
 
-        # 1. Truncate dialogue to the recency window limit; keep the goal echo.
-        while len([b for b in dialogue if b.source != GOAL_ECHO_SOURCE]) > max_items:
-            index = next((i for i, block in enumerate(dialogue) if block.source != GOAL_ECHO_SOURCE), None)
+        # 1. Truncate dialogue to the recency window limit; keep the goal
+        #    echo and the newest complete interaction (`NT-C04`).
+        while len([b for b in dialogue if b.source not in PINNED_L5_SOURCES]) > max_items:
+            index = next((i for i, block in enumerate(dialogue)
+                          if block.source not in PINNED_L5_SOURCES), None)
             if index is None:
                 break
             removed = dialogue.pop(index)
@@ -212,7 +275,8 @@ class StructuredConsolidateStrategy:
         to_consolidate: list[Block] = []
 
         while total() > ceiling and dialogue:
-            index = next((i for i, block in enumerate(dialogue) if block.source != GOAL_ECHO_SOURCE), None)
+            index = next((i for i, block in enumerate(dialogue)
+                          if block.source not in PINNED_L5_SOURCES), None)
             if index is None:
                 break
             b = dialogue.pop(index)
@@ -239,7 +303,8 @@ class StructuredConsolidateStrategy:
             while total() > ceiling and len(dialogue) > 1:
                 index = next(
                     (i for i, block in enumerate(dialogue)
-                     if block.source != GOAL_ECHO_SOURCE and block.label != "structured_record"),
+                     if block.source not in PINNED_L5_SOURCES
+                     and block.label != "structured_record"),
                     None,
                 )
                 if index is None:

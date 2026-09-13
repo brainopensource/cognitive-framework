@@ -1,12 +1,28 @@
 # ARCHITECTURAL SYNTHESIS OF RECORD — ELECTROWEAK v0.9.2 → v0.9.3
 
-**To:** Vanguard / AETHER Engineering Steering Group & Release Governance
-**From:** Principal Systems Architect / Lead Invariant Auditor (Package 0.9.3)
-**Date:** 2026-09-04
-**Authority:** Architectural Directive / Synthesis of Record (`authority: execution-runway-foundation`)
-**Supersedes:** [DRAFT SYNTHESIS], Senior Tech Lead, 2026-09-04
-**Applicable trees:** `docs/execution/{backlog,milestones,tasks,spec}.md`
-**Verification basis:** working tree at `feat/strongforce_beta_release_v093`, HEAD `537bdb66`
+> [!IMPORTANT]
+> **Document Status: ARCHITECTURAL ANCESTRY — CODIFIED INTO CANONICAL SPEC (2026-09-11 | HEAD: `1e257e76`)**
+> - **Authority:** Foundational Design Directive (Codified normatively in [`docs/execution/main/spec.md`](../../docs/execution/main/spec.md) and [`technical.md`](../../docs/execution/main/technical.md)).
+> - **WHAT IS DONE & MERGED IN CODE:**
+>   - **Exact 2PC Edit Primitive (Item 1 / T-78):** Landed in `transaction.py` and `ast_patch.py`.
+>   - **Two-Axis Settlement Law (C-2 / T-72):** Decoupled run termination from task disposition in `domain/evidence/disposition.py`.
+>   - **CTRF Distillation & Trailing Goal Echo (Item 5a, 5b / T-77):** Landed in `agency/context/compaction.py`.
+>   - **Greenfield Vacuity Rejection (Item 5d / T-81):** Landed in `packs/code-default/oracles/gate.py`.
+>   - **Fenced JSON Unwrapping & Anti-Premature Finish (Item 6a, 6b / T-82):** Landed in `adapters/models/dialect.py`.
+>   - **Product Entrypoint & Budget Unification (Item 8 / T-79, T-89, T-99, T-102):** Unified on `presets.json` and `entrypoint.execute`.
+>   - **Measurement Ladder & Metric Veto (Item 9 / T-92–T-95):** Landed in `benchmarks/ladder/` with zero false-completion veto.
+> - **WHAT IS ACTIVE TODO:**
+>   - **MS-CONTROL (T-26 / T-27):** Freeze preregistration and execute single-agent canary ($n \ge 30$, Wilson $\ge 0.40$).
+> - **WHAT IS PROTOTYPE / STAGED AFTER CONTROL (FH-1 PROPOSALS):**
+>   - **Octopus Outer Director & Recursive Tournament Voting (Item 4, 5e / T-120):** Staged strictly to post-control `MS-CAMPAIGN`.
+
+**To:** Vanguard / AETHER Engineering Steering Group & Release Governance  
+**From:** Principal Systems Architect / Lead Invariant Auditor (Package 0.9.3)  
+**Date:** 2026-09-04 (Status updated: 2026-09-11)  
+**Authority:** Architectural Directive / Synthesis of Record (`authority: execution-runway-foundation`)  
+**Supersedes:** [DRAFT SYNTHESIS], Senior Tech Lead, 2026-09-04  
+**Applicable trees:** `docs/execution/{backlog,milestones,tasks,spec}.md`  
+**Verification basis:** working tree at `feat/strongforce_beta_release_v093`, HEAD `537bdb66`  
 
 ---
 
@@ -488,7 +504,7 @@ Invariants this buys, stated as commit-ready falsifiers:
 
 ## 4. Hardened backlog inventory additions
 
-**Copy-paste target:** `docs/execution/backlog.md`, new subsection after §2.10.
+**Copy-paste target:** `docs/execution/main/backlog.md`, new subsection after §2.10.
 
 ### 4.1 New section — insert verbatim
 
@@ -557,7 +573,7 @@ lift and therefore stays `PROPOSED` until a preregistered ablation says otherwis
 | `ARM-01` | T-96 | **New package, `PROPOSED`** (GPT PR-3). Gated on a closed MS-CONTROL and a landed EXP-01. |
 ```
 
-### 4.5 New task rows — `docs/execution/tasks.md` (T-69 onward; current max is T-68)
+### 4.5 New task rows — `docs/execution/main/tasks.md` (T-69 onward; current max is T-68)
 
 Every path verified present in this tree. `depends_on` edges live here, per §3's *"`requires:` edges live on tasks."*
 
@@ -646,7 +662,7 @@ vanguard/packages/agency/manifests/
 
 ## 6. Milestone overlay updates
 
-**Copy-paste target:** `docs/execution/milestones.md` §3. Replace these five rows.
+**Copy-paste target:** `docs/execution/main/milestones.md` §3. Replace these five rows.
 
 | ID | TARGET | Acceptance | Status | Evidence |
 |---|---|---|---|---|

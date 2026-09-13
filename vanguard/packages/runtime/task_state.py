@@ -180,6 +180,14 @@ def fold_task_state(events: Sequence[Any], *, objective: str = "") -> CodingTask
             budgets = payload.get("budgetCeiling") or payload.get("budget")
             if isinstance(budgets, Mapping):
                 state["remainingBudgets"] = {str(k): int(v) for k, v in budgets.items() if isinstance(v, int) and v >= 0}
+            if isinstance(payload.get("behaviorIdentity"), Mapping):
+                # Keep this inside the existing policy-identity field so the
+                # pure domain value remains unchanged while cold continuation
+                # still receives every runtime binding it must validate.
+                state["selectionPolicyIdentity"] = {
+                    "behaviorIdentity": dict(payload["behaviorIdentity"]),
+                    "contextEpoch": payload.get("contextEpoch"),
+                }
         if kind == "ObservationProduced":
             path = payload.get("path")
             if isinstance(path, str) and path:
@@ -257,13 +265,33 @@ def fold_task_state(events: Sequence[Any], *, objective: str = "") -> CodingTask
                 for path in surface:
                     if isinstance(path, str) and path not in change_surface:
                         change_surface.append(path)
+                    # DIR-D1. A deleted path is a changed path: a resumed
+                    # planner that saw only surviving files would believe a
+                    # delete never happened and propose it again. The carrier
+                    # publishes the complete set, deletions included, so the
+                    # modified-file projection takes the whole set.
+                    if isinstance(path, str) and path:
+                        modified.add(path)
+            candidate_digest = payload.get("candidateDigest") or payload.get("candidate_digest")
+            recorded = last_verification.get("workspaceDigest")
+            if (isinstance(candidate_digest, str) and candidate_digest
+                    and isinstance(recorded, str) and recorded
+                    and recorded != candidate_digest):
+                # DIR-D1: replay rejects stale evidence. The receipt attests a
+                # postimage this surface fact has superseded, so it is not
+                # evidence about the current candidate and must not be handed
+                # to the completion gate as though it were. Dropping it is not
+                # a loss of history -- the event stays in the ledger; only the
+                # projection refuses to present it as applicable.
+                last_verification = {}
         if kind == "NextActionSelected":
             action = payload.get("nextAction") or payload.get("action")
             if isinstance(action, str):
                 state["nextAction"] = action
         if kind == "ContextSelectionRecorded":
-            if isinstance(payload.get("repositoryIdentity"), str):
-                state["repositoryIdentity"] = payload["repositoryIdentity"]
+            subject = payload.get("repositorySubject", payload.get("repositoryIdentity"))
+            if isinstance(subject, str):
+                state["repositoryIdentity"] = subject
             if isinstance(payload.get("selectionPolicyIdentity"), Mapping):
                 state["selectionPolicyIdentity"] = dict(payload["selectionPolicyIdentity"])
             if "indexSnapshotDigest" in payload:

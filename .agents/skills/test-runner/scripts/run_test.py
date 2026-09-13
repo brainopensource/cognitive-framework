@@ -22,10 +22,16 @@ def run_isolated_test(command: str, timeout: float = 15.0, cwd: str = ".") -> Di
     exit_code = -1
 
     try:
+        env = dict(os.environ)
+        resolved_cwd = os.path.abspath(cwd)
+        curr_pp = env.get("PYTHONPATH", "")
+        env["PYTHONPATH"] = f"{resolved_cwd}:{curr_pp}" if curr_pp else resolved_cwd
+
         proc = subprocess.Popen(
             command,
             shell=True,
             cwd=cwd,
+            env=env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True

@@ -7,15 +7,15 @@ status: living
 owner: repository-governance
 canonical_for:
   - active-feature-delta-specification
-version: "2.0.0"
-date: "2026-09-05"
-last_verified: 2026-09-07
-lock_head: "66aa7a3c0c31"
+version: "2.1.0"
+date: "2026-09-11"
+last_verified: 2026-09-12
+lock_head: "bf56eea9"
 derived_from:
-  - .draft/DEVELOPMENT_FINAL_PLAN.md
-  - .draft/DEVELOPMENT_FINAL_PLAN_B.md
-  - .draft/DEVELOPMENT_FINAL_PLAN_v2.md
-  - .draft/PHASE-0_DEVELOPMENT_FINAL_PLAN.md
+  - docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN.md
+  - docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN_B.md
+  - docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN_v2.md
+  - docs/reports/reviews/electroweak_v092/plans/PHASE-0_DEVELOPMENT_FINAL_PLAN.md
 normative_authority:
   - docs/architecture/boundaries.md
 relationships:
@@ -32,16 +32,343 @@ Lock SHA `66aa7a3c` is the forensic baseline. Implementation head for closed ins
 
 Companion handbook: [`technical.md`](technical.md). Task IDs: [`tasks.md`](tasks.md).
 
+## RUN-1. Leadership execution decision (2026-09-12)
+
+**ACCEPTED planning requirements; implementation not claimed.** Authority is the
+user's delegation of technical/product/release planning in this session. Inspected
+subject: `001911e3231967cf23e885ce2ea4356083d67d01`. This amendment decides the
+remaining work; it does not retroactively accept the documentation commits
+`faa53259`, `486fb530` or `001911e3`, execute a freeze, spend money or close a gate.
+It supersedes conflicting readiness, placement and scheduling statements in the
+five execution files. VISION, constitutional boundaries and independent empirical
+acceptance remain binding. Earlier `lock_head` metadata identifies historical
+planning subjects, not permanent authority over this amendment.
+
+**RUN-01 — Current outcome.** The next outcome SHALL be a reproducible Coding Max
+single-controller qualification through the shipped product path. Complete the
+control evidence boundary before collecting the canary. Existing context, editing,
+index, recovery and composition mechanisms SHALL be reused. New capability
+activation remains outside this control arm. Negative or undeterminable results
+SHALL preserve evidence and keep the positive gate open; they SHALL NOT trigger
+unbounded repair-and-rescore loops or unlock the post-control tree.
+
+**RUN-02 — Diagnostic versus release scoring.** Pure metric functions MAY compute
+fixture/replay diagnostics without filesystem reads or a frozen production record.
+A publishable control report MUST pass one explicit admission boundary that takes
+the frozen manifest and reconciled evidence; a caller-supplied `frozen=True` is
+insufficient. No fixture diagnostic is a control acceptance receipt. T-26a MUST
+validate schema/version, exact subject, all four control-arm fields, suite/task/
+oracle identities, model/provider/configuration identity, declared attempts,
+resource ceilings, stop/missingness policy and the complete evidence population.
+Empty mappings, missing values, duplicate task attempts, stale or mixed subjects,
+unknown dispositions and mismatched denominators MUST fail closed. Preserve the
+false-completion veto independently of pass rate. The production publication
+caller MUST use this boundary; a new unused helper does not satisfy T-26a.
+
+**RUN-03 — Bounded qualification.** T-51 SHALL freeze exactly 30 distinct L2 tasks,
+in a deterministic order, stratified across the existing coding-task taxonomy
+with explicit class counts. L0/L1 development tasks MUST NOT enter this holdout.
+One measured attempt per task; failures and missing outcomes retain their slots.
+Stop after the 30 scheduled attempts, a resource ceiling, or an integrity veto;
+no replacement, top-up, outcome-dependent early success or best-of-retries claim.
+Positive acceptance requires all 30 binary outcomes and the existing two-sided
+95% Wilson lower bound >= 0.40 plus zero observed false completions. Insufficient
+binary evidence is UNDETERMINABLE. This narrows the former open-ended
+`n_evaluable >= 30` stopping text; T-26 MUST reconcile the frozen artifact first.
+Per-task balanced ceilings remain unchanged. Total attempt, provider-call,
+inference-cost, evaluation-cost and wall-time ceilings MUST be explicit and
+approved for the run; no unspecified resource is unlimited. This amendment grants
+no paid-call allowance. Qualification MUST reserve verification/recovery capacity
+before work, retain unknown usage as unsettled, and never infer a refund from timeout.
+
+**RUN-04 — Autonomous engineering.** A READY row authorizes implementation in a
+subsequent engineering assignment within its lease and accepted contract. The
+developer MAY choose private helpers, test fixtures, error wording, equivalent
+algorithms and bounded fixes to task-introduced failures. They MAY prepare the
+declared new falsifier before implementation; absence of a new test file alone is
+not a blocker. They MUST NOT silently add public ports/schemas, change product
+presets, widen scope/authority, disable verification, alter acceptance thresholds
+or promote an unapproved proposal. Every session SHALL record subject, row,
+remaining work, file ownership, verification disposition and remaining allowance
+using the existing task handoff, without a new planning file. At session exhaustion,
+preserve a resumable handoff; iterative repair obeys the existing rollback contract.
+
+**RUN-05 — Admission depth.** Only the bounded control-hardening and corpus/metric
+work in the active tasks table is ready now. FH-1 remains proposed. Its mathematics
+and pseudocode describe candidate contracts, not ratified schemas or implemented
+APIs. Before a branch becomes READY, T-129 SHALL resolve source-path collisions,
+reuse owners, missing emitter/reducer/composition work, migrations, executable
+falsifiers and the finite session envelope, then seek one package-level decision.
+That decision authorizes ordinary choices within the branch; no per-leaf leadership
+permission is needed thereafter. Passing T-27 alone never approves every branch.
+
+**RUN-06 — Preserved boundaries.** Planned kernel delta remains zero, ceiling 1438;
+N-06 forbids `import subprocess` in runtime. Reuse one ledger writer, governor,
+episode execution path and existing ports. A memory composition registry is not a
+workspace CAS implementation. Static skill discovery is not durable learned-skill
+qualification. Empirical M-8 acceptance remains required before M-9/M-10; control
+qualification is not a renamed beta release. Required containment/authorization
+for a selected execution profile cannot be deferred by calling it post-beta.
+
+## RUN-2. Director causal decision (2026-09-12)
+
+**ACCEPTED decisions; no implementation, freeze, paid call or SOTA claim.**
+Assignment subject `63881e68caab8a33a4da588718db33fe0fb88706`; recorded here on
+`41429f91`. This amendment answers the questions reserved to leadership under
+RUN-01..RUN-06 and supersedes conflicting scheduling statements. It does not
+retroactively accept T-26b, reopen an accepted receipt, or authorize T-26/T-27.
+
+**RUN-07 — Measurement trust and holdout integrity.** The control instrument is
+NOT currently trustworthy. Two defects compound: two bound oracle files changed
+after acceptance, and previously exercised `todo`/`quiz` development tasks are
+present in the T-51 holdout despite having been used for live development
+diagnostics. Corpus reconstitution is therefore broader than digest repair: the
+exposure of all 30 members MUST be audited, every exposed member removed and
+replaced, and cardinality and strata counts preserved. The default escalation
+rule is retained unchanged — three or more toothless or nondeterministic oracles
+means systemic failure and corpus rebuild; fewer permits named repair or
+replacement — and applies to oracle quality independently of the exposure audit.
+Corpus, accounting, publication and false-completion tests MUST become mandatory
+in `just verify`; `just check` remains fast. A measurement instrument that no
+gate protects will drift again, and did.
+
+**RUN-08 — Invalidated oracle treatment.** REPAIR both invalidated members,
+`04_sqlite_wal_checkpoint_lock` and `05_token_budget_clamping_drift`. Rebinding
+the resulting source, oracle and suite digests is explicitly authorized, but only
+after the repaired oracle is independently proven deterministically red on the
+intended defect and green on a correct implementation. Digest synchronization
+alone is forbidden: it would rebind the instrument to whatever the tree currently
+says rather than to the defect the member exists to detect. **Ordering is
+normative.** The RUN-07 exposure audit runs BEFORE this repair. A member that the
+audit removes MUST NOT first be repaired and rebound; repairing then deleting a
+member wastes the independent-proof step and leaves a rebound digest in history
+with no member behind it.
+
+**RUN-09 — Defects that block measurement.** The following are `BLOCK-T27`; none
+may be deferred to post-control, because each can produce a published number that
+does not mean what it claims: (1) valid model writes do not land; (2) multi-file
+application can be partial or invisible to the oracle; (3) patchless, test-inlined
+or unauthorized-extra-file completion can appear green; (4) product episodes
+continue after a valid admitted completion; (5) malformed or undeclared tool
+dialect is not attributed precisely; (6) evidence identity can diverge from the
+submitted product candidate; (7) resume or compaction can lose task, candidate,
+plan or budget identity; (8) model escalation can bypass the aggregate budget or
+provider policy. After attribution in (5) is repaired, an actual malformed
+response or pre-action resource exhaustion MAY be recorded as
+`MEASURED-MISSINGNESS` with a typed reason, a retained slot and a non-binary
+`UNDETERMINABLE` disposition. Neither is ever silently scored as an ordinary task
+failure. New autofix-cascade activation is `POST-CONTROL` and excluded from the
+balanced arm; existing policy and budget bypasses remain pre-control blockers.
+
+**RUN-10 — Approved architectural boundaries.** All nine are approved: one
+canonical `EpisodeEngine` with no second agent loop; atomic all-or-nothing
+multi-file commit carrying a final whole-candidate tree digest; an exterior oracle
+that evaluates the exact submitted candidate; token-bounded and provenance-bound
+context retrieval; compaction preserving objective, constraints, unresolved
+failures, plan state, changed-file identity and the resource ledger; fresh-process
+resume that neither duplicates effects nor resets ceilings; finite replanning with
+terminal exhaustion; escalation through the existing `ModelPort`, provider factory,
+credential isolation and evidence accounting; one task/slot identity and one
+aggregate resource budget across escalation. **No public port or schema change is
+authorized.** Current public contracts MUST be preserved; a demonstrated
+incompatibility is a named leadership-reviewed delta, not a developer's call.
+Planned kernel delta remains zero.
+
+**RUN-11 — Delivery order and permitted parallelism.** Packages and rough sizes:
+P1 measurement and oracle integrity (M); P2 product-path write and change closure
+(M); P3 exterior completion and false-completion resistance (M); P4 large-context,
+compaction and resumable-session qualification (L); P5 budgeted model cascade plus
+comparative evidence (L). P1 and P2 MAY proceed in parallel under separate,
+disjoint leases. P3 falsifier authoring and P4 read-only qualification MAY proceed
+alongside them. P3 integration requires a reviewed P2; final P4 qualification
+requires reviewed P2 and P3. T-26b acceptance requires reaccepted P1 and T-51.
+
+**RUN-12 — Live model authority.** `DEFER — zero calls`. Zero USD, zero provider
+calls, zero tokens, zero turns and zero live wall-clock time are allocated before
+freeze. No model is authorized. The aggregate `$0.10 USD / 150 provider call`
+diagnostic ceiling remains unallocated, and the existence of a credential is not
+authority. Historical usage of unknown cost remains unsettled and MUST NOT be
+reported as zero. Diagnosis before freeze is hermetic. Any later live allocation
+requires a separately pinned authorization naming the exact model ID, task class,
+purpose, USD/call/token/turn/wall-clock sub-ceilings, ledger destination and stop
+condition, granted only after the RUN-13 diagnostic packet is retained.
+
+**RUN-13 — The one open causal question.** The write-landing failure does NOT yet
+have a causal boundary, and this amendment does not invent one. Retained `todo`
+and `quiz` failures reached the harness through `ForgeFacade`
+(`benchmarks/baac/lib/runner.py:213`); their cassettes retain hashes and usage
+counts rather than tool payloads, so they cannot identify the failing product
+seam, and both tasks are additionally inside the RUN-07 holdout. No qualifying
+retained L0 product trace exists. Forge, BaaC and the autofix proficiency are
+comparative evidence only; a repair in one of those paths never closes a
+product-path defect. One hermetic diagnostic set is therefore authorized under
+T-130 at zero cost. Until it returns, an `entrypoint.py` root cause is unproven
+and MUST NOT be assumed. The symptom is stated as: capable models consume turns
+on multi-file and greenfield work while changing zero files; the governing
+invariant is that a valid emitted write lands atomically in the candidate
+workspace and the exterior oracle observes that identical submitted tree.
+
+## DIR-1. Wave 1 rulings and replacement-corpus quarantine
+
+Accepted Director decisions, 2026-09-12, inspected subject
+`c3d640783e9bfb96e46551c27ebb6336b9d6e461` (successor of requested `da12be3f`).
+The landed T-130/T-131 work is preserved, not independently accepted here.
+This amendment authorizes only the named task leases and contracts below;
+RUN-12 stays zero calls/zero USD, T-26 stays UNFROZEN, and T-27 is not authorized.
+
+**DIR-D1 — REFRAME: durable carriers, not blanket kind activation.** At this
+subject 18 of the fold's 28 recognized kinds are unwritable, not 16; none belongs
+to `DEPRECATED_KINDS`. Shrinking that set cannot repair the gap. `READABLE_KINDS`
+MUST remain derived from generated `EventKind`, and `WRITABLE_KINDS` MUST remain
+its difference with deprecated kinds. The normative kind allocation is
+`schemas/mhf/event_envelope.schema.json#/$defs/EventKind`.
+`schemas/mhf/event_envelope_v2.schema.json` is the normative production `/2`
+envelope and references that allocation; the two `schemas/v4/event-envelope*`
+files are compatibility shapes, not a second allocation authority.
+
+Authorize the narrow public schema addition of `VerificationRecorded` and
+`ChangeSurfaceUpdated` in that shared allocation, with typed payload definitions
+and `/2` payload validation, generated types, sole session-writer ownership,
+real emission, fold handling, golden vectors and event-coverage proof delivered
+together. No envelope-version bump, deprecated-kind revival, kernel change or
+activation of the other 16 compatibility names is authorized. Existing
+`PlanRevised`, `EpisodeStateChanged` and `EffectCompleted` carriers remain in use.
+The new verification fact records observed verification, not an evaluator verdict
+or independent authority to complete; `VerdictRecorded` ownership is unchanged.
+It binds task/composition/workspace/verification-subject digests, argv, exit code,
+observed test count (unknown stays null), and result artifact digest. The surface
+fact binds the task and candidate digests, settled effect descriptor and complete
+sorted changed-path set including deletions. Append through the single writer
+before the next proposal; append failure stops progress. Replay verifies these
+bindings and rejects stale evidence. Reconstruct verification and multi-file
+surface from persisted production facts in a fresh process, without fixtures
+injecting otherwise-unwritable events. The fold's existing generic
+`lastVerification` payload support means "NEVER reconstructible" is too absolute;
+the actual gap is an emitted, validated, qualified durable carrier.
+
+**DIR-D2 — ACCEPT: INDEX_UNBOUND is infrastructure missingness.** Extend RUN-09
+MEASURED-MISSINGNESS to absent required index infrastructure: retain the scheduled
+slot, terminal reason `INDEX_UNBOUND`, and non-binary `UNDETERMINABLE` disposition.
+Keep completion fail-closed and do not consult the pack policy to bypass the
+missing index. Detect absence before inference where knowable; at admission stop
+without spending semantic repair retries. Missing infrastructure is not evidence
+of model reasoning failure. This moves affected observations from abandoned/
+task-failure counts to infrastructure-missing counts, reduces the binary sample,
+and can improve conditional pass rate without improving all-slot coverage.
+Publish both denominators; fewer than 30 binary outcomes cannot qualify. Missing
+index, stale packet, explicit policy rejection and provider failure stay distinct.
+Use existing terminal/disposition axes and reason fields; no new terminal enum.
+
+**DIR-D3 — ACCEPT: remove the false SHA-256 shim.** Authorize removal of the
+zero-padded SHA-1 acceptance in `domain/evidence/baseline.py`. The inspected
+accepted `CONVERGENCE-BASE-v1.json` pin equals SHA-256 of the ASCII Git tree object
+ID and does not equal the padded value; the verifier test constructs that same
+canonical hash. No legitimate padded caller/pin was found in the current tree.
+Retain that established digest algorithm: changing to a hash of tree contents
+would be a separate migration. Reject raw SHA-1 mislabeled `sha256:` as well.
+Never rewrite or re-sign historical baseline evidence as part of this deletion;
+if an external signed padded pin is discovered, quarantine it and return a named
+migration decision, rather than silently converting or accepting it.
+
+**Q-01 — Quarantine invariant (RUN-07/RUN-08).** All 30 old members are exposed
+by solve-attempt-grade evidence and MUST be retired from qualification, including
+the two stale-digest members. Their old bytes/digests stay historical; no repair
+or rebinding of these removed members. Replacement is exactly 30 tasks with
+10 brownfield / 11 greenfield / 5 multi_file / 1 multi_turn / 3 single_file.
+
+Let `D*` be the append-only development/exposure registry, closed under task
+aliases, origin/lineage and content fingerprints; let `H` be the replacement
+holdout registry. Require `closure(H) intersect closure(D*) = empty` at admission
+and on every use. A development exposure is irreversible: neither rename, copy,
+new digest nor new suite revision restores holdout eligibility. Holdout material
+MUST be held in a separate curator-controlled store absent from developer mounts,
+LDA/retrieval, LAM capture, generic glob loaders and training/export paths. The
+repository carries opaque IDs, strata, commitments and curator attestations only,
+never replacement task/oracle/reference-solution plaintext. The existing product
+path receives only the assigned task and source at an authorized measured slot;
+the exterior oracle and reference solution are never mounted for the solver.
+Pre-freeze red/green validation uses isolated curator fixtures, not a solver or
+development model; only signed validation metadata leaves that boundary.
+
+Every development task registration, materialization, capture and export MUST
+fail closed unless its ID/origin/content is registered DEV and absent from H.
+Every evaluation materialization MUST require an admitted frozen manifest and
+separate run authority; default-deny missing role/registry/attestation or store.
+A holdout exposed to development is irrevocably marked EXPOSED and removed before
+freeze; after freeze it invalidates the subject, never triggers slot replacement.
+Exposure history includes LAM prompts, benchmark results, retained patches and
+`DOGFOOD_SET`; deletion of those artifacts does not erase the tombstone.
+
+`tools/linters/check_corpus_quarantine.py` MUST check: exactly 30 unique IDs and
+the exact strata; canonical source/oracle commitments; immutable origin and
+exposure ancestry; DEV/HOLDOUT role separation; forbidden aliases, normalized
+paths, symlink escapes and matching task/source/oracle fingerprints; absence of
+holdout plaintext in tracked files and configured caches/indexes/exports; and
+registered guarded entrypoints for every loader/capture/export. Renamed copies
+and missing registries/attestations MUST fail. Fingerprint matching does not prove
+semantic novelty: an independent curator attests lineage and checks near-duplicate
+candidates; unresolved similarity is excluded, not declared clean by the linter.
+The linter runs metadata/entrypoint checks in `just check`, full admission checks
+in `just verify` and both CI workflows, and at every materialization boundary.
+Offline CI validates immutable curator receipts; freeze admission additionally
+revalidates the sealed store under the curator role. Neither absence of private
+material nor inability to inspect it may be reported as corpus acceptance.
+
+**DIR-P — Approval probe, not an approval repair.** T-130's valid instrument
+returned NOT_REPRODUCED for all three write fixtures; it did not qualify successful
+completion. The absent-approver/suspension path remains cold. Probe the real
+entrypoint with a hermetic approval-requiring composition, missing approver,
+explicit denial, valid descriptor-bound approval and invalid/stale approval.
+Missing approver MUST NOT become default-allow. A valid signed positive control
+may enter at the existing session approval boundary but MUST be labeled as such,
+not misrepresented as public-entrypoint wiring. No production approval injection
+or threshold change is authorized before attribution and independent review.
+
+### DIR-2. Phase-transition review (63d12d83, 2026-09-12)
+
+The Director accepts T-136 and T-134's bounded component contracts after source
+review and the isolated 123-test focused slice. T-134's two shared MHF kind/payload
+allocations remain the only authorized schema expansion; `/2` references the
+shared allocation and retains its envelope version. Neither acceptance qualifies
+the full product or control. session.py transfers to B/T-135.
+
+T-133 is NOT accepted: 22 inventoried paths include only seven required guards,
+14 observed-unleased paths and one declarative path. Missing/unknown task IDs
+bypass guards; supplied source is not fingerprint-checked; nonempty authority and
+a caller's FROZEN flag do not prove evaluation authority or exact identity.
+An exit-0 `HOLDOUT UNACCEPTED` diagnostic is not admission. Q-01 is unchanged;
+the correction must close these actual paths before independent reacceptance.
+
+Gate discovery and the synthetic approval diagnostic do not depend on acceptance
+of a fresh holdout. Explicitly authorize T-132, T-135, T-137 and T-131.6 as READY
+under their disjoint task-row leases; transfer gate files to C/T-132 now and
+serialize C's correction/probe work. T-51 remains REOPENED/BLOCKED on quarantine
+reacceptance, an independent curator, external sealed store and new-corpus proof.
+No old-member oracle digest repair, T-26 freeze or T-27 execution is authorized.
+
+**RUN-13 causal statement:** observed historical zero-write symptom → no failing
+write seam reproduced by T-130's valid instrument → preserve RUN-10's atomic
+candidate/exterior-oracle identity invariant → no product repair site authorized
+yet → T-137's allow/suspend/deny/signed/stale-approval matrix must distinguish the
+cold suspension path. Passing write controls does not prove admitted completion.
+The diagnostic implementation now lives in `tools/diagnostics/write_landing_probe.py`;
+moving concrete normalization/store wiring to tooling fixes its architectural
+placement, not the historical write defect. The product entrypoint, EpisodeEngine,
+ports and schemas are unchanged by that move. No evidence currently requires a
+public port/schema repair; if T-137 demonstrates one, return a named delta rather
+than inferring approval. Missing approver remains refusal, never default-allow.
+T-137 is hermetic synthetic-fixture work only: zero provider calls/USD under RUN-12.
+
 ## NT-1. Near-term baseline, context, cache and recovery delta
 
 **Authority and scope (2026-09-07).** This executive amendment authorizes T-98–T-111 and the revised T-77 before control qualification. It supersedes earlier EW-9 exclusions only for deterministic context/cache/recovery hardening and baseline remediation. Existing T-09–T-16 mechanisms are extended, not re-created. T-80 remains the later workspace-policy treatment; deterministic semantic stall detection belongs to T-106. Model escalation, consultation, specialists, CAS workspace promotion, memory learning, new index backends and T-96 remain outside this iteration. Historical milestone receipts retain their original subjects. No new milestone is accepted by this amendment.
 
 ### NT-1.1 Baseline and execution safety
 
-- **NT-B01:** Baseline receipts MUST bind source SHA, dirty-state digest, environment/runner identity, exact commands, collected/executed/skipped counts, failures/errors, import failures and output artifact digests. The historical 66/2,855 audit result MUST NOT be presented as a current measurement. An unexecuted command has status `not_run`, never `passed`.
+- **NT-B01:** Baseline receipts MUST bind source SHA, dirty-state digest, environment/runner identity, exact commands, collected/executed/skipped counts, failures/errors, import failures and output artifact digests. The historical 66/2,855 audit result MUST NOT be presented as a current measurement. An unexecuted command has status `not_run`, never `passed`. Current-subject baseline discovery (T-101) established exact counts on commit `771850c1c28f9509f4d976690e1055346c826e00`: 2,924 collected, 2,918 executed, 2,861 passed, 10 failed, 7 errored, 42 skipped (0 missing or unaccounted modules; floor >= 2,900 pinned by `test/contracts/test_collection_integrity.py`).
 - **NT-B02:** Broad discovery and context-refresh workflows that execute tests MUST run in an isolated repository with independent Git metadata, redirected writable corpora, provider credentials removed and network denied until nonmutation is proven. Compare source/index/corpus bytes before and after; a linked worktree alone does not isolate Git metadata. Every required module MUST be collected or have a recorded retirement and successor claim. Silent deletion or skipping of failing/security tests is forbidden.
 - **NT-B03:** The near-term canonical Python runner is unittest. Essential safety setup MUST NOT depend on pytest hooks. Required additional runners remain explicit. Acceptance requires the complete `just check`/`just verify` recipe bodies, full `python3 -m unittest discover -s test -t .` in the qualified runner, and the declared TypeScript gates. Missing executables/dependencies block acceptance; invoking only available subsets does not satisfy the gate.
-- **NT-B04:** Product surfaces MUST preserve terminal status and task disposition as separate axes under EW-9.1. `abstained` MUST NOT become `completed`; a refusal cannot be relabeled as success by a facade, child adapter, CLI exit mapper, or benchmark writer. Successful completion requires fresh applicable evidence under TC-E-058. Help MUST perform no model/effect invocation. Existing budget-only presets MUST NOT be advertised as behaviorally distinct harness arms.
+- **NT-B04:** Product surfaces MUST preserve terminal status and task disposition as separate axes under EW-9.1. `abstained` MUST NOT become `completed`; a refusal cannot be relabeled as success by a facade, child adapter, CLI exit mapper, or benchmark writer. Successful completion requires fresh applicable evidence under TC-E-058. Help MUST perform no model/effect invocation. Existing budget-only presets MUST NOT be advertised as behaviorally distinct harness arms. Preset and evidence configuration integrity (T-103) binds catalog ceilings (`fast`: $0.05/8t/16k, `balanced`: $0.15/20t/40k, `max`: $0.40/40t/96k); caller attenuation via `effective_limit` is strictly monotonic and cannot elevate declared limits; normalized behavioral identity includes selected plugins (`planner`, `context`); budget-only differences or identical behavior cannot be relabeled as distinct comparative treatment arms.
 
 ### NT-1.2 Typed value contracts
 
@@ -90,11 +417,74 @@ The versioned wrapper adds lineage/reducer validation to Part 3's reference `Mem
 | `PROVIDER_TRANSIENT` | Bounded deadline-aware retry with retained accounting | Unlimited retries or fictitious zero usage |
 | `RECOVERY_FAILED` | Quarantine owned work and report failure | Claim rollback or task success without evidence |
 
-**NT-I01:** Planned kernel delta = 0 LOC; ceiling remains 1438. All additions live above the domain-blind kernel. Ports cannot import agency/kernel; adapters cannot import agency/kernel; runtime cannot execute subprocesses (N-06). Preserve I-6 isolation, I-7 domain blindness, one event writer and grant/budget attenuation. **NT-I02:** New gates `MS-BASELINE` and `MS-CONTEXT` are prerequisites to a new T-26 control freeze, not replacements for historical M-1–M-3/MS-INSTRUMENT/MS-RESUME receipts or M-8–M-10 release predicates. Deterministic 100+ turn fixtures do not change the balanced product ceiling or imply benchmark success.
+**NT-I01:** Planned kernel delta = 0 LOC; ceiling remains 1438. All additions live above the domain-blind kernel. Ports cannot import agency/kernel; adapters cannot import agency/kernel; runtime cannot execute subprocesses (N-06). Preserve I-6 isolation, I-7 domain blindness, one event writer and grant/budget attenuation. **NT-I02:** New gates `MS-BASELINE` and `MS-CONTEXT` are prerequisites to a new T-26 control freeze, not replacements for historical M-1–M-3/MS-INSTRUMENT/MS-RESUME receipts or M-8–M-10 release predicates. Deterministic 100+ turn fixtures do not change the balanced product ceiling or imply benchmark success. **NT-I03:** Concurrent contributors MUST start from one recorded integration subject, use isolated branches/repositories and hold disjoint write leases. A owns runtime/product consumers, B owns pure context/recovery policy, and C owns schema/catalog generator inputs, preset/catalog configuration, benchmarks/corpora/metrics, execution documentation and the serial merge queue. Branch-local success is candidate evidence only. Leadership acceptance occurs once at the final T-111 boundary unless a proposed change exceeds this specification.
+
+### NT-1.6 Runtime durability and ordering protocol
+
+This protocol governs T-107. An **external boundary** is any model inference, effect dispatch, pending-operation poll, approval request or delay whose repetition or omission changes observable behavior or spends budget. A derived in-memory object is not durable merely because its source events are eventually writable. The fact authorizing the next boundary MUST be accepted by the existing single ledger writer first.
+
+| Transition | Required durable precondition | Required identity/content | Failure disposition |
+|---|---|---|---|
+| Compose or recompose | Composition and epoch identity validated | subject, manifest/composition, prompt, ordered tool schemas, context policy, model route, serializer, counter and recovery-policy digests | Reject stale/unknown identity; perform no inference or effect. |
+| Select context -> infer | Registered `ContextSelectionRecorded` fact appended | `aether.prompt-selection/1`, cursor, prefix/state/policy/request digests, final serialized token count and ordered omissions | `CONTEXT_STALE` or durable-write failure; model call count remains unchanged. |
+| Semantic outcome -> recover | Complete recovery snapshot appended through a registered state/recovery fact | `aether.recovery-state/1`, triggering attempt, chosen action/reason/delay, remaining-budget reference and pending-operation/deadline state | `RECOVERY_FAILED`; do not wait, retry, reground, replan or dispatch. |
+| Effect intent -> execute | Existing `EffectStarted` intent durably appended | descriptor, grant/lease, idempotency identity, resource, action and reservation | Stop before adapter invocation. |
+| Effect settles -> next turn | Existing completion/failure/reconciliation fact durably appended | result or explicit unknown occurrence, actual settlement and artifact/result identity | Keep unknown occurrence unsettled; reconcile before replay or refund. |
+
+`ContextSelectionRecorded` and recovery-carrier payloads are runtime facts, not prompt text. Their payloads MUST contain identities or canonical typed values, not mutable Python objects. `runtime/task_state.py` may recognize compatibility kinds during replay, but recognition alone does not authorize production emission: every emitted kind MUST be registered in the canonical event schema/catalog and covered by `check_event_coverage.py`. `EpisodeStateChanged` remains a permitted carrier where its registered payload can represent the complete recovery state; a distinct `RecoveryStateUpdated` kind requires schema/catalog registration before use.
+
+Cold reconstruction MUST follow this order: verify the event chain; fold semantic task state; validate schema, subject, lineage, reducer and policy identities; reconcile open effect intents and child operations; restore settled descriptors, remaining budgets, recovery counters/history, pending operation/deadline and composition epoch; then compile the next context. It MUST NOT call a model or adapter while reconstructing. A descriptor already settled or occurrence-unknown MUST NOT be dispatched again. An expired pending operation is reconciled or terminated under its original reservation, never replaced with a new operation identity.
+
+Behavior-affecting identity includes at least system instructions, capability-card bytes, ordered tool schemas, model dialect/route, context-selection policy, serializer/counter, recovery policy and product preset. A change to any member creates a new epoch/composition identity and invalidates reuse of an earlier prompt-selection or control-freeze receipt. Telemetry-only fields such as wall-clock observation timestamps do not alter selected bytes or behavior identity.
+
+### NT-1.7 Integrated qualification and control-handoff protocol
+
+T-109 and T-111 are empirical acceptance boundaries. Their receipts MUST be produced on a committed candidate with an empty working tree. Administrative evidence may be recorded in a later documentation-only commit that cites the tested candidate; any executable, schema, prompt, corpus, policy, lockfile or generated-index change creates a new candidate and requires the affected gate to run again.
+
+For every test runner, counts MUST satisfy:
+
+```text
+collected = passed + failed + errors + skipped
+executed  = passed + failed + errors
+failed = 0 and errors = 0
+```
+
+If the runner reports a different counting model, the receipt MUST provide an explicit mapping that reconciles every collected test. Import failures are errors, never skips. Focused reruns are diagnostic supplements. They cannot replace a failing or incomplete broad-discovery receipt. Environmental attribution requires a deterministic reproduction plus a passing unchanged candidate in the qualified environment; prose attribution is not a waiver.
+
+The protected acceptance subject comprises tracked source, tests, fixtures/corpora, lockfiles, manifest/schema inputs and generated knowledge outputs. The verifier records pre/post digests and `git status`; mutation invalidates the run even when tests pass. Required commands are the current literal full unittest discovery, `just check`, `just verify`, TypeScript typecheck and declared npm tests. A missing dependency or command is `not_run` and blocks acceptance.
+
+T-110 establishes semantic equivalence between uninterrupted and cold-resumed execution over at least 100 deterministic turns. The comparison vector is:
+
+```text
+(objective, constraints, plan, next_action, modified_resources,
+ last_material_failure, latest_applicable_verification, settled_effects,
+ remaining_budgets, recovery_history_and_counters, pending_operation,
+ pending_deadline, composition_epoch, serializer_id, counter_id,
+ terminal_status, disposition)
+```
+
+Every field MUST match after canonical encoding except event positions explicitly introduced to record restart/reconciliation. The fixture MUST force compaction and restart, exercise misleading external text, stale verification, pending-operation expiry and exhausted recovery, and prove zero duplicate settled effects. Passing the fixture proves deterministic preservation only; it does not prove provider cache hit rate, model quality, live benchmark success or production sandbox strength.
+
+T-111 closes MS-CONTEXT only when MS-BASELINE and all context tasks are accepted on a compatible integrated subject. Its output is an **unfrozen control candidate**. T-26 remains the sole freeze task and MUST still verify applicable T-79/T-89/T-92–T-95 and T-51/T-52 evidence. T-111 performs no paid call, does not close MS-CONTROL and does not authorize T-80, T-96, specialists, CAS, campaigns or memory learning.
+
+Before T-111, C MAY prepare and falsify the hermetic portions of the control corpus,
+metrics, evidence-row validation, hypothesis registry and L0 operator recipe. Such
+preparation MUST preserve `control_preregistration.json` as `UNFROZEN` with no subject,
+MUST NOT execute a paid provider call, and MUST NOT be reported as T-26/T-27 or
+MS-CONTROL acceptance. A MAY repair the public product consumers that this instrument
+invokes. B MUST NOT own or mutate benchmark, corpus, statistics or preregistration
+assets during the context-convergence batch.
 
 ## FH-1. Post-control backend horizon [PROPOSAL]
 
-This section defines conditional TARGET contracts for prototype refinement after NT-1. It does not activate implementations, change T-98–T-111, authorize paid runs, or accept milestones. “Sprints 3–5” maps to capability dependencies in tasks, not a calendar. FH-1 governs the future CAS/delegation/evaluation scope where older proposal catalogs differ. Historical accepted subjects remain intact. The reference provenance is [Part 3 §§5–6](../reports/reviews/aether_v093_review/part3_blueprints_and_interface_contracts.md); its Python protocols are illustrative seams, not a requirement for additional public ports. Gate ownership is in [milestones.md](milestones.md#post-control-horizon-release-predicates-fh-1); algorithms are in [technical.md](technical.md#post-control-reference-handbook-fh-1-proposal).
+This section defines conditional TARGET contracts for prototype refinement after NT-1. It does not activate implementations, change T-98–T-111, authorize paid runs, or accept milestones. “Sprints 3–5” maps to capability dependencies in tasks, not a calendar. FH-1 governs the future CAS/delegation/evaluation scope where older proposal catalogs differ. Historical accepted subjects remain intact. The reference provenance is [Part 3 §§5–6](../../reports/reviews/aether_v093_review/part3_blueprints_and_interface_contracts.md); its Python protocols are illustrative seams, not a requirement for additional public ports. Gate ownership is in [milestones.md](milestones.md#post-control-horizon-release-predicates-fh-1); algorithms are in [technical.md](technical.md#post-control-reference-handbook-fh-1-proposal).
+
+FH-1.1–FH-1.8 are **PROPOSED contract detail**, retained for branch review. Their
+RFC-2119 language is conditional on adoption; these sections are not accepted law
+merely because they contain formulas. Formal/prose disagreement is a design defect
+to resolve at T-129, never an automatic license to choose the narrower expression.
+RUN-1 and accepted constitutional invariants govern current work. No schema or
+public port is registered by this document.
 
 ### FH-1.1 Immutable workspace contracts
 
@@ -141,7 +531,269 @@ All proposed schemas use NT-1 digest/type validation and existing JCS encoding. 
 
 **FH-E04:** Paired treatments hold tasks and total budgets fixed and vary one declared component. Include coordination, verification, retries and failures in cost/latency. Use prespecified uncertainty estimates and multiplicity/stop handling; do not tune on held-out results. Protocol qualification can close with a valid negative result; treatment promotion requires the predeclared positive predicate. SOTA is a dated, benchmark-specific comparison against a reproducible eligible comparator, with uncertainty and resource differences disclosed. An inconclusive or negative result completes an honest report but does not establish superiority.
 
-### FH-1.4 Failure and compatibility matrix
+### FH-1.4 Tree algebra, preimage law and promotion monotonicity (CAS-01)
+
+These clauses make FH-1.1 computable. Every function below is a pure domain function over values; none reaches a filesystem, clock, process or network. `JCS(.)` is the existing serializer (`domain/canonicalisation/jcs.py::canonical_bytes`) and `H(.)` the existing digest (`domain/canonicalisation/digest.py::digest_bytes`), i.e. `sha256:` followed by 64 lowercase hex (`CT-09`, `SC-2`). No second serializer, digest alphabet or canonical form is introduced.
+
+**FH-C05 (tree identity).** A tree is a flat sorted entry manifest over blob leaves — a depth-2 Merkle structure whose leaves are exact source byte strings:
+
+```text
+H_blob(b)  := H(b)                                    -- b is the exact source byte string
+ent(e)     := {"blob": beta(e), "kind": kappa(e), "mode": mu(e), "path": pi(e)}
+                beta(e)  = H_blob(bytes(e)) if kappa(e) = "file", else null
+                kappa(e) in {"file", "directory"}
+                mu(e)    in [0, 0o777]
+order(T)   := entries of T ascending by UTF-8 byte order of pi(e)   -- total; pi is injective
+H_node(e)  := H(JCS(ent(e)))
+H_tree(T)  := H(JCS({"entries": [ent(e) : e in order(T)], "schema": "aether.tree/1"}))
+```
+
+Recursive per-directory subtree digests are **not** normative: a reader MUST NOT infer subtree identity, structural sharing or rename detection from `H_tree`. The flat manifest costs `O(|T|)` per recomputation, bounded by the capture limits of FH-C01, and is accepted in exchange for exactly one canonical preimage per tree. Consequences that MUST hold: `H_tree(T1) = H_tree(T2)` for `T1 != T2` implies a SHA-256 collision; mode changes and empty directories change `H_tree`; a digest scheme that erases modes or empty directories (git tree semantics) is inadmissible for this profile.
+
+**FH-C06 (capture admissibility).** A captured tree `T` is admissible iff all of:
+
+```text
+P1 path shape     pi(e) = normalise(pi(e)); relative; no "", ".", "..", leading "/" or "\",
+                  no NUL, no backslash, no empty or trailing segment
+P2 reserved       no segment equals ".git"
+P3 uniqueness     pi injective on T
+P4 parent closure every proper directory prefix of pi(e) is in T with kind "directory"
+P5 kind closure   kappa(e) in {"file","directory"}; beta(e) non-null iff kappa(e) = "file"
+P6 case/NF safety fold(p) := join(casefold(NFC(segment)) for segment in p); fold injective on pi(T)
+P7 declared bounds |T| <= max_entries; sum(size(bytes(e))) <= max_bytes; depth(pi(e)) <= max_depth
+```
+
+Violations map to `TREE_PATH_INVALID` (P1–P3), `TREE_PARENT_MISSING` (P4), `TREE_UNSUPPORTED` (P5), `TREE_CASE_COLLISION` (P6) and `CAPTURE_BOUNDS_EXCEEDED` (P7). P6 is what makes a candidate portable to case-insensitive and NFD-normalising hosts: two paths that a target filesystem would merge are rejected at capture, not discovered at export. Symlinks, devices, sockets, FIFOs, hardlink identity, extended attributes and ACLs fail P5 as `TREE_UNSUPPORTED` and MUST NOT be dereferenced — following a link converts a workspace escape into a copied byte string inside the candidate. Capture consistency is proven, not assumed: source identity is recomputed and compared after reading; a mismatch is `CAPTURE_CHANGED`, retried within budget and never partially accepted.
+
+**FH-C07 (exact preimage law).** For edit set `E` over baseline tree `A`:
+
+```text
+nu_A(p)   := ent(e) if exists e in A with pi(e) = p, else BOTTOM
+D(BOTTOM) := null ;  D(ent) := H(JCS(ent))
+admissible(E, A) <=> for all (p, x, r) in E : D(nu_A(p)) = x
+A (+) E   := (A \ {e : pi(e) in paths(E)}) union {r : (p, x, r) in E, r != null}
+```
+
+`expected_node` is the digest of the **entry object**, not of the blob: a mode-only change therefore has a distinct preimage and cannot be applied under a stale expectation. Admissibility is total and evaluated over all of `E` before any effect; a single mismatch rejects the whole set as `PATCH_PREIMAGE_MISMATCH`. No context window, fuzz factor, offset search, whitespace normalisation or anchor heuristic is admissible in the CAS profile — this is the formal reason every legacy patch frontend must converge on one validated edit set. The result `A (+) E` MUST itself satisfy FH-C06 (P4 in particular: creating `a/b/c.py` requires explicit directory entries for `a` and `a/b`), else `EDIT_SET_INCONSISTENT`. Non-idempotence is intended: `apply(apply(A, E), E)` fails because the preimages no longer match. Workspace-layer replay safety is preimage-based and promotion-layer replay safety is transaction-identity-based (FH-C08); they are different mechanisms and neither substitutes for the other. Language-syntax validation of the resulting complete tree belongs to packs/adapters, never to domain.
+
+**FH-C08 (promotion identity, generation monotonicity, ABA immunity).**
+
+```text
+branch state   (head_k, gen_k), with gen_0 = 0
+identity       I(P) := H(JCS(P without "receipts"))   -- every promotion field except the receipt set
+commit k admissible <=> P.expected_head       = head_{k-1}
+                    AND P.expected_generation = gen_{k-1}
+                    AND authorised(P.grant, now)
+                    AND promotable(P.candidate, P.check_plan, P.receipts)
+post-state     head_k = P.candidate ; gen_k = gen_{k-1} + 1
+```
+
+`gen` is a strictly monotone fold over registered `mhf.event/2` facts and never decreases, including on rollback — which is a new forward compare-and-append (FH-C03), never event deletion.
+
+*ABA immunity (theorem).* Let the head traverse `A -> B -> A` at commits `k` and `k+1`. A request prepared at `(A, gen_{k-1})` is refused at the later state `(A, gen_{k+1})` because `gen_{k+1} != gen_{k-1}`. Head equality alone never authorises a commit; the compare key is the pair. The two refusals are reported distinctly — `PROMOTION_CONFLICT` when the head differs, `GENERATION_STALE` when the head matches but the generation does not — so a rebase loop can tell an intervening rollback from an ordinary race.
+
+*Idempotency.* Commit is a partial function of `transaction_id`: replaying a committed transaction returns the recorded original result and original generation with no mutation, even if the branch has since advanced. `receipts` is excluded from `I(P)` so that a retry carrying additional receipts is the same transaction; required-check satisfaction is re-evaluated at commit against the receipt set actually presented. A request bearing a known `transaction_id` but a different `I(P)` is `TRANSACTION_IDENTITY_MISMATCH` — refused, and never served the earlier result. The admissibility test and the append are one critical section inside the existing single-writer boundary: exactly one of a concurrent set wins and every loser mutates nothing.
+
+**FH-C09 (verification sufficiency).** For check plan `C`, candidate tree `candidate` and receipt set `R`:
+
+```text
+satisfied(c, R) <=> exists r in R :
+      r.check_id     = c.id
+  AND r.plan         = H(JCS(C))
+  AND r.candidate    = H_tree(candidate)
+  AND r.environment  = c.environment
+  AND r.command      = H(JCS({"argv": c.argv, "cwd": c.cwd}))
+  AND r.exit_code    = 0
+  AND r.timed_out    = false
+  AND r.cancelled    = false
+  AND trusted(r.verifier_identity) AND attested(r)
+  AND (c.kind = "test" =>
+           r.collected != null AND r.executed != null
+       AND r.collected >= c.minimum_tests AND r.executed >= c.minimum_tests)
+
+promotable(candidate, C, R) <=> for all c in C.checks : satisfied(c, R)
+```
+
+Null counts never coerce to zero and never satisfy a test check (`CHECK_INCOMPLETE`). A receipt bound to a different tree is `VERIFICATION_STALE`, the rebase case included. A model-authored or unattested receipt is `VERIFIER_UNTRUSTED`. Receipt *execution* is an adapter/tool concern under N-06; runtime validates receipts and never spawns processes.
+
+**FH-C10 (retention closure and GC safety).**
+
+```text
+Pins        := live heads U pending-operation candidates U accepted evidence subjects
+                 U authorised retention roots
+reach(X)    := transitive closure of tree -> entry -> blob references from X
+collectable(o) <=> o not in reach(Pins)
+```
+
+The ordering rule is pin-before-write: a pin covering an object is durable **before** the object is first referenced and is released only after its last reference is dropped. A sweep deletes only objects unreachable at a mark epoch taken inside the single-writer boundary, with no pin registered since that epoch. Deleting a reachable object is `GC_PIN_VIOLATION` — a defect, not a recoverable condition. Missing or corrupt blobs stop resume and promotion (`BLOB_MISSING`, `BLOB_CORRUPT`) and never license reconstructed or inferred evidence.
+
+**FH-C11 (export journal ordering).** The journal is a total order on states; backward transitions are forbidden and each transition is durable before the effect it authorises:
+
+```text
+prepared -> publishing -> committed
+prepared -> publishing -> restoring -> restored
+prepared -> publishing -> restoring -> quarantined
+```
+
+Recovery resumes from the recorded state by `operation_id` and is idempotent. Promotion disposition and export disposition are reported separately: a committed promotion with a quarantined export is a truthful pair and MUST NOT be collapsed into a single success or failure.
+
+### FH-1.5 Envelope conservation algebra and settlement lattice (DEL-01)
+
+Grounded in `kernel/budget.py` (`ADDITIVE_DIMENSIONS`, `Reservation`, `Lease`, `Governor`) and `kernel/attenuation.py` (`Scope`, `attenuate`). No second budget accountant is created, and no kernel line is added.
+
+**FH-D04 (additive envelope conservation).** For every additive dimension `d in {usd_micros, millis, tokens, bytes}` and every node `v` of the delegation tree:
+
+```text
+spent_d(v) + unsettled_d(v) + SUM[ reserved_d(v -> c) : c in children(v) ] + recovery_d(v)
+    <= limit_d(v)
+
+limit_d(c) = reserved_d(v -> c)        -- a child's root limit is exactly its parent's reservation
+```
+
+*Aggregate conservation (theorem).* `SUM[ spent_d(w) : w in subtree(v) ] <= limit_d(v)`, by induction on depth: each child's total consumption is bounded by `limit_d(c) = reserved_d(v -> c)`, which is itself a term of the parent's inequality. Because the constraint binds reservations held *simultaneously*, no sibling set can co-consume more than the parent envelope — the cross-sibling overspend defect `F-10` is excluded by construction rather than by sequencing.
+
+Structural ceilings are excluded from the sum: `depth(c) = depth(v) + 1 <= max_depth` and `turns` is a per-episode ceiling. Summing either across siblings is `F-10`.
+
+*Overrun honesty.* An effect may settle above its reservation (`Lease.settlement` is negative in that dimension). The deficit is charged to `recovery_d(v)` first; once `recovery_d(v)` is exhausted, `remaining_d(v) < 0` and `v` is refused every further reservation (`ENVELOPE_OVERCOMMIT`, `BUDGET_DENIED`). The observed overrun is recorded exactly — never clamped to the ceiling, never masked by a compensating refund, and never reported as if the envelope had held.
+
+**FH-D05 (monotone attenuation at dispatch).** For child `c` of `v`, evaluated at dispatch time and not only at issue time:
+
+```text
+actions(c)       subset of actions(v)
+resources(c)     refines resources(v)         -- kernel attenuate(); K-23 / K-25 / K-26
+depth(c)         = depth(v) + 1 <= max_depth
+expiry(c)        <= expiry(v)
+reserved_d(v -> c) <= remaining_d(v)          for all additive d
+```
+
+No dimension may increase after dispatch, and expiry/revocation is re-checked at dispatch. Any fallback path that widens a dimension is `DELEGATION_DENIED` or `SCOPE_ESCALATION_DENIED`; a denial records the requested and grantable sides (`K-25`), never a bare refusal. Refunds are bounded by `refund_d(v -> c) <= reserved_d(v -> c) - settled_d(c)`: a refund is never a source of budget.
+
+**FH-D06 (settlement lattice).** Every delegation call occupies exactly one state, and the order is durable-before-effect, so a crash between any two states is reconcilable by `call_id`:
+
+```text
+RESERVED -> INTENT_RECORDED -> DISPATCHED -> RETURNED -> SETTLED
+```
+
+| State | Durable before entry | Non-zero conservation term | Permitted exits |
+|---|---|---|---|
+| `RESERVED` | governor lease held | `reserved_d(v -> c)` | `INTENT_RECORDED`; `SETTLED` (release, nothing dispatched) |
+| `INTENT_RECORDED` | intent + reservation record | `reserved_d(v -> c)` | `DISPATCHED`; `SETTLED` (abandon) |
+| `DISPATCHED` | child lineage fact | `reserved_d(v -> c)` as `unsettled` | `RETURNED`; `SETTLED` (timeout, at reserved) |
+| `RETURNED` | findings + usage receipt | `reserved` resolving to `observed` | `SETTLED` |
+| `SETTLED` | settlement record | `spent_d` | terminal |
+
+An unknown outcome keeps the reservation held and unsettled; reconciliation is by `call_id` against the durable record, and `CHILD_UNKNOWN` never releases it. A timeout settles at the **reserved** amount, not zero — a deadline proves nothing about effects already performed, and settling a timed-out call at zero is precisely the defect this rule excludes. Cancellation propagates a deadline to descendants but does not retroactively convert their settled spend into refundable budget. `SETTLED` is terminal and idempotent by `call_id`; a second settlement attempt is refused (`SETTLEMENT_UNRECONCILED`) rather than double-credited.
+
+| Schema | Required fields | Constraints |
+|---|---|---|
+| `aether.delegation-settlement/1` | `schema`, `call_id`, `request: Digest`, `state`, `reserved: map[dim, int >= 0]`, `observed: map[dim, int >= 0] or null`, `settled: map[dim, int >= 0]`, `deficit: map[dim, int >= 0]`, `reason` | Dimensions restricted to the four additive dimensions; structural ceilings rejected as dimensions (`C-05`). Null `observed` means unknown, never zero. `settled <= reserved + deficit` per dimension. Exactly one terminal record per `call_id`; the parent is its sole writer. |
+
+**FH-D07 (advisory isolation).** A read-only specialist writes no ledger fact of its own beyond its lineage and usage receipt: `writer(findings) = parent`. `aether.specialist-findings/1` is advisory input to a parent candidate and cannot satisfy a check plan, mark a campaign node `PASSED`, or enter acceptance evidence. Formally, the acceptance predicate `Acc` is a function of exterior verification receipts only; findings are not in its domain. No raw authenticated grant, authenticator key or session handle crosses into the child context — the child receives an attenuated grant, never the parent's credential.
+
+### FH-1.6 Campaign DAG readiness algebra and lease fencing (OCT-03)
+
+**FH-D08 (plan admission).** With `G = (V, E)` and `deps(v) = {u : (u, v) in E}`, a campaign plan is admissible iff `V` is finite, every dependency names a node in `V`, and a topological order exists (acyclicity). A plan failing any of these is `CAMPAIGN_PLAN_INVALID` and is never partially dispatched.
+
+**FH-D09 (dependency readiness).**
+
+```text
+disposition : V -> {PENDING, RUNNING, PASSED, FAILED, BLOCKED, UNDETERMINABLE}
+
+ready(v) <=> disposition(v) = PENDING
+         AND for all u in deps(v):
+                   disposition(u) = PASSED
+               AND artifact(u) != BOTTOM
+               AND validates(artifact(u), Schema_v(u))
+               AND artifact_digest(u) is bound into v's input record
+```
+
+Terminality is not readiness: a child that terminated without an accepted, schema-valid artifact does not release its dependents. Schema validity is checked against the **consumer's** declared `output_schema` for `u`, not against the producer's self-report. Failure closure is monotone — `disposition(u) in {FAILED, BLOCKED, UNDETERMINABLE}` forces `disposition(w) := BLOCKED` for every `w` reachable from `u`, and a `BLOCKED` node is never ready under the same plan version. A failed dependency cannot be argued ready.
+
+**FH-D10 (lease exclusivity and fencing).** At most one active lease per node, enforced by compare-and-append on the existing ledger inside the single-writer boundary:
+
+```text
+count{ l : l.node = v AND l.state = ACTIVE } <= 1
+append admissible <=> l.fence_token = current_fence_token(v)
+```
+
+A lease carries a strictly increasing `fence_token`. An append from a holder whose token is below the node's current token is refused (`NODE_LEASE_CONFLICT`). Fencing is what makes a resumed or partitioned director unable to duplicate effects: the superseded holder cannot write regardless of what it believes about its own liveness.
+
+| Schema | Required fields | Constraints |
+|---|---|---|
+| `aether.campaign-lease/1` | `schema`, `campaign_id`, `node_id`, `attempt: int >= 1`, `fence_token: int >= 1`, `holder_identity`, `state`, `deadline`, `operation_id` | `fence_token` strictly increases per node; at most one `ACTIVE` lease per node. Lease expiry alone settles nothing — the outcome is reconciled by `operation_id` under FH-D06. |
+
+**FH-D11 (zero mutation verbs).** `verbs(director) INTERSECT MutatingVerbs = EMPTY`. The director's admissible verb set is exactly `{compile plan, dispatch node, read artifact digest, record disposition, record lease}`. This is a set-theoretic constraint over the live verb inventory (§22) and is mechanically falsifiable: any filesystem, patch, process or network write verb reachable from the campaign client is a defect, not a configuration choice. Edits are performed only by qualified child episodes through the existing execution path — there is no second `EpisodeEngine`, scheduler or budget accountant.
+
+**FH-D12 (replan monotonicity and termination).** A revision `G'` of plan `G` satisfies:
+
+```text
+objective(G')  =  objective(G)                          -- digest-equal
+grants(G')     subset of grants(G)
+budget_d(G')   <= budget_d(G)                           for all additive d
+{ v : disposition(v) = PASSED } and their artifacts are preserved unchanged
+replans(G')    =  replans(G) + 1  <=  replan_allowance
+```
+
+Replanning cannot silently enlarge objective, authority or budget (`SCOPE_ESCALATION_DENIED`); exhausting the allowance is `REPLAN_EXHAUSTED`, a recorded terminal outcome rather than a retry. *Termination:* `V` is finite, failure closure is monotone, each dispatch consumes a strictly positive amount of a finite envelope, and replans are bounded — so the ready set is eventually empty and every node holds a terminal disposition. `BLOCKED`, `FAILED` and `UNDETERMINABLE` are persisted as outcomes; an unfinished campaign never reports completion.
+
+### FH-1.7 Governed learning, lift predicate and revocation algebra (MEM-01 / M-8)
+
+Grounded in `ports/memory.py` (`MemoryAccess`, `RetrievalProvenance`, `require_retrieval_provenance`, `authorize_memory_action`). This section states MEM-01's measurement and revocation law. It does not accept M-8, whose predicates remain independent obligations.
+
+**FH-M01 (partition and contamination).** Fix disjoint instance sets `S_gen` (lessons may be derived from it) and `S_eval` (held out). Let `prov(l)` be the source-artifact digest set of lesson `l`:
+
+```text
+contaminated(l) <=> prov(l) INTERSECT ( digests(S_eval) U official_tests U holdout_results ) != EMPTY
+```
+
+A contaminated lesson is inadmissible to retrieval, and its presence in any retrieval set of a scored run invalidates that run (`EVALUATION_INVALID`, `LESSON_CONTAMINATED`). The check is mechanical rather than declarative: `RetrievalProvenance.source_record_digests` is joined against the frozen holdout digest set for every admitted retrieval, and a run carrying no retrieval receipts to join is unscored rather than assumed clean. Official test patches, answers and held-out results never enter worker context, generation input, or any cache. Public availability of a corpus is not evidence of uncontaminated training; unknown exposure is disclosed, not omitted.
+
+**FH-M02 (lift predicate).** The study is paired on `S_eval`: treatment `M1` (retrieval enabled at lesson-set version `L`) against control `M0`, identical in every declared component except lesson retrieval, under one frozen `aether.evaluation-manifest/1`.
+
+```text
+mu(M)     := primary success rate of M on S_eval under the frozen manifest
+Delta_mu  := mu(M1) - mu(M0)
+(b, c)    := discordant pair counts (M1 pass / M0 fail, M1 fail / M0 pass)
+p         := exact two-sided McNemar p-value, X ~ Binomial(b + c, 1/2)
+
+promote(L) <=> Delta_mu >= 0.05
+           AND p < 0.05
+           AND false_completion_rate(M1) = 0
+           AND n >= n_min                                 -- preregistered
+           AND lower(CI_95(Delta_mu)) > 0                 -- internal consistency check
+           AND no admitted lesson satisfies contaminated(.)
+```
+
+The test, `n_min`, the primary metric, the missingness policy and the stop rule are preregistered before the first measured attempt; choosing between the useful-lift and the cost-saving/noninferiority alternative after viewing results is forbidden. The exact paired test is required rather than a normal approximation because discordant counts at `n` near 30 are small. *Multiplicity:* comparing `k` lesson-set versions or arms against the same holdout requires family-wise control at `0.05` (Holm–Bonferroni) or a single declared primary comparison; a holdout partition serves at most one preregistered decision, and a further decision requires a fresh partition. Reporting `Delta_mu >= 0.05` with `p < 0.05` while `lower(CI_95(Delta_mu)) <= 0` is internally inconsistent and vetoes acceptance instead of being published as a win. A negative or inconclusive study is a complete, honest result that leaves the treatment disabled (`LIFT_UNPROVEN`) and the positive gate open. Generation, evaluation and promotion remain separately authorised steps: the component that writes a lesson never also decides its promotion.
+
+**FH-M03 (lesson identity and revocation epochs).** Lessons are content-addressed and versioned; supersession mints a new digest and never edits in place.
+
+```text
+L         := H(JCS({"body": body, "provenance": provenance, "scope": scope, "version": version}))
+Revoked_e := set of revoked lesson digests at epoch e
+R_e       := H(JCS(sorted(Revoked_e)))          -- revocation root, a fold of mhf.event/2 facts
+e         strictly increases on every revocation append
+```
+
+| Schema | Required fields | Constraints |
+|---|---|---|
+| `aether.lesson/1` | `schema`, `lesson: Digest`, `version: int >= 1`, `body: Digest`, `provenance: Digest[]`, `scope`, `authority_grant: Digest`, `supersedes: Digest or null` | Identity is the digest over body, provenance, scope and version; in-place edit is forbidden. Empty provenance forbids admission. |
+| `aether.lesson-revocation/1` | `schema`, `lesson: Digest`, `reason`, `epoch: int >= 1`, `authority_grant: Digest`, `revoked_at`, `supersedes: Digest or null` | Appended to the one ledger under the single writer; never rewrites the admission events that preceded it. Epoch strictly monotone. |
+| `aether.retrieval-admission/1` | `schema`, `provenance: Digest`, `revocation_root: Digest`, `epoch: int >= 1`, `records: Digest[]`, `cache_identity: str or null` | A cached or live retrieval enters model context only while `revocation_root` equals the current `R_e`. |
+
+**FH-M04 (immediate cache invalidation).**
+
+```text
+admissible(retrieval) <=> retrieval.revocation_root = R_current
+                      AND records(retrieval) INTERSECT Revoked_current = EMPTY
+                      AND require_retrieval_provenance(result) holds
+```
+
+Advancing the epoch invalidates every cached retrieval globally in constant time without enumerating caches: a stale entry cannot satisfy the root equality and is recomputed or refused (`REVOCATION_ROOT_STALE`). Each revocation append emits a receipt binding `{revocation, epoch_before, epoch_after, revocation_root_after, cache_identities_invalidated, effective_at}`. The falsifier is direct: after the append, no recall returns the revoked record and no cached entry is admitted under a superseded root.
+
+*Non-retroactivity.* Revocation stops future admission and never rewrites past events. Accepted evidence records the lesson digests and the epoch under which they were admitted; an acceptance that depended on a since-revoked lesson is flagged for re-verification (`LESSON_REVOKED`) — never silently reversed and never silently retained. Rollback of a lesson-set promotion is executed revocation evidence, not an assertion that rollback would work.
+
+### FH-1.8 Failure and compatibility matrix
 
 | Failure | Required outcome |
 |---|---|
@@ -153,6 +805,42 @@ All proposed schemas use NT-1 digest/type validation and existing JCS encoding. 
 | `EXPORT_CONFLICT` / `RECOVERY_FAILED` | Stop export; restore only owned changes or quarantine; no false rollback claim. |
 | `DELEGATION_DENIED` / `BUDGET_DENIED` | No child dispatch; scope and budget never enlarged by fallback. |
 | `EVALUATION_INVALID` / `EVALUATION_INCOMPLETE` | Preserve denominator and null metrics; no acceptance. |
+
+The rows below extend the same fail-closed discipline to the formal clauses of FH-1.4–FH-1.7. Every code is a distinct observable outcome: a reader MUST be able to tell which invariant fired, and no code may be widened into a neighbour to make a run look cleaner.
+
+| Failure | Origin clause | Required outcome |
+|---|---|---|
+| `TREE_PATH_INVALID` / `TREE_PARENT_MISSING` / `TREE_CASE_COLLISION` | FH-C06 P1–P4, P6 | Reject at capture before any blob is persisted; report the offending path pair for a collision. Never repair by renaming. |
+| `CAPTURE_BOUNDS_EXCEEDED` | FH-C06 P7 | Refuse the capture; report the declared bound and the observed value. Never truncate the tree and proceed. |
+| `EDIT_SET_INCONSISTENT` | FH-C07 | Reject the whole edit set; the post-application tree violated admissibility. No partial application. |
+| `GENERATION_STALE` | FH-C08 | Keep the current head; report distinctly from `PROMOTION_CONFLICT` so an intervening rollback is distinguishable from a race. |
+| `TRANSACTION_IDENTITY_MISMATCH` | FH-C08 | Refuse; never serve the earlier recorded result to a request whose identity digest differs. |
+| `GC_PIN_VIOLATION` | FH-C10 | Stop collection and quarantine the store; a reachable object was collectable, which is a defect, not a recoverable condition. |
+| `ENVELOPE_OVERCOMMIT` | FH-D04 | Deny the reservation; record the observed overrun exactly. Never clamp to the ceiling or mask it with a refund. |
+| `SCOPE_ESCALATION_DENIED` / `DELEGATION_DEPTH_EXCEEDED` | FH-D05, FH-D12 | No dispatch and no replan; the denial records requested and grantable sides (`K-25`). |
+| `SETTLEMENT_UNRECONCILED` | FH-D06 | Keep the reservation held and unsettled; reconcile by `call_id`. Never double-credit and never settle a timeout at zero. |
+| `CAMPAIGN_PLAN_INVALID` | FH-D08 | Refuse the plan whole; never dispatch a prefix of a cyclic or dangling graph. |
+| `NODE_LEASE_CONFLICT` | FH-D10 | Refuse the append from the superseded fence token; the current holder is unaffected. |
+| `DEPENDENCY_BLOCKED` | FH-D09 | Persist `BLOCKED` for the reachable set; the node is never ready under this plan version. |
+| `REPLAN_EXHAUSTED` | FH-D12 | Terminal recorded outcome; not a retry and not a completion. |
+| `LESSON_CONTAMINATED` | FH-M01 | Refuse admission and invalidate any run that admitted the lesson; preserve the denominator. |
+| `LIFT_UNPROVEN` | FH-M02 | Treatment stays disabled and the positive gate stays open; the honest report still completes. |
+| `LESSON_REVOKED` / `REVOCATION_ROOT_STALE` | FH-M03, FH-M04 | Refuse admission; recompute under the current root. Flag dependent acceptances for re-verification without rewriting past events. |
+| `SCHEMA_UNSUPPORTED` | FH-1.1 preamble | Unknown required schema version fails closed on both read and write paths; no best-effort partial decode. |
+| `SYNTAX_REJECTED` | FH-C07 | Reject the candidate before verification; unsupported syntax is refused, never routed to a fuzzy fallback. |
+| `ARTIFACT_SCHEMA_INVALID` | FH-D09 | The producer's artifact failed the consumer's declared `output_schema`; the node is `FAILED`, never `PASSED`. |
+| `EXPORT_UNOWNED` | FH-C11 | Refuse before acquiring a lock or writing a journal; an undeclared destination root is never exported to. |
+
+**Normative placement.** The formal clauses above change no layer ownership. Placement is itself a falsifiable contract:
+
+| Concern | Owning layer | Forbidden in |
+|---|---|---|
+| Tree, edit-set, promotion, lease, settlement and lesson values; digest and preimage algebra | `domain/` | any filesystem, process, clock or network access |
+| Blob store, snapshot, materialization, export journal I/O | `adapters/` | `runtime/` |
+| Check execution and syntax validation | `adapters/`, `tools/`, packs | `runtime/` — N-06 forbids `import subprocess` there |
+| Grant, budget and attenuation decisions | existing `kernel/` surfaces only | new kernel lines; planned delta is zero against the 1438 ceiling |
+| Composition, receipt validation, `mhf.event/2` emission, campaign client | `runtime/` | any mutating verb reachable from the campaign client (FH-D11) |
+| Protocol and port shapes | `ports/` | concrete I/O or kernel types on the public surface |
 
 Schemas/events need registered readers, version migration and coverage falsifiers before activation. Existing events are never rewritten. All legacy patch frontends must converge on one validated edit set for the CAS profile, with explicit compatibility tests; retain old profiles only where their weaker guarantees are stated. Domain stays pure; syntax/filesystem/process work stays in packs/adapters/tools; runtime composes and emits. Planned kernel delta remains zero LOC, ceiling 1438. M-8 acceptance and M-9/M-10 predicates remain independent obligations.
 
@@ -1003,7 +1691,7 @@ class TransformResult:
     execution_duration_ms: int
 ```
 
-**FACT — live `TransformSpec` fields** from [`vanguard/packages/domain/transforms/contracts.py`](../../vanguard/packages/domain/transforms/contracts.py) lines 20–31 (HEAD `66aa7a3c`):
+**FACT — live `TransformSpec` fields** from [`vanguard/packages/domain/transforms/contracts.py`](../../../vanguard/packages/domain/transforms/contracts.py) lines 20–31 (HEAD `66aa7a3c`):
 
 ```python
 @dataclass(frozen=True, slots=True)
@@ -1041,7 +1729,7 @@ MECHANISM: `run` / `status` / `resume` / `evidence` / `cost`. `[PROPOSAL]`: `can
 
 Appended at lock; does **not** replace §3. **FACT** from pack YAML and toolkit source on HEAD `66aa7a3c`.
 
-Harness [`packs/code-default/harness.yaml`](../../packs/code-default/harness.yaml) declares:
+Harness [`packs/code-default/harness.yaml`](../../../packs/code-default/harness.yaml) declares:
 
 | Verb | Pack source | Notes (FACT) |
 |---|---|---|
@@ -1051,7 +1739,7 @@ Harness [`packs/code-default/harness.yaml`](../../packs/code-default/harness.yam
 | `patch.apply` | `harness.yaml`; `plugins/ast-patch.yaml`; `toolkits/ast_patch.py` | Sequential `GitEnvironment.apply`; post-write `ast.parse` is observation-only |
 | `proc.exec` | `harness.yaml`; `plugins/terminal.yaml`; `toolkits/terminal_runner.py` | Allowlisted `git,pytest,ruff,python3` |
 
-**Index toolkit.** [`packs/code-default/plugins/index.yaml`](../../packs/code-default/plugins/index.yaml) still declares capability verb **`fs.read`**. `IndexToolkit` in `toolkits/repo_map.py` also exposes `index.refresh`. Ranking stays out of `IndexPort` (observation-only). Pack also has `multi_file_completeness.py` and `GreenfieldPolicy` (MECHANISM; see §3.4).
+**Index toolkit.** [`packs/code-default/plugins/index.yaml`](../../../packs/code-default/plugins/index.yaml) still declares capability verb **`fs.read`**. `IndexToolkit` in `toolkits/repo_map.py` also exposes `index.refresh`. Ranking stays out of `IndexPort` (observation-only). Pack also has `multi_file_completeness.py` and `GreenfieldPolicy` (MECHANISM; see §3.4).
 
 **Facade (MECHANISM).** `CodingMaxFacade`: `run` / `status` / `resume` / `evidence` / `cost`; presets `fast|balanced|max`.
 
@@ -1105,7 +1793,7 @@ Wire recovery: `adapters/models/dialect.py` T-21 MECHANISM. Truncated JSON, Deep
 
 ## 2PC / tamper placement
 
-- 2PC: `adapters/environment/transaction.py` this-branch LIVE (T-17 MECHANISM). Lock `66aa7a3c` MISSING. Multi-file `GitEnvironment.apply` preflights `ast.parse` then all-or-nothing flush. Single-file sequential observation (S8-B-09) unchanged. T-18–T-20 MECHANISM; MS-CHANGE stays `OPEN` on T-47–T-49.
+- 2PC: `adapters/environment/transaction.py` this-branch LIVE (T-17 MECHANISM). Lock `66aa7a3c` MISSING. Multi-file `GitEnvironment.apply` preflights `ast.parse` then all-or-nothing flush and restores original bytes and modes on refusal. Stale declared preimages, ambiguous anchors, and incomplete hunks fail closed before write (`adapters/environment/hunks.py`, T-108). Single-file sequential observation (S8-B-09) unchanged. T-18–T-20 MECHANISM; MS-CHANGE stays `OPEN` on T-47–T-49. CAS workspace promotion is not introduced here.
 - Tamper: `runtime/governance/tamper_shield.py` this-branch LIVE (T-18). Enumerate via IndexPort; `Path.glob("test/**")` is insufficient. The session freezes and evaluates it through `_admit_completion`; the default product manifest declares `repo_index`.
 
 ---
@@ -1378,7 +2066,7 @@ This document is the authoritative typed delta contract for the active execution
 
 - **INV-DELTA-1 (Hexagonal Purity)**: All state schemas (`SemanticTaskState`, `TaskStep`) in `domain/` must use Python stdlib only, serialize deterministically via RFC 8785 JCS, and contain zero I/O or adapter imports.
 - **INV-DELTA-2 (TCB Line Budget Limit)**: No changes in this feature wave may increase `vanguard/packages/kernel/` beyond the strict $\le 1438$ logical LOC ceiling.
-- **INV-DELTA-3 (Two-Phase Commit Atomic Safety)**: No multi-file modification may write partially to disk. All candidate file mutations must pass in-memory AST syntax validation (`ast.parse`) before disk flush. Any syntax error triggers full rollback to pre-transaction content.
+- **INV-DELTA-3 (Two-Phase Commit Atomic Safety)**: No multi-file modification may write partially to disk. All candidate file mutations must pass in-memory AST syntax validation (`ast.parse`) before disk flush. Any syntax error, incomplete hunk, stale preimage, or later-file failure triggers full rollback to pre-transaction content and modes.
 - **INV-DELTA-4 (Anti-Tampering Test Isolation)**: Autonomous agents are strictly prohibited from mutating test suites during implementation. All test files are hashed at turn 0; any modification to test baselines produces immediate fail-closed rejection.
 - **INV-DELTA-5 (Deterministic Progressive Context)**: System prompts and immutable invariants must form a prefix-stable anchor. Compaction must never truncate `settled_invariants` or `falsified_hypotheses`.
 

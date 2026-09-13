@@ -3,22 +3,65 @@
 from __future__ import annotations
 
 import dataclasses
+import re
 from dataclasses import dataclass, field
 from enum import Enum
+from types import MappingProxyType
 from typing import Any, Mapping, Sequence
 
-from .canonicalisation.digest import digest_of
+from .canonicalisation.digest import digest_bytes, digest_of
+from .canonicalisation.jcs import canonical_bytes, parse_json_text
 
 __all__ = [
     "CodingTaskState",
     "DeadEnd",
     "Discovery",
+    "Evidence",
+    "MemoryView",
     "RouteDecision",
     "SemanticTaskState",
     "StepState",
     "TaskStep",
     "TodoItem",
+    "critical_state",
 ]
+
+
+def _detached(value: Any) -> Any:
+    """A copy that shares no container with the caller, at any depth.
+
+    A shallow copy stops `state.last_verification["ok"] = False` and nothing
+    else: `state.last_verification["nested"]["count"] = 99` still reaches
+    through, because the inner object was never copied. Since these values are
+    canonicalised and digested whole, a nested edit moves the digest just as
+    surely as a top-level one.
+    """
+    if isinstance(value, Mapping):
+        return {str(key): _detached(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_detached(item) for item in value]
+    return value
+
+
+def _frozen_mapping(value: Any, field: str) -> Mapping[str, Any]:
+    """Copy a caller's mapping behind a read-only view (`I-STATE`).
+
+    A frozen dataclass freezes its *attributes*, not the objects they point
+    at. Holding the caller's `dict` therefore leaves the caller able to edit
+    state that has already been digested, checkpointed or compared — and the
+    edit is invisible, because nothing about it goes through this type. The
+    deep copy is what makes the value immutable; the proxy is what stops the
+    next reader from assuming it can write through the top level.
+
+    The proxy is deliberately only one layer deep. Freezing every nested
+    container would change what `to_canonical_dict` hands to JCS from plain
+    JSON types into proxies and tuples, which is a wire-format change dressed
+    up as a safety fix. The copy already removes every path back to the
+    caller; the proxy only removes the most inviting one.
+    """
+    if not isinstance(value, Mapping):
+        raise TypeError(f"{field} must be a mapping")
+    return MappingProxyType(_detached(value))
 
 
 class StepState(str, Enum):
@@ -117,6 +160,10 @@ class RouteDecision:
     budget_snapshot: Mapping[str, int] = field(default_factory=dict)
     provider_usage_status: str = "unknown"
 
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self, "budget_snapshot", _frozen_mapping(self.budget_snapshot, "budget_snapshot"))
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "route": self.route, "reason": self.reason, "failure": self.failure,
@@ -192,6 +239,14 @@ class SemanticTaskState:
     index_snapshot_digest: str | None = None
 
     def __post_init__(self) -> None:
+        # Before any validation: a mapping validated in place and then kept by
+        # reference is validated against bytes the caller can still change.
+        for name in ("last_verification", "remaining_budgets", "recovery_state"):
+            object.__setattr__(self, name, _frozen_mapping(getattr(self, name), name))
+        if self.selection_policy_identity is not None:
+            object.__setattr__(
+                self, "selection_policy_identity",
+                _frozen_mapping(self.selection_policy_identity, "selection_policy_identity"))
         if not self.objective.strip():
             raise ValueError("objective must be non-empty")
         if self.revision < 0:
@@ -387,9 +442,205 @@ class SemanticTaskState:
 
 CodingTaskState = SemanticTaskState
 
+MEMORY_VIEW_SCHEMA = "aether.memory-view/1"
+_DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
+
 
 def _optional_str(value: Any) -> str | None:
     if value is None:
         return None
     text = str(value)
     return text if text else None
+
+
+def _natural(value: Any, field: str) -> int:
+    if type(value) is not int or value < 0:
+        raise ValueError(f"invalid {field}")
+    return value
+
+
+def _require_digest(value: Any, field: str) -> str:
+    if not isinstance(value, str) or not _DIGEST.fullmatch(value):
+        raise ValueError(f"malformed {field}")
+    return value
+
+
+def _require_text(value: Any, field: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{field} must be a nonempty string")
+    return value
+
+
+@dataclass(frozen=True, slots=True)
+class Evidence:
+    """One unique, artifact-bound finding in an `aether.memory-view/1` snapshot."""
+
+    key: str
+    subject: str
+    artifact: str
+    finding: str
+    body: str = ""
+
+    def __post_init__(self) -> None:
+        _require_text(self.key, "evidence key")
+        _require_text(self.finding, "evidence finding")
+        _require_digest(self.subject, "evidence subject")
+        _require_digest(self.artifact, "evidence artifact")
+        if not isinstance(self.body, str):
+            raise TypeError("evidence body must be a string")
+
+    def to_dict(self) -> dict[str, str]:
+        return {
+            "key": self.key,
+            "subject": self.subject,
+            "artifact": self.artifact,
+            "finding": self.finding,
+            "body": self.body,
+        }
+
+    @classmethod
+    def from_mapping(cls, raw: Mapping[str, Any]) -> "Evidence":
+        if not isinstance(raw, Mapping):
+            raise TypeError("evidence must be an object")
+        return cls(
+            key=str(raw.get("key", "")),
+            subject=raw.get("subject", ""),
+            artifact=raw.get("artifact", ""),
+            finding=str(raw.get("finding", "")),
+            body=str(raw.get("body", "")),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class MemoryView:
+    """Immutable `aether.memory-view/1` snapshot around a complete SemanticTaskState."""
+
+    task_bytes: bytes
+    cursor: int
+    lineage_id: str
+    reducer_version: str
+    evidence: tuple[Evidence, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.task_bytes, (bytes, bytearray)):
+            raise TypeError("task snapshot must be canonical bytes")
+        object.__setattr__(self, "task_bytes", bytes(self.task_bytes))
+        object.__setattr__(self, "evidence", tuple(self.evidence))
+        _natural(self.cursor, "cursor")
+        _require_text(self.lineage_id, "lineage_id")
+        _require_text(self.reducer_version, "reducer_version")
+        task_raw = parse_json_text(self.task_bytes.decode("utf-8"))
+        if not isinstance(task_raw, Mapping):
+            raise TypeError("task snapshot must be an object")
+        task = SemanticTaskState.from_mapping(task_raw)
+        if canonical_bytes(task.to_canonical_dict()) != self.task_bytes:
+            raise ValueError("task snapshot is not canonical")
+        if len({item.key for item in self.evidence}) != len(self.evidence):
+            raise ValueError("duplicate evidence key")
+        if not all(isinstance(item, Evidence) for item in self.evidence):
+            raise TypeError("evidence must contain Evidence values")
+
+    @property
+    def task(self) -> SemanticTaskState:
+        return SemanticTaskState.from_mapping(parse_json_text(self.task_bytes.decode("utf-8")))
+
+    @classmethod
+    def capture(
+        cls,
+        task: SemanticTaskState,
+        cursor: int,
+        *,
+        lineage_id: str,
+        reducer_version: str,
+        evidence: Sequence[Evidence] = (),
+    ) -> "MemoryView":
+        if not isinstance(task, SemanticTaskState):
+            raise TypeError("memory view requires a SemanticTaskState")
+        return cls(
+            task_bytes=canonical_bytes(task.to_canonical_dict()),
+            cursor=cursor,
+            lineage_id=lineage_id,
+            reducer_version=reducer_version,
+            evidence=tuple(evidence),
+        )
+
+    def encode(self) -> bytes:
+        return canonical_bytes({
+            "schema": MEMORY_VIEW_SCHEMA,
+            "cursor": self.cursor,
+            "lineageId": self.lineage_id,
+            "reducerVersion": self.reducer_version,
+            "task": parse_json_text(self.task_bytes.decode("utf-8")),
+            "evidence": [item.to_dict() for item in self.evidence],
+        })
+
+    def digest(self) -> str:
+        return digest_bytes(self.encode())
+
+    @classmethod
+    def decode(cls, payload: bytes, expected_digest: str) -> "MemoryView":
+        if not isinstance(payload, (bytes, bytearray)):
+            raise TypeError("memory view payload must be bytes")
+        payload_bytes = bytes(payload)
+        _require_digest(expected_digest, "memory digest")
+        if digest_bytes(payload_bytes) != expected_digest:
+            raise ValueError("memory digest mismatch")
+        raw = parse_json_text(payload_bytes.decode("utf-8"))
+        if not isinstance(raw, Mapping):
+            raise TypeError("memory view must be an object")
+        if raw.get("schema") != MEMORY_VIEW_SCHEMA:
+            raise ValueError("unsupported memory schema")
+        task_raw = raw.get("task")
+        if not isinstance(task_raw, Mapping):
+            raise TypeError("task snapshot must be an object")
+        evidence_raw = raw.get("evidence", ())
+        if not isinstance(evidence_raw, Sequence) or isinstance(evidence_raw, (str, bytes)):
+            raise TypeError("evidence must be a sequence")
+        view = cls(
+            task_bytes=canonical_bytes(dict(task_raw)),
+            cursor=raw.get("cursor"),
+            lineage_id=str(raw.get("lineageId", raw.get("lineage_id", ""))),
+            reducer_version=str(raw.get("reducerVersion", raw.get("reducer_version", ""))),
+            evidence=tuple(
+                Evidence.from_mapping(item) for item in evidence_raw if isinstance(item, Mapping)
+            ),
+        )
+        if len(view.evidence) != len(tuple(evidence_raw)):
+            raise TypeError("evidence must contain objects")
+        if view.encode() != payload_bytes:
+            raise ValueError("noncanonical or unknown memory fields")
+        return view
+
+
+def critical_state(view: MemoryView) -> dict[str, Any]:
+    """Projection of durable obligations; not a writeback format.
+
+    `T-131` row 7 / `RUN-09` defect 7. This projection is the mandatory-state
+    brief `ContextCompiler.compile_packet` places *below* the eviction
+    watermark, so anything absent from it is compactable. `changed_files_tree_hash`
+    was absent: compaction could therefore retain the changed-file *list* while
+    dropping the identity of the candidate tree those changes produced, which is
+    exactly the "compaction loses candidate identity" defect. It is carried here
+    so the candidate a turn is reasoning about survives context pressure.
+    """
+    task = view.task
+    return {
+        "objective": task.objective,
+        "constraints": list(task.constraints),
+        "plan": list(task.plan),
+        "next_action": task.next_action,
+        "modified_files": list(task.modified_files),
+        "changed_files_tree_hash": task.changed_files_tree_hash,
+        "failure": task.failure_class,
+        "verification": dict(task.last_verification),
+        "verification_plan": list(task.verification_plan),
+        "settled_effects": list(task.settled_effects),
+        "remaining_budgets": dict(task.remaining_budgets),
+        "requirements": list(task.completion_requirements),
+        "invariants": list(task.settled_invariants),
+        "hypotheses": list(task.hypotheses),
+        "state_ref": digest_bytes(view.encode()),
+        "cursor": view.cursor,
+        "lineage_id": view.lineage_id,
+        "reducer_version": view.reducer_version,
+    }

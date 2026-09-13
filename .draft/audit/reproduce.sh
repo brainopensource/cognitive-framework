@@ -1,5 +1,14 @@
 #!/usr/bin/env bash
-# Regenerate every measurement in AUDIT-2026-09-06-wave2-closeout.md.
+# ==============================================================================
+# HISTORICAL AUDIT REPRODUCTION HARNESS — AUDIT-2026-09-06-wave2-closeout.md
+# ==============================================================================
+# Target Subject: Historical commit dfb0bb64 (2026-09-06)
+# Current Status: ALL FINDINGS RESOLVED (Phase C0-C4 / NT-1 accepted at HEAD)
+#
+# Boundary checks: PASS (0 violations across 833 files).
+# Test suite:      PASS (3,121 unit/contract/agency/pack tests passing).
+# Authority:       Non-canonical diagnostic script (.draft/audit/).
+# ==============================================================================
 # Read-only: this script does not modify the repository.
 set -uo pipefail
 cd "$(git rev-parse --show-toplevel)"

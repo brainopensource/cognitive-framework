@@ -1,0 +1,120 @@
+...........................evaluator request failed
+......evaluator probe failed: ConnectionResetError
+...........................................................................................ss..................................................................../home/rock-dev/Coding/cognitive-framework/vanguard/packages/agency/manifests/loader.py:191: DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
+  resolver_type = getattr(jsonschema, "RefResolver", None)
+....................................................................................................................................................................................................................................../home/rock-dev/Coding/cognitive-framework/vanguard/packages/agency/manifests/loader.py:191: DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
+  resolver_type = getattr(jsonschema, "RefResolver", None)
+................................................./home/rock-dev/Coding/cognitive-framework/vanguard/packages/agency/manifests/loader.py:191: DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
+  resolver_type = getattr(jsonschema, "RefResolver", None)
+..............................................usage: vanguard code run [-h] [-w WORKSPACE] [--preset {fast,balanced,max}]
+                         [--profile PROFILE] [--model MODEL]
+                         [--model-port MODEL_PORT] [--run-id RUN_ID]
+                         [--max-turns MAX_TURNS] [--non-interactive]
+                         [--state-dir STATE_DIR]
+                         task
+vanguard code run: error: argument --preset: invalid choice: 'turbo' (choose from fast, balanced, max)
+............................................................E.F................................................................................................................................................/home/rock-dev/Coding/cognitive-framework/vanguard/packages/agency/manifests/loader.py:191: DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
+  resolver_type = getattr(jsonschema, "RefResolver", None)
+.............................................................................................................................................s..s..ss...s....ss.............................../home/rock-dev/Coding/cognitive-framework/vanguard/packages/agency/manifests/loader.py:191: DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
+  resolver_type = getattr(jsonschema, "RefResolver", None)
+.....................................................................................2026-09-12 18:04:41,454 [ERROR] Tool execution error: Unknown tool: lda_nonexistent
+Traceback (most recent call last):
+  File "/home/rock-dev/Coding/cognitive-framework/tools/007_LLM_DOCS_ATLAS/server_mcp.py", line 423, in handle_request
+    result_content = self._execute_tool(tool_name, args)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/rock-dev/Coding/cognitive-framework/tools/007_LLM_DOCS_ATLAS/server_mcp.py", line 671, in _execute_tool
+    raise ValueError(f"Unknown tool: {name}")
+ValueError: Unknown tool: lda_nonexistent
+........................................................................................................................................................................................................................................................................................................................................................................................................ssssss..............................................s........................ss................................................................................................................................................sssss..s............................................................................................................................................................[main (root-commit) 07e214d] broken
+ 2 files changed, 14 insertions(+)
+ create mode 100644 calc.py
+ create mode 100644 test_calc.py
+....................................................................................................................................................................................................................................................DOMAIN-BLINDNESS WARN: scan target missing (not an error): layer0/
+DOMAIN-BLINDNESS PASS: no coding|pytest|ast tokens in vanguard/packages/domain/, vanguard/packages/kernel/
+.DOMAIN-BLINDNESS FIXTURE FAIL-CLOSED: 1 planted hit(s)
+.ISOLATION POLICY FIXTURE FAIL-CLOSED: 1 violation(s)
+.ISOLATION POLICY PASS: proc.exec plugins declare container/subprocess
+...................................................................................................usage: autofix_harness.py [-h] --task TASK --target-file TARGET_FILE
+                          [--test-cmd TEST_CMD] [--max-turns MAX_TURNS]
+                          [--model-path MODEL_PATH] [--cascade]
+                          [--fallback-model-path FALLBACK_MODEL_PATH]
+                          [--fallback-port FALLBACK_PORT] [--port PORT]
+                          [--timeout TIMEOUT] [--budget BUDGET] [--json]
+autofix_harness.py: error: --cascade requires --fallback-model-path; remote providers are not supported
+........../home/rock-dev/Coding/cognitive-framework/vanguard/packages/agency/manifests/loader.py:191: DeprecationWarning: jsonschema.RefResolver is deprecated as of v4.18.0, in favor of the https://github.com/python-jsonschema/referencing library, which provides more compliant referencing behavior as well as more flexible APIs for customization. A future release will remove RefResolver. Please file a feature request (on referencing) if you are missing an API for the kind of customization you need.
+  resolver_type = getattr(jsonschema, "RefResolver", None)
+.....s........................................................................................s................................................................................................................................................./home/rock-dev/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/unittest/case.py:589: ResourceWarning: unclosed <socket.socket fd=8, family=2, type=1, proto=0, laddr=('127.0.0.1', 36937)>
+  if method() is not None:
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+...........................................s..............................................s...................................s............................................................................................................................................sssssss......sss.............................................................................127.0.0.1 - - [12/Sep/2026 18:06:21] "GET /api/capabilities HTTP/1.1" 200 -
+.127.0.0.1 - - [12/Sep/2026 18:06:22] "GET /api/health HTTP/1.1" 200 -
+127.0.0.1 - - [12/Sep/2026 18:06:22] "GET /api/v1/health HTTP/1.1" 200 -
+.127.0.0.1 - - [12/Sep/2026 18:06:22] "POST /api/runs/launch HTTP/1.1" 200 -
+127.0.0.1 - - [12/Sep/2026 18:06:22] "GET /api/runs/run-gw-01a09771 HTTP/1.1" 200 -
+127.0.0.1 - - [12/Sep/2026 18:06:22] "GET /api/runs HTTP/1.1" 200 -
+127.0.0.1 - - [12/Sep/2026 18:06:22] "POST /api/approvals/resolve HTTP/1.1" 400 -
+127.0.0.1 - - [12/Sep/2026 18:06:22] "POST /api/runs/run-gw-01a09771:cancel HTTP/1.1" 200 -
+.127.0.0.1 - - [12/Sep/2026 18:06:23] "POST /api/runs/launch HTTP/1.1" 200 -
+127.0.0.1 - - [12/Sep/2026 18:06:23] "GET /api/v1/runs/run-sse-01a09771/events:stream HTTP/1.1" 200 -
+.127.0.0.1 - - [12/Sep/2026 18:06:23] "GET /api/workspace/file?path=sample.txt HTTP/1.1" 200 -
+127.0.0.1 - - [12/Sep/2026 18:06:23] "GET /api/workspace/file?path= HTTP/1.1" 400 -
+127.0.0.1 - - [12/Sep/2026 18:06:23] "GET /api/workspace/file?path=../../etc/passwd HTTP/1.1" 404 -
+......127.0.0.1 - - [12/Sep/2026 18:06:24] "GET /api/credentials HTTP/1.1" 200 -
+.127.0.0.1 - - [12/Sep/2026 18:06:24] "GET /api/credentials HTTP/1.1" 200 -
+.127.0.0.1 - - [12/Sep/2026 18:06:25] "GET /api/credentials HTTP/1.1" 200 -
+.127.0.0.1 - - [12/Sep/2026 18:06:25] "POST /api/runs/launch HTTP/1.1" 200 -
+.127.0.0.1 - - [12/Sep/2026 18:06:26] "POST /api/runs/launch HTTP/1.1" 200 -
+.127.0.0.1 - - [12/Sep/2026 18:06:27] "POST /api/runs/launch HTTP/1.1" 200 -
+.127.0.0.1 - - [12/Sep/2026 18:06:27] "POST /api/runs/launch HTTP/1.1" 200 -
+..........................................................127.0.0.1 - - [12/Sep/2026 18:06:30] "GET /api/v1/runs/run-parity-01a09771/events:stream HTTP/1.1" 200 -
+......................................................s..s.........................................................................................unknown benchmark: 'not_a_real_benchmark'; available: ['artifact_capture_batch_50', 'checkpoint_reconstruction_500_events', 'durable_turn', 'event_append_batch_100', 'fold_1000_events', 'multi_agent_token_overhead', 'nested_agent_execution', 'no_op_turn', 'recovery_latency', 'single_agent_execution', 'single_effect_turn_durable_minus_no_op_is_kernel_dispatch_overhead', 'storage_amplification_1000_events']
+..running fold_1000_events...
+running storage_amplification_1000_events...
+wrote /tmp/tmpi65e8zn5/report.json
+.........DUPLICATION INFO: absorb-pending pair absent: layer0/events/selectors.py or vanguard/packages/domain/selectors/resource_selector.py
+DUPLICATION FAIL: DUPLICATE SURFACE: planted selector algebra fork (layer0/fork_selectors.py, vanguard/packages/domain/fork_selectors.py)
+DUPLICATION PASS: planted duplicate detected
+.DUPLICATION INFO: absorb-pending pair absent: layer0/events/selectors.py or vanguard/packages/domain/selectors/resource_selector.py
+DUPLICATION PASS: no forbidden duplicate surfaces detected
+..........................................s...................................................................................2026-09-12 18:06:46,731 [ERROR] Strategy 'flaky_plugin' failed after 0.00 ms with error: Strategy crash. Executing fallback 'fts5_bm25'.
+..........................................................................................
+======================================================================
+ERROR: test_frozen_suite_is_complete_and_digest_bound (test.benchmarks.test_control_corpus.TestControlCorpus.test_frozen_suite_is_complete_and_digest_bound)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/rock-dev/Coding/cognitive-framework/test/benchmarks/test_control_corpus.py", line 144, in test_frozen_suite_is_complete_and_digest_bound
+    validate_suite(self.suite)
+  File "/home/rock-dev/Coding/cognitive-framework/test/benchmarks/test_control_corpus.py", line 131, in validate_suite
+    raise ValueError("oracle digest mismatch")
+ValueError: oracle digest mismatch
+
+======================================================================
+FAIL: test_rejects_duplicate_ids (test.benchmarks.test_control_corpus.TestControlCorpus.test_rejects_duplicate_ids)
+----------------------------------------------------------------------
+ValueError: oracle digest mismatch
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/rock-dev/Coding/cognitive-framework/test/benchmarks/test_control_corpus.py", line 163, in test_rejects_duplicate_ids
+    with self.assertRaisesRegex(ValueError, "duplicate task identifier"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "duplicate task identifier" does not match "oracle digest mismatch"
+
+----------------------------------------------------------------------
+Ran 3183 tests in 148.635s
+
+FAILED (failures=1, errors=1, skipped=42)
+{
+  "status": "RESOLVED",
+  "target_file": "/tmp/tmppnux1ffu/subject.py",
+  "total_turns": 1,
+  "total_tokens": 0,
+  "total_duration_seconds": 0.0
+}
+Cassette written to: /tmp/tmpx6udagsa/recorded.cassette.json
+Replay completed: outcome=completed turns=1
+Diagnostic bundle written to: /tmp/tmpkixugmzu/diag_bundle.zip
+TEST HYGIENE FAIL: Provider credential OPENROUTER_API_KEY is set; hermetic suites require provider keys unset
+TEST HYGIENE FAIL: LAM_DB_PATH points directly to tracked repo corpus: /home/rock-dev/Coding/cognitive-framework/tools/002_LLM_API_MOCK/lam.sqlite
+TEST HYGIENE PASS: provider keys and inherited state are clean

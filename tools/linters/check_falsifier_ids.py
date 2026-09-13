@@ -11,8 +11,8 @@ from typing import Iterable
 _ROOT = Path(__file__).resolve().parents[2]
 _REGISTER = _ROOT / "docs/decisions.md"
 _CITATION_FILES = (
-    _ROOT / "docs/execution/spec.md",
-    _ROOT / "docs/execution/tasks.md",
+    _ROOT / "docs/execution/main/spec.md",
+    _ROOT / "docs/execution/main/tasks.md",
     _ROOT / "docs/execution/active.md",
 )
 _TOKEN = re.compile(r"RF-(\d+)(?:`?\s*[–-]\s*`?(?:RF-)?(\d+))?")
@@ -66,8 +66,8 @@ def cited_ids(paths: Iterable[Path]) -> dict[int, set[str]]:
 
 def citation_files() -> tuple[Path, ...]:
     return (
-        _ROOT / "docs/execution/spec.md",
-        _ROOT / "docs/execution/tasks.md",
+        _ROOT / "docs/execution/main/spec.md",
+        _ROOT / "docs/execution/main/tasks.md",
         *sorted((_ROOT / "docs/decisions.md").glob("[0-9][0-9][0-9][0-9]-*.md")),
     )
 

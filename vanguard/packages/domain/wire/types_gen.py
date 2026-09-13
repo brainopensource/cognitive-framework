@@ -85,6 +85,9 @@ class EventKind(str, Enum):
     STRATEGY_CHANGED = "StrategyChanged"
     PROGRESS_ASSESSED = "ProgressAssessed"
     CONTEXT_COMPACTED = "ContextCompacted"
+    CONTEXT_SELECTION_RECORDED = "ContextSelectionRecorded"
+    VERIFICATION_RECORDED = "VerificationRecorded"
+    CHANGE_SURFACE_UPDATED = "ChangeSurfaceUpdated"
 
 class GateDecision(str, Enum):
     PASS = "PASS"
@@ -143,6 +146,17 @@ class BlobRef:
     media_type: str | None = None
 
 @dataclass(frozen=True, slots=True)
+class ChangeSurfaceUpdatedPayload:
+    kind: str
+    taskDigest: str
+    candidateDigest: str
+    effectDescriptorDigest: str
+    changeSurface: tuple[str, ...]
+    deletedPaths: tuple[str, ...]
+    reason: str | None = None
+    alertable: bool | None = None
+
+@dataclass(frozen=True, slots=True)
 class CheckpointPayload:
     projectionId: str
     reducerVersion: str
@@ -180,6 +194,29 @@ class ContextCompactedPayload:
     tokensBefore: int | None = None
     tokensAfter: int | None = None
     removedTokens: int | None = None
+
+@dataclass(frozen=True, slots=True)
+class ContextOmission:
+    identity: str
+    reason: str
+
+@dataclass(frozen=True, slots=True)
+class ContextSelectionRecordedPayload:
+    behaviorIdentity: JsonObject
+    contextEpoch: str
+    prefixDigest: str
+    stateDigest: str
+    policyDigest: str
+    requestDigest: str
+    repositorySubject: str
+    cursor: int
+    serializedTokens: int
+    orderedOmissions: tuple[ContextOmission, ...]
+    serializerIdentity: JsonObject
+    counterIdentity: JsonObject
+    repositoryIdentity: str | None = None
+    selectionPolicyIdentity: JsonObject | None = None
+    indexSnapshotDigest: str | None = None
 
 @dataclass(frozen=True, slots=True)
 class EffectContext:
@@ -453,6 +490,20 @@ class TrajectoryRef:
     schema: str | None = None
 
 @dataclass(frozen=True, slots=True)
+class VerificationRecordedPayload:
+    kind: str
+    taskDigest: str
+    compositionDigest: str
+    workspaceDigest: str
+    verificationSubjectDigest: str
+    argv: tuple[str, ...]
+    exitCode: int
+    observedTestCount: int | None
+    resultArtifactDigest: str | None
+    reason: str | None = None
+    alertable: bool | None = None
+
+@dataclass(frozen=True, slots=True)
 class Capability:
     verb: str
     selector: Selector
@@ -653,12 +704,15 @@ __all__ = [
     "ArtifactRef",
     "Binding",
     "BlobRef",
+    "ChangeSurfaceUpdatedPayload",
     "CheckpointPayload",
     "ClaimRef",
     "CompactionReport",
     "ConsolidationReport",
     "ContextBundle",
     "ContextCompactedPayload",
+    "ContextOmission",
+    "ContextSelectionRecordedPayload",
     "EffectContext",
     "EffectFailure",
     "EpisodeOutcome",
@@ -689,6 +743,7 @@ __all__ = [
     "TopologyEdge",
     "TopologyRole",
     "TrajectoryRef",
+    "VerificationRecordedPayload",
     "Capability",
     "Component",
     "CostVector",

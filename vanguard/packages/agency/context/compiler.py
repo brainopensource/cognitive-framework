@@ -37,15 +37,21 @@ from typing import Any, Mapping, Sequence
 
 from ...domain.artifacts.skill_index import SkillCard, format_skill_index
 from ...domain.canonicalisation.digest import digest_of
+from ...domain.task_state import Evidence, MemoryView, critical_state
 from ...kernel import Event
 from .compaction import CompactionStrategy, resolve_compaction_strategy
+from .distiller import distill_tool_output, verification_receipt_from
 from .layers import (
     BREAKPOINT_LAYERS,
+    CAPABILITY_PREFIX_CEILING,
     GOAL_ECHO_SOURCE,
+    NEWEST_INTERACTION_SOURCE,
     PINNED_L4_SOURCES,
     Block,
     CompiledContext,
+    ContextBudget,
     Fragment,
+    Interaction,
     Layer,
     blocks_of,
     estimate_tokens,
@@ -54,9 +60,12 @@ from .layers import (
 __all__ = [
     "CONTEXT_POLICY_VERSION",
     "CacheBreakpointCeilingExceeded",
+    "CapabilityPrefixExceeded",
     "CompetencePriorRecorder",
+    "ContextBudget",
     "ContextBudgetExceeded",
     "ContextCompiler",
+    "Interaction",
 ]
 
 #: How many decimal places of a prior survive to the ledger. Four is well past
@@ -79,6 +88,17 @@ class CacheBreakpointCeilingExceeded(ValueError):
     pass
 
 
+class CapabilityPrefixExceeded(ValueError):
+    """The capability-card prefix is over its character ceiling (`NT-C05`).
+
+    A `ValueError`, because every existing caller that guards the ceiling
+    catches that; a distinct type, because "the cards are too long" and "the
+    window is too small" are different repairs and a caller that cannot tell
+    them apart will attempt the wrong one.
+    """
+    pass
+
+
 class ContextCompiler:
     """The L1-L5 context compiler.
 
@@ -91,6 +111,7 @@ class ContextCompiler:
         system_core: str,
         tool_schemas: Sequence[Mapping[str, Any]] = (),
         environment: str = "",
+        capability_cards: str = "",
         skill_cards: Sequence[SkillCard] = (),
         skill_index_ceiling: int = 4000,
         token_ceiling: int = 64_000,
@@ -98,17 +119,35 @@ class ContextCompiler:
         source: str = "manifest",
         context_policy: Mapping[str, Any] | str | None = None,
         compaction_strategy: CompactionStrategy | None = None,
+        behavior_identity: Mapping[str, Any] | None = None,
     ) -> None:
         if token_ceiling <= 0:
             raise ValueError("token_ceiling must be positive")
+        # `NT-C05`: the bound is characters, and it is checked here rather
+        # than against the token budget. A route whose tokenizer is generous
+        # must not be able to enlarge the injected capability prefix.
+        if len(capability_cards) > CAPABILITY_PREFIX_CEILING:
+            raise CapabilityPrefixExceeded(
+                f"capability prefix is {len(capability_cards)} characters "
+                f"against a ceiling of {CAPABILITY_PREFIX_CEILING} (NT-C05)")
         self._token_ceiling = token_ceiling
         self._breakpoint_ceiling = breakpoint_ceiling
+        self._capability_cards = capability_cards
+        # `NT-1.6`: the members of behavior-affecting identity this object
+        # cannot see for itself — model dialect/route, serializer, token
+        # counter, recovery policy, product preset. The compiler does not
+        # *use* them; it binds them, so that changing one produces a new
+        # epoch instead of silently reusing a freeze taken under the old one.
+        # Empty by default, which leaves the epoch of every existing
+        # composition exactly where it was.
+        self._behavior_identity = _declared_identity(behavior_identity)
         # `W12-B`: the skill index is stable within a task, so it rides `L3`
         # with the environment map -- named/described only, ceiling-bounded
         # (`≤4k` names+descriptions); bodies stay on disk behind `fs.read`.
         skill_text = format_skill_index(skill_cards, ceiling=skill_index_ceiling) if skill_cards else ""
         env_with_skills = "\n\n".join(part for part in (environment, skill_text) if part)
-        self._prefix = self._render_prefix(system_core, tool_schemas, env_with_skills, source)
+        self._prefix = self._render_prefix(
+            system_core, capability_cards, tool_schemas, env_with_skills, source)
         self._prefix_tokens = sum(block.token_estimate for block in self._prefix)
 
         if compaction_strategy is not None:
@@ -119,12 +158,26 @@ class ContextCompiler:
             self._compaction_strategy = strat
             self._compaction_options = opts
 
+        # `NT-C01`: the epoch is taken once, here, over the frozen bytes and
+        # the policy that produced them. Computing it per call would let a
+        # temporarily narrowed ceiling (`compile_packet` does exactly that)
+        # report a different epoch for an unchanged composition.
+        self._composition_epoch = digest_of({
+            "prefix": [block.identity() for block in self._prefix],
+            "policy": self._policy_identity(),
+        })
+
     # -- composition-time rendering -------------------------------------
 
     @staticmethod
-    def _render_prefix(system_core: str, tool_schemas: Sequence[Mapping[str, Any]],
+    def _render_prefix(system_core: str, capability_cards: str,
+                       tool_schemas: Sequence[Mapping[str, Any]],
                        environment: str, source: str) -> tuple[Block, ...]:
         """The cached region, rendered once.
+
+        Four declared regions in one fixed order (`NT-C01`): system
+        instructions, the capability-card prefix, the ordered canonical tool
+        schemas, and the environment/composition contract.
 
         Tool schemas go through a sorted-key JSON dump rather than `str()` so
         that two composition roots naming the same tools produce the same
@@ -135,9 +188,18 @@ class ContextCompiler:
         if system_core:
             rendered.append(Block(layer=Layer.SYSTEM, source=source,
                                   label="system-core", text=system_core))
+        if capability_cards:
+            # The cards describe what the agent may do. They belong with the
+            # instructions that frame every turn, not with the turn-local
+            # material, or the first card injection would move the prefix.
+            rendered.append(Block(layer=Layer.SYSTEM, source=source,
+                                  label="capability-cards", text=capability_cards))
         if tool_schemas:
-            payload = json.dumps([dict(schema) for schema in tool_schemas],
-                                 sort_keys=True, separators=(",", ":"),
+            ordered = sorted(
+                (dict(schema) for schema in tool_schemas),
+                key=lambda schema: str(schema.get("name") or schema.get("verb") or ""),
+            )
+            payload = json.dumps(ordered, sort_keys=True, separators=(",", ":"),
                                  ensure_ascii=False)
             rendered.append(Block(layer=Layer.TOOLS, source=source,
                                   label="tool-schemas", text=payload))
@@ -154,6 +216,7 @@ class ContextCompiler:
         brief: str,
         notes: Sequence[Fragment] = (),
         dialogue: Sequence[Fragment] = (),
+        goal_echo: str | None = None,
     ) -> CompiledContext:
         """Assemble one prompt vector for one turn.
 
@@ -161,6 +224,13 @@ class ContextCompiler:
         rest of `L4`. `dialogue` is `L5`, oldest first. FEATURE_SPEC tiers 0–1
         (settled invariants, falsified hypotheses, dead ends) are L4 head and
         are not reachable by the budget; pressure caps L5 only.
+
+        `goal_echo` is the `L5` trailing echo (`NT-C05`). Passed explicitly it
+        is rendered **whole**, after every dynamic fragment: the objective and
+        its constraints are the one thing a turn may not lose, and a truncated
+        restatement of a constraint is a different constraint. With no echo
+        supplied the legacy short restatement of the brief is kept, because a
+        brief is frequently a serialized structure whose head is not a goal.
         """
         task = ((Block(layer=Layer.TASK, source="operator", label="brief", text=brief),)
                 if brief else ())
@@ -168,13 +238,14 @@ class ContextCompiler:
         pinned_blocks = list(blocks_of(Layer.TASK, pinned_notes))
         notes_blocks = list(blocks_of(Layer.TASK, flexible_notes))
         dialogue_blocks = list(blocks_of(Layer.DIALOGUE, dialogue))
-        if brief:
-            echo_text = brief if len(brief) <= 240 else brief[:237] + "..."
+        echo = goal_echo if goal_echo is not None else (
+            f"Goal: {brief if len(brief) <= 240 else brief[:237] + '...'}" if brief else None)
+        if echo:
             dialogue_blocks.append(Block(
                 layer=Layer.DIALOGUE,
                 source=GOAL_ECHO_SOURCE,
                 label="goal-echo",
-                text=f"Goal: {echo_text}",
+                text=echo,
                 evictable=False,
             ))
 
@@ -214,6 +285,44 @@ class ContextCompiler:
 
     # -- provenance identity (pure; this object still cannot log) ---------
 
+    @property
+    def composition_epoch(self) -> str:
+        """The identity of the frozen region (`NT-C01`).
+
+        It is a function of the system instructions, the capability-card
+        prefix, the ordered tool schemas, the environment contract, the
+        context policy and any declared behavior identity (`NT-1.6`: model
+        dialect/route, serializer, token counter, recovery policy, product
+        preset) — and of nothing dynamic. Two runs sharing an epoch share
+        prefix bytes; a changed epoch is the record that an old freeze, and
+        any cache identity derived from it, may not be reused.
+        """
+        return self._composition_epoch
+
+    def _policy_identity(self) -> Mapping[str, Any]:
+        """Strategy, version and scalar options — the policy half of the epoch."""
+        parameters: dict[str, Any] = {
+            "tokenCeiling": self._token_ceiling,
+            "breakpointCeiling": self._breakpoint_ceiling,
+            "capabilityPrefixChars": len(self._capability_cards),
+        }
+        if self._behavior_identity:
+            # Nested under one key rather than merged, so a declared member
+            # can never collide with — or quietly overwrite — a parameter the
+            # compiler owns itself.
+            parameters["behaviorIdentity"] = dict(self._behavior_identity)
+        # Only scalars: an option value that was itself a structure would put
+        # unbounded (and possibly sensitive) material into a ledger fact.
+        for key in sorted(self._compaction_options):
+            value = self._compaction_options[key]
+            if isinstance(value, (str, int, float, bool)) or value is None:
+                parameters[str(key)] = value
+        return {
+            "policyId": f"agency.context-compiler/{type(self._compaction_strategy).__name__}",
+            "policyVersion": CONTEXT_POLICY_VERSION,
+            "parameters": parameters,
+        }
+
     def selection_identity(self) -> Mapping[str, Any]:
         """Who decided what this prompt contains, and under which parameters.
 
@@ -227,22 +336,7 @@ class ContextCompiler:
         make it behave differently by asking. Runtime owns writing the answer
         somewhere durable.
         """
-        strategy = type(self._compaction_strategy).__name__
-        parameters: dict[str, Any] = {
-            "tokenCeiling": self._token_ceiling,
-            "breakpointCeiling": self._breakpoint_ceiling,
-        }
-        # Only scalars: an option value that was itself a structure would put
-        # unbounded (and possibly sensitive) material into a ledger fact.
-        for key in sorted(self._compaction_options):
-            value = self._compaction_options[key]
-            if isinstance(value, (str, int, float, bool)) or value is None:
-                parameters[str(key)] = value
-        return {
-            "policyId": f"agency.context-compiler/{strategy}",
-            "policyVersion": CONTEXT_POLICY_VERSION,
-            "parameters": parameters,
-        }
+        return {**self._policy_identity(), "compositionEpoch": self._composition_epoch}
 
     def _breakpoints(self, *, task_present: bool) -> tuple[Layer, ...]:
         """A breakpoint on an empty layer is a breakpoint spent on nothing."""
@@ -261,6 +355,274 @@ class ContextCompiler:
             dialogue=dialogue,
             options=self._compaction_options,
         )
+
+    def compile_packet(
+        self,
+        view: MemoryView,
+        subject: str,
+        turns: Sequence[Interaction] = (),
+        *,
+        budget: ContextBudget | None = None,
+        capability_cards: str = "",
+    ) -> CompiledContext:
+        """NT-C01–C06 selection on the existing compiler. No inference.
+
+        The order of operations is the contract, not an implementation
+        detail. Cardinality and body size are bounded *before* the budget is
+        consulted, because a selection that first assembles an unbounded
+        vector has already paid for the material it is about to throw away.
+        Eviction then follows `NT-C04` exactly: stale evidence, bodies,
+        low-priority evidence, oldest complete interactions — and never the
+        newest complete interaction, which is the state the next action starts
+        from. Mandatory state may sit above the low watermark; nothing may sit
+        above hard usable, and an irreducible vector raises
+        `CONTEXT_BUDGET_EXCEEDED` here rather than being posted and truncated
+        by a provider.
+        """
+        if not isinstance(view, MemoryView):
+            raise TypeError("compile_packet requires a MemoryView")
+        if not str(subject).strip():
+            raise ValueError("subject digest is required")
+        if len(capability_cards) > CAPABILITY_PREFIX_CEILING:
+            raise CapabilityPrefixExceeded(
+                f"capability prefix is {len(capability_cards)} characters "
+                f"against a ceiling of {CAPABILITY_PREFIX_CEILING} (NT-C05)")
+        if capability_cards and capability_cards != self._capability_cards:
+            # `NT-C01`: the prefix is frozen for the composition epoch. A
+            # per-call card set that differed from the frozen one would move
+            # L1 mid-run, which is the failure the freeze exists to prevent.
+            raise CapabilityPrefixExceeded(
+                "the capability prefix is frozen at composition; a per-call "
+                "prefix cannot replace it (NT-C01)")
+        if len({turn.key for turn in turns}) != len(turns):
+            raise ValueError("duplicate interaction key")
+        policy = budget or ContextBudget(window=self._token_ceiling)
+        usable = policy.usable
+        omissions: list[tuple[str, str]] = []
+        #: label -> the text this fragment collapses to once its body goes.
+        receipts: dict[str, str] = {}
+
+        notes = self._select_evidence(view, subject, policy, omissions, receipts)
+        dialogue = self._select_interactions(turns, subject, policy, omissions, receipts)
+
+        brief = json.dumps(
+            critical_state(view), sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+        )
+        echo = _goal_echo_text(view)
+
+        # The floor is everything eviction may not touch: the frozen prefix,
+        # the mandatory-state brief and the trailing goal echo.
+        floor = (self._prefix_tokens + estimate_tokens(brief) + estimate_tokens(echo))
+        self._fit_packet(floor=floor, notes=notes, dialogue=dialogue,
+                         policy=policy, omissions=omissions, receipts=receipts)
+
+        previous_ceiling = self._token_ceiling
+        self._token_ceiling = usable
+        try:
+            compiled = self.compile(brief=brief, notes=tuple(notes),
+                                    dialogue=tuple(dialogue), goal_echo=echo)
+        except ContextBudgetExceeded as exc:
+            raise ContextBudgetExceeded(f"CONTEXT_BUDGET_EXCEEDED: {exc}") from exc
+        finally:
+            self._token_ceiling = previous_ceiling
+        if compiled.total_tokens > usable:
+            raise ContextBudgetExceeded(
+                f"CONTEXT_BUDGET_EXCEEDED: irreducible state costs "
+                f"{compiled.total_tokens} tokens against usable {usable}"
+            )
+        already = set(omissions)
+        note_keys = {item.label for item in notes}
+        residual = [
+            (label, "evidence_dropped" if label in note_keys else "interaction_dropped")
+            for label in compiled.dropped
+            if (label, "evidence_dropped" if label in note_keys else "interaction_dropped")
+            not in already
+        ]
+        ledger = tuple(omissions) + tuple(residual)
+        # `elided` and `dropped` report the same events the omission ledger
+        # records, so a consumer that reads only the compiled context sees the
+        # packet-level evictions too, not merely the ones the compaction
+        # strategy happened to perform. They stay disjoint: material that was
+        # elided and then dropped has no receipt left to report.
+        dropped = _unique(
+            _labels(ledger, ("evidence_dropped", "interaction_dropped")) + compiled.dropped)
+        elided = _unique(tuple(
+            label for label in _labels(ledger, ("body_elided",)) + compiled.elided
+            if label not in dropped))
+        return CompiledContext(
+            blocks=compiled.blocks,
+            breakpoints=compiled.breakpoints,
+            elided=elided,
+            dropped=dropped,
+            candidate_digest=compiled.candidate_digest,
+            candidate_tokens=compiled.candidate_tokens,
+            omissions=ledger,
+        )
+
+    # -- bounded selection (NT-C04 step 0: bound before you select) -------
+
+    def _select_evidence(
+        self,
+        view: MemoryView,
+        subject: str,
+        policy: ContextBudget,
+        omissions: list[tuple[str, str]],
+        receipts: dict[str, str],
+    ) -> list[Fragment]:
+        """Fresh, subject-bound, cardinality-capped evidence, oldest first."""
+        fresh: list[Evidence] = []
+        for evidence in view.evidence:
+            if evidence.subject != subject:
+                # `NT-C04` step one. Stale evidence is removed, not summarised:
+                # a finding about another subject is not weaker evidence about
+                # this one, it is evidence about something else.
+                omissions.append((evidence.key, "stale"))
+                continue
+            fresh.append(evidence)
+        if len(fresh) > policy.max_items:
+            for evidence in fresh[:-policy.max_items]:
+                omissions.append((evidence.key, "evidence_dropped"))
+            fresh = fresh[-policy.max_items:]
+
+        selected: list[Fragment] = []
+        for evidence in fresh:
+            body = evidence.body
+            full = evidence.finding if not body else f"{evidence.finding}\n{body}"
+            receipt, text, elided, retains_body = _bound_result(
+                label=evidence.key, header=evidence.finding,
+                body=body or evidence.finding, full=full,
+                artifact=evidence.artifact, subject=subject, policy=policy, fresh=True,
+            )
+            receipts[evidence.key] = receipt
+            if elided:
+                omissions.append((evidence.key, "body_elided"))
+            selected.append(Fragment(source="evidence", label=evidence.key,
+                                     text=text, evictable=retains_body))
+        return selected
+
+    def _select_interactions(
+        self,
+        turns: Sequence[Interaction],
+        subject: str,
+        policy: ContextBudget,
+        omissions: list[tuple[str, str]],
+        receipts: dict[str, str],
+    ) -> list[Fragment]:
+        """Complete action/result units only, cardinality-capped, oldest first.
+
+        `NT-C04`: an action whose result never arrived is an orphan tool call.
+        Retaining one invites the model to treat a dispatched effect as a
+        settled one, so the pair is admitted together or not at all.
+        """
+        complete: list[Interaction] = []
+        for turn in turns:
+            if not turn.result.strip():
+                omissions.append((turn.key, "incomplete_interaction"))
+                continue
+            complete.append(turn)
+        if len(complete) > policy.max_items:
+            for turn in complete[:-policy.max_items]:
+                omissions.append((turn.key, "interaction_dropped"))
+            complete = complete[-policy.max_items:]
+
+        selected: list[Fragment] = []
+        for index, turn in enumerate(complete):
+            full = f"{turn.action}\n{turn.result}"
+            receipt, text, elided, retains_body = _bound_result(
+                label=turn.key, header=turn.action, body=turn.result, full=full,
+                artifact=turn.artifact, subject=subject, policy=policy, fresh=True,
+            )
+            receipts[turn.key] = receipt
+            if elided:
+                omissions.append((turn.key, "body_elided"))
+            newest = index == len(complete) - 1
+            selected.append(Fragment(
+                source=NEWEST_INTERACTION_SOURCE if newest else "interaction",
+                label=turn.key, text=text, evictable=retains_body,
+            ))
+        return selected
+
+    # -- NT-C04 eviction order -------------------------------------------
+
+    def _fit_packet(
+        self,
+        *,
+        floor: int,
+        notes: list[Fragment],
+        dialogue: list[Fragment],
+        policy: ContextBudget,
+        omissions: list[tuple[str, str]],
+        receipts: dict[str, str],
+    ) -> None:
+        """Bring a packet to the low watermark in the declared order.
+
+        Hysteresis (`NT-C04`): nothing is removed until the candidate crosses
+        the high watermark, and once it does the target is the low watermark —
+        compacting to exactly the high watermark would compact again next turn
+        and every turn after it. What cannot be reduced is left above low; the
+        caller still refuses anything above hard usable.
+        """
+        def cost() -> int:
+            return (floor
+                    + sum(estimate_tokens(item.text) for item in notes)
+                    + sum(estimate_tokens(item.text) for item in dialogue))
+
+        if cost() <= policy.high_watermark:
+            return
+        target = policy.low_watermark
+
+        # Step two: elide bodies into receipts, lowest priority first.
+        # Evidence outranks nothing; the transcript outranks it only in
+        # recency, so evidence bodies go before interaction bodies.
+        for sequence in (notes, dialogue):
+            for index, item in enumerate(sequence):
+                if cost() <= target:
+                    return
+                receipt = receipts.get(item.label)
+                if receipt is None or estimate_tokens(receipt) >= estimate_tokens(item.text):
+                    # Eliding a body into a receipt that costs as much as the
+                    # body buys nothing and loses the body.
+                    continue
+                # `evictable=False`: the body this fragment carried is now a
+                # receipt, so a downstream compaction pass has nothing left to
+                # reclaim from it and must not overwrite the identity it kept.
+                sequence[index] = Fragment(source=item.source, label=item.label,
+                                           text=receipt, evictable=False)
+                omissions.append((item.label, "body_elided"))
+
+        # Step three: drop low-priority evidence, oldest first.
+        while cost() > target and notes:
+            omissions.append((notes.pop(0).label, "evidence_dropped"))
+
+        # Step four: drop the oldest complete interactions. The newest one is
+        # never a candidate: its body may already be a receipt, but the fact
+        # that it happened is the state the next action starts from.
+        while cost() > target and len(dialogue) > 1:
+            omissions.append((dialogue.pop(0).label, "interaction_dropped"))
+
+
+def _declared_identity(declared: Mapping[str, Any] | None) -> Mapping[str, Any]:
+    """Canonicalise declared behavior identity, or refuse it (`NT-1.6`).
+
+    Scalars only, for the same reason `_policy_identity` admits only scalars:
+    these values reach a ledger fact, and a structure here would put unbounded
+    — possibly sensitive — material into a record nothing can withdraw. Sorted
+    at the door so two composition roots declaring the same members in
+    different order share an epoch rather than splitting one.
+    """
+    if declared is None:
+        return {}
+    if not isinstance(declared, Mapping):
+        raise TypeError("behavior_identity must be a mapping of scalar identities")
+    canonical: dict[str, Any] = {}
+    for key in sorted(declared):
+        value = declared[key]
+        if not (isinstance(value, (str, int, float, bool)) or value is None):
+            raise TypeError(
+                f"behavior identity {key!r} must be a scalar identity, not "
+                f"{type(value).__name__}")
+        canonical[str(key)] = value
+    return canonical
 
 
 def _is_pinned_l4(fragment: Fragment) -> bool:
@@ -288,21 +650,84 @@ def _partition_l4_notes(
     return tuple(invariants + negatives + other_pinned), tuple(flexible)
 
 
-def _receipt_for(block: Block) -> Block:
-    """What `result_eviction` leaves behind: the fact, without the body.
+def _labels(ledger: Sequence[tuple[str, str]], reasons: Sequence[str]) -> tuple[str, ...]:
+    return tuple(label for label, reason in ledger if reason in reasons)
 
-    `VG-03 §10.3` — "keep that a file was read; drop the body once superseded".
-    An evicted result that vanished entirely would let the operator re-issue
-    the same read forever, which is the failure eviction exists to avoid.
+
+def _unique(labels: Sequence[str]) -> tuple[str, ...]:
+    """Order-preserving deduplication: one event, reported once."""
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for label in labels:
+        if label not in seen:
+            seen.add(label)
+            ordered.append(label)
+    return tuple(ordered)
+
+
+def _goal_echo_text(view: MemoryView) -> str:
+    """The complete objective and constraints, for the `L5` tail (`NT-C05`).
+
+    Rendered from the durable task state rather than from any message, so no
+    quantity of untrusted tool output can become the operative goal: the last
+    thing the model reads is the thing the operator asked for.
     """
-    return Block(
-        layer=block.layer,
-        source=block.source,
-        label=block.label,
-        text=f"[{block.label} from {block.source}: "
-             f"{block.byte_length} bytes elided after use]",
-        evictable=False,
-    )
+    task = view.task
+    lines = [f"Objective: {task.objective}"]
+    if task.constraints:
+        lines.append("Constraints:")
+        lines.extend(f"- {constraint}" for constraint in task.constraints)
+    return "\n".join(lines)
+
+
+def _bound_result(
+    *,
+    label: str,
+    header: str,
+    body: str,
+    full: str,
+    artifact: str,
+    subject: str,
+    policy: ContextBudget,
+    fresh: bool,
+) -> tuple[str, str, bool, bool]:
+    """Bound one result at the door, and say what it collapses to later.
+
+    Four values: the *eviction receipt* (`NT-C04` step two leaves this behind
+    when the body goes), the text admitted now, whether admitting it already
+    omitted the raw body, and whether any raw body survived admission.
+
+    The last one is what keeps a receipt a receipt. `evictable` means "a body
+    is still here and eviction can still reclaim it"; a verification receipt
+    has already replaced its body with identity, so a later pass that treated
+    it as evictable would collapse `command`, `environment`, `subject`,
+    counts, exit status and artifact into a byte count and call that an
+    eviction (`NT-C05`).
+
+    A verification body collapses immediately, whatever its size. What the
+    working state needs from a suite run is which command ran, where, against
+    which subject, how many tests it collected and executed, with which exit
+    status and how fresh (`NT-C05`) — never the passing log, which is the
+    largest and least informative part of it. An ordinary body is kept
+    verbatim until it crosses the declared byte bound, and is then capped
+    head/tail against its full preimage digest.
+    """
+    verification = verification_receipt_from(
+        body, subject=subject, artifact=artifact, fresh=fresh)
+    if verification is not None:
+        receipt = f"{header}\n{verification.render()}"
+        # The body is gone already and what replaced it is pure identity:
+        # there is nothing left for a later eviction pass to reclaim.
+        return receipt, receipt, estimate_tokens(receipt) < estimate_tokens(full), False
+
+    # The eviction receipt is identity, not content: after eviction the body
+    # is reachable by artifact and nothing else of it is claimed.
+    receipt = (f"{header}\nartifact={artifact}\n"
+               f"[{label}: {len(body.encode('utf-8'))} bytes elided after use]")
+    if len(full.encode("utf-8")) > policy.max_body_bytes:
+        distilled = distill_tool_output(body, cap_chars=policy.max_body_bytes)
+        return receipt, f"{header}\nartifact={artifact}\n{distilled.compact_text}", True, True
+    return receipt, full, False, True
 
 
 class CompetencePriorRecorder:
@@ -378,4 +803,4 @@ class CompetencePriorRecorder:
 
 
 # Re-exported for callers that only ever import the compiler module.
-__all__ += ["Block", "CompiledContext", "Fragment", "Layer", "estimate_tokens"]
+__all__ += ["Block", "CompiledContext", "ContextBudget", "Fragment", "Interaction", "Layer", "estimate_tokens"]

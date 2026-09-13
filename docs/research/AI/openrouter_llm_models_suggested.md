@@ -40,6 +40,7 @@ topic:
 
 ## 2. Great Paid Models
 
+- tencent/hy4-preview
 - google/gemini-3.8-flash
 - deepseek/deepseek-v4-pro
 - moonshotai/kimi-k3

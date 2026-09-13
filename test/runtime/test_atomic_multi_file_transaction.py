@@ -6,6 +6,8 @@ This module proves multi-file `GitEnvironment.apply` is all-or-nothing.
 
 from __future__ import annotations
 
+import os
+import stat
 import subprocess
 import tempfile
 import unittest
@@ -120,6 +122,65 @@ class TestAtomicMultiFileTransaction(unittest.TestCase):
             for name in _FILES:
                 self.assertEqual((root / name).read_text(encoding="utf-8"), _PRE)
             self.assertEqual(_leftover_tmp(root), [])
+
+    def test_later_file_failure_preserves_modes_and_content(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            _git_repo(repo)
+            pre_image: dict[str, str] = {}
+            for name in _FILES:
+                path = repo / name
+                path.write_text(_PRE, encoding="utf-8")
+                os.chmod(path, 0o640)
+                pre_image[name] = _PRE
+
+            hunks = []
+            for index, name in enumerate(_FILES):
+                if index == 3:
+                    hunks.append(f"--- a/{name}\n+++ b/{name}\n@@\n")
+                else:
+                    hunks.append(_mod_hunk(name, _PRE, _GOOD))
+            patch = "".join(hunks)
+
+            env = GitEnvironment(repo_path=repo)
+            result = env.apply(
+                EffectRequest(verb="patch.apply", action="patch", patch=patch)
+            )
+
+            self.assertFalse(result.ok, "incomplete hunk on file 4 must refuse the set")
+            self.assertIsNotNone(result.error)
+            self.assertIn("incomplete", result.error.message if result.error else "")
+            for name, expected in pre_image.items():
+                path = repo / name
+                self.assertEqual(path.read_text(encoding="utf-8"), expected)
+                self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o640)
+            self.assertEqual(_leftover_tmp(repo), [])
+
+    def test_syntax_fail_preserves_modes_after_refusal(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp)
+            _git_repo(repo)
+            for name in _FILES:
+                path = repo / name
+                path.write_text(_PRE, encoding="utf-8")
+                os.chmod(path, 0o640)
+
+            hunks = []
+            for index, name in enumerate(_FILES):
+                replacement = _BAD if index == 3 else _GOOD
+                hunks.append(_mod_hunk(name, _PRE, replacement))
+            patch = "".join(hunks)
+
+            env = GitEnvironment(repo_path=repo)
+            result = env.apply(
+                EffectRequest(verb="patch.apply", action="patch", patch=patch)
+            )
+            self.assertFalse(result.ok)
+            for name in _FILES:
+                path = repo / name
+                self.assertEqual(path.read_text(encoding="utf-8"), _PRE)
+                self.assertEqual(stat.S_IMODE(path.stat().st_mode), 0o640)
+            self.assertEqual(_leftover_tmp(repo), [])
 
 
 if __name__ == "__main__":

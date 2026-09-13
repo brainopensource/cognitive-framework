@@ -1,6 +1,6 @@
 # `aether` / `vg` CLI / TUI
 
-Requires Node ≥ 20. Architecture & Spec: [`docs/execution/spec.md`](../../../docs/execution/spec.md).
+Requires Node ≥ 20. Architecture & Spec: [`docs/execution/main/spec.md`](../../../docs/execution/main/spec.md).
 
 ## Install
 

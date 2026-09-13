@@ -24,7 +24,7 @@ Authority order for this work:
 2. `docs/SPEC.md` and `docs/01_law/` — normative invariants.
 3. accepted ADRs — binding decisions reflected in law.
 4. `schemas/v4/` and canonical protocol documents — wire contracts.
-5. `docs/03_execution/milestones.md` — stable gates.
+5. `docs/03_execution/main/milestones.md` — stable gates.
 6. `docs/03_execution/sprint_active.md` — sole current authorization.
 7. this dossier — advisory implementation decomposition only.
 

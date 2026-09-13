@@ -1,0 +1,46 @@
+{
+  "subject_sha": "1b97c66b4d5eb8b4f303a5e784a2ad6b37995404",
+  "dirty_flag": true,
+  "evaluated_at": "2026-09-12T08:26:00Z",
+  "control_preregistration": "UNFROZEN",
+  "paid_budget_cap_usd": 0.10,
+  "paid_call_cap": 150,
+  "paid_spend_usd": 0.004378,
+  "paid_turn_slots": 56,
+  "gates": {
+    "boundaries": "PASS 833 files",
+    "tcb": "PASS 1386/1438 LOC",
+    "domain_blindness": "PASS",
+    "isolation": "PASS",
+    "secrets": "PASS",
+    "duplication": "PASS",
+    "markdown_links": "PASS",
+    "stale_paths": "PASS 778 files",
+    "prompt_prefix_chars": 2180,
+    "prompt_prefix_ceiling": 4096,
+    "kernel_dispatch": "29/29 in 0.154s",
+    "control_falsifiers": "60/60 in 0.062s",
+    "lda_index_healthy": true,
+    "lda_docs": 296,
+    "lda_symbols": 11406,
+    "lda_relations": 91526
+  },
+  "corpus": {
+    "total": 37,
+    "baac": 9,
+    "benchmark_20_suite": 20,
+    "greenfield": 8,
+    "initial_RED": 33,
+    "initial_GREEN": 2,
+    "TIMEOUT": 1,
+    "NO_ORACLE": 1,
+    "trivial_assert_true": 0,
+    "task_leak_hits": 0,
+    "baac_zero_state": "9/9"
+  },
+  "lam_replay": {
+    "synthetic_50": "50/50",
+    "baac_cycle_vg_code_balanced": "9/9 PASS $0.00 0.83s",
+    "label": "REPLAY"
+  }
+}

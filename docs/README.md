@@ -18,12 +18,12 @@ audience:
   - developer
   - contributor
   - agent
-version: 0.9.3
-last_verified: 2026-09-03
+version: 0.9.4
+last_verified: 2026-09-12
 normative_authority:
   - VISION.md
-  - docs/execution/spec.md
-  - docs/execution/tasks.md
+  - docs/execution/main/spec.md
+  - docs/execution/main/tasks.md
 relationships:
   - arch.system.overview
   - arch.system.boundaries
@@ -45,9 +45,10 @@ AETHER documentation strictly separates constitutional vision, normative law, ar
 | **0. Constitutional** | [`VISION.md`](../VISION.md) | Foundational vision, identity, ontology, and high-level direction. |
 | **1. Operational Law** | [`AGENTS.md`](../AGENTS.md) | Operational guidelines and mandatory execution rules for AI agents and human contributors. |
 | **2. Human Entry Point** | [`README.md`](../README.md) | High-level repository entry point, setup guide, and validation summary table. |
-| **3. Normative Law & Delta Spec** | [`docs/execution/spec.md`](execution/spec.md) | RFC 2119 normative requirements, system invariants, and active sprint delta contract. |
+| **3. Normative Law & Delta Spec** | [`docs/execution/main/spec.md`](execution/main/spec.md) | RFC 2119 normative requirements, system invariants, and active sprint delta contract. |
 | **4. Architecture & Reference** | [`docs/architecture/`](architecture/overview.md), [`docs/backend/`](backend/architecture/runtime-execution.md), [`docs/frontend/`](frontend/README.md) | System workflows, subsystem architectures, integrated architectural decisions (DEC-01–DEC-11), wire contracts, and API references. |
-| **5. Execution Runway** | [`docs/execution/tasks.md`](execution/tasks.md), [`docs/execution/spec.md`](execution/spec.md), [`docs/execution/technical.md`](execution/technical.md), [`docs/execution/milestones.md`](execution/milestones.md), [`docs/execution/backlog.md`](execution/backlog.md) | The 5 operational runway documents: flat task tree, delta spec, handbook, TARGET gates, and capability inventory. |
+| **5. Execution** | [`docs/execution/`](execution/README.md) | Start here for execution: `main/` (canonical law), `guidelines/` (role charters), `management/` (process and current state of play). |
+| **5a. Execution Runway** | [`docs/execution/main/tasks.md`](execution/main/tasks.md), [`docs/execution/main/spec.md`](execution/main/spec.md), [`docs/execution/main/technical.md`](execution/main/technical.md), [`docs/execution/main/milestones.md`](execution/main/milestones.md), [`docs/execution/main/backlog.md`](execution/main/backlog.md) | The 5 operational runway documents: flat task tree, delta spec, handbook, TARGET gates, and capability inventory. |
 | **6. Product PRDs** | [`docs/product/`](product/frontend/PRD_FRONTEND_PLATFORM.md) | Client application PRDs and product requirements. |
 | **7. Non-Canonical** | [`docs/theory/`](theory/agent-substrate.md), [`docs/research/`](research/), [`docs/reports/`](reports/) | Non-canonical theoretical essays, historical harness research, and post-mortem audit reports (`authority: non-canonical`). |
 
@@ -91,7 +92,7 @@ To optimize LLM context usage (e.g. 16K and 32K context windows) and prevent pro
 
 | Task Category | Primary Canonical Owner | Secondary Reference / Evidence | Typical Docs Packet (Est Tokens) |
 |---|---|---|---|
-| **Kernel / TCB** | [`docs/backend/architecture/kernel.md`](backend/architecture/kernel.md) | [`docs/execution/spec.md`](execution/spec.md), [`backend/reference/ports.md`](backend/reference/ports.md) | ~3,500 – 5,500 tokens |
+| **Kernel / TCB** | [`docs/backend/architecture/kernel.md`](backend/architecture/kernel.md) | [`docs/execution/main/spec.md`](execution/main/spec.md), [`backend/reference/ports.md`](backend/reference/ports.md) | ~3,500 – 5,500 tokens |
 | **Runtime Service** | [`docs/backend/architecture/runtime-execution.md`](backend/architecture/runtime-execution.md) | [`backend/reference/runtime-service.md`](backend/reference/runtime-service.md), `symbols.jsonl` | ~3,800 – 6,000 tokens |
 | **Events & Ledgers** | [`docs/backend/architecture/causal-state.md`](backend/architecture/causal-state.md) | [`docs/backend/reference/events.md`](backend/reference/events.md), [`backend/reference/schemas.md`](backend/reference/schemas.md) | ~3,500 – 5,200 tokens |
 | **Agency & Turns** | [`docs/backend/architecture/agency.md`](backend/architecture/agency.md) | [`backend/architecture/workflows/agent-lifecycle.md`](backend/architecture/workflows/agent-lifecycle.md) | ~3,000 – 5,000 tokens |
@@ -99,7 +100,8 @@ To optimize LLM context usage (e.g. 16K and 32K context windows) and prevent pro
 | **Artifacts & Evidence** | [`docs/backend/architecture/assurance-evaluation.md`](backend/architecture/assurance-evaluation.md) | [`backend/reference/artifacts-memory.md`](backend/reference/artifacts-memory.md) | ~3,200 – 5,500 tokens |
 | **CLI / TUI / Client** | [`docs/product/frontend/PRD_AETHER_CLI.md`](product/frontend/PRD_AETHER_CLI.md) | [`docs/product/frontend/PRD_AETHER_TUI.md`](product/frontend/PRD_AETHER_TUI.md) | ~4,000 – 6,500 tokens |
 | **Frontend Platform** | [`docs/product/frontend/PRD_FRONTEND_PLATFORM.md`](product/frontend/PRD_FRONTEND_PLATFORM.md) | [`docs/product/frontend/PRD_AETHER_DESKTOP.md`](product/frontend/PRD_AETHER_DESKTOP.md) | ~6,000 – 9,000 tokens |
-| **Execution tasks**| [`docs/execution/tasks.md`](execution/tasks.md) | [`docs/execution/spec.md`](execution/spec.md), [`docs/execution/technical.md`](execution/technical.md) | ~2,000 – 8,000 tokens |
+| **Agent Capabilities** | [`.agents/README.md`](../.agents/README.md) | [`.agents/skills/lda-navigator/SKILL.md`](../.agents/skills/lda-navigator/SKILL.md), [`vanguard/packages/runtime/agent_plugins.py`](../vanguard/packages/runtime/agent_plugins.py) | ~2,000 – 4,500 tokens |
+| **Execution tasks**| [`docs/execution/main/tasks.md`](execution/main/tasks.md) | [`docs/execution/main/spec.md`](execution/main/spec.md), [`docs/execution/main/technical.md`](execution/main/technical.md) | ~2,000 – 8,000 tokens |
 
 ---
 
@@ -113,7 +115,21 @@ The repository automatically maintains a deterministic, machine-readable knowled
 - **`code-map.jsonl`**: Mappings from production packages (`vanguard/packages/`) to canonical documentation owners.
 - **`symbols.jsonl`**: AST-derived index of all public production classes/protocols (plus curated key symbols), each linked to its canonical doc owner. Regenerated by `tools/generate_knowledge_base.py`.
 
-To perform local deterministic context retrieval for an AI agent without loading full files:
+### Primary SOTA Fast Path vs. Deterministic Fallback
+
+1. **Primary SOTA Fast Path (LDA Engine)**: For active development and task routing, use the in-process SQLite-WAL engine (`.lda/index.db`) operating with 0 MB idle RAM and sub-25ms delta indexing:
+```bash
+# One-shot task bundle (symbols, callers, falsifiers, docs)
+uv run lda plan "<task keywords or intent>" --budget 8000
+
+# Natural-language intent resolution (when symbol is unknown)
+uv run lda resolve "<intent or concept>"
+
+# Instant sub-25ms incremental sync after editing files
+uv run lda index --delta
+```
+
+2. **Deterministic Fallback (`docs_rag_v0.py`)**: When the LDA SQLite graph is cold, degraded, or unbuilt:
 ```bash
 # Authority-ranked routing for a task, packed inside a token budget
 python3 tools/docs_rag_v0.py "YOUR SEARCH QUERY" --budget 8000
@@ -122,9 +138,7 @@ python3 tools/docs_rag_v0.py "YOUR SEARCH QUERY" --budget 8000
 python3 tools/docs_rag_v0.py --file vanguard/packages/kernel/budget.py
 ```
 
-The LDA dashboard (`uv run lda serve`, `127.0.0.1:8765`) visualizes the same knowledge base for humans. Its agent-facing `lda query` / `lda context` commands are **experimental** until `uv run lda doctor --json` reports `"index_healthy": true` (`just lda-index` populates the index); `docs_rag_v0.py` is the canonical agent retrieval surface.
-
-LDA is project-agnostic and profile-driven: this repository selects its AETHER profile (authority vocabulary, non-canonical tiers, workspace exclusions) explicitly via the root `lda.yaml` — never by artifact side-channel. Its architectural invariants, enforced by `test/tools/test_lda_portability.py`, are: (1) **Single Emitter** — LDA never writes `.generated/knowledge/`; (2) **Git-HEAD binding** — context packets record `provenance.source_head_sha` and must be recompiled (or refused) on workspace HEAD mismatch; (3) **Bounded growth** — global symbol rankings are capped at Top-K (`max_global_symbols`, default 500).
+The LDA engine is verified healthy via `uv run lda doctor --json` (`status: HEALTHY`). It is project-agnostic and profile-driven (root `lda.yaml`). Its architectural invariants, enforced by `test/tools/test_lda_portability.py`, are: (1) **Single Emitter** — LDA never writes `.generated/knowledge/`; (2) **Git-HEAD binding** — context packets record `provenance.source_head_sha` and must be recompiled (or refused) on workspace HEAD mismatch; (3) **Bounded growth** — global symbol rankings are capped at Top-K (`max_global_symbols`, default 500).
 
 ---
 
@@ -134,11 +148,11 @@ Task: *"Add a new typed budget class for sandbox wall-clock limits."*
 
 | Step | Command / Artifact | Question Answered | Tokens |
 |---|---|---|---|
-| 0. Bootstrap | `cat dev_context_logs/context_summary.md` | TCB ≤1438 (currently 1384 → **54 LOC headroom** constrains where the code may live); which suites must stay green; what is already failing | ~800 |
+| 0. Bootstrap | `cat dev_context_logs/context_summary.md` | TCB ≤1438 (currently 1386 → **52 LOC headroom** constrains where the code may live); which suites must stay green; what is already failing | ~800 |
 | 1. Route | `python3 tools/docs_rag_v0.py "typed budget wall clock limit" --budget 6000` | Subsystem = Kernel Core; canonical owner = `docs/backend/architecture/kernel.md`; secondary = `docs/backend/reference/ports.md` | ~800 |
 | 2. Reverse route | `python3 tools/docs_rag_v0.py --file vanguard/packages/kernel/budget.py` | Documentation debt: `kernel.md` must be updated; existing symbols in the target file | ~200 |
 | 3. Pin symbols | `grep "Budget" .generated/knowledge/symbols.jsonl` | Existing algebra to extend (`BudgetDenied`, attenuation classes) and where they live | ~200 |
-| 4. Read owners | `docs/backend/architecture/kernel.md` + `docs/execution/spec.md` budget clauses | The contract/invariants the change must respect | ~2,500–5,000 |
+| 4. Read owners | `docs/backend/architecture/kernel.md` + `docs/execution/main/spec.md` budget clauses | The contract/invariants the change must respect | ~2,500–5,000 |
 | 5. Validate | `python3 -m unittest discover -s test/kernel -t .` + `just check` | Executable falsifiers for the change | — |
 
 Total targeted reading: **~5–8K tokens** instead of the 50–150K+ a full-corpus scan costs — and the map told us our documentation obligations *before* the first commit, which is what keeps this knowledge base truthful.

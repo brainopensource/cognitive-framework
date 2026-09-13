@@ -30,7 +30,7 @@ authorizes_nothing: true
 navigation_mode: degraded-locator-plus-source
 ---
 
-> **Unused reference.** Day-to-day development authority is [`docs/execution/`](../docs/execution/): [`milestones.md`](../docs/execution/milestones.md), [`spec.md`](../docs/execution/spec.md), [`technical.md`](../docs/execution/technical.md), [`backlog.md`](../docs/execution/backlog.md), [`tasks.md`](../docs/execution/tasks.md). This draft remains forensic lock at HEAD `66aa7a3c`. Do not treat it as the work board.
+> **Unused reference.** Day-to-day development authority is [`docs/execution/`](../docs/execution/): [`milestones.md`](../docs/execution/main/milestones.md), [`spec.md`](../docs/execution/main/spec.md), [`technical.md`](../docs/execution/main/technical.md), [`backlog.md`](../docs/execution/main/backlog.md), [`tasks.md`](../docs/execution/main/tasks.md). This draft remains forensic lock at HEAD `66aa7a3c`. Do not treat it as the work board.
 
 # AETHER / Vanguard: SOTA Autonomous Coding Agent & Harness Builder Meta-Framework
 ## Architecture, Composable Primitives, and Engineering Execution Masterplan (v2)
@@ -115,7 +115,7 @@ Vanguard is simultaneously two tightly integrated systems:
 
 - **Plan A remains program law**: reliability identity, wave order, competency profiles, formal model, per-class evidence, non-goals, D-01–D-10.
 - **Plan B remains substrate ground truth and the critical-path DAG**: empirical contradiction audit, live inventory, lattice placement, and Tickets 01–35 (operator one-pager 01–13 first).
-- **`DEVELOPMENT_FINAL_PLAN_v2.md` defines the System Architecture & Primitive Mechanics**: It synthesizes the extensive research in `docs/research/coding_harness/`, the outer-loop director in `docs/reports/reviews/electroweak_v092/octopus/`, and dynamic multi-agent topologies (`HYDRA`). It translates conceptual theory into typed protocols, concrete data models, and execution packages ready to be decomposed (in a *later* sprint) into [`milestones.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/milestones.md), [`backlog.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/backlog.md), [`docs/execution/spec.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/spec.md) (current delta file; historical name `FEATURE_SPEC.md` is kept as a pointer), and [`tasks.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/tasks.md).
+- **`DEVELOPMENT_FINAL_PLAN_v2.md` defines the System Architecture & Primitive Mechanics**: It synthesizes the extensive research in `docs/research/coding_harness/`, the outer-loop director in `docs/reports/reviews/electroweak_v092/octopus/`, and dynamic multi-agent topologies (`HYDRA`). It translates conceptual theory into typed protocols, concrete data models, and execution packages ready to be decomposed (in a *later* sprint) into [`milestones.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/milestones.md), [`backlog.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/backlog.md), [`docs/execution/main/spec.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/spec.md) (current delta file; historical name `FEATURE_SPEC.md` is kept as a pointer), and [`tasks.md`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md).
 
 Historical claim (draft v2.0.0 §1.2, 2026-09-03): this document does not compete with nor replace `DEVELOPMENT_FINAL_PLAN_MERGED.md`; MERGED "remains the Substrate Ground Truth & Forensic Baseline" owning the empirical contradiction audit, the 3 headline metrics ($R_{\text{solve}}$, $C_{\text{turn}}$, $R_{\text{tamper}}$), and Tickets 01–35. **Keep that idea.** `[PROPOSAL]` if MERGED is restored as an optional historical sibling. It is **not** authority while absent. Critical-path numbering remains B tickets 01–35. v2 `SUB-*` / `M-HYD` inventory in §8 is `[PROPOSAL]` mapping, not a replacement DAG.
 
@@ -615,7 +615,7 @@ To transition these architectural pillars into delivery without documentation sp
 └───────────────────┴──────────────────────────────────────────────────────────────────────────────┘
 ```
 
-**FACT.** `docs/execution/FEATURE_SPEC.md` may be stale naming; current delta file observed in the execution set is [`docs/execution/spec.md`](../docs/execution/spec.md). `docs/execution/active.md` is **absent**. Keep the runway-file names above. This lock pass does **not** rewrite those files.
+**FACT.** `docs/execution/FEATURE_SPEC.md` may be stale naming; current delta file observed in the execution set is [`docs/execution/main/spec.md`](../docs/execution/main/spec.md). `docs/execution/active.md` is **absent**. Keep the runway-file names above. This lock pass does **not** rewrite those files.
 
 ### 8.1 Unified Capability Package Inventory
 
@@ -714,7 +714,7 @@ With the completion of this master plan (`DEVELOPMENT_FINAL_PLAN_v2`):
 3. **Execution Runway Ready** (later sprint; this lock pass does **not** edit `docs/execution/`):
    - **`milestones.md`** can now be updated with stable gates for `M-OCT` and `M-HYD`.
    - **`backlog.md`** can now be updated with the categorized packages (`SUB`, `PRG`, `TXN`, `SHD`, `WRN`, `VER`, `OCT`, `HYD`).
-   - Active sprint **`FEATURE_SPEC.md`** / current **`docs/execution/spec.md`** contracts can be drawn directly from the formal schemas in Sections 3–7 and the appended SOTA pillars.
+   - Active sprint **`FEATURE_SPEC.md`** / current **`docs/execution/main/spec.md`** contracts can be drawn directly from the formal schemas in Sections 3–7 and the appended SOTA pillars.
    - Dynamic **`tasks.md`** DAGs can sequence T0–T7 increments with exact test falsifiers.
 
 **Do not add a competing ticket DAG in this file.** Implementation numbering: **B §18**.

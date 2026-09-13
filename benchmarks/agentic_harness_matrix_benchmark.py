@@ -19,6 +19,7 @@ Outputs complete empirical metrics: Score/Pass Rate, Turns, Prompt/Completion To
 from __future__ import annotations
 
 import argparse
+import hashlib
 import io
 import json
 import os
@@ -35,10 +36,187 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from vanguard.packages.ports.event_store import EventRange
+from benchmarks.ladder.control import CONTROL_ARM, ControlManifestError, require_frozen
+from benchmarks.ladder.evidence import append_row
+from benchmarks.ladder.metrics import BUDGET_EXHAUSTED, budget_exhausted, publish_control_report
+from benchmarks.ladder.quarantine import refuse_unfrozen_scoring
 from benchmarks.product_path import PRODUCT_PRESETS, execute_product
 from benchmarks.swe_bench.challenges import CHALLENGES
 
 MANIFEST_ROOT = ROOT / "vanguard" / "packages" / "agency" / "manifests"
+
+
+def write_control_report(
+    *,
+    path: Path,
+    record: Mapping[str, Any],
+    rows: Sequence[Mapping[str, Any]],
+) -> dict[str, Any]:
+    """Publish one admitted control report at the real benchmark writer boundary."""
+    task_ids = [
+        str((row.get("identity") or {}).get("task_id") or "")
+        for row in rows
+        if isinstance(row, Mapping)
+    ]
+    refuse_unfrozen_scoring(task_ids, record)
+    report = publish_control_report(record=record, rows=rows)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
+    return report
+
+
+def _control_submission(
+    record: Mapping[str, Any],
+    rows: Sequence[Mapping[str, Any]],
+    *,
+    harness_name: str,
+    task_name: str,
+    profile_id: str,
+) -> dict[str, Any]:
+    """Admit one scheduled control dispatch before the product call happens."""
+    manifest = require_frozen(record)
+    if harness_name != CONTROL_ARM["harness"] or profile_id != "product":
+        raise ControlManifestError(
+            "T-26b: control dispatch requires vg-code-balanced on the product profile")
+    tasks = manifest["suite"]["tasks"]
+    if task_name not in tasks:
+        raise ControlManifestError("T-26b: task is absent from the frozen control membership")
+    observed_ids: set[str] = set()
+    checked: list[dict[str, Any]] = []
+    for row in rows:
+        # Reuse the canonical row/mixed-evidence validator before any dispatch.
+        append_row(checked, row)
+        identity = row.get("identity") or {}
+        row_arm = row.get("arm") or {}
+        task_id = str(identity.get("task_id") or "")
+        if task_id not in tasks or task_id in observed_ids:
+            raise ControlManifestError("T-26b: prior evidence has an unscheduled or duplicate task")
+        if (
+            identity.get("subject_sha") != manifest["subject_sha"]
+            or identity.get("suite_digest") != manifest["suite_digest"]
+            or identity.get("n") != len(tasks)
+            or identity.get("task_digest") != manifest["suite"]["task_digests"].get(task_id)
+            or identity.get("oracle_digest") != manifest["suite"]["oracle_digests"].get(task_id)
+            or row_arm.get("model_id") != manifest["model_id"]
+            or row_arm.get("provider") != manifest["arm"]["provider"]
+            or row_arm.get("preset") != CONTROL_ARM["preset"]
+            or any(
+                row_arm.get(field) != manifest["arm"][field]
+                for field in ("manifest_digest", "sampling_digest", "prompt_digest", "tool_schema_digest")
+            )
+        ):
+            raise ControlManifestError(
+                "T-26b: prior evidence does not bind the frozen control candidate")
+        observed_ids.add(task_id)
+    if task_name in observed_ids:
+        raise ControlManifestError("T-26b: a scheduled task cannot be dispatched twice")
+    if any(budget_exhausted(row) for row in rows):
+        raise ControlManifestError(
+            "T-26b: a budget-exhausted slot stops control dispatch before a replacement")
+    if len(rows) >= len(tasks):
+        raise ControlManifestError("T-26b: the frozen control population is already complete")
+    return manifest
+
+
+def _control_evidence_row(
+    *,
+    manifest: Mapping[str, Any],
+    task_name: str,
+    run_id: str,
+    frame: Mapping[str, Any],
+    receipt: Mapping[str, Any],
+    oracle_passed: bool,
+    oracle_stderr: str,
+    wall_ms: float,
+) -> dict[str, Any]:
+    """Bind the product frame and exterior oracle verdict to one frozen slot."""
+    returned_run_id = str(frame.get("runId") or receipt.get("runId") or "")
+    if returned_run_id != run_id:
+        raise ControlManifestError("T-26b: product frame does not bind the submitted run id")
+    outcome = str(receipt.get("outcome") or "instrument_error").lower()
+    if outcome == BUDGET_EXHAUSTED:
+        terminal_status = BUDGET_EXHAUSTED
+        disposition = "not_run"
+        reason = BUDGET_EXHAUSTED
+    elif outcome in {"instrument_error", "runtime_error"}:
+        terminal_status = outcome
+        disposition = "undeterminable"
+        reason = outcome
+    else:
+        terminal_status = outcome
+        disposition = "passed" if oracle_passed else "failed"
+        reason = None
+    arm = manifest["arm"]
+    suite = manifest["suite"]
+    raw_response = hashlib.sha256(
+        json.dumps(frame, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+    return {
+        "identity": {
+            "subject_sha": manifest["subject_sha"],
+            "dirty_flag": False,
+            "suite_digest": manifest["suite_digest"],
+            "n": len(suite["tasks"]),
+            "task_id": task_name,
+            "task_digest": suite["task_digests"][task_name],
+            "oracle_digest": suite["oracle_digests"][task_name],
+            "run_id": run_id,
+        },
+        "arm": {
+            "manifest_digest": arm["manifest_digest"],
+            "preset": CONTROL_ARM["preset"],
+            "model_id": manifest["model_id"],
+            "provider": arm["provider"],
+            "server_build": None,
+            "gguf_digest": None,
+            "quantization": None,
+            "context_size": None,
+            "sampling_digest": arm["sampling_digest"],
+            "prompt_digest": arm["prompt_digest"],
+            "tool_schema_digest": arm["tool_schema_digest"],
+        },
+        "execution": {
+            "evidence_label": "LIVE-LOCAL",
+            "raw_response_digest": f"sha256:{raw_response}",
+            "valid_tool_calls": None,
+            "malformed_tool_calls": None,
+            "recovery_attempts": None,
+            "turns": receipt.get("turns"),
+            "time_to_first_valid_action_s": None,
+            "latency_s": wall_ms / 1000.0,
+        },
+        "change": {
+            "patch_digest": None,
+            "postimage_digest": None,
+            "files_changed": None,
+            "no_op": None,
+        },
+        "verification": {
+            "tests_discovered": None,
+            "tests_executed": 1,
+            "tests_passed": 1 if oracle_passed else 0,
+            "tests_failed": 0 if oracle_passed else 1,
+            "tamper_digest": None,
+            "tamper_verdict": "clean" if oracle_passed else oracle_stderr,
+        },
+        "settlement": {
+            "terminal_status": terminal_status,
+            "disposition": disposition,
+            "undeterminable_reason": reason,
+        },
+        "economics": {
+            "prompt_tokens": receipt.get("promptTokens"),
+            "completion_tokens": receipt.get("completionTokens"),
+            "cache_read_tokens": None,
+            "cache_write_tokens": None,
+            "cost_usd_micros": receipt.get("spentUsdMicros"),
+            "local_time_proxy_s": wall_ms / 1000.0,
+        },
+        "provenance": {
+            "hypothesis_id": "control",
+            "control_digest": arm["manifest_digest"],
+            "varied_dimension": None,
+        },
+    }
 
 
 def run_single_harness_task(
@@ -50,8 +228,25 @@ def run_single_harness_task(
     model: Any,
     max_turns: int = 6,
     profile_id: str = "local",
+    control_record: Mapping[str, Any] | None = None,
+    control_rows: list[dict[str, Any]] | None = None,
+    control_report_path: Path | None = None,
 ) -> dict[str, Any]:
     """Execute a real episode through the Vanguard runtime kernel and evaluate the oracle."""
+    control_manifest: dict[str, Any] | None = None
+    if control_record is not None:
+        if control_rows is None or control_report_path is None:
+            raise ControlManifestError(
+                "T-26b: a control dispatch requires an evidence accumulator and report path")
+        control_manifest = _control_submission(
+            control_record,
+            control_rows,
+            harness_name=harness_name,
+            task_name=task_name,
+            profile_id=profile_id,
+        )
+    elif control_rows is not None or control_report_path is not None:
+        raise ControlManifestError("T-26b: control rows and report path require a frozen record")
     manifest_path = MANIFEST_ROOT / harness_name / "manifest.json"
     if not manifest_path.is_file():
         raise FileNotFoundError(f"Manifest not found: {manifest_path}")
@@ -86,9 +281,10 @@ def run_single_harness_task(
                 workspace=repo,
                 brief=brief,
                 harness=harness_name,
-                preset=PRODUCT_PRESETS.get(harness_name, "balanced"),
+                preset=(CONTROL_ARM["preset"] if control_manifest else
+                        PRODUCT_PRESETS.get(harness_name, "balanced")),
                 model=model,
-                profile_id=profile_id,
+                profile_id=("product" if control_manifest else profile_id),
                 run_id=run_id,
                 store_path=db_path,
                 interactive=False,
@@ -138,7 +334,28 @@ def run_single_harness_task(
             if raw_bytes and sqlite_bytes:
                 waf = round(sqlite_bytes / max(1, raw_bytes), 2)
 
-            return {
+            control_evidence = None
+            control_report = None
+            if control_manifest is not None and control_rows is not None:
+                control_evidence = _control_evidence_row(
+                    manifest=control_manifest,
+                    task_name=task_name,
+                    run_id=run_id,
+                    frame=frame,
+                    receipt=receipt,
+                    oracle_passed=oracle_passed,
+                    oracle_stderr=proc.stderr,
+                    wall_ms=wall_ms,
+                )
+                control_rows.append(control_evidence)
+                if len(control_rows) == len(control_manifest["suite"]["tasks"]):
+                    control_report = write_control_report(
+                        path=control_report_path,
+                        record=control_manifest,
+                        rows=control_rows,
+                    )
+
+            result = {
                 "harness": harness_name,
                 "task": task_name,
                 "terminal": terminal_val,
@@ -158,7 +375,13 @@ def run_single_harness_task(
                 "missing": missing,
                 "preset": PRODUCT_PRESETS.get(harness_name),
             }
+            if control_evidence is not None:
+                result["control_evidence"] = control_evidence
+                result["control_report"] = control_report
+            return result
         except Exception as exc:
+            if control_manifest is not None:
+                raise
             return {
                 "harness": harness_name,
                 "task": task_name,

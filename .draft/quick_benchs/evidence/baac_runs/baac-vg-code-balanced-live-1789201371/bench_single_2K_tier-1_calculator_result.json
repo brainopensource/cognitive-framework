@@ -1,0 +1,66 @@
+{
+  "challengeId": "bench_single_2K_tier-1_calculator",
+  "tier": "tier-1",
+  "scope": "single",
+  "contextBracket": "2K",
+  "preset": "vg-code-balanced",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "mode": "live",
+  "status": "PASS",
+  "disposition": "passed",
+  "attribution": "PASS",
+  "turns": 8,
+  "promptTokens": 11688,
+  "completionTokens": 1284,
+  "totalTokens": 12972,
+  "costUsd": 0.000406,
+  "durationSeconds": 24.54,
+  "changedFiles": [
+    "src/calculator.py",
+    "verify_fix.py"
+  ],
+  "diffPatch": "--- a/calculator.py\n+++ b/calculator.py\n@@ -1,3 +1,3 @@\n def calculate_value(A: float, B: float) -> float:\n-    resultado = (A + B) + B\n+    resultado = (A + B) * B\n     return resultado\n",
+  "oracle": {
+    "passed": true,
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "test_calc (__main__.TestCalc.test_calc) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+    "durationSeconds": 0.034,
+    "error": null,
+    "assertionCount": 1,
+    "failingAssertions": []
+  },
+  "aiJudgeScore": null,
+  "diagnosis": "All falsifiers green",
+  "metadata": {
+    "id": "bench_single_2K_tier-1_calculator",
+    "name": "Single-File Formula Repair",
+    "scope": "single",
+    "context_bracket": "2K",
+    "tier": "tier-1",
+    "difficulty": 1,
+    "timeout_seconds": 35,
+    "entrypoint": "src/main.py",
+    "eval_type": "oracle",
+    "tags": [
+      "math",
+      "single_file",
+      "formula"
+    ],
+    "metadata": {
+      "schema": "aether.baac.challenge/1"
+    },
+    "cli_args": {
+      "command": "run",
+      "preset": "vg-code-balanced",
+      "mode": "live",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "tier": "tier-1",
+      "single": null,
+      "max_turns": 8,
+      "max_requests": 80,
+      "budget": 0.07,
+      "keep_scratch": false
+    }
+  }
+}

@@ -27,6 +27,7 @@ from typing import Any, Mapping, Sequence
 
 LAM_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(LAM_DIR.parents[1]))
+sys.path.insert(0, str(LAM_DIR.parents[2]))
 from vanguard.packages.adapters.models.config import get_default_model
 from vanguard.packages.domain.workspace import controlled_environment, get_workspace_path
 DEFAULT_CHALLENGE_ROOT = Path(os.environ.get("LEX_CHALLENGE_ROOT", str(LAM_DIR / "lab")))
@@ -105,6 +106,8 @@ def load_challenge(root: Path, key: str) -> Challenge:
     root_resolved = root.resolve()
     if root_resolved not in challenge_root.parents and challenge_root != root_resolved:
         raise ValueError(f"challenge escapes root: {key}")
+    from benchmarks.ladder.quarantine import guard_materialization
+    guard_materialization(task_id=key, source=challenge_root, purpose="development")
     if not challenge_root.is_dir():
         raise FileNotFoundError(f"challenge not found: {challenge_root}")
 

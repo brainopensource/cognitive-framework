@@ -189,9 +189,138 @@
         "PlanRevised",
         "StrategyChanged",
         "ProgressAssessed",
-        "ContextCompacted"
+        "ContextCompacted",
+        "ContextSelectionRecorded",
+        "VerificationRecorded",
+        "ChangeSurfaceUpdated"
       ],
-      "description": "ADR-0098 Decision 3/4/5: the eight live VG-04 kinds, the eight deprecated-but-readable historical kinds, and the five M-5a semantic kinds are folded in, making this enum the sole live event-kind authority. Deprecation is a write rule (DEPRECATED_KINDS), not an absence from the vocabulary -- a historical ledger legally contains these names."
+      "description": "ADR-0098 Decision 3/4/5: the eight live VG-04 kinds, the eight deprecated-but-readable historical kinds, and the five M-5a semantic kinds are folded in, making this enum the sole live event-kind authority. Deprecation is a write rule (DEPRECATED_KINDS), not an absence from the vocabulary -- a historical ledger legally contains these names. DIR-D1 allocates exactly two further kinds -- VerificationRecorded and ChangeSurfaceUpdated -- as the durable carriers of observed verification and of the settled change surface. No other compatibility fold name is allocated by that amendment."
+    },
+    "VerificationRecordedPayload": {
+      "title": "VerificationRecordedPayload",
+      "type": "object",
+      "additionalProperties": false,
+      "$comment": "DIR-D1: an OBSERVED verification fact, not an evaluator verdict. It confers no independent authority to complete a task; VerdictRecorded remains the evaluator_gateway's sole instrument. observedTestCount is null when the runner did not report a count -- absent knowledge is recorded as unknown, never as zero.",
+      "required": [
+        "kind",
+        "taskDigest",
+        "compositionDigest",
+        "workspaceDigest",
+        "verificationSubjectDigest",
+        "argv",
+        "exitCode",
+        "observedTestCount",
+        "resultArtifactDigest"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "VerificationRecorded"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "alertable": {
+          "type": "boolean"
+        },
+        "taskDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "compositionDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "workspaceDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "verificationSubjectDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "argv": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "exitCode": {
+          "type": "integer"
+        },
+        "observedTestCount": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "resultArtifactDigest": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^(sha256:[0-9a-f]{64})?$"
+        }
+      }
+    },
+    "ChangeSurfaceUpdatedPayload": {
+      "title": "ChangeSurfaceUpdatedPayload",
+      "type": "object",
+      "additionalProperties": false,
+      "$comment": "DIR-D1: the settled change surface of one candidate. changeSurface is the COMPLETE sorted repository-relative path set, deletions included; deletedPaths is the sorted subset of those paths whose settled effect removed the file. A create/modify/delete surface that omitted its deletions would reconstruct a candidate that never existed.",
+      "required": [
+        "kind",
+        "taskDigest",
+        "candidateDigest",
+        "effectDescriptorDigest",
+        "changeSurface",
+        "deletedPaths"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "const": "ChangeSurfaceUpdated"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "alertable": {
+          "type": "boolean"
+        },
+        "taskDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "candidateDigest": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$"
+        },
+        "effectDescriptorDigest": {
+          "type": "string",
+          "minLength": 1
+        },
+        "changeSurface": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[^/\\\\][^\\\\]*$"
+          }
+        },
+        "deletedPaths": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[^/\\\\][^\\\\]*$"
+          }
+        }
+      }
     }
   }
 }

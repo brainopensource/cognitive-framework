@@ -9,7 +9,7 @@ inspection of `.lda/index.db` and `.vanguard/events.sqlite3`, git history analys
 and reconciliation against the peer reviews in `../octopus/` and `../../main/`.
 
 **Nature of this document:** descriptive and advisory. It is a *review*, not law. It modifies no
-ADR, no `VISION.md`, no `docs/execution/spec.md`. Under the precedence ladder it sits at layer 5
+ADR, no `VISION.md`, no `docs/execution/main/spec.md`. Under the precedence ladder it sits at layer 5
 (Communication) and introduces no architecture of its own authority. Everything it proposes must
 pass through the repository's normal ADR and backlog promotion process before any code lands.
 

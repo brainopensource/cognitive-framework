@@ -17,64 +17,69 @@ Descriptive cache only. [Tasks](../main/tasks.md) owns leases and acceptance;
 owns Wave 1 decisions. No statement here grants authority.
 
 **Snapshot binding:** inspected HEAD
-`c3d640783e9bfb96e46551c27ebb6336b9d6e461`, branch
-`feat/aether-framework-electroweak-canonical-agents`. Requested `da12be3f` is its
-parent; the described uncommitted T-130/T-131 work was committed at this HEAD.
-Initial worktree was clean; this handoff edits documentation only.
+`63d12d839ff334befa2ae64a07e5c80ed35ecb82`, branch
+`feat/aether-framework-electroweak-canonical-agents`. The five requested local
+commits are present; initial worktree was clean. This handoff relocates the
+diagnostic tooling and synchronizes docs/knowledge, without product-code changes.
 
 | Live working-file binding | Git blob |
 |---|---|
-| `main/tasks.md` | `4039dedfb81e63f89f681fcacc129d6687404900` |
-| `main/spec.md` | `9d0bdf827f82f1958a791c27d98ec4f2c51affe6` |
+| `main/tasks.md` | `4fa0d207fb2a3f2f29d8124a4e8e036759b5f569` |
+| `main/spec.md` | `add9939a3c72e1616fbe3538f08c9392a93ce1aa` |
 | `main/milestones.md` | `d010465eea63bf44898fb36ab7d734388da50f15` |
 | `main/technical.md` | `77f741673923da5cdd62040883c6e464ffaf847a` |
 
 Verify with `git hash-object docs/execution/main/{tasks,spec,milestones,technical}.md`.
 Any mismatch invalidates this snapshot; derive state from the board. The director
-charter's older current-assignment blob binding is stale; only its standing role
-and the explicit Wave 1 user assignment informed this handoff.
+charter's older current-assignment blob binding is stale; its standing role and
+the explicit phase-transition dispatch informed this handoff.
 
 ## Live dispatch
 
 | Owner | Row | State / dependency |
 |---|---|---|
-| A | T-134 | READY: narrow MHF schema and durable carriers; sole session.py lease |
-| B | T-136 | READY: baseline shim removal; real accepted pin preserved |
-| B | T-135 | BLOCKED until independently reviewed T-134 and session.py transfer |
-| C | T-133 | READY: quarantine guards/registry and gate wiring; sole gate-file lease |
-| C | T-132 | BLOCKED until reviewed T-133 gate-file transfer |
-| C | T-137 | After T-133: approval probe only, no product repair |
-| C + curator | T-51 | All 30 old members retired from eligibility; replacement after T-133, sealed-store/curator availability and independent validation |
+| A | T-134 | ACCEPTED component; session.py transferred to B |
+| B | T-136 | ACCEPTED; canonical baseline pin unchanged |
+| B | T-135 | READY; session.py and its named companion lease |
+| A | T-131.6 | READY; candidate/evidence identity lease excludes B's files |
+| C | T-133 | REOPENED; correction READY, acceptance explicitly withheld |
+| C | T-132 | READY; justfile, collection-integrity test and CI files transferred |
+| C | T-137 | READY; synthetic approval probe only, zero provider calls/USD |
+| C + curator | T-51 | REOPENED/BLOCKED: T-133 reacceptance, independent curator and external sealed store |
 
-C serializes its rows; A and B can start their disjoint READY leases concurrently.
-T-130 and T-131 rows 4/6/7 are landed, not independently accepted. T-130 packet
-reports VALID instrument, both controls passed and NOT_REPRODUCED on all three
-write fixtures. Its terminal instrument errors are not completion qualification.
-The approval suspension seam remains unproven. T-26b acceptance waits for T-51;
+C serializes its rows; A and B may start disjoint READY leases concurrently.
+T-131 rows 4/6/7 remain outside the narrow T-134 acceptance. T-130's valid
+instrument retains both controls and NOT_REPRODUCED on three write fixtures.
+The moved `tools/diagnostics/write_landing_probe.py` still enters the shipped
+product route; no benchmark adapter-import permission was added. Its terminal
+instrument errors are not completion qualification. No historical write-failure
+repair site or public port/schema change is attributed. T-26b waits for T-51;
 T-26 remains UNFROZEN, T-27 unauthorized, RUN-12 zero provider calls/USD.
 
 ## Evidence and decisions
 
-Retained `.draft/logs/full_discovery.log` reports 3,183 tests in 148.635s,
-one failure, one error and 42 skips; both terminal defects are the T-51 oracle
-digest mismatch. `.draft/logs/just_verify.log` covers the narrow gate. These are
-retained receipts, not tests rerun or new acceptance in this session.
+The isolated Python 3.12 review slice passed 123 tests in 10.428s (runner 11.241s),
+covering baseline, carriers, event/schema vectors, row-7 replay, quarantine and
+the moved write probe. The first system-Python attempt lacked cryptography and
+was superseded by this correctly provisioned run. `just check` passed in 5.414s;
+boundary, execution-truth and local-link checks also passed. These component
+receipts do not accept the control instrument or a fresh corpus.
 
-Delta 1 REFRAMED: 18/28 recognized kinds are unwritable, none deprecated; add only
-the two specified MHF carriers with production emission and replay proof.
-Delta 2 ACCEPTED: INDEX_UNBOUND is typed infrastructure missingness with retained
-slot, no policy bypass or semantic retry burn. Delta 3 ACCEPTED: remove padding;
-the accepted baseline uses SHA-256(ASCII tree ID), with no padded pin found.
-Q-01 replaces all 30 exposed members with exactly 10/11/5/1/3 tasks under enforced
-development/holdout isolation. Old oracle repairs remain forbidden by RUN-08.
-Charter II A1–A6, Wilson derivation and P6/P7 proposals are in the technical handbook.
+Independent synthetic counterexamples allow missing/unknown task IDs and accept
+forged evaluation authority plus a FROZEN flag, copying both source and oracle
+into the solver directory. Inventory is 7 required guards / 14 observed-unleased
+/ 1 declarative, not 22 guarded paths. T-133 cannot be signed off on green helper
+tests. Q-01 remains binding; old oracle repairs remain forbidden under RUN-08.
+Replacement remains exactly 30 with strata 10/11/5/1/3. No holdout was exercised.
+The former domain.md/system_composition.md paths no longer exist; current mapped
+owners schemas.md, events.md, causal-state.md and runtime-execution.md were updated.
 
 ## Explicit outstanding boundaries
 
 - No write-landing repair site attributed; Director rules after T-137 evidence.
 - Private curator/store provisioning and actual fresh corpus availability are not
   established; metadata checks alone cannot close T-51.
-- New public schema authority is limited to DIR-D1's two kind/payload additions;
+- Accepted public schema scope is limited to DIR-D1's two kind/payload additions;
   no other port, preset, terminal-enum, threshold or paid authority is granted.
 - External signed padded baseline pins, if found, require a migration decision.
 - P6/P7 remain proposals behind control and T-129; no implementation lease.

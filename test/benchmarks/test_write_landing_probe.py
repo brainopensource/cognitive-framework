@@ -15,7 +15,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from benchmarks.diagnostics.write_landing_probe import (
+from tools.diagnostics.write_landing_probe import (
     EXPECTED_WRITES,
     FRESH_FIXTURES,
     NEGATIVE_INJECTIONS,
@@ -58,7 +58,7 @@ class TestProbeShape(unittest.TestCase):
             self.assertNotIn("m8_heldout", folder.parts)
 
     def test_probe_drives_the_real_product_entrypoint(self) -> None:
-        source = (Path(__file__).resolve().parents[2] / "benchmarks"
+        source = (Path(__file__).resolve().parents[2] / "tools"
                   / "diagnostics" / "write_landing_probe.py").read_text("utf-8")
         # The route must be the shipped one, not a substituted harness.
         self.assertIn("from benchmarks.product_path import execute_product", source)
@@ -67,7 +67,7 @@ class TestProbeShape(unittest.TestCase):
         self.assertNotIn("baac", source)
 
     def test_probe_uses_the_shipped_dialect_normalizer(self) -> None:
-        source = (Path(__file__).resolve().parents[2] / "benchmarks"
+        source = (Path(__file__).resolve().parents[2] / "tools"
                   / "diagnostics" / "write_landing_probe.py").read_text("utf-8")
         self.assertIn("ProposalTranslator", source)
 

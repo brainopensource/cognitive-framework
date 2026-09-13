@@ -324,6 +324,41 @@ may enter at the existing session approval boundary but MUST be labeled as such,
 not misrepresented as public-entrypoint wiring. No production approval injection
 or threshold change is authorized before attribution and independent review.
 
+### DIR-2. Phase-transition review (63d12d83, 2026-09-12)
+
+The Director accepts T-136 and T-134's bounded component contracts after source
+review and the isolated 123-test focused slice. T-134's two shared MHF kind/payload
+allocations remain the only authorized schema expansion; `/2` references the
+shared allocation and retains its envelope version. Neither acceptance qualifies
+the full product or control. session.py transfers to B/T-135.
+
+T-133 is NOT accepted: 22 inventoried paths include only seven required guards,
+14 observed-unleased paths and one declarative path. Missing/unknown task IDs
+bypass guards; supplied source is not fingerprint-checked; nonempty authority and
+a caller's FROZEN flag do not prove evaluation authority or exact identity.
+An exit-0 `HOLDOUT UNACCEPTED` diagnostic is not admission. Q-01 is unchanged;
+the correction must close these actual paths before independent reacceptance.
+
+Gate discovery and the synthetic approval diagnostic do not depend on acceptance
+of a fresh holdout. Explicitly authorize T-132, T-135, T-137 and T-131.6 as READY
+under their disjoint task-row leases; transfer gate files to C/T-132 now and
+serialize C's correction/probe work. T-51 remains REOPENED/BLOCKED on quarantine
+reacceptance, an independent curator, external sealed store and new-corpus proof.
+No old-member oracle digest repair, T-26 freeze or T-27 execution is authorized.
+
+**RUN-13 causal statement:** observed historical zero-write symptom → no failing
+write seam reproduced by T-130's valid instrument → preserve RUN-10's atomic
+candidate/exterior-oracle identity invariant → no product repair site authorized
+yet → T-137's allow/suspend/deny/signed/stale-approval matrix must distinguish the
+cold suspension path. Passing write controls does not prove admitted completion.
+The diagnostic implementation now lives in `tools/diagnostics/write_landing_probe.py`;
+moving concrete normalization/store wiring to tooling fixes its architectural
+placement, not the historical write defect. The product entrypoint, EpisodeEngine,
+ports and schemas are unchanged by that move. No evidence currently requires a
+public port/schema repair; if T-137 demonstrates one, return a named delta rather
+than inferring approval. Missing approver remains refusal, never default-allow.
+T-137 is hermetic synthetic-fixture work only: zero provider calls/USD under RUN-12.
+
 ## NT-1. Near-term baseline, context, cache and recovery delta
 
 **Authority and scope (2026-09-07).** This executive amendment authorizes T-98–T-111 and the revised T-77 before control qualification. It supersedes earlier EW-9 exclusions only for deterministic context/cache/recovery hardening and baseline remediation. Existing T-09–T-16 mechanisms are extended, not re-created. T-80 remains the later workspace-policy treatment; deterministic semantic stall detection belongs to T-106. Model escalation, consultation, specialists, CAS workspace promotion, memory learning, new index backends and T-96 remain outside this iteration. Historical milestone receipts retain their original subjects. No new milestone is accepted by this amendment.

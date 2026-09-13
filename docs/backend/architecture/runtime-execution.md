@@ -50,6 +50,32 @@ confidence: high
 ## Purpose
 This document is the canonical architecture owner for the end-to-end runtime lifecycle: manifest composition, execution profile binding, `RunPlan` identity construction, `HarnessSession` lifecycle management, turn engine handoff, and cold recovery entry points (`RF-94`).
 
+**DIR-D1 integration (63d12d83).** The existing HarnessSession/single-emitter
+boundary persists observed verification and whole change-surface facts before
+the next proposal, with append failure stopping inference/dispatch. Cold replay
+uses the existing task-state fold; no second session loop, state store or port
+was introduced. The event field contract is in [events](../reference/events.md).
+
+**Quarantine topology (Q-01; implementation not yet accepted).**
+`benchmarks/ladder/quarantine.py` and the commitments/exposure registry sit in the
+measurement tooling layer. Runtime task sets carry declarative identity only.
+The target separates development materialization/capture from curator-held
+holdout source; only an authorized measured slot receives source/task bytes,
+while the exterior oracle/reference remain outside the solver mount. Current
+guards allow missing/unknown identity and do not verify sealed content/authority;
+14 of 22 inventoried paths remain observed-unleased. Metadata diagnostics and
+`HOLDOUT UNACCEPTED` output must not be read as enforcement or corpus acceptance.
+T-133 correction and T-51 curator/store provisioning remain blockers.
+
+**Diagnostic composition boundary.** T-130 adapter normalization and durable-store
+inspection are tooling in `tools/diagnostics/write_landing_probe.py`, invoked by
+`python3 -m tools.diagnostics.write_landing_probe`. The probe still enters via
+`benchmarks.product_path.execute_product`; fixtures remain under
+`benchmarks/diagnostics/fixtures/`. Benchmarks gain no adapter import privilege,
+and no runtime re-export facade was introduced to hide the dependency. Its valid
+NOT_REPRODUCED result preserves the unresolved approval-path hypothesis; T-137 is
+authorized to discriminate that seam, not to change production approvals.
+
 ## Scope
 - The unified construction pipeline: `compose` $	o$ `activate` $	o$ `begin_episode` $	o$ `execute_turns` $	o$ `teardown`.
 - `RunPlan` immutable identity preimage and environment digest ($D_R$).

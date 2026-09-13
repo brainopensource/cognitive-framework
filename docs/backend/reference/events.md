@@ -150,6 +150,22 @@ Events must be emitted exclusively through `LedgerEmitter` via role-scoped facad
 | `ProgressAssessed` | `session` | `session-policy` | Goal progress evaluated. |
 | `ContextCompacted` | `session` | `session-policy` | Context window compacted. |
 | `ContextSelectionRecorded` | `session` | `session-policy` | Final prompt-selection identities, serialized token count, cursor and ordered omissions persisted before inference. |
+| `VerificationRecorded` | `session` only | `kernel-capability` | Observed runner verification with task/composition/workspace/subject bindings; not an exterior verdict. |
+| `ChangeSurfaceUpdated` | `session` only | `kernel-capability` | Complete sorted changed-path surface, including deletions, bound to the candidate and settled effect descriptor. |
+
+**DIR-D1 (T-134, reviewed 63d12d83).** Both kinds are allocated in
+`schemas/mhf/event_envelope.schema.json#/$defs/EventKind`; the `/2` envelope
+references this shared vocabulary and validates the typed payloads in schema
+vectors. Generated `EventKind` supplies READABLE_KINDS; WRITABLE_KINDS remains its
+difference with DEPRECATED_KINDS. No v4 allocation fork or deprecated-kind revival.
+Verification records argv, exit code, result artifact identity and observed test
+count, preserving null versus observed zero. Session emission precedes the next
+proposal; durable append failure latches and refuses further inference/dispatch.
+The fold recovers verification and multi-file surface after SQLite reopen and
+invalidates verification superseded by a different candidate digest. Event
+history is retained; this projection is not independent completion authority.
+The schema-vector validation is distinct from generic store append validation;
+these receipts do not qualify arbitrary untrusted payload ingress.
 
 ### Deprecated Historical Kinds (`DEPRECATED_KINDS`)
 The following kinds are frozen historical names from legacy specifications. They remain permanently readable by all readers to ensure past ledgers validate, but new writes are unconditionally rejected with `DeprecatedKindError`:

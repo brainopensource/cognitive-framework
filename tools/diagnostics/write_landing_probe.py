@@ -38,7 +38,7 @@ is read back out of the durable store rather than trusted from projections.
 
 Usage (repository root, package-relative so ``benchmarks`` resolves)::
 
-    python3 -m benchmarks.diagnostics.write_landing_probe [packet.json]
+    python3 -m tools.diagnostics.write_landing_probe [packet.json]
 """
 
 from __future__ import annotations
@@ -74,7 +74,7 @@ __all__ = [
 ]
 
 ROOT = Path(__file__).resolve().parents[2]
-FIXTURE_ROOT = Path(__file__).resolve().parent / "fixtures"
+FIXTURE_ROOT = ROOT / "benchmarks" / "diagnostics" / "fixtures"
 
 #: Ignored when digesting a candidate tree: harness state, not candidate code.
 _EXCLUDED_DIRS = frozenset({".vanguard", ".git", "__pycache__", ".venv"})

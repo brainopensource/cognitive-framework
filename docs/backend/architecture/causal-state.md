@@ -59,7 +59,7 @@ This document is the canonical architecture owner for the event-sourced causal s
 
 ## AS_BUILT Status
 - `IMPLEMENTED` — Pure event sourcing with deterministic state folding and verified checkpoint caches is implemented in `vanguard.packages.domain.ledger` and `vanguard.packages.runtime.checkpoints`.
-- `PARTIAL` — Coding task, verification freshness, and classified-recovery projections are **v0.9.2 targets**. Until their event payloads and reducers exist, they must not be represented as durable current behavior.
+- `IMPLEMENTED` — DIR-D1 session-owned `VerificationRecorded` and `ChangeSurfaceUpdated` carriers preserve observed verification and complete changed paths through durable append and cold replay. Candidate-changing surface facts invalidate stale verification in the fold. This bounded T-134 acceptance does not close full T-131 resume/compaction qualification or confer exterior verdict authority; field/role details belong to [events](../reference/events.md).
 
 ---
 
@@ -195,4 +195,3 @@ Benchmark evidence should bind `run_id`, task and repository digests, harness/ma
 - **Rationale:** Conflating declared intent with observed execution prevents truthful post-mortem auditing, hides runtime attenuation, and allows unverified declarations to pass as evidence.
 - **Rejected alternative:** Dynamic manifest mutation during execution to reflect intermediate turn outcomes.
 - **Reversal condition:** None; maintaining declared versus observed separation is an inviolable architectural auditability invariant.
-

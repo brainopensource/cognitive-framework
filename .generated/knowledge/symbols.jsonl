@@ -80,6 +80,7 @@
 {"symbol": "CellState", "kind": "class", "defined_in": "vanguard/packages/runtime/registry/broker.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ChangeSurfaceEstimate", "kind": "class", "defined_in": "vanguard/packages/domain/transforms/repository/change_surface.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "ChangeSurfaceEstimator", "kind": "class", "defined_in": "vanguard/packages/domain/transforms/repository/change_surface.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "ChangeSurfaceUpdatedPayload", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "Checkpoint", "kind": "class", "defined_in": "vanguard/packages/runtime/checkpoints.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "CheckpointManager", "kind": "class", "defined_in": "vanguard/packages/runtime/checkpoints.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "CheckpointPayload", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
@@ -640,6 +641,7 @@
 {"symbol": "VerificationReceipt", "kind": "class", "defined_in": "vanguard/packages/agency/context/distiller.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "VerificationReceipt", "kind": "class", "defined_in": "vanguard/packages/agency/episode/admission_gate.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "VerificationReceipt", "kind": "class", "defined_in": "vanguard/packages/agency/forge/engine.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "VerificationRecordedPayload", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "VerificationResult", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/suites/formal_sat.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "VerificationSubject", "kind": "class", "defined_in": "vanguard/packages/runtime/session.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "WalContentionMetrics", "kind": "class", "defined_in": "vanguard/packages/runtime/pareto_measurement.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}

@@ -23,7 +23,7 @@
     {
       "guard": "observed-unleased",
       "kind": "loader",
-      "path": "benchmarks/diagnostics/write_landing_probe.py"
+      "path": "tools/diagnostics/write_landing_probe.py"
     },
     {
       "guard": "observed-unleased",

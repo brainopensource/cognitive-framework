@@ -67,12 +67,13 @@ creating no new planning file; at session exhaustion, leave a resumable handoff.
 | T-27 | C runs; independent reviewer accepts — BLOCKED | T-26, explicit run authorization | Execute the fixed canary, publish all outcomes, and record independent disposition. A published negative is task reporting completion, not acceptance for dependency edges. |
 | T-130 | C — LANDED; review pending | none | Valid retained instrument, NOT_REPRODUCED on three write fixtures; approval seam remains cold (T-137). No write repair attributed. |
 | T-131 | A/B by surface; measurement rows C — READY (rows 1/2/5 gated on T-130) | T-130 for rows 1, 2, 5 | Close the eight `BLOCK-T27` pre-measurement defects with product-route positive and adversarial falsifiers. Detailed row below. |
-| T-132 | C — BLOCKED on gate-file transfer | T-133 | Widen gate discovery, record cost and prove deterministic stale-digest red; T-133 owns gate integration first. |
-| T-133 | C — READY | none | Q-01 quarantine registry, guarded materialization and mechanical checks; owns gate files until reviewed transfer to T-132. |
-| T-134 | A — READY | none | DIR-D1 narrow schema allocation and durable verification/change-surface carriers. |
-| T-135 | B — BLOCKED on lease transfer | T-134 | DIR-D2 INDEX_UNBOUND infrastructure missingness without retry burn. |
-| T-136 | B — READY | none | DIR-D3 remove padded/raw SHA-1 acceptance; preserve legitimate canonical baseline pin. |
-| T-137 | C — READY after T-133 lease delivery | T-130 retained packet, T-133 | Approval-path diagnostic only; no production repair authority. |
+| T-132 | C — READY | Director gate-file transfer | Widen gate discovery; quarantine acceptance remains independent and open. |
+| T-133 | C — REOPENED; correction READY | none | Q-01 acceptance rejected: unknown-ID bypass, identity-only guards, unverified evaluation authority and 14 unleased loaders. Gates transferred to T-132. |
+| T-134 | A — ACCEPTED (Director review, 63d12d83) | none | Two durable carriers, schema vectors, append-before-next-call and cold replay; session.py transferred to B. |
+| T-135 | B — READY | T-134 accepted | DIR-D2 INDEX_UNBOUND infrastructure missingness without retry burn. |
+| T-136 | B — ACCEPTED (Director review, 63d12d83) | none | False SHA-256 shim removed; actual accepted baseline pin preserved. |
+| T-137 | C — READY | T-130 retained valid packet | Hermetic approval-path probe; synthetic non-control fixtures only, no repair authority. |
+| T-131.6 | A — READY | T-134 accepted | Product candidate/evidence identity qualification; explicit lease below, no session.py overlap. |
 | T-129 | C with relevant package owner — BLOCKED | T-27 accepted / MS-CONTROL closed | Refine one selected post-control package, memory/skills first. Ratify scope, paths, schema obligations, budgets and leaf edges before implementation. No automatic FH-1 activation. |
 
 **Session rules.** Acquire exact file leases from the task row after inspecting
@@ -933,7 +934,7 @@ rule; it means the stop rule currently depends on a caller choosing to check.
     this task; they contaminate the frozen corpus if tested in the shared tree.
 
 **T-51 Internal multi-class corpus freeze** (A §31.28, B Wave 0 corpus sizes)  
-- [ ] **state**: REOPENED; replacement implementation BLOCKED on T-133 review;
+- [ ] **state**: REOPENED / BLOCKED on T-133 reacceptance and independent curator/sealed-store provisioning;
   owner C plus independent corpus curator; **requires**: [T-111 accepted, T-133].
 - **leased files**: `benchmarks/ladder/l2_thirty/suite.json`,
   `test/benchmarks/test_control_corpus.py`; new
@@ -1018,7 +1019,7 @@ rule; it means the stop rule currently depends on a caller choosing to check.
 **T-130 Hermetic write-landing seam diagnostic** (RUN-13; Director 2026-09-12)
 - [ ] **state**: LANDED, independent review pending; owner C authors, Principal reviews;
   **requires**: [none — hermetic, zero cost, no holdout contact].
-- **leased files**: new `benchmarks/diagnostics/write_landing_probe.py`, new
+- **leased files**: `tools/diagnostics/write_landing_probe.py` (Director relocation),
   `test/benchmarks/test_write_landing_probe.py`, new fixtures under
   `benchmarks/diagnostics/fixtures/`. Product source is read-only in this row: the
   probe observes the existing route, it does not repair it.
@@ -1086,7 +1087,32 @@ rule; it means the stop rule currently depends on a caller choosing to check.
   repair lease from NOT_REPRODUCED. An independent reviewer must distinguish
   synthetic fixture reachability from production emission and cold replay.
 
-**T-133 Q-01 quarantine construction** (C; READY; requires: none)
+**T-133 Q-01 quarantine construction** (C; REOPENED; correction READY; requires: none)
+
+- **Director review (63d12d83): REOPENED; acceptance withheld.** The 123-test
+  isolated review slice passes, but independent read-only calls show
+  `guard_materialization(task_id=None)` and an unknown ID, and
+  `guard_capture(task_id=None)`, return normally. Source bytes are not checked by
+  the guard. `admit_evaluation` accepts a truthy authority string and a
+  caller-supplied FROZEN flag without reconciling identity/commitments. The
+  22-entrypoint inventory is 7 required / 14 observed-unleased / 1 declarative;
+  it is not 22 guarded routes. `HOLDOUT UNACCEPTED` returns process exit 0: valid
+  for metadata diagnostics, never for an acceptance/scoring gate.
+- **correction lease**: keep the implementation/test leases below, excluding
+  `justfile` and both CI workflows (transferred to T-132). C may additionally edit
+  the 14 exact paths inventoried as `observed-unleased` in
+  `benchmarks/ladder/corpus_registry.json` at 63d12d83, with the diagnostic path
+  relocated to `tools/diagnostics/write_landing_probe.py`; other expansion needs
+  a named lease. Inventory entries must have callable-level guard/role coverage,
+  not just a guard name somewhere in the file. Serialize these C-owned changes
+  with T-132/T-137; no concurrent edits to shared product-path helpers.
+- **required red controls before repair**: missing/unknown/renamed ID; missing
+  registry or receipt; forged authority and FROZEN flag; modified sealed source;
+  oracle/reference bytes copied into solver workspace; removed exposure history;
+  a listed but unguarded callable. Separate ordinary user work from registered
+  corpus operations explicitly; an omitted task ID cannot be a corpus bypass.
+  Do not weaken Q-01 to make existing permissive tests pass. Reacceptance requires
+  proof through actual guarded entrypoints, not helper-only positive tests.
 
 - **objective/contract**: implement spec DIR-1/Q-01. Development and holdout are
   separate authorization domains, not two labels on a shared glob pool. Register
@@ -1100,14 +1126,14 @@ rule; it means the stop rule currently depends on a caller choosing to check.
   `tools/002_LLM_API_MOCK/` (capture/materialization/export guard sites only),
   `vanguard/packages/runtime/task_sets.py` (declarative identity only),
   `justfile`, `.github/workflows/ci.yml`, `.github/workflows/clean-candidate.yml`.
-  Gate files transfer to T-132 only after T-133 review; no concurrent owner.
+  Gate files are transferred to T-132 by this Director review; no concurrent owner.
 - **implementation boundary**: seal holdout outside all development/retrieval
   mounts; registry commits origin, aliases, source/oracle/task fingerprints,
   role, irreversible exposure and curator receipt. Use hermetic synthetic sealed
   stores for tests. Audit every loader; an uncovered route blocks acceptance,
   and any additional source file needs a named lease before editing. No product
   public port change or production model call. Repository-source documentation
-  owner is `docs/architecture/system_composition.md`, edited by Senior only after
+  owner is `docs/backend/architecture/runtime-execution.md`, edited by Senior only after
   code review; regenerate docs knowledge then, not by hand.
 - **falsifiers**: `python3 -m unittest test.tools.test_check_corpus_quarantine test.benchmarks.test_corpus_quarantine -v`;
   `python3 tools/linters/check_corpus_quarantine.py --metadata`.
@@ -1115,11 +1141,21 @@ rule; it means the stop rule currently depends on a caller choosing to check.
   exposure tombstone, absent receipt, DEV capture of HOLDOUT and unfrozen scoring.
   Positive control admits a fresh DEV fixture and separately authorized synthetic
   evaluation; captured development data can never migrate back into HOLDOUT.
-- **exit**: independent reviewer verifies entrypoint inventory, CI integration,
-  no plaintext leakage and negative controls. Old corpus remains unaccepted.
-  C then transfers gates to T-132 and proceeds to T-137/T-51 serially.
+- **exit**: independent reviewer verifies actual guarded callables, authorization,
+  sealed commitments, no plaintext leakage and negative controls. Old corpus
+  remains unaccepted. Gate transfer is already effective; C serializes the
+  correction with T-132/T-137 and seeks independent T-133 reacceptance before T-51.
 
-**T-134 Durable verification and change-surface carriers** (A; READY; requires: none)
+**T-134 Durable verification and change-surface carriers** (A; ACCEPTED; requires: none)
+
+- **Director acceptance, 63d12d83 (2026-09-12)**: reviewed f429490e plus the
+  executed-count refinement 63d12d83, shared kind allocation, `/2` schema vectors,
+  sole session ownership, durable append latches and cold-process fold tests.
+  The isolated 123-test review slice passed, including all named T-134 suites.
+  Null/zero/positive observed counts remain distinct; no deprecated kind was
+  revived or evaluator verdict authority transferred. This accepts DIR-D1's
+  component contract, not T-131 row 7 or complete product/control qualification.
+  **session.py lease transfers now to B/T-135**; A may read it but not edit it.
 
 - **objective/contract**: spec DIR-D1 and NT-1.6. Allocate only
   `VerificationRecorded`/`ChangeSurfaceUpdated` in the normative MHF EventKind;
@@ -1141,10 +1177,10 @@ rule; it means the stop rule currently depends on a caller choosing to check.
   fails, append failure prevents the next call, deprecated writes remain denied.
 - **exit**: independent B review of schema/writer/reducer/vectors together;
   retained old-ledger compatibility and no duplicate effects. Senior synchronizes
-  `docs/backend/reference/events.md` and `docs/architecture/system_composition.md`
+  `docs/backend/reference/events.md` and `docs/backend/architecture/runtime-execution.md`
   and generated knowledge after review. Transfer session.py to T-135 afterward.
 
-**T-135 Missing index disposition** (B; BLOCKED until T-134 review/lease transfer)
+**T-135 Missing index disposition** (B; READY; requires: T-134 accepted)
 
 - **objective/contract**: spec DIR-D2, RUN-09 and NT-B04. index=None is typed
   infrastructure UNDETERMINABLE with retained slot, not an ordinary failure or
@@ -1161,7 +1197,13 @@ rule; it means the stop rule currently depends on a caller choosing to check.
   30-slot denominator. Senior synchronizes mapped agency/composition docs and
   generated knowledge. Existing row-4 green controls must stay meaningful.
 
-**T-136 Baseline digest shim removal** (B; READY; requires: none)
+**T-136 Baseline digest shim removal** (B; ACCEPTED; requires: none)
+
+- **Director acceptance, 63d12d83 (2026-09-12)**: reviewed e269c1dd and import
+  cleanup 2d212abb. Verifier accepts only SHA-256(ASCII Git tree ID), rejects raw
+  and padded SHA-1, and preserves the real committed accepted pin without
+  re-signing. The baseline verifier passed within the isolated 123-test slice.
+  No public schema migration or historical evidence mutation was needed.
 
 - **objective/contract**: spec DIR-D3. Reject padded/raw SHA-1 pretending to be
   SHA-256; preserve SHA-256(ASCII Git tree ID), the actual accepted pin algorithm.
@@ -1173,11 +1215,14 @@ rule; it means the stop rule currently depends on a caller choosing to check.
   tree; prove the committed accepted manifest's tree pin uses the retained form.
 - **exit**: independent A review; no legitimate current pin changed. External
   padded signed evidence, if discovered, is a migration escalation, not silently
-  repaired. Senior updates `docs/backend/architecture/domain.md` and knowledge.
+  repaired. Senior updates `docs/backend/reference/schemas.md` and knowledge.
 
-**T-137 Approval-path discrimination probe** (C; READY after T-133 delivery)
+**T-137 Approval-path discrimination probe** (C; READY)
 
-- **requires**: T-130 retained packet and T-133 (C lease serialization).
+- **requires**: T-130 retained valid packet. Director removes T-133 acceptance
+  as a prerequisite for this synthetic, non-control diagnostic only. C serializes
+  T-132/T-133/T-137 work; this is authority to execute T-137, not to repair product
+  approval wiring. Zero provider calls and zero USD remain mandatory.
 - **contract**: spec DIR-P/RUN-13/RUN-12. Attribute, do not repair, the cold seam
   where entrypoint supplies no approver and `_resolve(None)` refuses suspension.
 - **lease**: new `benchmarks/diagnostics/approval_path_probe.py`,
@@ -1197,9 +1242,11 @@ rule; it means the stop rule currently depends on a caller choosing to check.
   any repair boundary. NOT_REPRODUCED leaves RUN-13 open, not a repair lease.
 
 **T-132 Gate discovery widening and cost disposition** (RUN-07; Director 2026-09-12)
-- [ ] **state**: BLOCKED until T-133 reviewed gate-file transfer; owner C;
-  **requires**: [T-133].
-- **leased files**: `justfile`, `test/contracts/test_collection_integrity.py`.
+- [ ] **state**: READY; owner C; **requires**: [Director gate-file transfer].
+- **leased files**: `justfile`, `test/contracts/test_collection_integrity.py`,
+  `.github/workflows/ci.yml`, `.github/workflows/clean-candidate.yml`.
+  Transfer is authorized despite withheld T-133 acceptance: gate discovery must
+  expose, not conceal, its gaps. No quarantine admission from exit 0 metadata.
 - **contract**: RUN-07. `just verify` currently discovers only `test/kernel`,
   `test/agency` and `test/contracts`, which is approximately 947 of approximately
   3,171 tests. `test/benchmarks` — which contains the control instrument — and
@@ -1222,6 +1269,23 @@ rule; it means the stop rule currently depends on a caller choosing to check.
   plus a deterministic red control — an intentionally stale oracle digest MUST
   fail `just verify`. Proving the widened gate reds on the exact defect that
   escaped it is the point of the row; a green widened gate alone proves nothing.
+
+**T-131.6 Product candidate evidence identity** (A; READY)
+
+- **requires**: T-134 accepted; **contract**: RUN-09(6), RUN-10, DIR-D1.
+- **lease**: `vanguard/packages/runtime/entrypoint.py`,
+  `vanguard/packages/runtime/evidence_capture.py`,
+  `test/falsifiers/test_t131_row6_evidence_identity.py`,
+  `test/benchmarks/test_product_path_subject.py`. session.py and
+  `benchmarks/ladder/evidence.py` remain B/T-135-owned; no shared-file edits.
+- **objective**: retain the landed row-6 controls and qualify candidate identity
+  through public execute, durable receipt, exterior oracle and returned evidence.
+  A same-named foreign tree, post-verification mutation, extra/deleted file or
+  stale artifact must not publish green. Do not invent a second tree algorithm.
+- **falsifier**: `python3 -m unittest test.falsifiers.test_t131_row6_evidence_identity test.benchmarks.test_product_path_subject -v`.
+- **exit**: independent B review of positive and adversarial real-product traces;
+  reconcile exact tree/task/composition identities. A defect requiring B's files
+  becomes an explicit dependency/lease transfer, not a concurrent patch.
 
 **T-52 Wilson intervals + cost κ on control** (A §13.5, B §16)  
 - [x] **state**: ACCEPTED; owner A;

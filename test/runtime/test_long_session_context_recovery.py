@@ -47,10 +47,20 @@ from vanguard.packages.runtime.task_state import fold_task_state
 ROOT = Path(__file__).resolve().parents[2]
 PRESETS_JSON = ROOT / "packs" / "code-default" / "presets.json"
 
+#: NT-I02 drift guard. Every dimension a preset declares is pinned here, so a
+#: silent edit to `presets.json` reds. The `tokens` figures were recalibrated
+#: and `context_window_tokens` added when inference began settling against the
+#: governor (`runtime/inference_meter.py`): the previous ceilings were never
+#: enforced against the model call, and once enforced they funded roughly a
+#: third of each preset's declared turns. USD, wall-clock and turn ceilings are
+#: unchanged. The guard is not relaxed by this update -- it gained a dimension.
 EXPECTED_PRESETS = {
-    "fast": {"usd_micros": 50_000, "millis": 300_000, "tokens": 16_000, "turns": 8},
-    "balanced": {"usd_micros": 150_000, "millis": 900_000, "tokens": 40_000, "turns": 20},
-    "max": {"usd_micros": 400_000, "millis": 2_400_000, "tokens": 96_000, "turns": 40},
+    "fast": {"usd_micros": 50_000, "millis": 300_000, "tokens": 140_000,
+             "turns": 8, "context_window_tokens": 12_000},
+    "balanced": {"usd_micros": 150_000, "millis": 900_000, "tokens": 340_000,
+                 "turns": 20, "context_window_tokens": 24_000},
+    "max": {"usd_micros": 400_000, "millis": 2_400_000, "tokens": 720_000,
+            "turns": 40, "context_window_tokens": 48_000},
 }
 
 T110_PROJECT_ID = "project-t110"

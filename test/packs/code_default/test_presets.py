@@ -20,10 +20,19 @@ from load import (
 from vanguard.packages.runtime.paired_evaluation import assert_single_varied_dimension
 
 
+#: T-79 catalog identity. `tokens` was recalibrated and `context_window_tokens`
+#: introduced when inference started settling against the governor
+#: (`runtime/inference_meter.py`): `tokens` is now conserved episode spend and
+#: the window is the per-turn prompt bound they used to share. USD, wall-clock
+#: and turn ceilings are unchanged, and `as_budget_map()` parity below still
+#: requires an exact match -- the guard gained a dimension rather than losing one.
 EXPECTED_BUDGETS = {
-    "fast": {"usd_micros": 50_000, "millis": 300_000, "tokens": 16_000, "turns": 8},
-    "balanced": {"usd_micros": 150_000, "millis": 900_000, "tokens": 40_000, "turns": 20},
-    "max": {"usd_micros": 400_000, "millis": 2_400_000, "tokens": 96_000, "turns": 40},
+    "fast": {"usd_micros": 50_000, "millis": 300_000, "tokens": 140_000,
+             "turns": 8, "context_window_tokens": 12_000},
+    "balanced": {"usd_micros": 150_000, "millis": 900_000, "tokens": 340_000,
+                 "turns": 20, "context_window_tokens": 24_000},
+    "max": {"usd_micros": 400_000, "millis": 2_400_000, "tokens": 720_000,
+            "turns": 40, "context_window_tokens": 48_000},
 }
 
 

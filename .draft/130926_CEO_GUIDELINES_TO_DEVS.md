@@ -223,6 +223,62 @@ public-contract changes to leadership; this is leadership exercising it):**
 **This is a `BLOCK-T26` item.** Do not freeze a control arm whose declared
 resource envelope is not the envelope it enforces.
 
+#### D-6 status: measured, built, landed (2026-09-13)
+
+Not delegated. Measured on the product path, fixed, and falsified in this
+session. The measurement first, because it changed the diagnosis:
+
+| preset | declared | reported, before | stopped by |
+|---|---|---|---|
+| fast | $0.05 / 16,000 tok / 8 turns | $0.20 / 31,200 tok | turn bound |
+| balanced | $0.15 / 40,000 tok / 20 turns | $0.50 / 78,000 tok | turn bound |
+| max | $0.40 / 96,000 tok / 40 turns | $1.00 / 156,000 tok | turn bound |
+
+So the "double-binding" half of my reading was **wrong** and the hole was
+larger than I described: the presets did deliver their declared turns, because
+*nothing enforced the other two ceilings at all*. Inference was the one
+unmetered resource in an episode. The ceiling denominated in money did not bind.
+
+Landed:
+
+- `runtime/inference_meter.py` (new) — reserve worst-case before the provider
+  call, settle actual after, against the same `Governor` the kernel uses.
+  Unknown cost is recorded `unsettled`, never zero. Overruns are charged.
+- `runtime/session.py` — the meter is built beside the governor and wired into
+  the layered operator, which was already the runtime-owned model boundary.
+- `agency/episode/engine.py` — a denied reservation terminates
+  `BUDGET_EXHAUSTED`, not `instrument_error`. A working ceiling must not be
+  reported as the model misbehaving, and must not land in the missingness
+  taxonomy (`DIR-D2`).
+- `adapters/models/openrouter.py` — a three-valued `pricing` property so the USD
+  dimension can be bounded *before* a paid call. Priced route → rates; free tier
+  → `(0, 0)`; unknown route → `None`, which has never meant free.
+- `compose.py` / `packs/code-default/load.py` / `presets.json` / all seven
+  manifest `budget-policy.json` — the key split. `tokens` is conserved spend;
+  `contextWindowTokens` is the per-turn prompt bound. Every one of those
+  manifests had declared `tokens` meaning *window* while handing it to the
+  governor as *spend*, which is why the original values were incoherent as
+  budgets.
+- Calibration is from measurement, not arithmetic: compiled prompts run
+  10,823–15,973 tokens/turn, growing ~50–100/turn as L5 accumulates.
+
+Measured after: **fast 8/8, balanced 20/20, max 40/40**, all terminating on the
+turn bound with the token and USD ceilings live.
+
+Falsifier: `python3 -m unittest test.falsifiers.test_inference_accounting`
+(14 tests). Three mutations proven red and restored:
+
+1. unwire `meter=` in `session.py` → the overrun test reds (`'reservation
+   denied' not found in 'turn bound 20 reached'`);
+2. delete the engine's budget branch → reds `instrument_error != budget_exhausted`;
+3. restore the old token ceilings → `fast declares 8 turns but funded 2`.
+
+Regression: kernel 102, agency 310, contracts 546, adapters 198, packs 92,
+apps 38, falsifiers 565, runtime 851, benchmarks 194. The only failures are the
+five that are red at `HEAD` without this change (3 runtime import/approval
+errors, 2 `test_control_corpus` quarantine failures), confirmed by a stash
+baseline. All linters pass; kernel LOC unchanged at 1386.
+
 ### D-7. Turn economics — stop spending the budget on looking.
 
 Ranked by leverage, all four are authorized:
@@ -445,8 +501,8 @@ Verified at `HEAD 4db1f758`, clean tree. Cited so nobody has to re-derive them.
 | E-3 | `IndexPort` is a regex definition scan | `adapters/stores/repo_index.py:29` (`_DEFINITIONS`) |
 | E-4 | LDA graph unused by product: 63,514 `calls`, 11,752 `tests`, 10,260 py symbols | `uv run lda doctor --json` |
 | E-5 | No `str_replace` anywhere | `grep -rn str_replace vanguard/ packs/` → 0 hits |
-| E-6 | `tokens` is both a Governor additive ceiling and a compiler window ceiling | `runtime/session.py:898-901` vs `:942`; `kernel/budget.py:49` |
-| E-7 | Model call bypasses kernel dispatch and the Governor | `agency/episode/engine.py:447`; usage is diagnostics only at `:1034` |
+| E-6 | **Partly wrong, corrected by measurement.** `tokens` did carry both meanings, but the compiler ceiling never bound, because the governor ceiling was never debited. Now split and both enforced. | probe + `test_inference_accounting` |
+| E-7 | **Confirmed, and it was the whole defect.** The model call bypassed the governor; every preset overran its declared token *and USD* ceilings by 1.6–4x with no denial. Fixed. | `agency/episode/engine.py:447`; measured table in D-6 |
 | E-8 | `just verify` covers ~947 / ~3,171 tests; excludes `test/benchmarks` and `test/falsifiers` | `tasks.md` T-132 row; `justfile` |
 | E-9 | ~6 modules fail at import | `setuptools`; `lab.m65_study`; `lab.m701_independence`; `adapters.models.ollama` |
 | E-10 | `check_doc_budgets` red on `main`, 5 owner-held docs | `milestones.md` §"Still failing" |
@@ -456,8 +512,14 @@ Verified at `HEAD 4db1f758`, clean tree. Cited so nobody has to re-derive them.
 E-6, E-7 and E-12 are the ones I would want a second pair of eyes on before they
 become law. Everything else I read directly.
 
-**Honest scope note.** E-6 and E-7 are read from source, not from an executed
-episode. Neither has been demonstrated by a run. A2's first deliverable is
-therefore a *measurement* — declared vs. effective turns for all three presets —
-and if that measurement contradicts my reading, the measurement wins and I want
-to hear it in the first week, not the second.
+**Scope note, updated.** E-6 and E-7 were read from source when first written.
+They have since been executed: the probe in D-6 ran real episodes through the
+public entrypoint, and it corrected E-6. The measurement won, as it should have.
+
+**Stream A no longer owns A2** — it is landed. A's sprint is A1 (exact edit),
+A3 (local-model write-landing) and A4 (evidence identity). A should still review
+the inference-accounting change as an independent reviewer, and in particular
+re-derive the preset calibration on a large workspace: my prompt measurements
+come from a synthetic 80-file tree, and a real repository will compile larger
+L5 evidence. If `context_window_tokens` turns out to be too tight there, that is
+a calibration change, not a design change.

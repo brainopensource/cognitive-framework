@@ -99,7 +99,7 @@ Hexagonal ports define the interfaces required by the runtime and kernel:
 | `EnvironmentAdapter` (`environment.py`) | `observe(req) -> Observation`<br>`execute(req, ctx) -> EffectReceipt` | Host environment inspection and effect execution. |
 | `ClockPort` (`determinism.py`) | `now() -> datetime` | Pluggable time source for deterministic replay. |
 | `RandomPort` (`determinism.py`) | `token() -> str`, `randint(a, b) -> int` | Pluggable entropy source for deterministic replay. |
-| `IndexPort` (`index.py`) | `index(root)`, `files(prefix)`, `symbols(name, path)`, `dependencies(path)`, `tests(path)`, `repo_map(token_budget)` | Workspace-relative, deterministic repository observations with typed failures and provenance-bearing summaries. `RepositoryMap` is additive: `source_revision`, `tree_hash` (git or hashed tree), `index_digest` (IndexPort snapshot, not a directory listing). Ranking stays out of this port. |
+| `IndexPort` (`index.py`) | `index(root)`, `files(prefix)`, `symbols(name, path)`, `dependencies(path)`, `tests(path)`, `callers(symbol)`, `get_callers(symbol)`, `repo_map(token_budget)` | Workspace-relative, deterministic repository observations with typed failures and provenance-bearing summaries. `RepositoryMap` is additive: `source_revision`, `tree_hash` (git or hashed tree), `index_digest` (IndexPort snapshot, not a directory listing). `IndexSelection` is the DIR-I5 composition value (`backend`, `source_identity`, `health_verdict`, `degradation_reason`, `unresolved_coverage`). Ranking stays out of this port. |
 | `MemoryPort` (`memory.py`) | `search(q) -> list[MemoryHit]`, `put(r) -> None` | Memory retrieval port interface. |
 | `ChildRuntimePort` (`child_runtime.py`) | `spawn(child_spec) -> ChildResult` | Mediated child agent execution delegation. |
 
@@ -132,7 +132,7 @@ SPI methods return the `Result[T]` Algebraic Data Type (`vanguard.packages.domai
 
 ## 5. Repository-Intelligence Binding
 
-The existing `IndexPort` is the narrow repository-intelligence boundary; no LDA-specific substrate port is added. `FileRepoIndex` and `InMemoryRepoIndex` return value-only observations. The file adapter bounds files, symbols, dependency edges, and test associations, rejects traversal and symlink escape, and reports a deterministic source revision plus a live hashed-tree `tree_hash` and an observation-snapshot `index_digest` for `WorkspaceEpoch`.
+The existing `IndexPort` is the narrow repository-intelligence boundary; no LDA-specific substrate port is added. `LdaRepoIndex`, `FileRepoIndex` and `InMemoryRepoIndex` return value-only observations. Production composition prefers a healthy current `LdaRepoIndex` via `select_production_index`; optional absence records File fallback; a present stale, corrupt, empty, unsupported or unresolved LDA cannot be accepted as current evidence. Required missing/unusable indexes remain `INDEX_UNBOUND` without retry burn. The file adapter bounds files, symbols, dependency edges, and test associations, rejects traversal and symlink escape, and reports a deterministic source revision plus a live hashed-tree `tree_hash` and an observation-snapshot `index_digest` for `WorkspaceEpoch`.
 
 The code-pack `IContextManager` may query `IndexPort` or a provider adapter and compile the results into a bounded, value-only context packet. The planned logical fields are:
 

@@ -92,7 +92,11 @@ Semantic task state (`vanguard/packages/domain/task_state.py`, `SemanticTaskStat
 `schemas/` wire family. Runtime `fold_task_state` is the only producer. `aether.memory-view/1`
 wraps the complete state in an immutable `MemoryView`: capture freezes canonical JCS bytes and
 binds cursor, lineage identifier, reducer version, and unique `Evidence` entries whose subject
-and artifact identities are lowercase `sha256:` digests. `Interaction` is the compiler-selection
+and artifact identities are lowercase `sha256:` digests. `TaskRevision` (`aether.task-revision/1`,
+ADR-0107 / D-1) defines typed task revision requests over mutable task fields (`plan`, `strategy_steps`,
+`hypotheses`, `verification_plan`, `next_action`, `active_step_id`, `backlog`), enforcing optimistic
+concurrency via `expected_revision` / `expected_state_digest` and fail-closed anti-widening invariants
+without altering objective, constraints, or remaining budgets. `Interaction` is the compiler-selection
 value used for bounded recent history. Neither value creates a second state store, and a digest is
 an integrity identity rather than authorization.
 

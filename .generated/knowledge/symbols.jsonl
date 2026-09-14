@@ -65,6 +65,8 @@
 {"symbol": "CacheBreakpointCeilingExceeded", "kind": "class", "defined_in": "vanguard/packages/agency/context/compiler.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "CacheObservation", "kind": "class", "defined_in": "vanguard/packages/adapters/models/prompt_codec.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "CalculatorOracle", "kind": "class", "defined_in": "vanguard/packages/adapters/evaluators/suites/bug-001-single-file/test_oracle.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "CallerAdmissionEvidence", "kind": "class", "defined_in": "vanguard/packages/agency/multi_file_completeness.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "CallerAdmissionVerdict", "kind": "class", "defined_in": "vanguard/packages/agency/multi_file_completeness.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "CancellationRequested", "kind": "class", "defined_in": "vanguard/packages/runtime/service/service.py", "canonical_owner": "docs/backend/architecture/application-interfaces.md"}
 {"symbol": "CanonicalManifest", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/manifest.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "CanonicalisationError", "kind": "class", "defined_in": "vanguard/packages/domain/canonicalisation/jcs.py", "canonical_owner": "docs/backend/reference/schemas.md"}
@@ -301,6 +303,7 @@
 {"symbol": "InMemoryMemoryPort", "kind": "class", "defined_in": "vanguard/packages/runtime/memory.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "InMemoryRepoIndex", "kind": "class", "defined_in": "vanguard/packages/adapters/stores/repo_index.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "IndexPort", "kind": "protocol", "defined_in": "vanguard/packages/ports/index.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "IndexSelection", "kind": "class", "defined_in": "vanguard/packages/ports/index.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "InferenceMeter", "kind": "class", "defined_in": "vanguard/packages/runtime/inference_meter.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "InferenceReservation", "kind": "class", "defined_in": "vanguard/packages/runtime/inference_meter.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "InferenceSettlement", "kind": "class", "defined_in": "vanguard/packages/runtime/inference_meter.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -424,6 +427,7 @@
 {"symbol": "ProcessHistory", "kind": "class", "defined_in": "vanguard/packages/runtime/governance/definitions.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ProcessInstance", "kind": "class", "defined_in": "vanguard/packages/runtime/governance/definitions.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "Producer", "kind": "class", "defined_in": "vanguard/packages/domain/evidence/envelope.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "ProductionIndexBinding", "kind": "class", "defined_in": "vanguard/packages/runtime/bootstrap.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ProgressAssessedPayload", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "ProgressProjection", "kind": "class", "defined_in": "vanguard/packages/domain/ledger/progress.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "ProgressView", "kind": "class", "defined_in": "vanguard/packages/domain/ledger/progress.py", "canonical_owner": "docs/backend/reference/schemas.md"}
@@ -597,6 +601,8 @@
 {"symbol": "TaskContext", "kind": "class", "defined_in": "vanguard/packages/runtime/compose.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "TaskDisposition", "kind": "class", "defined_in": "vanguard/packages/domain/evidence/disposition.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "TaskReport", "kind": "class", "defined_in": "vanguard/packages/runtime/dogfood.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "TaskRevision", "kind": "class", "defined_in": "vanguard/packages/domain/task_state.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "TaskRevisionHook", "kind": "class", "defined_in": "vanguard/packages/runtime/task_state.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "TaskStep", "kind": "class", "defined_in": "vanguard/packages/domain/task_state.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "TierAttempt", "kind": "class", "defined_in": "vanguard/packages/runtime/tier_escalation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "TierEscalationRouter", "kind": "class", "defined_in": "vanguard/packages/adapters/models/routing.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}

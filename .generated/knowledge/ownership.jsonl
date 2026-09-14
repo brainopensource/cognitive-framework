@@ -4,6 +4,14 @@
 {"canonical_id": "nav.home", "canonical_owner_path": "docs/README.md", "owner": "documentation-governance"}
 {"canonical_id": "arch.system.boundaries", "canonical_owner_path": "docs/architecture/boundaries.md", "owner": "system-architecture"}
 {"canonical_id": "arch.system.data-flow", "canonical_owner_path": "docs/architecture/data-flow.md", "owner": "system-architecture"}
+{"canonical_id": "adr-0047-disposable-prototypes", "canonical_owner_path": "docs/architecture/decisions/0047-disposable-prototypes.md", "owner": "engineering-director"}
+{"canonical_id": "adr-0060-domain-generality", "canonical_owner_path": "docs/architecture/decisions/0060-domain-generality.md", "owner": "engineering-director"}
+{"canonical_id": "adr-0075-production-subject-and-falsifiers", "canonical_owner_path": "docs/architecture/decisions/0075-production-subject-and-falsifiers.md", "owner": "engineering-director"}
+{"canonical_id": "adr-0092-measurement-before-concurrency", "canonical_owner_path": "docs/architecture/decisions/0092-measurement-before-concurrency.md", "owner": "engineering-director"}
+{"canonical_id": "adr-0107-dir3-seam-types", "canonical_owner_path": "docs/architecture/decisions/0107-dir3-seam-types.md", "owner": "engineering-director"}
+{"canonical_id": "adr-0108-session-composition-and-analysis", "canonical_owner_path": "docs/architecture/decisions/0108-session-composition-and-analysis.md", "owner": "engineering-director"}
+{"canonical_id": "adr-0109-binding-decision-medium", "canonical_owner_path": "docs/architecture/decisions/0109-binding-decision-medium.md", "owner": "engineering-director"}
+{"canonical_id": "adr-0110-fh1-retrieval-disposition", "canonical_owner_path": "docs/architecture/decisions/0110-fh1-retrieval-disposition.md", "owner": "engineering-director"}
 {"canonical_id": "arch.system.overview", "canonical_owner_path": "docs/architecture/overview.md", "owner": "system-architecture"}
 {"canonical_id": "arch.workflow.end-to-end-execution", "canonical_owner_path": "docs/architecture/workflows/end-to-end-execution.md", "owner": "architecture-governance"}
 {"canonical_id": "arch.workflow.system-bootstrap", "canonical_owner_path": "docs/architecture/workflows/system-bootstrap.md", "owner": "architecture-governance"}

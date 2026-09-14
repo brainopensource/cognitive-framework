@@ -20,7 +20,7 @@ The field inventory below is the cross-lane contract, while private helpers and 
 
 | Type | Fields and field types |
 |---|---|
-| `IndexSelection` | `backend: Literal["lda", "file"]`; `source_identity: WorkspaceEpoch`; `health_verdict: Literal["healthy_current", "optional_absent", "present_invalid", "required_unbound", "subject_changed"]`; `degradation_reason: str | None`; `unresolved_coverage: bool` |
+| `IndexSelection` | `backend: Literal["lda", "file"]`; `source_identity: WorkspaceEpoch`; `health_verdict: Literal["healthy_current", "optional_absent", "present_invalid", "required_unbound", "subject_changed"]`; `degradation_reason: str \| None`; `unresolved_coverage: bool` |
 | `TaskRevision` | `revision_id: str` (canonical request digest); `target_binding: tuple[str, str, str, str]` in order run ID, episode ID, task digest, composition digest; `expected_revision: int`; `expected_state_digest: str`; `mutated_fields: tuple[TaskMutableField, ...]`; `proposed_state: SemanticTaskState`; `authority_proof: str` (reference to authenticated dispatch/grant evidence) |
 | `CallerAdmissionEvidence` | `changed_public_symbols: tuple[Symbol, ...]`; `inspected_callers: tuple[Symbol, ...]`; `updated_callers: tuple[Symbol, ...]`; `inspection_receipts: tuple[tuple[Symbol, str], ...]`; `update_receipts: tuple[tuple[Symbol, str], ...]`; `omissions: tuple[str, ...]`; `candidate_identity: tuple[str, str, str]` in order task digest, composition digest, whole submitted tree digest; `source_identity: WorkspaceEpoch`; `unresolved_coverage: bool` |
 

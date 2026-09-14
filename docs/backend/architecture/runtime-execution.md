@@ -85,6 +85,13 @@ refuses the whole batch before dispatch. Settlement is deterministic and sequent
 within dependency levels for the current control candidate; concurrent settlement
 is an optional optimization and cannot change ledger shape or turn accounting.
 
+**Task revision capability (T-139 / ADR-0107).** The `task.revise` capability (`_TaskReviseEffect`) binds
+to the privileged sink in `wiring.py` and is declared across `vg-code-*` manifests. `TaskRevisionHook` manages
+optimistic concurrency validation (`validate_task_revision_request`) against `expected_revision` / `expected_state_digest`
+and appends `PlanRevised` before the next prompt compilation via the sole ledger writer. Batches containing
+`task.revise` are strictly refused under the single-writer rule; invalid, stale, or widening requests leave authority
+and state completely unchanged.
+
 ## Scope
 - The unified construction pipeline: `compose` $	o$ `activate` $	o$ `begin_episode` $	o$ `execute_turns` $	o$ `teardown`.
 - `RunPlan` immutable identity preimage and environment digest ($D_R$).

@@ -215,19 +215,7 @@ page neither freezes that artifact nor authorizes measurement.
 | Nonpositive result | A valid complete sample below the success threshold is `NEGATIVE`; insufficient evaluable evidence is `UNDETERMINABLE`; unfrozen or identity-invalid measurement is `INVALID`. A false-completion veto prevents acceptance regardless of a numeric disposition. Publish the result, missingness, costs and stop reason; all such outcomes leave MS-CONTROL open. |
 | Closure | An independent reviewer accepts the exact-subject evidence digest and repository governance records closure. A helper returning `POSITIVE` is insufficient. Zero observed false completions is a finite-sample observation, not proof of zero population risk. |
 
-**Delivery order into MS-CONTROL (RUN-11, Director 2026-09-12).** Five packages
-with rough engineering sizes: P1 measurement and oracle integrity (M, T-51/T-132);
-P2 product-path write and change closure (M, T-130 then its repair); P3 exterior
-completion and false-completion resistance (M, T-131); P4 large-context,
-compaction and resumable-session qualification (L); P5 budgeted model cascade plus
-comparative evidence (L). P1 and P2 may run in parallel under disjoint leases. P3
-falsifier authoring and P4 read-only qualification may run alongside them. P3
-integration requires a reviewed P2; final P4 qualification requires reviewed P2
-and P3. T-26b acceptance requires reaccepted P1 and T-51. Measurement corruption
-and the absent product trace both precede reliable qualification, which is why
-P1 and P2 lead: a number produced before either is closed cannot be trusted even
-if it is favourable. The finite freeze boundary is now D-6 F1–F7 above; this historical delivery order
-adds no further prerequisite or live-run authority.
+**Delivery order into MS-CONTROL (RUN-11, Director 2026-09-12).** Five packages with rough engineering sizes: P1 measurement and oracle integrity (M, T-51/T-132); P2 product-path write and change closure (M, T-130 then its repair); P3 exterior completion and false-completion resistance (M, T-131); P4 large-context, compaction and resumable-session qualification (L); P5 budgeted model cascade plus comparative evidence (L). P1 and P2 may run in parallel under disjoint leases. P3 falsifier authoring and P4 read-only qualification may run alongside them. P3 integration requires a reviewed P2; final P4 qualification requires reviewed P2 and P3. T-26b acceptance requires reaccepted P1 and T-51. Measurement corruption and the absent product trace both precede reliable qualification, which is why P1 and P2 lead: a number produced before either is closed cannot be trusted even if it is favourable. The finite freeze boundary is now D-6 F1–F7 above; this historical delivery order adds no further prerequisite or live-run authority.
 
 **Grounding boundary.** Existing mechanisms are
 [`live_oracle_pass`, `score_metrics`, `canary_disposition`](../../../benchmarks/ladder/metrics.py),

@@ -103,6 +103,7 @@ def observation_sinks() -> SinkRegistry:
     registry.register("fs.read", SinkClass.OBSERVATION)
     registry.register("fs.search", SinkClass.OBSERVATION)
     registry.register("patch.apply", SinkClass.PRIVILEGED)
+    registry.register("agency.finish", SinkClass.PRIVILEGED)
     return registry
 
 
@@ -266,6 +267,23 @@ class ReadOnlyOnly(unittest.TestCase):
         run(engine)
 
         self.assertEqual(harness.ledger.entries, [])
+
+    def test_a_batch_carrying_a_terminal_is_refused(self) -> None:
+        mixed = batch(["a.py"])
+        mixed["requests"].append({
+            "id": "done", "action": "agency.finish",
+            "resource": {"kind": "generic", "uriPattern": "agency://finish"},
+            "args": {"summary": "done"},
+        })
+        harness, adapter, engine = build([mixed, doubles.finish()])
+
+        run(engine)
+
+        self.assertEqual(adapter.calls, [])
+        denials = [event for event in harness.sink.events
+                   if event.reason == "observation_batch_refused"]
+        self.assertEqual(len(denials), 1)
+        self.assertIn("agency.finish", denials[0].payload["detail"])
 
     def test_a_composition_with_no_declared_sinks_settles_no_batch(self) -> None:
         """Fail closed (`F-05`). A composition that has not said which of its

@@ -60,7 +60,14 @@ class TestManifestLoader(unittest.TestCase):
     def test_load_vg_code_default(self) -> None:
         pack = self.loader.load_pack("vg-code-default")
         self.assertEqual(pack.name, "vg-code-default")
-        self.assertEqual(len(pack.manifest.capabilities), 5)
+        self.assertEqual(
+            {capability.verb for capability in pack.manifest.capabilities},
+            {
+                "fs.read", "fs.search", "patch.apply", "proc.exec",
+                "repo.search_symbols", "repo.get_callers",
+                "repo.get_dependencies", "repo.get_tests", "agency.finish",
+            },
+        )
 
     def test_load_vg_code_claude_shaped(self) -> None:
         pack = self.loader.load_pack("vg-code-claude-shaped")

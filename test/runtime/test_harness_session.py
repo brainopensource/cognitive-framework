@@ -57,6 +57,7 @@ class FakeEnvironment:
     def __init__(self) -> None:
         self.disposed = False
         self.applied: list[Any] = []
+        self.observed: list[Any] = []
 
     def profile(self) -> Result[Any]:
         return Result.success(EnvironmentProfile(
@@ -68,6 +69,7 @@ class FakeEnvironment:
             created_at="2026-08-16T00:00:00.000Z"))
 
     def observe(self, req: Any, grant: Any = None) -> Result[Any]:
+        self.observed.append(req)
         return Result.success(Observation(
             action=getattr(req, "action", "fs.read"),
             content="def total(values): pass"))
@@ -150,6 +152,38 @@ class SessionConstructsWithoutIO(unittest.TestCase):
         session = HarnessSession(self.harness, _ports(model, self.environment), _task())
         result = session.run()
         self.assertIsNotNone(result.terminal)
+
+    def test_composed_observation_sinks_reach_the_production_episode_engine(self) -> None:
+        proposal = {
+            "kind": "observe",
+            "requests": [
+                {
+                    "id": "read-a",
+                    "action": "fs.read",
+                    "resource": {"kind": "fs", "root": "/workspace", "paths": ["/workspace/a.py"]},
+                    "args": {"path": "a.py"},
+                },
+                {
+                    "id": "read-b",
+                    "action": "fs.read",
+                    "resource": {"kind": "fs", "root": "/workspace", "paths": ["/workspace/b.py"]},
+                    "args": {"path": "b.py"},
+                },
+            ],
+        }
+        model = ScriptedModel([proposal, finish()])
+        session = HarnessSession(self.harness, _ports(model, self.environment), _task())
+
+        result = session.run()
+
+        self.assertIsNotNone(result.terminal)
+        self.assertEqual(len(self.environment.observed), 2)
+        batches = [
+            event for event in result.events
+            if event.kind == "EpisodeStateChanged"
+            and event.reason == "observation_batch"
+        ]
+        self.assertEqual(len(batches), 1)
 
 
 class MetaControllerRuntimeIntegration(unittest.TestCase):

@@ -1619,6 +1619,11 @@ class HarnessSession:
                 protocol_decoders=decoders,
                 patch_detector=patch_detector,
                 truncation_detector=truncation_detector,
+                # Manifest sink declarations are the sole authority for
+                # classifying members of a read-only observation batch.
+                # Omitting this handoff leaves the engine correctly closed
+                # and makes batching reachable only to direct engine tests.
+                observation_sinks=harness.sinks,
                 # Raw composition tests and legacy in-process callers may
                 # intentionally omit a pack policy. The strict completion
                 # contract is enabled by the product activation seam, which

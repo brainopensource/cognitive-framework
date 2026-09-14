@@ -5,6 +5,10 @@
     "tools": [
       "vg-code-default/read-tool.json",
       "vg-code-default/search-tool.json",
+      "vg-code-default/repo-search-symbols-tool.json",
+      "vg-code-default/repo-get-callers-tool.json",
+      "vg-code-default/repo-get-dependencies-tool.json",
+      "vg-code-default/repo-get-tests-tool.json",
       "vg-code-default/patch-tool.json",
       "vg-code-default/test-tool.json",
       "vg-code-default/finish-tool.json"
@@ -46,8 +50,32 @@
       "risk": "high"
     },
     {
-      "verb": "agency.finish",
+      "verb": "repo.search_symbols",
       "sink": "observation",
+      "selector": {"kind":"generic","uriPattern":"repo://symbols/*"},
+      "risk": "low"
+    },
+    {
+      "verb": "repo.get_callers",
+      "sink": "observation",
+      "selector": {"kind":"generic","uriPattern":"repo://callers/*"},
+      "risk": "low"
+    },
+    {
+      "verb": "repo.get_dependencies",
+      "sink": "observation",
+      "selector": {"kind":"generic","uriPattern":"repo://dependencies/*"},
+      "risk": "low"
+    },
+    {
+      "verb": "repo.get_tests",
+      "sink": "observation",
+      "selector": {"kind":"generic","uriPattern":"repo://tests/*"},
+      "risk": "low"
+    },
+    {
+      "verb": "agency.finish",
+      "sink": "privileged",
       "selector": {"kind":"generic","uriPattern":"agency://finish"},
       "risk": "low"
     }

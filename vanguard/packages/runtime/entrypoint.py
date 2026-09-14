@@ -13,6 +13,11 @@ from ..adapters.stores.blob_store import FileBlobStore
 from ..adapters.sandbox.platform import discover_platform
 from .app_service import project_receipts, project_terminal_outcome
 from .compose import TaskContext
+from .evidence_capture import (
+    last_kind_payload,
+    qualify_candidate_identity,
+    submitted_workspace_digests,
+)
 from . import pack_catalog
 from .profiles import SandboxUnavailable, resolve_profile
 from .root import Runtime
@@ -268,6 +273,36 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
          if item.status == "in_progress"), None,
     )
     usage = run_result.token_usage or {}
+    # T-131.6. Qualify the published receipt against the submitted tree using
+    # the existing candidate snapshot and DIR-D1 carriers. A green claim that
+    # names any other tree is an instrument failure, not a terminal mapping.
+    events = getattr(result, "events", ()) or ()
+    verification = last_kind_payload(events, "VerificationRecorded")
+    if verification is None and run_result.verification_identity:
+        verification = dict(run_result.verification_identity)
+    trajectory = result.trajectory if isinstance(getattr(result, "trajectory", None), Mapping) else {}
+    artifacts = trajectory.get("artifacts") if isinstance(trajectory.get("artifacts"), (list, tuple)) else ()
+    qualification = qualify_candidate_identity(
+        submitted_digests=submitted_workspace_digests(task.repo_path),
+        task_digest=run_result.task_digest,
+        composition_digest=run_result.composition_digest,
+        verification=verification,
+        change_surface=last_kind_payload(events, "ChangeSurfaceUpdated"),
+        captured_artifacts=artifacts,
+    )
+    detail = run_result.detail
+    claims_green = (
+        outcome == "completed"
+        and isinstance(verification, Mapping)
+        and verification.get("exitCode") == 0
+    )
+    if claims_green and not qualification["qualified"]:
+        outcome = "instrument_error"
+        reason = qualification.get("reason") or "VERIFICATION_STALE"
+        detail = f"EVIDENCE_IDENTITY: {reason}"
+        if projections and projections[-1].get("kind") == "complete":
+            projections[-1] = {**projections[-1], "outcome": outcome}
+    identity = qualification.get("identity") or run_result.verification_identity
     return {"type": "result", "runId": run_id, "result": {
         "runId": run_id, "outcome": outcome, "phase": "complete", "attempts": 1,
         "turns": run_result.turns,
@@ -277,8 +312,12 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
         "promptTokens": usage.get("promptTokens"),
         "completionTokens": usage.get("completionTokens"),
         "spentUsdMicros": run_result.observed_cost,
+        "taskDigest": run_result.task_digest,
+        "compositionDigest": run_result.composition_digest,
+        "candidateDigest": qualification.get("candidateDigest"),
+        "verificationIdentity": dict(identity) if identity else None,
         "projections": projections,
-        "detail": run_result.detail,
+        "detail": detail,
     }}
 
 

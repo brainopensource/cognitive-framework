@@ -31,12 +31,16 @@ import unittest
 from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 from test.runtime.test_harness_session import FakeClock, FakeEnvironment
 from vanguard.packages.adapters.environment.sandboxed import SandboxedEnvironmentAdapter
 from vanguard.packages.adapters.models.fake import FakeModel
 from vanguard.packages.adapters.stores.event_store import SqliteEventStore
+from vanguard.packages.agency.episode.state import RunTermination
+from vanguard.packages.domain.canonicalisation.digest import digest_of
 from vanguard.packages.kernel import FailurePath
+from vanguard.packages.runtime import entrypoint
 from vanguard.packages.runtime.entrypoint import _completion_policy, _manifest
 from vanguard.packages.runtime.root import HarnessSession, Runtime, SessionPorts, TaskContext
 
@@ -259,6 +263,241 @@ class DriftedEvidenceIdentityIsRefused(unittest.TestCase):
             self.assertFalse(
                 verdict.admissible,
                 "a verification subject bound to another tree was admitted")
+
+
+# ---------------------------------------------------------------------------
+# T-131.6: the same identity question on the public product route.
+# Landed row-6 controls above still hit the session admitter. Qualification
+# here is `entrypoint.execute`: returned evidence, durable receipt, exterior
+# oracle, task, composition and submitted workspace must name one tree.
+# ---------------------------------------------------------------------------
+
+BRIEF = "Create a greenfield project from scratch"
+TASK_DIGEST = digest_of({"task": BRIEF})
+COMPOSITION_DIGEST = "sha256:" + "c" * 64
+ARGV = ("python3", "-m", "unittest", "test_app.py")
+
+
+class _ProductTelemetry:
+    turns = 2
+    prompt_tokens = None
+    completion_tokens = None
+
+
+class _ProductExecution:
+    def __init__(
+        self,
+        *,
+        terminal: RunTermination,
+        events: tuple[object, ...] = (),
+        trajectory: dict | None = None,
+        composition_digest: str = COMPOSITION_DIGEST,
+        detail: str = "identity-qualified stub",
+    ) -> None:
+        self.terminal = terminal
+        self.receipts = ()
+        self.events = events
+        self.telemetry = _ProductTelemetry()
+        self.run_digest = "sha256:" + "d" * 64
+        self.state_digest = None
+        self.detail = detail
+        self.trajectory = trajectory or {"task_digest": TASK_DIGEST}
+        self.composition_digest = composition_digest
+
+
+def _subject_digest(workspace_digest: str, task_digest: str = TASK_DIGEST) -> str:
+    return digest_of({
+        "argv": list(ARGV),
+        "workspaceDigest": workspace_digest,
+        "taskDigest": task_digest,
+    })
+
+
+def _carrier_events(
+    *,
+    workspace_digest: str,
+    task_digest: str = TASK_DIGEST,
+    composition_digest: str = COMPOSITION_DIGEST,
+    exit_code: int = 0,
+    result_artifact: str | None = None,
+    artifacts: tuple[dict, ...] = (),
+) -> tuple[object, ...]:
+    verification = SimpleNamespace(
+        kind="VerificationRecorded",
+        payload={
+            "taskDigest": task_digest,
+            "compositionDigest": composition_digest,
+            "workspaceDigest": workspace_digest,
+            "verificationSubjectDigest": _subject_digest(workspace_digest, task_digest),
+            "argv": list(ARGV),
+            "exitCode": exit_code,
+            "observedTestCount": 1,
+            "resultArtifactDigest": result_artifact,
+        },
+    )
+    surface = SimpleNamespace(
+        kind="ChangeSurfaceUpdated",
+        payload={
+            "taskDigest": task_digest,
+            "candidateDigest": workspace_digest,
+            "effectDescriptorDigest": "sha256:" + "e" * 64,
+            "changeSurface": ["app.py", "test_app.py"],
+            "deletedPaths": [],
+        },
+    )
+    if artifacts:
+        return (verification, surface, SimpleNamespace(
+            kind="EpisodeCompleted",
+            payload={"artifacts": list(artifacts)},
+        ))
+    return (verification, surface)
+
+
+def _seed_workspace(root: Path, app: str = REAL) -> None:
+    (root / "app.py").write_text(app, encoding="utf-8")
+    (root / "test_app.py").write_text(ORACLE, encoding="utf-8")
+
+
+def _public_execute(
+    root: Path,
+    *,
+    events: tuple[object, ...],
+    terminal: RunTermination = RunTermination.COMPLETED,
+    trajectory: dict | None = None,
+    composition_digest: str = COMPOSITION_DIGEST,
+) -> dict:
+    store = root.parent / f"{root.name}-events.sqlite3"
+    execution = _ProductExecution(
+        terminal=terminal,
+        events=events,
+        trajectory=trajectory,
+        composition_digest=composition_digest,
+    )
+
+    def _stub(*_args: object, **_kwargs: object) -> _ProductExecution:
+        return execution
+
+    with patch.object(entrypoint.Runtime, "execute_profiled", _stub):
+        return entrypoint.execute({
+            "command": "code",
+            "brief": BRIEF,
+            "workspace": str(root),
+            "storePath": str(store),
+            "injectedModel": object(),
+            "profile": "product",
+            "interactive": False,
+            "maxTurnsPerEpisode": 4,
+        })
+
+
+class PublicProductRouteIdentityEqualsTheSubmittedCandidate(unittest.TestCase):
+    """POSITIVE falsifier: public execute publishes one exact-tree identity."""
+
+    def test_execute_publishes_green_only_when_every_carrier_names_the_submitted_tree(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "candidate"
+            root.mkdir()
+            _seed_workspace(root)
+            submitted = _tree_digest(root)
+            frame = _public_execute(root, events=_carrier_events(workspace_digest=submitted))
+            result = frame["result"]
+            self.assertEqual(result["outcome"], "completed", result.get("detail"))
+            self.assertEqual(result["taskDigest"], TASK_DIGEST)
+            self.assertEqual(result["compositionDigest"], COMPOSITION_DIGEST)
+            self.assertEqual(result["candidateDigest"], submitted)
+            identity = result["verificationIdentity"]
+            self.assertEqual(identity["workspaceDigest"], submitted)
+            self.assertEqual(identity["taskDigest"], TASK_DIGEST)
+            self.assertEqual(identity["compositionDigest"], COMPOSITION_DIGEST)
+            self.assertEqual(
+                identity["verificationSubjectDigest"], _subject_digest(submitted))
+
+
+class PublicProductRouteRefusesDriftedIdentity(unittest.TestCase):
+    """ADVERSARIAL: foreign, mutated, extra, deleted, or stale must not publish green."""
+
+    def test_a_post_verification_mutation_cannot_publish_green(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "mutated"
+            root.mkdir()
+            _seed_workspace(root)
+            verified = _tree_digest(root)
+            (root / "app.py").write_text(REAL + "\n# unverified edit\n", encoding="utf-8")
+            self.assertNotEqual(_tree_digest(root), verified)
+            result = _public_execute(
+                root, events=_carrier_events(workspace_digest=verified))["result"]
+            self.assertNotEqual(result["outcome"], "completed")
+            self.assertEqual(result["outcome"], "instrument_error")
+
+    def test_a_same_named_foreign_tree_cannot_publish_green(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            submitted_root = Path(tmp) / "submitted"
+            foreign_root = Path(tmp) / "foreign"
+            submitted_root.mkdir()
+            foreign_root.mkdir()
+            _seed_workspace(submitted_root)
+            _seed_workspace(foreign_root, app=REAL.replace("n < 2", "n <= 1"))
+            foreign = _tree_digest(foreign_root)
+            self.assertNotEqual(foreign, _tree_digest(submitted_root))
+            result = _public_execute(
+                submitted_root, events=_carrier_events(workspace_digest=foreign))["result"]
+            self.assertNotEqual(result["outcome"], "completed")
+            self.assertEqual(result["outcome"], "instrument_error")
+
+    def test_an_extra_file_cannot_publish_green(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "extra"
+            root.mkdir()
+            _seed_workspace(root)
+            verified = _tree_digest(root)
+            (root / "bonus.py").write_text("x = 1\n", encoding="utf-8")
+            self.assertNotEqual(_tree_digest(root), verified)
+            result = _public_execute(
+                root, events=_carrier_events(workspace_digest=verified))["result"]
+            self.assertNotEqual(result["outcome"], "completed")
+
+    def test_a_deleted_file_cannot_publish_green(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "deleted"
+            root.mkdir()
+            _seed_workspace(root)
+            verified = _tree_digest(root)
+            (root / "test_app.py").unlink()
+            self.assertNotEqual(_tree_digest(root), verified)
+            result = _public_execute(
+                root, events=_carrier_events(workspace_digest=verified))["result"]
+            self.assertNotEqual(result["outcome"], "completed")
+
+    def test_a_stale_artifact_cannot_publish_green(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "stale"
+            root.mkdir()
+            _seed_workspace(root)
+            submitted = _tree_digest(root)
+            stale = "sha256:" + "a" * 64
+            events = _carrier_events(
+                workspace_digest=submitted,
+                result_artifact=stale,
+                artifacts=({"digest": stale, "workspaceDigest": stale},),
+            )
+            result = _public_execute(
+                root,
+                events=events,
+                trajectory={
+                    "task_digest": TASK_DIGEST,
+                    "artifacts": [{"digest": stale, "workspaceDigest": stale}],
+                },
+            )["result"]
+            self.assertNotEqual(result["outcome"], "completed")
+
+    def test_unbound_verification_identity_cannot_publish_green(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "unbound"
+            root.mkdir()
+            _seed_workspace(root)
+            result = _public_execute(
+                root, events=_carrier_events(workspace_digest=""))["result"]
+            self.assertNotEqual(result["outcome"], "completed")
 
 
 if __name__ == "__main__":

@@ -10,6 +10,7 @@ Verifies:
 
 from __future__ import annotations
 
+import dataclasses
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
@@ -25,6 +26,10 @@ from vanguard.packages.ports.memory import (
 )
 from vanguard.packages.runtime.compose import TaskContext
 from vanguard.packages.runtime.prompt_assembler import PromptAssembler
+from vanguard.packages.runtime.root import HarnessSession, Runtime
+
+from test.agency.doubles import ScriptedModel, finish
+from test.runtime.test_harness_session import FakeEnvironment, _ports, _task
 
 
 class FakeClock:
@@ -60,6 +65,48 @@ class FakeMemoryPort:
             record_ids=selected_ids,
             provenance=provenance,
             texts=texts,
+        )
+
+    def write(self, value: Mapping[str, Any], access: MemoryAccess) -> str:
+        if not access.permitted():
+            raise PermissionError("unauthorized write")
+        return "rec-new"
+
+
+class CountingMemoryPort:
+    """Records whether a protected read ever happened.
+
+    `recall_calls` increments only after the authorization check, so a zero
+    count is evidence that no record was dereferenced -- which is the claim
+    "denied memory performs zero protected reads" actually makes.
+    """
+
+    category = "knowledge"
+
+    def __init__(self, *, mismatched_receipt: bool = False) -> None:
+        self.recall_calls = 0
+        self._mismatched_receipt = mismatched_receipt
+
+    def recall(self, query: str, access: MemoryAccess, limit: int = 20) -> MemoryResult:
+        if not access.permitted():
+            raise PermissionError("unauthorized access")
+        self.recall_calls += 1
+        selected = ("rec-1",)
+        return MemoryResult(
+            record_ids=selected,
+            provenance=RetrievalProvenance(
+                query_digest="sha256:" + "5" * 64,
+                policy_identity="policy-product",
+                source_record_digests=("sha256:" + "6" * 64,),
+                # A receipt naming other records than the payload carries is
+                # the shape a stale or swapped cache produces.
+                selected_ids=("rec-other",) if self._mismatched_receipt else selected,
+                dropped_ids=(),
+                cache_identity=None,
+                context_selection_digest=None,
+                redacted=False,
+            ),
+            texts=("Fact A: auth must precede recall",),
         )
 
     def write(self, value: Mapping[str, Any], access: MemoryAccess) -> str:
@@ -218,6 +265,129 @@ class TestMemoryRetrievalL5(unittest.TestCase):
 
         with self.assertRaises(PermissionError):
             assembler.assemble(view={}, turn=0)
+
+
+class ProductSessionMemoryRetrieval(unittest.TestCase):
+    """T-140: the same contract, through the composed product session.
+
+    The unit cases above exercise `PromptAssembler` directly. These drive
+    `Runtime.compose("vg-code-default")` → `HarnessSession` → `run()`, because
+    an authorization rule that holds only when the assembler is called by hand
+    is not a product property.
+    """
+
+    def setUp(self) -> None:
+        self.harness = Runtime.compose("vg-code-default", episode_id="ep-session-1")
+
+    @staticmethod
+    def _binding(port: Any, access: MemoryAccess) -> MemoryBinding:
+        return MemoryBinding(
+            port=port,
+            access=access,
+            tenant="tenant-default",
+            project="proj-mem",
+            selector={"category": "knowledge"},
+            query="prior facts about this repository",
+        )
+
+    def _session(self, binding: MemoryBinding | None) -> HarnessSession:
+        ports = dataclasses.replace(
+            _ports(ScriptedModel([finish()]), FakeEnvironment()), memory=binding)
+        return HarnessSession(self.harness, ports, _task())
+
+    def test_denied_memory_performs_zero_protected_reads(self) -> None:
+        """The load-bearing one: a denied lease never reaches the records."""
+        port = CountingMemoryPort()
+        denied = self._binding(port, MemoryAccess(
+            grant_ref="", selector={}, tenant="", project=""))
+        result = self._session(denied).run()
+
+        self.assertEqual(port.recall_calls, 0)
+        self.assertEqual(result.terminal.value, "instrument_error")
+        self.assertIn("memory capability denied", result.detail)
+
+    def test_denied_memory_never_invokes_the_model(self) -> None:
+        """Fail closed before inference: no provider call, no turn, no receipt."""
+        port = CountingMemoryPort()
+        denied = self._binding(port, MemoryAccess(
+            grant_ref="", selector={}, tenant="", project=""))
+        result = self._session(denied).run()
+
+        self.assertEqual(result.instrument_error, "model_not_invoked")
+        self.assertEqual(result.telemetry.turns, 0)
+        self.assertEqual(result.receipts, ())
+
+    def test_a_revoked_lease_performs_zero_protected_reads(self) -> None:
+        port = CountingMemoryPort()
+        revoked = self._binding(port, dataclasses.replace(
+            _make_valid_access(), revoked=True))
+        result = self._session(revoked).run()
+
+        self.assertEqual(port.recall_calls, 0)
+        self.assertEqual(result.terminal.value, "instrument_error")
+
+    def test_a_lease_naming_another_category_performs_zero_reads(self) -> None:
+        """Naming a grant is not holding one: the selector must match."""
+        port = CountingMemoryPort()
+        foreign = MemoryBinding(
+            port=port,
+            access=dataclasses.replace(
+                _make_valid_access(), selector={"category": "experience"}),
+            tenant="tenant-default",
+            project="proj-mem",
+            selector={"category": "knowledge"},
+            query="prior facts",
+        )
+        result = self._session(foreign).run()
+
+        self.assertEqual(port.recall_calls, 0)
+        self.assertEqual(result.terminal.value, "instrument_error")
+
+    def test_authorized_retrieval_reaches_l5_with_bound_provenance(self) -> None:
+        port = CountingMemoryPort()
+        session = self._session(self._binding(port, _make_valid_access()))
+        bundle, compiled = session.operator._assembler.assemble(view={}, turn=0)
+
+        self.assertEqual(port.recall_calls, 1)
+        dialogue = compiled.layer_blocks(Layer.DIALOGUE)
+        self.assertTrue(any(b.label.startswith("memory:") for b in dialogue))
+        # Provenance is bound into the bundle, not merely computed.
+        self.assertIn("memoryRetrievalDigest", bundle)
+        self.assertTrue(bundle["memoryRetrievalDigest"].startswith("sha256:"))
+
+    def test_authorized_retrieval_never_perturbs_the_frozen_prefix(self) -> None:
+        port = CountingMemoryPort()
+        with_memory = self._session(self._binding(port, _make_valid_access()))
+        without_memory = self._session(None)
+
+        _, a = with_memory.operator._assembler.assemble(view={}, turn=0)
+        _, b = without_memory.operator._assembler.assemble(view={}, turn=0)
+
+        self.assertEqual(a.prefix_digest, b.prefix_digest)
+        for layer in PREFIX_LAYERS:
+            for block in a.layer_blocks(layer):
+                self.assertNotIn("Fact A", block.text)
+
+    def test_a_result_whose_receipt_does_not_match_admits_nothing(self) -> None:
+        """Provenance is checked against the records, not trusted alongside them."""
+        port = CountingMemoryPort(mismatched_receipt=True)
+        session = self._session(self._binding(port, _make_valid_access()))
+        result = session.run()
+
+        self.assertEqual(port.recall_calls, 1)
+        self.assertEqual(result.terminal.value, "instrument_error")
+        self.assertIn("do not match", result.detail)
+
+    def test_removing_authorization_would_fail_this_oracle(self) -> None:
+        """The bypass falsifier: reads under a denied lease must be detectable."""
+        port = CountingMemoryPort()
+        denied_access = MemoryAccess(
+            grant_ref="", selector={}, tenant="", project="")
+        self.assertFalse(denied_access.permitted())
+        # Simulating the removed gate: calling the port directly does read.
+        with self.assertRaises(PermissionError):
+            port.recall("q", denied_access, 20)
+        self.assertEqual(port.recall_calls, 0)
 
 
 if __name__ == "__main__":

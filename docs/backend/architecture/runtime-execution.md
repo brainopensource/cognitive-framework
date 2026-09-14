@@ -56,6 +56,15 @@ the next proposal, with append failure stopping inference/dispatch. Cold replay
 uses the existing task-state fold; no second session loop, state store or port
 was introduced. The event field contract is in [events](../reference/events.md).
 
+**T-131.6 product-route identity qualification.** `entrypoint.execute` reuses
+the existing candidate snapshot and DIR-D1 carriers to qualify the published
+receipt. Returned evidence, durable `VerificationRecorded`, exterior-oracle
+subject, task, composition and submitted workspace must name one tree; a
+same-named foreign tree, post-verification mutation, extra or deleted file, or
+stale artifact publishes `instrument_error` rather than green. This is
+publication qualification, not a second episode loop, tree algorithm, store or
+ledger writer. Session admission remains the B-owned mechanism.
+
 **Quarantine topology (Q-01; implementation not yet accepted).**
 `benchmarks/ladder/quarantine.py` and the commitments/exposure registry sit in the
 measurement tooling layer. Runtime task sets carry declarative identity only.

@@ -91,6 +91,7 @@ from .meta_controller import ControllerProposal, guarded_consult
 from .provenance import RuntimeProvenanceSink, cache_participation
 from .evidence_capture import capture_evidence as _capture_evidence_pure
 from .prompt_assembler import PromptAssembler
+from .skill_index import SkillSelection, select_skills_for_task
 from .protocol_pipeline import default_protocol_pipeline
 from .response_handler import ResponseHandler
 from .task_state import fold_task_state
@@ -1083,6 +1084,16 @@ class HarnessSession:
         # exclusively by this session's mediated dispatch path.
         self.operator._completion_calls = self.calls
 
+        # `W12-A` / T-140. The stable index of every composed card is already
+        # frozen into `L3` by `ContextCompiler`; this is the dynamic half. The
+        # selection is task-conditioned, so it must not touch the prefix -- it
+        # enters `L5` as one bounded observation, like any other turn-local
+        # fact. Done once here, at composition, because the brief is immutable
+        # for the episode: re-selecting per turn would spend the ceiling again
+        # to reach the same answer.
+        self.skill_selection: SkillSelection | None = None
+        self._admit_dynamic_skill_selection()
+
         # Ed25519 verify keys are injected by the operator. The root never mints
         # a signing authority in-process (`GOV-01`, `ADR-0062`): a missing key can
         # still *issue* a challenge, but it cannot accept or verify a decision.
@@ -1092,6 +1103,29 @@ class HarnessSession:
             # The harness names its own patch verb; `VG-05` writes `fs.patch`
             # and `vg-code-default` writes `patch.apply`. The manifest wins.
             patch_verb=harness.diff_verb() or "fs.patch")
+
+    def _admit_dynamic_skill_selection(self) -> None:
+        """Admit this task's relevant skills to `L5`, never to the prefix.
+
+        Fails open *as a selection* and closed as an authority: a pack with no
+        skill cards, or a brief that implicates none of them, contributes no
+        note at all rather than an empty header. Nothing here reads a skill
+        body -- the card carries a path, and the agent spends its own `fs.read`
+        if it wants the contents.
+        """
+        cards = getattr(self.harness, "skill_cards", ()) or ()
+        brief = self.task.brief or ""
+        if not cards or not brief:
+            return
+        selection = select_skills_for_task(cards, brief)
+        if not selection.selected:
+            return
+        self.skill_selection = selection
+        self.operator.note(
+            label="skill-selection",
+            source="skill_retrieval",
+            text=selection.render(),
+        )
 
     # -- the ledger is the only memory ------------------------------------
 

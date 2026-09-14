@@ -125,6 +125,12 @@ Upon episode conclusion, `EvidenceCaptureService` compiles an immutable `Traject
 ## Implementation Evidence
 
 - **Evidence Capture**: `vanguard/packages/runtime/evidence_capture.py`.
+  T-131.6 product-route qualification (`qualify_candidate_identity`) compares
+  the submitted workspace snapshot to DIR-D1 verification/change-surface
+  carriers, task/composition digests, the T-07 oracle subject and captured
+  artifact identity. A green claim that names another tree is refused at
+  `entrypoint.execute` without a second tree hash or ledger writer.
+- **Trajectory Representation**: `vanguard/packages/runtime/trajectory.py`.
 - **Trajectory Representation**: `vanguard/packages/runtime/trajectory.py`.
 - **Evaluator Gateway**: `vanguard/packages/runtime/evaluator_gateway.py`.
 - **Evaluator Daemon & Client**: `vanguard/packages/adapters/evaluators/daemon.py`, `client.py` (`EvaluatorClient`).

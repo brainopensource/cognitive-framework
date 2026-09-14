@@ -33,6 +33,7 @@ from vanguard.packages.agency.context.layers import Layer, PREFIX_LAYERS
 from vanguard.packages.domain.canonicalisation.digest import digest_of
 from vanguard.packages.ports.memory import (
     MemoryAccess,
+    MemoryAuthorizationPort,
     MemoryBinding,
     MemoryResult,
     RetrievalProvenance,
@@ -45,7 +46,7 @@ from vanguard.packages.runtime.root import (
     SessionPorts,
 )
 from test.agency.doubles import ScriptedModel, finish
-from test.runtime.test_harness_session import FakeEnvironment
+from test.runtime.test_harness_session import FakeEnvironment, _ports, _task
 
 class FakeClock:
     def __init__(self, now_iso: str = "2026-09-13T12:00:00Z") -> None:
@@ -285,3 +286,159 @@ class TestLongSessionIndexAndMemory(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CountingMemoryPort:
+    """Counts protected reads. Zero is the proof that nothing was dereferenced."""
+
+    category = "knowledge"
+
+    def __init__(self) -> None:
+        self.recall_calls = 0
+
+    def recall(self, query: str, access: MemoryAccess, limit: int = 20) -> MemoryResult:
+        if not access.permitted():
+            raise PermissionError("unauthorized access")
+        self.recall_calls += 1
+        return MemoryResult(
+            record_ids=("rec-1",),
+            provenance=RetrievalProvenance(
+                query_digest="sha256:" + "7" * 64,
+                policy_identity="policy-restart",
+                source_record_digests=("sha256:" + "8" * 64,),
+                selected_ids=("rec-1",),
+                dropped_ids=(),
+                cache_identity=None,
+                context_selection_digest=None,
+                redacted=False,
+            ),
+            texts=("A durable prior fact",),
+        )
+
+
+class ProductSessionMemoryReauthorization(unittest.TestCase):
+    """T-140: a restart re-verifies the lease; a revoked grant reads nothing.
+
+    The lease is a genuinely signed, epoch-versioned grant verified by
+    `MemoryAuthorizationPort`, not a hand-built `MemoryAccess` with a boolean
+    flipped. Revocation therefore has to be defeated the way it would be in
+    production -- by forging a signature or replaying a superseded epoch --
+    rather than by the double choosing to cooperate.
+    """
+
+    KEY = b"t140-memory-authorization-key"
+    GRANT_REF = "grant-t140"
+
+    def setUp(self) -> None:
+        self.harness = Runtime.compose("vg-code-default", episode_id="ep-session-1")
+        self.grant = {
+            "grantRef": self.GRANT_REF,
+            "issuer": "gov-1",
+            "subject": "agent-1",
+            "tenant": "tenant-default",
+            "project": "project-default",
+            "actions": ["read"],
+            "purpose": "task-context",
+            "expiresAt": "2026-12-31T00:00:00Z",
+            "revocationEpoch": 3,
+            "selector": {"category": "knowledge"},
+        }
+        self.signature = self._sign(self.grant)
+
+    def _sign(self, grant: Mapping[str, Any]) -> str:
+        import hashlib
+        import hmac
+
+        required = ("grantRef", "issuer", "subject", "tenant", "project", "actions",
+                    "purpose", "expiresAt", "revocationEpoch", "selector")
+        payload = {key: grant[key] for key in required}
+        return hmac.new(
+            self.KEY, digest_of(payload).encode("ascii"), hashlib.sha256).hexdigest()
+
+    def _binding(self, port: CountingMemoryPort,
+                 authorization: MemoryAuthorizationPort) -> MemoryBinding:
+        return MemoryBinding(
+            port=port,
+            authorization=authorization,
+            grant=self.grant,
+            signature=self.signature,
+            tenant="tenant-default",
+            project="project-default",
+            selector={"category": "knowledge"},
+            query="prior facts about this repository",
+        )
+
+    def _session(self, binding: MemoryBinding) -> HarnessSession:
+        ports = dataclasses.replace(
+            _ports(ScriptedModel([finish()]), FakeEnvironment()), memory=binding)
+        return HarnessSession(self.harness, ports, _task())
+
+    def test_a_valid_signed_lease_retrieves_once_per_turn(self) -> None:
+        port = CountingMemoryPort()
+        session = self._session(self._binding(port, MemoryAuthorizationPort(self.KEY)))
+        _, compiled = session.operator._assembler.assemble(view={}, turn=0)
+
+        self.assertEqual(port.recall_calls, 1)
+        self.assertTrue(any(
+            block.label.startswith("memory:")
+            for block in compiled.layer_blocks(Layer.DIALOGUE)))
+
+    def test_a_fresh_session_with_a_revoked_grant_reads_nothing(self) -> None:
+        """The named case: restart plus revocation cannot reuse prior authority."""
+        first_port = CountingMemoryPort()
+        authorization = MemoryAuthorizationPort(self.KEY)
+        first = self._session(self._binding(first_port, authorization))
+        first.operator._assembler.assemble(view={}, turn=0)
+        self.assertEqual(first_port.recall_calls, 1)
+
+        # The grant is revoked between processes; the epoch is superseded.
+        authorization.revoke(self.GRANT_REF, 3)
+
+        restarted_port = CountingMemoryPort()
+        restarted = self._session(self._binding(restarted_port, authorization))
+        result = restarted.run()
+
+        self.assertEqual(restarted_port.recall_calls, 0)
+        self.assertEqual(result.terminal.value, "instrument_error")
+        self.assertEqual(result.instrument_error, "model_not_invoked")
+
+    def test_a_restart_reverifies_rather_than_inheriting_the_prior_verdict(self) -> None:
+        """A fresh verifier that never saw the first success still re-checks."""
+        port = CountingMemoryPort()
+        cold = MemoryAuthorizationPort(self.KEY, revoked_epochs={self.GRANT_REF: 3})
+        result = self._session(self._binding(port, cold)).run()
+
+        self.assertEqual(port.recall_calls, 0)
+        self.assertEqual(result.terminal.value, "instrument_error")
+
+    def test_a_forged_signature_reads_nothing(self) -> None:
+        port = CountingMemoryPort()
+        forged = dataclasses.replace(
+            self._binding(port, MemoryAuthorizationPort(self.KEY)),
+            signature="0" * 64)
+        result = self._session(forged).run()
+
+        self.assertEqual(port.recall_calls, 0)
+        self.assertEqual(result.terminal.value, "instrument_error")
+
+    def test_a_widened_grant_body_invalidates_the_signature(self) -> None:
+        """Editing the grant after signing must not widen what it authorizes."""
+        port = CountingMemoryPort()
+        widened = dict(self.grant, actions=["read", "write"])
+        binding = dataclasses.replace(
+            self._binding(port, MemoryAuthorizationPort(self.KEY)), grant=widened)
+        result = self._session(binding).run()
+
+        self.assertEqual(port.recall_calls, 0)
+        self.assertEqual(result.terminal.value, "instrument_error")
+
+    def test_the_dynamic_skill_selection_survives_a_restart(self) -> None:
+        """Restart re-derives the selection from the brief, not from prior state."""
+        first = self._session(self._binding(
+            CountingMemoryPort(), MemoryAuthorizationPort(self.KEY)))
+        restarted = self._session(self._binding(
+            CountingMemoryPort(), MemoryAuthorizationPort(self.KEY)))
+
+        self.assertIsNotNone(first.skill_selection)
+        self.assertEqual(
+            first.skill_selection.digest(), restarted.skill_selection.digest())

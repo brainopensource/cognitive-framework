@@ -9,7 +9,7 @@ canonical_for:
   - repository-backlog
   - feature-lifecycle-tracking
 version: "0.9.6"
-last_verified: 2026-09-13
+last_verified: 2026-09-14
 lock_head: "6f4f3942"
 audience:
   - contributor
@@ -36,16 +36,17 @@ Invariant: Mechanism presence is not closure; state transitions require empirica
 ====================================================================================================
 ```
 
-**Current package scope (2026-09-13, DIR-I5–I7).** The coding-harness integration
-assignment admits IDX-01/T-75–T-76, CHANGE/T-78/T-83b and T-138–T-139; exact
-readiness, owners and leases live only in `tasks.md`. T-140 is a conditional
-production retrieval continuation after the shared session transfer, not admission
-of memory learning/promotion or a new backend. No other package is activated as
-fill-in work. FTS5 stale-index 0/1 and Datalog 0/5 are intentional broken benchmark
-inputs (source evidence and consequences in spec DIR-I6). Production deletion
-freshness belongs to IDX-01 acceptance; fixture repair and a Datalog solver remain
-outside the assignment. Future diagnostic use needs separate admission and supplies
-no fresh control holdout. Existing documentation drift adds no package scope.
+**Current package scope (2026-09-14).** Active A/T-131.6, C/T-140 and B's
+independent reviews retain their contracts and leases. Successor execution is limited
+to the two control-frontier packets in `tasks.md`: Q-01 correction, gate discovery,
+approval-path attribution, remaining RUN-09 evidence and the T-51→T-26b→T-26→T-27
+readiness path under unchanged D-6 F1–F7. Existing integration task acceptances are
+recorded but their exact-subject/non-author provenance is still being reconciled;
+MS-SEE/MS-CHANGE/MS-CONTROL remain OPEN. FH-1/CAS/delegation/specialists/campaign/
+official/SOTA stay proposed until accepted MS-CONTROL and T-129 admission, with no
+new leaves or schemas. DIR-I6 benchmark disposition is unchanged; unrelated drift
+adds no scope. This planning authorizes neither external corpus access nor provider
+calls, freeze, paid execution, scores or release/milestone acceptance.
 
 ## 1. Lifecycle State Definitions
 

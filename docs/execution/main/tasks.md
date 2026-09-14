@@ -14,7 +14,7 @@ audience:
   - contributor
   - release-owner
 version: 0.9.8
-last_verified: 2026-09-13
+last_verified: 2026-09-14
 lock_head: "6f4f3942"
 normative_authority:
   - docs/execution/main/spec.md
@@ -36,7 +36,186 @@ Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technic
 governs the active work below. Older checklists retain historical obligations but
 cannot add READY work. No sprint/wave ordering. No new compiler or episode loop.
 
-## Active autonomous work (2026-09-13)
+## Control-frontier decision and successor packets (2026-09-14)
+
+This section supersedes older READY labels, lane assignments and acceptance wording
+for the tasks named here; RUN-04, DIR-I7/D-3 and D-6 F1–F7 remain the contracts.
+It grants successor work only after the named active lease releases, not immediate
+access to occupied files. No Git operation, LDA refresh, test or provider call was
+performed to establish this planning disposition; old baseline receipts retain their
+original subjects and are not current-tree measurements.
+
+### Protected active work and acceptance reconciliation
+
+| Task | Current disposition / owner | Boundary |
+|---|---|---|
+| T-131.6 | A active; latest row records LANDED with B review pending | Preserve A's entrypoint/evidence-capture and two test-file lease through handoff; the reported 24 green tests do not constitute independent acceptance |
+| T-130 / T-135 | B actively reviewing C's landed evidence | Accept valid instrument/NOT_REPRODUCED and INDEX_UNBOUND separately; neither closes all RUN-09 defects |
+| T-140 | C active; B's next independent review | Preserve C's current production retrieval lease, including session integration; no successor acquires these files until explicit release |
+| T-75/T-76, T-78, T-83b, T-138, T-139 | ACCEPTED as recorded integration work; acceptance provenance UNRECONCILED | The board names only “final integration subject”, without a linked exact SHA, evidence digest or non-author disposition; this planning pass neither fabricates nor re-performs acceptance |
+| T-26a / T-52, T-134 / T-136 | Existing recorded acceptances retained | Compatibility with a later control subject remains an evidence obligation, not automatic reimplementation |
+| T-133 / T-132 / T-137 | Successors below; no active lease taken | Q-01 correction remains reopened; discovery unaccepted; approval probe awaits B's valid T-130 disposition |
+| T-51 / T-26b / T-26 / T-27 | BLOCKED / BLOCKED / UNFROZEN / BLOCKED | Dependencies and external authority below; no freeze or run authorized |
+| MS-SEE / MS-CHANGE / MS-CONTROL | OPEN | Integration task labels alone supply no exact-subject milestone acceptance; historical MS-BASELINE/MS-CONTEXT closures remain intact |
+
+**Acceptance record repair, not a new review campaign.** The integration record owner
+supplies the actual implementation/integration SHA or dirty-subject digest, durable
+product-case artifacts, complete final-gate receipt and named acceptor/disposition
+for each claim from existing handoffs. Component author C and glue author B cannot
+accept the C/B integration; A can accept only if A did not author its claimed delta,
+otherwise an uninvolved qualified reviewer is required. Apply the same rule to A's
+revision/batch and B's change-policy claims, retaining component acceptance separately
+from the combined product claim. If no valid non-author disposition exists, mark the
+claim LANDED / acceptance pending instead of manufacturing a date or signer; no
+milestone closes until its complete subject-bound predicate is accepted. This record
+repair does not interrupt A/C or add a freeze prerequisite: only D-6 governs freeze.
+
+### Packet 1 — quarantine, discovery and remaining integrity evidence
+
+This is the next bounded assignment after each developer's current handoff, not a
+request to stop current work. C executes T-133 → T-132 → T-137 serially; T-137's
+semantic prerequisite is accepted valid T-130, while the other edges prevent shared
+loader/probe collisions. T-132's gate files are reserved to C now and become writable
+only when C leaves T-140; T-133 never edits them. T-133 code acceptance can precede
+full real-corpus admission, and T-132 can proceed with actual T-51 admission red:
+prove the strict gate rejects the real unaccepted corpus while a synthetic eligible
+fixture exercises its green path, rather than pretending the whole repository is green.
+
+| Lane / ordered unit | requires: and exact source/test lease | Acceptance and D-6 contribution |
+|---|---|---|
+| C: T-133 | C T-140 release; B T-130/T-135 review complete before touching the retained probe; Q-01 files and callable inventory listed below | A non-author accepts entrypoint-level controls; F3 local quarantine readiness |
+| C: T-132 | T-133 implementation handoff; exclusive `justfile`, `.github/workflows/ci.yml`, `.github/workflows/clean-candidate.yml`, `test/contracts/test_collection_integrity.py` | A non-author accepts discoverability and deliberate gate failure; F2/F3/F4, not corpus acceptance |
+| C: T-137 | B accepts T-130 instrument as valid; T-132 handoff releases C's shared diagnostic work | Exact existing T-137 probe/test/fixture lease only; A non-author accepts diagnostic validity, F5(1/2/5) attribution input, no repair authorization |
+| A: T-131.8 | A T-131.6 handed off, with its files unchanged pending review | `vanguard/packages/runtime/{inference_meter,budget_view}.py`, `vanguard/packages/adapters/models/{cascade,factory}.py`, `test/falsifiers/test_inference_accounting.py`, `test/contracts/test_evo09_model_factory.py`; B reviews after active queue; F5(8)/F7 |
+| B: T-131.6 review, then T-131.3/4/7 | B finishes T-130/T-135 then T-140 review; A row-6 handoff; C explicitly releases session/context files after T-140 | Exact B leases below; A accepts B-authored changes if independent of the claim, otherwise uninvolved reviewer; F5(3/4/6/7) |
+| Rows T-131.1/2/5 | Accepted T-130 and T-137 dispositions plus existing integration receipts | No speculative repair lease: distinguish accepted reachability/negative findings from completion qualification; remaining reproduced seam gets its current source owner and a bounded lease before repair |
+
+**T-133 exact lease.** `benchmarks/ladder/{quarantine.py,corpus_registry.json}`,
+`tools/linters/check_corpus_quarantine.py`,
+`test/tools/test_check_corpus_quarantine.py`, `test/benchmarks/test_corpus_quarantine.py`,
+plus guard sites only in the following current inventory (all other contents remain
+outside this task; there is no directory-wide LAM lease):
+
+- `benchmarks/agentic_harness_matrix_benchmark.py`
+- `benchmarks/baac/lib/runner.py`
+- `benchmarks/baac/lib/state.py`
+- `benchmarks/benchmark_needle_in_haystack.py`
+- `tools/diagnostics/write_landing_probe.py`
+- `benchmarks/gemini_multifile_benchmark/runner.py`
+- `benchmarks/harness_comparison_bench.py`
+- `benchmarks/ladder/l0_triad/runner.py`
+- `benchmarks/ladder_runner.py`
+- `benchmarks/product_path.py`
+- `benchmarks/run_20_eval_suite.py`
+- `benchmarks/run_3_hard_lda.py`
+- `tools/002_LLM_API_MOCK/import_10_pro_corpus.py`
+- `tools/002_LLM_API_MOCK/import_16_corpus.py`
+- `tools/002_LLM_API_MOCK/import_pro_corpus.py`
+- `tools/002_LLM_API_MOCK/import_swe_verified_repo.py`
+- `tools/002_LLM_API_MOCK/importer.py`
+- `tools/002_LLM_API_MOCK/live_coding.py`
+- `tools/002_LLM_API_MOCK/record.py`
+- `tools/002_LLM_API_MOCK/store.py`
+- `tools/telemetry/coding_lam.py`
+- `vanguard/packages/runtime/task_sets.py` — declarative identity only
+
+The inventory is a lease, not proof of guard coverage: every listed callable route
+needs role/identity/content/authority evidence, and newly discovered routes are blocked
+until named in an owner-to-owner lease amendment. No replacement plaintext, old fixture
+repair, provider invocation, new store/public schema or production threshold change.
+T-133 hands off a callable coverage matrix, immutable exposure commitments and fixture
+red/green receipts to T-132; its product-path/runner files transfer to B/T-26b only after
+C completes this packet, and A's active row-6 test is never part of T-133's lease.
+
+**B exact lease after release.** T-131.3: `vanguard/packages/runtime/session.py`,
+`test/falsifiers/test_completion_gate_scope.py`; T-131.4:
+`vanguard/packages/agency/episode/engine.py`,
+`test/falsifiers/test_t131_row4_admitted_completion_stops_episode.py`;
+T-131.7: `vanguard/packages/runtime/{task_state,checkpoints}.py`,
+`vanguard/packages/agency/context/{compiler,compaction}.py`,
+`test/falsifiers/test_t131_row7_resume_compaction_identity.py`.
+These rows run serially in B's lane; existing qualified behavior needs only receipt
+reconciliation, not mandatory edits. C's release names the actual files it touched;
+any retained C file delays only that B leaf. Row-6 review is read-only and does not
+transfer A's source or `test/benchmarks/test_product_path_subject.py` to B until A releases.
+
+| Unit | Focused falsifier (prefix `python3 -m unittest`, suffix `-v`) | Bounded positive / adversarial exit |
+|---|---|---|
+| T-133 | `test.tools.test_check_corpus_quarantine test.benchmarks.test_corpus_quarantine` | Actual callable admits registered fresh DEV and separately authenticated synthetic evaluation; missing/unknown/renamed ID, copied content, tombstone removal, symlink escape, forged role/authority/FROZEN, altered commitments and solver-mounted oracle/reference bytes refuse before access/capture; ordinary user work is distinguished explicitly, never by omitted corpus ID |
+| T-132 | `test.contracts.test_collection_integrity`; then strict repository gate in isolation | Required benchmark/accounting/publication/falsifier modules are collected; stale oracle or quarantine refusal forces nonzero gate exit; synthetic eligible control is green, actual unaccepted holdout remains red; compare gate cost and list each exclusion with reason, never hide a suite to pass |
+| T-137 | `test.benchmarks.test_approval_path_probe` (authorized new module if absent) | Existing DIR-P matrix: valid signed descriptor-bound approval produces one effect, denial/missing/stale/foreign/boolean approval produces no unauthorized effect; resume does not duplicate; unchanged public entrypoint versus session-only control labeled separately, first failing seam retained |
+| T-131.3 | `test.falsifiers.test_completion_gate_scope` | Exact authorized complete candidate plus exterior verification may complete; patchless, test-inlined, unauthorized extra files, stale verdict and unbound candidate cannot; extend the existing focused module only as needed |
+| T-131.4 | `test.falsifiers.test_t131_row4_admitted_completion_stops_episode` | Product stops after admitted completion with no next model/effect call; rejection continues only within original bounds; disabling stop makes the oracle fail |
+| T-131.7 | `test.falsifiers.test_t131_row7_resume_compaction_identity` | Real durable fold and fresh-process continuation preserve task/candidate/revision/evidence/resource identity; dropped carrier, stale checkpoint or reset budget is detected, not repaired by synthetic state injection |
+| T-131.8 | `test.falsifiers.test_inference_accounting test.contracts.test_evo09_model_factory` | Selected existing product route charges all model/tool use to one slot budget; fallback cannot reset ceilings or bypass registry, unknown usage remains unsettled, exhaustion denies the next dispatch; no new cascade enabled and no claim from the separate-run research tier helper |
+
+Row 8 hands any necessary session binding to B after C releases it; A never edits
+session.py. Rows 1/2 reuse accepted product write/whole-candidate receipts, row 5 reuses
+the actual declared/malformed dialect observations; an uncovered case stays open and
+is reported with its first seam, without inventing repair authority from NOT_REPRODUCED.
+All eight F5 subclaims get explicit accepted/open/blocked dispositions; T-130/T-137
+alone do not accept them. No active B review is displaced by these successor reviews.
+
+### Packet 2 — replacement readiness and the finite control path
+
+Requires Packet 1's relevant accepted dispositions, not elapsed time or generic “all
+hardening done”; D-6 F1–F7 alone decides the control frontier. Preparation below is
+hermetic and authorized, while material acquisition, freeze and actual T-27 dispatch
+remain externally gated. A receives the independent preparation review only after
+its Packet 1 obligations, and relinquishes acceptance if it supplies a repair.
+
+| Unit / owner | requires: / exclusive lease | Focused falsifier and positive/adversarial exit | D-6 |
+|---|---|---|---|
+| T-51 readiness / C; independent curator authors private material | T-133 reacceptance + T-132 discovery disposition + T-111 compatibility; `benchmarks/ladder/l2_thirty/suite.json`, NEW `benchmarks/ladder/l2_thirty/curator_receipts.json` (commitments only), `test/benchmarks/test_control_corpus.py` | `python3 -m unittest test.benchmarks.test_control_corpus test.tools.test_check_corpus_quarantine -v`; exactly 30 at 10/11/5/1/3, distinct committed source/oracle identities, independent red/green/determinism and novelty receipts; reject 29/31, wrong strata, aliases/copied ancestry, absent/changed receipts; no real acceptance until sealed-store authority and proofs exist | F3 |
+| T-26b / B; non-author A or uninvolved reviewer accepts | T-51 accepted + T-26a/T-52 compatibility + C releases guarded runner helpers + A releases row-6 test; `benchmarks/{agentic_harness_matrix_benchmark,product_path}.py`, `benchmarks/ladder/control.py`, `test/benchmarks/test_product_path_subject.py` | Existing T-26b focused command below; drive the public balanced/product path with synthetic frozen evidence, bind exterior submitted tree, publish all fixed slots; UNFROZEN/foreign/duplicate/mixed/exhausted input refuses before dispatch/publication; no live control or actual manifest freeze | F1/F4 |
+| T-26 readiness / C release owner; non-author checks predicate receipt | T-26b accepted + each F1–F7 explicitly satisfied; `benchmarks/ladder/control_preregistration.json` reserved for an authorized future freeze, existing task row records preparation | `python3 -m unittest test.benchmarks.test_preregistration -v` on synthetic manifests only; complete coherent candidate admits, missing F-number or changed identity refuses; deliver seven-row receipt map and proposed exact subject, leave actual record UNFROZEN | F1–F7 |
+| T-27 preparation / C operator; independent reviewer accepts outcome | Actual T-26 freeze + separate explicit run/resource authorization before any dispatch; existing runner unchanged, output only to the predeclared artifact destination after authorization | `python3 -m unittest test.benchmarks.test_ladder_runner test.benchmarks.test_metric_veto test.benchmarks.test_control_accounting -v`; hermetic preparation preserves 30 slots/one attempt, missingness, exact costs and stopping, 17/30 negative versus 18/30 positive Wilson boundary with zero false completions; live outcome unclaimed | F4/F7 and subsequent MS-CONTROL disposition |
+
+T-26b focused command remains `python3 -m unittest test.benchmarks.test_ladder_runner
+test.benchmarks.test_product_path_subject test.benchmarks.test_preregistration
+test.benchmarks.test_metric_veto -v`; extend only affected cases and reuse valid current
+receipts. B's existing authorship of T-26b forbids B accepting it; A's earlier row-6
+work also excludes A if that changed dependency is part of the claimed acceptance
+unit, requiring an uninvolved reviewer rather than exchanging signatures.
+
+**External readiness request.** Curator/store is not yet the sole T-51 blocker:
+T-133 guard/authority correction and T-132 effective discovery remain local work.
+C first supplies a read-only coverage/negative-control packet, metadata-only 30-slot
+schema and strata checks using synthetic identities, exposure tombstone integrity,
+proposed principal/access boundaries, sealed-store commitment verification procedure,
+and the names of the independent curator and acceptor (or explicitly unassigned).
+Only after those local exits can the outstanding material blocker be narrowed to
+curator appointment/store provisioning and private corpus production/validation;
+appointment alone does not provide thirty accepted members. The authority request
+specifies destination, read/write principals, no developer/retrieval mounts, signed
+commitments, near-duplicate/exposure attestations, oracle red/green/determinism proofs,
+and assigned-slot-only materialization with oracle/reference isolation. No developer
+contacts a curator, provisions infrastructure or imports private material by this plan.
+F6 additionally needs the existing live L0 authority and L1 dispositions; F7 needs
+finite approved aggregate resources, and a non-author acceptor is an external staffing
+blocker if none is available. Request only the actual missing authority after local
+readiness; do not infer it from a fixture or a truthy authority string.
+
+**Shared definition of done.** Each leaf supplies exact subject/dirty digest,
+composition/environment/fixture identity, actual command/results/counts, positive and
+adversarial product receipts, artifact digests, author set, independent disposition,
+changed-file handoff and the F-number discharged; unresolved evidence stays explicit.
+Use existing artifacts, not new reports. Seniors choose private helpers/algorithms
+and ordinary fixtures under RUN-04, run affected focused checks while editing,
+`just check` incrementally and required final `just verify` before completion claims.
+A known real-corpus admission failure is reported as blocked gate, never suppressed
+or converted into full PASS; synthetic green plus real red may accept T-132's bounded
+gate behavior, but not T-51 or the control subject. Reuse compatible evidence instead
+of restarting broad baseline/LDA work; changed relevant code or navigation assumptions
+trigger only the necessary refresh. Existing session/repair/time limits still apply.
+
+No provider calls, paid runs, actual control freeze, benchmark score, M-8/M-9/M-10
+acceptance or SOTA claim is authorized. T-27 negative/undeterminable is an honest
+reporting disposition, not positive MS-CONTROL acceptance; only accepted positive
+control plus T-129 admission can activate later packages. FH-1/CAS/delegation/
+specialists/campaign/official/SOTA remain existing proposals with no new leaves.
+
+## Prior integration board (2026-09-13; successor ownership above)
 
 Planning is approved under the present leadership delegation; no implementation
 or test execution is claimed in this planning update. Start from
@@ -74,7 +253,7 @@ creating no new planning file; at session exhaustion, leave a resumable handoff.
 | T-135 | C — LANDED; independent review pending | T-134 accepted | DIR-D2 INDEX_UNBOUND infrastructure missingness without retry burn; three focused falsifiers are green on `6f4f3942`. |
 | T-136 | B — ACCEPTED (Director review, 63d12d83) | none | False SHA-256 shim removed; actual accepted baseline pin preserved. |
 | T-137 | C — READY | T-130 retained valid packet | Hermetic approval-path probe; synthetic non-control fixtures only, no repair authority. |
-| T-131.6 | A — READY | T-134 accepted | Product candidate/evidence identity qualification; explicit lease below, no session.py overlap. |
+| T-131.6 | A — LANDED; independent B review pending | T-134 accepted | Product candidate/evidence identity qualification; explicit lease below, no session.py overlap. |
 | T-75/T-76 | C — ACCEPTED on final integration subject | none / T-75 | Healthy LDA-or-explicit-File selection is now passed through `Runtime.execute_profiled` into the product session; all four `repo.*` observations remain L5-only. |
 | T-78 | B — ACCEPTED on final integration subject | T-17 | Exact unique-preimage replacement now has real five-file 2PC/preflight proof in both production and hermetic fake environments; this does not close MS-CHANGE. |
 | T-83b | B — ACCEPTED on final integration subject | T-75 accepted | The pure caller policy is bound at the session completion seam with candidate-bound, current inspection evidence. |
@@ -83,7 +262,7 @@ creating no new planning file; at session exhaustion, leave a resumable handoff.
 | T-140 | C — READY (separate next task) | T-75/T-76 accepted, T-83b/T-139 integrated, B session handoff | Implement one production L5 skill/retrieval path and authorized memory retrieval; no work is authorized merely by this readiness change. |
 | T-129 | C with relevant package owner — BLOCKED | T-27 accepted / MS-CONTROL closed | Refine one selected post-control package, memory/skills first. Ratify scope, paths, schema obligations, budgets and leaf edges before implementation. No automatic FH-1 activation. |
 
-**Current integration disposition.** A/T-138→T-139, B/T-78→T-83b and C/T-75→T-76
+**Recorded integration disposition (provenance reconciliation above).** A/T-138→T-139, B/T-78→T-83b and C/T-75→T-76
 are accepted together on the final integration subject. Session ownership returns to
 the execution board with no pending A/B/C hook. T-140 is the next separately scoped
 C task; its READY state is not a lease, automatic continuation, or milestone acceptance.
@@ -100,7 +279,7 @@ measurements or product acceptance. Non-blocking documentation drift is out of s
 
 The cross-lane shapes and transitional composition boundary are now [ADR-0107](../../architecture/decisions/0107-dir3-seam-types.md) and [ADR-0108](../../architecture/decisions/0108-session-composition-and-analysis.md); spec DIR-I7/D-3 supersedes any author-as-acceptor assignment below, and milestones D-6 is the closed control-freeze boundary.
 
-### Exclusive file leases and integration handoffs
+### Prior integration leases (released where superseded by active work above)
 
 Paths below are relative to the repository root; brace lists mean the exact named
 files, not directory leases. Tests marked NEW are authorized focused fixtures.
@@ -120,7 +299,7 @@ A/C deliver row updates in their handoffs for B to apply.
 | Production environment `adapters/environment/{git,transaction,sandboxed}.py` | B | C preserves selected environment/profile and requests any needed environment change from B. No host fallback for containment failure. |
 | Mapped canonical-owner documentation and generated knowledge refresh | B integrates lane-provided deltas serially | Planning edits only the five main files. During implementation, synchronize existing mapped owners for changed behavior; no new docs or unrelated drift cleanup. |
 
-### Autonomous lane A — durable control state
+### Prior autonomous lane A — durable control state
 
 - **Objective / dependencies:** close the bounded independent T-138 review, then
   T-139. B reviews A's new implementation evidence; A may independently review the
@@ -153,7 +332,7 @@ A/C deliver row updates in their handoffs for B to apply.
   session hook and accepts T-139 before releasing session.py. A does not wait for C
   to implement task-state logic and does not acquire session.py to unblock itself.
 
-### Autonomous lane B — caller-aware exact change closure
+### Prior autonomous lane B — caller-aware exact change closure
 
 - **Objective / dependencies:** close bounded T-78 mutation review; implement T-83b's
   pure policy now. Session integration requires C's accepted T-75 index contract;
@@ -192,7 +371,7 @@ A/C deliver row updates in their handoffs for B to apply.
   shared test to C explicitly, listing pending hooks as empty, only after both T-83b
   and T-139 acceptance. B remains final documentation integrator.
 
-### Autonomous lane C — production repository intelligence
+### Prior autonomous lane C — production repository intelligence
 
 - **Objective / dependencies:** finish T-75 selection/fallback, then T-76 product L5
   observations. No dependency on A's task-state implementation or B's pure caller policy.
@@ -1499,6 +1678,27 @@ rule; it means the stop rule currently depends on a caller choosing to check.
 - **exit**: independent B review of positive and adversarial real-product traces;
   reconcile exact tree/task/composition identities. A defect requiring B's files
   becomes an explicit dependency/lease transfer, not a concurrent patch.
+  - **session 2026-09-14 (Dev A) — implementation landed, awaiting independent B review. Not self-accepted.**
+    Base HEAD `824d61103ea19c5a2f58f0f3a858109f67f9e4d2` (uncommitted T-131.6
+    delta on that HEAD). Qualified the public product route
+    (`entrypoint.execute`) so a green publication requires the submitted
+    workspace snapshot, durable `VerificationRecorded`, `ChangeSurfaceUpdated`
+    candidate digest, task digest, composition digest and T-07 verification
+    subject to name one tree. Reused `SandboxedEnvironmentAdapter.snapshot` /
+    host git snapshot and DIR-D1 carriers; no second tree algorithm, store,
+    ledger writer or episode loop. A same-named foreign tree, post-verification
+    mutation, extra/deleted file, unbound identity or stale artifact publishes
+    `instrument_error` rather than `completed`. Landed session-admitter
+    controls in the row-6 falsifier are unchanged. `session.py` was not edited
+    by this lease. Commands actually run:
+    `python3 -m unittest test.falsifiers.test_t131_row6_evidence_identity test.benchmarks.test_product_path_subject -v` → 24 tests, 0.238s, OK;
+    `python3 -m unittest test.falsifiers.test_rf90_generic_entrypoint test.runtime.test_receipt_telemetry test.runtime.test_run_identity -v` → OK (NT-B04 `completed` without a verification claim preserved);
+    `just check` → `AETHER CHECK: PASS`;
+    `just verify` → `AETHER VERIFY: PASS` (kernel 102, agency 313, contracts 565, npm 11/11, docs-full/knowledge rebuild).
+    Zero provider calls, zero USD. Residual: the verify worktree also contained
+    uncommitted T-140 files outside this lease (`session.py`, `skill_index.py`,
+    three `test/runtime/test_*retrieval*` modules); those are not part of this
+    packet and must not be treated as T-131.6 authorship.
 
 **T-52 Wilson intervals + cost κ on control** (A §13.5, B §16)  
 - [x] **state**: ACCEPTED; owner A;

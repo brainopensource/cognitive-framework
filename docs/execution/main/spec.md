@@ -9,7 +9,7 @@ canonical_for:
   - active-feature-delta-specification
 version: "2.1.1"
 date: "2026-09-13"
-last_verified: 2026-09-13
+last_verified: 2026-09-14
 lock_head: "6f4f3942"
 derived_from:
   - docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN.md
@@ -392,8 +392,9 @@ authority. Product composition MUST prefer a healthy, current `LdaRepoIndex` whe
 when it is absent. A declared required index that is stale or cannot be bound remains
 `INDEX_UNBOUND`; fallback MUST NOT launder stale data into current evidence.
 
-**DIR-I3 — Change and task-state closure.** T-78's exact unique-preimage edit is a
-mechanism candidate, not MS-CHANGE closure. T-83b still gates completion on inspected
+**DIR-I3 — Change and task-state closure.** T-78 and T-83b are recorded accepted
+integration tasks, with exact-subject/non-author provenance reconciliation pending
+under the 2026-09-14 decision below; this is not MS-CHANGE closure. T-83b gates completion on inspected
 known callers and the exact submitted candidate. A serialized `task.revise`
 capability is authorized to write the existing `SemanticTaskState`/`PlanRevised`
 projection; it MUST introduce no second planner loop, event kind, task-state enum or
@@ -401,18 +402,19 @@ store, MUST survive compaction/restart, and MUST never appear in an observation
 batch. Agency-local identifiers continue to obey the existing lint restriction;
 the durable domain/event spelling remains unchanged.
 
-**DIR-I4 — Honest status of the integrated work.** Green focused tests and `just verify`
-establish a coherent implementation candidate only. C3/C6 tests strengthen existing
-memory/restart behavior; they do not prove a new production retrieval path. The
-task-conditioned helper in `runtime/skill_index.py` has no production caller and is
-not accepted as retrieval-driven skill selection. MS-SEE stays open through LDA
-selection and product-path observation proof; MS-CHANGE stays open through T-83b and
-whole-candidate qualification; MS-CONTROL stays open through its existing empirical
-and quarantine gates.
+**DIR-I4 — Honest status of integrated work (2026-09-14).** The board records
+T-75/T-76, T-78, T-83b, T-138 and T-139 accepted as integration tasks, but its
+“final integration subject” entry does not identify the exact subject, evidence
+digest and non-author acceptor needed for a milestone claim. Preserve recorded
+acceptances while reconciling those artifacts under DIR-I7/D-3; absence of a valid
+disposition becomes LANDED / acceptance pending, never a fabricated acceptance.
+MS-SEE and MS-CHANGE remain OPEN for their complete product predicates and
+independent exact-subject disposition; these tasks are not implicitly reopened
+for implementation. T-140 is active production retrieval work, so the earlier
+unused-helper observation is historical, not a current finding or M-8 acceptance.
 
-**DIR-I5 — Current production acceptance delta.** The immediately dispatched lanes
-are A/T-138→T-139, B/T-78→T-83b and C/T-75→T-76, with exact ownership,
-benchmarks and handoffs in `tasks.md`. Production index selection MUST distinguish:
+**DIR-I5 — Production acceptance delta.** These contracts remain in force;
+current active leases and successor packets are in the 2026-09-14 tasks decision. Production index selection MUST distinguish:
 
 | Input state | Required product behavior |
 |---|---|
@@ -464,6 +466,22 @@ These decisions supersede conflicting DIR-3 type/placement and acceptance assign
 **D-7 — Committed subject and receipt provenance.** The planning/runway baseline is committed subject `cba24fda57573ba5dc6f99b229ded0c11a2e0582`, which contains the formerly staged five-document change and has the same production-source tree as `90b2970210f474dd0357611d7b101e4a816a8fbe`.
 The supplied implementation-test receipts remain bound to `90b2970210f474dd0357611d7b101e4a816a8fbe`; documentation checks and these rulings belong to their own commits, not a retrospectively relabeled test run.
 Successor work records its actual SHA and any dirty-tree digest, and the ruling commit refers to this already-existing baseline rather than attempting to embed its own self-referential SHA.
+
+**Control-frontier arbitration (2026-09-14).** The two successor packets in
+`tasks.md` supersede earlier ready-work routing, not the deep behavioral contracts:
+A/T-131.6, C/T-140 and B's T-130/T-135→T-140 reviews keep their active leases.
+C receives the reserved gate files only after its active release and serializes
+T-133→T-132→T-137; the approval probe additionally requires B's accepted valid
+T-130 instrument, and neither negative diagnostic grants product repair authority.
+Non-author acceptance covers the component and behavior-affecting integration delta;
+no author accepts their glue, and an unavailable independent acceptor is a named
+staffing blocker rather than permission for self-acceptance. T-51 still has local
+Q-01/discovery readiness gaps as well as external curator/sealed-store requirements;
+request external authority only with the bounded local readiness evidence in Packet 2.
+D-6 F1–F7 is unchanged: integrity and corpus preparation lead to T-51→T-26b→T-26→T-27,
+with freeze/run/resource authorization still separate and no new capability dependency.
+No provider call, paid run, actual freeze, score, M-8/M-9/M-10 closure or SOTA claim
+is authorized, and existing post-control proposals gain no implementation leaves.
 
 ## NT-1. Near-term baseline, context, cache and recovery delta
 

@@ -16,7 +16,7 @@ derived_from:
   - docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN_v2.md
   - docs/reports/reviews/electroweak_v092/plans/PHASE-0_DEVELOPMENT_FINAL_PLAN.md
 lock_head: "6f4f3942"
-last_verified: 2026-09-13
+last_verified: 2026-09-14
 relationships:
   - execution.milestones
   - execution.feature_spec
@@ -25,6 +25,27 @@ relationships:
 ---
 
 # Technical Specifications (Detailed)
+
+## Control-frontier packet execution (2026-09-14)
+
+The current `tasks.md` decision supersedes the historical integration sequence below;
+its Packet 1/2 are the only successor assignments, preserving active A/T-131.6,
+C/T-140 and B's current reviews. Use the named focused modules and existing deep
+contracts rather than authoring another benchmark suite or architectural treatment.
+Before a leaf starts, record its actual subject, released file lease, relevant accepted
+predecessors and F-number; after it ends, retain the product positive/refusal evidence,
+complete command outcomes, authors and non-author disposition in the existing row.
+An integration acceptor is independent of the changed component and its glue; already
+accepted unchanged baseline dependencies do not require re-review merely by inclusion.
+T-133 synthetic quarantine qualification and T-132 discovery qualification can be
+recorded separately from the deliberately failing actual-corpus admission gate, but
+the failing gate remains visible and no full verification PASS follows from that split.
+No current baseline tests or LDA runs are repeated for planning; developers refresh only
+changed relevant assumptions, run focused development checks and the existing required
+final gates, and retain any outstanding corpus/authority blocker honestly.
+Preparation stops at the F1–F7 receipt map and authorization-ready canary protocol;
+external material, actual freeze and live execution are not implied by the packet.
+Existing FH-1 and SOTA reference material below remains proposed/pre-admission only.
 
 ## Director Charter III — capability integration lanes (2026-09-13)
 
@@ -250,7 +271,7 @@ RUN-1; historical recipes do not authorize implementation.
 ## Active control implementation guide (2026-09-12)
 
 Use [RUN-1](spec.md#run-1-leadership-execution-decision-2026-09-12) and the
-[active work table](tasks.md#active-autonomous-work-2026-09-13). Read only the
+[active work table](tasks.md#control-frontier-decision-and-successor-packets-2026-09-14). Read only the
 guidance for the admitted task. NT-1 recipes below are preservation references
 for accepted historical work; they are not instructions to repeat T-98–T-111.
 

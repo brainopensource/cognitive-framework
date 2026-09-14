@@ -556,6 +556,7 @@
 {"symbol": "SkillIndexError", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/skill_index.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "SkillLibrary", "kind": "protocol", "defined_in": "vanguard/packages/ports/memory.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "SkillPromoter", "kind": "protocol", "defined_in": "vanguard/packages/runtime/skill_lifecycle.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "SkillSelection", "kind": "class", "defined_in": "vanguard/packages/runtime/skill_index.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "Span", "kind": "class", "defined_in": "vanguard/packages/kernel/model.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "SpawnAdapter", "kind": "class", "defined_in": "vanguard/packages/runtime/delegation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "SpawnIntent", "kind": "class", "defined_in": "vanguard/packages/runtime/delegation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}

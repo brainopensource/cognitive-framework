@@ -64,6 +64,15 @@ class TestProductPathSubject(unittest.TestCase):
         self.assertEqual(execute_product.__module__, "benchmarks.product_path")
         self.assertIs(entrypoint.execute, entrypoint.execute)
 
+    def test_product_path_qualifies_candidate_identity_before_publishing_green(self) -> None:
+        """T-131.6. execute_product is execute; identity must ride that seam."""
+        source = Path(entrypoint.__file__).read_text(encoding="utf-8")
+        self.assertIn("qualify_candidate_identity", source)
+        capture = (
+            ROOT / "vanguard" / "packages" / "runtime" / "evidence_capture.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn("def qualify_candidate_identity", capture)
+
 
 class TestControlProductRoute(unittest.TestCase):
     """T-26b: report admission is reached through the real runner seam."""
@@ -195,6 +204,53 @@ class TestControlProductRoute(unittest.TestCase):
             with self.assertRaises(EvidenceError):
                 write_control_report(path=path, record=manifest, rows=rows)
             self.assertFalse(path.exists())
+
+
+class TestProductPathEvidenceIdentity(unittest.TestCase):
+    """T-131.6: the public product path must not publish a foreign/stale tree as green."""
+
+    def test_execute_product_refuses_a_foreign_tree_as_green(self) -> None:
+        from test.falsifiers.test_t131_row6_evidence_identity import (
+            REAL,
+            _carrier_events,
+            _public_execute,
+            _seed_workspace,
+            _tree_digest,
+        )
+
+        with TemporaryDirectory() as directory:
+            submitted = Path(directory) / "submitted"
+            foreign = Path(directory) / "foreign"
+            submitted.mkdir()
+            foreign.mkdir()
+            _seed_workspace(submitted)
+            _seed_workspace(foreign, app=REAL.replace("n < 2", "n <= 1"))
+            result = _public_execute(
+                submitted, events=_carrier_events(workspace_digest=_tree_digest(foreign)),
+            )["result"]
+            self.assertNotEqual(result["outcome"], "completed")
+
+    def test_execute_product_publishes_matching_tree_identity(self) -> None:
+        from test.falsifiers.test_t131_row6_evidence_identity import (
+            COMPOSITION_DIGEST,
+            TASK_DIGEST,
+            _carrier_events,
+            _public_execute,
+            _seed_workspace,
+            _tree_digest,
+        )
+
+        with TemporaryDirectory() as directory:
+            root = Path(directory) / "candidate"
+            root.mkdir()
+            _seed_workspace(root)
+            submitted = _tree_digest(root)
+            result = _public_execute(
+                root, events=_carrier_events(workspace_digest=submitted))["result"]
+            self.assertEqual(result["outcome"], "completed", result.get("detail"))
+            self.assertEqual(result["candidateDigest"], submitted)
+            self.assertEqual(result["taskDigest"], TASK_DIGEST)
+            self.assertEqual(result["compositionDigest"], COMPOSITION_DIGEST)
 
 
 if __name__ == "__main__":

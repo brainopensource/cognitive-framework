@@ -56,8 +56,10 @@ B T-83b integration/acceptance; A T-139 binding → B session hook / acceptance;
 explicit B→C session transfer; C T-140 / B review. T-139 implementation may proceed
 in parallel; only its session hook is serialized. Early shared declarations must be
 separable from T-139 so index integration cannot deadlock waiting for task revision.
-Review only changed seams and required evidence; a non-author senior supplies the
-acceptance disposition. No additional leadership approval is needed for this work.
+Review only changed seams and required evidence; spec DIR-I7/D-3 defines
+non-author acceptance of the complete integration claim, including authored glue.
+ADR-0108 replaces repeated session edits with bootstrap-assembled collaborators
+through one transitional session adaptation; seniors own the implementation. No additional leadership approval is needed for this work.
 
 Reuse the supplied `90b2970210f474dd0357611d7b101e4a816a8fbe` baseline in `tasks.md`.
 Do not rerun LDA, the 95-test slice, or unchanged baseline modules merely to start a

@@ -37,11 +37,32 @@ confidence: high
 
 ## Current integration evidence boundary (2026-09-13)
 
-The supplied clean `90b2970210f474dd0357611d7b101e4a816a8fbe` baseline has a 95/95 focused integration receipt and passing full `just verify`; neither was rerun for planning. Detailed counts are in `tasks.md`. This establishes a green implementation baseline, not new milestone acceptance.
+The committed runway baseline is `cba24fda57573ba5dc6f99b229ded0c11a2e0582`; its unchanged production source inherits the supplied 95/95 integration and full `just verify` receipts only as evidence recorded on `90b2970210f474dd0357611d7b101e4a816a8fbe`, not as tests rerun on the documentation commit. Detailed counts are in `tasks.md`. This establishes a green implementation baseline, not new milestone acceptance.
 
 DIR-I5–I7 authorize three integration lanes and conditional T-140 continuation. MS-SEE remains OPEN pending accepted production selection/fallback/freshness and L5 observations; MS-CHANGE remains OPEN pending caller-aware five-file whole-candidate proof. T-139 requires durable product revision/restart evidence; T-140 requires authorized production retrieval evidence and does not close M-8. MS-CONTROL remains OPEN; T-26 remains UNFROZEN with existing quarantine, live-prerequisite and benchmark-backed acceptance requirements unchanged.
 
 FTS5 0/1 and Datalog 0/5 are failures on intentional broken benchmark inputs (spec DIR-I6). They neither close nor independently block a product milestone. A demonstrated production stale-index failure would block MS-SEE/change acceptance; the fixture score does not establish one. Do not freeze controls, assert SOTA superiority or close milestones from green smokes, mechanism presence or manually solved diagnostic fixtures.
+
+## D-6 — Closed MS-CONTROL freeze preconditions (2026-09-13)
+
+T-26 freezes the selected subject when and only when F1–F7 below have accepted, mutually compatible receipts; this finite list replaces open-ended references to “applicable prerequisites”, RUN-11 package ordering and capability hardening as freeze conditions.
+
+| Predicate | Closed content |
+|---|---|
+| F1 — Subject and arm identity | One clean commit and exact product `entrypoint.execute` / single-worker `vg-code-balanced` arm; manifest, ordered prompt/tool bytes, model/provider/registry, sampling/serializer/context/recovery policy, environment and cost identities pinned; existing T-79/T-89/T-97 product-route obligations reconciled |
+| F2 — Baseline and context integrity | MS-BASELINE/MS-CONTEXT accepted-baseline compatibility for that subject, required final repository gates and preserved one-loop, one-writer, containment, grant and budget invariants; no renewal of historical tests merely because a newer capability branch exists |
+| F3 — Independent corpus admission | T-51 reaccepted under Q-01/T-133 and T-132 gate coverage: 30 fresh distinct L2 tasks with strata 10/11/5/1/3, fixed order, immutable suite/member/oracle identities, exposure exclusion, independent curator/evaluation authority and sealed-store access boundary; no old-member digest repair |
+| F4 — Measurement and publication integrity | Independent T-26a/T-26b/T-52 acceptance on the selected runner: complete evidence population, binary versus missing reconciliation, exact candidate/oracle provenance, false-completion veto, authentic usage accounting, one measured attempt per slot and enforced stopping; T-94/T-95 metric/preregistration obligations included here |
+| F5 — Eight existing RUN-09 integrity defects disposed | Accepted evidence for (1) model writes land, (2) atomic multifile/exterior visibility, (3) rejection of patchless/test-inlined/unauthorized-extra-file completion, (4) stop after admitted completion, (5) precise malformed/undeclared dialect attribution, (6) submitted-candidate/evidence identity, (7) compaction/resume identity and budget continuity, (8) aggregate budget/provider-policy enforcement; a valid NOT_REPRODUCED finding needs an independently accepted disposition, not invented repair work |
+| F6 — Fixed pre-canary qualifications | Accepted T-92 live product P0-FIB/P0-CSV/P0-BUG triad via an explicitly authorized zero-paid-call route, plus T-93 twelve-task L1 suite identity (4 greenfield / 4 single-file / 4 data-CLI) and complete attributable evidence dispositions with REPLAY and LIVE-LOCAL separated; no new L1 pass-rate threshold or additional live suite inferred |
+| F7 — Finite preregistration and resources | Exactly 30 L2 attempts, balanced per-task ceiling $0.15 / 20 turns / 40k tokens, explicit aggregate attempt/provider-call/inference-cost/evaluation-cost/wall-time ceilings and resource authorization, fixed missingness/integrity-stop policy, all 30 binary outcomes plus two-sided 95% Wilson lower bound >= 0.40 and zero observed false completions for subsequent positive T-27 acceptance; zero paid calls before freeze |
+
+Missing receipts identify the failing F-number rather than creating a new task-shaped prerequisite, and an unsupported NOT_REPRODUCED assertion does not satisfy F5.
+T-75/T-76, T-78/T-83b, T-138/T-139/T-140, the session extraction and FH-1 are not additional freeze dependencies; if included in the chosen control arm, their actual effects are covered by F1–F7, while unrelated development continues on its own subject.
+The release owner can choose the earliest compatible control subject without waiting for newer DIR-3 capabilities, preserving the 2026-09-13 decoupling and the identity invalidation rule for changes actually included in that subject.
+Freeze records the eligible subject without authorizing paid execution, T-27 or milestone closure; F7's Wilson/pass predicate is an outcome rule for T-27, not a result demanded before freeze.
+Adding an eighth predicate requires an explicit successor director ruling identifying a measurement-integrity or authorization need, never an implicit capability-integration dependency.
+Current T-26 remains UNFROZEN and MS-CONTROL remains OPEN because publishing this closed list supplies none of its missing acceptance receipts.
 
 ## Leadership disposition (2026-09-12)
 
@@ -185,7 +206,7 @@ page neither freezes that artifact nor authorizes measurement.
 
 | Decision boundary | Required evidence / stopping rule |
 |---|---|
-| Admission | MS-BASELINE/MS-CONTEXT compatibility and applicable T-79/T-89/T-92–T-95/T-51/T-52 receipts on the candidate; required L0/L1 dispositions; one clean SHA and frozen task/oracle membership, model/provider, manifest/preset, prompt/tool/sampling and cost identities. Any unresolved prerequisite keeps T-26 unfrozen. |
+| Admission | MS-BASELINE/MS-CONTEXT compatibility and applicable T-79/T-89/T-92–T-95/T-51/T-52 receipts on the candidate; required L0/L1 dispositions; one clean SHA and frozen task/oracle membership, model/provider, manifest/preset, prompt/tool/sampling and cost identities. Only unresolved predicates in D-6 F1–F7 keep T-26 unfrozen. |
 | Spending | Zero paid control calls before freeze; T-26 itself makes zero paid calls. Freeze is necessary but does not itself authorize spending. Any required pre-freeze live L0 must use an eligible authorized zero-paid-call route; otherwise admission remains blocked. |
 | Arm | Single-worker `vg-code-balanced`, preset `balanced`, through `vanguard.packages.runtime.entrypoint.execute`; preserve the public $0.15 / 900000 ms / 40000 tokens / 20 turns ceiling and record tighter caller attenuation separately. |
 | Sample and denominator | At least 30 distinct current `LIVE-LOCAL` / `LIVE-HOSTED` tasks with binary exterior outcomes. Freeze finite membership and task order; one qualifying attempt per task. Retries never increase coverage or replace failed attempts. Preserve every missing, undeterminable and not-run outcome with its reason, outside the binary denominator; no full-suite pass-rate claim from partial coverage. |
@@ -205,10 +226,8 @@ integration requires a reviewed P2; final P4 qualification requires reviewed P2
 and P3. T-26b acceptance requires reaccepted P1 and T-51. Measurement corruption
 and the absent product trace both precede reliable qualification, which is why
 P1 and P2 lead: a number produced before either is closed cannot be trusted even
-if it is favourable. MS-CONTROL is freeze-ready only after corpus reacceptance,
-independent T-26b acceptance, every RUN-09 blocker closed, exact-subject baseline
-and context compatibility, and the required live L0 acceptance under a separate
-authority that RUN-12 does not grant.
+if it is favourable. The finite freeze boundary is now D-6 F1–F7 above; this historical delivery order
+adds no further prerequisite or live-run authority.
 
 **Grounding boundary.** Existing mechanisms are
 [`live_oracle_pass`, `score_metrics`, `canary_disposition`](../../../benchmarks/ladder/metrics.py),

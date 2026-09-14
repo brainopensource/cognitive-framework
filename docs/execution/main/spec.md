@@ -361,14 +361,15 @@ T-137 is hermetic synthetic-fixture work only: zero provider calls/USD under RUN
 
 ## DIR-3. Product capability integration and three-lane continuation (2026-09-13)
 
-Leadership authorizes continuation from the supplied clean baseline
-`90b2970210f474dd0357611d7b101e4a816a8fbe` toward a SOTA single-agent coding
-harness before any control freeze. Earlier `6f4f3942` candidate receipts remain
+Leadership authorizes continuation from committed runway subject
+`cba24fda57573ba5dc6f99b229ded0c11a2e0582` toward a SOTA single-agent coding
+harness independently of control-freeze preparation. Earlier `6f4f3942` candidate receipts remain
 historical; the current planning baseline and exact file leases are in `tasks.md`. This decision does not
 accept a benchmark result, authorize a provider call, close a milestone, or activate
 post-control campaign/learning machinery. RUN-12 remains zero calls and zero USD.
-Every prompt, tool-surface, index-selection, or completion-policy change invalidates
-an earlier prospective control identity; T-26 remains UNFROZEN.
+A prompt, tool-surface, index-selection or completion-policy change included in a
+selected control subject changes its identity; unrelated DIR-3 work does not extend
+the closed freeze prerequisites in milestones D-6. T-26 remains UNFROZEN.
 
 **DIR-I1 — Read-only observation batches.** One proposal MAY carry a bounded causal
 partial order of independently safe observations. The manifest `SinkRegistry` is the
@@ -451,20 +452,18 @@ initial fixture, submitted candidate, oracle and durable trajectory. These inspe
 fixtures are exposed diagnostics, never fresh T-51 holdouts. No paid benchmark run,
 fixture repair, alternate solver core or expanded benchmark campaign is admitted.
 
-**DIR-I7 — Autonomy and acceptance boundary.** Current work requires no leadership
-approval and may be dispatched immediately. Seniors resolve ordinary implementation
-choices and record non-conflicting file transfers locally. Return to leadership only
-for unresolved architectural trade-offs, repeated evidenced blockers, scope or
-acceptance disputes, security/authorization approvals or changes to canonical
-invariants. A bounded non-author review of each task's required product evidence
-remains necessary; this is not an invitation to broad review work. Baseline reuse
-and focused verification follow `technical.md`; final repository gates remain
-mandatory for implementation completion. T-140 starts only after T-75/T-76
-acceptance and B transfers session.py after integrating both T-83b and T-139.
-Its authorized scope is production skill/authorized-memory retrieval, not learning,
-promotion or an empirical lift claim. Green gates and mechanisms close no milestone
-by themselves. MS-SEE, MS-CHANGE, MS-CONTROL and M-8 retain their unfulfilled
-acceptance predicates; T-26 remains UNFROZEN and zero paid calls remain in force.
+**DIR-I7 / D-3 — Acceptance authority.** A non-author acceptor has authored neither the implementation nor any behavior-affecting integration delta within the acceptance claim, has no authority to rewrite the submitted evidence, and records an independent disposition bound to its exact subject and evidence digest.
+An integrator is an author of their glue code even when the component was written by somebody else; component acceptance cannot substitute for integrated-product acceptance, so B integrating C requires A or another uninvolved qualified reviewer for that integration claim.
+A reviewer who contributes a repair becomes an author of the repaired acceptance unit and transfers its acceptance to a non-author; if all three contributed, an uninvolved reviewer is required for acceptance but independent implementation continues.
+Authorship follows the claimed artifact and its dependencies rather than lane titles, and mechanical merging alone does not establish authorship unless it changes the accepted behavior, resolves semantic conflicts or changes the evidence.
+Ordinary implementation remains delegated, while structural independence, scope/acceptance disputes, repeated evidenced blockers, security authority and invariant changes retain the established escalation boundary.
+
+**Architectural ruling navigation (D-1, D-2, D-4, D-5).** Binding decisions now live in [ADR-0109](../../architecture/decisions/0109-binding-decision-medium.md); the current rulings are [three seam types](../../architecture/decisions/0107-dir3-seam-types.md), [session composition and analysis](../../architecture/decisions/0108-session-composition-and-analysis.md), and [FH-1 retrieval disposition](../../architecture/decisions/0110-fh1-retrieval-disposition.md).
+These decisions supersede conflicting DIR-3 type/placement and acceptance assignments without suspending the three lanes, adding control-freeze prerequisites, registering FH-1 schemas or claiming implementation acceptance.
+
+**D-7 — Committed subject and receipt provenance.** The planning/runway baseline is committed subject `cba24fda57573ba5dc6f99b229ded0c11a2e0582`, which contains the formerly staged five-document change and has the same production-source tree as `90b2970210f474dd0357611d7b101e4a816a8fbe`.
+The supplied implementation-test receipts remain bound to `90b2970210f474dd0357611d7b101e4a816a8fbe`; documentation checks and these rulings belong to their own commits, not a retrospectively relabeled test run.
+Successor work records its actual SHA and any dirty-tree digest, and the ruling commit refers to this already-existing baseline rather than attempting to embed its own self-referential SHA.
 
 ## NT-1. Near-term baseline, context, cache and recovery delta
 
@@ -586,7 +585,7 @@ assets during the context-convergence batch.
 
 This section defines conditional TARGET contracts for prototype refinement after NT-1. It does not activate implementations, change T-98–T-111, authorize paid runs, or accept milestones. “Sprints 3–5” maps to capability dependencies in tasks, not a calendar. FH-1 governs the future CAS/delegation/evaluation scope where older proposal catalogs differ. Historical accepted subjects remain intact. The reference provenance is [Part 3 §§5–6](../../reports/reviews/aether_v093_review/part3_blueprints_and_interface_contracts.md); its Python protocols are illustrative seams, not a requirement for additional public ports. Gate ownership is in [milestones.md](milestones.md#post-control-horizon-release-predicates-fh-1); algorithms are in [technical.md](technical.md#post-control-reference-handbook-fh-1-proposal).
 
-FH-1.1–FH-1.8 are **PROPOSED contract detail**, retained for branch review. Their
+The authoritative current disposition is [ADR-0110 / D-5](../../architecture/decisions/0110-fh1-retrieval-disposition.md): only its named existing-invariant constraints are pre-adopted for T-140; all remaining FH-1.1–FH-1.8 detail stays **PROPOSED**, quarantined until T-129. Their
 RFC-2119 language is conditional on adoption; these sections are not accepted law
 merely because they contain formulas. Formal/prose disagreement is a design defect
 to resolve at T-129, never an automatic license to choose the narrower expression.

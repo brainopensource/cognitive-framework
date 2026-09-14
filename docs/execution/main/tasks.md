@@ -40,7 +40,7 @@ cannot add READY work. No sprint/wave ordering. No new compiler or episode loop.
 
 Planning is approved under the present leadership delegation; no implementation
 or test execution is claimed in this planning update. Start from
-`90b2970210f474dd0357611d7b101e4a816a8fbe` (clean, Git identity confirmed),
+`cba24fda57573ba5dc6f99b229ded0c11a2e0582` (committed runway baseline),
 or an explicitly reconciled successor. The historical NT-1 handoff below remains accepted on
 `2989d57d`; its counts are not current measurements. Only the following READY
 rows are authorized for the next engineering assignment. All other unchecked
@@ -98,6 +98,8 @@ long-session compaction/rebinding, W12-A retrieval and INDEX_UNBOUND). Full
 `just verify` PASS; kernel 102/102, agency 313/313, contracts 558/558 with 7 skipped;
 TypeScript and documentation gates PASS. These are supplied receipts, not new
 measurements or product acceptance. Non-blocking documentation drift is out of scope.
+
+The cross-lane shapes and transitional composition boundary are now [ADR-0107](../../architecture/decisions/0107-dir3-seam-types.md) and [ADR-0108](../../architecture/decisions/0108-session-composition-and-analysis.md); spec DIR-I7/D-3 supersedes any author-as-acceptor assignment below, and milestones D-6 is the closed control-freeze boundary.
 
 ### Exclusive file leases and integration handoffs
 
@@ -195,7 +197,7 @@ A/C deliver row updates in their handoffs for B to apply.
 
 - **Objective / dependencies:** finish T-75 selection/fallback, then T-76 product L5
   observations. No dependency on A's task-state implementation or B's pure caller policy.
-  B accepts the product integration evidence; authored code is not self-accepted.
+  A or another non-author accepts the combined C component/B integration evidence under DIR-I7; B cannot accept glue that B authored.
 - **Owned files:** `vanguard/packages/runtime/bootstrap.py`,
   `vanguard/packages/adapters/stores/{lda_index,repo_index}.py`,
   `vanguard/packages/ports/index.py` (existing minimal seam only),
@@ -226,7 +228,7 @@ A/C deliver row updates in their handoffs for B to apply.
 - **Handoff / merge:** deliver B a callable selection result using existing value types,
   healthy/absent/invalid branch behavior, durable diagnostic fields and focused command.
   Deliver repo wiring/schema needs to A early. B lands the session hook, then C executes
-  the product matrix on that subject and B accepts T-75/T-76. C waits for the explicit
+  the product matrix on that subject and a non-author accepts T-75/T-76 under DIR-I7. C waits for the explicit
   session transfer before beginning T-140; no automatic unrelated backlog work.
 
 **Session rules.** Acquire exact file leases from the task row after inspecting

@@ -24,7 +24,7 @@ from ...domain.canonicalisation.digest import digest_of
 from ...ports.event_store import Result
 from ...ports.index import DependencyEdge, RepositoryMap, Symbol, TestAssociation
 
-__all__ = ["FileRepoIndex", "InMemoryRepoIndex"]
+__all__ = ["FileRepoIndex", "InMemoryRepoIndex", "workspace_tree_hash"]
 
 #: Definition forms this scan recognises. Adding a language is a row.
 _DEFINITIONS: tuple[tuple[str, str, re.Pattern[str]], ...] = (
@@ -211,6 +211,8 @@ class InMemoryRepoIndex:
 class FileRepoIndex:
     """The real one. Walks a workspace and records definitions by regex."""
 
+    unresolved_coverage: bool = True
+
     def __init__(self, max_bytes: int = 1_048_576, *, max_files: int = 10_000,
                  max_symbols: int = 20_000, max_edges: int = 20_000,
                  max_tests: int = 20_000) -> None:
@@ -359,6 +361,14 @@ class FileRepoIndex:
         if self._indexed_tree_hash and tree_hash != self._indexed_tree_hash:
             mapped = replace(mapped, truncated=True)
         return Result.success(mapped)
+
+
+def workspace_tree_hash(root: str | Path, *, max_files: int = 10_000) -> str | None:
+    """Live hashed-tree identity. None if the workspace cannot be bound."""
+    live = _live_content_digests(Path(root), max_files=max_files)
+    if live is None:
+        return None
+    return _hashed_tree(live)
 
 
 def _live_content_digests(root: Path, *, max_files: int) -> dict[str, str] | None:

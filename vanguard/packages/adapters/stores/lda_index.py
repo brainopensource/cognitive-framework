@@ -27,6 +27,13 @@ from ...ports.index import (
 
 __all__ = ["LdaRepoIndex"]
 
+_REQUIRED_COLUMNS: dict[str, tuple[str, ...]] = {
+    "files": ("path", "content_hash"),
+    "symbols": ("id", "name", "kind", "file_path", "start_line", "qualified_name"),
+    "relations": ("source_id", "source_path", "target_id", "kind"),
+    "index_runs": ("head_sha", "completed_at"),
+}
+
 _IGNORED = {
     ".git", ".vanguard", ".pytest_cache", "__pycache__", "node_modules",
     ".venv", "dist", "build", ".cursor", ".lda",
@@ -186,6 +193,8 @@ class LdaRepoIndex:
         self._tests: tuple[TestAssociation, ...] = ()
         self._revision: str = ""
         self._indexed_tree_hash: str = ""
+        self.unresolved_coverage: bool = True
+        self._enforce_freshness: bool = True
 
         if self._root is not None:
             self.index(str(self._root))
@@ -205,7 +214,7 @@ class LdaRepoIndex:
                 return None
 
     def _verify_freshness(self) -> Result[sqlite3.Connection]:
-        """Verify database existence, schema completeness, and git HEAD binding."""
+        """Verify schema, HEAD, nonzero entities, and resolvable current paths."""
         if self._root is None:
             return Result.fail("invalid_request", "index() has not been called")
         if self._db_path is None or not self._db_path.is_file():
@@ -214,15 +223,30 @@ class LdaRepoIndex:
         con = self._connect()
         if con is None:
             return Result.fail("unavailable", f"cannot connect to LDA database at {self._db_path}")
+        if not self._enforce_freshness:
+            return Result.success(con)
 
         cur = con.cursor()
         try:
             cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
             tables = {row[0] for row in cur.fetchall()}
-            required_tables = {"files", "symbols", "relations", "index_runs"}
+            required_tables = set(_REQUIRED_COLUMNS)
             if not required_tables.issubset(tables):
                 con.close()
-                return Result.fail("stale_index", f"LDA database missing required tables: {required_tables - tables}")
+                return Result.fail(
+                    "stale_index",
+                    f"LDA database missing required tables: {required_tables - tables}",
+                )
+            for table, columns in _REQUIRED_COLUMNS.items():
+                cur.execute(f"PRAGMA table_info({table})")
+                present = {row[1] for row in cur.fetchall()}
+                missing = set(columns) - present
+                if missing:
+                    con.close()
+                    return Result.fail(
+                        "stale_index",
+                        f"unsupported LDA schema: {table} missing {sorted(missing)}",
+                    )
 
             cur.execute("SELECT head_sha FROM index_runs ORDER BY completed_at DESC LIMIT 1")
             run_row = cur.fetchone()
@@ -236,31 +260,70 @@ class LdaRepoIndex:
                 con.close()
                 return Result.fail("stale_index", f"index HEAD {index_head} != git HEAD {ws_head}")
 
-            cur.execute("SELECT count(*) FROM files")
-            count_row = cur.fetchone()
-            if count_row is None or count_row[0] == 0:
+            cur.execute("SELECT path, content_hash FROM files")
+            file_rows = cur.fetchall()
+            if not file_rows:
                 con.close()
                 return Result.fail("stale_index", "LDA database has 0 files indexed")
+
+            unresolved: list[str] = []
+            changed: list[str] = []
+            for path, stored in file_rows:
+                live = self._root / str(path)
+                if not live.is_file():
+                    unresolved.append(str(path))
+                    continue
+                try:
+                    live_hash = hashlib.sha256(live.read_bytes()).hexdigest()
+                except OSError:
+                    unresolved.append(str(path))
+                    continue
+                if stored and live_hash != str(stored):
+                    changed.append(str(path))
+            if unresolved:
+                con.close()
+                return Result.fail(
+                    "stale_index",
+                    f"unresolved indexed paths: {unresolved[:8]}",
+                )
+            if changed:
+                con.close()
+                return Result.fail(
+                    "stale_index",
+                    f"indexed content changed: {changed[:8]}",
+                )
 
             return Result.success(con)
         except sqlite3.Error as exc:
             con.close()
             return Result.fail("unavailable", f"SQLite query error: {exc}")
 
-    def index(self, root: str) -> Result[int]:
+    def index(self, root: str, *, enforce_freshness: bool = True) -> Result[int]:
         """Validate and bind the LDA index for root."""
         base = Path(root).resolve()
         if not base.is_dir():
             return Result.fail("not_found", f"not a directory: {root}")
         self._root = base
-        self._db_path = base / ".lda" / "index.db"
+        if self._db_path is None:
+            self._db_path = base / ".lda" / "index.db"
+        self._enforce_freshness = enforce_freshness
 
-        verified = self._verify_freshness()
-        if not verified.ok or verified.value is None:
-            error = verified.error
-            return Result.fail(error.kind if error else "unavailable",
-                               error.message if error else "index validation failed")
-        con = verified.value
+        if enforce_freshness:
+            verified = self._verify_freshness()
+            if not verified.ok or verified.value is None:
+                error = verified.error
+                return Result.fail(
+                    error.kind if error else "unavailable",
+                    error.message if error else "index validation failed",
+                )
+            con = verified.value
+        else:
+            con = self._connect()
+            if con is None:
+                return Result.fail(
+                    "unavailable",
+                    f"cannot connect to LDA database at {self._db_path}",
+                )
         cur = con.cursor()
         try:
             cur.execute("SELECT path, content_hash FROM files ORDER BY path ASC LIMIT ?", (self.max_files,))
@@ -298,6 +361,9 @@ class LdaRepoIndex:
             cur.execute("SELECT head_sha FROM index_runs ORDER BY completed_at DESC LIMIT 1")
             head_row = cur.fetchone()
             revision = head_row[0] if head_row and head_row[0] else "sha256:" + hashlib.sha256(b"").hexdigest()
+            cur.execute("SELECT count(*) FROM relations WHERE kind = 'calls'")
+            calls_row = cur.fetchone()
+            calls_count = int(calls_row[0]) if calls_row else 0
 
             self._files = tuple(files)
             self._symbols = tuple(symbols)
@@ -305,6 +371,7 @@ class LdaRepoIndex:
             self._tests = tuple(tests)
             self._revision = revision
             self._indexed_tree_hash = _hashed_tree(content_digests)
+            self.unresolved_coverage = calls_count == 0
             return Result.success(len(files))
         except sqlite3.Error as exc:
             return Result.fail("unavailable", f"failed reading index data: {exc}")

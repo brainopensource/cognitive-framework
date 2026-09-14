@@ -14,6 +14,33 @@ from ...domain.canonicalisation.digest import digest_of
 from ...ports.environment import EffectRequest as EnvironmentRequest
 from ...ports.environment import ObservationRequest
 
+REPO_OBSERVATION_LIMIT = 80
+
+
+def observation_payload(
+    items: list[Any],
+    *,
+    unresolved_coverage: bool = False,
+    coverage_key: str = "callers",
+) -> str:
+    """Bounded observation JSON with explicit omissions. Unranked value items only."""
+    limit = REPO_OBSERVATION_LIMIT
+    truncated = len(items) > limit
+    kept = items[:limit]
+    omissions: list[dict[str, str]] = []
+    if truncated:
+        omissions.append({"key": "items", "reason": "truncated"})
+    if unresolved_coverage:
+        omissions.append({"key": coverage_key, "reason": "unresolved_coverage"})
+    return json.dumps({"items": kept, "omissions": omissions, "truncated": truncated})
+
+
+def _index_unresolved_coverage(index: Any) -> bool:
+    flag = getattr(index, "unresolved_coverage", None)
+    if isinstance(flag, bool):
+        return flag
+    return True
+
 
 @dataclass(frozen=True, slots=True)
 class CodeAdapterOutcome:
@@ -89,7 +116,9 @@ class CodeEffectAdapter:
                         cost={"usd_micros": 0},
                         detail=str(res.error.message if res.error else "symbols failed"),
                     )
-                detail = json.dumps([{"name": s.name, "kind": s.kind, "path": s.path, "line": s.line} for s in (res.value or ())])
+                detail = observation_payload(
+                    [{"name": s.name, "kind": s.kind, "path": s.path, "line": s.line} for s in (res.value or ())],
+                )
             elif self.verb == "repo.get_callers":
                 res = self._index.callers(symbol=str(args.get("symbol", "")))
                 if not res.ok:
@@ -99,7 +128,10 @@ class CodeEffectAdapter:
                         cost={"usd_micros": 0},
                         detail=str(res.error.message if res.error else "callers failed"),
                     )
-                detail = json.dumps([{"name": s.name, "kind": s.kind, "path": s.path, "line": s.line} for s in (res.value or ())])
+                detail = observation_payload(
+                    [{"name": s.name, "kind": s.kind, "path": s.path, "line": s.line} for s in (res.value or ())],
+                    unresolved_coverage=_index_unresolved_coverage(self._index),
+                )
             elif self.verb == "repo.get_dependencies":
                 res = self._index.dependencies(path=str(args.get("path", "")))
                 if not res.ok:
@@ -109,7 +141,9 @@ class CodeEffectAdapter:
                         cost={"usd_micros": 0},
                         detail=str(res.error.message if res.error else "dependencies failed"),
                     )
-                detail = json.dumps([{"source": d.source, "target": d.target, "kind": d.kind} for d in (res.value or ())])
+                detail = observation_payload(
+                    [{"source": d.source, "target": d.target, "kind": d.kind} for d in (res.value or ())],
+                )
             elif self.verb == "repo.get_tests":
                 res = self._index.tests(path=str(args.get("path", "")))
                 if not res.ok:
@@ -119,7 +153,9 @@ class CodeEffectAdapter:
                         cost={"usd_micros": 0},
                         detail=str(res.error.message if res.error else "tests failed"),
                     )
-                detail = json.dumps([{"test_path": t.test_path, "source_path": t.source_path} for t in (res.value or ())])
+                detail = observation_payload(
+                    [{"test_path": t.test_path, "source_path": t.source_path} for t in (res.value or ())],
+                )
             else:
                 return CodeAdapterOutcome(
                     status="error",

@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 from typing import ClassVar, Mapping, Sequence
 
+from vanguard.packages.adapters.bindings.code import observation_payload
 from vanguard.packages.adapters.stores.repo_index import FileRepoIndex
 from vanguard.packages.ports.index import IndexPort
 from vanguard.packages.domain.wire.result import Ok, Result
@@ -87,28 +87,29 @@ class IndexToolkit:
             if not res.ok:
                 return Result.fail(res.error.kind if res.error else "unavailable", res.error.message if res.error else "symbol query failed")
             out_syms = [{"name": s.name, "kind": s.kind, "path": s.path, "line": s.line} for s in (res.value or ())]
-            return Ok(Receipt(request_digest="sha256:" + "0" * 64, outcome=json.dumps(out_syms), cost=request.reservation))
+            return Ok(Receipt(request_digest="sha256:" + "0" * 64, outcome=observation_payload(out_syms), cost=request.reservation))
 
         if request.verb == "repo.get_callers":
             res = self._index.callers(symbol=str(args.get("symbol", "")))
             if not res.ok:
                 return Result.fail(res.error.kind if res.error else "unavailable", res.error.message if res.error else "callers query failed")
             out_callers = [{"name": s.name, "kind": s.kind, "path": s.path, "line": s.line} for s in (res.value or ())]
-            return Ok(Receipt(request_digest="sha256:" + "0" * 64, outcome=json.dumps(out_callers), cost=request.reservation))
+            unresolved = bool(getattr(self._index, "unresolved_coverage", True))
+            return Ok(Receipt(request_digest="sha256:" + "0" * 64, outcome=observation_payload(out_callers, unresolved_coverage=unresolved), cost=request.reservation))
 
         if request.verb == "repo.get_dependencies":
             res = self._index.dependencies(path=str(args.get("path", "")))
             if not res.ok:
                 return Result.fail(res.error.kind if res.error else "unavailable", res.error.message if res.error else "dependencies query failed")
             out_deps = [{"source": d.source, "target": d.target, "kind": d.kind} for d in (res.value or ())]
-            return Ok(Receipt(request_digest="sha256:" + "0" * 64, outcome=json.dumps(out_deps), cost=request.reservation))
+            return Ok(Receipt(request_digest="sha256:" + "0" * 64, outcome=observation_payload(out_deps), cost=request.reservation))
 
         if request.verb == "repo.get_tests":
             res = self._index.tests(path=str(args.get("path", "")))
             if not res.ok:
                 return Result.fail(res.error.kind if res.error else "unavailable", res.error.message if res.error else "tests query failed")
             out_tests = [{"test_path": t.test_path, "source_path": t.source_path} for t in (res.value or ())]
-            return Ok(Receipt(request_digest="sha256:" + "0" * 64, outcome=json.dumps(out_tests), cost=request.reservation))
+            return Ok(Receipt(request_digest="sha256:" + "0" * 64, outcome=observation_payload(out_tests), cost=request.reservation))
 
         return Result.fail("invalid_request", f"unsupported verb {request.verb}")
 

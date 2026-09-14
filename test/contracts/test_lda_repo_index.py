@@ -11,6 +11,7 @@ Verifies:
 from __future__ import annotations
 
 from pathlib import Path
+import hashlib
 import sqlite3
 import tempfile
 import unittest
@@ -98,12 +99,14 @@ class TestLdaRepoIndexContract(unittest.TestCase):
 
         # Insert files
         file_list = files if files is not None else [("pkg/core.py", "hash1"), ("pkg/util.py", "hash2")]
-        for p, h in file_list:
+        for p, _ignored_hash in file_list:
             (self.root / p).parent.mkdir(parents=True, exist_ok=True)
-            (self.root / p).write_text("# content\n", encoding="utf-8")
+            payload = b"# content\n"
+            (self.root / p).write_bytes(payload)
+            digest = hashlib.sha256(payload).hexdigest()
             cur.execute(
                 "INSERT INTO files VALUES (?, ?, 10, 'python', '2026-09-01T00:00:00Z')",
-                (p, h)
+                (p, digest)
             )
 
         # Insert symbols

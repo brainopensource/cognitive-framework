@@ -39,8 +39,9 @@ cannot add READY work. No sprint/wave ordering. No new compiler or episode loop.
 ## Active autonomous work (2026-09-13)
 
 Planning is approved under the present leadership delegation; no implementation
-or test execution is claimed in this review. Start from `001911e3` or an explicitly
-reconciled successor. The historical NT-1 handoff below remains accepted on
+or test execution is claimed in this planning update. Start from
+`90b2970210f474dd0357611d7b101e4a816a8fbe` (clean, Git identity confirmed),
+or an explicitly reconciled successor. The historical NT-1 handoff below remains accepted on
 `2989d57d`; its counts are not current measurements. Only the following READY
 rows are authorized for the next engineering assignment. All other unchecked
 historical/proposed rows require reconciliation before activation.
@@ -79,17 +80,154 @@ creating no new planning file; at session exhaustion, leave a resumable handoff.
 | T-83b | B — READY; pure policy may proceed now | T-75 acceptance for session integration | Implement caller-aware completion as a pure agency policy, then integrate under B's exclusive `session.py` lease. |
 | T-138 | A — LANDED candidate; independent review READY | none | Product activation of bounded read-only batches: session sink handoff, product prompt/tool declarations, and product-path falsifier. |
 | T-139 | A — READY after T-138 review | T-138 accepted | Add serialized `task.revise` over existing task-state/event contracts; no second loop or public event allocation. |
-| T-140 | C — BLOCKED for this parallel batch | T-75/T-76 accepted, B session handoff | Replace the unused task-conditioned skill helper with one production L5 retrieval path and qualify authorized memory retrieval end to end. |
+| T-140 | C — BLOCKED pending handoff; conditional continuation | T-75/T-76 accepted, T-83b/T-139 integrated, B session handoff | Replace the unused task-conditioned skill helper with one production L5 retrieval path and qualify authorized memory retrieval end to end. |
 | T-129 | C with relevant package owner — BLOCKED | T-27 accepted / MS-CONTROL closed | Refine one selected post-control package, memory/skills first. Ratify scope, paths, schema obligations, budgets and leaf edges before implementation. No automatic FH-1 activation. |
 
-**Current three-developer batch.** Dev A owns T-138 review then T-139; Dev B owns
-T-78 review plus T-83b; Dev C owns T-75/T-76 product integration. These are three
-disjoint implementation lanes. B alone owns `vanguard/packages/runtime/session.py`
-after this handoff. C may edit `runtime/bootstrap.py`, `adapters/stores/`, and the
-repository-tool pack surfaces but hands any session call to B. A may edit task-state
-domain/runtime reducers, `runtime/wiring.py`, and the task-revision tool schema but
-does not edit `session.py` or C's index adapter. Existing READY governance work is
-preserved but MUST NOT acquire a conflicting lease during this batch.
+**Current three-developer assignment.** Dispatch A/T-138→T-139, B/T-78→T-83b,
+and C/T-75→T-76 immediately under DIR-I5–I7. T-140 is a conditional C continuation,
+not concurrent session work. Other READY rows retain their status but acquire no
+lease or automatic fill-in scope here. The exact leases below supersede older
+lane labels, directory-wide leases and candidate file-touch lists for these tasks.
+
+**Baseline receipt (supplied by leadership; not rerun during planning).** Subject
+`90b2970210f474dd0357611d7b101e4a816a8fbe`: clean; LDA HEALTHY,
+`index_healthy=true`, UP_TO_DATE, zero dirty files; 2,133 files / 11,783 symbols /
+90,101 relations. Focused backend integration 95/95 PASS in 0.780s (parallel
+observations, manifests, production HarnessSession, exact edits, repository L5,
+long-session compaction/rebinding, W12-A retrieval and INDEX_UNBOUND). Full
+`just verify` PASS; kernel 102/102, agency 313/313, contracts 558/558 with 7 skipped;
+TypeScript and documentation gates PASS. These are supplied receipts, not new
+measurements or product acceptance. Non-blocking documentation drift is out of scope.
+
+### Exclusive file leases and integration handoffs
+
+Paths below are relative to the repository root; brace lists mean the exact named
+files, not directory leases. Tests marked NEW are authorized focused fixtures.
+Reading any lane's files is allowed; editing another lane's files requires a recorded
+owner-to-owner transfer, not leadership approval. Unlisted implementation files
+require a bounded lease amendment in this row before editing; no new public contract
+or scope follows from that amendment. All lanes forbid kernel changes, benchmark
+source/oracle/reset edits, control manifests/corpora, provider presets and generated
+artifact hand edits. Canonical execution files have one writer, B as integrator;
+A/C deliver row updates in their handoffs for B to apply.
+
+| Surface | Exclusive writer | Handoff rule |
+|---|---|---|
+| `vanguard/packages/runtime/session.py`, `test/runtime/test_harness_session.py` | B until all A/B/C product hooks are integrated | A supplies task binding/emission contract; C supplies index factory/selection contract. B applies hooks and associated shared tests. Transfer to C only after T-139 and T-83b integration acceptance; B then stops editing. |
+| `vanguard/packages/runtime/wiring.py`; `vanguard/packages/agency/manifests/vg-code-{default,fast,balanced,max}/manifest.json`; `vanguard/packages/agency/manifests/vg-code-default/system-prompt.txt`; its NEW `task-revise-tool.json` | A | C supplies any repo binding/declaration correction to A; B supplies exact-edit declaration correction to A. A lands those narrow prerequisites separately so C need not wait for T-139. |
+| `vanguard/packages/agency/manifests/vg-code-default/repo-{search-symbols,get-callers,get-dependencies,get-tests}-tool.json` | C | A consumes these schema paths without editing their contents. Existing other shared read/search/edit schemas stay read-only unless explicitly transferred. |
+| Production environment `adapters/environment/{git,transaction,sandboxed}.py` | B | C preserves selected environment/profile and requests any needed environment change from B. No host fallback for containment failure. |
+| Mapped canonical-owner documentation and generated knowledge refresh | B integrates lane-provided deltas serially | Planning edits only the five main files. During implementation, synchronize existing mapped owners for changed behavior; no new docs or unrelated drift cleanup. |
+
+### Autonomous lane A — durable control state
+
+- **Objective / dependencies:** close the bounded independent T-138 review, then
+  T-139. B reviews A's new implementation evidence; A may independently review the
+  existing candidate only if A was not its author, otherwise B owns that disposition.
+- **Owned files:** shared A surfaces above; `vanguard/packages/domain/task_state.py`,
+  `vanguard/packages/runtime/task_state.py`, `test/falsifiers/test_parallel_observation.py`,
+  `test/contracts/test_semantic_task_state.py`,
+  `test/runtime/test_task_state_{fold,durable_carriers}.py`, NEW
+  `test/falsifiers/test_task_revision_capability.py`. No B/C source or shared session test edits.
+- **Required behavior:** retain DIR-I1 batching. Implement DIR-I3 task revision through
+  existing binding, sole ledger writer and fold. Reject malformed, stale/conflicting or
+  unauthorized revisions before state change; preserve objective constraints, grants,
+  ceilings and settled evidence. Existing event carriers and replay semantics decide
+  representation; no parallel task store, event allocation or new enum. A supplies B
+  the concrete callable/payload, validation/refusal and append-before-next-compile hooks.
+- **Benchmark acceptance:** hermetic scripted product episode settles two independent
+  reads in one proposal with distinct receipts; mixed/unknown/terminal batches dispatch
+  zero members. A model-issued revision is durable before the next proposal, appears
+  in L5 working state, and matches uninterrupted state after compaction and fresh-process
+  restart without duplicate revision. Invalid/stale/widening requests leave state and
+  authority unchanged; a task.revise/read batch dispatches nothing. All named cases
+  must satisfy their oracle, with zero false completions; disabling sink handoff or
+  revision persistence must make the corresponding oracle fail.
+- **Focused smoke:** `python3 -m unittest test.falsifiers.test_parallel_observation
+  test.falsifiers.test_task_revision_capability -v`; add only the relevant existing
+  task-state module above when its code changes. The NEW module must include the
+  product/restart cases, not merely helper tests. Do not rerun unchanged baseline modules.
+- **Handoff / merge:** send T-138 disposition first, then independently mergeable shared
+  declarations/bindings, then T-139 implementation and evidence to B. B integrates the
+  session hook and accepts T-139 before releasing session.py. A does not wait for C
+  to implement task-state logic and does not acquire session.py to unblock itself.
+
+### Autonomous lane B — caller-aware exact change closure
+
+- **Objective / dependencies:** close bounded T-78 mutation review; implement T-83b's
+  pure policy now. Session integration requires C's accepted T-75 index contract;
+  T-78 is not an artificial dependency of the pure T-83b policy. A reviews B's new
+  policy/evidence (and T-78 if B authored its candidate).
+- **Owned files:** B surfaces above; NEW
+  `vanguard/packages/agency/multi_file_completeness.py`, NEW
+  `test/runtime/test_multi_file_callers_admission.py`,
+  `test/adapters/test_str_replace_exact.py`, `test/runtime/test_atomic_multi_file_transaction.py`.
+  No task reducers, index adapters, bootstrap, manifest or wiring edits.
+- **Required behavior:** exact unique-preimage replacement, typed mismatch, adapter 2PC
+  and preflight rollback. Pure agency policy consumes value-only IndexPort caller facts
+  plus candidate-bound inspection evidence; session remains the integration owner.
+  Treat missing/stale/truncated caller coverage as unresolved, never an empty complete
+  graph. A public-symbol edit cannot complete until all known callers are inspected or
+  updated and relevant verification succeeds on the exact submitted candidate. A later
+  edit invalidates affected inspection/verification evidence. No fuzzy edit cascade,
+  AST in kernel, index ranking authority or inspection-as-proof-of-behavior shortcut.
+- **Benchmark acceptance:** one five-file product change spanning public API and callers
+  completes only after candidate-bound inspections and exterior verification; known
+  uninspected callers yield `UNINSPECTED_CALLERS_REMAINING`. Inject syntax failure in
+  file four and require all five byte-identical to preimages; absent/duplicate preimage
+  likewise writes nothing. Missing/stale index blocks completion with existing missingness
+  semantics, without consuming reasoning retries. Post-verification tree mutation cannot
+  reuse the verdict. All positive/negative cases meet the oracle, zero false completions;
+  bypassing caller admission must fail the refusal oracle. Preserve production host and
+  containment-profile environment selection while wiring C's index.
+- **Focused smoke:** `python3 -m unittest test.adapters.test_str_replace_exact
+  test.runtime.test_multi_file_callers_admission -v`; select only affected production
+  composition cases in `test.runtime.test_harness_session` and existing transaction
+  module as needed. Extend these fixtures for the whole-candidate benchmark, not a
+  second exhaustive suite.
+- **Handoff / merge:** consume C's selection packet and A's minimal declarations first;
+  integrate C's product path before accepting T-75/T-76, then T-83b, then A's T-139 hook.
+  Publish subject-bound benchmark receipts and final gates. Transfer session.py and its
+  shared test to C explicitly, listing pending hooks as empty, only after both T-83b
+  and T-139 acceptance. B remains final documentation integrator.
+
+### Autonomous lane C — production repository intelligence
+
+- **Objective / dependencies:** finish T-75 selection/fallback, then T-76 product L5
+  observations. No dependency on A's task-state implementation or B's pure caller policy.
+  B accepts the product integration evidence; authored code is not self-accepted.
+- **Owned files:** `vanguard/packages/runtime/bootstrap.py`,
+  `vanguard/packages/adapters/stores/{lda_index,repo_index}.py`,
+  `vanguard/packages/ports/index.py` (existing minimal seam only),
+  `packs/code-default/toolkits/repo_map.py`, `packs/code-default/plugins/index.yaml`,
+  `vanguard/packages/adapters/bindings/code.py`, C schemas above,
+  `test/contracts/test_lda_repo_index.py`, `test/agency/test_l5_only_observations.py`,
+  `test/runtime/test_{bootstrap_coercion,index_refresh,no_index_fallback}.py`,
+  NEW `test/runtime/test_production_index_selection.py`.
+  No session, wiring, four manifests, environment adapters or A task-state files.
+- **Required behavior:** DIR-I2/I5 explicit selection and recorded reason/source identity;
+  unranked value objects through RepositoryMap/IndexPort. All four observations execute
+  through production bindings, are bounded with explicit omissions and appear only in L5.
+  Expose unresolved caller coverage to B; File fallback is not evidence of complete LDA
+  coverage. Do not switch execution profiles or silently downgrade sandboxing.
+- **Benchmark acceptance:** hermetic product fixture matrix: healthy current LDA is
+  selected; absent optional LDA records File fallback; stale, corrupt, empty, unresolved
+  or unsupported present index cannot be accepted as healthy; required missing/unusable
+  index is INDEX_UNBOUND. Delete/rename/edit a source after indexing: next observation
+  contains current facts or explicit stale/unbound refusal, never a deleted symbol as
+  current evidence. Refresh and restart agree on repository identity. All four repo
+  verbs work through the composed product session over ten turns with identical L1–L3
+  bytes and bounded L5 outputs. Every case meets its oracle; disabling selection or
+  freshness rejection fails its corresponding oracle. Fixture FTS5 0/1 is not this proof.
+- **Focused smoke:** `python3 -m unittest test.contracts.test_lda_repo_index
+  test.agency.test_l5_only_observations test.runtime.test_production_index_selection -v`;
+  select affected index-refresh/no-index cases only when those paths change. Use temporary
+  fixture indexes; no mandatory scan/rebuild of the developer's unchanged LDA database.
+- **Handoff / merge:** deliver B a callable selection result using existing value types,
+  healthy/absent/invalid branch behavior, durable diagnostic fields and focused command.
+  Deliver repo wiring/schema needs to A early. B lands the session hook, then C executes
+  the product matrix on that subject and B accepts T-75/T-76. C waits for the explicit
+  session transfer before beginning T-140; no automatic unrelated backlog work.
 
 **Session rules.** Acquire exact file leases from the task row after inspecting
 current Git state; proposed directory maps are not active leases. With no overlap,
@@ -134,7 +272,7 @@ resolved at package admission rather than improvised as new architecture.
 - **requires**: T-138 accepted; **contract**: DIR-I3.
 - **lease**: `vanguard/packages/domain/task_state.py`,
   `vanguard/packages/runtime/task_state.py`, `vanguard/packages/runtime/wiring.py`,
-  one shared `task-revise-tool.json`, the four product manifests, and new
+  the default-manifest `task-revise-tool.json`, the four product manifests, and new
   `test/falsifiers/test_task_revision_capability.py`. No `session.py`, index adapter,
   public event allocation, or second control loop.
 - **exit**: a model-issued serialized `task.revise` validates the existing task-state
@@ -144,10 +282,25 @@ resolved at package admission rather than improvised as new architecture.
 
 **T-140 Production skill and memory retrieval closure** (C; BLOCKED)
 
-- **requires**: T-75/T-76 accepted and B's `session.py` handoff after T-83b.
-- **preparatory lease only**: `vanguard/packages/runtime/skill_index.py`,
-  `vanguard/packages/agency/context/`, memory/index fakes and new focused tests.
-  C MUST NOT edit `session.py` in the current batch.
+- **requires**: T-75/T-76 accepted and B's `session.py` handoff after T-83b and T-139 acceptance.
+- **conditional lease (inactive until handoff)**: `vanguard/packages/runtime/skill_index.py`,
+  transferred `vanguard/packages/runtime/session.py` and `test/runtime/test_harness_session.py`,
+  `test/runtime/test_skill_retrieval_w12a.py`, `test/runtime/test_memory_retrieval_l5.py`,
+  `test/runtime/test_long_session_index_and_memory.py`. No broad context-directory lease,
+  new memory backend, promotion/learning, or A/B source edits. T-140 implementation
+  begins only after T-75/T-76 acceptance and B's session transfer following T-139/T-83b.
+- **benchmark / smoke**: through a composed product session, two distinct task briefs
+  select relevant skill observations, overflow omits whole cards within W12-A, dynamic
+  retrieval preserves L1–L3, denied memory performs zero protected reads, permitted
+  retrieval binds provenance, and a fresh process with a revoked grant cannot reuse
+  prior authority. All cases must meet their oracle; removing authorization or the
+  production selector must fail the corresponding oracle. Run only affected cases in
+  `python3 -m unittest test.runtime.test_skill_retrieval_w12a
+  test.runtime.test_memory_retrieval_l5 test.runtime.test_long_session_index_and_memory -v`.
+  These hermetic results establish integration, not held-out lift or M-8 acceptance.
+- **handoff / merge**: B independently accepts C's subject-bound product evidence;
+  final gates on the resulting subject precede T-140 task acceptance. No other lane
+  reclaims session.py until C records its transfer back.
 - **exit after unblock**: remove or supersede the unused duplicate helper; one
   task-conditioned production selector admits stable cards to L3 only at composition
   and dynamic results to L5, stays within 4096 characters, authorizes memory before

@@ -35,6 +35,14 @@ confidence: high
 
 # TARGET Milestone Gates
 
+## Current integration evidence boundary (2026-09-13)
+
+The supplied clean `90b2970210f474dd0357611d7b101e4a816a8fbe` baseline has a 95/95 focused integration receipt and passing full `just verify`; neither was rerun for planning. Detailed counts are in `tasks.md`. This establishes a green implementation baseline, not new milestone acceptance.
+
+DIR-I5–I7 authorize three integration lanes and conditional T-140 continuation. MS-SEE remains OPEN pending accepted production selection/fallback/freshness and L5 observations; MS-CHANGE remains OPEN pending caller-aware five-file whole-candidate proof. T-139 requires durable product revision/restart evidence; T-140 requires authorized production retrieval evidence and does not close M-8. MS-CONTROL remains OPEN; T-26 remains UNFROZEN with existing quarantine, live-prerequisite and benchmark-backed acceptance requirements unchanged.
+
+FTS5 0/1 and Datalog 0/5 are failures on intentional broken benchmark inputs (spec DIR-I6). They neither close nor independently block a product milestone. A demonstrated production stale-index failure would block MS-SEE/change acceptance; the fixture score does not establish one. Do not freeze controls, assert SOTA superiority or close milestones from green smokes, mechanism presence or manually solved diagnostic fixtures.
+
 ## Leadership disposition (2026-09-12)
 
 The next product outcome is **qualified single-controller Coding Max**: an agent

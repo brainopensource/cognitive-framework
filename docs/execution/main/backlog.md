@@ -36,6 +36,17 @@ Invariant: Mechanism presence is not closure; state transitions require empirica
 ====================================================================================================
 ```
 
+**Current package scope (2026-09-13, DIR-I5–I7).** The coding-harness integration
+assignment admits IDX-01/T-75–T-76, CHANGE/T-78/T-83b and T-138–T-139; exact
+readiness, owners and leases live only in `tasks.md`. T-140 is a conditional
+production retrieval continuation after the shared session transfer, not admission
+of memory learning/promotion or a new backend. No other package is activated as
+fill-in work. FTS5 stale-index 0/1 and Datalog 0/5 are intentional broken benchmark
+inputs (source evidence and consequences in spec DIR-I6). Production deletion
+freshness belongs to IDX-01 acceptance; fixture repair and a Datalog solver remain
+outside the assignment. Future diagnostic use needs separate admission and supplies
+no fresh control holdout. Existing documentation drift adds no package scope.
+
 ## 1. Lifecycle State Definitions
 
 Every item in this backlog is managed through a strict predicate-driven lifecycle:

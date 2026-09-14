@@ -361,9 +361,10 @@ T-137 is hermetic synthetic-fixture work only: zero provider calls/USD under RUN
 
 ## DIR-3. Product capability integration and three-lane continuation (2026-09-13)
 
-Leadership authorizes integrated subject `6f4f3942` plus the reviewed working
-integration delta to continue toward a
-SOTA single-agent coding harness before any control freeze. This decision does not
+Leadership authorizes continuation from the supplied clean baseline
+`90b2970210f474dd0357611d7b101e4a816a8fbe` toward a SOTA single-agent coding
+harness before any control freeze. Earlier `6f4f3942` candidate receipts remain
+historical; the current planning baseline and exact file leases are in `tasks.md`. This decision does not
 accept a benchmark result, authorize a provider call, close a milestone, or activate
 post-control campaign/learning machinery. RUN-12 remains zero calls and zero USD.
 Every prompt, tool-surface, index-selection, or completion-policy change invalidates
@@ -407,6 +408,63 @@ not accepted as retrieval-driven skill selection. MS-SEE stays open through LDA
 selection and product-path observation proof; MS-CHANGE stays open through T-83b and
 whole-candidate qualification; MS-CONTROL stays open through its existing empirical
 and quarantine gates.
+
+**DIR-I5 — Current production acceptance delta.** The immediately dispatched lanes
+are A/T-138→T-139, B/T-78→T-83b and C/T-75→T-76, with exact ownership,
+benchmarks and handoffs in `tasks.md`. Production index selection MUST distinguish:
+
+| Input state | Required product behavior |
+|---|---|
+| Healthy current LDA, declared index | Prefer LDA; record source identity and selected backend. Health includes supported schema, nonzero required entities and resolvable current paths. |
+| Optional LDA absent | Bind FileRepoIndex and record absence/fallback reason and current workspace identity. |
+| Present LDA stale, corrupt, empty, unsupported or unresolved | Reject it as usable evidence; record the cause. An optional index may use an independently current FileRepoIndex with explicit degraded coverage. No silent success or stale facts. |
+| Required index missing or unusable | Preserve INDEX_UNBOUND infrastructure missingness; no reasoning retry burn, fabricated empty graph or success admission. |
+| Workspace changes after selection | Revalidate/refresh against the changed subject before using observations or completion evidence; current facts or explicit unresolved/refusal, never stale-as-current. |
+
+Fallback does not relax a declared required backend or claim full caller coverage.
+No index branch may change the production environment or downgrade containment.
+Caller-admission evidence MUST bind changed public symbols, inspected/updated known
+callers, coverage/omissions and the candidate identity. Incomplete or stale coverage
+cannot satisfy completion. Inspection alone does not replace relevant exterior tests.
+All five transaction preimages MUST survive any failed preflight byte-for-byte;
+verification of an earlier tree cannot authorize completion of a later one.
+Task revision MUST preserve scope, authority, budget and settled evidence, reject
+malformed/stale/conflicting updates, and use the existing sole-writer carriers and
+fold before the next proposal. Compaction and fresh-process replay MUST preserve
+revision identity and state without duplicate effects. These requirements extend
+integration proof, not public event/schema inventory or kernel responsibility.
+
+**DIR-I6 — Benchmark relevance and disposition (source-inspected; scores supplied).**
+The primary product objective is an empirically qualified coding harness. An oracle
+failure on a deliberately broken input is not evidence that the harness ran and
+failed, nor proof of a defect in production repository intelligence.
+
+| Reported result | Evidence and classification | Assignment / acceptance consequence |
+|---|---|---|
+| FTS5 stale-index 0/1, deleted-file symbols searchable | `benchmarks/benchmark_20_suite/README.md` defines brownfield challenges and reset-to-broken inputs; `06_fts5_stale_index_rebuild/src/symbol_indexer.py` explicitly omits the FTS deletion required by its `docs/SPEC.md`. **Intentional unsolved coding fixture**, not an established production blocker. Production uses `adapters/stores/{lda_index,repo_index}.py`; the pack's similarly named indexer is a separate AST function. | Preserve fixture/oracle/reset bytes. Deletion freshness is directly relevant to T-75/T-76 and T-83b, so C's product-path deletion/rename/edit matrix is mandatory. A reproduced production failure blocks those tasks and is repaired within the owning lane; fixture repair is not assigned. |
+| Datalog oracle 0/5, closure/cycles/stratification/aggregation | `benchmarks/datalog_engine/src/datalog.py` labels itself a skeleton with intentional flaws; its README defines the coding problem. Targeted inspection finds no Datalog engine dependency in `vanguard/packages/` or the code-default pack. **Intentional unsolved coding fixture**; no current product blocker established. | No Datalog implementation task. Future separately admitted diagnostic challenge may measure difficult multi-step coding, with bounded resources and independent oracle; not a prerequisite for these lanes or control freeze. |
+
+The supplied scores remain failures on their reported subject; this classification
+MUST NOT relabel them PASS, suppress them, or count reference solutions as agent
+success. No task-solving claim may be made without a bound harness invocation,
+initial fixture, submitted candidate, oracle and durable trajectory. These inspected
+fixtures are exposed diagnostics, never fresh T-51 holdouts. No paid benchmark run,
+fixture repair, alternate solver core or expanded benchmark campaign is admitted.
+
+**DIR-I7 — Autonomy and acceptance boundary.** Current work requires no leadership
+approval and may be dispatched immediately. Seniors resolve ordinary implementation
+choices and record non-conflicting file transfers locally. Return to leadership only
+for unresolved architectural trade-offs, repeated evidenced blockers, scope or
+acceptance disputes, security/authorization approvals or changes to canonical
+invariants. A bounded non-author review of each task's required product evidence
+remains necessary; this is not an invitation to broad review work. Baseline reuse
+and focused verification follow `technical.md`; final repository gates remain
+mandatory for implementation completion. T-140 starts only after T-75/T-76
+acceptance and B transfers session.py after integrating both T-83b and T-139.
+Its authorized scope is production skill/authorized-memory retrieval, not learning,
+promotion or an empirical lift claim. Green gates and mechanisms close no milestone
+by themselves. MS-SEE, MS-CHANGE, MS-CONTROL and M-8 retain their unfulfilled
+acceptance predicates; T-26 remains UNFROZEN and zero paid calls remain in force.
 
 ## NT-1. Near-term baseline, context, cache and recovery delta
 

@@ -46,12 +46,52 @@ threshold, holdout status, kernel contract or campaign/memory-learning gate.
    session. C owns `bootstrap.py`, index adapters and pack repository tooling;
    any required session call is a handoff to B.
 
-The merge order is T-138 review, T-75/T-76 integration, T-78 review, T-83b
-integration, then T-139. This merge order does not serialize independent coding.
-Run targeted falsifiers in each lane and `uv run lda index --delta` after edits;
-the integrated owner runs `just check`, `just verify`, and drift diagnostics once
-all three handoffs are present. T-140 follows B's session handoff. T-26 remains
-UNFROZEN throughout this batch.
+### Execution and evidence recipe for the current assignment
+
+Use the exact file leases and lane contracts in `tasks.md`; these supersede broad
+surface descriptions above. Independent coding proceeds immediately. Integration
+order is: bounded T-138/T-78 review dispositions and minimal shared declarations;
+C selection adapter → B session binding → C product proof / T-75–T-76 acceptance;
+B T-83b integration/acceptance; A T-139 binding → B session hook / acceptance;
+explicit B→C session transfer; C T-140 / B review. T-139 implementation may proceed
+in parallel; only its session hook is serialized. Early shared declarations must be
+separable from T-139 so index integration cannot deadlock waiting for task revision.
+Review only changed seams and required evidence; a non-author senior supplies the
+acceptance disposition. No additional leadership approval is needed for this work.
+
+Reuse the supplied `90b2970210f474dd0357611d7b101e4a816a8fbe` baseline in `tasks.md`.
+Do not rerun LDA, the 95-test slice, or unchanged baseline modules merely to start a
+lane. If HEAD, relevant source or navigation assumptions change, reconcile the
+specific affected paths and refresh navigation only as needed; after code changes,
+perform required delta synchronization and canonical-owner knowledge generation.
+Existing consolidation/drift warnings do not admit cleanup work. Planning itself
+runs neither LDA nor baseline/final test suites.
+
+Each developer runs affected focused smoke cases and the lane's small product
+benchmark while editing, plus repository-required `just check`; before claiming a
+changed implementation task/PR complete, run repository-required `just verify` on
+its exact subject in NT-B02 isolation. One common integrated final-gate receipt may
+cover unchanged constituent tasks on that subject; no receipt carries over silently
+to a changed tree. A candidate waiting for final gates remains LANDED/review-pending.
+Prefer extending named falsifiers over new exhaustive suites. A negative oracle is
+expected to deny; a deliberately disabled guard must make that oracle fail. Do not
+count a negative-path refusal as a benchmark failure or a skipped case as a pass.
+
+For every lane's benchmark retain source SHA/dirty digest, fixture preimage and
+submitted postimage identities, entrypoint/profile, scripted model or cassette
+identity, exact invocation, oracle identity, case-level outcomes, observed counts,
+budgets, and ledger/artifact references. Compare cold-replay state/digests where
+specified. Store evidence using existing artifact conventions, never scratch docs;
+record links and non-author disposition in the existing task row. Hermetic scripted
+runs prove product-path behavior, not model task-solving quality or SOTA superiority.
+Zero provider calls/USD remain in force; no exposed fixture is a frozen holdout.
+
+The benchmark disposition is DIR-I6: preserve reported FTS5 0/1 and Datalog 0/5 as
+broken-input diagnostics. C's production deletion/freshness matrix is required;
+repairing benchmark targets or implementing Datalog is not. Escalate only unresolved
+architectural trade-offs, repeated evidenced blockers, scope/acceptance disputes,
+security/authorization needs or changes to canonical invariants. Ordinary algorithm,
+fixture, private-helper and owner-to-owner handoff choices remain with the seniors.
 
 ## Director Charter II — A1–A6 (2026-09-12)
 

@@ -17,9 +17,9 @@ audience:
   - developer
   - architect
   - contributor
-analysis_subject_sha: 9fd444674bf3a97f2673ff36a5f5928ef046c574
-version: 0.9.1a1
-last_verified: 2026-09-03
+analysis_subject_sha: 6f4f39422abde27d31715560be790003681d4981
+version: 0.9.2
+last_verified: 2026-09-13
 evidence:
   - E-B-009
   - E-B-019
@@ -75,6 +75,15 @@ inspection are tooling in `tools/diagnostics/write_landing_probe.py`, invoked by
 and no runtime re-export facade was introduced to hide the dependency. Its valid
 NOT_REPRODUCED result preserves the unresolved approval-path hypothesis; T-137 is
 authorized to discriminate that seam, not to change production approvals.
+
+**Read-only batch handoff.** A composed harness passes its `SinkRegistry` into the
+single production `EpisodeEngine`. One provider turn may therefore carry a bounded
+partial order of capabilities that the manifest itself classifies as
+`observation`; every member still crosses `Kernel.dispatch` with its own grant,
+reservation and receipt. Any unknown, mutating, process, spawn or terminal member
+refuses the whole batch before dispatch. Settlement is deterministic and sequential
+within dependency levels for the current control candidate; concurrent settlement
+is an optional optimization and cannot change ledger shape or turn accounting.
 
 ## Scope
 - The unified construction pipeline: `compose` $	o$ `activate` $	o$ `begin_episode` $	o$ `execute_turns` $	o$ `teardown`.

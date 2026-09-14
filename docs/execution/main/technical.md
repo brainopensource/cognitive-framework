@@ -8,15 +8,15 @@ status: living
 owner: repository-governance
 canonical_for:
   - execution-technical-handbook
-version: "0.9.6"
+version: "0.9.7"
 purpose: Self-explaining engineering handbook for future work. Present-tense architecture stays in docs/architecture and docs/backend.
 derived_from:
   - docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN.md
   - docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN_B.md
   - docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN_v2.md
   - docs/reports/reviews/electroweak_v092/plans/PHASE-0_DEVELOPMENT_FINAL_PLAN.md
-lock_head: "bf56eea9"
-last_verified: 2026-09-12
+lock_head: "6f4f3942"
+last_verified: 2026-09-13
 relationships:
   - execution.milestones
   - execution.feature_spec
@@ -25,6 +25,33 @@ relationships:
 ---
 
 # Technical Specifications (Detailed)
+
+## Director Charter III — capability integration lanes (2026-09-13)
+
+DIR-3 in `spec.md` supersedes the earlier post-control ordering only for the
+three explicitly admitted lanes below. It changes no provider budget, benchmark
+threshold, holdout status, kernel contract or campaign/memory-learning gate.
+
+1. **A — control state and batch review.** Independently mutation-review T-138,
+   then implement T-139 as one serialized `task.revise` effect over the existing
+   `SemanticTaskState` and `PlanRevised` carrier. The action is not named `plan`
+   inside `agency/`, introduces no second loop and owns no `session.py` changes.
+2. **B — act and verify.** Independently review T-78, author T-83b's pure
+   caller-completeness policy against `IndexPort`, then integrate it as the sole
+   owner of `session.py`. The successful exit binds complete changed paths,
+   inspected callers, verification and the exact submitted candidate.
+3. **C — see.** Independently review T-75/T-76, make the production composition
+   choose a healthy current `LdaRepoIndex` with an explicit `FileRepoIndex`
+   fallback, and exercise all four repository observations through the product
+   session. C owns `bootstrap.py`, index adapters and pack repository tooling;
+   any required session call is a handoff to B.
+
+The merge order is T-138 review, T-75/T-76 integration, T-78 review, T-83b
+integration, then T-139. This merge order does not serialize independent coding.
+Run targeted falsifiers in each lane and `uv run lda index --delta` after edits;
+the integrated owner runs `just check`, `just verify`, and drift diagnostics once
+all three handoffs are present. T-140 follows B's session handoff. T-26 remains
+UNFROZEN throughout this batch.
 
 ## Director Charter II — A1–A6 (2026-09-12)
 
@@ -181,7 +208,7 @@ RUN-1; historical recipes do not authorize implementation.
 ## Active control implementation guide (2026-09-12)
 
 Use [RUN-1](spec.md#run-1-leadership-execution-decision-2026-09-12) and the
-[active work table](tasks.md#active-autonomous-work-2026-09-12). Read only the
+[active work table](tasks.md#active-autonomous-work-2026-09-13). Read only the
 guidance for the admitted task. NT-1 recipes below are preservation references
 for accepted historical work; they are not instructions to repeat T-98–T-111.
 

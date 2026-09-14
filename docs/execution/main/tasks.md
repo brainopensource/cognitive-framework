@@ -13,9 +13,9 @@ purpose: Flat tasks and subtasks by context. No sprint calendar. Near-term owner
 audience:
   - contributor
   - release-owner
-version: 0.9.7
-last_verified: 2026-09-12
-lock_head: "1f42de23"
+version: 0.9.8
+last_verified: 2026-09-13
+lock_head: "6f4f3942"
 normative_authority:
   - docs/execution/main/spec.md
   - docs/execution/main/technical.md
@@ -36,7 +36,7 @@ Authority: execution. Delta contracts: [`spec.md`](spec.md). Handbook: [`technic
 governs the active work below. Older checklists retain historical obligations but
 cannot add READY work. No sprint/wave ordering. No new compiler or episode loop.
 
-## Active autonomous work (2026-09-12)
+## Active autonomous work (2026-09-13)
 
 Planning is approved under the present leadership delegation; no implementation
 or test execution is claimed in this review. Start from `001911e3` or an explicitly
@@ -70,11 +70,26 @@ creating no new planning file; at session exhaustion, leave a resumable handoff.
 | T-132 | C — READY | Director gate-file transfer | Widen gate discovery; quarantine acceptance remains independent and open. |
 | T-133 | C — REOPENED; correction READY | none | Q-01 acceptance rejected: unknown-ID bypass, identity-only guards, unverified evaluation authority and 14 unleased loaders. Gates transferred to T-132. |
 | T-134 | A — ACCEPTED (Director review, 63d12d83) | none | Two durable carriers, schema vectors, append-before-next-call and cold replay; session.py transferred to B. |
-| T-135 | B — READY | T-134 accepted | DIR-D2 INDEX_UNBOUND infrastructure missingness without retry burn. |
+| T-135 | C — LANDED; independent review pending | T-134 accepted | DIR-D2 INDEX_UNBOUND infrastructure missingness without retry burn; three focused falsifiers are green on `6f4f3942`. |
 | T-136 | B — ACCEPTED (Director review, 63d12d83) | none | False SHA-256 shim removed; actual accepted baseline pin preserved. |
 | T-137 | C — READY | T-130 retained valid packet | Hermetic approval-path probe; synthetic non-control fixtures only, no repair authority. |
 | T-131.6 | A — READY | T-134 accepted | Product candidate/evidence identity qualification; explicit lease below, no session.py overlap. |
+| T-75/T-76 | C — LANDED candidate `6f4f3942`; integration review READY | none / T-75 | Qualify `LdaRepoIndex`, bind explicit LDA-or-File fallback at the product composition root, and prove all four `repo.*` observations through the product session in L5. |
+| T-78 | B — LANDED candidate `6f4f3942`; independent review READY | T-17 | Re-run exact-edit mutations and extend the five-file transaction proof; mechanism presence does not close MS-CHANGE. |
+| T-83b | B — READY; pure policy may proceed now | T-75 acceptance for session integration | Implement caller-aware completion as a pure agency policy, then integrate under B's exclusive `session.py` lease. |
+| T-138 | A — LANDED candidate; independent review READY | none | Product activation of bounded read-only batches: session sink handoff, product prompt/tool declarations, and product-path falsifier. |
+| T-139 | A — READY after T-138 review | T-138 accepted | Add serialized `task.revise` over existing task-state/event contracts; no second loop or public event allocation. |
+| T-140 | C — BLOCKED for this parallel batch | T-75/T-76 accepted, B session handoff | Replace the unused task-conditioned skill helper with one production L5 retrieval path and qualify authorized memory retrieval end to end. |
 | T-129 | C with relevant package owner — BLOCKED | T-27 accepted / MS-CONTROL closed | Refine one selected post-control package, memory/skills first. Ratify scope, paths, schema obligations, budgets and leaf edges before implementation. No automatic FH-1 activation. |
+
+**Current three-developer batch.** Dev A owns T-138 review then T-139; Dev B owns
+T-78 review plus T-83b; Dev C owns T-75/T-76 product integration. These are three
+disjoint implementation lanes. B alone owns `vanguard/packages/runtime/session.py`
+after this handoff. C may edit `runtime/bootstrap.py`, `adapters/stores/`, and the
+repository-tool pack surfaces but hands any session call to B. A may edit task-state
+domain/runtime reducers, `runtime/wiring.py`, and the task-revision tool schema but
+does not edit `session.py` or C's index adapter. Existing READY governance work is
+preserved but MUST NOT acquire a conflicting lease during this batch.
 
 **Session rules.** Acquire exact file leases from the task row after inspecting
 current Git state; proposed directory maps are not active leases. With no overlap,
@@ -94,6 +109,50 @@ scope without leadership. Escalate only changed acceptance/authority/public
 contracts, paid resources, unsafe migration or a scope expansion. Missing fixtures
 are authored as the first step of an admitted leaf; missing design decisions are
 resolved at package admission rather than improvised as new architecture.
+
+### Current capability-integration contracts
+
+**T-138 Product read-only batch activation** (A review; LANDED candidate)
+
+- **requires**: none; **contract**: DIR-I1.
+- **candidate lease already touched**: `vanguard/packages/runtime/session.py`,
+  `vanguard/packages/agency/manifests/vg-code-{default,fast,balanced,max}/manifest.json`,
+  shared read/search/repository tool schemas and system prompt,
+  `test/runtime/test_harness_session.py`, `test/falsifiers/test_parallel_observation.py`.
+- **review exit**: prove a composed product `HarnessSession` settles two independent
+  reads in one proposal turn using its own manifest sink registry; removing the sink
+  handoff or restoring the prompt prohibition reds. Mixed mutation/read batches,
+  unknown verbs and completion-plus-read dispatch nothing. Preserve one engine,
+  per-request kernel receipts and sequential deterministic settlement.
+- **verification**: focused product handoff 1/1, parallel/translation slice 66/66,
+  repository L5 slice 3/3 passed on the working candidate atop `6f4f3942` on
+  2026-09-13.
+  Independent mutation review and post-edit full gates remain required.
+
+**T-139 Durable task revision capability** (A; READY after T-138 acceptance)
+
+- **requires**: T-138 accepted; **contract**: DIR-I3.
+- **lease**: `vanguard/packages/domain/task_state.py`,
+  `vanguard/packages/runtime/task_state.py`, `vanguard/packages/runtime/wiring.py`,
+  one shared `task-revise-tool.json`, the four product manifests, and new
+  `test/falsifiers/test_task_revision_capability.py`. No `session.py`, index adapter,
+  public event allocation, or second control loop.
+- **exit**: a model-issued serialized `task.revise` validates the existing task-state
+  shape, appends `PlanRevised` through the sole writer, appears in the next compiled
+  working state, survives a fresh-process fold, and cannot widen task scope, authority
+  or budget. It is privileged/single-action and a mixed observation batch refuses it.
+
+**T-140 Production skill and memory retrieval closure** (C; BLOCKED)
+
+- **requires**: T-75/T-76 accepted and B's `session.py` handoff after T-83b.
+- **preparatory lease only**: `vanguard/packages/runtime/skill_index.py`,
+  `vanguard/packages/agency/context/`, memory/index fakes and new focused tests.
+  C MUST NOT edit `session.py` in the current batch.
+- **exit after unblock**: remove or supersede the unused duplicate helper; one
+  task-conditioned production selector admits stable cards to L3 only at composition
+  and dynamic results to L5, stays within 4096 characters, authorizes memory before
+  retrieval, binds provenance, and reauthorizes after restart. Existing unit tests
+  alone do not satisfy this product-path exit.
 
 **Historical handoff (2026-09-11; accepted integrated subject `2989d57d4d38c01eecdb7a5fbb6f125077f00e59`).** Leadership accepted T-77, T-107, T-110 and T-111 after exact-subject qualification. Full discovery ran 3,121 tests: 3,079 passed, 42 skipped, zero failures/errors. The complete `just check` and `just verify` pipelines, 815-test runtime collection (17 skipped), 38-test focused runtime/RF slice and 20-test preregistration/frozen-canary slice passed. T-110 executed 104 deterministic turns over four fresh Python interpreters and matched the uninterrupted semantic vector without duplicate settled effects. Public presets remain byte-identical; TCB LOC is 1386 (<= 1438); Invariant N-06 has zero `subprocess` imports in runtime; `control_preregistration.json` remains `UNFROZEN` (`subject_sha: null`) with zero paid calls. MS-BASELINE and MS-CONTEXT are CLOSED. MS-CONTROL remains OPEN; T-26 was recorded READY but UNFROZEN; current readiness is superseded by RUN-1, and T-27/T-51/T-52 remain open.
 

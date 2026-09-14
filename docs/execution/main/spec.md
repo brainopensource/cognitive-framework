@@ -7,10 +7,10 @@ status: living
 owner: repository-governance
 canonical_for:
   - active-feature-delta-specification
-version: "2.1.0"
-date: "2026-09-11"
-last_verified: 2026-09-12
-lock_head: "bf56eea9"
+version: "2.1.1"
+date: "2026-09-13"
+last_verified: 2026-09-13
+lock_head: "6f4f3942"
 derived_from:
   - docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN.md
   - docs/reports/reviews/electroweak_v092/plans/DEVELOPMENT_FINAL_PLAN_B.md
@@ -358,6 +358,55 @@ ports and schemas are unchanged by that move. No evidence currently requires a
 public port/schema repair; if T-137 demonstrates one, return a named delta rather
 than inferring approval. Missing approver remains refusal, never default-allow.
 T-137 is hermetic synthetic-fixture work only: zero provider calls/USD under RUN-12.
+
+## DIR-3. Product capability integration and three-lane continuation (2026-09-13)
+
+Leadership authorizes integrated subject `6f4f3942` plus the reviewed working
+integration delta to continue toward a
+SOTA single-agent coding harness before any control freeze. This decision does not
+accept a benchmark result, authorize a provider call, close a milestone, or activate
+post-control campaign/learning machinery. RUN-12 remains zero calls and zero USD.
+Every prompt, tool-surface, index-selection, or completion-policy change invalidates
+an earlier prospective control identity; T-26 remains UNFROZEN.
+
+**DIR-I1 — Read-only observation batches.** One proposal MAY carry a bounded causal
+partial order of independently safe observations. The manifest `SinkRegistry` is the
+only read-only classifier and MUST be handed from `HarnessSession` to the one
+`EpisodeEngine`. Every member MUST cross `Kernel.dispatch` separately with its own
+descriptor, grant, reservation, settlement and receipt. A batch containing an
+unknown, mutation, process, spawn or terminal capability MUST be refused before any
+member dispatches. The batch costs one proposal turn, while resource accounting
+remains per member. Sequential settlement inside a dependency level is the accepted
+deterministic baseline; actual concurrency requires paired evidence that event and
+receipt semantics are unchanged.
+
+**DIR-I2 — Repository observations and index choice.** The four bounded verbs
+`repo.search_symbols`, `repo.get_callers`, `repo.get_dependencies` and
+`repo.get_tests` are authorized product observations and enter L5 only. The minimal
+`IndexPort.callers/get_callers` extension is accepted as the public seam required by
+T-76 and T-83b; it returns value objects and grants no ranking or completion
+authority. Product composition MUST prefer a healthy, current `LdaRepoIndex` when
+`.lda/index.db` is present and MUST record an explicit fallback to `FileRepoIndex`
+when it is absent. A declared required index that is stale or cannot be bound remains
+`INDEX_UNBOUND`; fallback MUST NOT launder stale data into current evidence.
+
+**DIR-I3 — Change and task-state closure.** T-78's exact unique-preimage edit is a
+mechanism candidate, not MS-CHANGE closure. T-83b still gates completion on inspected
+known callers and the exact submitted candidate. A serialized `task.revise`
+capability is authorized to write the existing `SemanticTaskState`/`PlanRevised`
+projection; it MUST introduce no second planner loop, event kind, task-state enum or
+store, MUST survive compaction/restart, and MUST never appear in an observation
+batch. Agency-local identifiers continue to obey the existing lint restriction;
+the durable domain/event spelling remains unchanged.
+
+**DIR-I4 — Honest status of the integrated work.** Green focused tests and `just verify`
+establish a coherent implementation candidate only. C3/C6 tests strengthen existing
+memory/restart behavior; they do not prove a new production retrieval path. The
+task-conditioned helper in `runtime/skill_index.py` has no production caller and is
+not accepted as retrieval-driven skill selection. MS-SEE stays open through LDA
+selection and product-path observation proof; MS-CHANGE stays open through T-83b and
+whole-candidate qualification; MS-CONTROL stays open through its existing empirical
+and quarantine gates.
 
 ## NT-1. Near-term baseline, context, cache and recovery delta
 

@@ -1,7 +1,7 @@
 # Electroweak v0.9.2 → Living Execution Runway Transition Blueprint
 
 **Authority**: Non-Canonical Planning & Staging Resource (`.draft/`) — not law, not a board
-**Target Runway**: [`docs/execution/`](../docs/execution/) (`milestones.md`, `backlog.md`, `spec.md`, `technical.md`, `tasks.md`)
+**Target Runway**: [`docs/execution/`](../../docs/execution/) (`milestones.md`, `backlog.md`, `spec.md`, `technical.md`, `tasks.md`)
 **Source Corpus**: `docs/reports/reviews/electroweak_v092/` — `grok/`, `opus/`, `octopus/`, `gpt/`, `gem/`, **`plans/`**
 **Companion**: `.draft/todo/ELECTROWEAK_SYNTHESIS_FINAL_v093.md` (Synthesis of Record, 2026-09-04)
 **Revision**: v4 — re-aligned 2026-09-04 against the 900-line `.draft/todo/ELECTROWEAK_SYNTHESIS_FINAL_v093.md`

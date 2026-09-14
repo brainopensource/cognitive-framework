@@ -255,7 +255,7 @@ Before T-26 freezes the candidate SHA, all runner contracts, metric vetoes, and 
 | Task ID | Package | Scope & Owner | Falsifier Command | Current Status |
 |:---|:---|:---|:---|:---:|
 | **T-79** ([`tasks.md:828`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L828)) | `CMX-01` | Sole budget catalog on `presets.json`; facade `max_turns` default is `None`; declared ceilings (50k/8t, 150k/20t, 400k/40t). | `python3 -m unittest test.apps.test_preset_budgets -v` | **12/12 PASS** |
-| **T-89** ([`tasks.md:930`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L930)) | `INS-01 / EXP-01` | Canary routes through public [`product_path.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/apps/coding_max/product_path.py) $\to$ [`entrypoint.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/runtime/entrypoint.py). Matches CLI manifest & preset identity. | `python3 -m unittest test.benchmarks.test_product_path_subject -v` | **4/4 PASS** |
+| **T-89** ([`tasks.md:930`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L930)) | `INS-01 / EXP-01` | Canary routes through public [`product_path.py`](file:///home/rock-dev/Coding/cognitive-framework/benchmarks/product_path.py) $\to$ [`entrypoint.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/runtime/entrypoint.py). Matches CLI manifest & preset identity. | `python3 -m unittest test.benchmarks.test_product_path_subject -v` | **4/4 PASS** |
 | **T-92** ([`tasks.md:958`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L958)) | `EXP-01` | L0 smoke triad (P0-FIB, P0-CSV, P0-BUG) through public CLI; typed terminals or failures; patchless completion rejected. | `python3 -m unittest test.benchmarks.test_l0_triad -v` | **4/4 PASS** |
 | **T-93** ([`tasks.md:968`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L968)) | `EXP-01` | L1 12-task freeze (`suite.json`); evidence row schema; reject mixed REPLAY and LIVE tables. | `python3 -m unittest test.benchmarks.test_evidence_row_schema -v` | **5/5 PASS** |
 | **T-94** ([`tasks.md:978`](file:///home/rock-dev/Coding/cognitive-framework/docs/execution/main/tasks.md#L978)) | `EXP-01` | §EW-9.4 metrics; false-completion hard veto (`fc > 0` fails gate); Wilson score calculated solely on `LIVE-*` rows. | `python3 -m unittest test.benchmarks.test_metric_veto -v` | **4/4 PASS** |
@@ -588,3 +588,536 @@ Task / Work Item                                                             │
   - Genuine blockers, approvals, or external resources still required.
   - Any canonical execution documents updated.
  
+
+
+
+
+
+
+
+
+
+
+
+# NEXT PROMPTS TASK INSTRUCTION V094
+
+
+
+
+ # ROLE
+
+  Act as Developer B: Staff Engineer, Principal Runtime and Agency Architect, senior AI-agent systems engineer, and evidence-driven integration owner.
+
+  You own a substantial autonomous development packet, not a narrow review task.
+
+  # BROADER PRODUCT GOAL
+
+  Develop AETHER Vanguard into a state-of-the-art coding-agent harness and meta-framework capable of:
+
+  - Long autonomous development sessions over large repositories and contexts.
+  - Complex multi-file greenfield implementation.
+  - Brownfield code navigation, explanation, debugging, refactoring, and feature development.
+  - Durable planning and execution across compaction and fresh-process restart.
+  - Atomic edits, exterior verification, fail-closed completion, and trustworthy evidence.
+  - Repository intelligence, authorized memory and skill retrieval, subagent coordination, and bounded context composition.
+  - Exact budget, inference, tool-use, candidate, task, and evaluation accounting.
+  - Benchmark-grounded improvement without false success or fabricated evidence.
+
+  The immediate project gap is not more speculative architecture. It is independently qualified product behavior, durable autonomous execution, and trustworthy measurement.
+
+  # YOUR OUTCOME PACKET
+
+  Own and complete:
+
+  1. T-131.3 — candidate-bound completion qualification.
+  2. T-131.4 — immediate termination after admitted completion.
+  3. T-131.7 — durable restart and compaction identity.
+  4. F5 evidence consolidation across all eight qualification rows.
+  5. Integration review and session binding for Developer A’s T-131.8.
+  6. Hermetic T-26b preparation after Developer C releases the relevant runner files.
+
+  Execute T-131.3 → T-131.4 → T-131.7 serially inside your lane. Evidence reconciliation and read-only review may proceed in parallel. Begin T-26b production-file work only after the
+  documented releases and prerequisites are satisfied.
+
+  You have authority to make ordinary local implementation and refactoring decisions within this packet. Escalate only when a necessary change would alter a canonical invariant,
+  authorization/security boundary, public schema, acceptance threshold, control subject, or another developer’s active lease.
+
+  # VERIFIED STARTING SUBJECT
+
+  Committed baseline:
+
+  - Git commit: 2662dd86c3355786387bc37ab773372b2b4e885f
+  - Branch: feat/aether-framework-electroweak-canonical-agents
+  - Package line: 0.9.4
+
+  Post-commit consistency repairs are present in the working tree:
+
+  - Runtime and CLI release identity synchronized to 0.9.4.
+  - Runtime release tests synchronized to 0.9.4.
+  - Four model-accounting vectors synchronized with intentional registry pricing.
+  - docs/execution/main/milestones.md synchronized to package 0.9.4.
+  - docs/backend/architecture/agency.md records inspected-path preservation.
+  - Generated knowledge catalog rebuilt.
+
+  Do not discard or overwrite these repairs. Inspect the working-tree diff before editing and preserve unrelated changes.
+
+  # VERIFIED BASELINE EVIDENCE
+
+  LDA:
+
+  - Index status: HEALTHY.
+  - Bound HEAD: 2662dd86c3355786387bc37ab773372b2b4e885f.
+  - Catalog: VALIDATED.
+  - Stale symbol paths: 0.
+  - Indexed files: 2,146.
+  - Symbols: 12,005.
+  - Relations: approximately 90,000.
+  - Broad drift reports undocumented symbols/orphan documents, including skills and drafts, but no stale paths. Do not create documentation sprawl merely to eliminate this projection-level
+  count.
+
+  Focused consistency slice:
+
+  python3 -m unittest \
+    test.contracts.test_model_accounting_vectors \
+    test.runtime.test_release_identity \
+    test.runtime.test_studio_gateway_version \
+    test.runtime.test_app_service_and_cli -v
+
+  Result: 16/16 PASS.
+
+  Canonical gates after repair:
+
+  - just check: PASS.
+  - just verify: PASS.
+  - Kernel: 102/102 PASS.
+  - Agency: 316/316 PASS.
+  - Contracts: 565/565 PASS, 7 skipped.
+  - TypeScript typechecks: PASS.
+  - TypeScript package/client tests: PASS.
+  - Documentation metadata, links, Markdown, and knowledge generation: PASS.
+  - TCB: 1386/1438 LOC.
+  - Corpus admission intentionally reports HOLDOUT UNACCEPTED.
+  - No paid provider calls were made.
+
+  Full repository discovery:
+
+  python3 -m unittest discover -s test -t .
+
+  Observed result before the consistency repairs:
+
+  - 3,472 tests.
+  - 53 failures.
+  - 49 errors.
+  - 42 skipped.
+  - Duration approximately 295 seconds.
+
+  A large portion of the errors came from restricted UDS/socket/subprocess execution in the test environment. Do not “fix” production code merely to bypass environmental isolation. Relevant
+  genuine failures included:
+
+  - HarnessSession paths using missing `ledger`.
+  - HarnessSession paths using missing `_durable_carrier_append_error`.
+  - Tamper-shield cases returning INDEX_UNBOUND before the expected tamper disposition.
+  - Completion/reconstruction and candidate-workspace integration failures.
+  - Capability/manifest expectation drift.
+  - Control-corpus oracle digest mismatch.
+  - Version and pricing failures, which have already been repaired in the working tree.
+
+  Treat these as evidence to classify. Fix only failures belonging to this packet. Separate product defects, stale tests, deliberate holdout failures, and environment-denied tests.
+
+  # REPOSITORY MAP
+
+  Primary architecture:
+
+  domain ← ports ← kernel ← agency ← runtime → adapters
+                                  ↑
+                                apps
+
+  Relevant tree:
+
+  vanguard/packages/
+  ├── domain/
+  │   ├── task_state.py
+  │   ├── evidence/
+  │   └── ledger/
+  ├── ports/
+  │   ├── model.py
+  │   ├── environment.py
+  │   ├── index.py
+  │   └── evidence_errors.py
+  ├── kernel/
+  │   ├── budget.py
+  │   ├── dispatch.py
+  │   ├── grants.py
+  │   ├── policy.py
+  │   └── provenance.py
+  ├── agency/
+  │   ├── episode/
+  │   │   └── engine.py
+  │   ├── context/
+  │   │   ├── compiler.py
+  │   │   └── compaction.py
+  │   └── completion/
+  ├── runtime/
+  │   ├── session.py
+  │   ├── task_state.py
+  │   ├── checkpoints.py
+  │   ├── evidence_capture.py
+  │   ├── inference_meter.py
+  │   ├── budget_view.py
+  │   ├── app_service.py
+  │   └── entrypoint.py
+  └── adapters/
+      ├── environment/
+      ├── models/
+      └── stores/
+
+  benchmarks/
+  ├── ladder/
+  │   ├── evidence.py
+  │   ├── metrics.py
+  │   └── quarantine.py
+  ├── product_path.py
+  └── baac/
+
+  test/
+  ├── falsifiers/
+  ├── runtime/
+  ├── contracts/
+  ├── agency/
+  ├── benchmarks/
+  └── integration/
+
+  # MODULE BRIEFING
+
+  ## Runtime session
+
+  `vanguard/packages/runtime/session.py` is the product integration seam. It connects task state, index evidence, completion admission, verification, budgets, retrieval, and the episode
+  loop.
+
+  Inspect the initialization and cold-restart paths before adding guards. A field used by dispatch or verification must exist on every valid construction route or fail with a typed
+  disposition—not an AttributeError.
+
+  Do not introduce a second ledger writer, task store, candidate identity algorithm, or control loop.
+
+  ## Episode engine
+
+  `vanguard/packages/agency/episode/engine.py` owns turn progression and termination.
+
+  An admitted completion must terminate immediately. No later model call, proposal, tool dispatch, recovery retry, or effect may occur. A rejected completion may continue only within the
+  original budget and turn constraints.
+
+  Preserve the existing one-proposal turn accounting and observation-batch semantics.
+
+  ## Durable task state and checkpoints
+
+  `vanguard/packages/runtime/task_state.py` and `checkpoints.py` must preserve semantic identity across real store closure and a fresh interpreter.
+
+  Do not prove restart using the same in-memory objects. Do not reconstruct missing authority, budgets, receipts, or candidate identity from convenient defaults.
+
+  ## Context compiler and compaction
+
+  `vanguard/packages/agency/context/compiler.py` and `compaction.py` must preserve the frozen prefix and durable semantic carriers while reducing expendable dialogue.
+
+  Compaction may summarize observation bodies, but it must retain required identity, current task state, relevant evidence, remaining budgets, settled effects, and already-inspected paths.
+
+  ## Evidence and completion
+
+  Use existing evidence envelopes, candidate digests, verification records, exterior-oracle identity, and ledger receipts. Completion is valid only when all required claims bind to the same
+  current candidate and subject.
+
+  No successful outcome may be inferred from missing, stale, foreign, partial, or unverifiable evidence.
+
+  # AUTHORITATIVE DOCUMENTS TO READ
+
+  Read in this order and only load sections relevant to the assigned packet:
+
+  1. README.md
+  2. AGENTS.md
+  3. docs/execution/main/spec.md
+  4. docs/execution/main/tasks.md
+  5. docs/execution/main/technical.md
+  6. docs/execution/main/milestones.md
+  7. docs/execution/main/backlog.md
+  8. docs/backend/architecture/agency.md
+  9. docs/backend/architecture/runtime-execution.md
+  10. docs/architecture/system_composition.md
+  11. docs/backend/reference/events.md
+  12. docs/backend/reference/ports.md
+
+  Applicable authority includes RUN-09, RUN-10, DIR-I7/D-3, D-6/F1–F7, the T-131 row contracts, and T-26b’s current hermetic-preparation boundary.
+
+  Historical reports, benchmark outputs, LDA projections, and chat logs are evidence—not architectural authority.
+
+  # AI-AGENT CAPABILITIES AVAILABLE
+
+  The repository provides:
+
+  - `lda-navigator`: task routing, symbols, callers, documentation obligations, and focused falsifiers.
+  - `test-runner`: timeout-bounded hermetic test execution with structured diagnostics.
+  - `tdd-falsifier`: LDA-guided adversarial development.
+  - `spec-driven-codegen`: spec- and AST-grounded patch preparation.
+  - `autofix-loop`: bounded repair with rollback guarantees.
+  - `lam-engine`: zero-cost deterministic model/harness simulations.
+  - `llama-cpp`: local inference through native llama.cpp; Ollama is forbidden.
+
+  Capability hierarchy:
+
+  Skill → Technique → Proficiency → Mastery
+
+  Use the minimum capability necessary. Maintain the W12-A capability-prefix ceiling of 4096 characters. No live providers or paid evaluation are authorized.
+
+  # REQUIRED LDA WORKFLOW
+
+  Start from the current tree:
+
+  1. Read `dev_context_logs/context_summary.md`, but reject it if its recorded HEAD is stale.
+  2. Run:
+
+     uv run lda doctor --json
+     uv run lda plan "T-131.3 T-131.4 T-131.7 F5 T-26b durable completion restart evidence" --budget 8000
+
+  3. Read targeted symbol ranges and caller graphs.
+  4. Before touching any shared file, confirm its current lease and working-tree state.
+  5. After edits:
+
+     uv run lda index --delta
+     uv run lda drift --json
+     uv run lda diff --json
+
+  Generated knowledge is a projection and must be regenerated, never edited manually.
+
+  # TASK 1 — T-131.3 CANDIDATE-BOUND COMPLETION
+
+  Primary lease after release:
+
+  - vanguard/packages/runtime/session.py
+  - test/falsifiers/test_completion_gate_scope.py
+
+  Outcome:
+
+  Only an exact, authorized, complete candidate with current exterior verification may complete.
+
+  Prove refusal for:
+
+  - Patchless completion.
+  - Tests substituted for implementation.
+  - Unauthorized additional files.
+  - Missing or deleted expected files.
+  - Foreign or same-named workspace.
+  - Candidate mutation after verification.
+  - Stale verification or admission verdict.
+  - Missing candidate/task/composition binding.
+  - Index missingness incorrectly masking a stronger security disposition.
+  - Evidence referring to different candidate trees.
+
+  Preserve T-131.6’s qualified product identity, T-140 retrieval behavior, fixed-slot accounting, tamper shielding, and non-claiming runtime behavior.
+
+  The positive path must traverse the real product session and exterior verification—not only a pure policy helper.
+
+  Focused falsifier:
+
+  python3 -m unittest test.falsifiers.test_completion_gate_scope -v
+
+  Include a bounded adversarial or mutation control proving the oracle fails when candidate-bound admission is bypassed.
+
+  # TASK 2 — T-131.4 TERMINATE AFTER ADMISSION
+
+  Primary lease after release:
+
+  - vanguard/packages/agency/episode/engine.py
+  - test/falsifiers/test_t131_row4_admitted_completion_stops_episode.py
+
+  Outcome:
+
+  - An admitted completion ends the episode immediately.
+  - No subsequent model call occurs.
+  - No subsequent proposal, tool dispatch, effect, retry, or recovery occurs.
+  - A rejection may continue only within the pre-existing turn and budget limits.
+  - INDEX_UNBOUND remains distinct, non-retryable infrastructure missingness.
+  - Ledger ordering remains causal and single-writer.
+  - One ProposalProduced remains one consumed turn.
+  - Observation batching remains read-only and cannot carry a completion or mutation.
+
+  Focused falsifier:
+
+  python3 -m unittest test.falsifiers.test_t131_row4_admitted_completion_stops_episode -v
+
+  Prove that disabling the stop makes the oracle red.
+
+  # TASK 3 — T-131.7 DURABLE RESTART AND COMPACTION IDENTITY
+
+  Primary lease after release:
+
+  - vanguard/packages/runtime/task_state.py
+  - vanguard/packages/runtime/checkpoints.py
+  - vanguard/packages/agency/context/compiler.py
+  - vanguard/packages/agency/context/compaction.py
+  - test/falsifiers/test_t131_row7_resume_compaction_identity.py
+
+  Outcome:
+
+  A real durable fold and fresh-process continuation preserve:
+
+  - Run, task, revision, and active-step identity.
+  - Candidate/workspace identity.
+  - Verification and exterior-evidence identity.
+  - Composition/profile identity.
+  - Resource/index snapshot identity.
+  - Model/tool budget spending and remaining ceilings.
+  - Settled-effect and receipt continuity.
+  - Frozen L1–L3 prefix identity.
+  - Required L5 working state.
+  - Already-inspected paths.
+  - Authorization revalidation at point of use.
+
+  Detect and refuse:
+
+  - Dropped carriers.
+  - Stale checkpoints.
+  - Candidate or task digest mismatch.
+  - Reset or widened budgets.
+  - Duplicated settled effects.
+  - Reused expired authority.
+  - Synthetic state injected to conceal absent durability.
+  - Compaction that loses a completion-critical fact.
+
+  Use actual SQLite close/reopen and a fresh Python process where required.
+
+  Focused falsifier:
+
+  python3 -m unittest test.falsifiers.test_t131_row7_resume_compaction_identity -v
+
+  # TASK 4 — F5 EVIDENCE CONSOLIDATION
+
+  Produce an exact-subject disposition for all eight F5 subclaims.
+
+  For every row, classify:
+
+  - ACCEPTED
+  - LANDED / ACCEPTANCE PENDING
+  - OPEN
+  - BLOCKED
+  - NOT REPRODUCED
+
+  Bind each disposition to:
+
+  - Exact Git subject or dirty-tree digest.
+  - Author and independent acceptor.
+  - Positive product-path receipt.
+  - Adversarial falsifier.
+  - Candidate/task/composition identities.
+  - Test command and actual result.
+  - Remaining dependency or reason for refusal.
+
+  Do not infer acceptance from mechanism presence, old green tests, T-130 diagnostics, or another row’s evidence.
+
+  Do not self-accept behavior you materially authored. If all available reviewers contributed to the claimed behavior, report the need for an uninvolved acceptor.
+
+  # TASK 5 — T-131.8 INTEGRATION REVIEW
+
+  Developer A owns inference accounting and unified budget visibility.
+
+  After A’s handoff and the necessary file releases:
+
+  - Review exact-subject accounting behavior.
+  - Integrate only the smallest required session binding.
+  - Ensure model fallback cannot reset ceilings or bypass the registry.
+  - Ensure unknown usage remains unsettled.
+  - Ensure replay/restart does not double-debit.
+  - Ensure exhaustion denies the next dispatch.
+  - Preserve candidate, task, slot, attempt, and model identity.
+  - Do not redesign A’s implementation without demonstrated need.
+
+  If you materially change A’s claimed behavior, you become a co-author and an uninvolved reviewer must accept it.
+
+  # TASK 6 — HERMETIC T-26b PREPARATION
+
+  Start only after Developer C explicitly releases guarded runner files.
+
+  Hermetic preparation may proceed before real T-51 acceptance, but T-26b acceptance may not.
+
+  Prepare and falsify:
+
+  - Product publication and report-gate integration.
+  - Fixed 30-slot population accounting.
+  - Correct missing/undeterminable dispositions.
+  - No replacement attempts.
+  - Candidate and exterior-oracle identity agreement.
+  - Budget/cost provenance.
+  - Stop behavior after terminal admission.
+  - Refusal of invalid, stale, quarantined, or incomplete evidence.
+
+  Use synthetic, non-control fixtures only. Do not access or execute the held-out corpus. Do not freeze T-26, run T-27, invoke paid providers, change thresholds, or claim control readiness.
+
+  # TEST AND REVIEW STRATEGY
+
+  Use focused positive/adversarial tests during development. Do not repeatedly run the entire repository suite after every local edit.
+
+  For each leaf:
+
+  1. Run its focused falsifier.
+  2. Run directly affected regression modules.
+  3. Run LDA delta and drift checks.
+  4. Record the exact subject and evidence.
+
+  Before claiming the complete packet:
+
+  - Run `just check`.
+  - Run `just verify`.
+  - Run full discovery only in an environment that permits required UDS/socket/subprocess tests.
+  - Separate environment-denied tests from genuine product failures.
+  - Do not suppress failures or report unexecuted commands as passing.
+
+  Benchmarks and real product behavior are the ground truth, but critical authorization, identity, atomicity, and fail-closed contracts must retain executable falsifiers.
+
+  # DOCUMENTATION
+
+  Update existing canonical documentation only when durable behavior or contracts change.
+
+  Route changes to their semantic owner:
+
+  - Execution status/dependencies: docs/execution/main/tasks.md
+  - Typed feature contracts/invariants: docs/execution/main/spec.md
+  - Engineering implementation guidance: docs/execution/main/technical.md
+  - Stable milestone predicates: docs/execution/main/milestones.md
+  - Stable capability inventory: docs/execution/main/backlog.md
+  - Runtime/agency architecture: the existing applicable architecture document
+
+  Do not create new ADRs, reports, task plans, or scratch Markdown. Do not manually edit generated knowledge.
+
+  # DEFINITION OF DONE
+
+  The packet is complete only when:
+
+  - T-131.3, T-131.4, and T-131.7 satisfy their positive and adversarial product-path exits.
+  - Relevant genuine full-discovery failures are fixed or precisely dispositioned.
+  - F5 has an exact-subject eight-row evidence matrix.
+  - A’s T-131.8 integration has an independent disposition.
+  - Hermetic T-26b preparation is complete without claiming real T-51/T-26 acceptance.
+  - All file leases are released explicitly.
+  - LDA is synchronized and reports zero stale paths.
+  - `just check` passes.
+  - `just verify` passes.
+  - No paid provider or held-out control run occurred.
+  - Remaining blockers are reported with evidence.
+
+  # FINAL HANDOFF FORMAT
+
+  Report:
+
+  1. Exact starting and ending Git subjects.
+  2. Files changed, grouped by task.
+  3. Architectural decisions made locally.
+  4. Contracts and failure modes implemented.
+  5. Focused test commands and exact results.
+  6. Canonical gate results.
+  7. Full-discovery disposition.
+  8. F5 row-by-row status.
+  9. T-131.8 integration disposition.
+  10. T-26b preparation status.
+  11. Files released to A and C.
+  12. Genuine blockers requiring leadership or external authority.
+
+  Continue autonomously until the packet is complete or a genuine documented blocker prevents further safe progress.
+
+  The consistency repairs are currently uncommitted, so commit them as a small baseline-fix commit before giving B the task, or explicitly tell B to preserve them.

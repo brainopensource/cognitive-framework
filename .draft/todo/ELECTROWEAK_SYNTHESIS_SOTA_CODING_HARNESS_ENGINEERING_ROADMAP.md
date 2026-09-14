@@ -7,7 +7,7 @@ owner: engineering-architecture-council
 version: "0.9.3"
 date: "2026-09-04"
 supersedes: ["vanguard-sota-coding-harness-engineering-roadmap v1.0.0"]
-companion: [".draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md", ".draft/todo/ELECTROWEAK_SYNTHESIS_DEVELOPMENT_PLAN_GUIDELINES_0209.md"]
+companion: [".draft/todo/ELECTROWEAK_SYNTHESIS_FINAL_v093.md", ".draft/todo/ELECTROWEAK_SYNTHESIS_DEVELOPMENT_PLAN_GUIDELINES_0209.md"]
 verification_basis: "working tree at feat/strongforce_beta_release_v093, HEAD 537bdb66"
 ---
 

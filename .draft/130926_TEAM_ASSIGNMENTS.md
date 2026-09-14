@@ -6,6 +6,8 @@ status: draft
 owner: ceo-cto
 date: 2026-09-13
 subject_head: 4db1f758a4621868e8fbcca80d472c20e94ab385
+reverified_head: fc945740f248f1eaac57d69f118db37787ae4a53
+reverified_on: 2026-09-14
 branch: feat/aether-framework-electroweak-canonical-agents
 companion: .draft/130926_CEO_GUIDELINES_TO_DEVS.md
 team: Dev A (hard problems, architecture, planning) + Dev B & Dev C (core, together)
@@ -21,25 +23,36 @@ decisions nobody else is allowed to make. B and C own the core together, one coh
 
 ## 0. Where we actually are
 
-Verified at `HEAD 4db1f758`. This is the honest gap, not the roadmap's version
-of it. Everything marked **landed** is real and should not be rebuilt.
+Verified at `HEAD 4db1f758` (2026-09-13). This is the honest gap, not the
+roadmap's version of it. Everything marked **landed** is real and should not be
+rebuilt.
+
+> [!IMPORTANT]
+> **Re-verified at `HEAD fc945740` on 2026-09-14.** Six rows below moved between
+> those two subjects and the table has been corrected in place. What landed since
+> the directive was written: the **symbol verbs** (T-75/T-76), the **exact-edit
+> primitive** (T-78), **caller admission** (T-83b), **parallel observation** (A1),
+> the **plan verb** (`task.revise`), and two further **skill cards**. What did not
+> move: `agency.spawn` is still undeclared in the pack, memory retrieval is still
+> unwired, and T-80 (thrash breaker) is still unimplemented. Rows are marked
+> `landed 09-14` where this pass changed them.
 
 | Capability | What a SOTA harness needs | What we have | Owner |
 |---|---|---|---|
-| Tool surface | read / write / edit / glob / grep / shell / plan / delegate | **5 verbs**: `fs.read`, `fs.search`, `patch.apply`, `proc.exec`, `finish` | A + B |
-| Actions per turn | batch of independent reads, partial-ordered | **1, structurally** — `Proposal.action: str \| None` (`agency/episode/state.py:87`) | **A** |
-| Code index | symbol graph, callers, tests, imports | **regex definition scan** (`adapters/stores/repo_index.py:29`); LDA's 90,128 relations unused by the product | **C** |
-| Edit primitive | exact unique-preimage replace + whole-file | **unified diff / whole-file only**; `str_replace` returns zero hits repo-wide | **B** |
-| Multi-file | atomic all-or-nothing + whole-candidate tree digest | 2PC transaction manager exists; exact-edit and caller admission missing | **B** |
-| Planning | durable plan the model reads and revises each turn | `SemanticTaskState` + `PlanRevised` exist and fold; **no plan verb** — the model cannot write to its own plan | **A** |
+| Tool surface | read / write / edit / glob / grep / shell / plan / delegate | **10 tool cards** in `vg-code-balanced` (`landed 09-14`): `read`, `search`, `repo_search_symbols`, `repo_get_callers`, `repo_get_dependencies`, `repo_get_tests`, `patch`, `test`, `task_revise`, `finish`. Was 5 verbs at `4db1f758`. | A + B |
+| Actions per turn | batch of independent reads, partial-ordered | **landed 09-14** — A1 parallel observation: `ProposalKind.OBSERVE`, `MAX_PARALLEL_OBSERVATIONS = 16`, read-only batches only (`agency/episode/observation.py`). Single-action `Proposal.action` (now `state.py:101`) still governs every privileged verb. | **A** |
+| Code index | symbol graph, callers, tests, imports | **partly landed 09-14** (T-75/T-76 ACCEPTED) — healthy LDA-or-explicit-File selection is passed through `Runtime.execute_profiled` into the product session and the four `repo.*` verbs are exposed. `FileRepoIndex` is still a regex definition scan (`adapters/stores/repo_index.py:29`) as the fallback. | **C** |
+| Edit primitive | exact unique-preimage replace + whole-file | **landed 09-14** (T-78 ACCEPTED) — `patch` now accepts unified diff, whole-file write, *and* byte-exact unique `str_replace` (`unique_str_replace` in `adapters/environment/hunks.py`). It never guesses near matches. | **B** |
+| Multi-file | atomic all-or-nothing + whole-candidate tree digest | **landed 09-14** — 2PC transaction manager plus exact-edit (T-78) and caller admission (T-83b) are all ACCEPTED on the final integration subject. This does **not** close MS-CHANGE. | **B** |
+| Planning | durable plan the model reads and revises each turn | **landed 09-14** — `task_revise` (`task.revise`) lets the model revise plan, strategy steps, hypotheses, verification plan and next action under optimistic concurrency. It cannot alter the objective, constraints or budgets. | **A** |
 | Sub-agents | delegate exploration so the parent's context survives | `EpisodeEngine.spawn()` implemented with attenuation — but **`agency.spawn` is not a declared capability in `packs/code-default/harness.yaml`**, so it is unreachable from the product | **A** |
 | Memory | authorized retrieval into the turn | adapter is 639 LOC and declared; on the product path only `authorize("write")` appears — **retrieval is not wired** | **C** |
-| Skills | retrieved, versioned, promoted on evidence | **one static card** (`pytest-green.json`) | **C** |
+| Skills | retrieved, versioned, promoted on evidence | **three static cards** (`pytest-green`, `read-receipt-before-repatch`, `scaffold-python-api-static-html`). Still static: no retrieval, no versioning, no evidence-gated promotion. | **C** |
 | Context economics | progressive, cache-stable prefix, distilled results | **landed** — stable L1–L3, CTRF distillation, trailing goal echo (T-77) | C (hardening only) |
 | Prompt caching | provider `cache_control` on the frozen prefix | **landed** — `prompt_codec.py` negotiates per model, auto-detects support; never verified against a live provider (RUN-12) | C (verify hermetically) |
 | Compaction / long sessions | survive 100+ turns and a process restart | **landed** — 104 turns across four fresh interpreters, semantic parity (T-110) | C (extend to index/memory) |
 | Budget | one aggregate across effects *and* inference | **landed 2026-09-13** — `runtime/inference_meter.py`; presets recalibrated from measurement | A (ratified) |
-| Verification truth | exterior oracle on the exact submitted tree; no false green | tamper shield wired; vacuity gate landed; caller admission missing | **B** |
+| Verification truth | exterior oracle on the exact submitted tree; no false green | tamper shield wired; vacuity gate landed; **caller admission landed 09-14** (T-83b), bound at the session completion seam with candidate-bound inspection evidence. | **B** |
 | Measurement gate | the gate runs the instrument that measures us | `just verify` covers ~947 of ~3,171 tests and excludes `test/benchmarks` and `test/falsifiers` | **B** |
 
 **The one-sentence read:** context engineering is largely solved; *acting* and

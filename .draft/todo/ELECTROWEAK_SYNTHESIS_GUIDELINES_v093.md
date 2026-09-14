@@ -53,8 +53,8 @@ This is the historical implementation runbook designed for autonomous coding age
 Before editing any production code, verify context against:
 1. `AGENTS.md` (Operational rules and anti-sprawl invariants)
 2. `dev_context_logs/context_summary.md` (Current gate headroom and test status)
-3. `.draft/ELECTROWEAK_SYNTHESIS_FINAL_v093.md` (Authoritative Synthesis of Record)
-4. `.draft/todo/SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md` (Architectural Blueprint)
+3. `.draft/todo/ELECTROWEAK_SYNTHESIS_FINAL_v093.md` (Authoritative Synthesis of Record)
+4. `.draft/todo/ELECTROWEAK_SYNTHESIS_SOTA_CODING_HARNESS_ENGINEERING_ROADMAP.md` (Architectural Blueprint)
 5. `docs/execution/main/spec.md` (The Law & delta contracts)
 6. `docs/execution/main/tasks.md` (Tasks T-69 through T-97)
 7. `docs/execution/main/milestones.md` (Target outcomes and release gates)

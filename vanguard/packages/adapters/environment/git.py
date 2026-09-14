@@ -768,43 +768,88 @@ class GitEnvironment:
             mutations
         )
 
+    @staticmethod
+    def _str_replace_edits(args: Mapping[str, Any]) -> list[dict[str, str]] | None:
+        """Normalize the single-edit and batched forms into one ordered list.
+
+        T-78 routes exact replacement through the *multi-file* transaction
+        manager, so the request surface has to be able to carry more than one
+        file. The single ``path``/``old``/``new`` form stays valid and is just
+        a one-element batch; ``None`` means the request was malformed.
+        """
+        raw = args.get("edits")
+        if raw is None:
+            path, old, new = args.get("path"), args.get("old"), args.get("new")
+            if not isinstance(path, str) or not isinstance(old, str) or not isinstance(new, str):
+                return None
+            return [{"path": path, "old": old, "new": new}]
+        if isinstance(raw, (str, bytes, Mapping)) or not isinstance(raw, Sequence):
+            return None
+        edits: list[dict[str, str]] = []
+        for entry in raw:
+            if not isinstance(entry, Mapping):
+                return None
+            path, old, new = entry.get("path"), entry.get("old"), entry.get("new")
+            if not isinstance(path, str) or not isinstance(old, str) or not isinstance(new, str):
+                return None
+            edits.append({"path": path, "old": old, "new": new})
+        return edits or None
+
     def _apply_str_replace(self, req: EffectRequest, descriptor_digest: str, observed_at: str) -> Result[EffectReceipt]:
-        """Apply a unique exact replacement through the normal 2PC manager."""
-        path = req.args.get("path")
-        old = req.args.get("old")
-        new = req.args.get("new")
-        if not isinstance(path, str) or not isinstance(old, str) or not isinstance(new, str):
+        """Apply unique exact replacements as one all-or-nothing 2PC batch.
+
+        Every preimage is resolved against an in-memory shadow before anything
+        reaches disk, so a later edit that is absent, non-unique or syntactically
+        invalid leaves *all* of the batch's files byte-identical to their
+        preimages. Successive edits to the same file compose against the shadow,
+        which keeps each one an exact observation of what it is editing rather
+        than of a state two edits ago.
+        """
+        edits = self._str_replace_edits(req.args)
+        if edits is None:
             return Result.fail(
                 "invalid_request",
                 "str_replace requires string path, old, and new arguments",
             )
-        resolved = self._resolve_safe_path(path)
-        if not resolved.ok or resolved.value is None:
-            return Result.fail("denied", f"path traversal escape denied: {path!r}")
-        file_obj = resolved.value
-        if not file_obj.is_file():
-            return Result.fail(
-                "PATCH_PREIMAGE_MISMATCH",
-                f"PATCH_PREIMAGE_MISMATCH for {path}: target file is absent",
+        shadow: dict[str, str] = {}
+        preimages: dict[str, str] = {}
+        order: list[str] = []
+        for edit in edits:
+            path = edit["path"]
+            resolved = self._resolve_safe_path(path)
+            if not resolved.ok or resolved.value is None:
+                return Result.fail("denied", f"path traversal escape denied: {path!r}")
+            norm_path = os.path.normpath(path).replace("\\", "/")
+            if norm_path not in shadow:
+                file_obj = resolved.value
+                if not file_obj.is_file():
+                    return Result.fail(
+                        "PATCH_PREIMAGE_MISMATCH",
+                        f"PATCH_PREIMAGE_MISMATCH for {path}: target file is absent",
+                    )
+                before = file_obj.read_text(encoding="utf-8")
+                shadow[norm_path] = before
+                preimages[norm_path] = before
+                order.append(norm_path)
+            try:
+                shadow[norm_path] = unique_str_replace(
+                    shadow[norm_path], edit["old"], edit["new"], norm_path)
+            except HunkFailure as err:
+                return Result.fail(err.kind, err.message)
+        affected = tuple(
+            AffectedResource(
+                resource=norm_path,
+                change="modified",
+                pre_digest=_compute_file_digest(preimages[norm_path]),
+                post_digest=_compute_file_digest(shadow[norm_path]),
             )
-        before = file_obj.read_text(encoding="utf-8")
-        norm_path = os.path.normpath(path).replace("\\", "/")
-        try:
-            after = unique_str_replace(before, old, new, norm_path)
-        except HunkFailure as err:
-            return Result.fail(err.kind, err.message)
-        pre_digest = _compute_file_digest(before)
-        post_digest = _compute_file_digest(after)
-        affected = AffectedResource(
-            resource=norm_path,
-            change="modified",
-            pre_digest=pre_digest,
-            post_digest=post_digest,
+            for norm_path in order
         )
-        stale = stale_preimage_kind_message((affected,), req.args)
+        stale = stale_preimage_kind_message(affected, req.args)
         if stale is not None:
             return Result.fail(stale[0], stale[1])
-        transaction = self._apply_multi_file_transaction({norm_path: after})
+        transaction = self._apply_multi_file_transaction(
+            {norm_path: shadow[norm_path] for norm_path in order})
         if not transaction.ok:
             return Result.fail(
                 transaction.error.kind if transaction.error else "invalid_request",
@@ -815,8 +860,16 @@ class GitEnvironment:
                 descriptor_digest=descriptor_digest,
                 outcome="ok",
                 observed_at=observed_at,
-                result_digest=digest_of({"resource": norm_path, "post_digest": post_digest}),
-                affected_resources=(affected,),
+                result_digest=digest_of({
+                    "resources": [
+                        {"resource": item.resource, "post_digest": item.post_digest}
+                        for item in affected
+                    ]
+                }) if len(affected) > 1 else digest_of({
+                    "resource": affected[0].resource,
+                    "post_digest": affected[0].post_digest,
+                }),
+                affected_resources=affected,
             )
         )
 

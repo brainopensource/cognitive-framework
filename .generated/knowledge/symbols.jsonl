@@ -68,6 +68,7 @@
 {"symbol": "CallerAdmissionEvidence", "kind": "class", "defined_in": "vanguard/packages/agency/multi_file_completeness.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "CallerAdmissionVerdict", "kind": "class", "defined_in": "vanguard/packages/agency/multi_file_completeness.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "CancellationRequested", "kind": "class", "defined_in": "vanguard/packages/runtime/service/service.py", "canonical_owner": "docs/backend/architecture/application-interfaces.md"}
+{"symbol": "CandidateStructure", "kind": "class", "defined_in": "vanguard/packages/adapters/environment/analysis.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "CanonicalManifest", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/manifest.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "CanonicalisationError", "kind": "class", "defined_in": "vanguard/packages/domain/canonicalisation/jcs.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "Capability", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}

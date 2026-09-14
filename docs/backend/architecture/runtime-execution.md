@@ -92,6 +92,14 @@ and appends `PlanRevised` before the next prompt compilation via the sole ledger
 `task.revise` are strictly refused under the single-writer rule; invalid, stale, or widening requests leave authority
 and state completely unchanged.
 
+**Bootstrap and completion handoff (DIR-2 / ADR-0107).** `Runtime.execute_profiled` passes the bootstrap-selected
+`IndexPort`, its immutable `IndexSelection`, any typed binding failure, and the pure caller-admission policy into the
+single `HarnessSession`; the session does not silently replace an explicit bootstrap failure. Completion evidence is
+candidate-bound: changed public symbols obtain known callers from that selected index, and each caller must be current
+inspection evidence or part of the submitted change. A file fallback records unresolved coverage and cannot manufacture
+an empty caller graph. Shared Python syntax/stub inspection is adapter-side analysis: transactions own write preflight,
+while the session consumes the same structural facts for completion qualification.
+
 ## Scope
 - The unified construction pipeline: `compose` $	o$ `activate` $	o$ `begin_episode` $	o$ `execute_turns` $	o$ `teardown`.
 - `RunPlan` immutable identity preimage and environment digest ($D_R$).

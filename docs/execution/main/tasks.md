@@ -75,19 +75,18 @@ creating no new planning file; at session exhaustion, leave a resumable handoff.
 | T-136 | B — ACCEPTED (Director review, 63d12d83) | none | False SHA-256 shim removed; actual accepted baseline pin preserved. |
 | T-137 | C — READY | T-130 retained valid packet | Hermetic approval-path probe; synthetic non-control fixtures only, no repair authority. |
 | T-131.6 | A — READY | T-134 accepted | Product candidate/evidence identity qualification; explicit lease below, no session.py overlap. |
-| T-75/T-76 | C — LANDED candidate `6f4f3942`; integration review READY | none / T-75 | Qualify `LdaRepoIndex`, bind explicit LDA-or-File fallback at the product composition root, and prove all four `repo.*` observations through the product session in L5. |
-| T-78 | B — LANDED candidate `6f4f3942`; independent review READY | T-17 | Re-run exact-edit mutations and extend the five-file transaction proof; mechanism presence does not close MS-CHANGE. |
-| T-83b | B — READY; pure policy may proceed now | T-75 acceptance for session integration | Implement caller-aware completion as a pure agency policy, then integrate under B's exclusive `session.py` lease. |
-| T-138 | A — LANDED candidate; independent review READY | none | Product activation of bounded read-only batches: session sink handoff, product prompt/tool declarations, and product-path falsifier. |
-| T-139 | A — READY after T-138 review | T-138 accepted | Add serialized `task.revise` over existing task-state/event contracts; no second loop or public event allocation. |
-| T-140 | C — BLOCKED pending handoff; conditional continuation | T-75/T-76 accepted, T-83b/T-139 integrated, B session handoff | Replace the unused task-conditioned skill helper with one production L5 retrieval path and qualify authorized memory retrieval end to end. |
+| T-75/T-76 | C — ACCEPTED on final integration subject | none / T-75 | Healthy LDA-or-explicit-File selection is now passed through `Runtime.execute_profiled` into the product session; all four `repo.*` observations remain L5-only. |
+| T-78 | B — ACCEPTED on final integration subject | T-17 | Exact unique-preimage replacement now has real five-file 2PC/preflight proof in both production and hermetic fake environments; this does not close MS-CHANGE. |
+| T-83b | B — ACCEPTED on final integration subject | T-75 accepted | The pure caller policy is bound at the session completion seam with candidate-bound, current inspection evidence. |
+| T-138 | A — ACCEPTED on final integration subject | none | Bounded read-only batches retain one proposal turn and per-request kernel receipts through the product session. |
+| T-139 | A — ACCEPTED on final integration subject | T-138 accepted | Serialized `task.revise` is durable before the following prompt, privileged/single-action, and preserves task-state invariants. |
+| T-140 | C — READY (separate next task) | T-75/T-76 accepted, T-83b/T-139 integrated, B session handoff | Implement one production L5 skill/retrieval path and authorized memory retrieval; no work is authorized merely by this readiness change. |
 | T-129 | C with relevant package owner — BLOCKED | T-27 accepted / MS-CONTROL closed | Refine one selected post-control package, memory/skills first. Ratify scope, paths, schema obligations, budgets and leaf edges before implementation. No automatic FH-1 activation. |
 
-**Current three-developer assignment.** Dispatch A/T-138→T-139, B/T-78→T-83b,
-and C/T-75→T-76 immediately under DIR-I5–I7. T-140 is a conditional C continuation,
-not concurrent session work. Other READY rows retain their status but acquire no
-lease or automatic fill-in scope here. The exact leases below supersede older
-lane labels, directory-wide leases and candidate file-touch lists for these tasks.
+**Current integration disposition.** A/T-138→T-139, B/T-78→T-83b and C/T-75→T-76
+are accepted together on the final integration subject. Session ownership returns to
+the execution board with no pending A/B/C hook. T-140 is the next separately scoped
+C task; its READY state is not a lease, automatic continuation, or milestone acceptance.
 
 **Baseline receipt (supplied by leadership; not rerun during planning).** Subject
 `90b2970210f474dd0357611d7b101e4a816a8fbe`: clean; LDA HEALTHY,

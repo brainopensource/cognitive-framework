@@ -74,6 +74,22 @@ capabilities:
     selector:
       kind: generic
       uriPattern: proc://exec/allow/git,pytest,ruff,python3
+  - verb: repo.search_symbols
+    selector:
+      kind: generic
+      uriPattern: repo://symbols/*
+  - verb: repo.get_callers
+    selector:
+      kind: generic
+      uriPattern: repo://callers/*
+  - verb: repo.get_dependencies
+    selector:
+      kind: generic
+      uriPattern: repo://dependencies/*
+  - verb: repo.get_tests
+    selector:
+      kind: generic
+      uriPattern: repo://tests/*
 budget:
   usd_micros: 250000
   millis: 1800000

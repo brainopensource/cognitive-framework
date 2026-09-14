@@ -20,7 +20,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Iterable, Mapping, Sequence
 
-__all__ = ["SkillIndex", "SkillEntry", "build_skill_index"]
+__all__ = ["SkillIndex", "SkillEntry", "build_skill_index", "retrieve_skills_for_task"]
 
 #: `W12-A`. Characters, not tokens: the ceiling must be checkable without a
 #: tokenizer, and a character bound is conservative against every tokenizer.
@@ -92,3 +92,43 @@ def build_skill_index(
         used += cost
     return SkillIndex(entries=tuple(entries), dropped=tuple(dropped),
                       budget_chars=budget_chars)
+
+
+def retrieve_skills_for_task(
+    skills: Iterable[Mapping[str, str]],
+    task_description: str,
+    *,
+    budget_chars: int = DEFAULT_BUDGET_CHARS,
+) -> SkillIndex:
+    """Task-conditioned skill selection respecting the W12-A <= 4096 char ceiling.
+
+    Scores candidate skills by relevance against `task_description`.
+    Candidate skills with higher overlap are prioritized. Fits as many relevant
+    skills as possible within `budget_chars <= 4096`. Truncation is by whole entries.
+    """
+    raw_list = list(skills)
+    if not task_description:
+        return build_skill_index(raw_list, budget_chars=budget_chars)
+
+    task_tokens = set(
+        part.lower() for part in "".join(c if c.isalnum() else " " for c in task_description).split()
+        if len(part) >= 2
+    )
+
+    def score_skill(raw: Mapping[str, str]) -> int:
+        name = str(raw.get("name", "")).lower()
+        desc = str(raw.get("description", "")).lower()
+        name_tokens = set("".join(c if c.isalnum() else " " for c in name).split())
+        desc_tokens = set("".join(c if c.isalnum() else " " for c in desc).split())
+        name_score = sum(3 for t in task_tokens if t in name_tokens or t in name)
+        desc_score = sum(1 for t in task_tokens if t in desc_tokens)
+        return name_score + desc_score
+
+    scored = []
+    for idx, raw in enumerate(raw_list):
+        score = score_skill(raw)
+        scored.append((score, -idx, raw))
+    scored.sort(key=lambda item: (item[0], item[1]), reverse=True)
+
+    sorted_skills = [item[2] for item in scored]
+    return build_skill_index(sorted_skills, budget_chars=budget_chars)

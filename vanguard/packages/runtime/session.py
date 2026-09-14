@@ -856,6 +856,19 @@ class HarnessSession:
 
         self.workspace_access = ports.workspace_access or _workspace_access_of(run_plan)
         self.scope = task.scope_override or _scope_for(harness, workspace_access=self.workspace_access)
+        # `W11-A`. The index is bound only when the pack declares it. A
+        # harness that did not ask for one must not silently acquire it: an
+        # unread component is a composition error (`S7-B-02`), and an unasked-
+        # for one is a capability nobody authorised.
+        self.index: IndexPort | None = None
+        if harness.index_component is not None:
+            self.index = ports.index or FileRepoIndex()
+            self.index.index(str(repo))
+        elif ports.index is not None:
+            raise CompositionError(
+                "an IndexPort was supplied but the manifest declares no index "
+                "component; bind it in the pack or do not pass it")
+
         # `W3`. `self.scope.actions` is the manifest ceiling attenuated for
         # this session (e.g. plan mode drops `patch.apply`/`proc.exec` --
         # `wiring._scope_for`). Binding adapters only for held verbs, rather
@@ -883,23 +896,12 @@ class HarnessSession:
                     composition_digest=harness.frozen.composition_digest,
                     lineage=task.lineage or (task.episode_id,),
                     ledger=self.ledger,
+                    index=self.index,
                 )
             )
             for verb in harness.verbs
             if verb in self.scope.actions
         }
-        # `W11-A`. The index is bound only when the pack declares it. A
-        # harness that did not ask for one must not silently acquire it: an
-        # unread component is a composition error (`S7-B-02`), and an unasked-
-        # for one is a capability nobody authorised.
-        self.index: IndexPort | None = None
-        if harness.index_component is not None:
-            self.index = ports.index or FileRepoIndex()
-            self.index.index(str(repo))
-        elif ports.index is not None:
-            raise CompositionError(
-                "an IndexPort was supplied but the manifest declares no index "
-                "component; bind it in the pack or do not pass it")
 
         # `I-SHD` / T-18. Freeze the enumerated oracle set now, at turn 0,
         # before the operator has seen the workspace -- a shield frozen after
@@ -2444,7 +2446,11 @@ class HarnessSession:
         """Apply the coding completion contract before reducing ``finish``."""
         policy = self.ports.completion_policy or self._completion_gate
         packet = self.context_packet
-        if packet is None:
+        if (
+            self.index is None
+            or packet is None
+            or (INDEX_PORT_UNBOUND in getattr(packet, "omissions", ()))
+        ):
             return AdmissionVerdict(
                 False,
                 "INDEX_UNBOUND",

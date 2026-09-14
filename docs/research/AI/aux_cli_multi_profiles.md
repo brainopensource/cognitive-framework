@@ -1,6 +1,17 @@
+---
+id: research.ai-aux-cli-multi-profiles
+kind: research
+status: reference
+authority: non-canonical
+summary: "Multi-profile CLI configuration and keyring isolation report for Antigravity CLI on Fedora Linux."
+topic:
+  - cli
+  - authentication
+---
+
 # Multi-Profile CLI Configuration & Keyring Isolation Report
 **Target Platform:** Fedora Linux Workstation 44 (x86_64)  
-**Binary:** Antigravity CLI (`/home/rock-dev/.local/bin/agy`)  
+**Binary:** Antigravity CLI (`/home/user/.local/bin/agy`)  
 **Scope:** Dual-profile independent authentication caching (`agy` vs `agy2`)  
 **Date:** September 12, 2026  
 
@@ -23,7 +34,7 @@
 
 ## 2. Root Cause Analysis: Why `--gemini_dir` Alone Always Failed
 
-Binary reverse engineering and runtime tracing of `/home/rock-dev/.local/bin/agy` (ELF 64-bit LSB Go binary) revealed the exact failure mechanism:
+Binary reverse engineering and runtime tracing of `/home/user/.local/bin/agy` (ELF 64-bit LSB Go binary) revealed the exact failure mechanism:
 
 ### 2.1 The Two Storage Planes
 Antigravity CLI segregates state into two distinct subsystems:
@@ -52,7 +63,7 @@ a{ss} 3 "service" "gemini" "username" "antigravity" "xdg:schema" "org.freedeskto
 ```
 
 ### 2.3 The Inevitable Token Collision Loop
-Because Fedora Workstation runs **one D-Bus user session bus** and **one GNOME Keyring daemon** (`/home/rock-dev/.local/share/keyrings/login.keyring`) per Linux UID (`1000`):
+Because Fedora Workstation runs **one D-Bus user session bus** and **one GNOME Keyring daemon** (`/home/user/.local/share/keyrings/login.keyring`) per Linux UID (`1000`):
 1. User runs `agy` -> reads `(service="gemini", username="antigravity")` from GNOME Keyring.
 2. User runs `agy2` (with `--gemini_dir=$HOME/.profiles/rock-dev_beta/.gemini`).
 3. `agy2` initializes authentication -> connects to `$DBUS_SESSION_BUS_ADDRESS` -> queries `(service="gemini", username="antigravity")`.
@@ -64,8 +75,8 @@ Because Fedora Workstation runs **one D-Bus user session bus** and **one GNOME K
 Additionally, inspection of `~/.bashrc` lines 54–59 showed that the aliases had been inverted:
 ```bash
 # Previous erroneous configuration:
-alias agy='/home/rock-dev/.local/bin/agy --gemini_dir=$HOME/.profiles/rock-dev_beta/.gemini'
-alias agy2='/home/rock-dev/.local/bin/agy --gemini_dir=$HOME/.gemini'
+alias agy='/home/user/.local/bin/agy --gemini_dir=$HOME/.profiles/rock-dev_beta/.gemini'
+alias agy2='/home/user/.local/bin/agy --gemini_dir=$HOME/.gemini'
 ```
 `agy` was pointed at the son's directory (`rock-dev_beta`), while `agy2` was pointed at the root `.gemini` directory.
 
@@ -105,7 +116,7 @@ Below is an exhaustive technical evaluation of all viable architectures on Fedor
 #### Architecture:
 Instead of allowing `agy2` to connect to the shared user D-Bus daemon at `/run/user/1000/bus`, `agy2` is wrapped in `dbus-run-session`. This spawns an ephemeral, private D-Bus bus for `agy2`. Simultaneously, `XDG_DATA_HOME` is pointed to `$HOME/.profiles/rock-dev_beta/.local/share`, directing a dedicated `gnome-keyring-daemon` to store keys exclusively in `$HOME/.profiles/rock-dev_beta/.local/share/keyrings/login.keyring`.
 
-#### Wrapper Implementation (`/home/rock-dev/.local/bin/agy2`):
+#### Wrapper Implementation (`/home/user/.local/bin/agy2`):
 ```bash
 #!/usr/bin/env bash
 set -e
@@ -119,7 +130,7 @@ mkdir -p "$XDG_DATA_HOME/keyrings"
 exec dbus-run-session -- bash -c '
   echo "" | gnome-keyring-daemon --unlock 2>/dev/null || true
   eval $(gnome-keyring-daemon --start --components=secrets 2>/dev/null)
-  exec /home/rock-dev/.local/bin/agy --gemini_dir="'"$PROFILE_DIR"'/.gemini" "$@"
+  exec /home/user/.local/bin/agy --gemini_dir="'"$PROFILE_DIR"'/.gemini" "$@"
 ' bash "$@"
 ```
 
@@ -136,9 +147,9 @@ exec dbus-run-session -- bash -c '
 If a strict OS-level boundary is preferred in the future, creating a separate Linux account for the son is the mathematically infallible Unix approach.
 
 #### Architecture:
-Create an independent Linux user `rock-son`. Every Linux user automatically receives:
+Create an independent Linux user `user-son`. Every Linux user automatically receives:
 - A separate Linux UID (`1001`).
-- A distinct `$HOME` (`/home/rock-son`).
+- A distinct `$HOME` (`/home/user`).
 - An isolated systemd user instance (`systemd --user`).
 - A separate D-Bus session bus (`/run/user/1001/bus`).
 - A dedicated encrypted GNOME Keyring unlocked by the son's login credentials.
@@ -146,14 +157,14 @@ Create an independent Linux user `rock-son`. Every Linux user automatically rece
 #### Setup Commands:
 ```bash
 # 1. Create the user
-sudo useradd -m -s /bin/bash rock-son
-sudo passwd rock-son
+sudo useradd -m -s /bin/bash user-son
+sudo passwd user-son
 
-# 2. Grant rock-dev permission to run agy as rock-son without password
-echo "rock-dev ALL=(rock-son) NOPASSWD: /home/rock-son/.local/bin/agy" | sudo tee /etc/sudoers.d/agy-son
+# 2. Grant user permission to run agy as user-son without password
+echo "user ALL=(user-son) NOPASSWD: /home/user/.local/bin/agy" | sudo tee /etc/sudoers.d/agy-son
 
-# 3. Define the alias in rock-dev's ~/.bashrc:
-alias agy2='sudo -u rock-son -i agy'
+# 3. Define the alias in user's ~/.bashrc:
+alias agy2='sudo -u user-son -i agy'
 ```
 
 #### Trade-offs:
@@ -184,7 +195,7 @@ exec bwrap \
   --bind "$HOME/Coding" "$HOME/Coding" \
   --setenv HOME "$PROFILE_DIR" \
   --setenv DBUS_SESSION_BUS_ADDRESS "" \
-  /home/rock-dev/.local/bin/agy "$@"
+  /home/user/.local/bin/agy "$@"
 ```
 
 #### Trade-offs:
@@ -232,20 +243,20 @@ When `agy` cannot reach any Secret Service daemon (e.g. `DBUS_SESSION_BUS_ADDRES
 ## 4. Current Configuration & Verification
 
 ### Applied Modifications
-1. **Created Executable Wrapper**: `/home/rock-dev/.local/bin/agy2` (Solution 1).
+1. **Created Executable Wrapper**: `/home/user/.local/bin/agy2` (Solution 1).
 2. **Updated Shell Aliases**:
    - `~/.bashrc`:
      ```bash
-     alias agy='/home/rock-dev/.local/bin/agy --gemini_dir=$HOME/.gemini'
-     alias agy2='/home/rock-dev/.local/bin/agy2'
+     alias agy='/home/user/.local/bin/agy --gemini_dir=$HOME/.gemini'
+     alias agy2='/home/user/.local/bin/agy2'
      ```
    - `~/.zshrc`:
      ```bash
-     alias agy='/home/rock-dev/.local/bin/agy --gemini_dir=$HOME/.gemini'
-     alias agy2='/home/rock-dev/.local/bin/agy2'
+     alias agy='/home/user/.local/bin/agy --gemini_dir=$HOME/.gemini'
+     alias agy2='/home/user/.local/bin/agy2'
      ```
 3. **Initialized Private Keyring Store**:
-   - Located at: `/home/rock-dev/.profiles/rock-dev_beta/.local/share/keyrings/`
+   - Located at: `/home/user/.profiles/rock-dev_beta/.local/share/keyrings/`
    - Pre-configured with an unlocked keyring to prevent password prompts.
 
 ### Verification Steps
@@ -274,7 +285,7 @@ If either CLI ever prompts for authentication in a future session:
 1. **Verify D-Bus Session Isolation**:
    ```bash
    # Check if agy2 is successfully launching its private D-Bus bus:
-   /home/rock-dev/.local/bin/agy2 --help
+   /home/user/.local/bin/agy2 --help
    # If an error regarding DBus appears, check if dbus-run-session is present:
    which dbus-run-session gnome-keyring-daemon
    ```

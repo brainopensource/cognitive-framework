@@ -32,15 +32,24 @@ class CodeAdapterOutcome:
 
 
 class CodeEffectAdapter:
-    """Effect adapter bridging filesystem, patch, and process effects to EnvironmentPort."""
+    """Effect adapter bridging filesystem, patch, process, and repo index effects."""
 
-    def __init__(self, verb: str, environment: Any, call_type: str = "apply") -> None:
+    def __init__(
+        self,
+        verb: str,
+        environment: Any,
+        call_type: str = "apply",
+        index: Any = None,
+    ) -> None:
         self.name = verb
         self.verb = verb
         self._environment = environment
         self._call_type = call_type
+        self._index = index
 
     def healthy(self) -> bool:
+        if self.verb.startswith("repo."):
+            return self._index is not None
         if self._environment is None:
             return False
         required_method = "observe" if self._call_type == "observe" else "apply"
@@ -55,6 +64,79 @@ class CodeEffectAdapter:
         return True
 
     def execute(self, request: Any) -> CodeAdapterOutcome:
+        if self.verb.startswith("repo."):
+            if self._index is None:
+                return CodeAdapterOutcome(
+                    status="error",
+                    occurrence="not_occurred",
+                    cost={"usd_micros": 0},
+                    detail="index is not available",
+                )
+            args = getattr(request, "args", {}) or {}
+            if not isinstance(args, Mapping):
+                return CodeAdapterOutcome(
+                    status="error",
+                    occurrence="not_occurred",
+                    cost={"usd_micros": 0},
+                    detail="effect args must be an object",
+                )
+            if self.verb == "repo.search_symbols":
+                res = self._index.symbols(name=str(args.get("name", "")), path=str(args.get("path", "")))
+                if not res.ok:
+                    return CodeAdapterOutcome(
+                        status="error",
+                        occurrence="not_occurred",
+                        cost={"usd_micros": 0},
+                        detail=str(res.error.message if res.error else "symbols failed"),
+                    )
+                detail = json.dumps([{"name": s.name, "kind": s.kind, "path": s.path, "line": s.line} for s in (res.value or ())])
+            elif self.verb == "repo.get_callers":
+                res = self._index.callers(symbol=str(args.get("symbol", "")))
+                if not res.ok:
+                    return CodeAdapterOutcome(
+                        status="error",
+                        occurrence="not_occurred",
+                        cost={"usd_micros": 0},
+                        detail=str(res.error.message if res.error else "callers failed"),
+                    )
+                detail = json.dumps([{"name": s.name, "kind": s.kind, "path": s.path, "line": s.line} for s in (res.value or ())])
+            elif self.verb == "repo.get_dependencies":
+                res = self._index.dependencies(path=str(args.get("path", "")))
+                if not res.ok:
+                    return CodeAdapterOutcome(
+                        status="error",
+                        occurrence="not_occurred",
+                        cost={"usd_micros": 0},
+                        detail=str(res.error.message if res.error else "dependencies failed"),
+                    )
+                detail = json.dumps([{"source": d.source, "target": d.target, "kind": d.kind} for d in (res.value or ())])
+            elif self.verb == "repo.get_tests":
+                res = self._index.tests(path=str(args.get("path", "")))
+                if not res.ok:
+                    return CodeAdapterOutcome(
+                        status="error",
+                        occurrence="not_occurred",
+                        cost={"usd_micros": 0},
+                        detail=str(res.error.message if res.error else "tests failed"),
+                    )
+                detail = json.dumps([{"test_path": t.test_path, "source_path": t.source_path} for t in (res.value or ())])
+            else:
+                return CodeAdapterOutcome(
+                    status="error",
+                    occurrence="not_occurred",
+                    cost={"usd_micros": 0},
+                    detail=f"unknown verb {self.verb}",
+                )
+
+            digest = digest_of({"verb": self.verb, "detail": detail})
+            return CodeAdapterOutcome(
+                status="ok",
+                occurrence="occurred",
+                cost={"usd_micros": 0},
+                result_digest=digest,
+                detail=detail,
+            )
+
         if self._environment is None:
             return CodeAdapterOutcome(
                 status="error",
@@ -202,10 +284,17 @@ class CodeBindingProvider:
             "patch.apply",
             "fs.patch",
             "proc.exec",
+            "repo.search_symbols",
+            "repo.get_callers",
+            "repo.get_dependencies",
+            "repo.get_tests",
         )
 
     def create_adapter(self, verb: str, environment: Any, **kwargs: Any) -> CodeEffectAdapter:
         if verb not in self.supported_verbs:
             raise ValueError(f"Verb {verb!r} not supported by CodeBindingProvider")
-        call_type = "observe" if verb in {"fs.read", "fs.search"} else "apply"
-        return CodeEffectAdapter(verb, environment, call_type=call_type)
+        call_type = "observe" if verb in {
+            "fs.read", "fs.search",
+            "repo.search_symbols", "repo.get_callers", "repo.get_dependencies", "repo.get_tests",
+        } else "apply"
+        return CodeEffectAdapter(verb, environment, call_type=call_type, index=kwargs.get("index"))

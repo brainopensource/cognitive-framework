@@ -37,7 +37,7 @@ _DEFINITIONS: tuple[tuple[str, str, re.Pattern[str]], ...] = (
 
 _IGNORED = {
     ".git", ".vanguard", ".pytest_cache", "__pycache__", "node_modules",
-    ".venv", "dist", "build",
+    ".venv", "dist", "build", ".cursor", ".lda",
 }
 
 
@@ -180,6 +180,18 @@ class InMemoryRepoIndex:
             return Result.fail("invalid_request", str(exc))
         return Result.success(tuple(item for item in self._tests if not path or item.source_path.startswith(path) or item.test_path.startswith(path)))
 
+    def callers(self, *, symbol: str = "") -> Result[Sequence[Symbol]]:
+        if not symbol:
+            return Result.success(())
+        matching: list[Symbol] = []
+        for path, text in sorted(self._contents.items()):
+            if symbol in text:
+                matching.extend(_symbols_in(path, text.splitlines()))
+        return Result.success(tuple(matching))
+
+    def get_callers(self, symbol: str) -> Result[Sequence[Symbol]]:
+        return self.callers(symbol=symbol)
+
     def repo_map(self, *, token_budget: int = 4000) -> Result[RepositoryMap]:
         if token_budget < 0:
             return Result.fail("invalid_request", "token_budget must be non-negative")
@@ -222,9 +234,17 @@ class FileRepoIndex:
         files: list[str] = []
         symbols: list[Symbol] = []
         for path in sorted(base.rglob("*")):
+            if set(path.parts) & _IGNORED:
+                continue
             if path.is_symlink():
-                return Result.fail("invalid_request", f"symlink escape is not indexable: {path.relative_to(base)}")
-            if not path.is_file() or set(path.parts) & _IGNORED:
+                try:
+                    resolved = path.resolve()
+                    if not resolved.is_relative_to(base):
+                        return Result.fail("invalid_request", f"symlink escape is not indexable: {path.relative_to(base)}")
+                except OSError:
+                    return Result.fail("invalid_request", f"symlink unresolvable: {path.relative_to(base)}")
+                continue
+            if not path.is_file():
                 continue
             if len(files) >= self.max_files:
                 break
@@ -302,6 +322,24 @@ class FileRepoIndex:
             return Result.fail("invalid_request", str(exc))
         return Result.success(tuple(item for item in self._tests if not path or item.source_path.startswith(path) or item.test_path.startswith(path)))
 
+    def callers(self, *, symbol: str = "") -> Result[Sequence[Symbol]]:
+        if self._root is None:
+            return Result.fail("invalid_request", "index() has not been called")
+        if not symbol:
+            return Result.success(())
+        matching: list[Symbol] = []
+        for s in self._symbols:
+            try:
+                content = (self._root / s.path).read_text(encoding="utf-8")
+                if symbol in content:
+                    matching.append(s)
+            except OSError:
+                continue
+        return Result.success(tuple(matching))
+
+    def get_callers(self, symbol: str) -> Result[Sequence[Symbol]]:
+        return self.callers(symbol=symbol)
+
     def repo_map(self, *, token_budget: int = 4000) -> Result[RepositoryMap]:
         if self._root is None:
             return Result.fail("invalid_request", "index() has not been called")
@@ -333,9 +371,17 @@ def _live_content_digests(root: Path, *, max_files: int) -> dict[str, str] | Non
         return None
     digests: dict[str, str] = {}
     for path in sorted(base.rglob("*")):
+        if set(path.parts) & _IGNORED:
+            continue
         if path.is_symlink():
-            return None
-        if not path.is_file() or set(path.parts) & _IGNORED:
+            try:
+                resolved = path.resolve()
+                if not resolved.is_relative_to(base):
+                    return None
+            except OSError:
+                return None
+            continue
+        if not path.is_file():
             continue
         if len(digests) >= max_files:
             break

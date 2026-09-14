@@ -91,11 +91,15 @@ class ProposalTranslator:
                     "was cut off before the closing fence. Send the action again with "
                     "a shorter payload.")
             return Result.success({"kind": "finish", "note": text or "Task completed."})
-        if len(calls) != 1:
-            return Result.fail("instrument_error", "multiple actions in one proposal are unsupported")
 
-        call = calls[0]
-        name = str(call["name"])
+        # One call is a single action. Several are a parallel observation
+        # batch: N independent read-only requests settled as a causal
+        # partial order inside one turn (`A1`, Vision Ch. 15). Whether the
+        # verbs in a batch are actually read-only is *not* decided here --
+        # sink classification is manifest and kernel authority, and a
+        # translator carrying its own list of safe verbs would be a second
+        # place a domain has to be registered (`C-01`). The episode refuses
+        # a batch carrying anything that is not an observation.
 
         declared: dict[str, str] = {}
 
@@ -139,115 +143,147 @@ class ProposalTranslator:
             if isinstance(verb, str) and isinstance(selector, Mapping):
                 selector_of.setdefault(verb, selector)
 
-        # The manifest is the only authority on which verbs exist. There is no
-        # builtin table to fall back to: a translator carrying its own list of
-        # legal verbs is a second place a domain has to be registered, and the
-        # two drift (`C-01`, `ADR-0060`).
-        if declared:
-            action = declared.get(name)
-            if action is None and name in set(declared.values()):
+        def _translate_call(call: Mapping[str, Any]) -> Result[Mapping[str, Any]]:
+            name = str(call["name"])
+
+            # The manifest is the only authority on which verbs exist. There is no
+            # builtin table to fall back to: a translator carrying its own list of
+            # legal verbs is a second place a domain has to be registered, and the
+            # two drift (`C-01`, `ADR-0060`).
+            if declared:
+                action = declared.get(name)
+                if action is None and name in set(declared.values()):
+                    action = name
+                if action is None:
+                    # Fails closed against the pack that *is* declared.
+                    return Result.fail("instrument_error",
+                                       f"tool is not declared by manifest: {name}")
+            elif _is_canonical_verb(name):
+                # No pack was supplied. The translator has no opinion about which
+                # verbs exist -- carrying a builtin list is what made this file the
+                # second place a domain had to be registered (`C-01`) -- but it can
+                # tell a canonical verb from an alias by *shape*: `namespace.verb`
+                # is already canonical and passes through unresolved.
                 action = name
-            if action is None:
-                # Fails closed against the pack that *is* declared.
-                return Result.fail("instrument_error",
-                                   f"tool is not declared by manifest: {name}")
-        elif _is_canonical_verb(name):
-            # No pack was supplied. The translator has no opinion about which
-            # verbs exist -- carrying a builtin list is what made this file the
-            # second place a domain had to be registered (`C-01`) -- but it can
-            # tell a canonical verb from an alias by *shape*: `namespace.verb`
-            # is already canonical and passes through unresolved.
-            action = name
-        else:
-            # A bare tool name is a pack alias, and only a pack can resolve it.
-            # Rejecting here rather than guessing is what keeps a competitor's
-            # tool vocabulary out of this file (`C-01`).
-            return Result.fail(
-                "instrument_error",
-                f"{name!r} is an alias; no manifest was supplied to resolve it")
+            else:
+                # A bare tool name is a pack alias, and only a pack can resolve it.
+                # Rejecting here rather than guessing is what keeps a competitor's
+                # tool vocabulary out of this file (`C-01`).
+                return Result.fail(
+                    "instrument_error",
+                    f"{name!r} is an alias; no manifest was supplied to resolve it")
 
-        raw_args = call.get("arguments", {})
-        args = _coerce_tool_arguments(raw_args)
-        if args is None:
-            kind = type(raw_args).__name__
-            return Result.fail("instrument_error", f"tool arguments must be an object, got {kind}")
-        args = dict(args)
+            raw_args = call.get("arguments", {})
+            args = _coerce_tool_arguments(raw_args)
+            if args is None:
+                kind = type(raw_args).__name__
+                return Result.fail("instrument_error", f"tool arguments must be an object, got {kind}")
+            args = dict(args)
 
-        try:
-            encoded = json.dumps(args, ensure_ascii=False, separators=(",", ":"))
-        except (TypeError, ValueError):
-            return Result.fail("instrument_error", "tool arguments are not JSON data")
-        if len(encoded.encode("utf-8")) > 1_048_576:
-            return Result.fail("instrument_error", "tool arguments exceed 1MB")
-        if not _within_depth(args):
-            return Result.fail("instrument_error", "tool arguments exceed nesting limit")
-
-        # Normalise provider vocabulary against the *declared* schema. Nothing
-        # here knows which verb it is normalising: the tool's own schema says
-        # which properties exist, and a synonym is consulted only for a
-        # property that schema declares.
-        properties = _declared_properties(schema_of.get(action))
-        for target, synonyms in cls.PROVIDER_SYNONYMS.items():
-            # When the pack declared a schema, only its properties are filled.
-            # With no schema there is nothing to consult, so a synonym present
-            # in the call is taken at face value.
-            if (properties and target not in properties) or target in args:
-                continue
-            for synonym in synonyms:
-                if synonym in args:
-                    args[target] = args[synonym]
-                    break
-        wants_argv = "argv" in properties or (
-            not properties and any(key in args for key in cls.COMMAND_SYNONYMS))
-        if wants_argv and "argv" not in args:
-            command = next((args[key] for key in cls.COMMAND_SYNONYMS
-                            if isinstance(args.get(key), str)), None)
-            if not isinstance(command, str) or not command.strip():
-                return Result.fail("instrument_error", "action requires an argv array")
             try:
-                args["argv"] = shlex.split(command)
-            except ValueError:
-                return Result.fail("instrument_error", "command is not valid argv text")
-            for key in cls.COMMAND_SYNONYMS:
-                args.pop(key, None)
+                encoded = json.dumps(args, ensure_ascii=False, separators=(",", ":"))
+            except (TypeError, ValueError):
+                return Result.fail("instrument_error", "tool arguments are not JSON data")
+            if len(encoded.encode("utf-8")) > 1_048_576:
+                return Result.fail("instrument_error", "tool arguments exceed 1MB")
+            if not _within_depth(args):
+                return Result.fail("instrument_error", "tool arguments exceed nesting limit")
 
-        if "path" not in args:
-            diff_text = args.get("diff") or args.get("patch")
-            if isinstance(diff_text, str):
-                match = re.search(r"^\+\+\+\s+(?:b/)?(\S+)", diff_text, re.MULTILINE) or re.search(r"^---\s+(?:a/)?(\S+)", diff_text, re.MULTILINE)
-                if match:
-                    args["path"] = match.group(1)
+            # Normalise provider vocabulary against the *declared* schema. Nothing
+            # here knows which verb it is normalising: the tool's own schema says
+            # which properties exist, and a synonym is consulted only for a
+            # property that schema declares.
+            properties = _declared_properties(schema_of.get(action))
+            for target, synonyms in cls.PROVIDER_SYNONYMS.items():
+                # When the pack declared a schema, only its properties are filled.
+                # With no schema there is nothing to consult, so a synonym present
+                # in the call is taken at face value.
+                if (properties and target not in properties) or target in args:
+                    continue
+                for synonym in synonyms:
+                    if synonym in args:
+                        args[target] = args[synonym]
+                        break
+            wants_argv = "argv" in properties or (
+                not properties and any(key in args for key in cls.COMMAND_SYNONYMS))
+            if wants_argv and "argv" not in args:
+                command = next((args[key] for key in cls.COMMAND_SYNONYMS
+                                if isinstance(args.get(key), str)), None)
+                if not isinstance(command, str) or not command.strip():
+                    return Result.fail("instrument_error", "action requires an argv array")
+                try:
+                    args["argv"] = shlex.split(command)
+                except ValueError:
+                    return Result.fail("instrument_error", "command is not valid argv text")
+                for key in cls.COMMAND_SYNONYMS:
+                    args.pop(key, None)
 
-        missing = _missing_required(schema_of.get(action), args)
-        if missing:
-            return Result.fail(
-                "instrument_error",
-                f"{name}: missing required argument(s): {', '.join(missing)}")
+            if "path" not in args:
+                diff_text = args.get("diff") or args.get("patch")
+                if isinstance(diff_text, str):
+                    match = re.search(r"^\+\+\+\s+(?:b/)?(\S+)", diff_text, re.MULTILINE) or re.search(r"^---\s+(?:a/)?(\S+)", diff_text, re.MULTILINE)
+                    if match:
+                        args["path"] = match.group(1)
 
-        # Explicit completion is a declared tool, never a translator builtin.
-        # Resolve and validate it through the manifest first, then hand the
-        # candidate to agency admission; this branch grants no completion.
-        if action == "agency.finish":
-            finish_schema = schema_of.get(action)
-            error = _finish_arguments_error(finish_schema, args)
-            if error is not None:
-                return Result.fail("instrument_error", f"{name}: {error}")
-            return Result.success({"kind": "finish", "note": args["summary"]})
+            missing = _missing_required(schema_of.get(action), args)
+            if missing:
+                return Result.fail(
+                    "instrument_error",
+                    f"{name}: missing required argument(s): {', '.join(missing)}")
 
-        selector = selector_of.get(action) or _selector_from_schema(
-            properties or frozenset(args))
-        resource = _bind_resource(selector, args, resource_root)
-        if not resource.ok:
-            return Result.fail(resource.error.kind, resource.error.message)
-        return Result.success({
-            "kind": "effect",
-            "action": action,
-            "resource": resource.value,
-            "args": args,
-            # Null is intentional: the provider has no reservation authority.
-            # The episode parser normalises this to an empty runtime request.
-            "reservation": None,
-        })
+            # Explicit completion is a declared tool, never a translator builtin.
+            # Resolve and validate it through the manifest first, then hand the
+            # candidate to agency admission; this branch grants no completion.
+            if action == "agency.finish":
+                finish_schema = schema_of.get(action)
+                error = _finish_arguments_error(finish_schema, args)
+                if error is not None:
+                    return Result.fail("instrument_error", f"{name}: {error}")
+                return Result.success({"kind": "finish", "note": args["summary"]})
+
+            selector = selector_of.get(action) or _selector_from_schema(
+                properties or frozenset(args))
+            resource = _bind_resource(selector, args, resource_root)
+            if not resource.ok:
+                return Result.fail(resource.error.kind, resource.error.message)
+            return Result.success({
+                "kind": "effect",
+                "action": action,
+                "resource": resource.value,
+                "args": args,
+                # Null is intentional: the provider has no reservation authority.
+                # The episode parser normalises this to an empty runtime request.
+                "reservation": None,
+            })
+
+        if len(calls) == 1:
+            return _translate_call(calls[0])
+
+        requests: list[dict[str, Any]] = []
+        for position, call in enumerate(calls):
+            translated = _translate_call(call)
+            if not translated.ok:
+                return Result.fail(translated.error.kind, translated.error.message)
+            row = translated.value
+            if row.get("kind") != "effect":
+                # Completion is a terminal, not an observation. It travels
+                # alone or the turn it ends is ambiguous.
+                return Result.fail(
+                    "instrument_error",
+                    "a completion cannot be combined with other actions in one "
+                    "proposal; send it on its own")
+            call_id = call.get("id")
+            requests.append({
+                "id": (call_id if isinstance(call_id, str) and call_id
+                       else f"obs-{position}"),
+                "action": row["action"],
+                "resource": row["resource"],
+                "args": row["args"],
+                # No `dependsOn`: a provider that emits several calls in one
+                # reply is asserting they are independent. Declaring an order
+                # it did not ask for would invent causality.
+            })
+        return Result.success({"kind": "observe", "requests": requests})
 
 
 def validate_proposal_schema(proposal: Mapping[str, Any]) -> Result[None]:

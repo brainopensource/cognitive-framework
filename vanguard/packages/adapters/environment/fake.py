@@ -35,6 +35,7 @@ from .hunks import (
     parse_hunk_header,
     require_complete_hunk,
     stale_preimage_kind_message,
+    unique_str_replace,
 )
 
 __all__ = ["FakeEnvironment"]
@@ -448,6 +449,41 @@ class FakeEnvironment:
         descriptor_digest = digest_of({"verb": req.verb, "action": req.action, "args": req.args})
 
         action = req.action
+        if action == "str_replace":
+            path = req.args.get("path")
+            old = req.args.get("old")
+            new = req.args.get("new")
+            if not isinstance(path, str) or not isinstance(old, str) or not isinstance(new, str):
+                return Result.fail("invalid_request", "str_replace requires string path, old, and new arguments")
+            if not _is_safe_relative_path(path):
+                return Result.fail("denied", f"path traversal escape denied: {path!r}")
+            norm_path = os.path.normpath(path).replace("\\", "/")
+            before = self._files.get(norm_path)
+            if before is None:
+                return Result.fail("PATCH_PREIMAGE_MISMATCH", f"PATCH_PREIMAGE_MISMATCH for {norm_path}: target file is absent")
+            try:
+                after = unique_str_replace(before, old, new, norm_path)
+            except HunkFailure as err:
+                return Result.fail(err.kind, err.message)
+            affected = AffectedResource(
+                resource=norm_path,
+                change="modified",
+                pre_digest=_compute_file_digest(before),
+                post_digest=_compute_file_digest(after),
+            )
+            stale = stale_preimage_kind_message((affected,), req.args)
+            if stale is not None:
+                return Result.fail(stale[0], stale[1])
+            self._files[norm_path] = after
+            return Result.success(
+                EffectReceipt(
+                    descriptor_digest=descriptor_digest,
+                    outcome="ok",
+                    observed_at=observed_at,
+                    result_digest=digest_of({"resource": norm_path, "post_digest": affected.post_digest}),
+                    affected_resources=(affected,),
+                )
+            )
         if action == "patch" or req.patch is not None:
             patch_content = req.patch or req.args.get("patch", "")
             if not isinstance(patch_content, str):

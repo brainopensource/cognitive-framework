@@ -20,6 +20,7 @@ __all__ = [
     "parse_hunk_header",
     "require_complete_hunk",
     "stale_preimage_kind_message",
+    "unique_str_replace",
 ]
 
 _HUNK_HEADER = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
@@ -32,6 +33,36 @@ class HunkFailure(Exception):
         super().__init__(message)
         self.kind = kind
         self.message = message
+
+
+def unique_str_replace(before: str, old: str, new: str, path: str) -> str:
+    """Replace one and only one byte-exact text preimage.
+
+    This deliberately has no whitespace normalization, line-number fallback, or
+    approximate matching.  A model must observe the exact current preimage
+    before it can edit it; otherwise the write is refused rather than guessed.
+    """
+    if not old:
+        raise HunkFailure(
+            "PATCH_PREIMAGE_MISMATCH",
+            f"PATCH_PREIMAGE_MISMATCH for {path}: preimage must not be empty",
+        )
+    positions: list[int] = []
+    offset = 0
+    while True:
+        position = before.find(old, offset)
+        if position < 0:
+            break
+        positions.append(position)
+        offset = position + 1
+    if len(positions) != 1:
+        detail = "absent" if not positions else f"non-unique ({len(positions)} matches)"
+        raise HunkFailure(
+            "PATCH_PREIMAGE_MISMATCH",
+            f"PATCH_PREIMAGE_MISMATCH for {path}: exact preimage is {detail}",
+        )
+    position = positions[0]
+    return before[:position] + new + before[position + len(old):]
 
 
 def parse_hunk_header(line: str) -> int | None:

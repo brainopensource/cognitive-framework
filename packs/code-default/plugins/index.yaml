@@ -13,4 +13,20 @@ capabilities:
       root: /workspace
       paths:
         - /workspace
+  - verb: repo.search_symbols
+    selector:
+      kind: generic
+      uriPattern: repo://symbols/*
+  - verb: repo.get_callers
+    selector:
+      kind: generic
+      uriPattern: repo://callers/*
+  - verb: repo.get_dependencies
+    selector:
+      kind: generic
+      uriPattern: repo://dependencies/*
+  - verb: repo.get_tests
+    selector:
+      kind: generic
+      uriPattern: repo://tests/*
 entry: toolkits/repo_map.py:IndexToolkit

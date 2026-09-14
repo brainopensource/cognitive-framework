@@ -91,5 +91,11 @@ class IndexPort(Protocol):
     def tests(self, *, path: str = "") -> Result[Sequence[TestAssociation]]:
         """Test-to-source associations, optionally for one source path."""
 
+    def callers(self, *, symbol: str = "") -> Result[Sequence[Symbol]]:
+        """Callers of `symbol`, as definitions. Empty is not a failure."""
+
+    def get_callers(self, symbol: str) -> Result[Sequence[Symbol]]:
+        """Convenience alias for callers(symbol=symbol)."""
+
     def repo_map(self, *, token_budget: int = 4000) -> Result[RepositoryMap]:
         """Return a bounded, attributable repository summary."""

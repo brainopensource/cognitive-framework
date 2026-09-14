@@ -43,6 +43,7 @@ from .hunks import (
     parse_hunk_header,
     require_complete_hunk,
     stale_preimage_kind_message,
+    unique_str_replace,
 )
 from .transaction import AtomicMultiFileTransactionManager, FileMutation
 
@@ -767,6 +768,58 @@ class GitEnvironment:
             mutations
         )
 
+    def _apply_str_replace(self, req: EffectRequest, descriptor_digest: str, observed_at: str) -> Result[EffectReceipt]:
+        """Apply a unique exact replacement through the normal 2PC manager."""
+        path = req.args.get("path")
+        old = req.args.get("old")
+        new = req.args.get("new")
+        if not isinstance(path, str) or not isinstance(old, str) or not isinstance(new, str):
+            return Result.fail(
+                "invalid_request",
+                "str_replace requires string path, old, and new arguments",
+            )
+        resolved = self._resolve_safe_path(path)
+        if not resolved.ok or resolved.value is None:
+            return Result.fail("denied", f"path traversal escape denied: {path!r}")
+        file_obj = resolved.value
+        if not file_obj.is_file():
+            return Result.fail(
+                "PATCH_PREIMAGE_MISMATCH",
+                f"PATCH_PREIMAGE_MISMATCH for {path}: target file is absent",
+            )
+        before = file_obj.read_text(encoding="utf-8")
+        norm_path = os.path.normpath(path).replace("\\", "/")
+        try:
+            after = unique_str_replace(before, old, new, norm_path)
+        except HunkFailure as err:
+            return Result.fail(err.kind, err.message)
+        pre_digest = _compute_file_digest(before)
+        post_digest = _compute_file_digest(after)
+        affected = AffectedResource(
+            resource=norm_path,
+            change="modified",
+            pre_digest=pre_digest,
+            post_digest=post_digest,
+        )
+        stale = stale_preimage_kind_message((affected,), req.args)
+        if stale is not None:
+            return Result.fail(stale[0], stale[1])
+        transaction = self._apply_multi_file_transaction({norm_path: after})
+        if not transaction.ok:
+            return Result.fail(
+                transaction.error.kind if transaction.error else "invalid_request",
+                transaction.error.message if transaction.error else "str_replace transaction failed",
+            )
+        return Result.success(
+            EffectReceipt(
+                descriptor_digest=descriptor_digest,
+                outcome="ok",
+                observed_at=observed_at,
+                result_digest=digest_of({"resource": norm_path, "post_digest": post_digest}),
+                affected_resources=(affected,),
+            )
+        )
+
     def apply(self, req: EffectRequest, grant: Optional[Any] = None) -> Result[EffectReceipt]:
         del grant
         disposed_err = self._check_disposed()
@@ -780,6 +833,8 @@ class GitEnvironment:
         descriptor_digest = digest_of({"verb": req.verb, "action": req.action, "args": req.args})
 
         action = req.action
+        if action == "str_replace":
+            return self._apply_str_replace(req, descriptor_digest, observed_at)
         if action == "patch" and req.patch is None and "diff" not in req.args and "content" in req.args:
             action = "write"
 

@@ -65,6 +65,7 @@ class BindingContext:
     composition_digest: str = ""
     lineage: tuple[str, ...] = ()
     ledger: Any = None
+    index: Any = None
 
 class _EnvironmentEffect:
     """`kernel.EffectAdapter` over an `EnvironmentAdapter` (`ICD §4`).
@@ -238,6 +239,100 @@ def _spawn_effector(context: BindingContext) -> Any:
     )
 
 
+class _RepoIndexEffect:
+    """`kernel.EffectAdapter` over an `IndexPort` for repo.* query verbs."""
+
+    def __init__(self, name: str, index: Any) -> None:
+        self.name = name
+        self.verb = name
+        self._index = index
+
+    def healthy(self) -> bool:
+        return self._index is not None
+
+    def execute(self, request: Any) -> Any:
+        import json
+        from ..domain.canonicalisation.digest import digest_of
+        from ..kernel import AdapterOutcome, Occurrence
+
+        if self._index is None:
+            return AdapterOutcome(
+                status="error",
+                occurrence=Occurrence.NOT_OCCURRED,
+                actual_cost={"usd_micros": 0},
+                result_digest="sha256:" + "0" * 64,
+                detail="index is not available",
+            )
+        args = getattr(request, "args", {}) or {}
+        if not isinstance(args, Mapping):
+            args = {}
+        if self.name == "repo.search_symbols":
+            res = self._index.symbols(name=str(args.get("name", "")), path=str(args.get("path", "")))
+            if not res.ok:
+                return AdapterOutcome(
+                    status="error",
+                    occurrence=Occurrence.NOT_OCCURRED,
+                    actual_cost={"usd_micros": 0},
+                    result_digest="sha256:" + "0" * 64,
+                    detail=str(res.error.message if res.error else "symbols failed"),
+                )
+            detail = json.dumps([{"name": s.name, "kind": s.kind, "path": s.path, "line": s.line} for s in (res.value or ())])
+        elif self.name == "repo.get_callers":
+            res = self._index.callers(symbol=str(args.get("symbol", "")))
+            if not res.ok:
+                return AdapterOutcome(
+                    status="error",
+                    occurrence=Occurrence.NOT_OCCURRED,
+                    actual_cost={"usd_micros": 0},
+                    result_digest="sha256:" + "0" * 64,
+                    detail=str(res.error.message if res.error else "callers failed"),
+                )
+            detail = json.dumps([{"name": s.name, "kind": s.kind, "path": s.path, "line": s.line} for s in (res.value or ())])
+        elif self.name == "repo.get_dependencies":
+            res = self._index.dependencies(path=str(args.get("path", "")))
+            if not res.ok:
+                return AdapterOutcome(
+                    status="error",
+                    occurrence=Occurrence.NOT_OCCURRED,
+                    actual_cost={"usd_micros": 0},
+                    result_digest="sha256:" + "0" * 64,
+                    detail=str(res.error.message if res.error else "dependencies failed"),
+                )
+            detail = json.dumps([{"source": d.source, "target": d.target, "kind": d.kind} for d in (res.value or ())])
+        elif self.name == "repo.get_tests":
+            res = self._index.tests(path=str(args.get("path", "")))
+            if not res.ok:
+                return AdapterOutcome(
+                    status="error",
+                    occurrence=Occurrence.NOT_OCCURRED,
+                    actual_cost={"usd_micros": 0},
+                    result_digest="sha256:" + "0" * 64,
+                    detail=str(res.error.message if res.error else "tests failed"),
+                )
+            detail = json.dumps([{"test_path": t.test_path, "source_path": t.source_path} for t in (res.value or ())])
+        else:
+            return AdapterOutcome(
+                status="error",
+                occurrence=Occurrence.NOT_OCCURRED,
+                actual_cost={"usd_micros": 0},
+                result_digest="sha256:" + "0" * 64,
+                detail=f"unknown verb {self.name}",
+            )
+
+        digest = digest_of({"verb": self.name, "detail": detail})
+        return AdapterOutcome(
+            status="ok",
+            occurrence=Occurrence.OCCURRED,
+            actual_cost={"usd_micros": 0},
+            result_digest=digest,
+            detail=detail,
+        )
+
+
+def _repo_observer(context: BindingContext) -> Any:
+    return _RepoIndexEffect(context.verb, context.index)
+
+
 #: Verb → adapter. Adding a capability is a row here plus a manifest line
 #: (`01 §2`, open/closed); the dispatcher and the loop never change to
 #: accommodate one.
@@ -251,6 +346,10 @@ DEFAULT_BINDINGS: Mapping[str, EffectBinding] = {
     "agent.spawn": EffectBinding(_spawn_effector),
     "web.distill": EffectBinding(_environment_observer),
     "agency.finish": EffectBinding(_environment_effector),
+    "repo.search_symbols": EffectBinding(_repo_observer),
+    "repo.get_callers": EffectBinding(_repo_observer),
+    "repo.get_dependencies": EffectBinding(_repo_observer),
+    "repo.get_tests": EffectBinding(_repo_observer),
 }
 
 
@@ -312,7 +411,9 @@ class _DomainProviderBridge:
         carries_diff = bool(declared(verb)) if callable(declared) else verb.endswith(
             self._DIFF_SUFFIXES)
         return EffectBinding(
-            lambda context: provider.create_adapter(context.verb, context.environment),
+            lambda context: provider.create_adapter(
+                context.verb, context.environment, index=context.index
+            ),
             carries_diff=carries_diff,
         )
 

@@ -301,6 +301,9 @@
 {"symbol": "InMemoryMemoryPort", "kind": "class", "defined_in": "vanguard/packages/runtime/memory.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "InMemoryRepoIndex", "kind": "class", "defined_in": "vanguard/packages/adapters/stores/repo_index.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "IndexPort", "kind": "protocol", "defined_in": "vanguard/packages/ports/index.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "InferenceMeter", "kind": "class", "defined_in": "vanguard/packages/runtime/inference_meter.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "InferenceReservation", "kind": "class", "defined_in": "vanguard/packages/runtime/inference_meter.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "InferenceSettlement", "kind": "class", "defined_in": "vanguard/packages/runtime/inference_meter.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "InsecureKeyMaterial", "kind": "class", "defined_in": "vanguard/packages/runtime/keys.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "Interaction", "kind": "class", "defined_in": "vanguard/packages/agency/context/layers.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "InvalidPreset", "kind": "class", "defined_in": "vanguard/packages/runtime/pack_catalog.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -317,6 +320,7 @@
 {"symbol": "KnowledgePort", "kind": "protocol", "defined_in": "vanguard/packages/ports/memory.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "LamModelAdapter", "kind": "class", "defined_in": "vanguard/packages/adapters/models/lam.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "Layer", "kind": "class", "defined_in": "vanguard/packages/agency/context/layers.py", "canonical_owner": "docs/backend/architecture/agency.md"}
+{"symbol": "LdaRepoIndex", "kind": "class", "defined_in": "vanguard/packages/adapters/stores/lda_index.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "Lease", "kind": "class", "defined_in": "vanguard/packages/kernel/budget.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "LeaseState", "kind": "class", "defined_in": "vanguard/packages/kernel/budget.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "Ledger", "kind": "protocol", "defined_in": "vanguard/packages/ports/kernel.py", "canonical_owner": "docs/backend/reference/ports.md"}
@@ -373,6 +377,7 @@
 {"symbol": "NotFoundError", "kind": "class", "defined_in": "vanguard/packages/runtime/service/contract.py", "canonical_owner": "docs/backend/architecture/application-interfaces.md"}
 {"symbol": "NullProvenanceSink", "kind": "class", "defined_in": "vanguard/packages/agency/provenance.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "Observation", "kind": "class", "defined_in": "vanguard/packages/ports/environment.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "ObservationRequest", "kind": "class", "defined_in": "vanguard/packages/agency/episode/observation.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "ObservationRequest", "kind": "class", "defined_in": "vanguard/packages/ports/environment.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "ObservedTestCounts", "kind": "class", "defined_in": "vanguard/packages/runtime/session.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "Occurrence", "kind": "class", "defined_in": "vanguard/packages/kernel/model.py", "canonical_owner": "docs/backend/architecture/kernel.md"}

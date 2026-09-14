@@ -96,6 +96,7 @@
 {"canonical_id": "aether_technical_report_part2_architecture", "canonical_owner_path": "docs/reports/reviews/main/aether_technical_report_part2_architecture.md", "owner": "repository-governance"}
 {"canonical_id": "aether_technical_report_part3_health_gaps", "canonical_owner_path": "docs/reports/reviews/main/aether_technical_report_part3_health_gaps.md", "owner": "repository-governance"}
 {"canonical_id": "aether_technical_report_part4_metaframework", "canonical_owner_path": "docs/reports/reviews/main/aether_technical_report_part4_metaframework.md", "owner": "repository-governance"}
+{"canonical_id": "research.ai-aux-cli-multi-profiles", "canonical_owner_path": "docs/research/AI/aux_cli_multi_profiles.md", "owner": "repository-governance"}
 {"canonical_id": "research.ai-openrouter-llm-models-suggested", "canonical_owner_path": "docs/research/AI/openrouter_llm_models_suggested.md", "owner": "repository-governance"}
 {"canonical_id": "research.coding-harness-archon-gemini-prototype", "canonical_owner_path": "docs/research/coding_harness/ARCHON_gemini_prototype.md", "owner": "repository-governance"}
 {"canonical_id": "research.coding-harness-dekas-claude-prototype", "canonical_owner_path": "docs/research/coding_harness/DEKAS_claude_prototype.md", "owner": "repository-governance"}

@@ -7,7 +7,6 @@ compose a harness and it does not write envelopes except through
 
 from __future__ import annotations
 
-import ast
 import json
 import re
 from dataclasses import dataclass, replace
@@ -16,6 +15,7 @@ from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
 from ..adapters.stores.repo_index import FileRepoIndex
+from ..adapters.environment.analysis import analyze_candidate
 from ..agency import EpisodeEngine, RunTermination
 from ..agency.episode import ProtocolRecoveryState
 from ..agency.episode.admission_gate import AdmissionGate, AdmissionVerdict, VerificationReceipt
@@ -65,8 +65,8 @@ from ..ports.blob_store import BlobStorePort
 from ..ports.child_runtime import ChildRuntimePort
 from ..ports.determinism import RandomPort
 from ..ports.evaluator import EvaluationProtocol, RunRef, Verdict
-from ..ports.event_store import EventRange, EventStorePort, Result
-from ..ports.index import IndexPort
+from ..ports.event_store import EventRange, EventStorePort, PortFailure, Result
+from ..ports.index import IndexPort, IndexSelection
 from ..ports.meta_controller import MetaController
 from ..ports.memory import MemoryBinding, require_retrieval_provenance
 from ..ports.spi import ICompletionPolicy
@@ -650,6 +650,12 @@ class SessionPorts:
     #: `W11-A`. Bound only when the pack declares an index component. `None`
     #: means the harness declared none -- not that indexing failed.
     index: IndexPort | None = None
+    #: DIR-I5's selected backend and health result. The session consumes the
+    #: already-selected port; it never chooses an index implementation itself.
+    index_selection: IndexSelection | None = None
+    #: A bootstrap refusal is evidence of missingness, not permission to
+    #: silently substitute a weaker index inside the session.
+    index_error: PortFailure | None = None
     verifier: Any = None
     approver: Callable[[Any], Any] | None = None
     approval_key: bytes | None = None
@@ -685,6 +691,9 @@ class SessionPorts:
     #: built-in gate for legacy harnesses; production coding packs bind their
     #: repository/greenfield policy here.
     completion_policy: ICompletionPolicy | None = None
+    #: Pure T-83b policy. The session gathers repository observations and
+    #: verification bindings; agency alone judges their completeness.
+    caller_admission: Callable[..., Any] | None = None
     #: `M-6`. The runtime that executes child episodes. `None` is legal for a
     #: composition that never declares `agent.spawn`; for one that does, the
     #: binding fails closed at composition rather than substituting a fake.
@@ -806,6 +815,7 @@ class HarnessSession:
         self._completion_gate = AdmissionGate()
         self._completion_changed_files: set[str] = set()
         self._completion_inspected_files: set[str] = set()
+        self._completion_inspection_receipts: dict[str, str] = {}
         self._completion_verification: VerificationReceipt | None = None
         self._completion_verification_command: str | None = None
         #: T-07. The typed subject the current verification receipt is bound
@@ -861,9 +871,24 @@ class HarnessSession:
         # unread component is a composition error (`S7-B-02`), and an unasked-
         # for one is a capability nobody authorised.
         self.index: IndexPort | None = None
+        self.index_selection = ports.index_selection
+        self.index_error = ports.index_error
         if harness.index_component is not None:
-            self.index = ports.index or FileRepoIndex()
-            self.index.index(str(repo))
+            if ports.index is not None:
+                self.index = ports.index
+                indexed = self.index.index(str(repo))
+                if not indexed.ok:
+                    self.index_error = indexed.error
+                    self.index = None
+            elif ports.index_error is None:
+                # Direct/test composition has no bootstrap selection. Preserve
+                # its established local FileRepoIndex fallback; a production
+                # bootstrap refusal takes the explicit branch above instead.
+                self.index = FileRepoIndex()
+                indexed = self.index.index(str(repo))
+                if not indexed.ok:
+                    self.index_error = indexed.error
+                    self.index = None
         elif ports.index is not None:
             raise CompositionError(
                 "an IndexPort was supplied but the manifest declares no index "
@@ -1964,6 +1989,14 @@ class HarnessSession:
         }
         if fallback_reason is not None:
             view["fallbackReason"] = fallback_reason
+        if self.index_selection is not None:
+            view["indexSelection"] = {
+                "backend": self.index_selection.backend,
+                "healthVerdict": self.index_selection.health_verdict,
+                "degradationReason": self.index_selection.degradation_reason,
+                "unresolvedCoverage": self.index_selection.unresolved_coverage,
+                "sourceIdentity": self.index_selection.source_identity.to_canonical_dict(),
+            }
         return view
 
     def _bind_no_index_fallback(self, cause: str) -> Mapping[str, Any]:
@@ -2139,11 +2172,28 @@ class HarnessSession:
         if request.action in {"read", "search"} or request.action == "fs.read":
             path = request.args.get("path")
             if isinstance(path, str) and path and not path.startswith(("/", "\\")):
-                self._completion_inspected_files.add(path.replace("\\", "/"))
-        if request.action in {"patch", "patch.apply", "fs.patch", "write", "fs.write", "delete"}:
+                normalized = path.replace("\\", "/")
+                self._completion_inspected_files.add(normalized)
+                self._completion_inspection_receipts[normalized] = self._workspace_digest()
+        is_str_replace = (
+            request.action == "str_replace"
+            or request.args.get("action") == "str_replace"
+            or "edits" in request.args
+        )
+        if request.action in {"patch", "patch.apply", "fs.patch", "write", "fs.write", "delete"} or is_str_replace:
+            changed_paths: list[str] = []
             path = request.args.get("path")
-            if isinstance(path, str) and path and not path.startswith(("/", "\\")):
-                self._completion_changed_files.add(path.replace("\\", "/"))
+            if isinstance(path, str):
+                changed_paths.append(path)
+            edits = request.args.get("edits")
+            if isinstance(edits, (list, tuple)):
+                changed_paths.extend(
+                    edit.get("path") for edit in edits
+                    if isinstance(edit, Mapping) and isinstance(edit.get("path"), str)
+                )
+            for changed_path in changed_paths:
+                if changed_path and not changed_path.startswith(("/", "\\")):
+                    self._completion_changed_files.add(changed_path.replace("\\", "/"))
             self._refresh_sigma()
             self._refresh_index_after_write()
             artifacts = getattr(self, "artifacts", None)
@@ -2162,6 +2212,11 @@ class HarnessSession:
             # surface fact, so an incremental fact would reconstruct only the
             # final file of a multi-file candidate.
             self._append_change_surface(request)
+        if request.action == "task.revise":
+            # `_TaskReviseEffect` has already appended the existing PlanRevised
+            # carrier through the sole writer. Re-fold before the next proposal
+            # so the task revision becomes current L5 state in this episode.
+            self._refresh_sigma()
         if not is_verification:
             return
         argv = verification_argv(request.args)
@@ -2387,50 +2442,16 @@ class HarnessSession:
 
     def _changed_implementation_is_stub(self) -> bool:
         """Whether a changed non-test Python implementation is still a stub."""
-        candidates = [
-            self.repo / relative
-            for relative in self._completion_changed_files
+        paths = tuple(
+            relative for relative in self._completion_changed_files
             if "test" not in Path(relative).name.lower()
             and Path(relative).suffix == ".py"
-        ]
-        for candidate in candidates:
-            try:
-                tree = ast.parse(candidate.read_text(encoding="utf-8"))
-            except (OSError, SyntaxError, UnicodeError):
-                continue
-            for node in ast.walk(tree):
-                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                    body = list(node.body)
-                    if body and all(
-                        isinstance(item, ast.Pass)
-                        or (
-                            isinstance(item, ast.Raise)
-                            and isinstance(item.exc, (ast.Name, ast.Call))
-                            and (
-                                getattr(item.exc, "id", "") == "NotImplementedError"
-                                or getattr(getattr(item.exc, "func", None), "id", "")
-                                == "NotImplementedError"
-                            )
-                        )
-                        for item in body
-                    ):
-                        return True
-        return False
+        )
+        return analyze_candidate(self.repo, paths).contains_stub
 
     def _completion_structure_is_valid(self) -> bool:
         """Check file presence and Python syntax independently of test results."""
-        if not self._completion_changed_files:
-            return False
-        for relative in self._completion_changed_files:
-            candidate = self.repo / relative
-            if not candidate.is_file():
-                return False
-            if candidate.suffix == ".py":
-                try:
-                    ast.parse(candidate.read_text(encoding="utf-8"))
-                except (OSError, SyntaxError, UnicodeError):
-                    return False
-        return True
+        return analyze_candidate(self.repo, self._completion_changed_files).valid
 
     def _freeze_tamper_shield(self) -> TestTamperShield | None:
         """Hash the IndexPort-enumerated oracle set for this workspace (T-18).
@@ -2446,6 +2467,88 @@ class HarnessSession:
         except OSError:
             return TestTamperShield(
                 workspace=self.repo, frozen_test_digests={}, enumeration_failed=True)
+
+    def _caller_admission_evidence(self) -> Any:
+        """Collect candidate-bound caller observations for T-83b's pure policy."""
+        from ..agency.multi_file_completeness import (
+            CallerAdmissionEvidence,
+            omit_uninspected_caller,
+        )
+
+        candidate_identity = (
+            self._current_task_digest(),
+            self.run_plan.composition_digest if self.run_plan is not None else self.harness.composition_digest,
+            self._workspace_digest(),
+        )
+        unresolved = bool(
+            getattr(self.index_selection, "unresolved_coverage", False)
+            or getattr(self.index, "unresolved_coverage", False)
+        )
+        source_identity: WorkspaceEpoch | None = None
+        symbols: list[Any] = []
+        callers: list[Any] = []
+        if self.index is None:
+            unresolved = True
+        else:
+            try:
+                source_identity = self.current_workspace_epoch()
+            except ContextPacketError:
+                unresolved = True
+            for path in sorted(self._completion_changed_files):
+                result = self.index.symbols(path=path)
+                if not result.ok:
+                    unresolved = True
+                    continue
+                # Leading underscores are the portable minimum signal that a
+                # definition is not a public API. Everything else is kept
+                # conservative until a richer language visibility fact exists.
+                symbols.extend(
+                    symbol for symbol in (result.value or ())
+                    if not str(getattr(symbol, "name", "")).startswith("_")
+                )
+            unique_symbols = {
+                (item.path, item.line, item.name, item.kind): item for item in symbols
+            }
+            symbols = [unique_symbols[key] for key in sorted(unique_symbols)]
+            for symbol in symbols:
+                result = self.index.get_callers(symbol.name)
+                if not result.ok:
+                    unresolved = True
+                    continue
+                callers.extend(result.value or ())
+
+        unique_callers = {
+            (item.path, item.line, item.name, item.kind): item for item in callers
+        }
+        caller_values = [unique_callers[key] for key in sorted(unique_callers)]
+        inspected: list[Any] = []
+        updated: list[Any] = []
+        inspection_receipts: list[tuple[Any, str]] = []
+        update_receipts: list[tuple[Any, str]] = []
+        omissions: list[str] = []
+        current_tree = candidate_identity[2]
+        for caller in caller_values:
+            path = str(caller.path)
+            if path in self._completion_changed_files:
+                updated.append(caller)
+                update_receipts.append((caller, current_tree))
+            elif path in self._completion_inspection_receipts:
+                inspected.append(caller)
+                inspection_receipts.append(
+                    (caller, self._completion_inspection_receipts[path]))
+            else:
+                omissions.append(omit_uninspected_caller(caller))
+        return CallerAdmissionEvidence(
+            changed_public_symbols=tuple(symbols),
+            inspected_callers=tuple(inspected),
+            updated_callers=tuple(updated),
+            inspection_receipts=tuple(inspection_receipts),
+            update_receipts=tuple(update_receipts),
+            omissions=tuple(sorted(set(omissions))),
+            candidate_identity=candidate_identity,
+            source_identity=source_identity,
+            unresolved_coverage=unresolved,
+        )
 
     def _admit_completion(self, _episode: Any, _proposal: Any) -> AdmissionVerdict:
         """Apply the coding completion contract before reducing ``finish``."""
@@ -2530,14 +2633,31 @@ class HarnessSession:
             },
         )
         if isinstance(verdict, AdmissionVerdict):
-            return verdict
-        if isinstance(verdict, Mapping):
-            return AdmissionVerdict(
+            admission = verdict
+        elif isinstance(verdict, Mapping):
+            admission = AdmissionVerdict(
                 bool(verdict.get("admissible", verdict.get("admitted", False))),
                 str(verdict.get("reason", "COMPLETION_POLICY_REJECTED")),
                 verdict.get("rejection_feedback"),
             )
-        return AdmissionVerdict(False, "COMPLETION_POLICY_INVALID_VERDICT")
+        else:
+            return AdmissionVerdict(False, "COMPLETION_POLICY_INVALID_VERDICT")
+        if not admission.admissible or self.ports.caller_admission is None:
+            return admission
+        evidence = self._caller_admission_evidence()
+        caller_verdict = self.ports.caller_admission(
+            evidence,
+            verification_passed=bool(
+                self._completion_verification and self._completion_verification.passed),
+            verification_candidate_identity=evidence.candidate_identity,
+        )
+        if bool(getattr(caller_verdict, "admissible", False)):
+            return admission
+        return AdmissionVerdict(
+            False,
+            str(getattr(caller_verdict, "reason", "CALLER_ADMISSION_INVALID_VERDICT")),
+            getattr(caller_verdict, "rejection_feedback", None),
+        )
 
 
 def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any,

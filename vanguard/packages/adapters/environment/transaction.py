@@ -1,12 +1,12 @@
 """Adapter-side two-phase commit for multi-file workspace mutations.
 
-I-7 / I-TXN: `ast.parse` lives here, never in `kernel/`. Syntax failure aborts
-before any durable flush; any later commit error restores the pre-image.
+I-7 / I-TXN: structural parsing lives at the shared environment-adapter boundary,
+never in `kernel/`. This transaction owns syntax preflight: a failure aborts before
+any durable flush; any later commit error restores the pre-image.
 """
 
 from __future__ import annotations
 
-import ast
 import hashlib
 import os
 import stat
@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Literal, Sequence
 
 from ...ports.event_store import Result
+from .analysis import python_syntax_error
 
 __all__ = [
     "FileMutation",
@@ -119,12 +120,11 @@ class AtomicMultiFileTransactionManager:
                 continue
             if not mutation.path.endswith(".py"):
                 continue
-            try:
-                ast.parse(mutation.content, filename=mutation.path)
-            except SyntaxError as syn_err:
+            syntax_error = python_syntax_error(mutation.content, path=mutation.path)
+            if syntax_error is not None:
                 return Result.fail(
                     "invalid_request",
-                    f"SyntaxError at {mutation.path}:{syn_err.lineno}: {syn_err.msg}",
+                    syntax_error,
                 )
         return None
 

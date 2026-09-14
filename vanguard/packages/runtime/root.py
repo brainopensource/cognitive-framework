@@ -274,11 +274,19 @@ class Runtime(_ComposedRuntime):
             host_facts=host_facts,
         )
         release = deps.profile.requested.assurance_level == "hermetic"
+        # Bootstrap can inspect repository health, but an index remains an
+        # explicit manifest authority. Do not hand an unrequested capability
+        # to profiles such as vg-code-explain.
+        index_declared = harness.index_component is not None
         ports = SessionPorts(
             model=deps.model,
             environment=deps.environment,
             clock=deps.clock,
             store=deps.store,
+            index=deps.index if index_declared else None,
+            index_selection=deps.index_selection if index_declared else None,
+            index_error=deps.index_error if index_declared else None,
+            caller_admission=_caller_admission_policy() if index_declared else None,
             verifier=verifier,
             approver=approver,
             approval_key=approval_key,
@@ -298,7 +306,6 @@ class Runtime(_ComposedRuntime):
             )
         finally:
             deps.cleanup()
-
     @classmethod
     def run_composed(
         cls,
@@ -720,6 +727,13 @@ def _build_component_handle(
     if service is None:
         service = {"component": step.name, "interface": step.interface}
     return ComponentHandle(step=step, run_id=run_id, service=service)
+
+
+def _caller_admission_policy() -> Callable[..., Any]:
+    """Bind B's pure completion policy at the production composition root."""
+    from ..agency.multi_file_completeness import evaluate_caller_admission
+
+    return evaluate_caller_admission
 
 
 __all__ = [

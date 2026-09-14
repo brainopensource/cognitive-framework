@@ -13,11 +13,18 @@ from __future__ import annotations
 
 import re
 import unittest
+from dataclasses import replace
 from pathlib import Path
 from typing import Any, Mapping
 
 from test.agency.doubles import ScriptedModel, effect, finish
 from vanguard.packages.adapters.stores.event_store import SqliteEventStore
+from vanguard.packages.adapters.stores.repo_index import InMemoryRepoIndex
+from vanguard.packages.agency.multi_file_completeness import (
+    CALLER_ADMISSION_OK,
+    UNINSPECTED_CALLERS_REMAINING,
+    evaluate_caller_admission,
+)
 from vanguard.packages.domain.ledger.progress import ConfidenceRecord
 from vanguard.packages.ports.meta_controller import StrategyDirective
 from vanguard.packages.ports.environment import (
@@ -33,6 +40,7 @@ from vanguard.packages.runtime.root import (
     SessionPorts,
     TaskContext,
 )
+from vanguard.packages.runtime.task_state import fold_task_state
 
 RUNTIME = Path(__file__).resolve().parents[2] / "vanguard" / "packages" / "runtime"
 
@@ -184,6 +192,65 @@ class SessionConstructsWithoutIO(unittest.TestCase):
             and event.reason == "observation_batch"
         ]
         self.assertEqual(len(batches), 1)
+
+    def test_task_revision_is_durable_and_visible_before_the_next_turn(self) -> None:
+        revision = {
+            "kind": "effect",
+            "action": "task.revise",
+            "resource": {"kind": "generic", "uri": "task://revise/run-session-1"},
+            "args": {
+                "plan": ["inspect", "repair"],
+                "next_action": "inspect",
+            },
+        }
+        model = ScriptedModel([
+            revision,
+            effect(action="fs.read", path="/workspace/after_revision.py"),
+            finish(),
+        ])
+        session = HarnessSession(self.harness, _ports(model, self.environment), _task())
+
+        session.run()
+
+        kinds = [event.kind for event in session.ledger.events]
+        self.assertIn("PlanRevised", kinds, session.ledger.events)
+        self.assertGreaterEqual(len(model.calls), 2)
+        self.assertEqual(
+            fold_task_state(session.ledger.events, objective=_task().brief).plan,
+            ("inspect", "repair"),
+        )
+
+    def test_caller_admission_requires_current_inspection_of_known_callers(self) -> None:
+        index = InMemoryRepoIndex({
+            "api.py": "def public_api():\n    return 1\n",
+            "consumer.py": "def use_api():\n    return public_api()\n",
+        })
+        ports = replace(
+            _ports(ScriptedModel([finish()]), self.environment),
+            index=index,
+            caller_admission=evaluate_caller_admission,
+        )
+        session = HarnessSession(self.harness, ports, _task())
+        session._completion_changed_files.add("api.py")
+
+        unresolved = session._caller_admission_evidence()
+        rejected = ports.caller_admission(
+            unresolved,
+            verification_passed=True,
+            verification_candidate_identity=unresolved.candidate_identity,
+        )
+        self.assertEqual(rejected.reason, UNINSPECTED_CALLERS_REMAINING)
+        self.assertIn("consumer.py", rejected.uninspected_callers)
+
+        session._completion_inspection_receipts["consumer.py"] = session._workspace_digest()
+        resolved = session._caller_admission_evidence()
+        admitted = ports.caller_admission(
+            resolved,
+            verification_passed=True,
+            verification_candidate_identity=resolved.candidate_identity,
+        )
+        self.assertTrue(admitted.admissible, admitted.rejection_feedback)
+        self.assertEqual(admitted.reason, CALLER_ADMISSION_OK)
 
 
 class MetaControllerRuntimeIntegration(unittest.TestCase):

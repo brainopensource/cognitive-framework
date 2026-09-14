@@ -7,6 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from vanguard.packages.adapters.environment.fake import FakeEnvironment
 from vanguard.packages.adapters.environment.git import GitEnvironment
 from vanguard.packages.adapters.environment.transaction import TXN_TMP_MARKER
 from vanguard.packages.ports.environment import EffectRequest
@@ -149,6 +150,25 @@ class TestStrReplaceExact(unittest.TestCase):
                 if item.is_file() and TXN_TMP_MARKER in item.name
             ]
             self.assertEqual(leftovers, [])
+
+    def test_fake_matches_git_batch_atomicity_and_python_preflight(self) -> None:
+        """Hermetic episodes cannot accept an edit production would refuse."""
+        initial = {
+            name: f"VALUE_{index} = {index}\n"
+            for index, name in enumerate(self._FIXTURE, start=1)
+        }
+        fake = FakeEnvironment(initial)
+        result = fake.apply(EffectRequest(
+            verb="patch.apply", action="str_replace", args={"edits": [
+                {"path": name, "old": f"= {index}", "new": f"= {index * 10}"}
+                for index, name in enumerate(self._FIXTURE, start=1)
+            ][0:3] + [{
+                "path": "file_four.py", "old": "VALUE_4 = 4", "new": "VALUE_4 = (",
+            }] + [{"path": "file_five.py", "old": "= 5", "new": "= 50"}]},
+        ))
+        self.assertFalse(result.ok)
+        self.assertIn("SyntaxError", result.error.message if result.error else "")
+        self.assertEqual(fake._files, initial)
 
     def test_all_code_presets_declare_the_shared_exact_edit_surface(self) -> None:
         repo_root = Path(__file__).resolve().parents[2]

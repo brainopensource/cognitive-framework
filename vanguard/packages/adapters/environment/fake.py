@@ -11,6 +11,7 @@ Invariants:
 
 from __future__ import annotations
 
+import ast
 import os
 import re
 from typing import Any, Callable, Mapping, Optional, Sequence
@@ -58,6 +59,29 @@ def _is_safe_relative_path(path: str) -> bool:
 def _compute_file_digest(content: str) -> str:
     """Digest of text file content."""
     return digest_bytes(content.encode("utf-8"))
+
+
+def _str_replace_edits(args: Mapping[str, Any]) -> list[dict[str, str]] | None:
+    """Normalize the production single- and multi-edit exact-replace surface.
+
+    The fake is used as a hermetic production double.  It must therefore
+    accept exactly the request shapes that ``GitEnvironment`` accepts rather
+    than turning a five-file transactional request into five unrelated writes.
+    """
+    raw_edits = args.get("edits")
+    if raw_edits is None:
+        raw_edits = (args,)
+    if not isinstance(raw_edits, (list, tuple)) or not raw_edits:
+        return None
+    edits: list[dict[str, str]] = []
+    for raw in raw_edits:
+        if not isinstance(raw, Mapping):
+            return None
+        path, old, new = raw.get("path"), raw.get("old"), raw.get("new")
+        if not all(isinstance(value, str) for value in (path, old, new)):
+            return None
+        edits.append({"path": path, "old": old, "new": new})
+    return edits
 
 
 class FakeEnvironment:
@@ -450,38 +474,70 @@ class FakeEnvironment:
 
         action = req.action
         if action == "str_replace":
-            path = req.args.get("path")
-            old = req.args.get("old")
-            new = req.args.get("new")
-            if not isinstance(path, str) or not isinstance(old, str) or not isinstance(new, str):
-                return Result.fail("invalid_request", "str_replace requires string path, old, and new arguments")
-            if not _is_safe_relative_path(path):
-                return Result.fail("denied", f"path traversal escape denied: {path!r}")
-            norm_path = os.path.normpath(path).replace("\\", "/")
-            before = self._files.get(norm_path)
-            if before is None:
-                return Result.fail("PATCH_PREIMAGE_MISMATCH", f"PATCH_PREIMAGE_MISMATCH for {norm_path}: target file is absent")
-            try:
-                after = unique_str_replace(before, old, new, norm_path)
-            except HunkFailure as err:
-                return Result.fail(err.kind, err.message)
-            affected = AffectedResource(
-                resource=norm_path,
-                change="modified",
-                pre_digest=_compute_file_digest(before),
-                post_digest=_compute_file_digest(after),
+            edits = _str_replace_edits(req.args)
+            if edits is None:
+                self._history.pop()
+                return Result.fail("invalid_request", "str_replace requires non-empty string path, old, and new edits")
+            shadow: dict[str, str] = {}
+            original: dict[str, str] = {}
+            order: list[str] = []
+            for edit in edits:
+                path = edit["path"]
+                if not _is_safe_relative_path(path):
+                    self._history.pop()
+                    return Result.fail("denied", f"path traversal escape denied: {path!r}")
+                norm_path = os.path.normpath(path).replace("\\", "/")
+                if norm_path not in shadow:
+                    before = self._files.get(norm_path)
+                    if before is None:
+                        self._history.pop()
+                        return Result.fail(
+                            "PATCH_PREIMAGE_MISMATCH",
+                            f"PATCH_PREIMAGE_MISMATCH for {norm_path}: target file is absent",
+                        )
+                    shadow[norm_path] = before
+                    original[norm_path] = before
+                    order.append(norm_path)
+                try:
+                    shadow[norm_path] = unique_str_replace(
+                        shadow[norm_path], edit["old"], edit["new"], norm_path)
+                except HunkFailure as err:
+                    self._history.pop()
+                    return Result.fail(err.kind, err.message)
+            for norm_path in order:
+                if norm_path.endswith(".py"):
+                    try:
+                        ast.parse(shadow[norm_path], filename=norm_path)
+                    except SyntaxError as exc:
+                        self._history.pop()
+                        return Result.fail(
+                            "invalid_request",
+                            f"SyntaxError in {norm_path}:{exc.lineno}: {exc.msg}",
+                        )
+            affected_resources = tuple(
+                AffectedResource(
+                    resource=norm_path,
+                    change="modified",
+                    pre_digest=_compute_file_digest(original[norm_path]),
+                    post_digest=_compute_file_digest(shadow[norm_path]),
+                )
+                for norm_path in order
             )
-            stale = stale_preimage_kind_message((affected,), req.args)
+            stale = stale_preimage_kind_message(affected_resources, req.args)
             if stale is not None:
+                self._history.pop()
                 return Result.fail(stale[0], stale[1])
-            self._files[norm_path] = after
+            self._files.update({norm_path: shadow[norm_path] for norm_path in order})
             return Result.success(
                 EffectReceipt(
                     descriptor_digest=descriptor_digest,
                     outcome="ok",
                     observed_at=observed_at,
-                    result_digest=digest_of({"resource": norm_path, "post_digest": affected.post_digest}),
-                    affected_resources=(affected,),
+                    result_digest=digest_of({
+                        "resources": [item.resource for item in affected_resources],
+                        "post_digests": [item.post_digest for item in affected_resources],
+                    }),
+                    affected_resources=affected_resources,
                 )
             )
         if action == "patch" or req.patch is not None:

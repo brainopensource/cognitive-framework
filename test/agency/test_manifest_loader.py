@@ -66,6 +66,7 @@ class TestManifestLoader(unittest.TestCase):
                 "fs.read", "fs.search", "patch.apply", "proc.exec",
                 "repo.search_symbols", "repo.get_callers",
                 "repo.get_dependencies", "repo.get_tests", "agency.finish",
+                "task.revise",
             },
         )
 

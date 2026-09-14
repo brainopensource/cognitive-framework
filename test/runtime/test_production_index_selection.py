@@ -28,6 +28,8 @@ from vanguard.packages.runtime.bootstrap import (
     RuntimeBootstrap,
     select_production_index,
 )
+from vanguard.packages.runtime.compose import TaskContext
+from vanguard.packages.runtime.root import Runtime
 
 
 HEAD_A = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
@@ -224,6 +226,40 @@ class ProductionIndexSelectionTests(unittest.TestCase):
         self.assertTrue(binding.selection.unresolved_coverage)
         names = {item.name for item in binding.port.symbols().value or ()}
         self.assertIn("CoreService", names)
+
+    def test_profiled_runtime_passes_bootstrap_selection_into_session_ports(self) -> None:
+        """T-76 is product wiring, not merely a bootstrap-local selection."""
+        _create_lda(self.root)
+        deps = RuntimeBootstrap.build(
+            profile_id="local", repo_path=self.root, model=FakeModel([]),
+        )
+        captured: dict[str, object] = {}
+
+        def capture(_harness, ports, _task, **_kwargs):
+            captured["ports"] = ports
+            return object()
+
+        task = TaskContext(
+            brief="inspect the repository",
+            repo_path=self.root,
+            run_id="run-index-wiring",
+            episode_id="episode-index-wiring",
+            principal="agent-index-wiring",
+        )
+        try:
+            with patch(
+                "vanguard.packages.runtime.bootstrap.RuntimeBootstrap.build",
+                return_value=deps,
+            ), patch.object(Runtime, "run_composed", side_effect=capture):
+                Runtime.execute_profiled("vg-code-default", task, profile_id="local")
+        finally:
+            deps.cleanup()
+
+        ports = captured["ports"]
+        self.assertIs(ports.index, deps.index)
+        self.assertEqual(ports.index_selection, deps.index_selection)
+        self.assertEqual(ports.index_error, deps.index_error)
+        self.assertTrue(callable(ports.caller_admission))
 
     def test_present_invalid_states_reject_lda_and_record_cause(self) -> None:
         for label in ("stale", "empty", "unresolved", "unsupported", "corrupt"):

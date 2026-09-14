@@ -272,7 +272,7 @@ class _RepoIndexEffect:
         if self._index is None:
             return AdapterOutcome(
                 status="error",
-                occurrence=Occurrence.NOT_OCCURRED,
+                occurrence=Occurrence.DID_NOT_OCCUR,
                 actual_cost={"usd_micros": 0},
                 result_digest="sha256:" + "0" * 64,
                 detail="index is not available",
@@ -285,7 +285,7 @@ class _RepoIndexEffect:
             if not res.ok:
                 return AdapterOutcome(
                     status="error",
-                    occurrence=Occurrence.NOT_OCCURRED,
+                    occurrence=Occurrence.DID_NOT_OCCUR,
                     actual_cost={"usd_micros": 0},
                     result_digest="sha256:" + "0" * 64,
                     detail=str(res.error.message if res.error else "symbols failed"),
@@ -296,7 +296,7 @@ class _RepoIndexEffect:
             if not res.ok:
                 return AdapterOutcome(
                     status="error",
-                    occurrence=Occurrence.NOT_OCCURRED,
+                    occurrence=Occurrence.DID_NOT_OCCUR,
                     actual_cost={"usd_micros": 0},
                     result_digest="sha256:" + "0" * 64,
                     detail=str(res.error.message if res.error else "callers failed"),
@@ -307,7 +307,7 @@ class _RepoIndexEffect:
             if not res.ok:
                 return AdapterOutcome(
                     status="error",
-                    occurrence=Occurrence.NOT_OCCURRED,
+                    occurrence=Occurrence.DID_NOT_OCCUR,
                     actual_cost={"usd_micros": 0},
                     result_digest="sha256:" + "0" * 64,
                     detail=str(res.error.message if res.error else "dependencies failed"),
@@ -318,7 +318,7 @@ class _RepoIndexEffect:
             if not res.ok:
                 return AdapterOutcome(
                     status="error",
-                    occurrence=Occurrence.NOT_OCCURRED,
+                    occurrence=Occurrence.DID_NOT_OCCUR,
                     actual_cost={"usd_micros": 0},
                     result_digest="sha256:" + "0" * 64,
                     detail=str(res.error.message if res.error else "tests failed"),
@@ -327,7 +327,7 @@ class _RepoIndexEffect:
         else:
             return AdapterOutcome(
                 status="error",
-                occurrence=Occurrence.NOT_OCCURRED,
+                occurrence=Occurrence.DID_NOT_OCCUR,
                 actual_cost={"usd_micros": 0},
                 result_digest="sha256:" + "0" * 64,
                 detail=f"unknown verb {self.name}",
@@ -407,7 +407,7 @@ class _TaskReviseEffect:
             err_msg = res.error.message if res.error else "revision failed"
             return AdapterOutcome(
                 status="error",
-                occurrence=Occurrence.NOT_OCCURRED,
+                occurrence=Occurrence.DID_NOT_OCCUR,
                 actual_cost={"usd_micros": 0},
                 result_digest="sha256:" + "0" * 64,
                 detail=f"{err_kind}: {err_msg}",

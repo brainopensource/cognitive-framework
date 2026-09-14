@@ -45,13 +45,50 @@ access to occupied files. No Git operation, LDA refresh, test or provider call w
 performed to establish this planning disposition; old baseline receipts retain their
 original subjects and are not current-tree measurements.
 
-### Protected active work and acceptance reconciliation
+### Leadership continuation — present queue and planning horizon
+
+The latest leadership briefing advances the working queue to A/T-131.8,
+C/T-133→T-132→T-137 and B/T-131.3→T-131.4→T-131.7 after their required releases;
+it is a dispatch update, not new acceptance of T-130/T-135/T-131.6/T-140.
+The exact Packet 1 leases and falsifiers below remain sufficient: do not add another
+implementation blueprint or reopen qualified work merely to occupy a lane.
+Planning depth is one executable integrity packet plus one conditional control-readiness
+packet, ending at an authorization-ready T-27 disposition path; it is not a promise
+of two sprints of independent work while curator, store or reviewer capacity is absent.
+
+| Owner | Autonomous continuation / synchronization |
+|---|---|
+| A | Complete T-131.8 within the current meter/budget/model-adapter lease; give any session hook to B after C's release, then perform the already assigned non-author C-packet reviews where eligible |
+| B | Complete remaining prior reviews without duplicating them, then serial T-131.3/4/7 on released files; consolidate the eight F5 row dispositions and outstanding integration acceptance references from A/C handoffs, without accepting B-authored claims |
+| C | Serial T-133→T-132→T-137, with valid accepted T-130 before the probe; then assemble T-51 local-readiness and F1–F7 evidence/authority checklist, retaining missing curator/store/acceptor identities explicitly |
+
+B owns the bounded acceptance-record reconciliation from existing artifacts, not a
+new broad review campaign; each missing item names its author, exact subject, evidence
+reference and eligible acceptor. C owns the consolidated external-resource request
+once local readiness is concrete; A checks its non-author technical disposition,
+and leadership alone supplies missing external authority or independent staffing.
+A completed leaf releases its files with a subject-bound handoff; waiting for its
+acceptance does not stop unrelated disjoint work, while a dependent acceptance claim
+continues to wait for its predecessor. If all three authored an integrated claim,
+leave that claim pending an uninvolved reviewer rather than trading signatures.
+
+**Preparation versus admission.** After C releases the guarded runner files and A
+releases the row-6 test, B may qualify T-26b with synthetic manifests before real
+T-51 acceptance; the real T-26b acceptance edge still requires accepted T-51.
+C may prepare the seven-row F1–F7 receipt map and canary authorization request with
+explicit missing entries before all predicates pass; neither preparation writes a
+real frozen record nor performs any provider/evaluation run. No benchmark invocation
+is added by this clarification: use only the existing focused hermetic falsifiers.
+When internal work reaches the evidence frontier, stop that blocked leaf and report
+the exact missing resource; do not fill idle time with CAS, delegation or more hardening.
+
+### Protected prior handoffs and acceptance reconciliation
 
 | Task | Current disposition / owner | Boundary |
 |---|---|---|
-| T-131.6 | A active; latest row records LANDED with B review pending | Preserve A's entrypoint/evidence-capture and two test-file lease through handoff; the reported 24 green tests do not constitute independent acceptance |
-| T-130 / T-135 | B actively reviewing C's landed evidence | Accept valid instrument/NOT_REPRODUCED and INDEX_UNBOUND separately; neither closes all RUN-09 defects |
-| T-140 | C active; B's next independent review | Preserve C's current production retrieval lease, including session integration; no successor acquires these files until explicit release |
+| T-131.6 | Prior A packet LANDED with independent acceptance pending in the recorded handoff | Latest detailed receipt includes focused and final gates on a mixed dirty tree; bind the actual delta and evidence before acceptance, and preserve files until explicit release |
+| T-130 / T-135 | Prior C packets; B completes any outstanding independent disposition | Accept valid instrument/NOT_REPRODUCED and INDEX_UNBOUND separately; neither closes all RUN-09 defects |
+| T-140 | Prior C packet; retain its actual handoff and B review disposition | No repeat implementation inferred; B acquires session/context files only on explicit C release, not from mechanism presence or this dispatch update |
 | T-75/T-76, T-78, T-83b, T-138, T-139 | ACCEPTED as recorded integration work; acceptance provenance UNRECONCILED | The board names only “final integration subject”, without a linked exact SHA, evidence digest or non-author disposition; this planning pass neither fabricates nor re-performs acceptance |
 | T-26a / T-52, T-134 / T-136 | Existing recorded acceptances retained | Compatibility with a later control subject remains an evidence obligation, not automatic reimplementation |
 | T-133 / T-132 / T-137 | Successors below; no active lease taken | Q-01 correction remains reopened; discovery unaccepted; approval probe awaits B's valid T-130 disposition |
@@ -158,8 +195,9 @@ alone do not accept them. No active B review is displaced by these successor rev
 
 ### Packet 2 — replacement readiness and the finite control path
 
-Requires Packet 1's relevant accepted dispositions, not elapsed time or generic “all
-hardening done”; D-6 F1–F7 alone decides the control frontier. Preparation below is
+Real admission requires Packet 1's relevant accepted dispositions, not elapsed time
+or generic “all hardening done”; hermetic preparation may proceed under the
+leadership continuation above, and D-6 F1–F7 alone decides the control frontier. Preparation below is
 hermetic and authorized, while material acquisition, freeze and actual T-27 dispatch
 remain externally gated. A receives the independent preparation review only after
 its Packet 1 obligations, and relinquishes acceptance if it supplies a repair.

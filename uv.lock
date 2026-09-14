@@ -713,7 +713,7 @@ wheels = [
 
 [[package]]
 name = "vanguard-runtime"
-version = "0.9.3"
+version = "0.9.4"
 source = { editable = "." }
 dependencies = [
     { name = "cryptography" },

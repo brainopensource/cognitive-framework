@@ -467,21 +467,22 @@ These decisions supersede conflicting DIR-3 type/placement and acceptance assign
 The supplied implementation-test receipts remain bound to `90b2970210f474dd0357611d7b101e4a816a8fbe`; documentation checks and these rulings belong to their own commits, not a retrospectively relabeled test run.
 Successor work records its actual SHA and any dirty-tree digest, and the ruling commit refers to this already-existing baseline rather than attempting to embed its own self-referential SHA.
 
-**Control-frontier arbitration (2026-09-14).** The two successor packets in
-`tasks.md` supersede earlier ready-work routing, not the deep behavioral contracts:
-A/T-131.6, C/T-140 and B's T-130/T-135→T-140 reviews keep their active leases.
-C receives the reserved gate files only after its active release and serializes
-T-133→T-132→T-137; the approval probe additionally requires B's accepted valid
-T-130 instrument, and neither negative diagnostic grants product repair authority.
-Non-author acceptance covers the component and behavior-affecting integration delta;
-no author accepts their glue, and an unavailable independent acceptor is a named
-staffing blocker rather than permission for self-acceptance. T-51 still has local
-Q-01/discovery readiness gaps as well as external curator/sealed-store requirements;
-request external authority only with the bounded local readiness evidence in Packet 2.
-D-6 F1–F7 is unchanged: integrity and corpus preparation lead to T-51→T-26b→T-26→T-27,
-with freeze/run/resource authorization still separate and no new capability dependency.
-No provider call, paid run, actual freeze, score, M-8/M-9/M-10 closure or SOTA claim
-is authorized, and existing post-control proposals gain no implementation leaves.
+**Control-frontier arbitration (2026-09-14; continuation).** The current queue is
+A/T-131.8, C/T-133→T-132→T-137 and B/T-131.3/4/7 under the existing exact leases,
+predecessor dispositions and file releases; progress reported on earlier packets
+does not manufacture independent acceptance. Planning ends at one executable
+integrity packet and one conditional control-readiness packet, since corpus authority
+and the forthcoming product evidence determine the useful next architecture.
+Hermetic T-26b preparation may precede T-51 acceptance after its source/test leases
+are released, but real acceptance retains T-51→T-26b→T-26→T-27 ordering and unchanged
+D-6 F1–F7; preparation never authorizes a real freeze or run. B consolidates existing
+acceptance/F5 provenance and C prepares the finite external-resource/evidence request,
+with an uninvolved acceptor required whenever the claimed delta includes all three
+authors. Local implementation decisions remain delegated; new public contracts,
+security authority, measurement acceptance changes and repeated evidenced blockers
+return to leadership. No provider call, paid run, actual control freeze, benchmark
+run/score, milestone closure or SOTA claim is authorized; CAS/delegation/campaign and
+other post-control proposals gain no implementation scope or replacement schedule.
 
 ## NT-1. Near-term baseline, context, cache and recovery delta
 

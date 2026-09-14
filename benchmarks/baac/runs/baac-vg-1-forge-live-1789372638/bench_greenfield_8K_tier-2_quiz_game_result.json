@@ -1,0 +1,69 @@
+{
+  "challengeId": "bench_greenfield_8K_tier-2_quiz_game",
+  "tier": "tier-2",
+  "scope": "greenfield",
+  "contextBracket": "8K",
+  "preset": "vg-1-forge",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "mode": "live",
+  "status": "FAIL",
+  "disposition": "failed",
+  "attribution": "LLM_COGNITIVE_ERROR",
+  "turns": 10,
+  "promptTokens": 19272,
+  "completionTokens": 4453,
+  "totalTokens": 23725,
+  "costUsd": 0.001461,
+  "durationSeconds": 225.35,
+  "changedFiles": [
+    "src/quiz_engine.py",
+    "verify_quiz_engine.py"
+  ],
+  "diffPatch": "--- a/quiz_engine.py\n+++ b/quiz_engine.py\n@@ -1,2 +1,210 @@\n+\"\"\"Interactive Quiz Game Engine.\n+\n+Provides a ``Question`` model, a ``QuizEngine`` state machine with\n+scoring/reset support, and JSON loading helpers.\n+\"\"\"\n+\n+from __future__ import annotations\n+\n+import json\n+from dataclasses import dataclass, field\n+from typing import Any, Dict, List, Optional\n+\n+\n+@dataclass\n+class Question:\n+    \"\"\"A single quiz question.\n+\n+    Attributes:\n+        id: 1-based question identifier.\n+        text: The question prompt.\n+        options: Ordered list of answer choices.\n+        correct_index: 0-based index into ``options`` holding the right answer.\n+        explanation: Optional feedback shown after answering.\n+    \"\"\"\n+\n+    id: int\n+    text: str\n+    options: List[str]\n+    correct_index: int\n+    explanation: Optional[str] = None\n+\n+    def is_correct(self, answer_index: int) -> bool:\n+        \"\"\"Return True when ``answer_index`` selects the correct option.\"\"\"\n+        return answer_index == self.correct_index\n+\n+    def to_dict(self) -> Dict[str, Any]:\n+        \"\"\"Serialize this question to a plain dictionary.\"\"\"\n+        data: Dict[str, Any] = {\n+            \"id\": self.id,\n+            \"text\": self.text,\n+            \"options\": list(self.options),\n+            \"correct_index\": self.correct_index,\n+        }\n+        if self.explanation is not None:\n+            data[\"explanation\"] = self.explanation\n+        return data\n+\n+    @classmethod\n+    def from_dict(cls, data: Dict[str, Any]) -> \"Question\":\n+        \"\"\"Build a Question from a dictionary (JSON object).\"\"\"\n+        if not isinstance(data, dict):\n+            raise ValueError(\"Question data must be a JSON object\")\n+        qid = data.get(\"id\")\n+        if qid is None:\n+            raise ValueError(\"Question missing required field 'id'\")\n+        text = data.get(\"text\") or data.get(\"question\")\n+        if not text:\n+            raise ValueError(\"Question missing required field 'text'\")\n+        options = data.get(\"options\")\n+        if not options:\n+            raise ValueError(\"Question missing required field 'options'\")\n+        correct = data.get(\"correct_index\", data.get(\"answer\"))\n+        if correct is None:\n+            raise ValueError(\"Question missing required field 'correct_index'\")\n+        return cls(\n+            id=int(qid),\n+            text=str(text),\n+            options=[str(opt) for opt in options],\n+            correct_index=int(correct),\n+            explanation=data.get(\"explanation\"),\n+        )\n+\n+\n class QuizEngine:\n-    pass\n+    \"\"\"State machine driving an interactive quiz.\n+\n+    States:\n+        not_started -- engine created, no question asked yet.\n+        in_progress -- quiz started, questions remain.\n+        finished    -- all questions answered; score is final.\n+    \"\"\"\n+\n+    def __init__(self, questions: Optional[List[Question]] = None) -> None:\n+        self.questions: List[Question] = list(questions or [])\n+        self._current_index = 0\n+        self._score = 0\n+        self._started = False\n+        self._finished = False\n+        self._answers: List[Dict[str, Any]] = []\n+\n+    # ------------------------------------------------------------------\n+    # State machine\n+    # ------------------------------------------------------------------\n+    @property\n+    def state(self) -> str:\n+        if self._finished:\n+            return \"finished\"\n+        if self._started:\n+            return \"in_progress\"\n+        return \"not_started\"\n+\n+    def start(self) -> None:\n+        \"\"\"Begin the quiz, resetting any previous progress.\"\"\"\n+        if self._finished:\n+            raise RuntimeError(\"Quiz already finished; call reset() to play again.\")\n+        if not self.questions:\n+            raise ValueError(\"Cannot start a quiz with no questions.\")\n+        self._current_index = 0\n+        self._score = 0\n+        self._started = True\n+        self._finished = False\n+        self._answers = []\n+\n+    @property\n+    def current_question(self) -> Optional[Question]:\n+        \"\"\"The question currently being asked, or None when idle/finished.\"\"\"\n+        if self.state != \"in_progress\":\n+            return None\n+        return self.questions[self._current_index]\n+\n+    def answer(self, answer_index: int) -> bool:\n+        \"\"\"Record an answer for the current question.\n+\n+        Returns True when the answer was correct. Advances the engine and\n+        transitions to ``finished`` after the last question.\n+        \"\"\"\n+        if self.state != \"in_progress\":\n+            raise RuntimeError(\"Quiz is not in progress; call start() first.\")\n+        question = self.current_question\n+        assert question is not None\n+        correct = question.is_correct(answer_index)\n+        if correct:\n+            self._score += 1\n+        self._answers.append(\n+            {\n+                \"question_id\": question.id,\n+                \"selected\": answer_index,\n+                \"correct\": correct,\n+            }\n+        )\n+        self._current_index += 1\n+        if self._current_index >= len(self.questions):\n+            self._finished = True\n+        return correct\n+\n+    # ------------------------------------------------------------------\n+    # Scoring / progress\n+    # ------------------------------------------------------------------\n+    @property\n+    def score(self) -> int:\n+        \"\"\"Number of correctly answered questions so far.\"\"\"\n+        return self._score\n+\n+    @property\n+    def total(self) -> int:\n+        \"\"\"Total number of questions in the quiz.\"\"\"\n+        return len(self.questions)\n+\n+    @property\n+    def progress(self) -> int:\n+        \"\"\"Number of questions answered so far (capped at total).\"\"\"\n+        return min(self._current_index, self.total)\n+\n+    @property\n+    def answers(self) -> List[Dict[str, Any]]:\n+        \"\"\"Read-only record of submitted answers.\"\"\"\n+        return list(self._answers)\n+\n+    def percentage(self) -> float:\n+        \"\"\"Return the score as a percentage (0.0-100.0).\"\"\"\n+        if not self.questions:\n+            return 0.0\n+        return (self._score / len(self.questions)) * 100.0\n+\n+    # ------------------------------------------------------------------\n+    # Reset\n+    # ------------------------------------------------------------------\n+    def reset(self) -> None:\n+        \"\"\"Return the engine to its initial ``not_started`` state.\"\"\"\n+        self._current_index = 0\n+        self._score = 0\n+        self._started = False\n+        self._finished = False\n+        self._answers = []\n+\n+    # ------------------------------------------------------------------\n+    # JSON loading\n+    # ------------------------------------------------------------------\n+    @classmethod\n+    def from_dict(cls, data: Any) -> \"QuizEngine\":\n+        \"\"\"Build an engine from a dict or list of question dicts.\"\"\"\n+        if isinstance(data, dict) and \"questions\" in data:\n+            data = data[\"questions\"]\n+        if not isinstance(data, list):\n+            raise ValueError(\"Quiz data must be a list of questions or an object with a 'questions' list\")\n+        return cls([Question.from_dict(item) for item in data])\n+\n+    @classmethod\n+    def from_json(cls, path: str) -> \"QuizEngine\":\n+        \"\"\"Load a quiz from a JSON file (list of questions or {questions: [...]}).\"\"\"\n+        with open(path, \"r\", encoding=\"utf-8\") as handle:\n+            data = json.load(handle)\n+        return cls.from_dict(data)\n+\n+    def to_dict(self) -> Dict[str, Any]:\n+        \"\"\"Serialize the full quiz (questions only) to a dictionary.\"\"\"\n+        return {\"questions\": [q.to_dict() for q in self.questions]}\n+\n+    def __len__(self) -> int:\n+        return len(self.questions)",
+  "oracle": {
+    "passed": false,
+    "exitCode": 1,
+    "stdout": "",
+    "stderr": "test_quiz (__main__.TestQuiz.test_quiz) ... ERROR\n\n======================================================================\nERROR: test_quiz (__main__.TestQuiz.test_quiz)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/baac/challenges/tier-2/bench_greenfield_8K_tier-2_quiz_game/oracle/verify.py\", line 8, in test_quiz\n    q = [Question(id='1', prompt='2+2?', options=['3','4'], correct_choice='4', points=10)]\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: Question.__init__() got an unexpected keyword argument 'prompt'\n\n----------------------------------------------------------------------\nRan 1 test in 0.005s\n\nFAILED (errors=1)\n",
+    "durationSeconds": 0.037,
+    "error": "test_quiz (__main__.TestQuiz.test_quiz) ... ERROR\n\n======================================================================\nERROR: test_quiz (__main__.TestQuiz.test_quiz)\n-------------------------------",
+    "assertionCount": 1,
+    "failingAssertions": [
+      "test_quiz",
+      "(errors=1)"
+    ]
+  },
+  "aiJudgeScore": null,
+  "diagnosis": "test_quiz (__main__.TestQuiz.test_quiz) ... ERROR\n\n======================================================================\nERROR: test_quiz (__main__.TestQuiz.test_quiz)\n-------------------------------",
+  "metadata": {
+    "id": "bench_greenfield_8K_tier-2_quiz_game",
+    "name": "Greenfield Quiz Game Engine",
+    "scope": "greenfield",
+    "context_bracket": "8K",
+    "tier": "tier-2",
+    "difficulty": 2,
+    "timeout_seconds": 35,
+    "entrypoint": "src/main.py",
+    "eval_type": "oracle",
+    "tags": [
+      "greenfield",
+      "state_machine",
+      "oop"
+    ],
+    "metadata": {
+      "schema": "aether.baac.challenge/1"
+    },
+    "cli_args": {
+      "command": "run",
+      "preset": "vg-1-forge",
+      "mode": "live",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "tier": "tier-2",
+      "single": null,
+      "max_turns": 10,
+      "max_requests": 22,
+      "budget": 0.03,
+      "keep_scratch": false
+    }
+  }
+}

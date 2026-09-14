@@ -355,6 +355,41 @@ class TestForgeReflexRules(unittest.TestCase):
         self.assertIsNotNone(directive)
         self.assertEqual(directive.kind, "abandon_hypothesis")
 
+    def test_a_read_only_stall_is_steered_to_write_not_to_more_investigation(self) -> None:
+        """The observed failure: no file written, and the reflex said 'investigate'.
+
+        Mutation proof: restore the single unconditional `abandon_hypothesis`
+        return in `NoProgressRule.evaluate` and this reds -- the directive goes
+        back to telling a read-only agent to find another angle of investigation,
+        which is what let episodes burn the whole turn ceiling without an edit.
+        """
+        directive = NoProgressRule.evaluate(3, has_changes=False)
+        self.assertIsNotNone(directive)
+        self.assertEqual(directive.kind, "force_write")
+        self.assertIn("edit_file", directive.feedback)
+        # It must not steer a zero-write agent back into exploration.
+        self.assertNotIn("angle of investigation", directive.feedback)
+
+    def test_a_stall_after_real_edits_still_redirects_the_hypothesis(self) -> None:
+        """Write-aware steering must not swallow the original stall directive."""
+        directive = NoProgressRule.evaluate(3, has_changes=True)
+        self.assertIsNotNone(directive)
+        self.assertEqual(directive.kind, "abandon_hypothesis")
+
+    def test_inspected_files_reach_the_model_context(self) -> None:
+        """Collected-but-unrendered state is why the agent re-read the same files.
+
+        Mutation proof: drop the `inspected_files` branch from
+        `ForgeWorkingState.to_context_block` and this reds.
+        """
+        state = ForgeWorkingState(
+            task_brief="implement EventBus",
+            inspected_files=("src/event_bus.py", "TASK.md"),
+        )
+        rendered = state.to_context_block()
+        self.assertIn("src/event_bus.py", rendered)
+        self.assertIn("TASK.md", rendered)
+
 
 class TestForgeEngineExecution(unittest.TestCase):
     """Full reflexive TDD episode execution tests."""

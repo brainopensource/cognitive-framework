@@ -28,24 +28,31 @@ relationships:
 
 ## Control-frontier packet execution (2026-09-14)
 
-The current `tasks.md` decision supersedes the historical integration sequence below;
-its Packet 1/2 are the only successor assignments, preserving active A/T-131.6,
-C/T-140 and B's current reviews. Use the named focused modules and existing deep
-contracts rather than authoring another benchmark suite or architectural treatment.
-Before a leaf starts, record its actual subject, released file lease, relevant accepted
-predecessors and F-number; after it ends, retain the product positive/refusal evidence,
-complete command outcomes, authors and non-author disposition in the existing row.
-An integration acceptor is independent of the changed component and its glue; already
-accepted unchanged baseline dependencies do not require re-review merely by inclusion.
-T-133 synthetic quarantine qualification and T-132 discovery qualification can be
-recorded separately from the deliberately failing actual-corpus admission gate, but
-the failing gate remains visible and no full verification PASS follows from that split.
-No current baseline tests or LDA runs are repeated for planning; developers refresh only
-changed relevant assumptions, run focused development checks and the existing required
-final gates, and retain any outstanding corpus/authority blocker honestly.
-Preparation stops at the F1–F7 receipt map and authorization-ready canary protocol;
-external material, actual freeze and live execution are not implied by the packet.
-Existing FH-1 and SOTA reference material below remains proposed/pre-admission only.
+The current `tasks.md` leadership continuation advances the queue to A/T-131.8,
+C/T-133→T-132→T-137 and B/T-131.3/4/7, preserving predecessor acceptance and
+file-release conditions rather than asserting that earlier packets are accepted.
+One executable integrity packet and one conditional control-readiness packet are
+sufficient; existing deep contracts and focused falsifiers remain the implementation
+instructions, with private designs and routine fixtures chosen by seniors.
+The next product outcome is reliable, attributable completion on the existing public
+path, followed by a trustworthy fixed control measurement; additional capabilities
+are not substitutes for either outcome.
+T-132 reconciles actual local/CI collection and quarantine enforcement: the inspected
+CI file already names runtime/adapters/security/falsifier suites while local `verify`
+names kernel/agency/contracts, so the older approximate count is historical, not a
+current measurement or justification to duplicate suites. Preserve bounded checks,
+measure changed gate cost, and retain intentional real-corpus refusal visibly.
+The latest row-6 handoff reports final gates on a tree also containing T-140 changes;
+its evidence must retain that dirty subject rather than imply an isolated clean run.
+B assembles existing acceptance/F5 references, C assembles the F1–F7/resource map, and
+eligible non-authors accept the corresponding claims; a missing reviewer is not
+permission to self-accept. Unchanged accepted baseline dependencies need no automatic
+re-review, but changed integration glue belongs to the acceptance unit.
+After exact file releases, hermetic T-26b preparation may precede real corpus admission;
+actual T-26b acceptance, freeze and execution retain their ordered dependencies.
+Use existing artifacts and focused tests plus required final gates, refreshing navigation
+only when relevant assumptions change; no new benchmark campaign or baseline rerun
+is needed for this leadership assessment. Later architecture remains pre-admission.
 
 ## Director Charter III — capability integration lanes (2026-09-13)
 

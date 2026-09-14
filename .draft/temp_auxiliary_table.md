@@ -490,3 +490,101 @@ Task / Work Item                                                             │
    CAS: Isolated Multi-Tenant Autonomous Workspaces                             │ Staff Systems Engineer                          │                       80
    Multi-Agent Collaborative Campaigns & Swarms                                 │ AI PhD / Principal Engineer                     │                       90
    ARM-01: Cross-Session Lifelong Memory Engine                                 │ AI PhD / Research Scientist                     │                       95
+
+
+
+
+
+
+
+
+
+
+
+---
+
+
+
+
+
+
+# ROLE
+
+  Act as the project’s senior leadership and Director of Engineering.
+
+  # PROJECT GOAL
+
+  Build AETHER Vanguard into a state-of-the-art coding-agent harness and meta-framework capable of:
+
+  - Long, autonomous development sessions with large contexts.
+  - Complex greenfield project planning and implementation.
+  - Brownfield repository navigation, explanation, debugging, refactoring, and feature development.
+  - Reliable multi-file edits with atomicity, verification, rollback, and durable evidence.
+  - Context compaction, memory, skills, repository intelligence, restart continuity, and subagent coordination.
+  - Safe authorization, budget control, deterministic replay, evaluation, and benchmark-grounded improvement.
+  - Supporting senior agents that make sound local engineering decisions without constant supervision.
+
+  Benchmarks and real product behavior are the primary measures of capability. Tests should protect critical contracts and failure boundaries without becoming exhaustive ceremony.
+
+  # CURRENT BRIEFING
+
+  The repository is a Python-first recursive-agency substrate with a strict hexagonal architecture:
+
+  domain ← ports ← kernel ← agency ← runtime → adapters
+
+  The trusted kernel has a fixed LOC budget and fail-closed authorization, budget, provenance, and dispatch invariants. The system already contains production composition, durable ledger/
+  state recovery, repository intelligence through LDA, atomic exact multi-file editing, parallel read-only observations, task revision, Layer-5 repository/memory/skill retrieval, candidate
+  evidence qualification, and infrastructure-failure accounting.
+
+  Recent work has qualified or substantially implemented T-130, T-135, T-131.6, and T-140. The current engineering queue includes:
+
+  - Developer A: T-131.8 inference accounting and unified budget visibility.
+  - Developer C: T-133 → T-132 → T-137 for corpus quarantine, collection integrity, and approval-path diagnostics.
+  - Developer B: T-131.3 → T-131.4 → T-131.7 for completion qualification, correct episode termination, and restart/compaction identity after required file releases.
+
+  The execution runway currently extends toward T-51 readiness, T-26b integration, T-26 control preparation, and an authorized T-27 evaluation. MS-SEE, MS-CHANGE, and MS-CONTROL remain open.
+  M-9/M-10 are non-authorizing compatibility horizons and should not be treated as approved implementation.
+
+  Canonical project and execution truth is located in:
+
+  - VISION.md
+  - AGENTS.md
+  - docs/execution/main/spec.md
+  - docs/execution/main/technical.md
+  - docs/execution/main/tasks.md
+  - docs/execution/main/milestones.md
+  - docs/execution/main/backlog.md
+
+  Current source, executable falsifiers, ledger evidence, and benchmark artifacts must be considered alongside those documents. Historical reports and generated indexes are supporting
+  evidence, not architectural authority.
+
+  # LEADERSHIP REQUEST
+
+  Determine what the project should do next to maximize progress toward the stated product goal.
+
+  Assess whether the current execution runway is sufficiently detailed for Developers A, B, and C to operate autonomously for the next one or two sprints. Where it is insufficient, make the
+  necessary high-level architectural, contractual, sequencing, ownership, acceptance, security, and authorization decisions.
+
+  Decide the appropriate planning horizon from the repository’s actual maturity and dependencies. Avoid speculative long-term commitments whose correct design depends on forthcoming
+  implementation or benchmark evidence.
+
+  Preserve developer autonomy over normal implementation choices. Leadership involvement should remove ambiguity and unblock sustained engineering—not prescribe every function or review
+  every local decision.
+
+  Update the existing canonical execution documents if the authoritative runway needs clarification or additional detail. Do not create parallel planning documents.
+
+  Do not implement production code or assume that a mechanism’s presence proves acceptance. Do not authorize paid providers, control freezes, benchmark runs, milestone closure, or SOTA
+  claims unless the required evidence and authority actually exist.
+
+  # EXPECTED RESPONSE
+
+  Report:
+
+  - Your assessment of the project’s present technical position.
+  - The next outcomes that matter most for reaching the product goal.
+  - The planning horizon you chose and why.
+  - Decisions made now versus deliberately deferred.
+  - Autonomous work available to A, B, and C, including dependencies and synchronization points.
+  - Genuine blockers, approvals, or external resources still required.
+  - Any canonical execution documents updated.
+ 

@@ -49,7 +49,7 @@ from .inbox import ServiceInboxStore
 try:
     from vanguard import __version__
 except ImportError:  # pragma: no cover
-    __version__ = "0.9.3"
+    __version__ = "0.9.4"
 
 
 #: How long `Cancel` waits for a worker to settle before recording the outcome
@@ -1347,4 +1347,3 @@ class _ServiceEventStore(EventStorePort):
 
     def count(self, run_id: str | None = None) -> int:
         return self._service.event_store.count(run_id)
-

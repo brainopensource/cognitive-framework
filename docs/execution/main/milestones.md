@@ -145,7 +145,7 @@ remains in force for future passes: a good outcome does not authorize bypassing 
 
 Stable release outcomes only. Work tree: [`tasks.md`](tasks.md). Packages: [`backlog.md`](backlog.md). Deltas: [`spec.md`](spec.md). Handbook: [`technical.md`](technical.md).
 
-No sprint calendar. MS-* is `OPEN` until receipts exist. Package version **0.9.3** is not M-9.
+No sprint calendar. MS-* is `OPEN` until receipts exist. Package version **0.9.4** is not M-9.
 
 Evidence integrity and the safety obligations of the selected profile are core to
 qualification. Additional deployment profiles may be deferred; their required

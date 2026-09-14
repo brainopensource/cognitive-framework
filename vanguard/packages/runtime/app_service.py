@@ -703,7 +703,7 @@ class ApplicationService:
         try:
             from vanguard import __version__
         except ImportError:
-            __version__ = "0.9.3"
+            __version__ = "0.9.4"
 
         checks: list[DiagnosticCheck] = []
         checks.append(DiagnosticCheck(

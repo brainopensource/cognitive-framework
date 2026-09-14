@@ -35,7 +35,7 @@ from vanguard.packages.runtime.service import (
 try:
     from vanguard import __version__
 except ImportError:
-    __version__ = "0.9.3"
+    __version__ = "0.9.4"
 
 
 def get_default_paths() -> tuple[Path, Path, Path, Path]:

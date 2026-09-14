@@ -219,7 +219,7 @@ SemanticTaskState / CodingTaskState (`domain/task_state.py`)
   remaining_budgets
 ```
 
-This is a coding-pack projection, not a new authoritative state store. Durable facts and referenced artifacts remain in the causal ledger; the value is reconstructed by folding them. Compaction must preserve the goal and constraints, current plan, modified files, latest relevant failure, latest verification, settled effects, next action, and remaining budgets. Raw old observations and duplicate reads may be summarized.
+This is a coding-pack projection, not a new authoritative state store. Durable facts and referenced artifacts remain in the causal ledger; the value is reconstructed by folding them. Compaction must preserve the goal and constraints, current plan, modified files, latest relevant failure, latest verification, settled effects, next action, and remaining budgets. Raw old observations and duplicate reads may be summarized, but the *paths* already inspected must stay visible in the rendered working state: a turn loop that cannot see what it has already read re-reads it, and observed episodes spent their whole turn ceiling on redundant inspection without ever emitting an edit. Summarize the bodies, keep the path list.
 
 `MemoryView` (`aether.memory-view/1`) is the versioned, deeply immutable snapshot around that full
 state; it binds cursor, lineage, reducer version, and digest-addressed evidence without introducing

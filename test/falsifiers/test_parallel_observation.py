@@ -103,6 +103,7 @@ def observation_sinks() -> SinkRegistry:
     registry.register("fs.read", SinkClass.OBSERVATION)
     registry.register("fs.search", SinkClass.OBSERVATION)
     registry.register("patch.apply", SinkClass.PRIVILEGED)
+    registry.register("task.revise", SinkClass.PRIVILEGED)
     registry.register("agency.finish", SinkClass.PRIVILEGED)
     return registry
 
@@ -284,6 +285,28 @@ class ReadOnlyOnly(unittest.TestCase):
                    if event.reason == "observation_batch_refused"]
         self.assertEqual(len(denials), 1)
         self.assertIn("agency.finish", denials[0].payload["detail"])
+
+    def test_a_batch_carrying_task_revise_is_refused(self) -> None:
+        """A batch carrying `task.revise` is refused: task revision is a privileged
+        state mutation and cannot be smuggled in or executed inside an observation batch.
+        """
+        mixed = batch(["a.py"])
+        mixed["requests"].append({
+            "id": "rev", "action": "task.revise",
+            "resource": {"kind": "generic", "uriPattern": "task://revise/*"},
+            "args": {"plan": ["step 1"]},
+        })
+        harness, adapter, engine = build([mixed, doubles.finish()])
+        outcome = run(engine)
+
+        self.assertEqual(adapter.calls, [])
+        denials = [event for event in harness.sink.events
+                   if event.kind == "AuthorizationDenied"
+                   and event.reason == "observation_batch_refused"]
+        self.assertEqual(len(denials), 1)
+        self.assertIn("task.revise", denials[0].payload["detail"])
+        self.assertEqual(harness.ledger.entries, [])
+        self.assertIs(outcome.terminal, RunTermination.COMPLETED)
 
     def test_a_composition_with_no_declared_sinks_settles_no_batch(self) -> None:
         """Fail closed (`F-05`). A composition that has not said which of its

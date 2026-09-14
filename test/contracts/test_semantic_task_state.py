@@ -22,6 +22,13 @@ from vanguard.packages.domain.task_state import (
     SemanticTaskState,
     StepState,
     TaskStep,
+    TaskRevision,
+    TASK_MUTABLE_FIELDS,
+    TASK_REVISION_CONFLICTING,
+    TASK_REVISION_MALFORMED,
+    TASK_REVISION_STALE,
+    TASK_REVISION_WIDENING,
+    validate_revision_invariants,
 )
 
 _DIGEST_A = "sha256:" + "a" * 64
@@ -436,5 +443,150 @@ class TestRecoveryStateContract(unittest.TestCase):
             )
 
 
+def _make_revision(
+    *,
+    revision_id: str = "rev-001",
+    target_binding: tuple[str, str, str, str] = ("run-1", "ep-1", "turn-1", "prop-1"),
+    expected_revision: int = 2,
+    expected_state_digest: str = _DIGEST_A,
+    mutated_fields: tuple[TaskMutableField, ...] = ("plan",),
+    proposed_state: SemanticTaskState | None = None,
+    authority_proof: str = "authenticated-dispatch",
+) -> TaskRevision:
+    if proposed_state is None:
+        proposed_state = _task(revision=expected_revision + 1)
+    return TaskRevision(
+        revision_id=revision_id,
+        target_binding=target_binding,
+        expected_revision=expected_revision,
+        expected_state_digest=expected_state_digest,
+        mutated_fields=mutated_fields,
+        proposed_state=proposed_state,
+        authority_proof=authority_proof,
+    )
+
+
+class TestTaskRevisionContract(unittest.TestCase):
+    def test_mutable_fields_specification(self) -> None:
+        self.assertEqual(
+            TASK_MUTABLE_FIELDS,
+            frozenset({
+                "plan",
+                "strategy_steps",
+                "hypotheses",
+                "verification_plan",
+                "next_action",
+                "active_step_id",
+                "backlog",
+            }),
+        )
+
+    def test_task_revision_dataclass_and_canonical_round_trip(self) -> None:
+        proposed = _task(
+            revision=3,
+            plan=("step 1: inspect", "step 2: test"),
+            next_action="step 1: inspect",
+        )
+        revision = _make_revision(
+            revision_id="rev-001",
+            expected_revision=2,
+            expected_state_digest=_DIGEST_A,
+            mutated_fields=("plan", "next_action"),
+            proposed_state=proposed,
+        )
+        canonical = revision.to_canonical_dict()
+        self.assertEqual(canonical["revisionId"], "rev-001")
+        self.assertEqual(canonical["expectedRevision"], 2)
+        self.assertEqual(canonical["expectedStateDigest"], _DIGEST_A)
+        self.assertEqual(canonical["mutatedFields"], ["plan", "next_action"])
+
+        restored = TaskRevision.from_mapping(canonical)
+        self.assertEqual(restored, revision)
+        self.assertEqual(restored.digest(), revision.digest())
+        self.assertTrue(revision.digest().startswith("sha256:"))
+
+    def test_task_revision_is_frozen_value_object(self) -> None:
+        revision = _make_revision()
+        with self.assertRaises(AttributeError):
+            revision.revision_id = "rev-002"  # type: ignore[misc]
+        with self.assertRaises(AttributeError):
+            revision.authority_proof = "tampered"  # type: ignore[misc]
+
+    def test_validate_revision_invariants_valid(self) -> None:
+        state = _task(revision=2)
+        proposed = _task(
+            revision=3,
+            plan=("p1", "p2"),
+            strategy_steps=("s1",),
+        )
+        revision = _make_revision(
+            revision_id="rev-valid-1",
+            expected_revision=2,
+            expected_state_digest=state.digest(),
+            mutated_fields=("plan", "strategy_steps"),
+            proposed_state=proposed,
+        )
+        ok, err_kind, err_msg = validate_revision_invariants(state, revision)
+        self.assertTrue(ok)
+        self.assertIsNone(err_kind)
+        self.assertIsNone(err_msg)
+
+    def test_validate_revision_invariants_refuses_stale_revision(self) -> None:
+        state = _task(revision=5)
+        # Sequence mismatch
+        stale_seq = _make_revision(
+            expected_revision=4,
+            expected_state_digest=state.digest(),
+            proposed_state=_task(revision=5),
+        )
+        ok, err, msg = validate_revision_invariants(state, stale_seq)
+        self.assertFalse(ok)
+        self.assertEqual(err, TASK_REVISION_STALE)
+
+        # Digest mismatch
+        stale_digest = _make_revision(
+            expected_revision=5,
+            expected_state_digest=_DIGEST_B,
+            proposed_state=_task(revision=6),
+        )
+        ok2, err2, msg2 = validate_revision_invariants(state, stale_digest)
+        self.assertFalse(ok2)
+        self.assertEqual(err2, TASK_REVISION_STALE)
+
+    def test_validate_revision_invariants_refuses_widening(self) -> None:
+        state = _task(revision=2)
+        # Attempt to widen objective
+        widening_obj = _make_revision(
+            expected_revision=2,
+            expected_state_digest=state.digest(),
+            proposed_state=_task(revision=3, objective="new unconstrained objective"),
+        )
+        ok, err, msg = validate_revision_invariants(state, widening_obj)
+        self.assertFalse(ok)
+        self.assertEqual(err, TASK_REVISION_WIDENING)
+
+        # Attempt to widen remaining budgets
+        widening_budget = _make_revision(
+            expected_revision=2,
+            expected_state_digest=state.digest(),
+            proposed_state=_task(revision=3, remaining_budgets={"turns": 100}),
+        )
+        ok2, err2, msg2 = validate_revision_invariants(state, widening_budget)
+        self.assertFalse(ok2)
+        self.assertEqual(err2, TASK_REVISION_WIDENING)
+
+    def test_validate_revision_invariants_refuses_malformed(self) -> None:
+        state = _task(revision=2)
+        # Empty revision_id fails at construction
+        with self.assertRaises(ValueError):
+            _make_revision(revision_id="")
+
+        # Non-whitelisted mutated field fails at construction
+        with self.assertRaises(ValueError):
+            _make_revision(mutated_fields=("arbitrary_field",))  # type: ignore[arg-type]
+
+
+
 if __name__ == "__main__":
     unittest.main()
+

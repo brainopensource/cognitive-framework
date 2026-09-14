@@ -7,7 +7,7 @@ import re
 from dataclasses import dataclass, field
 from enum import Enum
 from types import MappingProxyType
-from typing import Any, Mapping, Sequence
+from typing import Any, Literal, Mapping, Sequence
 
 from .canonicalisation.digest import digest_bytes, digest_of
 from .canonicalisation.jcs import canonical_bytes, parse_json_text
@@ -21,9 +21,17 @@ __all__ = [
     "RouteDecision",
     "SemanticTaskState",
     "StepState",
+    "TASK_MUTABLE_FIELDS",
+    "TASK_REVISION_CONFLICTING",
+    "TASK_REVISION_MALFORMED",
+    "TASK_REVISION_STALE",
+    "TASK_REVISION_WIDENING",
+    "TaskMutableField",
+    "TaskRevision",
     "TaskStep",
     "TodoItem",
     "critical_state",
+    "validate_revision_invariants",
 ]
 
 
@@ -644,3 +652,206 @@ def critical_state(view: MemoryView) -> dict[str, Any]:
         "lineage_id": view.lineage_id,
         "reducer_version": view.reducer_version,
     }
+
+
+TaskMutableField = Literal[
+    "plan",
+    "strategy_steps",
+    "hypotheses",
+    "verification_plan",
+    "next_action",
+    "active_step_id",
+    "backlog",
+]
+
+TASK_MUTABLE_FIELDS: frozenset[str] = frozenset({
+    "plan",
+    "strategy_steps",
+    "hypotheses",
+    "verification_plan",
+    "next_action",
+    "active_step_id",
+    "backlog",
+})
+
+TASK_REVISION_MALFORMED = "TASK_REVISION_MALFORMED"
+TASK_REVISION_STALE = "TASK_REVISION_STALE"
+TASK_REVISION_CONFLICTING = "TASK_REVISION_CONFLICTING"
+TASK_REVISION_WIDENING = "TASK_REVISION_WIDENING"
+
+
+@dataclass(frozen=True, slots=True)
+class TaskRevision:
+    """ADR-0107 / D-1: typed task revision seam."""
+
+    revision_id: str
+    target_binding: tuple[str, str, str, str]
+    expected_revision: int
+    expected_state_digest: str
+    mutated_fields: tuple[TaskMutableField, ...]
+    proposed_state: SemanticTaskState
+    authority_proof: str
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.revision_id, str) or not self.revision_id.strip():
+            raise ValueError("revision_id must be a non-empty string")
+        if not isinstance(self.target_binding, tuple) or len(self.target_binding) != 4:
+            raise TypeError("target_binding must be a 4-tuple of strings")
+        if not all(isinstance(x, str) for x in self.target_binding):
+            raise TypeError("target_binding entries must be strings")
+        if not isinstance(self.expected_revision, int) or self.expected_revision < 0:
+            raise ValueError("expected_revision must be a non-negative integer")
+        if not isinstance(self.expected_state_digest, str) or not self.expected_state_digest.strip():
+            raise ValueError("expected_state_digest must be a non-empty string")
+        if not isinstance(self.mutated_fields, tuple):
+            raise TypeError("mutated_fields must be a tuple")
+        for f in self.mutated_fields:
+            if f not in TASK_MUTABLE_FIELDS:
+                raise ValueError(f"unknown mutated field {f!r}")
+        if not isinstance(self.proposed_state, SemanticTaskState):
+            raise TypeError("proposed_state must be a SemanticTaskState")
+        if not isinstance(self.authority_proof, str) or not self.authority_proof.strip():
+            raise ValueError("authority_proof must be a non-empty string")
+
+    def to_canonical_dict(self) -> dict[str, Any]:
+        return {
+            "revisionId": self.revision_id,
+            "targetBinding": list(self.target_binding),
+            "expectedRevision": self.expected_revision,
+            "expectedStateDigest": self.expected_state_digest,
+            "mutatedFields": list(self.mutated_fields),
+            "proposedState": self.proposed_state.to_canonical_dict(),
+            "authorityProof": self.authority_proof,
+        }
+
+    def digest(self) -> str:
+        return digest_of(self.to_canonical_dict())
+
+    @classmethod
+    def from_mapping(cls, raw: Mapping[str, Any]) -> "TaskRevision":
+        target = raw.get("targetBinding", raw.get("target_binding", ()))
+        if not isinstance(target, (tuple, list)) or len(target) != 4:
+            raise TypeError("target_binding must be a sequence of 4 strings")
+        target_tuple = tuple(str(x) for x in target)
+
+        mutated = raw.get("mutatedFields", raw.get("mutated_fields", ()))
+        if not isinstance(mutated, (tuple, list)):
+            raise TypeError("mutated_fields must be a sequence of strings")
+        mutated_tuple = tuple(str(x) for x in mutated)
+
+        proposed_raw = raw.get("proposedState", raw.get("proposed_state"))
+        if isinstance(proposed_raw, SemanticTaskState):
+            proposed = proposed_raw
+        elif isinstance(proposed_raw, Mapping):
+            proposed = SemanticTaskState.from_mapping(proposed_raw)
+        else:
+            raise TypeError("proposed_state must be a mapping or SemanticTaskState")
+
+        return cls(
+            revision_id=str(raw.get("revisionId", raw.get("revision_id", ""))),
+            target_binding=target_tuple,
+            expected_revision=int(raw.get("expectedRevision", raw.get("expected_revision", 0))),
+            expected_state_digest=str(raw.get("expectedStateDigest", raw.get("expected_state_digest", ""))),
+            mutated_fields=mutated_tuple,  # type: ignore[arg-type]
+            proposed_state=proposed,
+            authority_proof=str(raw.get("authorityProof", raw.get("authority_proof", ""))),
+        )
+
+
+def validate_revision_invariants(
+    current_state: SemanticTaskState,
+    revision: TaskRevision,
+) -> tuple[bool, str | None, str | None]:
+    """Pure domain check of TaskRevision against current SemanticTaskState.
+
+    Returns (is_valid, failure_kind, failure_message).
+    """
+    if revision.expected_revision != current_state.revision:
+        return (
+            False,
+            TASK_REVISION_STALE,
+            f"stale revision: expected {revision.expected_revision}, current is {current_state.revision}",
+        )
+    if revision.expected_state_digest and revision.expected_state_digest != current_state.digest():
+        return (
+            False,
+            TASK_REVISION_STALE,
+            f"stale state digest: expected {revision.expected_state_digest}, current is {current_state.digest()}",
+        )
+
+    for field_name in revision.mutated_fields:
+        if field_name not in TASK_MUTABLE_FIELDS:
+            return (
+                False,
+                TASK_REVISION_MALFORMED,
+                f"unauthorized mutated field: {field_name}",
+            )
+
+    proposed = revision.proposed_state
+    if current_state.objective != proposed.objective:
+        return False, TASK_REVISION_WIDENING, "cannot mutate objective"
+    if current_state.constraints != proposed.constraints:
+        return False, TASK_REVISION_WIDENING, "cannot mutate constraints"
+    if dict(current_state.remaining_budgets) != dict(proposed.remaining_budgets):
+        return False, TASK_REVISION_WIDENING, "cannot mutate remaining_budgets"
+    if current_state.task_class != proposed.task_class:
+        return False, TASK_REVISION_WIDENING, "cannot mutate task_class"
+    if current_state.completion_requirements != proposed.completion_requirements:
+        return False, TASK_REVISION_WIDENING, "cannot mutate completion_requirements"
+    if current_state.settled_effects != proposed.settled_effects:
+        return False, TASK_REVISION_WIDENING, "cannot mutate settled_effects"
+    if current_state.settled_invariants != proposed.settled_invariants:
+        return False, TASK_REVISION_WIDENING, "cannot mutate settled_invariants"
+    if current_state.discoveries != proposed.discoveries:
+        return False, TASK_REVISION_WIDENING, "cannot mutate discoveries"
+    if current_state.dead_ends != proposed.dead_ends:
+        return False, TASK_REVISION_WIDENING, "cannot mutate dead_ends"
+    if current_state.todo_items != proposed.todo_items:
+        return False, TASK_REVISION_WIDENING, "cannot mutate todo_items"
+    if current_state.route_decisions != proposed.route_decisions:
+        return False, TASK_REVISION_WIDENING, "cannot mutate route_decisions"
+    if current_state.inspected_files != proposed.inspected_files:
+        return False, TASK_REVISION_WIDENING, "cannot mutate inspected_files"
+    if current_state.modified_files != proposed.modified_files:
+        return False, TASK_REVISION_WIDENING, "cannot mutate modified_files"
+    if current_state.implicated_files != proposed.implicated_files:
+        return False, TASK_REVISION_WIDENING, "cannot mutate implicated_files"
+    if current_state.change_surface != proposed.change_surface:
+        return False, TASK_REVISION_WIDENING, "cannot mutate change_surface"
+    if dict(current_state.last_verification) != dict(proposed.last_verification):
+        return False, TASK_REVISION_WIDENING, "cannot mutate last_verification"
+    if current_state.failure_class != proposed.failure_class:
+        return False, TASK_REVISION_WIDENING, "cannot mutate failure_class"
+    if current_state.falsified_hypotheses != proposed.falsified_hypotheses:
+        return False, TASK_REVISION_WIDENING, "cannot mutate falsified_hypotheses"
+    if current_state.changed_files_tree_hash != proposed.changed_files_tree_hash:
+        return False, TASK_REVISION_WIDENING, "cannot mutate changed_files_tree_hash"
+    if current_state.repository_identity != proposed.repository_identity:
+        return False, TASK_REVISION_WIDENING, "cannot mutate repository_identity"
+    if current_state.selection_policy_identity != proposed.selection_policy_identity:
+        return False, TASK_REVISION_WIDENING, "cannot mutate selection_policy_identity"
+    if current_state.index_snapshot_digest != proposed.index_snapshot_digest:
+        return False, TASK_REVISION_WIDENING, "cannot mutate index_snapshot_digest"
+    if dict(current_state.recovery_state) != dict(proposed.recovery_state):
+        return False, TASK_REVISION_WIDENING, "cannot mutate recovery_state"
+    if current_state.run_id != proposed.run_id:
+        return False, TASK_REVISION_WIDENING, "cannot mutate run_id"
+
+    mutable_attrs = {
+        "plan": (current_state.plan != proposed.plan),
+        "strategy_steps": (current_state.strategy_steps != proposed.strategy_steps),
+        "hypotheses": (current_state.hypotheses != proposed.hypotheses),
+        "verification_plan": (current_state.verification_plan != proposed.verification_plan),
+        "next_action": (current_state.next_action != proposed.next_action),
+        "active_step_id": (current_state.active_step_id != proposed.active_step_id),
+        "backlog": (current_state.backlog != proposed.backlog),
+    }
+    for field_name, was_mutated in mutable_attrs.items():
+        if was_mutated and field_name not in revision.mutated_fields:
+            return (
+                False,
+                TASK_REVISION_WIDENING,
+                f"field {field_name!r} was mutated but not declared in mutated_fields",
+            )
+
+    return True, None, None

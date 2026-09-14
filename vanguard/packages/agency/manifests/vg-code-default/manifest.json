@@ -11,6 +11,7 @@
       "vg-code-default/repo-get-tests-tool.json",
       "vg-code-default/patch-tool.json",
       "vg-code-default/test-tool.json",
+      "vg-code-default/task-revise-tool.json",
       "vg-code-default/finish-tool.json"
     ],
     "context_policy": ["vg-code-default/context-policy.json"],
@@ -71,6 +72,12 @@
       "verb": "repo.get_tests",
       "sink": "observation",
       "selector": {"kind":"generic","uriPattern":"repo://tests/*"},
+      "risk": "low"
+    },
+    {
+      "verb": "task.revise",
+      "sink": "privileged",
+      "selector": {"kind":"generic","uriPattern":"task://revise/*"},
       "risk": "low"
     },
     {

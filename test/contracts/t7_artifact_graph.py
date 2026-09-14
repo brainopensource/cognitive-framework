@@ -193,7 +193,7 @@ class CodeDefaultHarnessContract(unittest.TestCase):
             "read-tool.json", "search-tool.json", "repo-search-symbols-tool.json",
             "repo-get-callers-tool.json", "repo-get-dependencies-tool.json",
             "repo-get-tests-tool.json", "patch-tool.json", "test-tool.json",
-            "finish-tool.json",
+            "task-revise-tool.json", "finish-tool.json",
         ):
             tool_data = json.loads((MANIFESTS / "vg-code-default" / tool_file).read_text())
             self.assertIn("name", tool_data)
@@ -201,14 +201,15 @@ class CodeDefaultHarnessContract(unittest.TestCase):
 
     def test_code_default_contains_typed_tools_and_capabilities(self) -> None:
         components = dict(self.manifest.components)
-        self.assertEqual(len(components["tools"]), 9)
+        self.assertEqual(len(components["tools"]), 10)
         verbs = {cap.verb for cap in self.manifest.capabilities}
         self.assertEqual(
             verbs,
             {
                 "fs.read", "fs.search", "patch.apply", "proc.exec",
                 "repo.search_symbols", "repo.get_callers",
-                "repo.get_dependencies", "repo.get_tests", "agency.finish",
+                "repo.get_dependencies", "repo.get_tests",
+                "task.revise", "agency.finish",
             },
         )
         sinks = {cap.verb: cap.sink for cap in self.manifest.capabilities}
@@ -221,6 +222,7 @@ class CodeDefaultHarnessContract(unittest.TestCase):
             "repo.get_dependencies", "repo.get_tests",
         ):
             self.assertEqual(sinks[verb], "observation")
+        self.assertEqual(sinks["task.revise"], "privileged")
         self.assertEqual(sinks["agency.finish"], "privileged")
 
     def test_composition_digest_is_episode_independent(self) -> None:

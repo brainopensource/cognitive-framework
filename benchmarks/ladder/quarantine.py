@@ -577,34 +577,41 @@ def guard_loader(
     purpose: str = "development",
     registry: Mapping[str, Any] | None = None,
     capture: bool = False,
+    scope: str | None = None,
 ) -> None:
     """Fail-closed loader helper. Unregistered IDs are ordinary work only when named.
 
-    Unknown IDs still refuse unless the caller passes an explicit ordinary-user
-    scope through the primitive guards. This helper never treats an omitted ID
-    as ordinary work.
+    Unknown, renamed, or omitted identities refuse unless the caller passes an
+    explicit ordinary-user scope. This helper never treats an omitted ID as
+    ordinary work and never converts an alias into a canonical bypass.
     """
     if not task_id:
         raise QuarantineError("missing identity")
     active = registry if registry is not None else load_registry()
-    member = lookup_member(active, str(task_id))
-    if member is None:
+    resolved_scope = _require_scope(scope)
+    kind = _identity_kind(active, str(task_id))
+    if kind == "renamed":
+        raise QuarantineError("renamed identity")
+    if kind == "unknown":
+        if resolved_scope == SCOPE_ORDINARY_USER:
+            return
         if capture:
-            guard_capture(task_id=str(task_id), registry=active, scope=SCOPE_ORDINARY_USER)
+            guard_capture(task_id=str(task_id), registry=active)
         else:
             guard_materialization(
                 task_id=str(task_id),
                 source=source,
                 purpose=purpose,
                 registry=active,
-                scope=SCOPE_ORDINARY_USER,
             )
         return
+    if resolved_scope == SCOPE_ORDINARY_USER:
+        raise QuarantineError("registered corpus identity cannot use ordinary-user scope")
     if capture:
         guard_capture(task_id=str(task_id), registry=active)
         return
     guard_materialization(
-        task_id=member["id"],
+        task_id=str(task_id),
         source=source,
         purpose=purpose,
         registry=active,

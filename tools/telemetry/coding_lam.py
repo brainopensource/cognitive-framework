@@ -133,11 +133,11 @@ def default_workspace_map(repo_root: Path) -> dict[str, Path | None]:
         GREENFIELD_SET,
         resolve_task_set,
     )
-    from benchmarks.ladder.quarantine import guard_loader
+    from benchmarks.ladder.quarantine import SCOPE_ORDINARY_USER, guard_loader
 
     resolved = resolve_task_set(DOGFOOD_SET + GREENFIELD_SET, root=repo_root)
     for task in resolved:
-        guard_loader(task_id=task["id"], purpose="development")
+        guard_loader(task_id=task["id"], purpose="development", scope=SCOPE_ORDINARY_USER)
     return {task["id"]: (Path(task["workspace"])
                          if Path(task["workspace"]).is_dir() else None)
             for task in resolved}

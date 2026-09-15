@@ -19,7 +19,7 @@ if str(ROOT) not in sys.path:
 
 from schema import validate_scenario
 from store import LamStore
-from benchmarks.ladder.quarantine import guard_loader
+from benchmarks.ladder.quarantine import SCOPE_ORDINARY_USER, guard_loader
 
 NEW_10_PRO_TASKS = [
     ("t7_jit_bytecode_vm", "t7-jit-bytecode-vm", 7, "SWE-bench Pro: Stack Bytecode JIT VM Opcode Execution"),
@@ -38,7 +38,7 @@ def import_10_pro():
     store = LamStore(DB_PATH)
     imported = 0
     for folder_name, scenario_id, tier, title in NEW_10_PRO_TASKS:
-        guard_loader(task_id=scenario_id, capture=True)
+        guard_loader(task_id=scenario_id, capture=True, scope=SCOPE_ORDINARY_USER)
         matches = [p for p in CAPTURES_DIR.glob(f"{folder_name}-*") if p.is_dir()]
         if not matches:
             print(f"⚠ Missing capture for {folder_name}")

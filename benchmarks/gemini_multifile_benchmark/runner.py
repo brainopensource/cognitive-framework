@@ -27,7 +27,7 @@ if str(LAM_DIR) not in sys.path:
     sys.path.insert(0, str(LAM_DIR))
 
 from benchmarks.gemini_multifile_benchmark.challenges import GEMINI_CHALLENGES, MultifileChallenge
-from benchmarks.ladder.quarantine import guard_loader
+from benchmarks.ladder.quarantine import SCOPE_ORDINARY_USER, guard_loader
 import importlib
 LamStore = getattr(importlib.import_module("store"), "LamStore")
 
@@ -106,7 +106,7 @@ def run_multifile_benchmark(
     store: LamStore | None = None,
 ) -> dict[str, Any]:
     """Execute multi-file benchmark challenge, evaluate oracle, and record trace."""
-    guard_loader(task_id=challenge.challenge_id, purpose="development")
+    guard_loader(task_id=challenge.challenge_id, purpose="development", scope=SCOPE_ORDINARY_USER)
     with tempfile.TemporaryDirectory() as tmpdir:
         repo = Path(tmpdir)
         for rel_path, content in challenge.files.items():
@@ -182,7 +182,11 @@ def run_multifile_benchmark(
 
         # Record into LAM Store (lam.sqlite)
         if store is not None:
-            guard_loader(task_id=f"gemini/{challenge.challenge_id}", capture=True)
+            guard_loader(
+                task_id=f"gemini/{challenge.challenge_id}",
+                capture=True,
+                scope=SCOPE_ORDINARY_USER,
+            )
             store.upsert_scenario(
                 scenario_id=f"gemini/{challenge.challenge_id}",
                 tier=challenge.tier,

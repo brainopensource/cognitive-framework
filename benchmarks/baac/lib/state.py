@@ -14,7 +14,7 @@ from pathlib import Path
 import shutil
 from typing import Dict, List, Sequence, Tuple
 
-from benchmarks.ladder.quarantine import guard_loader
+from benchmarks.ladder.quarantine import SCOPE_ORDINARY_USER, guard_loader
 
 
 EXCLUDED_FROM_WORKSPACE = {
@@ -118,7 +118,7 @@ def materialize_scratch_workspace(challenge_dir: Path, target_scratch_dir: Path)
     
     CRITICAL: Never copies oracle/ or internal verification scripts to the agent workspace.
     """
-    guard_loader(task_id=challenge_dir.name, purpose="development")
+    guard_loader(task_id=challenge_dir.name, purpose="development", scope=SCOPE_ORDINARY_USER)
     target_scratch_dir.mkdir(parents=True, exist_ok=True)
 
     for item in challenge_dir.iterdir():

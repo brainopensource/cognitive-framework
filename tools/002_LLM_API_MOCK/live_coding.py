@@ -106,8 +106,8 @@ def load_challenge(root: Path, key: str) -> Challenge:
     root_resolved = root.resolve()
     if root_resolved not in challenge_root.parents and challenge_root != root_resolved:
         raise ValueError(f"challenge escapes root: {key}")
-    from benchmarks.ladder.quarantine import guard_loader
-    guard_loader(task_id=key, purpose="development")
+    from benchmarks.ladder.quarantine import SCOPE_ORDINARY_USER, guard_loader
+    guard_loader(task_id=key, purpose="development", scope=SCOPE_ORDINARY_USER)
     if not challenge_root.is_dir():
         raise FileNotFoundError(f"challenge not found: {challenge_root}")
 
@@ -518,9 +518,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         keys = ["semver_parser", "isolated_coding_test", "plugin_dag", "token_bucket", "circuit_breaker"]
 
     challenges = [load_challenge(args.challenge_root, key) for key in keys]
-    from benchmarks.ladder.quarantine import guard_loader
+    from benchmarks.ladder.quarantine import SCOPE_ORDINARY_USER, guard_loader
     for key in keys:
-        guard_loader(task_id=key, purpose="development")
+        guard_loader(task_id=key, purpose="development", scope=SCOPE_ORDINARY_USER)
     args.output.mkdir(parents=True, exist_ok=True)
     budget = Budget(max_calls=args.max_calls, max_usd=args.max_usd)
     client = OpenRouterClient(api_key=api_key, model=args.model, budget=budget, timeout_s=args.request_timeout)

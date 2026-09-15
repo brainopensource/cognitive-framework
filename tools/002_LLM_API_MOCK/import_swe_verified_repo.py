@@ -18,7 +18,7 @@ if str(ROOT) not in sys.path:
 
 from schema import validate_scenario
 from store import LamStore
-from benchmarks.ladder.quarantine import guard_loader
+from benchmarks.ladder.quarantine import SCOPE_ORDINARY_USER, guard_loader
 
 SWE_INSTANCES = [
     ("django__django-10097", "t2-django-10097", 2, "Django: Make URLValidator reject invalid characters in username/password"),
@@ -42,7 +42,7 @@ def import_swe_verified():
     print(f"Importing {len(SWE_INSTANCES)} genuine SWE-bench Verified repositories into LAM...")
 
     for inst_id, scenario_id, tier, title in SWE_INSTANCES:
-        guard_loader(task_id=scenario_id, capture=True)
+        guard_loader(task_id=scenario_id, capture=True, scope=SCOPE_ORDINARY_USER)
         inst_dir = SWE_REPO_DIR / inst_id
         if not inst_dir.is_dir():
             print(f"⚠ Missing instance dir {inst_dir}")

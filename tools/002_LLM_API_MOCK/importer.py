@@ -16,7 +16,7 @@ if str(_LAM) not in sys.path:
 
 from record import trace_to_scenario
 from schema import validate_scenario
-from benchmarks.ladder.quarantine import guard_loader
+from benchmarks.ladder.quarantine import SCOPE_ORDINARY_USER, guard_loader
 
 VERB_MAP = {
     "read_file": "view_file",
@@ -44,7 +44,7 @@ def import_trajectory(
     workspace: Mapping[str, str],
 ) -> Dict[str, Any]:
     """Import a JSONL trajectory log and output a validated gold scenario dictionary."""
-    guard_loader(task_id=scenario_id, capture=True)
+    guard_loader(task_id=scenario_id, capture=True, scope=SCOPE_ORDINARY_USER)
     path = Path(jsonl_path)
     if not path.is_file():
         raise FileNotFoundError(f"Trajectory JSONL missing at {path}")

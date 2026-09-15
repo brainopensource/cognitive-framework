@@ -51,7 +51,7 @@ from .state import (
     materialize_scratch_workspace,
     verify_challenge_zero_state,
 )
-from benchmarks.ladder.quarantine import guard_loader
+from benchmarks.ladder.quarantine import SCOPE_ORDINARY_USER, guard_loader
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -152,7 +152,7 @@ class BaaCRunner:
         # 3. Step 3: Materialize Ephemeral Scratch Workspace
         scratch_dir = Path(tempfile.mkdtemp(prefix=f"baac-scratch-{cid}-"))
         try:
-            guard_loader(task_id=cid, purpose="development")
+            guard_loader(task_id=cid, purpose="development", scope=SCOPE_ORDINARY_USER)
             materialize_scratch_workspace(challenge_dir, scratch_dir)
 
             budget_tracker = self.campaign_budget

@@ -486,12 +486,44 @@ class TestQ01CorrectionGuards(unittest.TestCase):
         (holdout_dir / "src.txt").write_bytes(self.holdout_bytes)
         scratch = self.root / "scratch"
         with patch("benchmarks.ladder.quarantine.load_registry", return_value=self.registry):
-            with self.assertRaisesRegex(QuarantineError, "HOLDOUT|unknown identity|DEV capture"):
+            with self.assertRaisesRegex(
+                QuarantineError,
+                "HOLDOUT|unknown identity|DEV capture|ordinary-user",
+            ):
                 materialize_scratch_workspace(holdout_dir, scratch)
 
     def test_guard_loader_never_treats_omitted_id_as_ordinary(self) -> None:
         with self.assertRaisesRegex(QuarantineError, "missing identity"):
             guard_loader(task_id=None, registry=self.registry)
+
+    def test_guard_loader_unknown_id_refuses_without_ordinary_scope(self) -> None:
+        with self.assertRaisesRegex(QuarantineError, "unknown identity"):
+            guard_loader(task_id="no-such-task", registry=self.registry)
+        with self.assertRaisesRegex(QuarantineError, "unknown identity"):
+            guard_loader(task_id="no-such-task", registry=self.registry, capture=True)
+        guard_loader(
+            task_id="no-such-task",
+            registry=self.registry,
+            scope=SCOPE_ORDINARY_USER,
+        )
+        guard_loader(
+            task_id="no-such-task",
+            registry=self.registry,
+            capture=True,
+            scope=SCOPE_ORDINARY_USER,
+        )
+
+    def test_guard_loader_renamed_alias_refuses(self) -> None:
+        with self.assertRaisesRegex(QuarantineError, "renamed identity"):
+            guard_loader(task_id="old-exposed-alias", registry=self.registry)
+
+    def test_registered_identity_cannot_use_ordinary_user_scope_on_loader(self) -> None:
+        with self.assertRaisesRegex(QuarantineError, "ordinary-user"):
+            guard_loader(
+                task_id="fresh-dev",
+                registry=self.registry,
+                scope=SCOPE_ORDINARY_USER,
+            )
 
 
 class TestCommittedRegistryCommitments(unittest.TestCase):

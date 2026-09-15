@@ -25,7 +25,7 @@ if str(ROOT) not in sys.path:
 
 from schema import validate_scenario
 from store import LamStore
-from benchmarks.ladder.quarantine import guard_loader
+from benchmarks.ladder.quarantine import SCOPE_ORDINARY_USER, guard_loader
 
 TASK_TO_SCENARIO_ID = {
     "semver_parser": "t1-semver-parser",
@@ -125,7 +125,7 @@ def import_corpus() -> None:
         trajectory = json.loads(traj_path.read_text(encoding="utf-8"))
 
         scenario_id = TASK_TO_SCENARIO_ID.get(task_id, f"t{meta['tier']}-{task_id.replace('_', '-')}")
-        guard_loader(task_id=scenario_id, capture=True)
+        guard_loader(task_id=scenario_id, capture=True, scope=SCOPE_ORDINARY_USER)
         tier = meta["tier"]
         title = f"SWE-Verified: {meta['description']}"
         workspace = build_workspace_snapshot(task_id)

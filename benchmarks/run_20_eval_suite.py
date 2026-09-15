@@ -31,7 +31,7 @@ from vanguard.packages.runtime.root import (
 from benchmarks.swe_bench.challenges import CHALLENGES, SWEProChallenge
 from benchmarks.swe_bench.domain_challenges import DOMAIN_CHALLENGES
 from benchmarks._env import load_benchmark_env
-from benchmarks.ladder.quarantine import guard_loader
+from benchmarks.ladder.quarantine import SCOPE_ORDINARY_USER, guard_loader
 
 ALL_CHALLENGES: dict[str, SWEProChallenge] = {}
 ALL_CHALLENGES.update(CHALLENGES)
@@ -85,7 +85,11 @@ class ChallengeResult:
 
 
 def setup_workspace(target_dir: Path, challenge: SWEProChallenge) -> None:
-    guard_loader(task_id=challenge.challenge_id, purpose="development")
+    guard_loader(
+        task_id=challenge.challenge_id,
+        purpose="development",
+        scope=SCOPE_ORDINARY_USER,
+    )
     for rel_path, content in challenge.files.items():
         file_p = target_dir / rel_path
         file_p.parent.mkdir(parents=True, exist_ok=True)
@@ -128,7 +132,7 @@ def evaluate_challenge(
     dry_run: bool = False,
     max_turns: int = 15,
 ) -> ChallengeResult:
-    guard_loader(task_id=challenge_key, purpose="development")
+    guard_loader(task_id=challenge_key, purpose="development", scope=SCOPE_ORDINARY_USER)
     challenge = ALL_CHALLENGES[challenge_key]
     with tempfile.TemporaryDirectory(prefix=f"swe_eval_{challenge_key}_") as temp_dir:
         ws_path = Path(temp_dir)

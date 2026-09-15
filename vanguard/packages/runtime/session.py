@@ -2339,8 +2339,7 @@ class HarnessSession:
             exit_code=exit_code,
             executed_test_count=_observed_test_count(detail),
             workspace_digest=subject.workspace_digest,
-            task_digest=(self.run_plan.task_digest if self.run_plan is not None
-                         else digest_of({"task": self.task.brief})),
+            task_digest=self._current_task_digest(),
             composition_digest=self.run_plan.composition_digest if self.run_plan is not None else self.harness.composition_digest,
             receipt_digest=outcome.result_digest or "",
             verification_command=verification_command,

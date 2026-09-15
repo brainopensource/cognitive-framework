@@ -30,6 +30,7 @@ from types import SimpleNamespace
 from typing import Any, Mapping, Sequence
 
 from vanguard.packages.adapters.stores.event_store import SqliteEventStore
+from vanguard.packages.agency.context import ContextPacketError
 from vanguard.packages.domain.canonicalisation.jcs import canonical_bytes
 from vanguard.packages.domain.task_state import MemoryView, SemanticTaskState, critical_state
 from vanguard.packages.ports.event_store import EventRange
@@ -717,6 +718,17 @@ class RuntimeContinuationIdentity(unittest.TestCase):
                 self.assertTrue(grant["grantId"])
                 self.assertTrue(str(grant["descriptorDigest"]).startswith("sha256:"))
 
+    def test_the_real_resume_hydrates_identity_into_the_next_model_context(self) -> None:
+        resumed = _drive("resume", self.root, self.store)
+        self.assertEqual(resumed.returncode, 0, resumed.stderr)
+        payload = json.loads(resumed.stdout.strip().splitlines()[-1])
+        self.assertNotEqual(payload["outcome"], "completed")
+        context = payload["firstResumedContext"]
+        self.assertIn(OBJECTIVE, context)
+        self.assertIn("app.py", context)
+        self.assertIn("remainingBudgets", context)
+        self.assertIn("pendingEffects", context)
+
     # -- ADVERSARIAL: each preservation step is individually load-bearing ---
 
     def test_a_restart_may_not_widen_the_ceiling(self) -> None:
@@ -856,47 +868,27 @@ class RuntimeContinuationIdentity(unittest.TestCase):
                     f"dropping {kind} did not lose its dimension; the carrier is not load-bearing")
 
 
-class ColdStartHydrationIsNotYetBound(unittest.TestCase):
-    """ESCALATED, NOT ACCEPTED — the ingress gap T-131.7 reproduced.
+class ColdStartHydrationIsBound(unittest.TestCase):
+    """T-131.7 cold-start ingress hydrates rather than synthesising a task."""
 
-    The durable fold above preserves continuation identity. The product
-    ingress does not hand it to the planner: `entrypoint.execute` builds its
-    `TaskContext` with no `resume_state` on every command, `resume` included,
-    so a resumed process compiles L4 from the synthesized brief
-    `"Resume run <id>"` and the objective, plan, change surface, settled
-    effects and consumption never reach the model.
-
-    `HarnessSession._assert_resume_behavior_identity` then returns at its first
-    branch, because the prior identity it revalidates lives in exactly the
-    `resume_state` that was never built -- so a changed preset or composition
-    on restart is not rejected either.
-
-    Both repairs are cold-start hydration on the existing ingress, in
-    `runtime/entrypoint.py` and `runtime/session.py`. Neither file is in the
-    released T-131.7 lease, so this module PINS the reproduction instead of
-    repairing it. These assertions describe a DEFECT: when the lease is
-    released and hydration lands, they fail, and that failure is the signal to
-    replace them with the positive assertions named in each docstring.
-    """
-
-    def test_the_ingress_builds_no_resume_state(self) -> None:
-        """On release, assert `resume_state` is populated for `command=resume`."""
+    def test_the_ingress_builds_the_durable_resume_state(self) -> None:
         source = inspect.getsource(entrypoint.execute)
         self.assertIn("task = TaskContext(", source)
         construction = source.split("task = TaskContext(", 1)[1].split(")", 1)[0]
-        self.assertNotIn("resume_state", construction,
-                         "entrypoint now hydrates resume_state: replace this pin with the "
-                         "positive continuation assertion (T-131.7 escalation E1 closed)")
+        self.assertIn("resume_state=resume_state", construction)
+        self.assertIn("fold_task_state(events", source)
 
-    def test_the_resume_identity_assertion_is_vacuous_without_prior_identity(self) -> None:
-        """On release, assert a changed composition raises `ContextPacketError`."""
+    def test_changed_composition_is_rejected_when_resume_identity_is_present(self) -> None:
         session = SimpleNamespace(
-            task=SimpleNamespace(resume_state=None),
-            _behavior_identity={"compositionDigest": "sha256:" + "a" * 64},
+            task=SimpleNamespace(resume_state={
+                "selectionPolicyIdentity": {"behaviorIdentity": {
+                    "compositionDigest": "sha256:" + "a" * 64,
+                }},
+            }),
+            _behavior_identity={"compositionDigest": "sha256:" + "b" * 64},
         )
-        # Returns instead of revalidating: there is no prior identity to compare.
-        self.assertIsNone(
-            HarnessSession._assert_resume_behavior_identity(session))
+        with self.assertRaises(ContextPacketError):
+            HarnessSession._assert_resume_behavior_identity(session)
 
 
 if __name__ == "__main__":  # pragma: no cover

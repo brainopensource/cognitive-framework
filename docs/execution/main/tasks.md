@@ -24,6 +24,7 @@ relationships:
   - execution.backlog
   - execution.feature_spec
   - execution.technical
+  - execution.mvp_delivery_protocol
 reviewer: repository-governance
 confidence: high
 ---
@@ -266,6 +267,59 @@ the smallest repair is cold-start hydration/revalidation on the existing ingress
 Focused commands are the row-7 module and then the T-142 module only; no broad run
 is implied. Any required source repair outside the released B lease returns to the
 Senior for an exact amendment; no speculative session rewrite is authorized.
+
+**Dev C independent review of B qualification packet T-131.7 / T-142 (2026-09-15).**
+C reviewed B's continuity packet (`runtime/ledger/recovery.py`, `runtime/entrypoint.py`, `runtime/session.py`,
+`test/falsifiers/test_t131_row7_resume_compaction_identity.py`, `test/falsifiers/test_t142_runtime_continuity.py`).
+Bounded in-process and chain-tip recovery behavior is **ACCEPTED**: all 5 mandatory dimensions (`task`, `candidate`,
+`plan`, `changed-file`, `budget`) are preserved by `critical_state` and `fold_task_state`; `reconcile_open_intents`
+and `reconcile_open_children` append at the current project chain tip preserving causation without sequence regression;
+replay deduplication of settled effects holds; monotonic grant revocation and non-replenishment of budgets survive
+restart and compaction; multi-compaction continuity under the 4096-token ceiling is verified (31 row-7 tests PASS, 16 T-142
+tests PASS). Public runtime-ingress behavior across all CLI surfaces is **WITHHELD / NOT ACCEPTED**: non-git/unborn
+workspace snapshot failures during finish attempts and general CLI multi-process resume remain open issues handed off
+to Developer A's final CLI integration packet.
+
+**Dev C local F1–F7 and T-51 readiness inventory (2026-09-15).**
+Local Q-01 quarantine controls (`quarantine.py`, 35 tests PASS) and gate discovery widening (`collection_integrity.py`,
+deliberate red on unaccepted holdout, green on synthetic eligible holdout) are complete. In accordance with DIR-I7,
+external dependencies are named explicitly without fabrication or contact:
+- Curator: UNASSIGNED / MISSING (independent private corpus authoring required).
+- Sealed store: UNPROVISIONED / MISSING (isolated storage infrastructure required).
+- External evaluation authority: UNASSIGNED / MISSING (signed cryptographic authorization required).
+- Uninvolved acceptor: UNASSIGNED / MISSING (non-author review required; A, B, and C are ineligible).
+Live execution, paid calls, control freeze (T-26), and milestone closure remain strictly unauthorized.
+
+**MS-MVP packet issue — leadership ruling (2026-09-15).** The T-141 activation packet
+landed at `90292daa` and `session.py` was released; B's session-dependent continuity
+repairs are complete in-tree awaiting operator commit and C's disposition. The
+remaining Engineering-MVP work is closed into the `E1`-`E7` gate and the six packets
+below, specified in full in
+[`mvp_delivery_protocol.md`](mvp_delivery_protocol.md#6-work-packets). Owners execute
+without further routine escalation. Two public-route defects were **reproduced**
+in-session and are named there with their exact stacks: `E-CLI-1` (a non-git workspace
+raises `WorkspaceSnapshotRefused` out of completion admission and escapes the public
+route unhandled) and `E-CLI-2` (`entrypoint.execute` hydrates durable resume state only
+when `command == "resume"`). Neither is speculative; both belong to A's integration
+lease, not to B or C.
+
+| Task / owner | requires: and lease boundary | Outcome and focused falsifier contract |
+|---|---|---|
+| **T-145 Public ingress truthfulness / A** | B's continuity packet committed; lease `runtime/entrypoint.py` and the `runtime/session.py` ingress/workspace-identity seams only | Close `E-CLI-1` and `E-CLI-2`. Typed terminal when workspace identity is unobservable — never a fabricated digest, an empty-tree default or a skipped binding; hydration keyed on durable state rather than the command verb, revalidating composition, preset, verification subject and turn ceiling fail-closed. Prove a plain-directory greenfield run reaches a truthful terminal, and that hydration never replenishes budget or re-widens a revoked grant. Acceptor: C |
+| **T-146 Public journey evidence / A** | T-145; lease is the new falsifier module only, no production source without amendment | One greenfield multi-file creation and one brownfield multi-file change through `entrypoint.execute` only, with exterior verification of the exact submitted candidate, complete changed-file attribution and honest cost accounting. Scripted model, disposable WAL, no provider. Acceptor: uninvolved (A authors the claim) |
+| **T-147 Independent acceptance of T-141 / C** | none — READY; read-only, no repair to any file under review | Dispose T-141 at `90292daa` against `C-PUB-1`-`C-PUB-9`. Re-run the eight mutation probes; a negative control that does not red when its guard is removed is a rejection, not a nit. Acceptor: C; Principal is ineligible |
+| **T-148 Independent acceptance of C's four packets / A** | none — READY; read-only on `a217a9ef`, `9b61c71b`, `d76156a3`, `95a9ba38` | Accept only bounded demonstrated behavior; record missing SHA or evidence instead of accepting a working-tree claim. No repair inside a packet under review. Acceptor: A |
+| **T-149 Independent acceptance of the integration / B** | T-145, T-146; read-only | Verify the integration weakened no continuity control and confirm `E6` on the public route: no false completion, and restart neither widens authority nor replenishes budget. Acceptor: B |
+| **T-150 MVP subject assembly and single verify / Principal** | T-145-T-149 | Assemble one clean exact MVP subject; run `just verify` **once**; name every pre-existing failure with file and reason and attribute none to the MVP subject; report `E1`-`E7` disposition honestly including any predicate that did not close |
+
+T-147 and T-148 are READY now and run in parallel with T-145/T-146. The only
+serialized chain is A (T-145 -> T-146) -> B (T-149) -> Principal (T-150).
+
+Pre-existing failures to name rather than repair under these packets: the 16
+machine-local path references in `docs/research/coding_harness/aux_cli_multi_profiles.md`,
+164 broken documentation links, and 63 frontmatter violations. Folding documentation
+debt into a product gate would let a chore block a capability outcome; it is tracked
+in [`backlog.md`](backlog.md) instead.
 
 T-144 remains unassigned until applicable foundations have independent acceptance.
 T-26, T-27, provider/paid calls, CAS and milestone closure remain unauthorized.

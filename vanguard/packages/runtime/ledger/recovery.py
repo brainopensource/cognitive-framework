@@ -282,6 +282,10 @@ class RecoveryScanner:
                     break
             if has_terminal:
                 continue
+            # The reconciliation records causation from ``intent``, but it
+            # appends at the project's current durable tip.  Anchoring this
+            # emitter on an earlier open intent would rewind its sequence and
+            # fail a normal restart once later ledger facts already exist.
             emitter = LedgerEmitter(
                 store,
                 episode_id=intent.episode_id or "recovery",
@@ -291,7 +295,6 @@ class RecoveryScanner:
                 parent_principal_id=intent.parent_principal_id,
                 parent_episode_id=intent.parent_episode_id,
                 role="recovery",
-                anchor=intent,
             )
             desc_digest = intent.payload.get("descriptorDigest") or intent.payload.get("descriptor_digest")
             payload = {
@@ -372,6 +375,8 @@ class RecoveryScanner:
             anchor = spawn_events.get(child_id)
             if anchor is None:  # pragma: no cover -- derived from the same fold
                 continue
+            # As for effect intents, the child spawn is causal evidence, not
+            # the append head: recovery must preserve the current chain tip.
             emitter = LedgerEmitter(
                 store,
                 episode_id=anchor.episode_id or child_id,
@@ -381,7 +386,6 @@ class RecoveryScanner:
                 parent_principal_id=anchor.parent_principal_id,
                 parent_episode_id=anchor.parent_episode_id,
                 role="recovery",
-                anchor=anchor,
             )
             out = emitter.recovery().emit_kind(
                 "EffectReconciled",

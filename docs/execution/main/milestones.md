@@ -28,6 +28,7 @@ relationships:
   - execution.backlog
   - execution.feature_spec
   - execution.technical
+  - execution.mvp_delivery_protocol
   - spec.core
 reviewer: repository-governance
 confidence: high
@@ -63,6 +64,37 @@ The release owner can choose the earliest compatible control subject without wai
 Freeze records the eligible subject without authorizing paid execution, T-27 or milestone closure; F7's Wilson/pass predicate is an outcome rule for T-27, not a result demanded before freeze.
 Adding an eighth predicate requires an explicit successor director ruling identifying a measurement-integrity or authorization need, never an implicit capability-integration dependency.
 Current T-26 remains UNFROZEN and MS-CONTROL remains OPEN because publishing this closed list supplies none of its missing acceptance receipts.
+
+## MS-MVP — Engineering-MVP product gate (2026-09-15)
+
+**Leadership ruling.** The Engineering-MVP outcome is closed into a finite acceptance
+gate of seven predicates, `E1`-`E7`, held canonically in
+[`mvp_delivery_protocol.md`](mvp_delivery_protocol.md#2-ms-mvp--closed-acceptance-predicates-e1-e7).
+That document also fixes the normative child publication protocol (`C-PUB-1`-`C-PUB-9`),
+records the two reproduced public-route defects, and issues the T-145-T-150 packets.
+This section states the gate's status and its relation to the other gates; it does not
+restate the predicates.
+
+| Predicate | Subject | Status (2026-09-15) |
+|---|---|---|
+| E1 Subject identity | one clean commit on the exact public route | OPEN — pending T-150 |
+| E2 Child mutation safety | T-141 at `90292daa` | LANDED / acceptance pending (T-147/C) |
+| E3 Continuity | T-131.4, T-131.3, T-131.7, T-142 | Bounded in-process and chain-tip halves ACCEPTED by C; ingress half is E4 |
+| E4 Public ingress truthfulness | `E-CLI-1`, `E-CLI-2` | OPEN — reproduced; T-145/A |
+| E5 Useful journey | greenfield + brownfield multi-file via the public CLI | OPEN — T-146/A |
+| E6 Truthful refusal | no false completion on the public route | OPEN — T-149/B |
+| E7 Gate honesty | one `just verify` on the clean subject | OPEN — T-150/Principal |
+
+**MS-MVP is orthogonal to MS-CONTROL.** It is a product-capability gate and is
+deliberately **not** a `D-6` freeze precondition; it adds no eighth `F` predicate and
+does not alter the 2026-09-13 decoupling. `MS-CONTROL` remains OPEN, `T-26` remains
+UNFROZEN, and the curator, sealed store, evaluation authority and uninvolved acceptor
+remain explicit external blockers on `F3`/`F6`/`F7` regardless of `MS-MVP`.
+
+Closing `MS-MVP` authorizes no paid execution, no corpus admission, no `T-27`, and no
+`T-144` implementation. It establishes that the shipped coding CLI performs a useful
+multi-file journey, preserves identity and budgets across restart, refuses unsafe
+child mutation, and never claims completion without exact exterior verification.
 
 ## Leadership disposition (2026-09-12)
 

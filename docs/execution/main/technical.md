@@ -371,6 +371,26 @@ reuse `ports/blob_store.py`, and account for schema registration, event reducers
 composition bindings. A handwritten algorithm-to-file table proves none of these.
 Campaign/MCTS/RTV expansion is deferred; voting never accepts a patch.
 
+## Child publication handbook (T-141 / MS-MVP)
+
+The delegation and publication path has one canonical description:
+[`mvp_delivery_protocol.md`](mvp_delivery_protocol.md). It carries the digest
+equations, the publication state machine, the five-fold revalidation table, the crash
+contract, the `C-PUB-1`-`C-PUB-9` clauses, reference pseudocode and the composition
+seam table. It is not restated here — duplicating it would create a second authority
+that drifts.
+
+Orientation only, for a reader arriving at the source:
+
+| Question | Where |
+|---|---|
+| Where does a child's view live, and who may mutate the shared tree? | `runtime/workspace.py` — views, fence, base binding, staging, publish, recover |
+| Why does the child not use the parent's environment adapter? | `runtime/child_runtime.py::_environment_for` — `DIR-C5`; a view whose effects execute elsewhere is a directory, not containment |
+| What stops a completed child from publishing? | `runtime/child_runtime.py::_publish_workspace` — completion yields a candidate, not permission |
+| Where is the exterior verdict bound to the tree? | `runtime/child_runtime.py::_verify_tree`, projected through `runtime/evaluator_gateway.py` |
+| Why is the composition refused instead of activated? | `runtime/root.py` — `RuntimeChildRunner.is_contained()`; all three collaborators or none |
+| Where is the child-local adapter minted? | `runtime/bootstrap.py` — beside the root adapter, per process backend |
+
 ## Near-term implementation handbook (NT-1)
 
 **Accepted historical scope; preservation guidance.** NT-1 on `2989d57d` is not

@@ -18,14 +18,12 @@ no second compiler here and no second task-state authority: sigma is whatever
 scripted double, the store is a local disposable WAL, and the only processes
 spawned are the sandbox's own allowlisted ones.
 
-DECLARED GAP. Two of the six T-142 properties are not qualified here and are
-not claimed: fresh-process agreement on durable identity, and pending-effect
-reconciliation before retry. Both are blocked on the T-131.7 escalations --
-`entrypoint.execute` builds no `resume_state`, and
-`RecoveryScanner.reconcile_open_intents` anchors a fresh emitter on the open
-intent and so cannot append when that intent is not the chain tail. Both
-repairs are outside the released T-142 lease.
-`FreshProcessAgreementRemainsBlocked` pins them rather than asserting them.
+T-131.7 closes the two ingress gaps that initially limited this packet.  The
+public resume entrypoint folds the durable run before composing the next
+session, and recovery appends its adjudication at the durable project tip while
+retaining the interrupted effect as causation.  The fresh-interpreter product
+route is exercised in T-131.7 row 7; the controls below keep the T-142 runtime
+side of that boundary explicit, including a non-tail open intent.
 """
 
 from __future__ import annotations
@@ -494,48 +492,65 @@ class ExhaustionDeniesTheNextDispatch(unittest.TestCase):
                          "exhaustion left an effect open instead of denying the next one")
 
 
-class FreshProcessAgreementRemainsBlocked(unittest.TestCase):
-    """ESCALATED, NOT ACCEPTED — the two T-142 properties this cannot qualify.
+class FreshProcessIngressAndRecoveryAreBound(unittest.TestCase):
+    """The resume seam preserves identity and reconciles without rewinding.
 
-    1. `entrypoint.execute` builds its `TaskContext` with no `resume_state`, so
-       a fresh process compiles L4 from the synthesized brief `"Resume run
-       <id>"` and cannot agree with an uninterrupted session on durable
-       identity. Repair: cold-start hydration in `runtime/entrypoint.py`.
-
-    2. `RecoveryScanner.reconcile_open_intents` constructs its emitter with
-       `anchor=intent`, which sets the chain head to that intent's sequence.
-       When the open intent is not the tail of the project's chain -- the
-       normal case after a crash, because shutdown events follow it -- the
-       append is refused as non-monotonic and the whole resume raises
-       `OSError`. Pending effects therefore cannot reconcile before retry on
-       the real cold-restart path. It fails closed, so no unauthorized retry
-       occurs, but the continuation does not happen either. Repair:
-       `runtime/ledger/recovery.py`.
-
-    Neither file is in the released T-142 lease. These assertions describe
-    DEFECTS: when the repairs land they fail, and that failure is the signal to
-    replace them with the positive properties named above.
+    The process-boundary positive control is T-131.7 row 7's public
+    ``entrypoint.execute('resume')`` run.  This packet additionally proves the
+    ingress binding and the recovery append rule at the exact two seams that
+    formerly prevented that route from continuing.
     """
 
-    def test_the_ingress_still_builds_no_resume_state(self) -> None:
+    def test_the_ingress_binds_durable_resume_state_to_task_context(self) -> None:
         import inspect
 
         source = inspect.getsource(entrypoint.execute)
         construction = source.split("task = TaskContext(", 1)[1].split(")", 1)[0]
-        self.assertNotIn("resume_state", construction,
-                         "cold-start hydration landed: replace this pin with the "
-                         "uninterrupted-vs-fresh-process agreement assertion")
+        self.assertIn("resume_state=resume_state", construction)
+        self.assertIn("fold_task_state(events", source)
 
-    def test_open_intent_reconciliation_still_anchors_on_the_intent(self) -> None:
-        import inspect
-
+    def test_non_tail_open_intent_reconciles_at_the_current_chain_tip(self) -> None:
+        from vanguard.packages.kernel.model import Event
         from vanguard.packages.runtime.ledger.recovery import RecoveryScanner
+        from vanguard.packages.runtime.ledger_emitter import LedgerEmitter
 
-        source = inspect.getsource(RecoveryScanner.reconcile_open_intents)
-        self.assertIn("anchor=intent", source,
-                      "the recovery emitter no longer rewinds the chain head: "
-                      "replace this pin with the pending-effect reconciliation "
-                      "assertion")
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        store = SqliteEventStore(str(Path(tmp.name) / "events.sqlite3"))
+        self.addCleanup(store.close)
+        emitter = LedgerEmitter(
+            store, episode_id="ep-t142-recovery", project_id="project-t142-recovery",
+            principal_id="agent-t142", harness_digest="sha256:" + "a" * 64,
+            role="session",
+        )
+        emitter.emit(Event(
+            kind="EpisodeStarted", reason="test", at="2026-09-15T00:00:00.000Z",
+            run_id="run-t142-recovery", principal="agent-t142",
+            payload={"kind": "EpisodeStarted"},
+        ))
+        emitter.append_intent(Event(
+            kind="EffectStarted", reason="test", at="2026-09-15T00:00:01.000Z",
+            run_id="run-t142-recovery", principal="agent-t142",
+            payload={"kind": "EffectStarted", "idempotencyKey": "open-t142",
+                     "descriptorDigest": "sha256:" + "b" * 64},
+        ))
+        tail = emitter.emit(Event(
+            kind="Heartbeat", reason="test", at="2026-09-15T00:00:02.000Z",
+            run_id="run-t142-recovery", principal="agent-t142",
+            payload={"kind": "Heartbeat"},
+        ))
+        before = list(store.read(EventRange(project_id="project-t142-recovery")).value or ())
+        intent = next(event for event in before if event.payload.get("kind") == "EffectStarted")
+
+        reconciled = RecoveryScanner(controller_principal="agent-t142-recovery").reconcile_open_intents(
+            store, occurred_at="2026-09-15T00:00:03.000Z", project_id="project-t142-recovery")
+        self.assertEqual(len(reconciled), 1)
+        self.assertEqual(reconciled[0].causation_id, intent.event_id)
+        self.assertGreater(int(reconciled[0].seq), int(tail.seq))
+        self.assertEqual(reconciled[0].payload["status"], "undeterminable")
+        second = RecoveryScanner(controller_principal="agent-t142-recovery").reconcile_open_intents(
+            store, occurred_at="2026-09-15T00:00:04.000Z", project_id="project-t142-recovery")
+        self.assertEqual(second, [])
 
 
 if __name__ == "__main__":  # pragma: no cover

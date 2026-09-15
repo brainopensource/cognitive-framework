@@ -42,7 +42,8 @@ from vanguard.packages.runtime.root import (
 from test.runtime.test_harness_session import FakeClock, FakeEnvironment
 
 from vanguard.packages.agency import EpisodeEngine, RunTermination
-from vanguard.packages.agency.episode.admission_gate import AdmissionVerdict
+from vanguard.packages.agency.episode.admission_gate import AdmissionVerdict, VerificationReceipt
+from vanguard.packages.runtime.session import VerificationSubject
 
 from test.agency import doubles
 from test.kernel import fakes
@@ -296,6 +297,29 @@ class TheFullProductSessionStopsAtCompletion(unittest.TestCase):
                 project_id="project-t131", run_id="run-t131-row4",
                 episode_id="ep-t131-row4", principal="agent-1",
                 max_turns=self.CEILING))
+        # T-131.3 now makes exact, current verification identity a prerequisite
+        # even for this deliberately tiny recording policy.  This remains a
+        # fake-environment row-4 test, but its admitted path must model the
+        # same receipt/subject binding the product gate requires.
+        workspace_digest = session._workspace_digest()
+        task_digest = session._current_task_digest()
+        command = "python3 -m unittest test.row4 -v"
+        subject = VerificationSubject(
+            argv=("python3", "-m", "unittest", "test.row4", "-v"),
+            workspace_digest=workspace_digest,
+            task_digest=task_digest,
+        )
+        session._completion_verification_subject = subject
+        session._completion_verification_command = command
+        session._completion_verification = VerificationReceipt(
+            exit_code=0,
+            executed_test_count=1,
+            workspace_digest=workspace_digest,
+            task_digest=task_digest,
+            composition_digest=harness.composition_digest,
+            verification_command=command,
+            verification_subject_digest=subject.digest(),
+        )
         return session
 
     def test_an_admitted_completion_ends_the_session_run(self) -> None:

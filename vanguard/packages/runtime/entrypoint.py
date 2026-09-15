@@ -10,7 +10,9 @@ from typing import Any, Mapping
 
 from ..adapters.models.fake import FakeModel
 from ..adapters.stores.blob_store import FileBlobStore
+from ..adapters.stores.event_store import SqliteEventStore
 from ..adapters.sandbox.platform import discover_platform
+from ..ports.event_store import EventRange
 from .app_service import project_receipts, project_terminal_outcome
 from .compose import TaskContext
 from .evidence_capture import (
@@ -21,6 +23,7 @@ from .evidence_capture import (
 from . import pack_catalog
 from .profiles import SandboxUnavailable, resolve_profile
 from .root import Runtime
+from .task_state import episode_id_from_events, fold_task_state
 
 
 def _manifest(command: str, preset: str | None = None) -> Path:
@@ -102,11 +105,43 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
             max_turns = (
                 pack_catalog.DEFAULT_TURN_CEILING if explicit_turns in (None, "")
                 else int(explicit_turns))
+    repo_path = Path(str(request.get("workspace", "."))).resolve()
+    configured_store_path = (
+        Path(str(request["storePath"])) if request.get("storePath") else
+        repo_path / ".vanguard" / "events.sqlite3"
+    )
+    resume_state = None
+    episode_id = f"episode-{run_id}"
+    project_id = str(request.get("projectId") or "coding-preview")
+    if command == "resume":
+        store = SqliteEventStore(str(configured_store_path))
+        try:
+            read = store.read(EventRange(run_id=run_id))
+        finally:
+            store.close()
+        if not read.ok:
+            detail = read.error.message if read.error is not None else "ledger unavailable"
+            raise ValueError(f"resume state unavailable: {detail}")
+        events = list(read.value or ())
+        if not events:
+            raise ValueError(f"resume state unavailable: no durable events for {run_id}")
+        resumed = fold_task_state(events, objective=brief)
+        resume_state = resumed.to_canonical_dict()
+        if resumed.objective:
+            brief = resumed.objective
+        episode_id = episode_id_from_events(events, run_id=run_id)
+        first_project = next(
+            (str(getattr(event, "project_id", "")) for event in events
+             if str(getattr(event, "project_id", ""))),
+            "",
+        )
+        if first_project and not request.get("projectId"):
+            project_id = first_project
     task = TaskContext(
-        brief=brief, repo_path=Path(str(request.get("workspace", "."))).resolve(),
-        run_id=run_id, episode_id=f"episode-{run_id}",
-        project_id=str(request.get("projectId") or "coding-preview"),
-        max_turns=max_turns,
+        brief=brief, repo_path=repo_path,
+        run_id=run_id, episode_id=episode_id,
+        project_id=project_id, max_turns=max_turns,
+        resume_state=resume_state,
     )
     # The client-side deterministic smoke backend is an explicit, non-release
     fake_backend = request.get("fakeBackend")
@@ -128,10 +163,6 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
             # explicit operator action (for the CLI, ``--budget-usd``).
             allow_paid=bool(request.get("allowPaid", False)),
         ).model
-    configured_store_path = (
-        Path(str(request["storePath"])) if request.get("storePath") else
-        task.repo_path / ".vanguard" / "events.sqlite3"
-    )
     # Product runs and explicit previews use a real content-addressed store;
     # topology artifact edges must never point at ephemeral process state.
     # The fake model remains an explicit preview choice, but its captured

@@ -20,6 +20,7 @@ relationships:
   - execution.milestones
   - execution.feature_spec
   - execution.technical
+  - execution.mvp_delivery_protocol
   - spec.core
   - repo-root-vision
 purpose: Track proposed, approved, in-progress, blocked, and deferred capability packages. No sprint queue. Alias table maps T-NN and v2 SUB/TXN/SHD/PRG onto packages without restamping live SUB-01.
@@ -438,6 +439,7 @@ to fit the current tree.
 | **PACKS** | CMX-01, CMX-04 | T-61–T-63 | — | Task-class policy; classifier; bypass |
 | **DOCS** | DOC-* | T-67–T-68 | — | T-68: this Dev C pass. T-67 after merges. |
 | **MUTATION** | VER-02, TLS-06 | T-39 | — | `[PROPOSAL]` optional ≥ 0.80 |
+| **MVP** | PUB-01, ING-01 | T-141–T-143, T-145–T-150 | MS-MVP | Engineering-MVP product gate. Predicates `E1`–`E7` and packet contracts are canonical in [`mvp_delivery_protocol.md`](mvp_delivery_protocol.md). T-141 LANDED / acceptance pending; T-147 and T-148 are READY. Orthogonal to MS-CONTROL; not a `D-6` freeze precondition |
 
 ### v2 ID → T-id aliases (not a second DAG)
 
@@ -474,6 +476,24 @@ to fit the current tree.
 Existing CMX-01…CMX-11, REL-*, OCT-*, TLS-*, MEM-*, TUI-01, SUB-* rows in §2 remain authoritative for lifecycle state. Do not restamp **SUB-01**.
 
 ---
+
+## 4a. Deferred under MS-MVP (2026-09-15)
+
+Recorded so these are neither silently forgotten nor silently started. Rationale is in
+[`mvp_delivery_protocol.md`](mvp_delivery_protocol.md#8-deliberately-deferred).
+
+| Package | Item | State | Why deferred |
+|---|---|---|---|
+| **PUB-02** | Concurrent sibling publication / merge strategy | `[PROPOSAL]` | Publication refuses a stale base rather than merging, so two siblings touching disjoint files still serialize and the second is refused if the first published. Correct and fail-closed, but it caps parallel worker throughput. A merge strategy is a genuinely new public contract and is out of `MS-MVP` |
+| **PUB-03** | Base computation at repository scale | `[PROPOSAL]` | `shared_entries()` reads the whole working tree as text on every view creation and publication — correct, `O(tree)`, untested at scale. Requires a measurement first; an unmeasured optimization here trades a proven invariant for a guess |
+| **PUB-04** | Binary and non-UTF-8 candidate content | `[PROPOSAL]` | Excluded from the base and refused in retention, so a child cannot presently publish a binary artifact |
+| **DOCS-DEBT** | 164 broken links, 63 frontmatter violations, 16 machine-local path references | `TRACKED` | Real debt, named in every packet receipt, deliberately not an `MS-MVP` predicate — folding it in would let a documentation chore block a product capability gate |
+
+`T-144` (planner-worker-verifier convergence) stays unassigned pending independent
+acceptance of T-141/T-142/T-143; it is a capability demonstration and never a control
+result. The `F3`/`F6`/`F7` external dependencies — curator, sealed store, evaluation
+authority, uninvolved acceptor — remain UNASSIGNED or UNPROVISIONED, named without
+fabrication or contact.
 
 ## 5. Decision register
 

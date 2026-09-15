@@ -23,6 +23,7 @@ relationships:
   - execution.backlog
   - execution.tasks
   - execution.technical
+  - execution.mvp_delivery_protocol
 ---
 
 # Feature & Target Specification (execution)
@@ -617,6 +618,51 @@ and exact released leases recorded in `tasks.md`. As-built behavior and green te
 are not acceptance. T-144 is a **capability demonstration**, never a control result;
 it does not close MS-SEE, MS-CHANGE or MS-CONTROL and cannot contribute a control
 success count or change the existing measurement protocol.
+
+## DIR-5. Engineering-MVP delivery and the child publication contract (2026-09-15)
+
+**DIR-5.1 — Typed outcome.** The next product outcome is the **Engineering-MVP
+subject**: the shipped public coding CLI performs a useful multi-file greenfield and
+brownfield journey, preserves identity and budgets across restart, refuses unsafe
+child mutation, and never claims completion without exact exterior verification. This
+outcome is closed into the finite predicate set `E1`-`E7` held canonically in
+[`mvp_delivery_protocol.md`](mvp_delivery_protocol.md). Prose elsewhere describing
+"the MVP" in open-ended terms is superseded by that predicate set.
+
+**DIR-5.2 — Orthogonality.** `MS-MVP` is a product-capability gate. It is not a `D-6`
+freeze precondition, adds no eighth `F` predicate, and does not alter the 2026-09-13
+`MS-CONTROL` decoupling. Closing it authorizes no paid execution, no corpus admission,
+no `T-27` and no `T-144`.
+
+**DIR-5.3 — Child publication is a normative contract, not an implementation detail.**
+`DIR-C5` and `DIR-C7` are realized by clauses `C-PUB-1`-`C-PUB-9`. Binding in
+substance: a supervised child executes effects through an adapter rooted at its own
+view; candidate retention is immutable and bound to the base it was computed against;
+shared-tree mutation is serialized by monotonic fencing token; publication revalidates
+fence, base, candidate, staged bytes and a signed exterior verdict naming the exact
+combined tree, at the instant before the tree changes; the bytes an evaluator read are
+the bytes that land; recovery finishes authorized publications and never promotes a
+merely retained candidate; and a refused publication is reported `undeterminable`,
+never `ok`.
+
+**DIR-5.4 — No second machinery.** This delta authorizes no scheduler, no second
+episode loop, no second ledger, no second task state and no transaction framework.
+`ChildRuntimePort` is unchanged; the publication authority seam is duck-typed so a
+conforming runner that needs no authority is not obliged to carry one.
+
+**DIR-5.5 — Mutation-proof obligation.** A negative control that does not fail when the
+guard it names is removed is not a control. Every packet introducing a negative control
+records which guards were disabled and that the suite reddened. A control that stays
+green is repaired; the guard is never narrowed to match a weak control, and no gate is
+weakened, silenced or narrowed to produce a green line.
+
+**DIR-5.6 — Reproduced defects are not speculation.** `E-CLI-1` (a non-git workspace
+raises `WorkspaceSnapshotRefused` out of completion admission and escapes the public
+route unhandled) and `E-CLI-2` (`entrypoint.execute` hydrates durable resume state only
+under `command == "resume"`) were reproduced at `90292daa` with exact stacks. Repair is
+bounded to a truthful terminal and to cold-start hydration with fail-closed
+revalidation on the existing ingress. A fabricated digest, an empty-tree default, a
+skipped binding or a second session implementation are each out of contract.
 
 ## NT-1. Near-term baseline, context, cache and recovery delta
 

@@ -95,6 +95,8 @@
 {"symbol": "ChildRunPlan", "kind": "class", "defined_in": "vanguard/packages/ports/child_runtime.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "ChildRunResult", "kind": "class", "defined_in": "vanguard/packages/ports/child_runtime.py", "canonical_owner": "docs/backend/reference/ports.md"}
 {"symbol": "ChildRuntimePort", "kind": "protocol", "defined_in": "vanguard/packages/ports/child_runtime.py", "canonical_owner": "docs/backend/reference/ports.md"}
+{"symbol": "ChildWorkspace", "kind": "class", "defined_in": "vanguard/packages/runtime/workspace.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "ChildWorkspaceSupervisor", "kind": "class", "defined_in": "vanguard/packages/runtime/workspace.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "Claim", "kind": "class", "defined_in": "vanguard/packages/domain/evidence/claim.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "ClaimError", "kind": "class", "defined_in": "vanguard/packages/domain/evidence/claim.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "ClaimRef", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
@@ -371,6 +373,7 @@
 {"symbol": "ModelRoute", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "ModelRoutingError", "kind": "class", "defined_in": "vanguard/packages/adapters/models/routing.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ModelUnavailable", "kind": "class", "defined_in": "vanguard/packages/runtime/model_selection.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "MutationTicket", "kind": "class", "defined_in": "vanguard/packages/runtime/workspace.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "NamedComponent", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/manifest.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "NamedManifest", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/manifest.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "NamedManifestV2", "kind": "class", "defined_in": "vanguard/packages/domain/wire/types_gen.py", "canonical_owner": "docs/backend/reference/schemas.md"}
@@ -394,6 +397,7 @@
 {"symbol": "OrphanArtifactError", "kind": "class", "defined_in": "vanguard/packages/runtime/artifacts.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "Outcome", "kind": "class", "defined_in": "vanguard/packages/kernel/policy.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "OutcomeLabel", "kind": "class", "defined_in": "vanguard/packages/runtime/outcome_labels.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "OwnershipConflict", "kind": "class", "defined_in": "vanguard/packages/runtime/workspace.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "PairedReport", "kind": "class", "defined_in": "vanguard/packages/runtime/paired_evaluation.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ParetoMeasurementReport", "kind": "class", "defined_in": "vanguard/packages/runtime/pareto_measurement.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "ParetoProfile", "kind": "class", "defined_in": "vanguard/packages/runtime/pareto_measurement.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
@@ -566,6 +570,7 @@
 {"symbol": "SqliteEventStore", "kind": "class", "defined_in": "vanguard/packages/adapters/stores/event_store.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "SqliteEventStore", "kind": "class", "defined_in": "vanguard/packages/adapters/stores/sqlite_store.py", "canonical_owner": "docs/backend/architecture/causal-state.md"}
 {"symbol": "StagedWorkflowEngine", "kind": "class", "defined_in": "vanguard/packages/runtime/staged_workflow.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "StaleWriterError", "kind": "class", "defined_in": "vanguard/packages/runtime/workspace.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "StandaloneRuntimeDaemon", "kind": "class", "defined_in": "vanguard/packages/runtime/standalone_daemon.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "StandardClassifier", "kind": "class", "defined_in": "vanguard/packages/kernel/classifier.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
 {"symbol": "StandardPolicy", "kind": "class", "defined_in": "vanguard/packages/kernel/policy.py", "canonical_owner": "docs/backend/architecture/kernel.md"}
@@ -678,5 +683,8 @@
 {"symbol": "Workspace", "kind": "class", "defined_in": "vanguard/packages/domain/artifacts/graph.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "WorkspaceDiscovery", "kind": "class", "defined_in": "vanguard/packages/agency/manifests/discovery.py", "canonical_owner": "docs/backend/architecture/agency.md"}
 {"symbol": "WorkspaceEpoch", "kind": "class", "defined_in": "vanguard/packages/domain/workspace_epoch.py", "canonical_owner": "docs/backend/reference/schemas.md"}
+{"symbol": "WorkspaceEscapeError", "kind": "class", "defined_in": "vanguard/packages/runtime/workspace.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "WorkspaceFenceError", "kind": "class", "defined_in": "vanguard/packages/runtime/workspace.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
+{"symbol": "WorkspaceSnapshotRefused", "kind": "class", "defined_in": "vanguard/packages/runtime/session.py", "canonical_owner": "docs/backend/architecture/runtime-execution.md"}
 {"symbol": "WrangleResult", "kind": "class", "defined_in": "vanguard/packages/domain/transforms/protocol/response_wrangler.py", "canonical_owner": "docs/backend/reference/schemas.md"}
 {"symbol": "WriterAuthorityError", "kind": "class", "defined_in": "vanguard/packages/runtime/ledger_emitter.py", "canonical_owner": "docs/backend/architecture/causal-state.md"}

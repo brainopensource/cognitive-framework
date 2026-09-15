@@ -274,6 +274,7 @@
 {"source_id": "execution.tasks", "source_path": "docs/execution/main/tasks.md", "target_id": "execution.technical", "target_path": "docs/execution/main/technical.md", "relationship_type": "markdown_link"}
 {"source_id": "execution.tasks", "source_path": "docs/execution/main/tasks.md", "target_id": "execution.backlog", "target_path": "docs/execution/main/backlog.md", "relationship_type": "markdown_link"}
 {"source_id": "execution.tasks", "source_path": "docs/execution/main/tasks.md", "target_id": "execution.milestones", "target_path": "docs/execution/main/milestones.md", "relationship_type": "markdown_link"}
+{"source_id": "execution.tasks", "source_path": "docs/execution/main/tasks.md", "target_id": "execution.management.roles", "target_path": "docs/execution/management/roles_and_authority.md", "relationship_type": "markdown_link"}
 {"source_id": "execution.tasks", "source_path": "docs/execution/main/tasks.md", "target_id": "adr-0107-dir3-seam-types", "target_path": "docs/architecture/decisions/0107-dir3-seam-types.md", "relationship_type": "markdown_link"}
 {"source_id": "execution.tasks", "source_path": "docs/execution/main/tasks.md", "target_id": "adr-0108-session-composition-and-analysis", "target_path": "docs/architecture/decisions/0108-session-composition-and-analysis.md", "relationship_type": "markdown_link"}
 {"source_id": "execution.tasks", "source_path": "docs/execution/main/tasks.md", "target_id": "task_state", "target_path": "vanguard/packages/domain/task_state.py", "relationship_type": "markdown_link"}

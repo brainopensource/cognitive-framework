@@ -72,7 +72,14 @@ jobs:
           python3 tools/linters/check_tcb_budget.py
           python3 tools/linters/check_event_coverage.py
           python3 tools/linters/check_corpus_quarantine.py --metadata
-          python3 tools/linters/check_corpus_quarantine.py --admission
+          python3 -m unittest test.benchmarks.test_corpus_quarantine test.benchmarks.test_control_accounting test.benchmarks.test_metric_veto test.falsifiers.test_completion_gate_scope -v
+          python3 -m unittest test.benchmarks.test_control_corpus -v
+          out="$(python3 tools/linters/check_corpus_quarantine.py --admission)"
+          printf '%s\n' "$out"
+          if printf '%s\n' "$out" | grep -q "HOLDOUT UNACCEPTED"; then
+            echo "STRICT ADMISSION GATE: RED (actual holdout unaccepted)"
+            exit 1
+          fi
           python3 tools/linters/check_falsifier_ids.py
           python3 tools/linters/check_commit_scope.py
           python3 tools/linters/scan_secrets.py

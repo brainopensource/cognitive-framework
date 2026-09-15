@@ -123,6 +123,16 @@ implementation SHA, released files/seams, evidence subject/digest and eligible p
 acceptor. Mixed “LDA improvements” commits are not packet receipts; a green test or
 mechanism's presence is not a release or independent acceptance.
 
+**T-131.8 receipt reconciliation.** `4006f6432e2c1545e95dc19c235d3d3737bfb224`
+and follow-up `5a3e6e444e0fe995eb8efd321ae9e11e6ded584c` both name T-131.8; the
+latter repairs its product-route fixture after W2c. Shared history is not rewritten,
+but this is not a one-commit packet receipt. B may review the bounded component
+evidence against the exact two-commit subject and record **LANDED / acceptance
+pending** with both SHAs, changed-file list, command receipt and release decision.
+It must not call the pair an accepted single-commit T-131.8 packet or release an
+unidentified integration subject. A future independent integration packet, if needed,
+has its own ID and one commit.
+
 **R4 — Standing sprint authorization.** A/B/C are authorized to execute the sprints
 in their dispatch prompts without further Leadership review, within the compiled
 leases and target contracts here, as soon as the named predecessor files are free.
@@ -154,6 +164,20 @@ The Senior refines each row into an exact subject-bound work packet before dispa
 including final changed files, canonical-owner documentation, focused command,
 positive/adversarial receipts and the R2 peer acceptor. This is delegated packet
 compilation, not a further Leadership review gate.
+
+**T-141 integration disposition (2026-09-15).** Component subject
+`f284599e238ca335ce1ee96a3a24aa90205fa812` supplies isolated views, fencing and
+recovery controls, but is **LANDED / INTEGRATION PENDING**, not production accepted:
+targeted LDA and source inspection show `Runtime.run_composed` constructs
+`RuntimeChildRunner` without a `ChildWorkspaceSupervisor`, so its existing public
+delegation path remains explicitly unsupervised. A receives the narrow, disjoint
+integration lease `vanguard/packages/runtime/root.py` at that constructor and a new
+focused production-wiring falsifier under `test/falsifiers/`; no workspace,
+child-runtime, delegation, session, port, public-contract or topology edit is
+authorized by this lease. The falsifier must drive the existing spawn path and prove
+the injected supervisor gives each child its isolated view and fences integration.
+B independently accepts A's exact integration subject after its SHA-bound handoff;
+until then T-141 remains dormant for downstream integration and cannot qualify T-144.
 
 ### Protected prior handoffs and acceptance reconciliation
 

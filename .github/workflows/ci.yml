@@ -106,10 +106,21 @@ jobs:
       - name: Isolation policy (I-6)
         run: python3 tools/linters/check_isolation_policy.py
 
-      - name: Corpus quarantine (Q-01)
+      - name: Corpus quarantine metadata (Q-01 diagnostic)
+        run: python3 tools/linters/check_corpus_quarantine.py --metadata
+
+      - name: Control instrument — corpus, accounting, publication, false-completion (T-132)
+        run: python3 -m unittest test.benchmarks.test_corpus_quarantine test.benchmarks.test_control_accounting test.benchmarks.test_metric_veto test.falsifiers.test_completion_gate_scope -v
+
+      - name: Control corpus stale-oracle / unaccepted-holdout gate (T-132; red until T-51)
         run: |
-          python3 tools/linters/check_corpus_quarantine.py --metadata
-          python3 tools/linters/check_corpus_quarantine.py --admission
+          python3 -m unittest test.benchmarks.test_control_corpus -v
+          out="$(python3 tools/linters/check_corpus_quarantine.py --admission)"
+          printf '%s\n' "$out"
+          if printf '%s\n' "$out" | grep -q "HOLDOUT UNACCEPTED"; then
+            echo "STRICT ADMISSION GATE: RED (actual holdout unaccepted)"
+            exit 1
+          fi
 
       - name: Event coverage (E-COV, SPEC §1.2, ADR-0076 §6)
         run: python3 tools/linters/check_event_coverage.py
@@ -192,10 +203,22 @@ jobs:
       - name: Isolation policy (I-6)
         run: uv run python tools/linters/check_isolation_policy.py
 
-      - name: Corpus quarantine (Q-01)
+      - name: Corpus quarantine metadata (Q-01 diagnostic)
+        run: uv run python tools/linters/check_corpus_quarantine.py --metadata
+
+      - name: Control instrument (T-132)
+        run: uv run python -m unittest test.benchmarks.test_corpus_quarantine test.benchmarks.test_control_accounting test.benchmarks.test_metric_veto test.falsifiers.test_completion_gate_scope -v
+
+      - name: Control corpus / unaccepted-holdout gate (T-132; red until T-51)
+        shell: bash
         run: |
-          uv run python tools/linters/check_corpus_quarantine.py --metadata
-          uv run python tools/linters/check_corpus_quarantine.py --admission
+          uv run python -m unittest test.benchmarks.test_control_corpus -v
+          out="$(uv run python tools/linters/check_corpus_quarantine.py --admission)"
+          printf '%s\n' "$out"
+          if printf '%s\n' "$out" | grep -q "HOLDOUT UNACCEPTED"; then
+            echo "STRICT ADMISSION GATE: RED (actual holdout unaccepted)"
+            exit 1
+          fi
 
       - name: Kernel package tests
         run: uv run python -m unittest discover -s test/kernel -t .

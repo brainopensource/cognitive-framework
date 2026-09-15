@@ -234,10 +234,40 @@ REQUIRED_VERIFY_MODULES: tuple[str, ...] = (
 )
 
 GATE_EXCLUSIONS: dict[str, str] = {
-    "test/e2e": "not an importable unittest package (no __init__.py); clean-machine RC install probe",
-    "test/broken": "linter negative fixtures, not a unittest package (no __init__.py)",
-    "test/falsifiers full discover": "material graph-coloring / M-5b / M-7 / inference-accounting currently error; named false-completion modules are gated instead",
+    "test/e2e": "not an importable unittest package",
+    "test/broken": "linter negative fixtures",
+    "test/falsifiers full discover": "graph-coloring",
 }
+
+
+def _just_recipe(justfile: str, name: str) -> str:
+    """Return the indented body of a just recipe, excluding later recipes."""
+    lines = justfile.splitlines()
+    capturing = False
+    body: list[str] = []
+    for line in lines:
+        if line == f"{name}:" or line.startswith(f"{name}:"):
+            capturing = True
+            continue
+        if not capturing:
+            continue
+        if line.startswith("\t") or line.startswith(" ") or line == "":
+            body.append(line)
+            continue
+        break
+    if not body:
+        raise AssertionError(f"just recipe {name} has no body")
+    return "\n".join(body)
+
+
+def _active_recipe_text(body: str) -> str:
+    """Recipe lines with trailing comments stripped; used to detect hidden suites."""
+    active: list[str] = []
+    for line in body.splitlines():
+        stripped = line.split("#", 1)[0].strip()
+        if stripped:
+            active.append(stripped)
+    return "\n".join(active)
 
 
 def strict_admission_exit(stdout: str, returncode: int) -> int:
@@ -252,12 +282,40 @@ class TestGateDiscoveryWidening(unittest.TestCase):
 
     def test_justfile_lists_required_control_modules(self) -> None:
         justfile = (_REPO_ROOT / "justfile").read_text(encoding="utf-8")
+        verify_active = _active_recipe_text(_just_recipe(justfile, "verify"))
         for module in REQUIRED_VERIFY_MODULES:
-            self.assertIn(module, justfile, f"just verify must collect {module}")
-        self.assertIn("verify-admission-strict", justfile)
+            self.assertIn(module, verify_active, f"just verify must collect {module}")
+        self.assertIn("verify-admission-strict", verify_active)
         for path, reason in GATE_EXCLUSIONS.items():
             self.assertIn(path, justfile, f"exclusion {path} must be named")
             self.assertGreater(len(reason), 10)
+
+    def test_required_control_modules_are_not_emptied_or_removed(self) -> None:
+        for module in REQUIRED_VERIFY_MODULES:
+            path = _REPO_ROOT.joinpath(*module.split(".")).with_suffix(".py")
+            self.assertTrue(path.is_file(), f"required suite hidden or removed: {module}")
+            self.assertRegex(
+                path.read_text(encoding="utf-8"),
+                r"def test_",
+                f"required suite emptied to manufacture green: {module}",
+            )
+
+    def test_just_check_stays_fast_without_red_scoring_controls(self) -> None:
+        justfile = (_REPO_ROOT / "justfile").read_text(encoding="utf-8")
+        check_active = _active_recipe_text(_just_recipe(justfile, "check"))
+        self.assertIn("check_corpus_quarantine.py --metadata", check_active)
+        self.assertNotIn("verify-admission-strict", check_active)
+        self.assertNotIn("test.benchmarks.test_control_corpus", check_active)
+
+    def test_exclusions_and_cost_are_recorded_honestly(self) -> None:
+        justfile = (_REPO_ROOT / "justfile").read_text(encoding="utf-8")
+        lowered = justfile.casefold()
+        self.assertIn("cost on this subject", lowered)
+        self.assertRegex(justfile, r"\d+\.\d+s")
+        self.assertIn("named false-completion", lowered)
+        for path, needle in GATE_EXCLUSIONS.items():
+            self.assertIn(path.casefold(), lowered, f"exclusion {path} must be named")
+            self.assertIn(needle.casefold(), lowered, f"exclusion reason missing for {path}")
 
     def test_ci_workflows_list_required_control_modules(self) -> None:
         ci = (_REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")

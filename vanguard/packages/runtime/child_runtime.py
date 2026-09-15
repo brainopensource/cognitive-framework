@@ -27,13 +27,22 @@ widening vector is closed here by construction rather than by check:
 
 from __future__ import annotations
 
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from typing import Any, Callable, Mapping
 
 from ..kernel.attenuation import Constraints, Scope
 from ..ports.child_runtime import ChildRunPlan, ChildRunResult
+from ..ports.evaluator import EvaluationProtocol, RunRef, Verdict
 from ..ports.event_store import EventRange
 from .compose import Harness, RunResult, TaskContext
+from .evaluator_gateway import settlement_payload
+from .workspace import (
+    CombinedTree,
+    PublicationAuthority,
+    PublicationRefused,
+    PublicationVerdict,
+    WorkspaceFenceError,
+)
 
 __all__ = ["RuntimeChildRunner", "TERMINAL_OUTCOMES"]
 
@@ -74,6 +83,8 @@ class RuntimeChildRunner:
         profile: Any = None,
         release: bool = False,
         workspaces: Any = None,
+        child_environment: Callable[[str, Any], Any] | None = None,
+        tree_verifier: Callable[[str, Any, str], Any] | None = None,
     ) -> None:
         #: The sole public activation boundary, injected rather than imported.
         #: `root` imports `session` imports `wiring` imports `delegation`, so
@@ -93,42 +104,100 @@ class RuntimeChildRunner:
         #: additive: an unsupervised composition keeps its existing behaviour
         #: rather than acquiring containment it was never given.
         self._workspaces = workspaces
+        #: T-141/`DIR-C5`. Builds a child-*local* effect adapter rooted at the
+        #: child's own view. Supplied by the composition root, which is the
+        #: only layer that knows which concrete adapter this profile runs, so
+        #: the runner stays free of adapter types. Required whenever
+        #: `workspaces` is bound: a contained view whose effects still land
+        #: through the parent's adapter is not containment, it is a directory.
+        self._child_environment = child_environment
+        #: T-141/`DIR-C7`. Builds an exterior evaluator bound to one staged
+        #: combined tree and the digest it must verify. Required whenever
+        #: `workspaces` is bound: without it nothing outside the episode has
+        #: seen the tree, and publication has nothing to revalidate.
+        self._tree_verifier = tree_verifier
+
+    def is_contained(self) -> bool:
+        """Whether this runner can run a child without touching the parent.
+
+        All three or none. A supervisor with no child-local adapter gives the
+        child a directory it does not actually write to; a supervisor with no
+        exterior verifier gives it work nothing outside the episode has seen.
+        Either alone would let `run_composed` activate delegation that `DIR-C5`
+        and `DIR-C7` do not admit, so the composition root asks this one
+        question and refuses on a `False`.
+        """
+        return (self._workspaces is not None
+                and self._child_environment is not None
+                and self._tree_verifier is not None)
 
     # -- the port ---------------------------------------------------------
 
     def run_child(self, plan: ChildRunPlan) -> ChildRunResult:
-        """Execute one child episode and project a typed result."""
+        """Execute one child episode and project a typed result.
+
+        The unauthorized entry point. It is legal only for a composition with
+        no workspace supervisor -- the historical shared-tree behaviour. A
+        supervised composition reaches the shared tree through publication, and
+        publication needs a live authority, so it must come through
+        `run_child_authorized` instead of acquiring one here.
+        """
+        return self.run_child_authorized(plan, None)
+
+    def run_child_authorized(
+        self, plan: ChildRunPlan, authority: PublicationAuthority | None,
+    ) -> ChildRunResult:
+        """Execute one child episode under the authority that dispatched it."""
         child_ports = self._rebind(plan)
         child_task = self._lower(plan)
 
-        result = self._run_composed(
-            self._harness,
-            child_ports,
-            child_task,
-            release=self._release,
-            profile=self._profile,
-        )
-        return self._settle_workspace(plan, self._project(plan, result))
+        try:
+            result = self._run_composed(
+                self._harness,
+                child_ports,
+                child_task,
+                release=self._release,
+                profile=self._profile,
+            )
+        finally:
+            self._dispose_child_environment(child_ports)
+        return self._publish_workspace(
+            plan, self._project(plan, result), authority)
 
     # -- internals --------------------------------------------------------
 
-    def _settle_workspace(self, plan: ChildRunPlan,
-                          projected: ChildRunResult) -> ChildRunResult:
-        """Retain the child's work, then integrate it only if it completed.
+    def _publish_workspace(
+        self,
+        plan: ChildRunPlan,
+        projected: ChildRunResult,
+        authority: PublicationAuthority | None,
+    ) -> ChildRunResult:
+        """Retain the child's work, then publish it only if it earns it.
 
         The order is the whole crash contract (`T-141`). Retention happens
         first and unconditionally, so an accepted child's work cannot be lost
-        to a crash during integration and an abandoned child's work stays
-        recoverable instead of being discarded on the way out. Integration
-        happens second, under the exclusive fence, and only for a child that
-        actually completed: applying an incomplete child's tree is precisely
-        the partial acceptance this forbids.
+        to a crash during publication and an abandoned child's work stays
+        recoverable instead of being discarded on the way out.
 
-        A fence refusal is left to propagate. The child completed in its own
-        view, so nothing of its work is lost, but whether the shared tree
-        received it is exactly the kind of unknown `TERMINAL_OUTCOMES` reserves
-        `undeterminable` for -- and reporting it as an ordinary success would
-        claim an integration that did not happen.
+        Publication is second, and it is not a consequence of completion. A
+        completed child has produced a *candidate*; four separate things must
+        still hold before the parent's tree changes, and each is rechecked
+        here rather than inherited from the moment of dispatch:
+
+        * the **fence**, taken exclusively for the whole staging/publish pair;
+        * the **base**, still the tree the candidate was computed against;
+        * the **authority** -- grant unexpired, actions still carried, spend
+          within what the parent has left (`PublicationAuthority.recheck`);
+        * an **exterior verdict** naming the exact combined tree, obtained from
+          outside the episode and never reconstructed from the child's terminal
+          state (`DIR-C7`, `ADR-0076 §5`).
+
+        Any refusal downgrades the result to `undeterminable` rather than
+        raising past the adapter or reporting an ordinary success. The child
+        did complete in its own view and nothing of its work is lost, but
+        whether the shared tree received it is exactly the unknown
+        `TERMINAL_OUTCOMES` reserves that outcome for -- and calling it `ok`
+        would claim a publication that did not happen.
         """
         if self._workspaces is None:
             return projected
@@ -138,12 +207,116 @@ class RuntimeChildRunner:
         if not projected.ok:
             return projected
 
+        try:
+            self._publish(plan, projected, authority, candidate_digest=digest)
+        except (PublicationRefused, WorkspaceFenceError) as refusal:
+            return replace(
+                projected,
+                ok=False,
+                outcome="undeterminable",
+                terminal="UNDETERMINABLE",
+                detail=(f"{projected.detail} | not published: {refusal}"
+                        if projected.detail else f"not published: {refusal}"),
+            )
+        return projected
+
+    def _publish(
+        self,
+        plan: ChildRunPlan,
+        projected: ChildRunResult,
+        authority: PublicationAuthority | None,
+        *,
+        candidate_digest: str,
+    ) -> None:
+        """Stage, verify and publish one candidate. Raises to refuse."""
+        if authority is None:
+            raise PublicationRefused(
+                "no live grant/budget authority accompanied this child; a "
+                "supervised child may not publish on completion alone")
+        if self._tree_verifier is None:
+            raise PublicationRefused(
+                "no exterior verifier is bound for the combined tree")
+
+        child_id = plan.child_episode_id
         ticket = self._workspaces.acquire(child_id)
         try:
-            self._workspaces.integrate(ticket, candidate_digest=digest)
+            combined = self._workspaces.stage(
+                ticket, candidate_digest=candidate_digest)
+            lapsed = authority.recheck(plan, projected.actual_cost)
+            if lapsed:
+                raise PublicationRefused(f"authority lapsed: {lapsed}")
+            verdict = self._verify_tree(plan, combined)
+            self._workspaces.publish(ticket, combined, verdict=verdict)
         finally:
             self._workspaces.release(ticket)
-        return projected
+
+    def _verify_tree(
+        self, plan: ChildRunPlan, combined: CombinedTree,
+    ) -> PublicationVerdict:
+        """What an exterior evaluator says about the exact staged tree.
+
+        The verdict is projected through `evaluator_gateway.settlement_payload`,
+        the same function that decides what may be ledgered, so publication and
+        the ledger cannot disagree about whether a pass was bound. An unsigned,
+        unbound or unreachable evaluator yields nothing to publish on -- there
+        is no branch here that repairs missingness into a pass.
+        """
+        evaluator = self._tree_verifier(
+            plan.child_episode_id, combined.root, combined.digest)
+        if evaluator is None:
+            raise PublicationRefused("no exterior evaluator was reachable")
+        evaluation = evaluator.evaluate(
+            RunRef(run_id=plan.run_id, episode_id=plan.child_episode_id),
+            EvaluationProtocol(
+                name=self._harness.evaluators[0]
+                if self._harness.evaluators else "unnamed"),
+        )
+        verdict = evaluation.value if evaluation.ok else None
+        if not isinstance(verdict, Verdict):
+            raise PublicationRefused("exterior evaluation produced no verdict")
+
+        # Candidate substitution is caught here, on the daemon's *own* bound
+        # subject, before `settlement_payload` is told what runtime believes
+        # the subject to be. Passing the combined digest in and then reading it
+        # back out would make this check compare the tree to itself, and a
+        # genuine pass about some other tree would publish this one.
+        binding = verdict.binding if isinstance(verdict.binding, Mapping) else {}
+        signed_subject = str(binding.get("subject_digest")
+                             or binding.get("subjectDigest") or "")
+        if signed_subject != combined.digest:
+            raise PublicationRefused(
+                f"exterior verdict is bound to {signed_subject or '<nothing>'}, "
+                f"not the tree to publish {combined.digest}")
+
+        payload = settlement_payload(
+            verdict,
+            task_id=plan.child_episode_id,
+            terminal_status="completed",
+            executed_test_count=_executed_test_count(verdict),
+            verification_subject_digest=combined.digest,
+        )
+        if payload is None:
+            raise PublicationRefused(
+                "exterior verdict carries no bound signature to publish on")
+        return PublicationVerdict(
+            subject_digest=str(payload.get("verificationSubjectDigest")
+                               or payload.get("verification_subject_digest") or ""),
+            disposition=str(payload.get("disposition") or ""),
+            envelope_digest=str(payload.get("envelopeDigest")
+                                or payload.get("envelope_digest") or ""),
+        )
+
+    def _dispose_child_environment(self, child_ports: Any) -> None:
+        """Retire the child's own adapter. The parent's is never touched."""
+        if self._child_environment is None:
+            return
+        environment = getattr(child_ports, "environment", None)
+        dispose = getattr(environment, "dispose", None)
+        if callable(dispose):
+            try:
+                dispose()
+            except Exception:  # noqa: BLE001 -- cleanup never decides an outcome
+                pass
 
     def _rebind(self, plan: ChildRunPlan) -> Any:
         """The parent's ports, narrowed. Never widened, never replaced.
@@ -169,10 +342,32 @@ class RuntimeChildRunner:
             # The child's own children run through this same runner, which is
             # what makes depth >= 3 real rather than simulated.
             child_runtime=self,
-            # The parent owns the adapter and must keep it alive for the next
-            # causally-ready sibling. A child may use it, never dispose it.
-            environment_owner=False,
+            # The parent owns its adapter and must keep it alive for the next
+            # causally-ready sibling. When the child gets its own adapter it
+            # owns that one, and `run_child_authorized` retires it.
+            environment=self._environment_for(plan),
+            environment_owner=self._child_environment is not None,
         )
+
+    def _environment_for(self, plan: ChildRunPlan) -> Any:
+        """The child's effect adapter (`DIR-C5`).
+
+        Sharing the parent's adapter was the defect that kept T-141 refused at
+        composition: pointing `repo_path` at an isolated view changes where the
+        child *thinks* it is writing, while every `fs.write`, `patch.apply` and
+        `proc.exec` still executes against the root the parent's adapter was
+        constructed with. Containment has to be in the adapter or it is not
+        containment. A supervised composition with no factory is refused rather
+        than quietly falling back to the parent's adapter.
+        """
+        if self._workspaces is None:
+            return self._parent_ports.environment
+        if self._child_environment is None:
+            raise PublicationRefused(
+                "T-141: a supervised child needs a child-local effect adapter; "
+                "refusing to run it against the parent's environment")
+        view = self._workspaces.workspace_for(plan.child_episode_id, seed=True)
+        return self._child_environment(plan.child_episode_id, view.root)
 
     def _lower(self, plan: ChildRunPlan) -> TaskContext:
         """The child's task: lowered ceilings, inherited nothing else.
@@ -229,7 +424,8 @@ class RuntimeChildRunner:
         """
         if self._workspaces is None:
             return self._parent_task.repo_path
-        return self._workspaces.workspace_for(plan.child_episode_id).root
+        return self._workspaces.workspace_for(
+            plan.child_episode_id, seed=True).root
 
     def _project(self, plan: ChildRunPlan, result: RunResult) -> ChildRunResult:
         """`RunResult` -> `ChildRunResult`. A projection, never a passthrough.
@@ -350,3 +546,20 @@ class RuntimeChildRunner:
                 spent = int(reserved.get(dimension, 0)) - amount
                 total[dimension] = total.get(dimension, 0) + spent
         return total
+
+
+def _executed_test_count(verdict: Verdict) -> int:
+    """How many tests the exterior evaluator says it actually executed.
+
+    Read off the daemon's own bound claims, never inferred. Zero is the
+    fail-closed answer, and `settlement_payload` turns a signed pass with zero
+    executed tests into `UNDETERMINABLE` rather than a publication licence.
+    """
+    binding = verdict.binding if isinstance(verdict.binding, Mapping) else {}
+    for key in ("executed_test_count", "executedTestCount"):
+        if key in binding:
+            try:
+                return max(0, int(binding[key]))
+            except (TypeError, ValueError):
+                return 0
+    return 0

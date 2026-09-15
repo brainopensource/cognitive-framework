@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import inspect
 import unittest
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import vanguard.packages.runtime.session as session_module
@@ -27,7 +27,10 @@ from vanguard.packages.runtime.app_service import (
 )
 from vanguard.packages.runtime.child_runtime import TERMINAL_OUTCOMES, RuntimeChildRunner
 from vanguard.packages.runtime.root import Runtime
-from vanguard.packages.runtime.session import admission_required
+from vanguard.packages.runtime.session import (
+    _completion_receipt_binding,
+    admission_required,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -229,6 +232,67 @@ class TestApplicableVerificationStillAdmits(unittest.TestCase):
         verdict = self._evaluate(current_workspace_digest="sha256:" + "b" * 64)
         self.assertFalse(verdict["admissible"], verdict)
         self.assertEqual(verdict["reason"], "VERIFICATION_STALE")
+
+
+class TestCompletionReceiptBinding(unittest.TestCase):
+    """T-131.3: an admitted finish names this candidate and no other."""
+
+    workspace_digest = "sha256:" + "a" * 64
+    task_digest = "sha256:" + "b" * 64
+    composition_digest = "sha256:" + "c" * 64
+    command = "python3 -m unittest test.widget -v"
+    subject_digest = "sha256:" + "d" * 64
+
+    def _receipt(self) -> VerificationReceipt:
+        return VerificationReceipt(
+            exit_code=0,
+            executed_test_count=1,
+            workspace_digest=self.workspace_digest,
+            task_digest=self.task_digest,
+            composition_digest=self.composition_digest,
+            verification_command=self.command,
+            verification_subject_digest=self.subject_digest,
+        )
+
+    def _binding(self, receipt: VerificationReceipt | None) -> AdmissionVerdict | None:
+        return _completion_receipt_binding(
+            receipt,
+            workspace_digest=self.workspace_digest,
+            task_digest=self.task_digest,
+            composition_digest=self.composition_digest,
+            verification_command=self.command,
+            verification_subject_digest=self.subject_digest,
+        )
+
+    def test_an_exact_current_receipt_is_bound(self) -> None:
+        self.assertIsNone(self._binding(self._receipt()))
+
+    def test_unbound_or_foreign_identity_dimensions_refuse(self) -> None:
+        cases = (
+            (None, "VERIFICATION_REQUIRED"),
+            (replace(self._receipt(), workspace_digest="sha256:" + "e" * 64),
+             "VERIFICATION_STALE"),
+            (replace(self._receipt(), task_digest=""), "VERIFICATION_UNBOUND_TASK"),
+            (replace(self._receipt(), task_digest="sha256:" + "e" * 64),
+             "VERIFICATION_FOREIGN_TASK"),
+            (replace(self._receipt(), composition_digest=""),
+             "VERIFICATION_UNBOUND_COMPOSITION"),
+            (replace(self._receipt(), composition_digest="sha256:" + "e" * 64),
+             "VERIFICATION_FOREIGN_COMPOSITION"),
+            (replace(self._receipt(), verification_command=""),
+             "VERIFICATION_UNBOUND_SUBJECT"),
+            (replace(self._receipt(), verification_command="echo green"),
+             "VERIFICATION_FOREIGN_SUBJECT"),
+            (replace(self._receipt(), verification_subject_digest=""),
+             "VERIFICATION_UNBOUND_SUBJECT"),
+            (replace(self._receipt(), verification_subject_digest="sha256:" + "e" * 64),
+             "VERIFICATION_FOREIGN_SUBJECT"),
+        )
+        for receipt, reason in cases:
+            with self.subTest(reason=reason):
+                refusal = self._binding(receipt)
+                self.assertIsNotNone(refusal)
+                self.assertEqual(refusal.reason, reason)
 
 
 if __name__ == "__main__":

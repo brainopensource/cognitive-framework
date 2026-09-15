@@ -96,6 +96,13 @@ class RuntimeDependencies:
     environment: Any
     profile: EffectiveExecutionProfile
     clock: ClockPort
+    #: `T-141`/`DIR-C5`. Builds a *second* adapter of the same kind, rooted at
+    #: one child's isolated view: `(child_id, root) -> EnvironmentAdapter`.
+    #: The composition root is the only layer that knows which concrete
+    #: adapter this profile resolved to, so the factory is minted here beside
+    #: the root adapter rather than reconstructed by the runtime from a type.
+    child_environment: Callable[[str, Any], Any] = field(
+        default=lambda child_id, root: None)
     cleanup: Callable[[], None] = field(default=lambda: None)
     index: Any = None
     index_selection: IndexSelection | None = None
@@ -274,6 +281,18 @@ class RuntimeBootstrap:
         if profile.requested.process_backend == "host":
             environment: Any = GitEnvironmentAdapter(
                 repo, environment_id=f"workspace-{profile.requested.id}:{repo}")
+
+            def child_environment(child_id: str, root: Any) -> Any:
+                """A child's own host adapter, rooted at its own view.
+
+                Same kind, same allowlist, different root. Reusing the parent's
+                adapter is what `T-141` refused: a child handed an isolated
+                directory whose effects still execute against the parent's repo
+                is contained in name only.
+                """
+                return GitEnvironmentAdapter(
+                    Path(root),
+                    environment_id=f"child-{profile.requested.id}:{child_id}")
         else:
             bwrap = _bwrap_path()
             sealed_dir = Path(tempfile.mkdtemp(prefix="vg-sealed-worker-", dir=get_workspace_path("sandboxes")))
@@ -285,6 +304,24 @@ class RuntimeBootstrap:
             environment = SandboxedEnvironmentAdapter(
                 worker, repo, environment_id=f"workspace:{repo}",
                 direct_filesystem=True)
+
+            def child_environment(child_id: str, root: Any) -> Any:
+                """A child's own contained adapter, rooted at its own view.
+
+                The worker is rebuilt against the child's root rather than
+                shared: a sandbox runner carries the path it may execute in, so
+                handing the parent's runner to a child would put the child's
+                processes back in the parent's tree with the containment report
+                still reading clean.
+                """
+                child_root = Path(root)
+                return SandboxedEnvironmentAdapter(
+                    WorkerProtocol(RootlessSandboxRunner(
+                        child_root, evaluator_bundle=sealed_bundle,
+                        runtime=bwrap)),
+                    child_root,
+                    environment_id=f"child:{child_id}",
+                    direct_filesystem=True)
 
             def cleanup() -> None:
                 shutil.rmtree(sealed_dir, ignore_errors=True)
@@ -315,6 +352,7 @@ class RuntimeBootstrap:
             model=selected_model,
             store=selected_store,
             environment=environment,
+            child_environment=child_environment,
             profile=profile,
             clock=clock or SystemClock(),
             cleanup=cleanup,

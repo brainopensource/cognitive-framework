@@ -37,12 +37,20 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from vanguard.packages.ports.evaluator import EvaluationProtocol, RunRef, Verdict
+from vanguard.packages.ports.event_store import Result
 from vanguard.packages.runtime.delegation import derive_child_id
 from vanguard.packages.runtime.workspace import (
     ChildWorkspaceSupervisor,
+    CombinedTree,
     OwnershipConflict,
+    PublicationAuthority,
+    PublicationVerdict,
+    StaleBaseError,
     StaleWriterError,
+    UnverifiedPublicationError,
     WorkspaceEscapeError,
+    _atomic_write,
 )
 
 
@@ -93,6 +101,51 @@ class _Fixture(unittest.TestCase):
         a crash loses every in-memory fact and nothing on disk."""
         return ChildWorkspaceSupervisor(
             self.shared, now=self.clock, lease_seconds=self.LEASE)
+
+    def _crash_mid_publication(self, child_id: str, digest: str) -> str:
+        """Authorize a publication, land one file, then die before the marker.
+
+        The crash is injected at the one instant that can leave the shared tree
+        in a state nobody declared: after the authorization is durable and
+        after the first byte lands, before acceptance is recorded.
+        """
+        ticket = self.supervisor.acquire(child_id)
+        combined = self.supervisor.stage(ticket, candidate_digest=digest)
+
+        def half(cid: str) -> None:
+            record = self.supervisor._authorization(cid)
+            first = sorted(record["entries"])[0]
+            _atomic_write(
+                self.supervisor._shared_target(first), record["entries"][first])
+
+        original = self.supervisor._apply_authorized
+        self.supervisor._apply_authorized = half  # type: ignore[method-assign]
+        try:
+            self.supervisor.publish(ticket, combined, verdict=_passing(combined))
+        finally:
+            self.supervisor._apply_authorized = original  # type: ignore[method-assign]
+        return combined.digest
+
+    def _publish(
+        self,
+        ticket,
+        digest: str,
+        *,
+        supervisor: ChildWorkspaceSupervisor | None = None,
+        verdict: PublicationVerdict | None = None,
+    ) -> str:
+        """Stage, verify and publish -- the whole authorized path, once.
+
+        Written as one helper because the three steps are not independently
+        meaningful: a staged tree nobody verified may not be published, and a
+        verdict about anything other than the staged tree is not a verdict
+        about what lands. Tests that want to break one of those links do it
+        explicitly below rather than by leaving a step out here.
+        """
+        supervisor = supervisor or self.supervisor
+        combined = supervisor.stage(ticket, candidate_digest=digest)
+        return supervisor.publish(
+            ticket, combined, verdict=verdict or _passing(combined))
 
 
 class IsolationHoldsUnderEscape(_Fixture):
@@ -217,7 +270,7 @@ class TheFenceSerialisesSharedMutation(_Fixture):
         # the token can still tell the truth.
         self.clock.now = stale.expires_at - 1
         with self.assertRaises(StaleWriterError):
-            self.supervisor.integrate(stale, candidate_digest=digest)
+            self._publish(stale, digest)
 
     def test_a_childs_own_earlier_ticket_is_refused_after_it_reacquires(self) -> None:
         """The holder's *name* is not enough: a zombie writer is the same child.
@@ -234,7 +287,7 @@ class TheFenceSerialisesSharedMutation(_Fixture):
                            "re-acquiring must mint a new token, not reuse one")
 
         with self.assertRaises(StaleWriterError):
-            self.supervisor.integrate(first, candidate_digest=digest)
+            self._publish(first, digest)
         self.assertFalse(
             (self.shared / "out" / "a.py").exists(),
             "the zombie writer's candidate was applied through the retry's lease")
@@ -251,7 +304,7 @@ class TheFenceSerialisesSharedMutation(_Fixture):
         self.clock.advance(self.LEASE + 1)
 
         with self.assertRaises(StaleWriterError):
-            self.supervisor.integrate(ticket, candidate_digest=digest)
+            self._publish(ticket, digest)
         self.assertFalse((self.shared / "out" / "a.py").exists())
 
     def test_a_released_ticket_cannot_be_replayed(self) -> None:
@@ -259,7 +312,7 @@ class TheFenceSerialisesSharedMutation(_Fixture):
         ticket = self.supervisor.acquire(self.alice)
         self.supervisor.release(ticket)
         with self.assertRaises(StaleWriterError):
-            self.supervisor.integrate(ticket, candidate_digest=digest)
+            self._publish(ticket, digest)
 
     def test_releasing_a_ticket_that_no_longer_owns_the_fence_is_not_a_takeover(self) -> None:
         """A late cleanup must not free the *new* owner's lease."""
@@ -274,6 +327,51 @@ class TheFenceSerialisesSharedMutation(_Fixture):
         self.assertIsNotNone(self.supervisor.acquire(self.alice))
 
 
+class TheBaseIsTheWorkingTreeNotTheRepository(_Fixture):
+    """What a candidate is computed against is content, not VCS metadata."""
+
+    def test_repository_metadata_is_not_part_of_the_base(self) -> None:
+        """Otherwise any `git` command makes every candidate stale."""
+        (self.shared / ".git").mkdir()
+        (self.shared / ".git" / "HEAD").write_text("ref: main\n", encoding="utf-8")
+        digest = self._retained(self.alice)
+
+        (self.shared / ".git" / "HEAD").write_text("ref: other\n", encoding="utf-8")
+        ticket = self.supervisor.acquire(self.alice)
+        self.assertEqual(self._publish(ticket, digest), "published",
+                         "a git operation was mistaken for a concurrent mutation")
+
+    def test_a_candidate_cannot_publish_into_repository_metadata(self) -> None:
+        """The exclusion cuts both ways, or it is an escape hatch.
+
+        `.git` is excluded from the base, so nothing compares it. A candidate
+        allowed to write there would be writing the one directory no staleness
+        check can see -- and a published `.git/config` carrying
+        `core.hooksPath` executes on the parent's next git command.
+        """
+        view = self.supervisor.workspace_for(self.alice)
+        view.write(".git/config", "[core]\n\thooksPath = /tmp/evil\n")
+        digest = self.supervisor.retain_candidate(self.alice)
+        ticket = self.supervisor.acquire(self.alice)
+
+        with self.assertRaises(WorkspaceEscapeError):
+            self._publish(ticket, digest)
+        self.assertFalse((self.shared / ".git" / "config").exists(),
+                         "a child rewrote the repository's own configuration")
+        self.assertIsNone(self.supervisor.settled_digest(self.alice))
+
+    def test_the_control_directory_is_still_refused(self) -> None:
+        """A candidate that could forge acceptance would settle itself."""
+        view = self.supervisor.workspace_for(self.alice)
+        view.write(".vanguard/children/fence.json", "forged")
+        digest = self.supervisor.retain_candidate(self.alice)
+        ticket = self.supervisor.acquire(self.alice)
+
+        with self.assertRaises(WorkspaceEscapeError):
+            self._publish(ticket, digest)
+        self.assertIsNone(self.supervisor.settled_digest(self.alice))
+
+
 class CrashLeavesNoPartialAcceptance(_Fixture):
     """No partial accepted candidate, no lost artifact, no duplicate effect."""
 
@@ -286,18 +384,15 @@ class CrashLeavesNoPartialAcceptance(_Fixture):
     def test_integration_is_all_or_nothing(self) -> None:
         digest = self._retained(self.alice)
         ticket = self.supervisor.acquire(self.alice)
-        self.supervisor.integrate(ticket, candidate_digest=digest)
+        self._publish(ticket, digest)
 
         self.assertEqual((self.shared / "out" / "a.py").read_text(encoding="utf-8"), "a = 1\n")
         self.assertEqual((self.shared / "out" / "b.py").read_text(encoding="utf-8"), "b = 2\n")
 
-    def test_a_crash_mid_integration_is_completed_by_recovery_not_left_partial(self) -> None:
+    def test_a_crash_mid_publication_is_completed_by_recovery_not_left_partial(self) -> None:
         """Acceptance is the marker, written last. Until then nothing is accepted."""
         digest = self._retained(self.alice)
-        ticket = self.supervisor.acquire(self.alice)
-
-        # Crash after the first file lands and before acceptance is recorded.
-        self.supervisor._apply_one(self.alice, "out/a.py")
+        tree = self._crash_mid_publication(self.alice, digest)
         self.assertIsNone(self.supervisor.settled_digest(self.alice),
                           "a half-applied candidate must not read as accepted")
 
@@ -305,6 +400,7 @@ class CrashLeavesNoPartialAcceptance(_Fixture):
         recovered = restarted.recover()
         self.assertIn(self.alice, recovered)
         self.assertEqual(restarted.settled_digest(self.alice), digest)
+        self.assertEqual(restarted.published_tree_digest(self.alice), tree)
         self.assertEqual((self.shared / "out" / "b.py").read_text(encoding="utf-8"),
                          "b = 2\n", "recovery left the accepted candidate partial")
 
@@ -312,30 +408,30 @@ class CrashLeavesNoPartialAcceptance(_Fixture):
         digest = self._retained(self.alice)
         ticket = self.supervisor.acquire(self.alice)
 
-        first = self.supervisor.integrate(ticket, candidate_digest=digest)
-        second = self.supervisor.integrate(ticket, candidate_digest=digest)
-        self.assertEqual(first, "integrated")
-        self.assertEqual(second, "already_integrated",
-                         "a replayed integration settled the same effect twice")
+        first = self._publish(ticket, digest)
+        second = self._publish(ticket, digest)
+        self.assertEqual(first, "published")
+        self.assertEqual(second, "already_published",
+                         "a replayed publication settled the same effect twice")
 
     def test_a_crash_during_handoff_does_not_settle_twice_on_replay(self) -> None:
         """The retry cannot tell whether the first attempt landed. It must not
         matter: the settled marker is keyed by candidate, so replay converges."""
         digest = self._retained(self.alice)
         ticket = self.supervisor.acquire(self.alice)
-        self.supervisor.integrate(ticket, candidate_digest=digest)
+        self._publish(ticket, digest)
 
         restarted = self._supervisor()
         replay = restarted.acquire(self.alice)
         self.assertEqual(
-            restarted.integrate(replay, candidate_digest=digest), "already_integrated")
+            self._publish(replay, digest, supervisor=restarted), "already_published")
         self.assertEqual(restarted.recover(), (),
                          "an already-settled child was re-integrated by recovery")
 
     def test_a_crash_during_cleanup_leaves_the_effect_settled_exactly_once(self) -> None:
         digest = self._retained(self.alice)
         ticket = self.supervisor.acquire(self.alice)
-        self.supervisor.integrate(ticket, candidate_digest=digest)
+        self._publish(ticket, digest)
         # Crash before `release`/cleanup ever runs: the lease is simply left
         # held, and expires. What must not happen is a second settlement.
         restarted = self._supervisor()
@@ -348,14 +444,14 @@ class CrashLeavesNoPartialAcceptance(_Fixture):
         digest = self._retained(self.alice)
         ticket = self.supervisor.acquire(self.alice)
         with self.assertRaises(StaleWriterError):
-            self.supervisor.integrate(ticket, candidate_digest=digest[:-4] + "0000")
+            self._publish(ticket, digest[:-4] + "0000")
         self.assertFalse((self.shared / "out" / "a.py").exists(),
                          "a candidate that failed its digest check was applied anyway")
 
     def test_a_child_with_no_retained_candidate_integrates_nothing(self) -> None:
         ticket = self.supervisor.acquire(self.alice)
         with self.assertRaises(StaleWriterError):
-            self.supervisor.integrate(ticket, candidate_digest="sha256:absent")
+            self._publish(ticket, "sha256:absent")
 
 
 class TheChildRunnerUsesTheIsolatedView(_Fixture):
@@ -380,12 +476,13 @@ class TheChildRunnerUsesTheIsolatedView(_Fixture):
 
 
 class TheLifecycleRunsOnTheExistingSpawnPath(_Fixture):
-    """`run_child` retains, then integrates only what completed."""
+    """`run_child_authorized` retains, then publishes only what earns it."""
 
-    def _run(self, terminal: str, child_id: str):
+    def _run(self, terminal: str, child_id: str, **kwargs):
         runner, plan = _child_runner(
-            self.shared, self.supervisor, child_id, terminal=terminal)
-        return runner.run_child(plan)
+            self.shared, self.supervisor, child_id, terminal=terminal, **kwargs)
+        self.runner = runner
+        return runner.run_child_authorized(plan, _authority())
 
     def test_a_completed_child_lands_in_the_shared_tree(self) -> None:
         result = self._run("completed", self.alice)
@@ -396,6 +493,159 @@ class TheLifecycleRunsOnTheExistingSpawnPath(_Fixture):
             "a completed child's work never reached the shared tree")
         self.assertEqual(self.supervisor.settled_digest(self.alice),
                          self.supervisor.candidate_digest(self.alice))
+
+    def test_the_child_ran_against_its_own_adapter_not_the_parents(self) -> None:
+        """`DIR-C5`. A view the child does not actually write through is a lie."""
+        self._run("completed", self.alice)
+        adapters = self.runner.environments
+
+        self.assertEqual(len(adapters), 1, "no child-local adapter was built")
+        self.assertEqual(
+            adapters[0].root,
+            self.supervisor.workspace_for(self.alice).root,
+            "the child's effects were bound to a root it does not own")
+        self.assertTrue(adapters[0].disposed,
+                        "the child's own adapter outlived the child episode")
+
+    def test_what_was_verified_is_exactly_what_was_published(self) -> None:
+        """`DIR-C7`. Verifying the view and publishing the tree verifies nothing."""
+        self._run("completed", self.alice)
+        evaluator = self.runner.evaluators[0]
+
+        published = self.supervisor.published_tree_digest(self.alice)
+        self.assertEqual(evaluator.tree_digest, published,
+                         "the evaluator saw a tree other than the one published")
+        self.assertIn("work.py", evaluator.seen)
+        self.assertIn("parent_secret.txt", evaluator.seen,
+                      "the verified tree was the child's view, not the "
+                      "combined tree the parent ends up with")
+
+    def test_an_unverified_child_is_not_published_on_completion_alone(self) -> None:
+        """Completion produces a candidate. It does not produce permission."""
+        runner, plan = _child_runner(
+            self.shared, self.supervisor, self.alice, terminal="completed")
+        result = runner.run_child(plan)  # no authority accompanies it
+
+        self.assertFalse(result.ok)
+        self.assertEqual(result.outcome, "undeterminable")
+        self.assertIn("not published", result.detail)
+        self.assertIsNone(self.supervisor.settled_digest(self.alice))
+        self.assertFalse((self.shared / "work.py").exists())
+
+    def test_a_failing_exterior_verdict_refuses_the_publication(self) -> None:
+        """A `fail` about the *right* tree. Binding alone must not admit it.
+
+        The evaluator is built through the factory so it is bound to the exact
+        staged tree: a control that rejected on a mismatched subject would
+        prove the subject check twice and the verdict check never.
+        """
+        runner, plan = _child_runner(
+            self.shared, self.supervisor, self.alice, terminal="completed")
+        runner._tree_verifier = lambda cid, root, digest: _ScriptedEvaluator(
+            Path(root), digest, verdict="fail")
+        result = runner.run_child_authorized(plan, _authority())
+
+        self.assertFalse(result.ok)
+        self.assertIsNone(self.supervisor.settled_digest(self.alice))
+        self.assertFalse((self.shared / "work.py").exists(),
+                         "a rejected candidate reached the shared tree")
+
+    def test_a_rejected_verdict_is_refused_at_the_publication_boundary(self) -> None:
+        """The same refusal one layer down, where the tree actually changes.
+
+        `_verify_tree` can refuse a verdict before `publish` ever sees it, so
+        the supervisor is exercised directly here: a caller holding the fence,
+        a live base and a correctly bound verdict that simply did not pass must
+        still be refused, or the gate lives only in the caller.
+        """
+        digest = self._retained(self.alice)
+        ticket = self.supervisor.acquire(self.alice)
+        combined = self.supervisor.stage(ticket, candidate_digest=digest)
+
+        with self.assertRaises(UnverifiedPublicationError):
+            self.supervisor.publish(ticket, combined, verdict=PublicationVerdict(
+                subject_digest=combined.digest, disposition="failed",
+                envelope_digest="sha256:envelope"))
+        self.assertFalse((self.shared / "out" / "a.py").exists())
+        self.assertIsNone(self.supervisor.settled_digest(self.alice))
+
+    def test_an_undeterminable_verdict_is_not_a_pass(self) -> None:
+        digest = self._retained(self.alice)
+        ticket = self.supervisor.acquire(self.alice)
+        combined = self.supervisor.stage(ticket, candidate_digest=digest)
+
+        with self.assertRaises(UnverifiedPublicationError):
+            self.supervisor.publish(ticket, combined, verdict=PublicationVerdict(
+                subject_digest=combined.digest, disposition="undeterminable"))
+        self.assertFalse((self.shared / "out" / "a.py").exists())
+
+    def test_a_verdict_about_another_tree_refuses_the_publication(self) -> None:
+        """Candidate substitution: a real pass, bound to something else."""
+        runner, plan = _child_runner(
+            self.shared, self.supervisor, self.alice, terminal="completed",
+            evaluator=_ScriptedEvaluator(
+                self.shared, "sha256:other", subject="sha256:other"))
+        result = runner.run_child_authorized(plan, _authority())
+
+        self.assertFalse(result.ok)
+        self.assertFalse((self.shared / "work.py").exists())
+
+    def test_a_signed_pass_with_no_executed_tests_is_not_a_publication(self) -> None:
+        """Vacuous verification is missingness, not a pass (`ADR-0076 §5`)."""
+        runner, plan = _child_runner(
+            self.shared, self.supervisor, self.alice, terminal="completed",
+            evaluator=None)
+        runner._tree_verifier = lambda cid, root, digest: _ScriptedEvaluator(
+            Path(root), digest, executed=0)
+        result = runner.run_child_authorized(plan, _authority())
+
+        self.assertFalse(result.ok)
+        self.assertFalse((self.shared / "work.py").exists())
+
+    def test_an_expired_grant_refuses_the_publication(self) -> None:
+        """A long child does not extend the authority that admitted it."""
+        runner, plan = _child_runner(
+            self.shared, self.supervisor, self.alice, terminal="completed")
+        result = runner.run_child_authorized(
+            plan, _authority(expires_at="2026-09-15T11:00:00.000Z"))
+
+        self.assertFalse(result.ok)
+        self.assertIn("grant expired", result.detail)
+        self.assertFalse((self.shared / "work.py").exists())
+
+    def test_authority_the_current_grant_no_longer_carries_refuses(self) -> None:
+        runner, plan = _child_runner(
+            self.shared, self.supervisor, self.alice, terminal="completed")
+        result = runner.run_child_authorized(plan, _authority(actions=("fs.stat",)))
+
+        self.assertFalse(result.ok)
+        self.assertFalse((self.shared / "work.py").exists())
+
+    def test_a_sibling_that_moved_the_tree_makes_the_base_stale(self) -> None:
+        """Stale base: the candidate describes a tree that no longer exists."""
+        runner, plan = _child_runner(
+            self.shared, self.supervisor, self.alice, terminal="completed")
+        self.supervisor.workspace_for(self.alice, seed=True)  # bind the base
+        (self.shared / "parent_secret.txt").write_text("moved", encoding="utf-8")
+
+        result = runner.run_child_authorized(plan, _authority())
+        self.assertFalse(result.ok)
+        self.assertFalse((self.shared / "work.py").exists(),
+                         "a candidate computed against a stale base was published")
+        self.assertEqual(
+            (self.shared / "parent_secret.txt").read_text(encoding="utf-8"), "moved",
+            "publication overwrote the change that made the base stale")
+
+    def test_an_uncontained_runner_never_reaches_a_child_episode(self) -> None:
+        """No child-local adapter means the child does not run at all."""
+        runner, plan = _child_runner(
+            self.shared, self.supervisor, self.alice, terminal="completed",
+            contained=False)
+        self.assertFalse(runner.is_contained())
+        with self.assertRaises(Exception):
+            runner.run_child_authorized(plan, _authority())
+        self.assertIsNone(self.supervisor.candidate_digest(self.alice),
+                          "an uncontained child ran far enough to produce work")
 
     def test_the_child_wrote_into_its_view_not_the_tree_it_integrated_into(self) -> None:
         """Integration is a separate, fenced step -- not a shared-tree write."""
@@ -435,14 +685,81 @@ class TheLifecycleRunsOnTheExistingSpawnPath(_Fixture):
             "the fence was left held after integration; siblings are blocked")
 
     def test_a_fence_refusal_is_not_reported_as_an_ordinary_success(self) -> None:
-        """A completed child whose integration was refused must not read `ok`."""
+        """A completed child whose publication was refused must not read `ok`."""
         self.supervisor.acquire(self.bob)  # a sibling owns the tree
-        with self.assertRaises(OwnershipConflict):
-            self._run("completed", self.alice)
+        result = self._run("completed", self.alice)
+
+        self.assertFalse(result.ok, "a refused publication was reported as success")
+        self.assertEqual(result.outcome, "undeterminable")
         self.assertIsNone(self.supervisor.settled_digest(self.alice))
+        self.assertFalse((self.shared / "work.py").exists())
 
 
-def _child_runner(shared: Path, supervisor, child_id: str, terminal: str | None = None):
+def _passing(combined: CombinedTree, *, subject: str | None = None) -> PublicationVerdict:
+    """The verdict shape publication accepts: a pass bound to one exact tree."""
+    return PublicationVerdict(
+        subject_digest=subject if subject is not None else combined.digest,
+        disposition="passed",
+        envelope_digest="sha256:envelope",
+    )
+
+
+class _ScriptedEvaluator:
+    """An exterior evaluator over one staged tree.
+
+    It signs and binds like the daemon does, because that is what publication
+    revalidates: an unsigned or unbound result has nothing to publish on, and
+    `evaluator_gateway.settlement_payload` is the same code that decides what
+    may be ledgered. It reads the staged tree it was handed, so a test that
+    verifies one tree and publishes another is caught rather than arranged.
+    """
+
+    def __init__(self, root: Path, tree_digest: str, *, verdict: str = "pass",
+                 subject: str | None = None, executed: int = 3) -> None:
+        self.root = root
+        self.tree_digest = tree_digest
+        self._verdict = verdict
+        self._subject = subject
+        self._executed = executed
+        self.seen: list[str] = []
+
+    def evaluate(self, run_ref: RunRef, protocol: EvaluationProtocol):
+        self.seen = sorted(
+            path.relative_to(self.root).as_posix()
+            for path in self.root.rglob("*") if path.is_file())
+        binding = {
+            "verdict": self._verdict,
+            "subject_digest": self._subject or self.tree_digest,
+            "oracle_digest": "sha256:oracle",
+            "executed_test_count": self._executed,
+        }
+        return Result.success(Verdict(
+            outcome="claims", claims=(), reason="",
+            signature="sig", signer_key_id="key-1", binding=binding))
+
+
+class _FakeChildEnvironment:
+    """A child-local effect adapter. It owns one root and disposes itself."""
+
+    def __init__(self, child_id: str, root: Path) -> None:
+        self.child_id = child_id
+        self.root = Path(root)
+        self.disposed = False
+
+    def dispose(self):
+        self.disposed = True
+        return None
+
+
+def _child_runner(
+    shared: Path,
+    supervisor,
+    child_id: str,
+    terminal: str | None = None,
+    *,
+    contained: bool = True,
+    evaluator: Any = None,
+):
     """A `RuntimeChildRunner` and one plan, built the way the runtime builds them."""
     from vanguard.packages.runtime.child_runtime import RuntimeChildRunner
     from vanguard.packages.runtime.compose import TaskContext
@@ -477,14 +794,63 @@ def _child_runner(shared: Path, supervisor, child_id: str, terminal: str | None 
         (Path(task.repo_path) / "work.py").write_text("done\n", encoding="utf-8")
         return _RunResult(terminal or "completed")
 
+    environments: list[_FakeChildEnvironment] = []
+    evaluators: list[Any] = []
+
+    def child_environment(cid: str, root: Path) -> _FakeChildEnvironment:
+        adapter = _FakeChildEnvironment(cid, root)
+        environments.append(adapter)
+        return adapter
+
+    def tree_verifier(cid: str, root: Path, tree_digest: str) -> Any:
+        bound = evaluator or _ScriptedEvaluator(Path(root), tree_digest)
+        evaluators.append(bound)
+        return bound
+
     runner = RuntimeChildRunner(
         run_composed=run_composed,
         parent_ports=_Ports(),
-        harness=None,
+        harness=_Harness(),
         parent_task=parent_task,
         workspaces=supervisor,
+        child_environment=child_environment if contained else None,
+        tree_verifier=tree_verifier if contained else None,
     )
+    runner.environments = environments  # type: ignore[attr-defined]
+    runner.evaluators = evaluators  # type: ignore[attr-defined]
     return runner, plan
+
+
+@dataclass(frozen=True)
+class _Harness:
+    """The one field `_verify_tree` reads: the oracle the pack declared."""
+
+    evaluators: tuple = ("oracle-1",)
+
+
+def _authority(
+    *,
+    actions: tuple = ("fs.read",),
+    expires_at: str = "2099-01-01T00:00:00.000Z",
+    remaining: dict | None = None,
+) -> PublicationAuthority:
+    """The live grant/budget authority `SpawnAdapter` hands the runner."""
+    from vanguard.packages.kernel.attenuation import Constraints, Scope
+
+    return PublicationAuthority(
+        grant=Scope(
+            actions=frozenset(actions),
+            resources=(),
+            constraints=Constraints(
+                expires_at=expires_at, max_uses=10, budget_usd_micros=1_000_000,
+                max_bytes=None, max_effects=None, risk_ceiling="low",
+                max_depth=4, network_policy="deny",
+            ),
+            depth=1,
+        ),
+        remaining_budget=lambda: dict(remaining or {"usd_micros": 1_000_000}),
+        now=lambda: "2026-09-15T12:00:00.000Z",
+    )
 
 
 @dataclass(frozen=True)
@@ -492,6 +858,7 @@ class _Ports:
     """The fields `_rebind` narrows. A real `replace()` target, not a stub."""
 
     model: Any = None
+    environment: Any = None
     interactive: bool = True
     meta_controller: Any = None
     controller_confidence: tuple = ()
@@ -533,7 +900,7 @@ class RetainedCandidateIntegrity(_Fixture):
         path.write_text(json.dumps(record))
         ticket = self.supervisor.acquire(self.alice)
         with self.assertRaises(StaleWriterError):
-            self.supervisor.integrate(ticket, candidate_digest=digest)
+            self._publish(ticket, digest)
         self.assertFalse((self.shared / "out/a.py").exists())
 
     def test_unreadable_candidate_content_is_not_silently_omitted(self) -> None:
@@ -548,15 +915,48 @@ class RetainedCandidateIntegrity(_Fixture):
         with self.assertRaises(StaleWriterError):
             self.supervisor.acquire(self.bob)
 
-    def test_recovery_rechecks_retained_content_identity(self) -> None:
-        self._retained(self.alice)
-        path = self.supervisor._child_dir(self.alice) / "candidate.json"
+    def test_recovery_never_promotes_a_merely_retained_candidate(self) -> None:
+        """Retention is work. Authorization is permission. They are not the same.
+
+        This is the defect the T-141 delivery ruling named: a recovery pass
+        that re-applies every retained candidate publishes work that no fence,
+        no base check, no grant and no evaluator ever admitted -- and does it
+        on a restart, where none of that authority can be re-derived.
+        """
+        self._retained(self.alice)  # retained, never staged, never authorized
+        restarted = self._supervisor()
+
+        self.assertEqual(restarted.recover(), (),
+                         "recovery published a candidate nothing authorized")
+        self.assertIsNone(restarted.settled_digest(self.alice))
+        self.assertFalse((self.shared / "out" / "a.py").exists())
+        self.assertFalse((self.shared / "out" / "b.py").exists())
+
+    def test_recovery_refuses_a_candidate_whose_child_never_completed(self) -> None:
+        """An abandoned child's work is retained and stays unpublished."""
+        runner, plan = _child_runner(
+            self.shared, self.supervisor, self.alice, terminal="abandoned")
+        runner.run_child_authorized(plan, _authority())
+        self.assertIsNotNone(self.supervisor.candidate_digest(self.alice))
+
+        self.assertEqual(self._supervisor().recover(), ())
+        self.assertFalse((self.shared / "work.py").exists(),
+                         "recovery accepted a child that never completed")
+
+    def test_recovery_rechecks_authorized_content_identity(self) -> None:
+        """Recovery re-applies bytes; it must prove they are the verified bytes."""
+        digest = self._retained(self.alice)
+        self._crash_mid_publication(self.alice, digest)
+        path = self.supervisor._child_dir(self.alice) / "authorized.json"
         record = json.loads(path.read_text())
-        record["entries"]["out/a.py"] = "forged"
+        record["entries"]["out/b.py"] = "forged"
         path.write_text(json.dumps(record))
-        with self.assertRaises(StaleWriterError):
+
+        with self.assertRaises(UnverifiedPublicationError):
             self._supervisor().recover()
         self.assertIsNone(self.supervisor.settled_digest(self.alice))
+        self.assertFalse((self.shared / "out" / "b.py").exists(),
+                         "recovery applied content no evaluator ever saw")
 
     def test_identical_retention_is_idempotent(self) -> None:
         original = self._retained(self.alice)

@@ -149,10 +149,15 @@ class TheProductRouteStopsAtCompletion(unittest.TestCase):
 
     def test_an_admitted_completion_ends_the_episode_well_inside_the_ceiling(self) -> None:
         admitter = RecordingAdmitter([ADMIT])
-        # Eight finishes are on the tape; the ceiling is eight turns. Only a
-        # loop that actually stops leaves seven of them unread.
+        # A mutating effect follows the admitted finish on the tape.  The
+        # terminal boundary must leave it unread: no later model request can
+        # become a later effect dispatch.  The ceiling is eight turns, so a
+        # loop that fails to stop has ample room to consume the sentinel.
         outcome, model, harness = run_episode(
-            [doubles.effect(), doubles.finish()] + [doubles.finish()] * 6, admitter)
+            [doubles.effect(), doubles.finish(),
+             doubles.effect(path="/workspace/src/must-not-dispatch.ts")]
+            + [doubles.finish()] * 5,
+            admitter)
 
         self.assertEqual(
             stop_at_completion_failures(
@@ -161,6 +166,8 @@ class TheProductRouteStopsAtCompletion(unittest.TestCase):
             [])
         self.assertEqual(outcome.episode.turn_count, 1)
         self.assertEqual(len(model.calls), 2)
+        self.assertEqual(len(outcome.dispatches), 1,
+                         "the post-finish effect must not reach kernel dispatch")
 
     def test_a_rejection_then_an_admission_still_stops_at_the_admission(self) -> None:
         """Retry is permitted; burning the remaining ceiling afterwards is not."""

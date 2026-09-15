@@ -301,6 +301,40 @@ def admission_required(harness: Any) -> bool:
     """
     return "patch.apply" in set(getattr(harness, "verbs", ()) or ())
 
+
+def _completion_receipt_binding(
+    receipt: VerificationReceipt | None,
+    *,
+    workspace_digest: str,
+    task_digest: str,
+    composition_digest: str,
+    verification_command: str | None,
+    verification_subject_digest: str | None,
+) -> AdmissionVerdict | None:
+    """Refuse a completion receipt not bound to this exact live subject."""
+    if receipt is None:
+        return AdmissionVerdict(False, "VERIFICATION_REQUIRED")
+    if receipt.workspace_digest != workspace_digest:
+        return AdmissionVerdict(False, "VERIFICATION_STALE")
+    if not receipt.task_digest:
+        return AdmissionVerdict(False, "VERIFICATION_UNBOUND_TASK")
+    if receipt.task_digest != task_digest:
+        return AdmissionVerdict(False, "VERIFICATION_FOREIGN_TASK")
+    if not receipt.composition_digest:
+        return AdmissionVerdict(False, "VERIFICATION_UNBOUND_COMPOSITION")
+    if receipt.composition_digest != composition_digest:
+        return AdmissionVerdict(False, "VERIFICATION_FOREIGN_COMPOSITION")
+    if not receipt.verification_command or not verification_command:
+        return AdmissionVerdict(False, "VERIFICATION_UNBOUND_SUBJECT")
+    if receipt.verification_command != verification_command:
+        return AdmissionVerdict(False, "VERIFICATION_FOREIGN_SUBJECT")
+    if not receipt.verification_subject_digest or not verification_subject_digest:
+        return AdmissionVerdict(False, "VERIFICATION_UNBOUND_SUBJECT")
+    if receipt.verification_subject_digest != verification_subject_digest:
+        return AdmissionVerdict(False, "VERIFICATION_FOREIGN_SUBJECT")
+    return None
+
+
 _CONTROLLER_BUDGET_KEYS: Mapping[str, str] = {
     "usd_micros": "usd_micros",
     "usdMicros": "usd_micros",
@@ -711,6 +745,18 @@ class SessionPorts:
     #: Child episodes share the parent's environment lifetime. Only the root
     #: composition owns and disposes the concrete environment adapter.
     environment_owner: bool = True
+    #: `T-141`/`DIR-C5`. Builds a child-local effect adapter rooted at one
+    #: child's isolated view: `(child_id, root) -> EnvironmentAdapter`. Only
+    #: the composition root knows which concrete adapter this profile runs, so
+    #: the factory is injected here rather than discovered by the runtime.
+    #: `None` is not a fallback to the parent's adapter -- it is the reason a
+    #: spawning composition is refused at `Runtime.run_composed`.
+    child_environment: Callable[[str, Any], Any] | None = None
+    #: `T-141`/`DIR-C7`. Builds an exterior evaluator bound to one staged
+    #: combined tree and the digest it must verify:
+    #: `(child_id, staged_root, tree_digest) -> EvaluatorPort`. Publication
+    #: revalidates that verdict; `None` means no child may publish.
+    child_tree_verifier: Callable[[str, Any, str], Any] | None = None
 
 
 class _SwappablePolicy:
@@ -2689,6 +2735,25 @@ class HarnessSession:
             )
         else:
             return AdmissionVerdict(False, "COMPLETION_POLICY_INVALID_VERDICT")
+        binding_refusal = _completion_receipt_binding(
+            self._completion_verification,
+            workspace_digest=self._workspace_digest(),
+            task_digest=self._current_task_digest(),
+            composition_digest=(self.run_plan.composition_digest
+                                if self.run_plan is not None
+                                else self.harness.composition_digest),
+            verification_command=self._completion_verification_command,
+            verification_subject_digest=(
+                replace(
+                    self._completion_verification_subject,
+                    workspace_digest=self._workspace_digest(),
+                    task_digest=self._current_task_digest(),
+                ).digest()
+                if self._completion_verification_subject is not None else None
+            ),
+        )
+        if binding_refusal is not None:
+            return binding_refusal
         if not admission.admissible or self.ports.caller_admission is None:
             return admission
         evidence = self._caller_admission_evidence()

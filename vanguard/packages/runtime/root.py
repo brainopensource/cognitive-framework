@@ -26,6 +26,7 @@ from ..domain.canonicalisation.digest import digest_of
 from ..domain.canonicalisation.jcs import canonical_bytes
 from ..domain.evidence.disposition import TaskDisposition
 from .workspace import (
+    ChildWorkspaceSupervisor,
     controlled_environment,
     get_workspace_path,
     get_workspace_root,
@@ -281,6 +282,12 @@ class Runtime(_ComposedRuntime):
         ports = SessionPorts(
             model=deps.model,
             environment=deps.environment,
+            # `T-141`. The child-local adapter factory travels with the root
+            # adapter it was minted beside. `child_tree_verifier` is
+            # deliberately not defaulted here: until a caller binds an exterior
+            # evaluator for a staged combined tree, a spawning composition is
+            # refused rather than activated without `DIR-C7`.
+            child_environment=deps.child_environment,
             clock=deps.clock,
             store=deps.store,
             index=deps.index if index_declared else None,
@@ -409,15 +416,22 @@ class Runtime(_ComposedRuntime):
             ports.child_runtime is None
             or isinstance(ports.child_runtime, RuntimeChildRunner)
         ):
-            # T-141 cannot be activated by changing repo_path alone:
-            # RuntimeChildRunner._rebind still shares the parent's environment,
-            # and _settle_workspace integrates on child success without the
-            # DIR-C7 base/combined-tree verification gate. Do not silently
-            # construct an unsupervised runner or claim isolated mutation.
-            raise CompositionError(
-                "T-141 automatic child runtime unavailable: child-local effect "
-                "environment and verified, base-bound integration are required"
-            )
+            # `T-141`. A runner is bound here only when it can actually
+            # contain a child: its own effect adapter rooted at its own view,
+            # and an exterior verifier for the tree it would publish. An
+            # unsupervised runner -- automatic or explicitly supplied -- is
+            # refused rather than silently given the parent's environment,
+            # because changing `repo_path` alone moves where the child thinks
+            # it writes while every effect still lands in the parent's tree.
+            runner = ports.child_runtime or _compose_child_runtime(
+                harness, ports, task_context, profile=profile, release=release)
+            if not runner.is_contained():
+                raise CompositionError(
+                    "T-141 automatic child runtime unavailable: child-local "
+                    "effect environment and verified, base-bound integration "
+                    "are required"
+                )
+            ports = replace(ports, child_runtime=runner)
         if completion_policy is not None:
             ports = replace(ports, completion_policy=completion_policy)
         session = HarnessSession(
@@ -655,6 +669,46 @@ def _validate_release_inputs(
     if "bubblewrap-rootless" != getattr(report, "runtime", ""):
         raise ValueError("release execution forbids host sandbox fallback")
     return digest
+
+
+def _compose_child_runtime(
+    harness: Harness,
+    ports: Any,
+    task_context: TaskContext,
+    *,
+    profile: Any,
+    release: bool,
+) -> RuntimeChildRunner:
+    """Bind the M-6 recursion edge with T-141 containment, or without it.
+
+    The supervisor is derived from the run's own repository rather than
+    injected, because the shared tree a child publishes into is definitionally
+    the tree this run was given; taking it from anywhere else would let a
+    composition point publication at a tree the run never opened.
+
+    The containment collaborators are *not* derived. `child_environment` and
+    `child_tree_verifier` come from the composition root, which alone knows
+    which concrete adapter and which exterior evaluator this profile runs. When
+    they are absent the runner is built anyway and reports itself uncontained,
+    so the refusal happens once, at the caller, with the reason visible --
+    rather than here, where a `None` would be indistinguishable from a
+    composition that simply never declared `agent.spawn`.
+    """
+    workspaces = (
+        ChildWorkspaceSupervisor(task_context.repo_path)
+        if ports.child_environment is not None else None
+    )
+    return RuntimeChildRunner(
+        run_composed=Runtime.run_composed,
+        harness=harness,
+        parent_ports=ports,
+        parent_task=task_context,
+        profile=profile,
+        release=release,
+        workspaces=workspaces,
+        child_environment=ports.child_environment,
+        tree_verifier=ports.child_tree_verifier,
+    )
 
 
 def _environment_identity(environment: Any) -> Mapping[str, Any]:

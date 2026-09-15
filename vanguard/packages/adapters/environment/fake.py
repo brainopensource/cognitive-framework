@@ -44,6 +44,15 @@ __all__ = ["FakeEnvironment"]
 _DIFF_HEADER = re.compile(r"^diff --git a/(.+) b/(.+)$")
 
 
+def _candidate_digest(entries: Sequence[Mapping[str, object]]) -> str:
+    framed = bytearray()
+    for entry in entries:
+        encoded = digest_of(dict(entry)).encode("ascii")
+        framed.extend(len(encoded).to_bytes(8, "big"))
+        framed.extend(encoded)
+    return digest_bytes(bytes(framed))
+
+
 def _is_safe_relative_path(path: str) -> bool:
     """Validate that path does not escape workspace root via .. or leading /."""
     if not path or path.startswith("/") or path.startswith("\\"):
@@ -126,8 +135,11 @@ class FakeEnvironment:
         if disposed_err:
             return disposed_err
         self._snapshot_seq += 1
-        sorted_entries = sorted(self._files.items())
-        snapshot_digest = digest_of({"files": sorted_entries, "seq": self._snapshot_seq})
+        sorted_entries = [
+            {"path": path, "type": "file", "mode": 0o644, "content": _compute_file_digest(content)}
+            for path, content in sorted(self._files.items())
+        ]
+        snapshot_digest = _candidate_digest(sorted_entries)
         return Result.success(
             EnvironmentSnapshot(
                 snapshot_id=f"snap-{self._snapshot_seq:04d}",

@@ -38,6 +38,7 @@ from vanguard.packages.runtime.inference_meter import (
     observed_usage,
 )
 from vanguard.packages.adapters.models.cascade import CascadingModel
+from vanguard.packages.runtime.session import _model_pricing
 
 _PRESETS = {
     name: entry["budget"]
@@ -79,8 +80,10 @@ class _Model:
 
 
 class _FailingModel:
-    def __init__(self) -> None:
+    def __init__(self, *, pricing: tuple[int, int] | None = None) -> None:
         self.calls = 0
+        if pricing is not None:
+            self.pricing = pricing
 
     def propose(self, context, tools, sampling):
         del context, tools, sampling
@@ -285,6 +288,106 @@ class PricingIsThreeValuedAtTheAdapter(unittest.TestCase):
         self.assertEqual(free.pricing, (0, 0))
         self.assertIsNone(unknown.pricing,
                           "an unknown route must not borrow a default price")
+
+
+
+class FallbackCannotEscapeTheDeclaredCeiling(unittest.TestCase):
+    """A cascade is priced by the leg it may actually escalate to.
+
+    The defect this guards
+    ----------------------
+    `InferenceMeter` learns a route's price from `model.pricing`
+    (`runtime/session.py::_model_pricing`). `CascadingModel` exposed no such
+    attribute, so *every* cascade route read as unpriced. Unpriced is honest
+    for a route nobody can price -- but it means the meter reserves no USD at
+    all and settles only what the provider volunteers, so the `usd_micros`
+    ceiling can never deny a dispatch. A `free -> paid` cascade therefore spent
+    real money with the money ceiling decorative: the exact class of defect
+    this module was written to close, still live one composition further out.
+
+    Mutation proof: delete the `pricing` property from
+    `adapters/models/cascade.py` and every test below reds.
+    """
+
+    #: Frontier-class rate in micro-USD per million tokens ($15 / $75), the
+    #: escalation target a cheap local primary exists to avoid. The gap between
+    #: the legs is the whole point: it is what an unpriced cascade let through.
+    PAID = (15_000_000, 75_000_000)
+    FREE = (0, 0)
+
+    def test_a_cascade_prices_itself_at_its_most_expensive_leg(self) -> None:
+        """The primary's cheap rate must not bound the fallback's spend."""
+        cascade = CascadingModel(
+            _FailingModel(pricing=self.FREE), _Model(pricing=self.PAID))
+
+        self.assertEqual(
+            _model_pricing(cascade), self.PAID,
+            "a cascade priced at its primary lets the fallback overrun the "
+            "declared USD ceiling by the difference between the two legs")
+
+    def test_an_unknown_leg_makes_the_whole_cascade_unknown_not_free(self) -> None:
+        """`None` has never meant free (`RUN-12`), and max() must not invent a 0.
+
+        This is the guard on the *fix*: taking a worst-case maximum across the
+        legs would silently read an unpriced leg as `(0, 0)` and report the
+        cascade as fully priced at the other leg's rate -- a route that cannot
+        be priced, reported as one that can.
+        """
+        unknown_fallback = CascadingModel(_Model(pricing=self.PAID), _Model())
+        unknown_primary = CascadingModel(_Model(), _Model(pricing=self.PAID))
+
+        self.assertIsNone(_model_pricing(unknown_fallback))
+        self.assertIsNone(_model_pricing(unknown_primary))
+
+    def test_a_nested_cascade_still_reaches_its_most_expensive_leg(self) -> None:
+        inner = CascadingModel(_Model(pricing=self.FREE), _Model(pricing=self.PAID))
+        outer = CascadingModel(_Model(pricing=self.FREE), inner)
+        self.assertEqual(_model_pricing(outer), self.PAID)
+
+    def test_the_usd_ceiling_denies_a_cascade_route(self) -> None:
+        """Exhaustion denies the *next* dispatch rather than reporting it after."""
+        cascade = CascadingModel(
+            _FailingModel(pricing=self.FREE), _Model(pricing=self.PAID))
+        governor = Governor({"usd_micros": 1_000, "tokens": 10_000_000})
+        meter = InferenceMeter(governor, "run-x", pricing=_model_pricing(cascade))
+
+        with self.assertRaises(BudgetDenied) as caught:
+            meter.reserve(prompt_tokens=100_000, sampling={"maxTokens": 4_096})
+        self.assertEqual(caught.exception.dimension, "usd_micros")
+
+    def test_a_free_only_cascade_is_still_never_denied_on_cost(self) -> None:
+        """Worst-case pricing must not manufacture a cost out of two free legs."""
+        cascade = CascadingModel(_Model(pricing=self.FREE), _Model(pricing=self.FREE))
+        self.assertEqual(_model_pricing(cascade), self.FREE)
+
+        meter = InferenceMeter(
+            Governor({"usd_micros": 0, "tokens": 1_000_000}),
+            "run-x", pricing=_model_pricing(cascade))
+        self.assertEqual(
+            meter.reserve(prompt_tokens=50_000,
+                          sampling={"maxTokens": 4_096}).usd_micros, 0)
+
+    def test_the_product_route_stops_a_cascade_on_the_money_ceiling(self) -> None:
+        """The product path, not a unit fixture: the defect lived in composition.
+
+        No research-tier helper stands in for this: it is the same public
+        entrypoint, preset and `profile: product` the shipped command uses.
+        """
+        fallback = _Model(prompt=4_000, completion=1_000, pricing=self.PAID)
+        cascade = CascadingModel(_FailingModel(pricing=self.FREE), fallback)
+
+        result = _run("fast", cascade)
+
+        detail = result.get("detail") or ""
+        self.assertEqual(result.get("outcome"), "budget_exhausted")
+        self.assertIn("reservation denied", detail,
+                      "the run must stop on the reservation, not the turn bound")
+        self.assertIn("usd_micros", detail,
+                      "a cascade must be stopped by the declared money ceiling")
+        self.assertLess(
+            fallback.calls, _PRESETS["fast"]["turns"],
+            "the paid fallback ran every declared turn: the money ceiling "
+            "never bound the escalated route")
 
 
 if __name__ == "__main__":

@@ -6,6 +6,8 @@ Invariants:
 - Tries primary model (e.g. fast local llama.cpp) first.
 - Fails over cleanly to fallback/frontier model upon primary error, timeout, or exhaustion.
 - Preserves typed Result[Proposal] semantics.
+- Prices itself at the most expensive leg it may escalate to, so the runtime's
+  USD ceiling bounds the *fallback* and not merely the primary.
 """
 
 from __future__ import annotations
@@ -48,6 +50,40 @@ class CascadingModel(ModelPort):
     @property
     def total_fallback_attempts(self) -> int:
         return self._total_fallback_attempts
+
+    @property
+    def pricing(self) -> tuple[int, int] | None:
+        """Worst-case `(prompt, completion)` micro-USD per million tokens.
+
+        The runtime reads this attribute to decide what a turn on this route
+        may cost before the call (`runtime/session.py::_model_pricing`), and
+        `InferenceMeter` reserves against it. A cascade exists precisely so a
+        cheap primary can escalate to an expensive one, so pricing it at the
+        primary would let the fallback overrun the declared `usd_micros`
+        ceiling by the difference between the legs. The bound that holds for
+        every outcome is the maximum across the legs; a reservation is a
+        ceiling, not a forecast, and the unused remainder is refunded on
+        commit.
+
+        `None` means *unknown*, and never free (`RUN-12`): one unpriceable leg
+        makes the whole route unpriceable, because the escalation that reaches
+        it cannot be bounded in advance. Reading that leg as `0` would report a
+        route that cannot be priced as one that can.
+        """
+        worst: tuple[int, int] | None = None
+        for leg in (self.primary, self.fallback):
+            leg_pricing = getattr(leg, "pricing", None)
+            if not isinstance(leg_pricing, (tuple, list)) or len(leg_pricing) < 2:
+                return None
+            try:
+                prompt, completion = int(leg_pricing[0]), int(leg_pricing[1])
+            except (TypeError, ValueError):
+                return None
+            if prompt < 0 or completion < 0:
+                return None
+            worst = (prompt, completion) if worst is None else (
+                max(worst[0], prompt), max(worst[1], completion))
+        return worst
 
     def reset_failures(self) -> None:
         """Reset consecutive failure counter (e.g. between independent episodes)."""

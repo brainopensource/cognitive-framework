@@ -80,7 +80,28 @@ explicit missing entries before all predicates pass; neither preparation writes 
 real frozen record nor performs any provider/evaluation run. No benchmark invocation
 is added by this clarification: use only the existing focused hermetic falsifiers.
 When internal work reaches the evidence frontier, stop that blocked leaf and report
-the exact missing resource; do not fill idle time with CAS, delegation or more hardening.
+the exact missing resource. The Senior MAY then dispatch only an explicitly authorized,
+lease-compatible capability-foundation row below; CAS, campaigns, learned routing and
+other FH-1 work remain unassigned.
+
+### Capability-foundation continuation (DIR-4, 2026-09-15)
+
+DIR-4 authorizes three bounded outcomes without waiting for MS-CONTROL. They do not
+displace the current integrity queue: each begins only when its exact files are free,
+the Senior records the lease, and an eligible acceptor is named. Ordinary private
+implementation choices belong to the developer. No provider calls or paid runs.
+
+| Task / initial owner | requires: and lease boundary | Outcome and focused falsifier contract |
+|---|---|---|
+| **T-141 Isolated child workspace lifecycle / A** | T-131.8 handoff; no active owner on `runtime/{child_runtime,workspace,delegation}.py`; final lease compiled before edit | Child-local mutation, recoverable candidate retention and controlled integration over the existing execution path. Attempt parent/sibling escape, stale-writer mutation, competing ownership, and crash during mutation/handoff/cleanup; prove no partial accepted candidate, lost accepted artifact or duplicate settled effect. |
+| **T-142 Long-session continuity / B** | T-131.7 handoff and release of its `runtime/checkpoints.py` plus `agency/context/{compiler,compaction}.py` lease; C releases any session seam | Separately identified bounded large-context treatment reusing the existing pack/compiler/runtime. Compare uninterrupted and fresh-process state; force repeated compaction, pending-effect interruption, identity change, revocation and exhaustion; prove no lost obligation, authority widening, fabricated evidence or budget reset. |
+| **T-143 Greenfield and multi-file oracle completeness / C** | T-137 handoff; final lease must extend, not duplicate, T-131 evidence work | Exterior verification of the exact submitted candidate with meaningful required-behavior coverage. Reject empty/stub solutions, vacuous discovery, test tampering, stale verification, omitted required files, unauthorized additions and candidate substitution; retain valid positive controls. |
+| **T-144 Planner-worker-verifier convergence / Senior assigns** | Applicable T-141/T-142/T-143 contracts independently accepted; topology/session/integration leases explicitly released | Use existing topology lowering and the same runtime. Competing candidates, stale bases, worker failure, restart, exhaustion and verifier rejection cannot produce unauthorized merge or completion; exterior verification binds the final combined tree. Capability demonstration only, never a control result. |
+
+The Senior refines each row into an exact subject-bound work packet before dispatch,
+including final changed files, canonical-owner documentation, focused command,
+positive/adversarial receipts and independent acceptor. Leadership may accept only
+where it did not author or materially supply the implementation under DIR-I7.
 
 ### Protected prior handoffs and acceptance reconciliation
 

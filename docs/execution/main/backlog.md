@@ -36,17 +36,15 @@ Invariant: Mechanism presence is not closure; state transitions require empirica
 ====================================================================================================
 ```
 
-**Current package scope (2026-09-14).** Active A/T-131.6, C/T-140 and B's
-independent reviews retain their contracts and leases. Successor execution is limited
-to the two control-frontier packets in `tasks.md`: Q-01 correction, gate discovery,
-approval-path attribution, remaining RUN-09 evidence and the T-51→T-26b→T-26→T-27
-readiness path under unchanged D-6 F1–F7. Existing integration task acceptances are
-recorded but their exact-subject/non-author provenance is still being reconciled;
-MS-SEE/MS-CHANGE/MS-CONTROL remain OPEN. FH-1/CAS/delegation/specialists/campaign/
-official/SOTA stay proposed until accepted MS-CONTROL and T-129 admission, with no
-new leaves or schemas. DIR-I6 benchmark disposition is unchanged; unrelated drift
-adds no scope. This planning authorizes neither external corpus access nor provider
-calls, freeze, paid execution, scores or release/milestone acceptance.
+**Current package scope (2026-09-15).** The integrity queue and its exact leases remain
+in `tasks.md`. DIR-4 additionally admits three bounded capability foundations:
+T-141 isolated child workspaces, T-142 long-session continuity and T-143 trustworthy
+greenfield/multi-file oracle completeness; T-144 convergence is conditional on their
+applicable independent acceptance. This does not activate the remaining FH-1 schemas,
+CAS algorithms, campaign machinery, learned routing, swarm experiments, external
+corpus access, provider calls, freeze, paid execution, scores or milestone acceptance.
+Existing integration provenance is still being reconciled; MS-SEE, MS-CHANGE and
+MS-CONTROL remain OPEN, T-26 UNFROZEN and T-27 unauthorized.
 
 ## 1. Lifecycle State Definitions
 

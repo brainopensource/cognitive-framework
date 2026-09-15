@@ -65,6 +65,12 @@
 {"canonical_id": "product.frontend.lab", "canonical_owner_path": "docs/product/frontend/PRD_AETHER_LAB.md", "owner": "product-architecture"}
 {"canonical_id": "product.frontend.tui", "canonical_owner_path": "docs/product/frontend/PRD_AETHER_TUI.md", "owner": "product-architecture"}
 {"canonical_id": "product.frontend.platform", "canonical_owner_path": "docs/product/frontend/PRD_FRONTEND_PLATFORM.md", "owner": "product-architecture"}
+{"canonical_id": "2026-09-12_wave_evaluation", "canonical_owner_path": "docs/reports/benchmark/quick_benchs/2026-09-12_wave_evaluation.md", "owner": "repository-governance"}
+{"canonical_id": "CARD_TEMPLATE", "canonical_owner_path": "docs/reports/benchmark/quick_benchs/CARD_TEMPLATE.md", "owner": "repository-governance"}
+{"canonical_id": "benchmark_audit_report", "canonical_owner_path": "docs/reports/benchmark/quick_benchs/benchmark_audit_report.md", "owner": "repository-governance"}
+{"canonical_id": "draft.audit.aether-sota-agentic-coding-development-plan-2026-09-06", "canonical_owner_path": "docs/reports/reviews/aether_v093_review/audit/AETHER_SOTA_AGENTIC_CODING_DEVELOPMENT_PLAN_AUDIT_2026-09-06.md", "owner": "repository-governance"}
+{"canonical_id": "draft.audit.wave2_closeout", "canonical_owner_path": "docs/reports/reviews/aether_v093_review/audit/AUDIT-2026-09-06-wave2-closeout.md", "owner": "external-review"}
+{"canonical_id": "audit.phd.architectural.execution_vs_code", "canonical_owner_path": "docs/reports/reviews/aether_v093_review/audit/EXHAUSTIVE_ARCHITECTURAL_AUDIT_EXECUTION_VS_CODE.md", "owner": "principal-systems-architect"}
 {"canonical_id": "aether-v093-review-part1-modular-hardware", "canonical_owner_path": "docs/reports/reviews/aether_v093_review/part1_modular_hardware_architecture.md", "owner": "architecture-review"}
 {"canonical_id": "aether-v093-review-part2-benchmarks-topologies", "canonical_owner_path": "docs/reports/reviews/aether_v093_review/part2_benchmark_mastery_and_topologies.md", "owner": "architecture-review"}
 {"canonical_id": "aether-v093-review-part3-interface-blueprints", "canonical_owner_path": "docs/reports/reviews/aether_v093_review/part3_blueprints_and_interface_contracts.md", "owner": "architecture-review"}
@@ -122,6 +128,7 @@
 {"canonical_id": "research.coding-harness-metaframework-2508-improved", "canonical_owner_path": "docs/research/coding_harness/RESEARCH_metaframework_2508_improved.md", "owner": "repository-governance"}
 {"canonical_id": "research.coding-harness-vanguard-frontier-swe-bench-report", "canonical_owner_path": "docs/research/coding_harness/VANGUARD_FRONTIER_SWE_BENCH_AND_AGENTIC_METAFRAMEWORK_REPORT.md", "owner": "repository-governance"}
 {"canonical_id": "research.coding-harness-vanguard-vs-lim-insights", "canonical_owner_path": "docs/research/coding_harness/VANGUARD_VS_LIM_INSIGHTS_SOTS_TECHNIQUES.md", "owner": "repository-governance"}
+{"canonical_id": "aux_cli_multi_profiles", "canonical_owner_path": "docs/research/coding_harness/aux_cli_multi_profiles.md", "owner": "repository-governance"}
 {"canonical_id": "research.coding-harness-future-improvements-sota-harness-2808", "canonical_owner_path": "docs/research/coding_harness/future_improvements_sota_harness_2808.md", "owner": "repository-governance"}
 {"canonical_id": "research.coding-harness-proposal-glm-harness-beta", "canonical_owner_path": "docs/research/coding_harness/proposal_glm_harness_BETA.md", "owner": "repository-governance"}
 {"canonical_id": "research.coding-harness-proposal-hy3-improved", "canonical_owner_path": "docs/research/coding_harness/proposal_hy3_improved.md", "owner": "repository-governance"}

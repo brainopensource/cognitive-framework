@@ -28,6 +28,23 @@ relationships:
 
 ## Control-frontier packet execution (2026-09-14)
 
+**DIR-4 capability continuation (2026-09-15).** Three bounded outcomes may proceed
+without waiting for MS-CONTROL, but only on released exact leases: isolated child
+writable views with fenced ownership; long-session compaction/restart with aggregate
+identity and budget continuity; and candidate-bound greenfield/multi-file oracle
+completeness. Planner-worker-verifier convergence follows only after the applicable
+foundations are independently accepted. Reuse the existing topology lowering,
+compiler, runtime, ledger, budgets and exterior verifier. Git worktrees are one
+possible mechanism, not proof of containment; long-horizon packaging and numeric
+envelopes remain evidence-dependent; worker agreement never authorizes merge.
+
+The Senior compiles T-141–T-144 from the outcome rows in `tasks.md`, checks live
+leases before every dispatch, and names an independent acceptor. Developers choose
+private helpers and algorithms. Focused adversarial falsifiers precede `just check`;
+`just verify` runs once on the final exact acceptance subject unless a specific risk
+requires another full run. These packets demonstrate capability only and neither
+extend D-6 beyond F1–F7 nor authorize a control result.
+
 The current `tasks.md` leadership continuation advances the queue to A/T-131.8,
 C/T-133→T-132→T-137 and B/T-131.3/4/7, preserving predecessor acceptance and
 file-release conditions rather than asserting that earlier packets are accepted.

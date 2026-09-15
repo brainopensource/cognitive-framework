@@ -484,6 +484,74 @@ return to leadership. No provider call, paid run, actual control freeze, benchma
 run/score, milestone closure or SOTA claim is authorized; CAS/delegation/campaign and
 other post-control proposals gain no implementation scope or replacement schedule.
 
+## DIR-4. Capability-foundation continuation (2026-09-15)
+
+Leadership authorizes three bounded capability outcomes alongside the existing
+integrity queue: isolated child workspaces, long-session continuity, and trustworthy
+greenfield/multi-file oracle completeness. Planner-to-worker-to-verifier convergence
+is conditional on independent acceptance of the applicable foundations. This
+supersedes blanket deferral of those outcomes until MS-CONTROL, but does not activate
+the remaining FH-1 schemas, CAS algorithms, campaign machinery, learned routing,
+swarm experiments, a provider call, a paid run, T-26, T-27, or milestone closure.
+
+**DIR-C1 — Completion admission.** Completion admission is capability-derived and
+MUST NOT exempt a composition by product name. Requested completion, runtime-admitted
+completion, and independent evaluation remain distinct. Admitted completion stops
+further effects; missing, stale, vacuous, or candidate-unbound verification cannot
+publish success.
+
+**DIR-C2 — One context compiler and one task state.** Context growth MUST extend the
+existing compiler through bounded policies, not a second compiler. The fold-produced
+`SemanticTaskState` remains the sole authoritative task state; versioned continuation
+envelopes MAY carry it but MUST NOT become another state authority.
+
+**DIR-C3 — Budget and identity algebra.** Only additive resource dimensions are
+summed. Depth and turn ceilings remain structural constraints. Grants are revalidated
+at dispatch, refunds cannot create budget, and restart cannot replenish consumption.
+Workspace, behavior/composition, and verification-subject identities remain distinct
+and MUST be explicitly bound where a claim depends on all three.
+
+**DIR-C4 — Topology and coordination.** Extend the existing `Topology` and runtime
+lowering. A versioned plan MAY be an input artifact, but MUST NOT introduce another
+scheduler, episode loop, ledger writer, or authority. Per-mille allocation and the
+named FH-1 aggregation algorithms remain deferred.
+
+**DIR-C5 — Isolated mutation.** Before concurrent mutating workers are enabled, each
+child MUST receive an isolated writable view and exclusive, fenced mutation ownership.
+Children cannot implicitly mutate the parent or sibling candidate. Ownership expiry,
+stale writers, recovery races, partial integration, and failed cleanup fail closed.
+Git worktrees alone do not establish containment. Shared-workspace mutation remains
+serialized.
+
+**DIR-C6 — Long-session continuity.** A long-session treatment MUST be separately
+identified without modifying the three control presets. It reuses the existing pack,
+compiler, runtime, ledger and budget identities. Compaction and fresh-process restart
+preserve objective, constraints, revision, unresolved work, evidence references,
+grants, aggregate consumption, and pending/settled effect identity. Uncertain effects
+are reconciled before retry; settled effects are never replayed. Public packaging and
+numeric envelopes remain evidence-dependent.
+
+**DIR-C7 — Oracle completeness and merge authority.** Workers produce immutable
+candidate references, never acceptance. Authorized integration validates the base,
+combines changes, and obtains exterior verification of the exact combined tree.
+Rebase or mutation invalidates affected evidence. Candidate-bound checks MUST reject
+empty/stub solutions, vacuous discovery, test tampering, stale verification, omitted
+required files, unauthorized additions, and candidate substitution while retaining
+valid positive controls. Consensus cannot mint merge or completion authority.
+
+**DIR-C8 — Measurement and acceptance.** Preserve the existing two-sided,
+uncorrected 95% Wilson calculation with `z = 1.96`, observed binary LIVE outcomes as
+its denominator, all 30 fixed slots, one measured attempt per slot, explicit
+missingness, the existing 18/30 positive boundary, and zero observed false
+completions. Descriptive missingness bounds remain separate from confidence
+intervals. Leadership MAY accept a batched claim only when independent of its
+implementation and material repair; otherwise an eligible non-author is required.
+
+Exact task leases, owners, predecessors, falsifiers and acceptors live in `tasks.md`.
+New target contracts enter this specification before implementation; an as-built
+observation is not an acceptance claim. Accepted durable behavior is promoted to its
+existing architecture/reference owner with its original subject, scope and limits.
+
 ## NT-1. Near-term baseline, context, cache and recovery delta
 
 **Authority and scope (2026-09-07).** This executive amendment authorizes T-98–T-111 and the revised T-77 before control qualification. It supersedes earlier EW-9 exclusions only for deterministic context/cache/recovery hardening and baseline remediation. Existing T-09–T-16 mechanisms are extended, not re-created. T-80 remains the later workspace-policy treatment; deterministic semantic stall detection belongs to T-106. Model escalation, consultation, specialists, CAS workspace promotion, memory learning, new index backends and T-96 remain outside this iteration. Historical milestone receipts retain their original subjects. No new milestone is accepted by this amendment.

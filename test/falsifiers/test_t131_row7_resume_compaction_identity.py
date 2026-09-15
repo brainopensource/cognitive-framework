@@ -17,19 +17,24 @@ interpreter only; the model is the scripted cassette double.
 
 from __future__ import annotations
 
+import inspect
 import json
 import os
+import signal
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
-from typing import Any, Mapping
+from types import SimpleNamespace
+from typing import Any, Mapping, Sequence
 
 from vanguard.packages.adapters.stores.event_store import SqliteEventStore
 from vanguard.packages.domain.canonicalisation.jcs import canonical_bytes
 from vanguard.packages.domain.task_state import MemoryView, SemanticTaskState, critical_state
 from vanguard.packages.ports.event_store import EventRange
+from vanguard.packages.runtime import entrypoint
+from vanguard.packages.runtime.session import HarnessSession
 from vanguard.packages.runtime.task_state import fold_task_state
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -344,6 +349,12 @@ class FreshProcessResumePreservesIdentity(unittest.TestCase):
                          (resumed.stdout or "") + (resumed.stderr or ""))
         return json.loads(resumed.stdout.strip().splitlines()[-1]), db
 
+    #: The writer durably commits 7 tokens against the declared 13-token
+    #: ceiling, so a continuation that preserved resource identity reports 6
+    #: remaining. Reporting 13 is not "identity preserved" -- it is the
+    #: replenished budget row 7 names as a defect (T-131.7).
+    DEBITED_BUDGETS = {"tokens": 6, "usd_micros": 500}
+
     def test_a_fresh_interpreter_recovers_all_five_dimensions(self) -> None:
         observed, _ = self._run()
         # This fixture's writer emits no `ChangeSurfaceUpdated`, so the
@@ -352,9 +363,29 @@ class FreshProcessResumePreservesIdentity(unittest.TestCase):
         # observe. DIR-D1 has since made `ChangeSurfaceUpdated` writable and
         # given it a producer; the surface carrier itself is falsified in
         # `test/runtime/test_task_state_durable_carriers.py`, not here.
-        declared = {k: v for k, v in DECLARED.items() if k != "changeSurface"}
+        declared = {
+            **{k: v for k, v in DECLARED.items() if k != "changeSurface"},
+            "remainingBudgets": self.DEBITED_BUDGETS,
+        }
         self.assertEqual(identity_failures(declared, observed["resumeState"]), [])
         self.assertEqual(observed["resumeState"]["modifiedFiles"], ["src/a.py"])
+
+    def test_the_resumed_budget_is_debited_by_the_durable_commitment(self) -> None:
+        """ADVERSARIAL: the ceiling is not what a continuation may report.
+
+        Before T-131.7 the fold read `remainingBudgets` back out of the
+        `EpisodeStarted` header, so a fresh process reported the full ceiling
+        however much the same WAL said it had already committed. The writer
+        commits 7 of 13 tokens; a resume that still says 13 has replenished a
+        spent budget, and this asserts it cannot.
+        """
+        observed, _ = self._run()
+        remaining = observed["resumeState"]["remainingBudgets"]
+        self.assertEqual(remaining["tokens"], 6)
+        self.assertNotEqual(
+            remaining["tokens"], DECLARED["remainingBudgets"]["tokens"],
+            "the fresh process restored the ceiling instead of the remainder")
+        self.assertLess(remaining["tokens"], DECLARED["remainingBudgets"]["tokens"])
 
     def test_the_fresh_process_neither_duplicates_effects_nor_resets_the_ceiling(self) -> None:
         observed, _ = self._run()
@@ -456,6 +487,416 @@ class EveryDimensionHasAWritableCarrier(unittest.TestCase):
         # None of the fold's kinds is deprecated, so shrinking
         # `DEPRECATED_KINDS` could never have closed this gap.
         self.assertEqual(_KNOWN_KINDS & DEPRECATED_KINDS, frozenset())
+
+
+# ==========================================================================
+# T-131.7 — continuation identity through the ACTUAL runtime, not the fold.
+#
+# Everything above scores `fold_task_state` over handcrafted events and
+# `critical_state` over a constructed `MemoryView`. That qualifies the
+# projection, not the product: a run whose ingress never hands the projection
+# to the planner would pass every assertion above while losing the objective
+# on restart.
+#
+# This section therefore drives the executable ingress the board names --
+# `entrypoint.execute` -> `Runtime.execute_profiled` -> `Runtime.run_composed`
+# -> `HarnessSession.run` -- with `injectedModel`, `storePath` and the same run
+# ID across two real processes, and kills the first one with SIGKILL after a
+# real durable `EffectStarted`. No provider is contacted: the model is a
+# scripted double and the store is a local disposable WAL (`RUN-12`).
+# ==========================================================================
+
+RUN_ID = "run-t131-row7-runtime"
+OBJECTIVE = "T131ROW7 OBJECTIVE: make app.f return 1"
+
+#: Emitted by the child so the parent can tell "the workspace was prepared"
+#: apart from "the child died before it prepared anything".
+_RUNTIME_DRIVER = r"""
+import json, os, subprocess, sys
+from pathlib import Path
+
+sys.path.insert(0, sys.argv[1])
+from vanguard.packages.ports.event_store import Result
+from vanguard.packages.runtime import entrypoint
+
+phase, root, store, run_id, objective = sys.argv[2:7]
+root, store = Path(root), Path(store)
+os.environ["AETHER_WORKSPACE_ROOT"] = str(root)
+
+
+class Scripted:
+    # A ModelPort double. It records the compiled context it was handed, so
+    # the parent can read exactly what the resumed planner was told.
+
+    def __init__(self, tape):
+        self.tape, self.cursor, self.contexts = list(tape), 0, []
+
+    def propose(self, context, tools, sampling):
+        self.contexts.append(context)
+        if self.cursor >= len(self.tape):
+            return Result.success({"kind": "abstain", "note": "tape exhausted"})
+        item = self.tape[self.cursor]
+        self.cursor += 1
+        return Result.success(dict(item))
+
+
+def patch(path, content):
+    return {"kind": "effect", "action": "patch.apply",
+            "resource": {"kind": "fs", "root": "/workspace", "paths": ["/workspace"]},
+            "args": {"path": path, "content": content}, "note": "implement"}
+
+
+def run_proc(argv, note):
+    return {"kind": "effect", "action": "proc.exec",
+            "resource": {"kind": "generic",
+                         "uriPattern": "proc://exec/allow/git,pytest,ruff,python3"},
+            "args": {"argv": argv}, "note": note}
+
+
+if phase == "seed":
+    root.mkdir(parents=True, exist_ok=True)
+    (root / "pyproject.toml").write_text("[project]\nname='row7'\n")
+    (root / "app.py").write_text("def f():\n    pass\n")
+    for command in (["git", "init", "-q"], ["git", "config", "user.email", "t@t"],
+                    ["git", "config", "user.name", "t"], ["git", "add", "-A"],
+                    ["git", "commit", "-qm", "init"]):
+        subprocess.run(command, cwd=root, check=True, capture_output=True)
+    (root / ".vanguard").mkdir(exist_ok=True)
+    model = Scripted([
+        patch("app.py", "def f():\n    return 1\n"),
+        # A real process effect whose child SIGKILLs this interpreter. The
+        # kernel has durably appended `EffectStarted` and has not yet appended
+        # any terminal, so the WAL is left holding a genuine open intent --
+        # not a fabricated test ledger entry.
+        run_proc(["python3", "-c",
+                  "import os, signal; os.kill(os.getppid(), signal.SIGKILL)"], "crash"),
+        {"kind": "abstain", "note": "unreachable"},
+    ])
+    entrypoint.execute({
+        "command": "code", "brief": objective, "workspace": str(root),
+        "storePath": str(store), "injectedModel": model, "profile": "product",
+        "interactive": False, "maxTurnsPerEpisode": 6, "runId": run_id})
+    print(json.dumps({"survivedTheCrash": True}))
+
+elif phase == "resume":
+    model = Scripted([{"kind": "abstain", "note": "observe the restored context"}])
+    frame = entrypoint.execute({
+        "command": "resume", "runId": run_id, "workspace": str(root),
+        "storePath": str(store), "injectedModel": model, "profile": "product",
+        "interactive": False, "maxTurnsPerEpisode": 6})
+    context = model.contexts[0] if model.contexts else {}
+    print(json.dumps({
+        "outcome": frame["result"]["outcome"],
+        "firstResumedContext": json.dumps(context, default=str),
+    }))
+"""
+
+
+def _drive(phase: str, root: Path, store: Path) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        [sys.executable, "-c", _RUNTIME_DRIVER, str(ROOT), phase,
+         str(root), str(store), RUN_ID, OBJECTIVE],
+        cwd=ROOT, env={**os.environ, "PYTHONPATH": str(ROOT)},
+        check=False, capture_output=True, text=True, timeout=600)
+
+
+class RuntimeContinuationIdentity(unittest.TestCase):
+    """T-131.7 through the product ingress, across a real process boundary."""
+
+    maxDiff = None
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls._tmp = tempfile.TemporaryDirectory()
+        cls.root = Path(cls._tmp.name) / "workspace"
+        cls.store = cls.root / ".vanguard" / "events.sqlite3"
+        cls.seed = _drive("seed", cls.root, cls.store)
+        cls.events = cls._read()
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        cls._tmp.cleanup()
+
+    @classmethod
+    def _read(cls) -> list[Any]:
+        store = SqliteEventStore(str(cls.store))
+        try:
+            read = store.read(EventRange(run_id=RUN_ID))
+            return list(read.value or ())
+        finally:
+            store.close()
+
+    @classmethod
+    def _kinds(cls, events: Sequence[Any]) -> list[str]:
+        return [(getattr(e, "payload", {}) or {}).get("kind") or "" for e in events]
+
+    def _folded(self) -> Mapping[str, Any]:
+        return fold_task_state(self.events, objective="").to_canonical_dict()
+
+    # -- the fixture itself must be the thing it claims to be --------------
+
+    def test_the_seed_process_really_died_after_a_durable_effect_started(self) -> None:
+        """The premise. A clean exit would make every assertion below vacuous."""
+        self.assertLess(self.seed.returncode, 0,
+                        f"seed exited {self.seed.returncode}, expected a signal death")
+        self.assertEqual(self.seed.returncode, -signal.SIGKILL)
+        self.assertNotIn("survivedTheCrash", self.seed.stdout)
+
+        kinds = self._kinds(self.events)
+        self.assertEqual(kinds.count("EffectStarted"), 2, kinds)
+        self.assertEqual(kinds.count("EffectCompleted"), 1, kinds)
+        # Exactly one intent is open: the process effect that killed us.
+        started = {
+            (getattr(e, "payload", {}) or {}).get("descriptorDigest")
+            for e in self.events
+            if (getattr(e, "payload", {}) or {}).get("kind") == "EffectStarted"
+        }
+        terminal = {
+            (getattr(e, "payload", {}) or {}).get("descriptorDigest")
+            for e in self.events
+            if (getattr(e, "payload", {}) or {}).get("kind")
+            in ("EffectCompleted", "EffectFailed", "EffectRejected", "EffectReconciled")
+        }
+        self.assertEqual(len(started - terminal), 1, "no genuinely open intent was left")
+
+    # -- POSITIVE: what the durable fold carries out of a real crash --------
+
+    def test_the_objective_survives_the_process_boundary(self) -> None:
+        self.assertEqual(self._folded()["objective"], OBJECTIVE)
+
+    def test_the_candidate_and_change_surface_survive(self) -> None:
+        folded = self._folded()
+        self.assertEqual(folded["modifiedFiles"], ["app.py"])
+        self.assertEqual(folded["changeSurface"], ["app.py"])
+        self.assertTrue(folded["changedFilesTreeHash"].startswith("sha256:"))
+
+    def test_the_settled_effect_is_identified_and_the_open_one_is_not(self) -> None:
+        """Settled and pending effect identity are distinct, and stay distinct.
+
+        Presenting the open intent as settled is how a continuation skips an
+        effect that may never have happened; presenting the settled one as
+        pending is how it replays one that did.
+        """
+        continuity = self._folded()["recoveryState"]["continuity"]
+        pending = {entry["descriptorDigest"] for entry in continuity["pendingEffects"]}
+        settled = set(self._folded()["settledEffects"])
+
+        self.assertEqual(len(settled), 1, settled)
+        self.assertEqual(len(pending), 1, pending)
+        self.assertEqual(settled & pending, set(),
+                         "an effect is reported as both settled and pending")
+        self.assertEqual(
+            [entry["action"] for entry in continuity["pendingEffects"]], ["proc.exec"])
+
+    def test_aggregate_consumption_survives_and_is_not_replenished(self) -> None:
+        """Resource identity: the ceiling is not the remainder.
+
+        The run settled one real effect against the preset's declared ceiling.
+        A continuation that reports the ceiling unchanged has replenished a
+        budget the same WAL says was spent.
+        """
+        folded = self._folded()
+        continuity = folded["recoveryState"]["continuity"]
+        ceiling = continuity["budgetCeiling"]
+        consumed = continuity["consumedBudgets"]
+
+        self.assertTrue(ceiling, "the episode declared no ceiling to preserve")
+        self.assertTrue(consumed, "a settled effect charged nothing at all")
+        for dimension, spent in consumed.items():
+            with self.subTest(dimension=dimension):
+                self.assertEqual(
+                    folded["remainingBudgets"][dimension],
+                    max(ceiling[dimension] - spent, 0))
+                self.assertLess(folded["remainingBudgets"][dimension], ceiling[dimension])
+
+    def test_grant_identity_survives_the_process_boundary(self) -> None:
+        live = self._folded()["recoveryState"]["continuity"]["liveGrants"]
+        self.assertTrue(live, "no grant identity survived the crash")
+        for grant in live:
+            with self.subTest(grant=grant["grantId"]):
+                self.assertTrue(grant["grantId"])
+                self.assertTrue(str(grant["descriptorDigest"]).startswith("sha256:"))
+
+    # -- ADVERSARIAL: each preservation step is individually load-bearing ---
+
+    def test_a_restart_may_not_widen_the_ceiling(self) -> None:
+        """A resumed episode re-declares its ceiling; a larger one is refused."""
+        widened = list(self.events) + [
+            _event("EpisodeStarted", {
+                "episodeId": f"episode-{RUN_ID}",
+                "budgetCeiling": {
+                    dimension: amount * 1000 for dimension, amount
+                    in self._folded()["recoveryState"]["continuity"]["budgetCeiling"].items()
+                },
+            })
+        ]
+        after = fold_task_state(widened, objective="").to_canonical_dict()
+        for dimension, amount in self._folded()["remainingBudgets"].items():
+            with self.subTest(dimension=dimension):
+                self.assertLessEqual(after["remainingBudgets"][dimension], amount)
+
+    def test_a_restart_may_not_replenish_a_spent_budget(self) -> None:
+        """The exact defect: re-declaring the ceiling after the spend."""
+        folded = self._folded()
+        spent_dimension = next(iter(
+            folded["recoveryState"]["continuity"]["consumedBudgets"]))
+        replenished = list(self.events) + [
+            _event("EpisodeStateChanged", {
+                "remainingBudgets": folded["recoveryState"]["continuity"]["budgetCeiling"],
+            })
+        ]
+        after = fold_task_state(replenished, objective="").to_canonical_dict()
+        self.assertEqual(
+            after["remainingBudgets"][spent_dimension],
+            folded["remainingBudgets"][spent_dimension],
+            "re-declaring the ceiling restored a spent dimension")
+
+    def test_a_settled_effect_may_not_be_replayed_as_pending(self) -> None:
+        """Re-emitting the intent for an already-settled effect changes nothing.
+
+        A retry loop that re-proposed the settled patch would append a second
+        `EffectStarted` for the same descriptor. The projection must still
+        report it settled, or the planner is invited to redo a durable write.
+        """
+        settled_digest = self._folded()["settledEffects"][0]
+        replayed = list(self.events) + [
+            _event("EffectStarted", {
+                "action": "patch.apply", "descriptorDigest": settled_digest})
+        ]
+        after = fold_task_state(replayed, objective="").to_canonical_dict()
+        pending = {
+            entry["descriptorDigest"]
+            for entry in after["recoveryState"]["continuity"]["pendingEffects"]
+        }
+        self.assertIn(settled_digest, after["settledEffects"])
+        self.assertNotIn(settled_digest, pending,
+                         "a settled effect was re-offered as unresolved work")
+
+    def test_an_undeterminable_reconciliation_is_unresolved_work_not_evidence(self) -> None:
+        """`F-22`: uncertainty is preserved, never resolved to success."""
+        open_digest = next(
+            entry["descriptorDigest"]
+            for entry in self._folded()["recoveryState"]["continuity"]["pendingEffects"]
+        )
+        reconciled = list(self.events) + [
+            _event("EffectReconciled", {
+                "action": "proc.exec", "descriptorDigest": open_digest,
+                "occurrence": "undeterminable"})
+        ]
+        after = fold_task_state(reconciled, objective="").to_canonical_dict()
+        pending = {
+            entry["descriptorDigest"]
+            for entry in after["recoveryState"]["continuity"]["pendingEffects"]
+        }
+        self.assertNotIn(open_digest, after["settledEffects"],
+                         "an undeterminable effect was promoted to settled")
+        self.assertIn(open_digest, pending)
+
+    def test_an_occurred_reconciliation_settles_and_stops_being_pending(self) -> None:
+        open_digest = next(
+            entry["descriptorDigest"]
+            for entry in self._folded()["recoveryState"]["continuity"]["pendingEffects"]
+        )
+        reconciled = list(self.events) + [
+            _event("EffectReconciled", {
+                "action": "proc.exec", "descriptorDigest": open_digest,
+                "occurrence": "occurred"})
+        ]
+        after = fold_task_state(reconciled, objective="").to_canonical_dict()
+        pending = {
+            entry["descriptorDigest"]
+            for entry in after["recoveryState"]["continuity"]["pendingEffects"]
+        }
+        self.assertIn(open_digest, after["settledEffects"])
+        self.assertNotIn(open_digest, pending)
+
+    def test_revocation_survives_restart_and_is_transitive(self) -> None:
+        """`K-49`. A restart may not restore authority that was revoked."""
+        live = self._folded()["recoveryState"]["continuity"]["liveGrants"]
+        parent = live[0]["grantId"]
+        revoked_stream = list(self.events) + [
+            _event("CapabilityGranted", {
+                "grantId": "grant-child", "parentGrantId": parent,
+                "descriptorDigest": "sha256:" + "c" * 64}),
+            _event("CapabilityRevoked", {"grantId": parent}),
+        ]
+        after = fold_task_state(revoked_stream, objective="").to_canonical_dict()
+        continuity = after["recoveryState"]["continuity"]
+        surviving = {grant["grantId"] for grant in continuity["liveGrants"]}
+
+        self.assertNotIn(parent, surviving, "a revoked grant survived the fold")
+        self.assertNotIn("grant-child", surviving,
+                         "a child of a revoked grant survived: revocation was not transitive")
+        self.assertIn(parent, continuity["revokedGrants"])
+        self.assertIn("grant-child", continuity["revokedGrants"])
+
+    def test_dropping_a_continuity_carrier_reds(self) -> None:
+        """No carrier is decorative: removing each one loses its dimension.
+
+        This is the row-7 "dropped carrier" case applied to the continuity
+        carriers, scored against the real runtime stream rather than a fixture.
+        """
+        baseline = self._folded()
+        cases = {
+            "EffectStarted": lambda after: after["recoveryState"]["continuity"]["pendingEffects"],
+            "EffectCompleted": lambda after: after["settledEffects"],
+            "CapabilityGranted": lambda after: after["recoveryState"]["continuity"]["liveGrants"],
+            "BudgetCommitted": lambda after: after["recoveryState"]["continuity"]["consumedBudgets"],
+        }
+        for kind, project in cases.items():
+            with self.subTest(carrier=kind):
+                self.assertTrue(project(baseline), f"{kind} carried nothing to begin with")
+                without = [
+                    e for e in self.events
+                    if (getattr(e, "payload", {}) or {}).get("kind") != kind
+                ]
+                after = fold_task_state(without, objective="").to_canonical_dict()
+                self.assertFalse(
+                    project(after),
+                    f"dropping {kind} did not lose its dimension; the carrier is not load-bearing")
+
+
+class ColdStartHydrationIsNotYetBound(unittest.TestCase):
+    """ESCALATED, NOT ACCEPTED — the ingress gap T-131.7 reproduced.
+
+    The durable fold above preserves continuation identity. The product
+    ingress does not hand it to the planner: `entrypoint.execute` builds its
+    `TaskContext` with no `resume_state` on every command, `resume` included,
+    so a resumed process compiles L4 from the synthesized brief
+    `"Resume run <id>"` and the objective, plan, change surface, settled
+    effects and consumption never reach the model.
+
+    `HarnessSession._assert_resume_behavior_identity` then returns at its first
+    branch, because the prior identity it revalidates lives in exactly the
+    `resume_state` that was never built -- so a changed preset or composition
+    on restart is not rejected either.
+
+    Both repairs are cold-start hydration on the existing ingress, in
+    `runtime/entrypoint.py` and `runtime/session.py`. Neither file is in the
+    released T-131.7 lease, so this module PINS the reproduction instead of
+    repairing it. These assertions describe a DEFECT: when the lease is
+    released and hydration lands, they fail, and that failure is the signal to
+    replace them with the positive assertions named in each docstring.
+    """
+
+    def test_the_ingress_builds_no_resume_state(self) -> None:
+        """On release, assert `resume_state` is populated for `command=resume`."""
+        source = inspect.getsource(entrypoint.execute)
+        self.assertIn("task = TaskContext(", source)
+        construction = source.split("task = TaskContext(", 1)[1].split(")", 1)[0]
+        self.assertNotIn("resume_state", construction,
+                         "entrypoint now hydrates resume_state: replace this pin with the "
+                         "positive continuation assertion (T-131.7 escalation E1 closed)")
+
+    def test_the_resume_identity_assertion_is_vacuous_without_prior_identity(self) -> None:
+        """On release, assert a changed composition raises `ContextPacketError`."""
+        session = SimpleNamespace(
+            task=SimpleNamespace(resume_state=None),
+            _behavior_identity={"compositionDigest": "sha256:" + "a" * 64},
+        )
+        # Returns instead of revalidating: there is no prior identity to compare.
+        self.assertIsNone(
+            HarnessSession._assert_resume_behavior_identity(session))
 
 
 if __name__ == "__main__":  # pragma: no cover

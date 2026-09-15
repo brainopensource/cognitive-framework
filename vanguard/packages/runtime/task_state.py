@@ -46,6 +46,32 @@ __all__ = [
     "validate_task_revision_request",
 ]
 
+#: T-131.7. Continuation identity is not only "what was the plan": a fresh
+#: process must also know what it already spent, what authority it still
+#: holds, and which effects are settled versus still in flight. Every kind
+#: here is in ``WRITABLE_KINDS`` with a real kernel producer, so each one is
+#: a carrier a production run actually originates rather than a fold-only
+#: name (`ADR-0098 Decision 3`).
+_CONTINUITY_KINDS = frozenset({
+    "EffectStarted",
+    "EffectRejected",
+    "EffectReconciled",
+    "BudgetReserved",
+    "BudgetCommitted",
+    "BudgetExhausted",
+    "CapabilityGranted",
+    "CapabilityRevoked",
+    "CapabilityAttenuated",
+})
+
+#: Effect kinds that close an open ``EffectStarted`` intent. Kept identical to
+#: ``RecoveryScanner.reconcile_open_intents`` (`runtime/ledger/recovery.py`):
+#: if the two disagreed, the scanner would reconcile an intent this projection
+#: still reports as pending, or the reverse.
+_EFFECT_TERMINAL_KINDS = frozenset({
+    "EffectCompleted", "EffectFailed", "EffectRejected", "EffectReconciled",
+})
+
 _KNOWN_KINDS = frozenset({
     "EpisodeStarted",
     "ObservationProduced",
@@ -75,7 +101,7 @@ _KNOWN_KINDS = frozenset({
     "NextActionSelected",
     "ContextSelectionRecorded",
     "OperatorDirectiveReceived",
-})
+}) | _CONTINUITY_KINDS
 
 
 def episode_id_from_events(events: Sequence[Any], *, run_id: str) -> str:
@@ -125,6 +151,21 @@ def fold_task_state(events: Sequence[Any], *, objective: str = "") -> CodingTask
     backlog: list[TaskStep] = []
     last_verification: dict[str, Any] = {}
     revision = 0
+    # -- T-131.7 continuation identity ------------------------------------
+    # The ceiling is pinned to the FIRST `EpisodeStarted` in the stream. A
+    # restart re-declares it, and adopting the later declaration is exactly
+    # how a continuation replenishes a budget it already spent. Later
+    # declarations may only attenuate, never widen.
+    ceiling: dict[str, int] = {}
+    ceiling_pinned = False
+    consumed: dict[str, int] = {}
+    reserved_by_lease: dict[str, dict[str, int]] = {}
+    started_effects: dict[str, dict[str, Any]] = {}
+    resolved_effects: set[str] = set()
+    undeterminable_effects: set[str] = set()
+    grants: dict[str, dict[str, Any]] = {}
+    grant_children: dict[str, list[str]] = {}
+    revoked_grants: set[str] = set()
     for event in events:
         payload = getattr(event, "payload", {})
         if not isinstance(payload, Mapping):
@@ -157,10 +198,23 @@ def fold_task_state(events: Sequence[Any], *, objective: str = "") -> CodingTask
             if isinstance(path, str):
                 inspected.add(path)
         if isinstance(payload.get("remainingBudgets"), Mapping):
-            state["remainingBudgets"] = {
+            # An explicitly declared remainder attenuates the derived one; it
+            # never raises it. Before T-131.7 the last event to carry this
+            # field simply won, so any writer -- including a resumed episode
+            # header -- could hand the next planner a replenished budget.
+            observed = {
                 str(k): int(v) for k, v in payload["remainingBudgets"].items()
-                if isinstance(v, int) and v >= 0
+                if isinstance(v, int) and not isinstance(v, bool) and v >= 0
             }
+            if not ceiling_pinned:
+                ceiling = observed
+                ceiling_pinned = True
+            else:
+                ceiling = {
+                    dimension: min(amount, observed[dimension])
+                    for dimension, amount in ceiling.items()
+                    if dimension in observed
+                }
         for descriptor in payload.get("settledEffects", ()) if isinstance(payload.get("settledEffects"), Sequence) else ():
             if isinstance(descriptor, str):
                 settled.add(descriptor)
@@ -197,7 +251,24 @@ def fold_task_state(events: Sequence[Any], *, objective: str = "") -> CodingTask
         if kind == "EpisodeStarted":
             budgets = payload.get("budgetCeiling") or payload.get("budget")
             if isinstance(budgets, Mapping):
-                state["remainingBudgets"] = {str(k): int(v) for k, v in budgets.items() if isinstance(v, int) and v >= 0}
+                declared = {
+                    str(k): int(v) for k, v in budgets.items()
+                    if isinstance(v, int) and not isinstance(v, bool) and v >= 0
+                }
+                if not ceiling_pinned:
+                    ceiling = declared
+                    ceiling_pinned = True
+                else:
+                    # A resumed process re-declares the ceiling. Taking the
+                    # smaller of the two lets an operator tighten a budget on
+                    # restart while making a widened one unreachable, so a
+                    # restart can never buy authority the first episode did
+                    # not have.
+                    ceiling = {
+                        dimension: min(amount, declared[dimension])
+                        for dimension, amount in ceiling.items()
+                        if dimension in declared
+                    }
             if isinstance(payload.get("behaviorIdentity"), Mapping):
                 # Keep this inside the existing policy-identity field so the
                 # pure domain value remains unchanged while cold continuation
@@ -213,6 +284,15 @@ def fold_task_state(events: Sequence[Any], *, objective: str = "") -> CodingTask
             for path in payload.get("inspectedFiles", ()) if isinstance(payload.get("inspectedFiles"), Sequence) else ():
                 if isinstance(path, str):
                     inspected.add(path)
+        if kind in _CONTINUITY_KINDS or kind in {"EffectCompleted", "EffectFailed"}:
+            _fold_continuity_event(
+                kind, payload,
+                consumed=consumed, reserved_by_lease=reserved_by_lease,
+                started_effects=started_effects, resolved_effects=resolved_effects,
+                undeterminable_effects=undeterminable_effects, settled=settled,
+                grants=grants, grant_children=grant_children,
+                revoked_grants=revoked_grants,
+            )
         if kind in {"EffectCompleted", "EffectFailed"}:
             descriptor = payload.get("descriptorDigest")
             if isinstance(descriptor, str) and kind == "EffectCompleted":
@@ -303,6 +383,14 @@ def fold_task_state(events: Sequence[Any], *, objective: str = "") -> CodingTask
                     if isinstance(path, str) and path:
                         modified.add(path)
             candidate_digest = payload.get("candidateDigest") or payload.get("candidate_digest")
+            if isinstance(candidate_digest, str) and candidate_digest:
+                # T-131.7. `HarnessSession._append_change_surface` publishes the
+                # candidate postimage under `candidateDigest`; no production
+                # writer emits `changedFilesTreeHash`, which is the only key
+                # this fold used to read. Candidate identity was therefore
+                # empty on every real continuation while a handcrafted fixture
+                # carrying the unwritten key looked green.
+                state["changedFilesTreeHash"] = candidate_digest
             recorded = last_verification.get("workspaceDigest")
             if (isinstance(candidate_digest, str) and candidate_digest
                     and isinstance(recorded, str) and recorded
@@ -351,7 +439,163 @@ def fold_task_state(events: Sequence[Any], *, objective: str = "") -> CodingTask
     state["changeSurface"] = list(change_surface)
     state["backlog"] = [item.to_dict() for item in backlog]
     state["revision"] = revision
+
+    # -- T-131.7 continuation identity -------------------------------------
+    # Resources: remaining is DERIVED from the pinned ceiling minus aggregate
+    # consumption, never read back from a header. A dimension cannot go below
+    # zero, and an overrun still counts as fully consumed.
+    state["remainingBudgets"] = {
+        dimension: max(amount - consumed.get(dimension, 0), 0)
+        for dimension, amount in ceiling.items()
+    }
+    state["settledEffects"] = sorted(settled)
+    pending = [
+        started_effects[descriptor]
+        for descriptor in sorted(
+            set(started_effects) - (resolved_effects - undeterminable_effects))
+    ]
+    for descriptor in sorted(undeterminable_effects):
+        if descriptor not in started_effects:
+            pending.append({"descriptorDigest": descriptor, "action": ""})
+    for entry in pending:
+        entry["occurrence"] = (
+            "undeterminable" if entry["descriptorDigest"] in undeterminable_effects
+            else "unknown")
+    live_grants = [
+        grants[grant_id] for grant_id in sorted(grants)
+        if grant_id not in revoked_grants
+    ]
+    # `recovery_state` is the domain's existing free mapping for "what an
+    # interrupted process must be told"; carrying continuity under one
+    # namespaced key keeps `SemanticTaskState` the sole task-state authority
+    # without adding a second schema beside it. `ProtocolRecoveryState`
+    # ignores keys it does not name, so the protocol carrier is unaffected.
+    recovery = dict(state.get("recoveryState") or {})
+    recovery["continuity"] = {
+        "budgetCeiling": dict(ceiling),
+        "consumedBudgets": {k: v for k, v in sorted(consumed.items()) if v},
+        "pendingEffects": pending,
+        "liveGrants": live_grants,
+        "revokedGrants": sorted(revoked_grants),
+    }
+    state["recoveryState"] = recovery
     return CodingTaskState.from_mapping(state)
+
+
+def _natural_amounts(raw: Any) -> dict[str, int]:
+    """Integer dimensions of a budget payload; anything else is not a budget."""
+    if not isinstance(raw, Mapping):
+        return {}
+    return {
+        str(key): int(value) for key, value in raw.items()
+        if isinstance(value, int) and not isinstance(value, bool)
+    }
+
+
+def _fold_continuity_event(
+    kind: str,
+    payload: Mapping[str, Any],
+    *,
+    consumed: dict[str, int],
+    reserved_by_lease: dict[str, dict[str, int]],
+    started_effects: dict[str, dict[str, Any]],
+    resolved_effects: set[str],
+    undeterminable_effects: set[str],
+    settled: set[str],
+    grants: dict[str, dict[str, Any]],
+    grant_children: dict[str, list[str]],
+    revoked_grants: set[str],
+) -> None:
+    """Accumulate consumption, authority and effect occurrence for one event.
+
+    T-131.7. These three are what a continuation cannot reconstruct from the
+    plan: a fresh process that reads only the semantic fields believes it has
+    spent nothing, holds every grant it was ever issued, and has no effect in
+    flight. Each accumulator below is driven by the carrier the *kernel*
+    actually writes, not by the shape a reader would prefer.
+    """
+    descriptor = payload.get("descriptorDigest")
+    descriptor = descriptor if isinstance(descriptor, str) and descriptor else None
+
+    if kind == "EffectStarted" and descriptor is not None:
+        started_effects[descriptor] = {
+            "descriptorDigest": descriptor,
+            "action": str(payload.get("action") or ""),
+            "grantId": payload.get("grantId"),
+            "leaseId": payload.get("leaseId"),
+            "idempotencyKey": payload.get("idempotencyKey"),
+        }
+    elif kind in _EFFECT_TERMINAL_KINDS and descriptor is not None:
+        resolved_effects.add(descriptor)
+        if kind == "EffectReconciled":
+            # `F-22`: uncertainty is first-class. An intent the recovery
+            # scanner could not resolve is neither settled nor undone, so it
+            # stays unresolved work and must NOT enter `settledEffects` --
+            # presenting it as settled is how a continuation skips an effect
+            # that may never have happened.
+            occurrence = str(payload.get("occurrence") or "undeterminable")
+            if occurrence == "occurred":
+                settled.add(descriptor)
+            else:
+                undeterminable_effects.add(descriptor)
+
+    elif kind == "BudgetReserved":
+        lease_id = payload.get("leaseId") or payload.get("lease_id")
+        if isinstance(lease_id, str) and lease_id:
+            reserved_by_lease[lease_id] = _natural_amounts(
+                payload.get("reserved", payload.get("dimensions")))
+
+    elif kind in {"BudgetCommitted", "BudgetExhausted"}:
+        lease_id = payload.get("leaseId") or payload.get("lease_id")
+        reserved = reserved_by_lease.get(lease_id or "", {})
+        debits = _natural_amounts(payload.get("debits"))
+        if not debits:
+            # `Governor.commit` returns `reserved - actual` per dimension and
+            # retains it when negative (`kernel/budget.py`, `MF-KRN-007`), so
+            # the spend is the inverse of the settlement the kernel emits.
+            # This is the same inversion `child_runtime` already performs; the
+            # reducer's `debits` spelling is honoured first where a writer
+            # supplies it.
+            settlement = _natural_amounts(payload.get("settlement"))
+            debits = {
+                dimension: reserved.get(dimension, 0) - amount
+                for dimension, amount in settlement.items()
+            }
+        for dimension, amount in debits.items():
+            if amount:
+                consumed[dimension] = consumed.get(dimension, 0) + amount
+
+    elif kind in {"CapabilityGranted", "CapabilityAttenuated"}:
+        grant_id = payload.get("grantId") or payload.get("id")
+        if isinstance(grant_id, str) and grant_id:
+            grants[grant_id] = {
+                "grantId": grant_id,
+                "principal": payload.get("principal"),
+                "descriptorDigest": payload.get("descriptorDigest"),
+                "actions": [
+                    str(item) for item in payload.get("actions", ())
+                    if isinstance(item, str)
+                ],
+                "expiresAt": payload.get("expiresAt"),
+                "singleUse": bool(payload.get("singleUse", False)),
+            }
+            parent = payload.get("parentGrantId") or payload.get("parentId")
+            if isinstance(parent, str) and parent:
+                grant_children.setdefault(parent, []).append(grant_id)
+
+    elif kind == "CapabilityRevoked":
+        grant_id = payload.get("grantId") or payload.get("id")
+        if isinstance(grant_id, str) and grant_id:
+            # `K-49`: revocation is transitive over descendants. A projection
+            # that revoked only the named grant would report a child of a
+            # revoked parent as live authority.
+            frontier = [grant_id]
+            while frontier:
+                current = frontier.pop()
+                if current in revoked_grants:
+                    continue
+                revoked_grants.add(current)
+                frontier.extend(grant_children.get(current, ()))
 
 
 def _to_camel(snake_str: str) -> str:

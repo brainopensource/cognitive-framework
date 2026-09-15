@@ -125,6 +125,13 @@ def observed_usage(raw: Any) -> tuple[int | None, int | None]:
     if not isinstance(raw, Mapping):
         return (None, None)
 
+    # A composed adapter may know that the returned usage covers only its
+    # final attempt (for example, a fallback after a failed primary).  Partial
+    # usage must not be mistaken for complete accounting: retaining the
+    # reservation and marking the call unsettled is the fail-closed result.
+    if raw.get("usage_complete") is False:
+        return (None, None)
+
     tokens: int | None = None
     usage = raw.get("usage")
     if isinstance(usage, Mapping):

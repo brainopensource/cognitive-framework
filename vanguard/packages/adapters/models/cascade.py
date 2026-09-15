@@ -75,8 +75,15 @@ class CascadingModel(ModelPort):
         self._consecutive_primary_failures += 1
         self._total_fallback_attempts += 1
         fallback_res = self.fallback.propose(context, tools, sampling)
-        if fallback_res.ok:
-            return fallback_res
+        if fallback_res.ok and fallback_res.value is not None:
+            # The fallback payload can report only its own usage.  The failed
+            # primary may already have consumed resources, so presenting that
+            # payload as complete would erase an attempt from the aggregate
+            # episode budget.  The runtime meter treats this private marker as
+            # unsettled and conservatively retains its reservation.
+            proposal = dict(fallback_res.value)
+            proposal["usage_complete"] = False
+            return Result.success(proposal)
 
         # Both failed: return typed instrument error combining both failure details
         prim_err = res.error.message if res.error else "primary failure"

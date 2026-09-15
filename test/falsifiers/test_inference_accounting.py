@@ -37,6 +37,7 @@ from vanguard.packages.runtime.inference_meter import (
     InferenceMeter,
     observed_usage,
 )
+from vanguard.packages.adapters.models.cascade import CascadingModel
 
 _PRESETS = {
     name: entry["budget"]
@@ -75,6 +76,17 @@ class _Model:
             payload["usd_micros"] = self._usd
             payload["pricing_known"] = True
         return Result.success(payload)
+
+
+class _FailingModel:
+    def __init__(self) -> None:
+        self.calls = 0
+
+    def propose(self, context, tools, sampling):
+        del context, tools, sampling
+        self.calls += 1
+        return Result.fail(
+            kind="instrument_error", message="primary failed", retryable=False)
 
 
 def _run(preset: str, model: _Model) -> dict:
@@ -179,6 +191,27 @@ class TheTwoConservationLawsAreSeparateKeys(unittest.TestCase):
 
 class MeterHonesty(unittest.TestCase):
     """Unknown cost stays unknown (`RUN-12`); overruns are charged, not clamped."""
+
+    def test_fallback_cannot_erase_the_failed_primary_attempt(self) -> None:
+        primary = _FailingModel()
+        fallback = _Model(prompt=5, completion=3, usd_micros=7)
+        cascade = CascadingModel(primary, fallback)
+        governor = Governor({"tokens": 100, "usd_micros": 100})
+        meter = InferenceMeter(governor, "run-x", pricing=(1, 1))
+        reservation = meter.reserve(
+            prompt_tokens=10, sampling={"maxTokens": 10})
+
+        result = cascade.propose({}, (), {})
+        self.assertTrue(result.ok)
+        self.assertEqual(primary.calls, 1)
+        self.assertEqual(fallback.calls, 1)
+        self.assertIs(result.value.get("usage_complete"), False)
+
+        settlement = meter.settle(reservation, result.value)
+        self.assertFalse(settlement.usage_observed)
+        self.assertTrue(settlement.unpriced)
+        self.assertEqual(settlement.tokens, reservation.tokens)
+        self.assertEqual(meter.unsettled_calls, 1)
 
     def _meter(self, ceilings, pricing=None) -> tuple[InferenceMeter, Governor]:
         governor = Governor(ceilings)

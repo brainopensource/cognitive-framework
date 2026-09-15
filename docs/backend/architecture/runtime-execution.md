@@ -174,7 +174,7 @@ To ensure complete reproducibility and formal auditability (`RF-87`):
 `HarnessSession` acts as the single runtime authority (`RF-94`):
 - **Sole Facade**: Components within a session interact exclusively through session-provided facades.
 - **Single Emitter Ownership**: All events written to SQLite WAL flow through `HarnessSession.emitter` (`LedgerEmitter`), ensuring unbroken hash-chaining and strict writer role validation (`PRIVILEGED_KIND_OWNERS`).
-- **Governor Coordination**: `HarnessSession` manages root budget leases and passes attenuated child leases to the kernel.
+- **Governor Coordination**: `HarnessSession` manages root budget leases and passes attenuated child leases to the kernel. Inference reserves and settles against that same governor. If a composed model route falls back after an attempted primary and cannot prove complete aggregate usage, the result remains explicitly unsettled and retains the conservative reservation; a successful final provider response cannot erase an earlier attempt.
 
 ---
 

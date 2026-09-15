@@ -37,6 +37,7 @@ _VACUOUS_ARGV = re.compile(
     r"^\s*(?:true|/bin/true|/usr/bin/true|echo\b|printf\b)\b",
     re.IGNORECASE,
 )
+_HOST_POLLUTION_VARS = ("PYTHONPATH", "PYTHONSTARTUP", "LD_PRELOAD", "PYTHONHOME")
 _INCOMPLETE_REASONS = frozenset({
     "empty_stub_solution",
     "vacuous_discovery",
@@ -143,8 +144,7 @@ class IsolatedEvaluator:
             completed = self._runner(
                 self._command,
                 cwd=self._workspace,
-                env=controlled_environment(
-                    os.environ, extra={"PYTHONPATH": str(self._workspace)}),
+                env=self._oracle_child_env(),
                 capture_output=True,
                 timeout=self._timeout_seconds,
                 check=False,
@@ -245,14 +245,16 @@ class IsolatedEvaluator:
             return None
         return candidate
 
+    def _oracle_child_env(self) -> dict[str, str]:
+        """Bind the oracle process to the submitted tree; strip host import hooks."""
+        env = controlled_environment(os.environ)
+        for var in _HOST_POLLUTION_VARS:
+            env.pop(var, None)
+        env["PYTHONPATH"] = str(self._workspace)
+        return env
+
     def _probe_non_pollution(self) -> tuple[bool, tuple[str, ...]]:
         pollution: list[str] = []
-
-        for var in ("PYTHONPATH", "PYTHONSTARTUP", "LD_PRELOAD"):
-            if var in os.environ:
-                if var == "PYTHONPATH" and os.environ[var] == str(self._workspace):
-                    continue
-                pollution.append(f"env:{var}")
 
         for root, dirs, files in os.walk(self._workspace):
             for name in dirs + files:

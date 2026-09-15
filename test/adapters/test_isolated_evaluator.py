@@ -163,12 +163,26 @@ class IsolatedEvaluatorContract(unittest.TestCase):
         self.assertFalse(result.value.claims[0]["probes"]["nonPollution"])
 
     def test_unsafe_env_vars(self) -> None:
+        captured: dict[str, object] = {}
+
+        def runner(*args: object, **kwargs: object) -> subprocess.CompletedProcess[bytes]:
+            captured["env"] = kwargs.get("env")
+            return subprocess.CompletedProcess(list(args[0]) if args else [], 0, b"", b"")
+
         os.environ["PYTHONPATH"] = "/tmp"
+        os.environ["LD_PRELOAD"] = "/tmp/evil.so"
         try:
-            result = self._evaluator().evaluate(RunRef("run", episode_id="ep1"), self.protocol)
-            self.assertFalse(result.value.claims[0]["probes"]["nonPollution"])
+            result = self._evaluator(runner=runner).evaluate(
+                RunRef("run", episode_id="ep1"), self.protocol)
+            self.assertTrue(result.value.claims[0]["probes"]["nonPollution"])
+            env = captured["env"]
+            self.assertIsInstance(env, dict)
+            assert isinstance(env, dict)
+            self.assertEqual(env.get("PYTHONPATH"), str(self.workspace.resolve()))
+            self.assertNotIn("LD_PRELOAD", env)
         finally:
             del os.environ["PYTHONPATH"]
+            del os.environ["LD_PRELOAD"]
 
     @unittest.skipIf(not hasattr(os, "getuid") or os.getuid() == 10002,
                      "this host already is the evaluator uid")

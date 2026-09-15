@@ -233,6 +233,94 @@ class TestT143OracleCompleteness(unittest.TestCase):
         self.assertEqual(verdict.claims[0]["event"], "EvaluationCompleted")
         self.assertEqual(verdict.claims[0]["status"], "passed")
         self.assertEqual(verdict.claims[0]["candidateDigest"], live)
+        self.assertNotIn("accepted", verdict.claims[0])
+
+
+class TestT143ChildBinding(unittest.TestCase):
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory()
+        self.workspace = Path(self._tmp.name)
+        (self.workspace / "mod.py").write_text("VALUE = 1\n", encoding="utf-8")
+        (self.workspace / "tests").mkdir()
+        self.oracle = self.workspace / "tests" / "test_oracle.py"
+        self.oracle.write_text("from mod import VALUE\nassert VALUE == 1\n", encoding="utf-8")
+        subprocess.run(["git", "init", "-q"], cwd=self.workspace, check=True)
+        subprocess.run(
+            ["git", "add", "mod.py", "tests/test_oracle.py"],
+            cwd=self.workspace, check=True,
+        )
+        self.live = _tree_digest({"mod.py": self.workspace / "mod.py"})
+        self.protocol = EvaluationProtocol(name="coding-oracle@3", parameters={
+            "candidateDigest": self.live, "requiredFiles": ["mod.py"],
+            "verificationSubjectDigest": self.live,
+        })
+
+    def tearDown(self) -> None:
+        self._tmp.cleanup()
+
+    def test_true_argv_is_vacuous_before_runner(self) -> None:
+        called = False
+
+        def runner(*args: object, **kwargs: object) -> subprocess.CompletedProcess[bytes]:
+            nonlocal called
+            called = True
+            return subprocess.CompletedProcess([], 0, b"", b"")
+
+        evaluator = IsolatedEvaluator(
+            workspace=self.workspace,
+            oracle_digests={"tests/test_oracle.py": _digest(self.oracle)},
+            command=("true",),
+            expected_uid=os.getuid(),
+            image_digest="sha256:" + "a" * 64,
+            runner=runner,
+        )
+        result = evaluator.evaluate(RunRef("vacuous", episode_id="ep-v"), self.protocol)
+        self.assertTrue(result.ok, result)
+        self.assertEqual(result.value.reason, "vacuous_discovery")
+        self.assertFalse(called)
+
+    def test_oracle_child_binds_workspace_and_strips_host_pollution(self) -> None:
+        captured: dict[str, object] = {}
+
+        def runner(*args: object, **kwargs: object) -> subprocess.CompletedProcess[bytes]:
+            captured["env"] = kwargs.get("env")
+            captured["cwd"] = kwargs.get("cwd")
+            return subprocess.CompletedProcess(list(args[0]) if args else [], 0, b"", b"")
+
+        previous = {
+            key: os.environ.get(key)
+            for key in ("PYTHONPATH", "PYTHONSTARTUP", "LD_PRELOAD")
+        }
+        os.environ["PYTHONPATH"] = "/evil/host/path"
+        os.environ["PYTHONSTARTUP"] = "/evil/startup.py"
+        os.environ["LD_PRELOAD"] = "/evil/lib.so"
+        try:
+            evaluator = IsolatedEvaluator(
+                workspace=self.workspace,
+                oracle_digests={"tests/test_oracle.py": _digest(self.oracle)},
+                command=("python3", "tests/test_oracle.py"),
+                expected_uid=os.getuid(),
+                image_digest="sha256:" + "a" * 64,
+                runner=runner,
+            )
+            result = evaluator.evaluate(RunRef("bind", episode_id="ep-bind"), self.protocol)
+            self.assertTrue(result.ok, result)
+            claim = result.value.claims[0]
+            self.assertEqual(claim["event"], "EvaluationCompleted")
+            self.assertNotIn("accepted", claim)
+            env = captured["env"]
+            self.assertIsInstance(env, dict)
+            assert isinstance(env, dict)
+            self.assertEqual(env.get("PYTHONPATH"), str(self.workspace.resolve()))
+            self.assertNotIn("PYTHONSTARTUP", env)
+            self.assertNotIn("LD_PRELOAD", env)
+            self.assertEqual(captured["cwd"], self.workspace.resolve())
+        finally:
+            for key, value in previous.items():
+                if value is None:
+                    os.environ.pop(key, None)
+                else:
+                    os.environ[key] = value
 
 
 if __name__ == "__main__":

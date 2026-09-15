@@ -576,7 +576,8 @@ if phase == "seed":
     entrypoint.execute({
         "command": "code", "brief": objective, "workspace": str(root),
         "storePath": str(store), "injectedModel": model, "profile": "product",
-        "interactive": False, "maxTurnsPerEpisode": 6, "runId": run_id})
+        "interactive": False, "maxTurnsPerEpisode": 6, "runId": run_id,
+        "harness": "vg-code-default"})
     print(json.dumps({"survivedTheCrash": True}))
 
 elif phase == "resume":
@@ -584,7 +585,8 @@ elif phase == "resume":
     frame = entrypoint.execute({
         "command": "resume", "runId": run_id, "workspace": str(root),
         "storePath": str(store), "injectedModel": model, "profile": "product",
-        "interactive": False, "maxTurnsPerEpisode": 6})
+        "interactive": False, "maxTurnsPerEpisode": 6,
+        "harness": "vg-code-default"})
     context = model.contexts[0] if model.contexts else {}
     print(json.dumps({
         "outcome": frame["result"]["outcome"],
@@ -754,7 +756,10 @@ class RuntimeContinuationIdentity(unittest.TestCase):
             folded["recoveryState"]["continuity"]["consumedBudgets"]))
         replenished = list(self.events) + [
             _event("EpisodeStateChanged", {
-                "remainingBudgets": folded["recoveryState"]["continuity"]["budgetCeiling"],
+                "remainingBudgets": {
+                    k: v * 10 for k, v in
+                    folded["recoveryState"]["continuity"]["budgetCeiling"].items()
+                },
             })
         ]
         after = fold_task_state(replenished, objective="").to_canonical_dict()
@@ -762,6 +767,10 @@ class RuntimeContinuationIdentity(unittest.TestCase):
             after["remainingBudgets"][spent_dimension],
             folded["remainingBudgets"][spent_dimension],
             "re-declaring the ceiling restored a spent dimension")
+        self.assertLess(
+            after["remainingBudgets"][spent_dimension],
+            folded["recoveryState"]["continuity"]["budgetCeiling"][spent_dimension],
+            "replenished budget reached or exceeded the ceiling")
 
     def test_a_settled_effect_may_not_be_replayed_as_pending(self) -> None:
         """Re-emitting the intent for an already-settled effect changes nothing.

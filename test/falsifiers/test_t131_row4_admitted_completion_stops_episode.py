@@ -24,6 +24,7 @@ double; nothing here reaches a network or a paid model.
 
 from __future__ import annotations
 
+from dataclasses import replace
 import shutil
 import tempfile
 import unittest
@@ -284,6 +285,7 @@ class TheFullProductSessionStopsAtCompletion(unittest.TestCase):
     def _session(self, policy, *, model):
         tmp = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, tmp, True)
+        (Path(tmp) / ".git").mkdir(exist_ok=True)
         Path(tmp, "a.py").write_text("def f():\n    return 1\n")
         harness = Runtime.compose("vg-code-default", episode_id="ep-t131-row4")
         session = HarnessSession(
@@ -359,6 +361,66 @@ class TheFullProductSessionStopsAtCompletion(unittest.TestCase):
             self.assertEqual(len(model.calls), 1)
         with self.assertRaises(AssertionError):
             self.assertEqual(policy.calls, 1)
+
+    def test_a_receipt_bound_to_a_stale_workspace_cannot_complete(self) -> None:
+        """T-131.3 negative control: drifted workspace digest refuses completion."""
+        policy = _RecordingPolicy(ADMIT)
+        model = doubles.ScriptedModel([doubles.finish("done")] * 20)
+        session = self._session(policy, model=model)
+        assert session._completion_verification is not None
+        session._completion_verification = replace(
+            session._completion_verification, workspace_digest="sha256:" + "0" * 64)
+        result = session.run()
+        self.assertIsNot(result.terminal, RunTermination.COMPLETED)
+        self.assertGreater(len(model.calls), 1)
+
+    def test_a_receipt_bound_to_a_foreign_task_cannot_complete(self) -> None:
+        """T-131.3 negative control: foreign task digest refuses completion."""
+        policy = _RecordingPolicy(ADMIT)
+        model = doubles.ScriptedModel([doubles.finish("done")] * 20)
+        session = self._session(policy, model=model)
+        assert session._completion_verification is not None
+        session._completion_verification = replace(
+            session._completion_verification, task_digest="sha256:" + "0" * 64)
+        result = session.run()
+        self.assertIsNot(result.terminal, RunTermination.COMPLETED)
+        self.assertGreater(len(model.calls), 1)
+
+    def test_a_receipt_bound_to_a_foreign_composition_cannot_complete(self) -> None:
+        """T-131.3 negative control: foreign composition digest refuses completion."""
+        policy = _RecordingPolicy(ADMIT)
+        model = doubles.ScriptedModel([doubles.finish("done")] * 20)
+        session = self._session(policy, model=model)
+        assert session._completion_verification is not None
+        session._completion_verification = replace(
+            session._completion_verification, composition_digest="sha256:" + "0" * 64)
+        result = session.run()
+        self.assertIsNot(result.terminal, RunTermination.COMPLETED)
+        self.assertGreater(len(model.calls), 1)
+
+    def test_a_receipt_bound_to_a_foreign_command_cannot_complete(self) -> None:
+        """T-131.3 negative control: foreign command refuses completion."""
+        policy = _RecordingPolicy(ADMIT)
+        model = doubles.ScriptedModel([doubles.finish("done")] * 20)
+        session = self._session(policy, model=model)
+        assert session._completion_verification is not None
+        session._completion_verification = replace(
+            session._completion_verification, verification_command="pytest")
+        result = session.run()
+        self.assertIsNot(result.terminal, RunTermination.COMPLETED)
+        self.assertGreater(len(model.calls), 1)
+
+    def test_a_receipt_bound_to_a_foreign_subject_digest_cannot_complete(self) -> None:
+        """T-131.3 negative control: foreign verification subject refuses completion."""
+        policy = _RecordingPolicy(ADMIT)
+        model = doubles.ScriptedModel([doubles.finish("done")] * 20)
+        session = self._session(policy, model=model)
+        assert session._completion_verification is not None
+        session._completion_verification = replace(
+            session._completion_verification, verification_subject_digest="sha256:" + "0" * 64)
+        result = session.run()
+        self.assertIsNot(result.terminal, RunTermination.COMPLETED)
+        self.assertGreater(len(model.calls), 1)
 
 
 class _RecordingPolicy:

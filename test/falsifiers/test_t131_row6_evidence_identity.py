@@ -85,6 +85,7 @@ class ContentBoundEnvironment(FakeEnvironment):
 
 def _tree_digest(root: Path) -> str:
     """The product's candidate identity for `root`, read independently."""
+    (root / ".git").mkdir(exist_ok=True)
     snapshot = SandboxedEnvironmentAdapter(
         worker=None, workspace=root, environment_id="t131-row6-probe").snapshot()
     assert snapshot.ok and snapshot.value is not None
@@ -92,6 +93,7 @@ def _tree_digest(root: Path) -> str:
 
 
 def _session(root: Path, suffix: str) -> HarnessSession:
+    (root / ".git").mkdir(exist_ok=True)
     return HarnessSession(
         Runtime.compose("vg-code-default", episode_id=f"ep-t131-row6-{suffix}"),
         SessionPorts(

@@ -411,7 +411,17 @@ def fold_task_state(events: Sequence[Any], *, objective: str = "") -> CodingTask
             if isinstance(subject, str):
                 state["repositoryIdentity"] = subject
             if isinstance(payload.get("selectionPolicyIdentity"), Mapping):
-                state["selectionPolicyIdentity"] = dict(payload["selectionPolicyIdentity"])
+                # Merge, never replace. `EpisodeStarted` records the immutable
+                # `behaviorIdentity` a cold continuation must revalidate
+                # against; this event describes the *selection policy*, which
+                # is a different thing under the same key. Replacing the dict
+                # wholesale dropped `behaviorIdentity` from the projection, so
+                # `HarnessSession._assert_resume_behavior_identity` found
+                # nothing to compare and cold-start composition revalidation
+                # silently became a no-op (`E-CLI-2`).
+                merged = dict(state.get("selectionPolicyIdentity") or {})
+                merged.update(payload["selectionPolicyIdentity"])
+                state["selectionPolicyIdentity"] = merged
             if "indexSnapshotDigest" in payload:
                 state["indexSnapshotDigest"] = payload.get("indexSnapshotDigest")
         if kind == "ConstraintDiscovered":

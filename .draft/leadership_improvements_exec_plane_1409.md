@@ -33,14 +33,14 @@ The documents are most rigorous about **FH-1**, the post-control horizon that is
 
 **This is the mechanism behind the gate problem.** A senior developer cannot make an ordinary decision from a document that contains no contract, so every ordinary decision becomes an escalation. Reviews are not heavy because leadership is cautious; they are heavy because the contracts that would make review unnecessary were never written down. `development_philosophy.md:59-65` states the target directly: a developer works two weeks, makes a hundred decisions, and review finds nothing that should have been escalated.
 
-**The director's job here is therefore not to design new architecture.** It is to delete dead weight, promote the as-built code to normative text, resolve the contradictions that force escalation, and lock only the genuinely-new capability surface.
+**The decision requested here is not a blank-sheet redesign.** Leadership should separate verified implementation facts from accepted architecture, resolve contradictions that force escalation, and decide which genuinely new capability boundaries are stable enough to lock. As-built code is evidence; it becomes normative only when it also satisfies the governing invariants and acceptance evidence.
 
 ### Decisions requested — scope of this packet **[DECISION]**
 
 Three scoping choices were taken in the originating session and are carried here **as proposals for leadership to ratify or overturn**, not as settled authority:
 
 1. **Lock horizon:** control path *and* the SOTA capability plane (context, multi-file, long-session, planner-worker) — accepting that capability design would be locked ahead of control evidence. *Leadership may instead restrict locking to the control path.*
-2. **Doc plane:** locked contracts go in `technical.md`; no sixth file. *The no-sixth-file part is `[AUTHORITY]` (`README.md:96`); the choice of `technical.md` over `spec.md` per contract is `[DECISION]`.*
+2. **Doc plane:** no sixth execution file. *That constraint is `[AUTHORITY]` (`README.md:96`); leadership must route each accepted result to its semantic owner: normative law and typed deltas in `spec.md`, implementation guidance in `technical.md`, live work in `tasks.md`, stable gates in `milestones.md`, and accepted durable design in the existing architecture/reference documents.*
 3. **Envelope:** a fourth long-horizon preset. *Whether a separate pack is the right product boundary is `[DECISION]` — see §3.2.*
 
 ### The enabling discovery
@@ -49,11 +49,22 @@ Three scoping choices were taken in the originating session and are carried here
 
 I verified those anchors have **zero inbound links**. The only inbound anchor link in the repository (`spec.md:605`) points at `#post-control-reference-handbook-fh-1-proposal`, which is at line 759 in the live section. The `dev_context_logs/*.json` hits are line-range locators against the pre-move path `docs/execution/technical.md` and are already dead.
 
-Collapsing that block yields ~1,667 lines and **~633 lines of headroom under the existing ceiling.** The entire directive fits without a governance ceiling raise. Original text stays recoverable at `git show 001911e3:docs/execution/technical.md`.
+Collapsing that block yields ~1,667 lines and **~633 lines of headroom under the existing ceiling.** The recommended handbook content could fit without a governance ceiling raise. Original text stays recoverable at `git show 001911e3:docs/execution/technical.md`.
 
 ### Role boundary
 
 `DIRECTOR.md:161` forbids the director from editing execution documents; `roles_and_authority.md:23` assigns task rows and status to the Senior. This packet is therefore written as **recommended dispositions for leadership to rule on, and for the Senior to transfer once accepted**. Items leadership must decide are marked **[DECISION]**; measured claims are marked **[VERIFIED]** and are open to checking, not ruling.
+
+### Executive decision surface
+
+| Decision | Packet posture |
+|---|---|
+| C1-C9 contradiction dispositions | **[RECOMMENDED]** individually; leadership confirms, amends, defers or rejects |
+| Contract promotion and semantic owner | **[DECISION]** based on invariants plus acceptance evidence, not source existence alone |
+| Leadership as independent acceptor | **[DECISION]**; eligibility and independence basis must be confirmed |
+| W2/W3 capability packets and leases | **[DECISION]**; candidate work only until authorized and assigned by the Senior |
+| Long-horizon packaging and envelope | **[DECISION]**; invariants may be locked before provisional numeric values |
+| Framework 0.9.4 cut | **[DECISION]** independent of the product-release milestones |
 
 ---
 
@@ -61,14 +72,14 @@ Collapsing that block yields ~1,667 lines and **~633 lines of headroom under the
 
 **[VERIFIED] Nothing in this packet blocks developer dispatch.** Phase 0a touches only `technical.md` and `spec.md`; the `tasks.md` retirement is in 0b and re-pinning in 0c. The current A/B/C queue is factual and already authorized — leadership may amend its sequencing, but it need not wait on any phase here.
 
-Documentation and development surfaces are disjoint on inspection: leadership edits `docs/execution/`, developers hold leases in `vanguard/`, `benchmarks/` and `test/`. **The one serialization point is `tasks.md`**, written by the Senior in 0b and whenever a lease or status changes — so 0b is scheduled between dispatch waves, never mid-lease.
+Documentation and development are **partly parallel, not automatically disjoint**. `tasks.md` is a Senior-owned serialization point, C's T-132 lease includes `justfile`, and production changes may carry canonical-document synchronization obligations. Leadership may prepare decisions concurrently, but the Senior schedules short merge windows and verifies every proposed documentation or source lease before dispatch.
 
 | When | Owner | What |
 |---|---|---|
 | **First — one commit, no content edits** | CEO + Senior | **Phase 0a** (mechanical only): reclaim `technical.md`'s unlinked anchors, delete the byte-identical dialect duplicate |
 | **On leadership ruling** | Senior | **Phase 0b**: the `spec.md` dedup/renumber choices, the `tasks.md` board retirement, and `justfile` linter placement — each selects surviving law or answers an open decision |
 | **After the last semantic edit** | Senior | **Phase 0c**: regenerate all four binding pins on the final subject |
-| **Same day Phase 0a lands** | Senior dispatches | **A**: T-131.8 on its exclusive lease. **B**: the four LANDED reviews (T-130/T-135/T-131.6/T-140) → acceptance-record reconciliation (T-75/T-76, T-78, T-83b, T-138, T-139) → T-131.3→4→7 on released files. **C**: T-133 *non-probe files first* → T-132 → T-137 → hermetic T-51 local readiness |
+| **Immediately under existing authority** | Senior dispatches | **A**: T-131.8 on its exclusive lease. **B**: the four LANDED reviews (T-130/T-135/T-131.6/T-140) → acceptance-record reconciliation (T-75/T-76, T-78, T-83b, T-138, T-139) → T-131.3→4→7 on released files. **C**: T-133 *non-probe files first* → T-132 → T-137 → hermetic T-51 local readiness |
 | **Concurrent with dev execution** | Director rules, Senior transfers | **Phases 1–4**: contradictions, as-built contracts, capability plane, measurement math |
 | **After Phases 1–4 land** | Senior | **Phase 5**: contract index in `DEVS.md`; escalation triggers unchanged |
 | **Last** | CEO | **Phase 6**: `.draft/` sweep; 0.9.4 cut **if** authorized |
@@ -77,7 +88,7 @@ Documentation and development surfaces are disjoint on inspection: leadership ed
 
 Everything else in this packet is either **[VERIFIED]** measurement or **[RECOMMENDED]** disposition awaiting confirmation.
 
-**Do not wait for Phases 1–4 before dispatching developers.** The contracts remove *future* escalations; they do not gate the work already leased. A/B/C are blocked today on review capacity, not on documentation.
+**Do not wait for Phases 1–4 before dispatching already authorized work.** The contracts remove *future* escalations; they do not gate the work already leased. Review capacity is a current constraint, while documentation ambiguity is a separate source of future escalation.
 
 ---
 
@@ -96,11 +107,11 @@ The 2026-09-13 CEO directive already decoupled capability from MS-CONTROL. Make 
 | | **Stream A — Control & integrity** | **Stream B — Capability** |
 |---|---|---|
 | Shape | Narrow, serialized, lease-contended | Wide, parallel, mostly new files |
-| Review burden | Heavy — non-author acceptance on every leaf | Light — new surface carries no acceptance debt |
-| Bound by | Acceptor availability, curator/store authority | Nothing external |
+| Review burden | Heavy — non-author acceptance at named evidence boundaries | Focused — new surface has no legacy debt but still needs falsification and acceptance |
+| Bound by | Acceptor availability, curator/store authority | Contract, lease and acceptance decisions; hermetic work need not wait on curator/store |
 | Output | F-number dispositions, T-27 readiness | The SOTA capability surface |
 
-**Two standing rules.** Stream B never claims a control result or a benchmark score — its output is capability, measured later under Stream A's protocol. Stream A never blocks Stream B: a blocked integrity leaf stops *that leaf*, and its owner moves to their Stream B row rather than idling or inventing hardening work.
+**Two proposed standing rules.** Stream B never claims a control result or a benchmark score — its output is capability, measured later under Stream A's protocol. A blocked Stream A leaf stops only that leaf; the Senior may move its owner to an already authorized, lease-compatible Stream B row rather than idling or inventing hardening work.
 
 ### Leadership as non-author acceptor **[DECISION]**
 
@@ -112,12 +123,12 @@ The acceptor deadlock is recorded in `tasks.md` as an external staffing blocker.
 
 This is the single highest-leverage action available right now: it unblocks B's entire queue and every downstream leaf that waits on a non-author disposition.
 
-### Leadership's coding box
+### Leadership and implementation boundary **[DECISION]**
 
-Leadership writes code only where the work is **small in LOC and large in consequence** — where getting it wrong is expensive and holding every invariant at once is the hard part:
+The recommended default is that leadership owns decision and acceptance semantics while the Senior assigns implementation. Leadership writes code only if its role authority explicitly permits it and independence for later acceptance remains available. The following surfaces require leadership rulings even when a developer implements them:
 
 - **Kernel-adjacent changes.** TCB is 1,386 logical LOC against a 1,438 alarm ceiling — **52 lines of headroom.** Any kernel edit is a leadership call by arithmetic alone.
-- **Measurement math.** `roles_and_authority.md:20-26` assigns "statistical meaning" to the Director. The Wilson bound and the false-completion detector (§4.1, §4.2) are leadership code.
+- **Measurement math.** `roles_and_authority.md:20-26` assigns "statistical meaning" to the Director. The Wilson bound and false-completion semantics require leadership decisions; implementation remains delegable.
 - **Cross-cutting seam repairs** surfaced during acceptance, where the fix spans more than one developer's lease.
 - **Wave sequencing and contract authorship** (Phases 1–4).
 
@@ -132,13 +143,13 @@ Explicitly **not** leadership work: feature implementation, test authoring, corp
 | A | T-131.8 to completion |
 | B | Four LANDED reviews → acceptance-record reconciliation → T-131.3→4→7 |
 | C | T-133 (non-probe files first) → T-132 → T-137 |
-| Leadership | Phase 0; then accept A's and C's leaves as they land; begin Phases 1–2 |
+| Leadership | Decide Phase 0 and begin Phases 1–2; accept completed leaves only if it confirms its eligibility and independence |
 
 **W2 — the capability sprint (Stream B, genuinely parallel)**
 
 **[DECISION] These three rows are proposed, not authorized.** Leadership decides whether each becomes a task row, in what dependency order, and under whose acceptance. Leases and falsifiers below are recommended starting points, not permanent architecture; the Senior compiles each against `work_packet_protocol.md`'s sixteen required fields before dispatch and assigns owners.
 
-Three disjoint surfaces, each substantially new code, no shared leases.
+Three candidate surfaces, each substantially new code. The Senior must verify their final leases against the live board before parallel dispatch; this packet does not prove that future edits remain disjoint.
 
 **B2-1 — Per-child worktree isolation** *(Senior assigns the owner)*
 > **The correctness blocker for parallel workers.** `child_runtime.py` contains *zero* worktree or workspace references; `runtime/workspace.py` is a 21-line re-export shim. `git worktree` exists only as a `GitEnvironment` constructor option (`git.py:153-168`) that nothing in the delegation path uses. Today two parallel workers edit the same tree.
@@ -148,7 +159,7 @@ Three disjoint surfaces, each substantially new code, no shared leases.
 > **Why it is hard:** crash-safe reclamation interacts with the `finally`-path teardown in `EpisodeEngine.spawn:1452` and with budget release ordering (S11 before S12).
 
 **B2-2 — `packs/code-horizon/` and compaction at scale** *(Senior assigns the owner)*
-> **Outcome:** the fourth preset as a separate pack, `code-default` bytes untouched so the frozen control subject survives. Mandatory `StructuredConsolidateStrategy`, checkpoint cadence, sigma durable across restart.
+> **Candidate outcome:** a long-horizon capability isolated from `code-default` so the frozen control subject survives, with mandatory bounded compaction, checkpoint policy and sigma durability across restart. A separate pack and `StructuredConsolidateStrategy` are recommended options, not preselected law.
 > **Lease:** new `packs/code-horizon/**`, `agency/context/compaction.py`, `runtime/checkpoints.py`, new `test/packs/code_horizon/**`.
 > **Falsifier:** a 200-turn session at 200k context survives a mid-run process kill and resumes with task/candidate/evidence/budget identity intact; compaction preserves the `TC-E-057` preservation set; a dropped carrier is detected, not silently repaired.
 > **Why it is hard:** the compaction strategies exist but have never run at this scale. Identity preservation across ~10 compaction cycles plus a restart is the real test, and it is exactly where long-session agents fail.
@@ -159,11 +170,11 @@ Three disjoint surfaces, each substantially new code, no shared leases.
 > **Falsifier:** an oracle that passes against `pass`/`NotImplementedError` stubs is rejected; a real oracle is admitted; the detector cannot be satisfied by test mutation.
 > **Why it is hard:** it must reject vacuity without rejecting legitimately simple tests — the false-positive side is what makes this a design problem rather than a grep.
 
-Leadership in W2: Phases 3–4, the false-completion detector, the Wilson formula, and acceptance of W1 leaves as they arrive.
+Proposed leadership work during W2: decide Phases 3–4, including false-completion and Wilson semantics, and disposition W1 leaves where leadership has confirmed its independence.
 
-**W3 — convergence**
+**W3 — proposed convergence**
 
-Planner→worker→verifier running end-to-end on the `horizon` preset over a real multi-file greenfield task, with worktree isolation active and exterior-verifier merge. This is the first run that exercises the whole SOTA claim. It produces a capability demonstration, **not** a control result — MS-CONTROL still requires Stream A's protocol.
+If leadership accepts the prerequisite packets, exercise planner→worker→verifier end to end on the selected long-horizon configuration over a real multi-file greenfield task, with accepted isolation and exterior-verifier merge. This would be a capability demonstration, **not** a control result — MS-CONTROL still requires Stream A's protocol.
 
 ---
 
@@ -171,7 +182,7 @@ Planner→worker→verifier running end-to-end on the `horizon` preset over a re
 
 `README.md:108-110`: *"A documentation topology move is isolated from semantic edits."*
 
-**Correction.** An earlier revision of this directive labelled all of Phase 0 "mechanical, no semantic content." That was wrong, and this document contradicted itself: Phase 1's table routes rulings **C5** and **C7** through Phase 0, and three further items below change law or pre-empt a decision leadership has been asked to make. The phase is split accordingly. **Only 0a is mechanical. 0b requires rulings and does not proceed without them.**
+**Correction.** An earlier revision of this packet labelled all of Phase 0 "mechanical, no semantic content." That was wrong, and the document contradicted itself: Phase 1's table routes dispositions **C5** and **C7** through Phase 0, and three further items below change law or pre-empt a decision leadership has been asked to make. The phase is split accordingly. **Only 0a is proposed as mechanical. Leadership must verify that classification; 0b requires rulings and does not proceed without them.**
 
 ### Phase 0a — Genuinely mechanical (its own commit, on leadership authorization)
 
@@ -197,7 +208,7 @@ Each item selects which of two conflicting texts becomes law, or decides a quest
 | **`spec.md`** — fold the second document at `2174–2390` | It duplicates §6.5/§5/§7/§8 with *conflicting* definitions. Selecting winners is a ruling, not a move. Its Python dataclasses are the only real typed contracts in the corpus and are retained for Phase 2 regardless. |
 | **`spec.md`** — renumber the incoherent heading sequence | Section numbers are cited across the corpus (`§23.2`, `A §9.4`). Renumbering rewrites those references and can break anchors. |
 | **`tasks.md`** — retire the superseded historical board | Deciding what is "superseded" is a **status judgment**, which `roles_and_authority.md` assigns to the Senior under leadership ruling, not a topology move. |
-| **`justfile`** — placement of `check_doc_budgets.py` and `check_stale_paths.py` | Both run in `.github/workflows/ci.yml` but in neither `just check` nor `just verify`, so local green does not predict CI green. **But which recipe they belong in is an open decision** — `docs-check`, `check`, or `verify` — and depends on measured cost. Leadership decides; this directive does not pre-empt it. |
+| **`justfile`** — placement of `check_doc_budgets.py` and `check_stale_paths.py` | Both run in `.github/workflows/ci.yml` but in neither `just check` nor `just verify`, so local green does not predict CI green. **But which recipe they belong in is an open decision** — `docs-check`, `check`, or `verify` — and depends on measured cost. Leadership decides; this packet does not pre-empt it. |
 
 ### Phase 0c — Final re-pin (after every applicable semantic edit)
 
@@ -205,7 +216,7 @@ Regenerate the binding blocks in `state_of_play.md`, `DEVS.md` and `DIRECTOR.md`
 
 ---
 
-## Phase 1 — Resolve the contradictions (pure director rulings)
+## Phase 1 — Proposed contradiction dispositions **[RECOMMENDED]**
 
 **The contradictions are [VERIFIED]; the dispositions are [RECOMMENDED] only.** `roles_and_authority.md:20-26` places "architecture, invariants, public contracts, genuine forks" in the Director's box, so each row below is a proposal with its evidence attached — not a ruling already made. Leadership confirms, amends, defers or rejects each.
 
@@ -225,11 +236,11 @@ Note also `DIRECTOR.md:54-63`: *"Silence on a decision means the existing decisi
 
 ---
 
-## Phase 2 — Lock the as-built (the core of the directive)
+## Phase 2 — Candidate contracts from accepted behavior **[RECOMMENDED]**
 
-Fill the empty normative slots by promoting working code to contract. **No redesign.** Each contract cites its implementation, so drift is detectable.
+Fill empty contract slots only after triangulating governing invariants, accepted evidence and current implementation. **Source existence alone is insufficient.** Each accepted contract cites stable symbols and executable falsifiers so drift is detectable.
 
-Target: `docs/execution/main/technical.md`, replacing the reclaimed space.
+Route normative predicates and typed deltas to `spec.md`, implementation algorithms and recipes to `technical.md`, and accepted durable design to its existing architecture/reference owner. Reclaimed space in `technical.md` is available for handbook content, not as a substitute normative plane.
 
 ### 2.1 Appendix A — the four algorithms, actually written
 
@@ -266,7 +277,7 @@ Per layer: membership rule, ordering, cache/prefix status, serialization. Plus `
 
 ---
 
-## Phase 3 — Lock the capability plane
+## Phase 3 — Candidate capability plane **[RECOMMENDED]**
 
 The three surfaces named in the objective. Each builds on shipped code.
 
@@ -274,7 +285,7 @@ The three surfaces named in the objective. Each builds on shipped code.
 
 Present: `transaction.py`, `hunks.py`, `multi_file_completeness.py:164`, `tamper_shield.py:33`, `analysis.py:57`.
 
-Lock: the greenfield oracle-vacuity protocol. `spec.md:2287-2297` gives five prose stages whose load-bearing predicate — *"if it passes on stubs, it is vacuous and rejected"* — has no formal form and no detector, though `VACUOUS_ORACLE_REJECTED` is already a code. Also fix `spec.md:2283`, *"every imported symbol from local modules must resolve"*, which is unimplementable as written (no definition of "local module", no resolution algorithm, no conditional-import behaviour).
+**Proposed contract:** define the greenfield oracle-vacuity protocol. `spec.md:2287-2297` gives five prose stages whose load-bearing predicate — *"if it passes on stubs, it is vacuous and rejected"* — has no formal form and no detector, though `VACUOUS_ORACLE_REJECTED` is already a code. Also resolve `spec.md:2283`, *"every imported symbol from local modules must resolve"*, which is unimplementable as written (no definition of "local module", no resolution algorithm, no conditional-import behaviour).
 
 ### 3.2 Long sessions and large context — the `horizon` preset **[DECISION]**
 
@@ -293,29 +304,29 @@ horizon:  usd_micros 2_000_000   ($2.00)
           checkpoint cadence: every N turns, sigma durable across restart
 ```
 
-Also lock what is currently one sentence (`spec.md:1315`, *"Checkpoints remain disposable caches with proof obligations"*): format, cadence, invalidation, and what "proof obligation" means — from `checkpoints.py:313`.
+Leadership should decide whether to lock what is currently one sentence (`spec.md:1315`, *"Checkpoints remain disposable caches with proof obligations"*): format, cadence, invalidation, and what "proof obligation" means — informed by `checkpoints.py:313` and acceptance evidence.
 
 ### 3.3 Planner and worker agents
 
 **Present and working, contrary to the documents.** `M6_SPAWN_ACTIVE = True` at `delegation.py:67`; `topology.py` compiles declarative graphs with cycle-checking `_validate_graph:274`, authority refusal `_reject_authority:173`, attenuation validation `_validate_attenuation:436`; three frozen topologies at `qualification_topology:343` — sequential planner→implementer→verifier, reviewer-in-loop, parallel-investigators.
 
-Lock:
+Recommended decisions for leadership review:
 - The topology contract from `topology.py`, and the director-has-no-mutating-verbs rule `verbs(director) ∩ MutatingVerbs = ∅` (`spec.md:850`), whose falsifier is already stated: grep the campaign client for an `EpisodeEngine` construction and the count must be zero.
 - **[DECISION] `CoordinationPlan` versus the as-built `Topology`.** An earlier revision of this packet ruled that `CoordinationPlan` "will not be created." That overstepped: `milestones.md` **W-OCT-2 / OCT-02** names *"Declarative CoordinationPlan DAG"* as a terminal acceptance boundary, and MS-CAMPAIGN carries it too. Overturning a milestone's stated acceptance boundary is leadership's call, not this packet's.
   *The argument for collapsing them:* `Topology` + `RunPlanExtension:113` already compiles declarative graphs with cycle-checking and attenuation validation; a second plan type risks the duplicate planner `DIRECTOR.md:165` forbids.
   *The argument against:* `CoordinationPlan` carries per-mille budget shares and named merge policies (`CONCAT`/`FIRST_COMPLETE`/`SYNTHESISE`/`UNANIMOUS`) that `Topology` does not express, and per-mille allocation appears nowhere in the corpus today.
   **Leadership decides: extend `Topology`, or admit `CoordinationPlan` as a distinct type, or amend W-OCT-2.**
 - Merge policy, already correctly stated at `technical.md:1292` and worth making normative: *merge is a candidate, not a vote.* Exterior verifier verdict only — never role agreement, never tournament rank.
-- **Gap to close:** no per-worker git-worktree isolation is wired into spawn. `git worktree` exists only as a `GitEnvironment` constructor option (`git.py:153-168`); nothing in `delegation.py`/`child_runtime.py` creates one per child. For parallel workers editing the same repo this is the correctness blocker. Specify the contract; it becomes a task row.
+- **Gap to disposition:** no per-worker git-worktree isolation is wired into spawn. `git worktree` exists only as a `GitEnvironment` constructor option (`git.py:153-168`); nothing in `delegation.py`/`child_runtime.py` creates one per child. Before parallel mutation is claimed, leadership should decide the isolation invariant and, if accepted, authorize the Senior to create a task row.
 - **Fix stale assertions:** `test/contracts/test_adr0090_child_fold.py:13` claims `M6_SPAWN_ACTIVE = False`. `test/runtime/test_coding_coordinator.py` is a retired empty suite, so "coding coordinator" has no live test.
 
 ---
 
-## Phase 4 — Lock the measurement math
+## Phase 4 — Measurement decisions **[RECOMMENDED]**
 
 ### 4.1 Wilson bound — write the formula
 
-`95% Wilson lower bound ≥ 0.40` is the release gate. It is referenced twice (`spec.md:75`, `technical.md:1300`) and **the formula is written nowhere.** Lock: the expression, one- vs two-sided (D-6 F7 says two-sided — make it consistent), continuity correction, and which denominator feeds it when `U` undeterminable outcomes exist. `technical.md:1300` reports `[R/N, (R+U)/N]` as descriptive bounds and explicitly says they are *not* a confidence interval, but never says what Wilson consumes.
+`95% Wilson lower bound ≥ 0.40` is the release gate. It is referenced twice (`spec.md:75`, `technical.md:1300`) and **the formula is written nowhere.** Leadership should decide and record the expression, one- versus two-sided interpretation (D-6 F7 says two-sided), continuity correction, and denominator when `U` undeterminable outcomes exist. `technical.md:1300` reports `[R/N, (R+U)/N]` as descriptive bounds and explicitly says they are *not* a confidence interval, but never says what Wilson consumes.
 
 ### 4.2 False-completion veto — define the detector
 
@@ -327,26 +338,24 @@ FH-D04/D05 (`spec.md:769-794`) is the best-specified content in the corpus — e
 
 ---
 
-## Phase 5 — Cut the gates the contracts replace
+## Phase 5 — Proposed gate simplification **[RECOMMENDED]**
 
 Only after Phases 1–4 land. Advisory files only (`AGENTS.md:317`).
 
 1. **`DEVS.md`** — add a contract index: capability → locked section → implementing module → falsifier. `README.md:91`: *"A row that cannot be started without reading all five documents is a malformed row."*
 2. **RUN-04 restated** against the now-existing contracts: a locked contract is a decision already made. A developer implementing to a locked contract does not escalate.
-3. **Escalation triggers unchanged.** `roles_and_authority.md:45-57` lists six. `:59-60`: *"The value of this list is entirely in what it excludes. Each addition costs a fortnight of autonomy."* This directive **adds none** and removes none. The gate reduction comes from contracts making escalation unnecessary, not from deleting gates.
-4. **The acceptor constraint — resolved, not escalated.** Non-author acceptance with a pool of three deadlocks: B authors T-131.3/4/7 and T-26b; A is excluded wherever it authored the delta; C cannot accept C/B integration. `tasks.md` records this as an external staffing blocker.
-
-   **It is not one.** Per *Leadership is the fourth acceptor* above, independence is per-change rather than per-role-label (`roles_and_authority.md:72-88`), and leadership authored none of these deltas. Leadership accepts at batched acceptance boundaries only; the Senior records the independence basis. No hire is required, and no escalation trigger is added — `roles_and_authority.md:45-57` still lists exactly six.
+3. **Escalation triggers unchanged.** `roles_and_authority.md:45-57` lists six. `:59-60`: *"The value of this list is entirely in what it excludes. Each addition costs a fortnight of autonomy."* This packet proposes no addition or removal. Gate reduction should come from clearer contracts, not from silently deleting safeguards.
+4. **The acceptor constraint — open fork.** Non-author acceptance with a pool of three can deadlock: B authors T-131.3/4/7 and T-26b; A is excluded wherever it authored the accepted delta; C cannot accept C/B integration. `tasks.md` records an external staffing blocker. Leadership must confirm whether it is eligible and sufficiently independent to accept at batched boundaries under `roles_and_authority.md:72-88`; otherwise it must name an uninvolved qualified acceptor. The Senior records the independence basis either way.
 
 ---
 
-## Phase 6 — Close out (CEO)
+## Phase 6 — Proposed closeout **[DECISION]**
 
 ### 6.1 Sweep `.draft/`
 
 **Not before Phase 1 completes.** `.draft/` holds the only recoverable record of the prior leadership decisions that the C1–C9 rulings cite — deleting it mid-transfer destroys the provenance those rulings depend on. It sits outside `docs/`, so it costs nothing against the linters and there is no urgency; `AGENTS.md:267` already makes it non-authoritative ("do not infer authorization from archived proposals … or unused `.draft/` triad files").
 
-Once the rulings are transferred into `main/`: retain this directive and `AETHER_VANGUARD_LEADERSHIP_IMPLEMENTATION_GUIDE.md`, retire the dated handoffs (`130926_*`) whose content now lives in `tasks.md`, and keep `audit/`, `logs/`, `quick_benchs/`, `todo/` untouched — they are working directories, not planning sprawl.
+If leadership accepts the cleanup, the Senior should preserve necessary provenance while removing redundant working copies after their durable content is transferred. The recommendation is to retain this decision packet and `AETHER_VANGUARD_LEADERSHIP_IMPLEMENTATION_GUIDE.md`, retire dated handoffs (`130926_*`) whose content is demonstrably represented in canonical files, and leave `audit/`, `logs/`, `quick_benchs/`, and `todo/` untouched unless separately reviewed.
 
 ### 6.2 Cut 0.9.4 **[DECISION]**
 
@@ -367,16 +376,16 @@ State which line `0.9.4` refers to, or the first person who reads it will conclu
 
 | File | Change |
 |---|---|
-| `docs/execution/main/technical.md` | Phase 0 reclaim; **primary target** for all locked contracts |
-| `docs/execution/main/spec.md` | Dedup, renumber, C1–C9 rulings, FH-D04/D05 promotion |
-| `docs/execution/main/tasks.md` | Retire superseded board; new rows from Phase 3 gaps |
+| `docs/execution/main/technical.md` | Proposed Phase 0 reclaim; handbook target for accepted implementation algorithms and recipes |
+| `docs/execution/main/spec.md` | Proposed dedup/renumber plus leadership-approved normative dispositions |
+| `docs/execution/main/tasks.md` | Senior records accepted status cleanup and any newly authorized task rows |
 | `docs/execution/main/milestones.md` | **1 line headroom** — touch only if a status token changes |
 | `docs/execution/management/state_of_play.md` | Regenerate; re-pin |
 | `docs/execution/guidelines/*.md` | Re-pin; contract index (**9 lines headroom** in `DIRECTOR.md`) |
-| `justfile` | Add `check_doc_budgets.py`, `check_stale_paths.py` to `check` |
-| `packs/code-horizon/` | **New pack** — `code-default` untouched |
+| `justfile` | Leadership chooses `docs-check`, `check` or `verify` after measured-cost evidence; C/T-132 owns the live lease |
+| `packs/code-horizon/` | **Proposed option** — create only if leadership accepts the boundary and the Senior assigns a packet |
 
-**Sources to promote, not rewrite:** `agency/context/layers.py`, `compiler.py`, `compaction.py`, `packet.py`; `adapters/environment/transaction.py`, `hunks.py`; `runtime/session.py`, `checkpoints.py`, `task_state.py`, `inference_meter.py`, `delegation.py`, `topology.py`; `agency/episode/admission_gate.py`, `protocol_recovery.py`, `engine.py`; `kernel/dispatch.py`, `budget.py`; `vanguard/packages/ports/*.py`.
+**Sources to inspect alongside invariants and acceptance evidence:** `agency/context/layers.py`, `compiler.py`, `compaction.py`, `packet.py`; `adapters/environment/transaction.py`, `hunks.py`; `runtime/session.py`, `checkpoints.py`, `task_state.py`, `inference_meter.py`, `delegation.py`, `topology.py`; `agency/episode/admission_gate.py`, `protocol_recovery.py`, `engine.py`; `kernel/dispatch.py`, `budget.py`; `vanguard/packages/ports/*.py`.
 
 ---
 
@@ -385,30 +394,30 @@ State which line `0.9.4` refers to, or the first person who reads it will conclu
 **Phase 0a** (must be its own commit)
 - `just docs-check` — metadata, links, markdownlint
 - `python3 tools/linters/check_markdown_links.py` — confirms the anchor deletion broke nothing
-- `python3 tools/linters/check_doc_budgets.py` — all five files under ceiling **without a raise**
+- `python3 tools/linters/check_doc_budgets.py` — record the actual remaining overages; 0a is not expected to resolve 0b-dependent budgets
 - `python3 tools/linters/check_execution_truth.py` — five files intact, milestone status vocabulary preserved
 - Blob comparison receipt: no semantic delta
 
 **Phases 1–4**
-- `just verify` after each phase
-- Every locked contract cites `file:line`; spot-check each citation resolves
+- Run focused checks for each changed contract and `just check` during incremental work; run `just verify` once on the final exact acceptance subject unless a specific risk justifies another full run
+- Every accepted contract cites stable symbols or section anchors; use line numbers only as review-time locators
 - `check_doc_metadata.py` — `id` and `canonical_for` stay globally unique
 - Re-pinned blobs verified through the prescribed generator, not string substitution
 
-**Phase 3 drift checks**
+**Phase 3 drift checks, if the corresponding changes are authorized**
 - `test/contracts/test_adr0090_child_fold.py:13` corrected to `M6_SPAWN_ACTIVE = True`
 - Director-verb falsifier: grep campaign client for `EpisodeEngine` construction, expect zero
 - Worktree isolation gap carries a task row and a falsifier before any parallel-worker claim
 
-**Standing boundaries — unchanged by this directive**
+**Standing boundaries — unchanged by this packet**
 - No provider calls, no paid runs, no control freeze, no benchmark score, no SOTA claim
 - T-26 UNFROZEN, T-27 unauthorized, MS-CONTROL OPEN
-- D-6 closed at F1–F7; **an eighth predicate requires an explicit successor ruling.** A documentation directive is exactly where a new prerequisite gets smuggled in — this one adds none.
+- D-6 closed at F1–F7; **an eighth predicate requires an explicit successor ruling.** A documentation packet is exactly where a new prerequisite can be smuggled in — this one proposes none.
 
 ---
 
 ## Assumptions most likely to be wrong
 
-1. **That the as-built code is correct enough to promote to contract.** Phase 2 converts implementation into law. If `admission_gate.py` has a defect, this directive blesses it. *Exposed by:* the F5 row dispositions, which are open for exactly these seams.
+1. **That the as-built code is correct enough to inform a contract.** Phase 2 must not convert implementation into law without acceptance evidence. A defect in `admission_gate.py`, for example, must remain a defect rather than becoming a documented invariant. *Exposed by:* the F5 row dispositions, which are open for exactly these seams.
 2. **That ~633 reclaimed lines is enough.** Nine contract sections plus the math may not fit. *Exposed by:* `check_doc_budgets.py` at Phase 2 close. If it fails, the overflow is a ceiling raise with justification in the commit (`check_doc_budgets.py:37`) — **not** a sixth file.
-3. **That contracts are what is actually blocking autonomy.** If throughput stays flat after Phase 5, the binding constraint was always the three-person acceptor pool, and this directive will have been necessary but not sufficient.
+3. **That contracts are what is actually blocking autonomy.** If throughput stays flat after Phase 5, reviewer capacity or another operational constraint may be dominant; leadership must measure that rather than assuming this packet is sufficient.

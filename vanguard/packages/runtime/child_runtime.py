@@ -73,6 +73,7 @@ class RuntimeChildRunner:
         parent_task: TaskContext,
         profile: Any = None,
         release: bool = False,
+        workspaces: Any = None,
     ) -> None:
         #: The sole public activation boundary, injected rather than imported.
         #: `root` imports `session` imports `wiring` imports `delegation`, so
@@ -87,6 +88,11 @@ class RuntimeChildRunner:
         self._parent_task = parent_task
         self._profile = profile
         self._release = release
+        #: T-141. When bound, each child runs in its own isolated writable
+        #: view instead of the parent's tree. Optional because the seam is
+        #: additive: an unsupervised composition keeps its existing behaviour
+        #: rather than acquiring containment it was never given.
+        self._workspaces = workspaces
 
     # -- the port ---------------------------------------------------------
 
@@ -102,9 +108,42 @@ class RuntimeChildRunner:
             release=self._release,
             profile=self._profile,
         )
-        return self._project(plan, result)
+        return self._settle_workspace(plan, self._project(plan, result))
 
     # -- internals --------------------------------------------------------
+
+    def _settle_workspace(self, plan: ChildRunPlan,
+                          projected: ChildRunResult) -> ChildRunResult:
+        """Retain the child's work, then integrate it only if it completed.
+
+        The order is the whole crash contract (`T-141`). Retention happens
+        first and unconditionally, so an accepted child's work cannot be lost
+        to a crash during integration and an abandoned child's work stays
+        recoverable instead of being discarded on the way out. Integration
+        happens second, under the exclusive fence, and only for a child that
+        actually completed: applying an incomplete child's tree is precisely
+        the partial acceptance this forbids.
+
+        A fence refusal is left to propagate. The child completed in its own
+        view, so nothing of its work is lost, but whether the shared tree
+        received it is exactly the kind of unknown `TERMINAL_OUTCOMES` reserves
+        `undeterminable` for -- and reporting it as an ordinary success would
+        claim an integration that did not happen.
+        """
+        if self._workspaces is None:
+            return projected
+
+        child_id = plan.child_episode_id
+        digest = self._workspaces.retain_candidate(child_id)
+        if not projected.ok:
+            return projected
+
+        ticket = self._workspaces.acquire(child_id)
+        try:
+            self._workspaces.integrate(ticket, candidate_digest=digest)
+        finally:
+            self._workspaces.release(ticket)
+        return projected
 
     def _rebind(self, plan: ChildRunPlan) -> Any:
         """The parent's ports, narrowed. Never widened, never replaced.
@@ -144,7 +183,7 @@ class RuntimeChildRunner:
         """
         return TaskContext(
             brief=plan.brief,
-            repo_path=self._parent_task.repo_path,
+            repo_path=self._child_repo_path(plan),
             run_id=plan.run_id,
             episode_id=plan.child_episode_id,
             principal=plan.principal,
@@ -178,6 +217,19 @@ class RuntimeChildRunner:
                 sealed=True,
             ),
         )
+
+    def _child_repo_path(self, plan: ChildRunPlan) -> Any:
+        """Where this child may write (`T-141`, `DIR-C5`).
+
+        Sharing the parent's tree was never containment: two causally-ready
+        siblings interleaved their edits and a child could overwrite the
+        parent's working state. The view is keyed by `child_episode_id`, which
+        `delegation.derive_child_id` content-addresses, so a retried spawn
+        lands on the same view and finds its own retained work.
+        """
+        if self._workspaces is None:
+            return self._parent_task.repo_path
+        return self._workspaces.workspace_for(plan.child_episode_id).root
 
     def _project(self, plan: ChildRunPlan, result: RunResult) -> ChildRunResult:
         """`RunResult` -> `ChildRunResult`. A projection, never a passthrough.

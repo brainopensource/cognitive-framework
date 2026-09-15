@@ -189,6 +189,47 @@ def main(argv=None):
     met_p = sub.add_parser("metrics", help="Structural metrics: fan-in/fan-out hubs, import cycles, hub files, doc coverage")
     met_p.add_argument("--json", action="store_true")
 
+    # 14. LDA 2.0 SOTA Orchestration Commands
+    sweep_p = sub.add_parser("sweep", help="Master one-shot sweep combining repo-status, code-status, and doc-status in <2.5s")
+    sweep_p.add_argument("--budget", type=int, default=4000)
+    sweep_p.add_argument("--json", action="store_true")
+
+    rs_p = sub.add_parser("repo-status", help="Fast C-git status, branch, HEAD SHA, dirty diffstat (<25ms)")
+    rs_p.add_argument("--json", action="store_true")
+
+    cs_p = sub.add_parser("code-status", help="Auto-run falsifiers for touched files via test-runner skill, plus linters (<2s)")
+    cs_p.add_argument("--task", type=str, default=None, help="Task ID from tasks.md")
+    cs_p.add_argument("--dirty", action="store_true", help="Run on git dirty files")
+    cs_p.add_argument("files", type=str, nargs="*", default=None, help="Specific files to falsify")
+    cs_p.add_argument("--json", action="store_true")
+
+    ds_p = sub.add_parser("doc-status", help="Scan frontmatter schemas, broken relative links, and drift (<300ms)")
+    ds_p.add_argument("--json", action="store_true")
+
+    tasks_p = sub.add_parser("tasks", help="Query runway tasks (tasks.md) by ID, owner, or --ready status without loading 2,500 lines into context")
+    tasks_p.add_argument("--inspect", type=str, default=None, help="Inspect specific task ID")
+    tasks_p.add_argument("--owner", type=str, default=None, help="Filter by owner")
+    tasks_p.add_argument("--ready", action="store_true", help="Filter for unblocked tasks whose dependencies are satisfied")
+    tasks_p.add_argument("--limit", type=int, default=50)
+    tasks_p.add_argument("--json", action="store_true")
+
+    runway_p = sub.add_parser("runway", help="Alias for 'lda tasks'")
+    runway_p.add_argument("--inspect", type=str, default=None)
+    runway_p.add_argument("--owner", type=str, default=None)
+    runway_p.add_argument("--ready", action="store_true")
+    runway_p.add_argument("--limit", type=int, default=50)
+    runway_p.add_argument("--json", action="store_true")
+
+    dscaff_p = sub.add_parser("doc-scaffold", help="Generate schema-compliant doc templates (architecture, decision, report, standard)")
+    dscaff_p.add_argument("type", type=str, choices=["architecture", "decision", "report", "standard"], help="Document type")
+    dscaff_p.add_argument("title", type=str, help="Document title")
+    dscaff_p.add_argument("--out", type=Path, default=None, help="Output file path")
+    dscaff_p.add_argument("--json", action="store_true")
+
+    dlint_p = sub.add_parser("doc-lint", help="Verify frontmatter schemas, relative markdown links, and optionally auto-repair")
+    dlint_p.add_argument("--fix", action="store_true", help="Auto-repair broken relative markdown links")
+    dlint_p.add_argument("--json", action="store_true")
+
     args = parser.parse_args(argv)
     repo_root = args.root.resolve() if args.root else Path.cwd().resolve()
     ctx = AtlasContext.discover(repo_root, getattr(args, "include_research", False))
@@ -405,6 +446,35 @@ def main(argv=None):
         from .dashboard import write_dashboard
         path = write_dashboard(ctx, repo_root / "tools" / "007_LLM_DOCS_ATLAS" / "dashboard.html")
         result = {"dashboard": str(path.relative_to(repo_root)), "status": "built"}
+    elif args.command == "sweep":
+        from .commands.cmd_sweep import handle_sweep
+        result = handle_sweep(repo_root, budget=getattr(args, "budget", 4000))
+    elif args.command == "repo-status":
+        from .commands.cmd_repo_status import handle_repo_status
+        result = handle_repo_status(repo_root)
+    elif args.command == "code-status":
+        from .commands.cmd_code_status import handle_code_status
+        files_arg = getattr(args, "files", None)
+        task_arg = getattr(args, "task", None)
+        result = handle_code_status(repo_root, task_id=task_arg, target_files=files_arg)
+    elif args.command == "doc-status":
+        from .core.doc_verifier import verify_doc_health
+        result = verify_doc_health(repo_root)
+    elif args.command in ("tasks", "runway"):
+        from .commands.cmd_tasks import handle_tasks
+        result = handle_tasks(
+            repo_root,
+            task_id=getattr(args, "inspect", None),
+            owner=getattr(args, "owner", None),
+            ready_only=getattr(args, "ready", False),
+            limit=getattr(args, "limit", 50),
+        )
+    elif args.command == "doc-scaffold":
+        from .commands.cmd_doc_scaffold import handle_doc_scaffold
+        result = handle_doc_scaffold(repo_root, args.type, args.title, output_path=getattr(args, "out", None))
+    elif args.command == "doc-lint":
+        from .commands.cmd_doc_scaffold import handle_doc_lint
+        result = handle_doc_lint(repo_root, fix=getattr(args, "fix", False))
 
     wants_json = getattr(args, "json", False)
     if wants_json or isinstance(result, (dict, list)):

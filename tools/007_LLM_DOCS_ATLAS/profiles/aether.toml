@@ -56,3 +56,13 @@ require_head_match = true
 constitutional = "Constitutional"
 normative = "Normative"
 canonical = "Canonical"
+
+default_normative_docs = ["docs/execution/main/spec.md"]
+
+[subsystem_doc_map]
+"vanguard/packages/kernel" = ["docs/backend/architecture/kernel.md", "normative", "TCB kernel specification & invariants"]
+"vanguard/packages/domain" = ["docs/backend/architecture/domain.md", "normative", "Domain pure value contracts & selectors"]
+"vanguard/packages/ports" = ["docs/backend/reference/ports.md", "canonical", "Hexagonal boundary port interfaces"]
+"vanguard/packages/agency" = ["docs/backend/architecture/agency.md", "canonical", "Recursive turn engine & context compaction"]
+"vanguard/packages/runtime" = ["docs/architecture/system_composition.md", "canonical", "System lifecycle, wiring, and governance"]
+"vanguard/packages/adapters" = ["docs/architecture/isolation_and_sandboxing.md", "canonical", "Adapters, Bubblewrap sandbox, and stores"]

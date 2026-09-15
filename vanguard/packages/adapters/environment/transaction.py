@@ -102,16 +102,22 @@ class AtomicMultiFileTransactionManager:
     def _snapshot(
         self,
         resolved: Sequence[tuple[FileMutation, Path]],
-    ) -> dict[str, tuple[bytes | None, int | None]]:
-        snapshots: dict[str, tuple[bytes | None, int | None]] = {}
+    ) -> dict[str, tuple[bytes | None, int | None, Path]]:
+        """Capture pre-images keyed by request path but bound to the resolved
+        destination. Recovery reuses `dest` rather than re-deriving it: a path
+        like `sub/../a.txt` normalises to `a.txt` here, and rebuilding it raw
+        would mkdir a `sub/` that was never part of the mutation set.
+        """
+        snapshots: dict[str, tuple[bytes | None, int | None, Path]] = {}
         for mutation, dest in resolved:
             if dest.is_file():
                 snapshots[mutation.path] = (
                     dest.read_bytes(),
                     stat.S_IMODE(dest.stat().st_mode),
+                    dest,
                 )
             else:
-                snapshots[mutation.path] = (None, None)
+                snapshots[mutation.path] = (None, None, dest)
         return snapshots
 
     def _preflight(self, mutations: Sequence[FileMutation]) -> Result[TransactionReceipt] | None:
@@ -135,37 +141,46 @@ class AtomicMultiFileTransactionManager:
         transaction_id: str,
     ) -> Result[TransactionReceipt] | None:
         staged: list[Path] = []
+        publishable: list[tuple[str, Path, Path]] = []
         try:
             for mutation, dest in resolved:
                 if mutation.content is None or mutation.action == "delete":
                     continue
                 dest.parent.mkdir(parents=True, exist_ok=True)
                 tmp = dest.parent / f".{dest.name}{TXN_TMP_MARKER}{transaction_id}.tmp"
-                tmp.write_text(mutation.content, encoding="utf-8")
+                # Track before writing: a write that raises part-way still
+                # leaves the file on disk, and cleanup can only remove what it
+                # knows about.
                 staged.append(tmp)
-            stage_index = 0
-            for mutation, dest in resolved:
-                if mutation.content is None or mutation.action == "delete":
-                    continue
-                os.replace(staged[stage_index], dest)
-                prior_mode = snapshots.get(mutation.path, (None, None))[1]
+                tmp.write_text(mutation.content, encoding="utf-8")
+                publishable.append((mutation.path, tmp, dest))
+            # Publish from what staging actually produced. Walking `resolved`
+            # again behind a parallel index made correctness depend on two skip
+            # conditions staying byte-identical forever.
+            for rel_path, tmp, dest in publishable:
+                os.replace(tmp, dest)
+                prior_mode = snapshots.get(rel_path, (None, None, dest))[1]
                 if prior_mode is not None:
                     os.chmod(dest, prior_mode)
-                stage_index += 1
             for mutation, dest in resolved:
                 if mutation.content is None or mutation.action == "delete":
                     if dest.is_file():
                         dest.unlink()
-        except OSError as exc:
+        except Exception as exc:  # noqa: BLE001 - recovery precedes reporting
+            # OSError alone left non-OSError paths (a UnicodeEncodeError from
+            # `write_text`, say) escaping with the pre-image unrestored and the
+            # staged temporaries still on disk.
             self._restore(snapshots)
             self._unlink_tmps(staged)
-            return Result.fail("instrument_error", f"transaction commit failed: {exc}")
+            return Result.fail(
+                "instrument_error",
+                f"transaction commit failed: {type(exc).__name__}: {exc}",
+            )
         self._unlink_tmps(staged)
         return None
 
-    def _restore(self, snapshots: dict[str, tuple[bytes | None, int | None]]) -> None:
-        for rel_path, (payload, mode) in snapshots.items():
-            dest = self._root / rel_path
+    def _restore(self, snapshots: dict[str, tuple[bytes | None, int | None, Path]]) -> None:
+        for _rel_path, (payload, mode, dest) in snapshots.items():
             if payload is None:
                 if dest.is_file():
                     dest.unlink()

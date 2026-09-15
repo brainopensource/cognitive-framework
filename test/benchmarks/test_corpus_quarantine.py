@@ -14,13 +14,18 @@ import unittest
 
 from benchmarks.ladder.quarantine import (
     QuarantineError,
+    SCOPE_ORDINARY_USER,
     SealedStore,
     admit_development,
     admit_evaluation,
+    bound_evaluation_authority,
     digest_canonical,
+    evaluation_frozen_manifest,
     fingerprint_bytes,
     fingerprint_tree,
     guard_capture,
+    guard_loader,
+    guard_materialization,
     load_registry,
     materialize,
     promote_to_holdout,
@@ -212,6 +217,9 @@ class TestQuarantineNegativeControls(unittest.TestCase):
         escaped = self.store.member_path("eval-fresh") / "link.txt"
         os.symlink(outside, escaped)
         dest = self.root / "workspace"
+        holdout = self.registry["members"][1]
+        authority = bound_evaluation_authority(holdout, run_id="eval-run-1")
+        frozen = evaluation_frozen_manifest(holdout, run_id="eval-run-1")
         with self.assertRaisesRegex(QuarantineError, "symlink"):
             materialize(
                 identity="eval-fresh",
@@ -219,8 +227,8 @@ class TestQuarantineNegativeControls(unittest.TestCase):
                 registry=self.registry,
                 purpose="evaluation",
                 store=self.store,
-                authority="eval-run-1",
-                frozen_manifest={"status": "FROZEN", "subject_sha": "abc" * 8},
+                authority=authority,
+                frozen_manifest=frozen,
             )
 
     def test_rejects_role_spoofing(self) -> None:
@@ -314,11 +322,14 @@ class TestQuarantinePositiveControls(unittest.TestCase):
         self.assertTrue((dest / "src.txt").is_file())
 
     def test_authorized_synthetic_evaluation_admits(self) -> None:
+        holdout = self.registry["members"][1]
+        authority = bound_evaluation_authority(holdout, run_id="eval-run-authorized")
+        frozen = evaluation_frozen_manifest(holdout, run_id="eval-run-authorized")
         admitted = admit_evaluation(
             "eval-auth",
             registry=self.registry,
-            authority="eval-run-authorized",
-            frozen_manifest={"status": "FROZEN", "subject_sha": "def" * 8},
+            authority=authority,
+            frozen_manifest=frozen,
             store=self.store,
         )
         self.assertEqual(admitted["role"], "HOLDOUT")
@@ -329,8 +340,8 @@ class TestQuarantinePositiveControls(unittest.TestCase):
             registry=self.registry,
             purpose="evaluation",
             store=self.store,
-            authority="eval-run-authorized",
-            frozen_manifest={"status": "FROZEN", "subject_sha": "def" * 8},
+            authority=authority,
+            frozen_manifest=frozen,
         )
         self.assertEqual((dest / "src.txt").read_bytes(), b"authorized-eval")
         refuse_unfrozen_scoring(
@@ -338,6 +349,181 @@ class TestQuarantinePositiveControls(unittest.TestCase):
             {"status": "FROZEN", "subject_sha": "def" * 8},
             registry=self.registry,
         )
+
+
+class TestQ01CorrectionGuards(unittest.TestCase):
+    def setUp(self) -> None:
+        self.tmpdir = tempfile.TemporaryDirectory()
+        self.root = Path(self.tmpdir.name)
+        self.dev_bytes = b"synthetic-dev-source-v2"
+        self.holdout_bytes = b"synthetic-holdout-source-v2"
+        self.oracle_bytes = b"synthetic-holdout-oracle-v2"
+        self.dev_dir = self.root / "fresh-dev"
+        self.dev_dir.mkdir()
+        (self.dev_dir / "src.txt").write_bytes(self.dev_bytes)
+        self.store = SealedStore(self.root / "sealed")
+        self.store.write_member("fresh-dev", {"src.txt": self.dev_bytes})
+        self.store.write_member("eval-auth", {"src.txt": self.holdout_bytes})
+        exposed = _member(
+            member_id="old-exposed",
+            role="EXPOSED",
+            source_fp=fingerprint_bytes(self.dev_bytes),
+            oracle_fp=fingerprint_bytes(b"old-oracle"),
+            aliases=["old-exposed-alias"],
+            tombstone=_attestation({"id": "old-exposed", "irreversible": True}),
+        )
+        holdout = _member(
+            member_id="eval-auth",
+            role="HOLDOUT",
+            source_fp=fingerprint_bytes(self.holdout_bytes),
+            oracle_fp=fingerprint_bytes(self.oracle_bytes),
+            stratum="single_file",
+        )
+        dev = _member(
+            member_id="fresh-dev",
+            role="DEV",
+            source_fp=fingerprint_tree(self.dev_dir),
+            oracle_fp=fingerprint_bytes(b"dev-oracle"),
+        )
+        self.registry = _registry([exposed, holdout, dev])
+        self.holdout = holdout
+
+    def tearDown(self) -> None:
+        self.tmpdir.cleanup()
+
+    def test_missing_id_refuses_without_ordinary_scope(self) -> None:
+        with self.assertRaisesRegex(QuarantineError, "missing identity"):
+            guard_materialization(task_id=None, registry=self.registry)
+        with self.assertRaisesRegex(QuarantineError, "missing identity"):
+            guard_capture(task_id=None, registry=self.registry)
+
+    def test_unknown_id_refuses(self) -> None:
+        with self.assertRaisesRegex(QuarantineError, "unknown identity"):
+            guard_materialization(task_id="no-such-task", registry=self.registry)
+        with self.assertRaisesRegex(QuarantineError, "unknown identity"):
+            guard_capture(task_id="no-such-task", registry=self.registry)
+
+    def test_renamed_alias_id_refuses(self) -> None:
+        with self.assertRaisesRegex(QuarantineError, "renamed identity"):
+            guard_materialization(task_id="old-exposed-alias", registry=self.registry)
+
+    def test_ordinary_user_work_is_explicit(self) -> None:
+        guard_materialization(
+            task_id=None,
+            registry=self.registry,
+            scope=SCOPE_ORDINARY_USER,
+        )
+        guard_capture(task_id="my-private-repo", registry=self.registry, scope=SCOPE_ORDINARY_USER)
+        with self.assertRaisesRegex(QuarantineError, "ordinary-user"):
+            guard_materialization(
+                task_id="fresh-dev",
+                registry=self.registry,
+                scope=SCOPE_ORDINARY_USER,
+            )
+
+    def test_copied_content_refuses(self) -> None:
+        other = self.root / "copied"
+        other.mkdir()
+        (other / "src.txt").write_bytes(self.holdout_bytes)
+        with self.assertRaisesRegex(QuarantineError, "copied content"):
+            admit_development("fresh-dev", source=other, registry=self.registry)
+        with self.assertRaisesRegex(QuarantineError, "copied content"):
+            guard_materialization(
+                task_id="fresh-dev",
+                source=other,
+                registry=self.registry,
+            )
+
+    def test_forged_authority_and_frozen_refuse(self) -> None:
+        with self.assertRaisesRegex(QuarantineError, "forged authority"):
+            admit_evaluation(
+                "eval-auth",
+                registry=self.registry,
+                authority="truthy-but-unbound",
+                frozen_manifest=evaluation_frozen_manifest(self.holdout, run_id="run-1"),
+                store=self.store,
+            )
+        with self.assertRaisesRegex(QuarantineError, "forged FROZEN|unfrozen"):
+            admit_evaluation(
+                "eval-auth",
+                registry=self.registry,
+                authority=bound_evaluation_authority(self.holdout, run_id="run-1"),
+                frozen_manifest={"status": "FROZEN"},
+                store=self.store,
+            )
+
+    def test_altered_commitments_refuse(self) -> None:
+        frozen = evaluation_frozen_manifest(self.holdout, run_id="run-1")
+        frozen["source_fingerprint"] = fingerprint_bytes(b"tampered-source")
+        with self.assertRaisesRegex(QuarantineError, "altered commitments"):
+            admit_evaluation(
+                "eval-auth",
+                registry=self.registry,
+                authority=bound_evaluation_authority(self.holdout, run_id="run-1"),
+                frozen_manifest=frozen,
+                store=self.store,
+            )
+
+    def test_solver_mounted_oracle_refuses(self) -> None:
+        poisoned = self.store.member_path("fresh-dev")
+        (poisoned / "hidden.txt").write_bytes(b"dev-oracle")
+        dest = self.root / "solver-ws"
+        with self.assertRaisesRegex(QuarantineError, "solver-mounted"):
+            materialize(
+                identity="fresh-dev",
+                destination=dest,
+                registry=self.registry,
+                purpose="development",
+                store=self.store,
+            )
+
+    def test_actual_loader_entrypoint_refuses_holdout_and_unknown(self) -> None:
+        from benchmarks.baac.lib.state import materialize_scratch_workspace
+        from unittest.mock import patch
+
+        holdout_dir = self.root / "eval-auth"
+        holdout_dir.mkdir()
+        (holdout_dir / "src.txt").write_bytes(self.holdout_bytes)
+        scratch = self.root / "scratch"
+        with patch("benchmarks.ladder.quarantine.load_registry", return_value=self.registry):
+            with self.assertRaisesRegex(
+                QuarantineError,
+                "HOLDOUT|unknown identity|DEV capture|ordinary-user",
+            ):
+                materialize_scratch_workspace(holdout_dir, scratch)
+
+    def test_guard_loader_never_treats_omitted_id_as_ordinary(self) -> None:
+        with self.assertRaisesRegex(QuarantineError, "missing identity"):
+            guard_loader(task_id=None, registry=self.registry)
+
+    def test_guard_loader_unknown_id_refuses_without_ordinary_scope(self) -> None:
+        with self.assertRaisesRegex(QuarantineError, "unknown identity"):
+            guard_loader(task_id="no-such-task", registry=self.registry)
+        with self.assertRaisesRegex(QuarantineError, "unknown identity"):
+            guard_loader(task_id="no-such-task", registry=self.registry, capture=True)
+        guard_loader(
+            task_id="no-such-task",
+            registry=self.registry,
+            scope=SCOPE_ORDINARY_USER,
+        )
+        guard_loader(
+            task_id="no-such-task",
+            registry=self.registry,
+            capture=True,
+            scope=SCOPE_ORDINARY_USER,
+        )
+
+    def test_guard_loader_renamed_alias_refuses(self) -> None:
+        with self.assertRaisesRegex(QuarantineError, "renamed identity"):
+            guard_loader(task_id="old-exposed-alias", registry=self.registry)
+
+    def test_registered_identity_cannot_use_ordinary_user_scope_on_loader(self) -> None:
+        with self.assertRaisesRegex(QuarantineError, "ordinary-user"):
+            guard_loader(
+                task_id="fresh-dev",
+                registry=self.registry,
+                scope=SCOPE_ORDINARY_USER,
+            )
 
 
 class TestCommittedRegistryCommitments(unittest.TestCase):

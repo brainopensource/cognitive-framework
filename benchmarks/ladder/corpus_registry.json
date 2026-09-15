@@ -11,32 +11,37 @@
       "path": "benchmarks/baac/lib/runner.py"
     },
     {
-      "guard": "observed-unleased",
+      "guard": "required",
       "kind": "loader",
       "path": "benchmarks/baac/lib/state.py"
     },
     {
-      "guard": "observed-unleased",
+      "guard": "required",
       "kind": "loader",
       "path": "benchmarks/benchmark_needle_in_haystack.py"
     },
     {
-      "guard": "observed-unleased",
+      "guard": "required",
       "kind": "loader",
       "path": "tools/diagnostics/write_landing_probe.py"
     },
     {
-      "guard": "observed-unleased",
+      "guard": "required",
+      "kind": "materialize",
+      "path": "benchmarks/diagnostics/approval_path_probe.py"
+    },
+    {
+      "guard": "required",
       "kind": "loader",
       "path": "benchmarks/gemini_multifile_benchmark/runner.py"
     },
     {
-      "guard": "observed-unleased",
+      "guard": "required",
       "kind": "loader",
       "path": "benchmarks/harness_comparison_bench.py"
     },
     {
-      "guard": "observed-unleased",
+      "guard": "required",
       "kind": "loader",
       "path": "benchmarks/ladder/l0_triad/runner.py"
     },
@@ -51,37 +56,37 @@
       "path": "benchmarks/product_path.py"
     },
     {
-      "guard": "observed-unleased",
+      "guard": "required",
       "kind": "loader",
       "path": "benchmarks/run_20_eval_suite.py"
     },
     {
-      "guard": "observed-unleased",
+      "guard": "required",
       "kind": "loader",
       "path": "benchmarks/run_3_hard_lda.py"
     },
     {
-      "guard": "observed-unleased",
+      "guard": "required",
       "kind": "loader",
       "path": "tools/002_LLM_API_MOCK/import_10_pro_corpus.py"
     },
     {
-      "guard": "observed-unleased",
+      "guard": "required",
       "kind": "loader",
       "path": "tools/002_LLM_API_MOCK/import_16_corpus.py"
     },
     {
-      "guard": "observed-unleased",
+      "guard": "required",
       "kind": "loader",
       "path": "tools/002_LLM_API_MOCK/import_pro_corpus.py"
     },
     {
-      "guard": "observed-unleased",
+      "guard": "required",
       "kind": "loader",
       "path": "tools/002_LLM_API_MOCK/import_swe_verified_repo.py"
     },
     {
-      "guard": "observed-unleased",
+      "guard": "required",
       "kind": "capture",
       "path": "tools/002_LLM_API_MOCK/importer.py"
     },
@@ -101,7 +106,7 @@
       "path": "tools/002_LLM_API_MOCK/store.py"
     },
     {
-      "guard": "observed-unleased",
+      "guard": "required",
       "kind": "loader",
       "path": "tools/telemetry/coding_lam.py"
     },

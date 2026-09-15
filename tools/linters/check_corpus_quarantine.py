@@ -44,6 +44,7 @@ GUARD_NAMES = frozenset({
     "guard_capture",
     "guard_export",
     "guard_product_execution",
+    "guard_loader",
     "refuse_unfrozen_scoring",
 })
 SKIP_PARTS = frozenset({
@@ -83,6 +84,47 @@ def _function_names(node: ast.AST) -> set[str]:
     elif isinstance(node, ast.Attribute):
         names.add(node.attr)
     return names
+
+
+def _direct_call_names(func: ast.AST) -> set[str]:
+    names: set[str] = set()
+    for child in ast.iter_child_nodes(func):
+        if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            continue
+        for node in ast.walk(child):
+            if isinstance(node, ast.Call):
+                names |= _function_names(node.func)
+    return names
+
+
+def _iter_callables(tree: ast.AST):
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            yield node.name, node
+
+
+def callable_guard_coverage(root: Path, rel: str) -> list[str]:
+    path = root / rel
+    if not path.is_file():
+        return [f"inventoried entrypoint missing {rel}"]
+    try:
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=rel)
+    except (OSError, SyntaxError) as exc:
+        return [f"unreadable entrypoint {rel}: {exc}"]
+    errors: list[str] = []
+    found_loader = False
+    for name, node in _iter_callables(tree):
+        calls = _direct_call_names(node)
+        is_loader = name in LOADER_NAMES
+        calls_loader = bool(calls & LOADER_NAMES)
+        if not is_loader and not calls_loader:
+            continue
+        found_loader = True
+        if not (calls & GUARD_NAMES):
+            errors.append(f"unguarded callable {rel}::{name}")
+    if not found_loader:
+        errors.append(f"listed but unguarded callable {rel}")
+    return errors
 
 
 def discover_loaders(root: Path) -> set[str]:
@@ -149,10 +191,16 @@ def check_entrypoints(root: Path, registry: dict[str, Any]) -> list[str]:
             errors.append(f"inventoried entrypoint missing {path}")
             continue
         kind = row.get("guard")
+        if kind == "observed-unleased":
+            errors.append(f"listed but unguarded callable {path}")
+            continue
+        if kind == "declarative":
+            text = (root / path).read_text(encoding="utf-8")
+            if '"id"' not in text or '"role"' not in text:
+                errors.append(f"declarative identity missing role {path}")
+            continue
         if kind == "required":
-            calls = _file_calls(root, path)
-            if not (calls & GUARD_NAMES):
-                errors.append(f"unguarded loader {path}")
+            errors.extend(callable_guard_coverage(root, path))
     return errors
 
 

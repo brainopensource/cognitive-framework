@@ -9,6 +9,10 @@ Scans three trees (F-18, ADR-0075):
 Wave 0 extension: the linter previously scanned only layer0/, which is narrower
 than Invariant I-7 as stated in SPEC. This change makes the enforcement scope
 match the invariant's stated coverage.
+
+Domain filesystem I/O is a hexagonal-purity rule (not I-7). The detector and
+DOMAIN_IO_ALLOWLIST live in check_boundaries.py as the single source of truth;
+this linter reuses find_domain_io so I/O-in-domain fails here as well.
 """
 
 from __future__ import annotations
@@ -25,6 +29,7 @@ for _p in (_COMMON, _TOOLS):
         sys.path.insert(0, str(_p))
 
 from repo_paths import repo_root
+from check_boundaries import find_domain_io
 
 # Word boundaries so `dataclass` / `last` are not false positives of `ast`.
 _FORBIDDEN = re.compile(r"\b(coding|pytest|ast)\b")
@@ -89,6 +94,9 @@ def main() -> int:
     if missing:
         for m in missing:
             print(f"DOMAIN-BLINDNESS WARN: scan target missing (not an error): {m}")
+
+    io_hits = find_domain_io(repo)
+    all_hits.extend(io_hits)
 
     if all_hits:
         for hit in all_hits:

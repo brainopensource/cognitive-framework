@@ -174,7 +174,7 @@ To ensure complete reproducibility and formal auditability (`RF-87`):
 `HarnessSession` acts as the single runtime authority (`RF-94`):
 - **Sole Facade**: Components within a session interact exclusively through session-provided facades.
 - **Single Emitter Ownership**: All events written to SQLite WAL flow through `HarnessSession.emitter` (`LedgerEmitter`), ensuring unbroken hash-chaining and strict writer role validation (`PRIVILEGED_KIND_OWNERS`).
-- **Governor Coordination**: `HarnessSession` manages root budget leases and passes attenuated child leases to the kernel.
+- **Governor Coordination**: `HarnessSession` manages root budget leases and passes attenuated child leases to the kernel. Inference reserves and settles against that same governor. If a composed model route falls back after an attempted primary and cannot prove complete aggregate usage, the result remains explicitly unsettled and retains the conservative reservation; a successful final provider response cannot erase an earlier attempt.
 
 ---
 
@@ -258,6 +258,13 @@ Custom execution-profile overrides accept JSON or YAML mappings. YAML parsing is
 ## 7. Semantic Continuation
 
 Cold resume reconstructs safety/accounting state and reconciles effects. `SemanticTaskState` (`CodingTaskState` alias) in `vanguard/packages/domain/task_state.py` is the compact durable continuation value: task class, completion requirements, plan/discoveries/dead ends, implicated and modified files, route decisions, evidence-gated TODOs, latest verification, settled effects, next action, remaining budgets, monotonic revision, and backlog steps. Runtime `fold_task_state` is the only producer. Resume preserves the ledger `episode_id` and compiles σ into L4/L5; it must not dump `resume_state` JSON into frozen L3. This packet is derived state; missing evidence must fail explicitly or trigger regrounding rather than silently invent context.
+
+Git-backed workspace identity is content-addressed from the observable tree, while
+the Git revision remains separate provenance metadata. An initialized repository
+with no commits is therefore a valid greenfield candidate: it has a tree digest
+and an explicit absent `head_commit`. A non-repository, an unenumerable tree, or
+an unresolved current `HEAD` in a repository with reachable history is a typed
+refusal; it never becomes an empty or synthetic workspace identity.
 
 Ledger sequence and digest continuity are scoped by `project_id`. Every session projection that reduces an episode therefore queries by both `episode_id` and `project_id`; folding an episode label across independent projects would combine separate sequence-zero events and violate monotonic reconstruction. `ContextSelectionRecorded.selectionPolicyIdentity` carries the stable `ContextPacket` selector identity used by resume. The compiler's richer policy identity remains bound by `policyDigest` and `behaviorIdentity.contextPolicyDigest`; it is not recursively inserted into the next frozen packet prefix.
 

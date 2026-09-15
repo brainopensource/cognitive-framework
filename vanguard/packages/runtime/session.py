@@ -119,6 +119,15 @@ from .wiring import (
 )
 
 
+class WorkspaceSnapshotRefused(RuntimeError):
+    """A workspace identity could not be observed at a trust boundary."""
+
+    def __init__(self, kind: str, message: str) -> None:
+        self.kind = kind
+        self.message = message
+        super().__init__(f"WORKSPACE_SNAPSHOT_REFUSED[{kind}]: {message}")
+
+
 def _workspace_access_of(run_plan: Any) -> str:
     """Duck-typed read of the profile's workspace access, mirroring
     `artifacts.resolve_capture_policy`'s `getattr(profile, "requested", profile)`
@@ -291,6 +300,40 @@ def admission_required(harness: Any) -> bool:
     what it declares, not by whether someone remembered to edit a set.
     """
     return "patch.apply" in set(getattr(harness, "verbs", ()) or ())
+
+
+def _completion_receipt_binding(
+    receipt: VerificationReceipt | None,
+    *,
+    workspace_digest: str,
+    task_digest: str,
+    composition_digest: str,
+    verification_command: str | None,
+    verification_subject_digest: str | None,
+) -> AdmissionVerdict | None:
+    """Refuse a completion receipt not bound to this exact live subject."""
+    if receipt is None:
+        return AdmissionVerdict(False, "VERIFICATION_REQUIRED")
+    if receipt.workspace_digest != workspace_digest:
+        return AdmissionVerdict(False, "VERIFICATION_STALE")
+    if not receipt.task_digest:
+        return AdmissionVerdict(False, "VERIFICATION_UNBOUND_TASK")
+    if receipt.task_digest != task_digest:
+        return AdmissionVerdict(False, "VERIFICATION_FOREIGN_TASK")
+    if not receipt.composition_digest:
+        return AdmissionVerdict(False, "VERIFICATION_UNBOUND_COMPOSITION")
+    if receipt.composition_digest != composition_digest:
+        return AdmissionVerdict(False, "VERIFICATION_FOREIGN_COMPOSITION")
+    if not receipt.verification_command or not verification_command:
+        return AdmissionVerdict(False, "VERIFICATION_UNBOUND_SUBJECT")
+    if receipt.verification_command != verification_command:
+        return AdmissionVerdict(False, "VERIFICATION_FOREIGN_SUBJECT")
+    if not receipt.verification_subject_digest or not verification_subject_digest:
+        return AdmissionVerdict(False, "VERIFICATION_UNBOUND_SUBJECT")
+    if receipt.verification_subject_digest != verification_subject_digest:
+        return AdmissionVerdict(False, "VERIFICATION_FOREIGN_SUBJECT")
+    return None
+
 
 _CONTROLLER_BUDGET_KEYS: Mapping[str, str] = {
     "usd_micros": "usd_micros",
@@ -702,6 +745,18 @@ class SessionPorts:
     #: Child episodes share the parent's environment lifetime. Only the root
     #: composition owns and disposes the concrete environment adapter.
     environment_owner: bool = True
+    #: `T-141`/`DIR-C5`. Builds a child-local effect adapter rooted at one
+    #: child's isolated view: `(child_id, root) -> EnvironmentAdapter`. Only
+    #: the composition root knows which concrete adapter this profile runs, so
+    #: the factory is injected here rather than discovered by the runtime.
+    #: `None` is not a fallback to the parent's adapter -- it is the reason a
+    #: spawning composition is refused at `Runtime.run_composed`.
+    child_environment: Callable[[str, Any], Any] | None = None
+    #: `T-141`/`DIR-C7`. Builds an exterior evaluator bound to one staged
+    #: combined tree and the digest it must verify:
+    #: `(child_id, staged_root, tree_digest) -> EvaluatorPort`. Publication
+    #: revalidates that verdict; `None` means no child may publish.
+    child_tree_verifier: Callable[[str, Any, str], Any] | None = None
 
 
 class _SwappablePolicy:
@@ -1662,6 +1717,19 @@ class HarnessSession:
         # a patch, the exact shape of the observed instrument error.
         seen_verbs_acc: set[str] = set()
         while True:
+            try:
+                self._workspace_digest()
+            except WorkspaceSnapshotRefused as refused:
+                # `E-CLI-1`. Bind identity before the model runs. Completion
+                # admission is not always wired (a harness without
+                # `patch.apply` has no admitter), so a finish-only tape must
+                # still refuse rather than complete against a parent-git
+                # identity or an unhandled exception.
+                terminal = RunTermination.ABANDONED
+                detail = (
+                    f"WORKSPACE_UNOBSERVABLE[{refused.kind}]: {refused.message}"
+                )
+                break
             remaining = task.max_turns - self.turns_consumed()
             if remaining <= 0:
                 terminal = RunTermination.ABANDONED
@@ -1694,16 +1762,27 @@ class HarnessSession:
                                      else None),
                 completion_allowed_tools=self._completion_allowed_tools)
             self._active_episode_engine = engine
-            outcome = engine.run(
-                episode_id=task.episode_id, run_id=task.run_id,
-                principal=task.principal, brief=task.brief,
-                spans=(_operator_span(),),
-                receipt_labeller=lambda turn, dispatch: _admit_turn_result(
-                    self.operator, turn, dispatch,
-                    on_dispatch=self._observe_completion_dispatch),
-                prior_turns=prior_turns,
-                prior_seen_verbs=tuple(sorted(seen_verbs_acc)),
-                prior_recovery_state=prior_recovery_state)
+            try:
+                outcome = engine.run(
+                    episode_id=task.episode_id, run_id=task.run_id,
+                    principal=task.principal, brief=task.brief,
+                    spans=(_operator_span(),),
+                    receipt_labeller=lambda turn, dispatch: _admit_turn_result(
+                        self.operator, turn, dispatch,
+                        on_dispatch=self._observe_completion_dispatch),
+                    prior_turns=prior_turns,
+                    prior_seen_verbs=tuple(sorted(seen_verbs_acc)),
+                    prior_recovery_state=prior_recovery_state)
+            except WorkspaceSnapshotRefused as refused:
+                # `E-CLI-1`. The public route must receive a typed terminal,
+                # not an unhandled exception, and not a substituted identity.
+                # This seam is the workspace-identity boundary: the episode
+                # loop is not required to classify the reason.
+                terminal = RunTermination.ABANDONED
+                detail = (
+                    f"WORKSPACE_UNOBSERVABLE[{refused.kind}]: {refused.message}"
+                )
+                break
             seen_verbs_acc.update(
                 str(getattr(req, "action", "")) for req, _ in self.calls)
             prior_turns = outcome.episode.turns
@@ -1932,10 +2011,20 @@ class HarnessSession:
         return digest_of({"runId": self.task.run_id, "brief": self.task.brief})
 
     def _workspace_digest(self) -> str:
+        # The environment port is what can or cannot observe this workspace;
+        # asking git directly here would assert one adapter's implementation
+        # at a port boundary and refuse every composition whose environment
+        # is legitimately not a git checkout. A refusal is carried, never
+        # repaired into a fabricated digest or an empty-tree default
+        # (`E-CLI-1`).
         snapshot = self.ports.environment.snapshot()
         if snapshot.ok and snapshot.value is not None:
             return snapshot.value.digest
-        return ""
+        failure = snapshot.error
+        raise WorkspaceSnapshotRefused(
+            getattr(failure, "kind", "instrument_error"),
+            getattr(failure, "message", "workspace snapshot unavailable"),
+        )
 
     def _epoch_from_repo_map(self, repo_map: Any, *, compiled_at_turn: int) -> WorkspaceEpoch:
         try:
@@ -2280,8 +2369,7 @@ class HarnessSession:
             exit_code=exit_code,
             executed_test_count=_observed_test_count(detail),
             workspace_digest=subject.workspace_digest,
-            task_digest=(self.run_plan.task_digest if self.run_plan is not None
-                         else digest_of({"task": self.task.brief})),
+            task_digest=self._current_task_digest(),
             composition_digest=self.run_plan.composition_digest if self.run_plan is not None else self.harness.composition_digest,
             receipt_digest=outcome.result_digest or "",
             verification_command=verification_command,
@@ -2635,12 +2723,21 @@ class HarnessSession:
                     "enumerated tests and re-verify; tests are the subject of "
                     "verification, not part of the patch.",
                 )
+        # `E-CLI-1`. `_workspace_digest` refuses rather than substituting
+        # an identity. The refusal raises so `HarnessSession.run` can emit a
+        # typed terminal on every public surface; converting it into a
+        # retryable admission verdict would burn the turn budget and then
+        # report tape exhaustion instead of the workspace.
+        #
+        # Read once. The four bindings below must agree about *which*
+        # workspace they describe.
+        current_workspace_digest = self._workspace_digest()
         verdict = policy.evaluate(
             preset_name=self.harness.harness,
             changed_files=tuple(sorted(self._completion_changed_files)),
             proposal={"kind": "finish"},
             verification=self._completion_verification,
-            current_workspace_digest=self._workspace_digest(),
+            current_workspace_digest=current_workspace_digest,
             current_task_digest=self._current_task_digest(),
             current_composition_digest=(self.run_plan.composition_digest if self.run_plan is not None else self.harness.composition_digest),
             current_verification_command=self._completion_verification_command,
@@ -2650,7 +2747,7 @@ class HarnessSession:
             current_verification_subject_digest=(
                 replace(
                     self._completion_verification_subject,
-                    workspace_digest=self._workspace_digest(),
+                    workspace_digest=current_workspace_digest,
                     task_digest=self._current_task_digest(),
                 ).digest()
                 if self._completion_verification_subject is not None else None
@@ -2676,6 +2773,25 @@ class HarnessSession:
             )
         else:
             return AdmissionVerdict(False, "COMPLETION_POLICY_INVALID_VERDICT")
+        binding_refusal = _completion_receipt_binding(
+            self._completion_verification,
+            workspace_digest=current_workspace_digest,
+            task_digest=self._current_task_digest(),
+            composition_digest=(self.run_plan.composition_digest
+                                if self.run_plan is not None
+                                else self.harness.composition_digest),
+            verification_command=self._completion_verification_command,
+            verification_subject_digest=(
+                replace(
+                    self._completion_verification_subject,
+                    workspace_digest=current_workspace_digest,
+                    task_digest=self._current_task_digest(),
+                ).digest()
+                if self._completion_verification_subject is not None else None
+            ),
+        )
+        if binding_refusal is not None:
+            return binding_refusal
         if not admission.admissible or self.ports.caller_admission is None:
             return admission
         evidence = self._caller_admission_evidence()

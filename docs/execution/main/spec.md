@@ -23,6 +23,7 @@ relationships:
   - execution.backlog
   - execution.tasks
   - execution.technical
+  - execution.mvp_delivery_protocol
 ---
 
 # Feature & Target Specification (execution)
@@ -483,6 +484,185 @@ security authority, measurement acceptance changes and repeated evidenced blocke
 return to leadership. No provider call, paid run, actual control freeze, benchmark
 run/score, milestone closure or SOTA claim is authorized; CAS/delegation/campaign and
 other post-control proposals gain no implementation scope or replacement schedule.
+
+## DIR-4. Capability-foundation continuation (2026-09-15)
+
+Leadership authorizes three bounded capability outcomes alongside the existing
+integrity queue: isolated child workspaces, long-session continuity, and trustworthy
+greenfield/multi-file oracle completeness. Planner-to-worker-to-verifier convergence
+is conditional on independent acceptance of the applicable foundations. This
+supersedes blanket deferral of those outcomes until MS-CONTROL, but does not activate
+the remaining FH-1 schemas, CAS algorithms, campaign machinery, learned routing,
+swarm experiments, a provider call, a paid run, T-26, T-27, or milestone closure.
+
+**DIR-C1 — Completion admission.** Completion admission is capability-derived and
+MUST NOT exempt a composition by product name. Requested completion, runtime-admitted
+completion, and independent evaluation remain distinct. Admitted completion stops
+further effects; missing, stale, vacuous, or candidate-unbound verification cannot
+publish success.
+
+**DIR-C2 — One context compiler and one task state.** Context growth MUST extend the
+existing compiler through bounded policies, not a second compiler. The fold-produced
+`SemanticTaskState` remains the sole authoritative task state; versioned continuation
+envelopes MAY carry it but MUST NOT become another state authority.
+
+**DIR-C3 — Budget and identity algebra.** Only additive resource dimensions are
+summed. Depth and turn ceilings remain structural constraints. Grants are revalidated
+at dispatch, refunds cannot create budget, and restart cannot replenish consumption.
+Workspace, behavior/composition, and verification-subject identities remain distinct
+and MUST be explicitly bound where a claim depends on all three.
+
+**DIR-C4 — Topology and coordination.** Extend the existing `Topology` and runtime
+lowering. A versioned plan MAY be an input artifact, but MUST NOT introduce another
+scheduler, episode loop, ledger writer, or authority. Per-mille allocation and the
+named FH-1 aggregation algorithms remain deferred.
+
+**DIR-C5 — Isolated mutation.** Before concurrent mutating workers are enabled, each
+child MUST receive an isolated writable view and exclusive, fenced mutation ownership.
+Children cannot implicitly mutate the parent or sibling candidate. Ownership expiry,
+stale writers, recovery races, partial integration, and failed cleanup fail closed.
+Git worktrees alone do not establish containment. Shared-workspace mutation remains
+serialized.
+
+**DIR-C6 — Long-session continuity.** A long-session treatment MUST be separately
+identified without modifying the three control presets. It reuses the existing pack,
+compiler, runtime, ledger and budget identities. Compaction and fresh-process restart
+preserve objective, constraints, revision, unresolved work, evidence references,
+grants, aggregate consumption, and pending/settled effect identity. Uncertain effects
+are reconciled before retry; settled effects are never replayed. Public packaging and
+numeric envelopes remain evidence-dependent.
+
+**DIR-C7 — Oracle completeness and merge authority.** Workers produce immutable
+candidate references, never acceptance. Authorized integration validates the base,
+combines changes, and obtains exterior verification of the exact combined tree.
+Rebase or mutation invalidates affected evidence. Candidate-bound checks MUST reject
+empty/stub solutions, vacuous discovery, test tampering, stale verification, omitted
+required files, unauthorized additions, and candidate substitution while retaining
+valid positive controls. Consensus cannot mint merge or completion authority.
+
+**DIR-C8 — Measurement and acceptance.** Preserve the existing two-sided,
+uncorrected 95% Wilson calculation with `z = 1.96`, observed binary LIVE outcomes as
+its denominator, all 30 fixed slots, one measured attempt per slot, explicit
+missingness, the existing 18/30 positive boundary, and zero observed false
+completions. Descriptive missingness bounds remain separate from confidence
+intervals. Leadership MAY accept a batched claim only when independent of its
+implementation and material repair; otherwise an eligible non-author is required.
+
+Exact task leases, owners, predecessors, falsifiers and acceptors live in `tasks.md`.
+New target contracts enter this specification before implementation; an as-built
+observation is not an acceptance claim. Accepted durable behavior is promoted to its
+existing architecture/reference owner with its original subject, scope and limits.
+
+### T-144 target — planner-worker-verifier capability demonstration
+
+**TARGET, design only; DIR-C3/C4/C5/C6/C7 refinement.** Extend the existing
+`Topology` and `lower_topology` in `vanguard/packages/runtime/topology.py` through
+the existing runtime execution path. A versioned plan MAY be an input artifact;
+it MUST bind its revision, objective/constraints, input references and intended
+role/artifact relationships. It supplies no execution authority. Lowering MUST
+preserve existing dispatch authorization, attenuated grants, resource ceilings and
+single-writer ledger semantics. No second scheduler, episode loop, ledger writer,
+task-state authority, per-mille allocation or FH-1 aggregation is introduced.
+
+**Identity and candidate contract.** Each immutable worker candidate MUST bind its
+plan/task revision, producing lineage, base workspace identity, candidate tree and
+artifact references. Claims dependent on all three MUST separately bind workspace
+identity, behavior/composition identity and verification-subject identity; one digest
+MUST NOT silently substitute for another. Verification additionally binds the
+required-behavior/oracle subject and its result. Unknown versions, missing bindings,
+changed requirements or mismatched identities MUST fail closed for integration or
+completion claims. Workers and a planner-local verifier role can propose and supply
+artifacts, but neither their agreement nor their role names confer exterior evaluator,
+merge or completion authority.
+
+**Integration and completion contract.** Only the existing authorized integration
+path MAY combine candidates. It MUST revalidate the current base, candidate lineage,
+mutation ownership/fence, grants and remaining resources before effects. It stages
+an exact combined tree, obtains exterior verification of that tree against the
+required behavior, and binds any publication to that same verified subject and
+still-current base. A base change between verification and publication MUST deny
+publication until revalidation and affected verification are repeated. Rebase,
+conflict resolution or any mutation invalidates affected evidence; individual worker
+passes do not verify the combined tree. Successful integration alone is not completion:
+the existing runtime completion admission MUST independently require the applicable
+exact-subject evidence. Partial integration MUST NOT become an accepted candidate.
+
+**Continuity contract.** Plan revisions, immutable candidate references, pending and
+settled integration identities and verification references MUST survive through the
+existing ledger fold/checkpoint path. Restart and compaction grant no new authority,
+reset no consumption and cannot turn uncertain effects into success. Reconcile
+uncertain integration before retry; settled effects MUST NOT be replayed. Only
+recoverable, completely identified artifacts may be considered after recovery.
+
+**Required paper safety argument and future falsifiers.** The invariant is that every
+published integration has current authorization and base binding plus exterior
+verification of its exact combined subject; every admitted completion additionally
+passes existing completion admission. Planning and worker transitions create only
+proposals/artifacts, so they cannot establish either conclusion. The only publishing
+transition checks those predicates; recovery preserves them rather than bypassing
+them. The following cases MUST retain positive controls and must-fail counterparts
+before an implementation can be independently accepted:
+
+| Case | Required disposition preserving the invariant |
+|---|---|
+| Competing candidates | Retain distinct immutable candidates; serialize/fence authorized integration. Selecting or voting for a candidate grants no merge authority; the loser cannot overwrite the accepted tree. |
+| Stale base | Reject integration/publication against a changed base. A newly rebased/combined candidate receives fresh affected evidence before retry. |
+| Worker failure | Failed or partial output cannot satisfy candidate completeness or verification; surviving candidates still pass the full integration gate. |
+| Restart during integration | Recover pending/settled identity from the existing ledger, reconcile uncertainty and prevent duplicate effects; absent proof leaves the claim unresolved. |
+| Exhaustion or revoked grant | Deny the next unauthorized dispatch/integration; preserve artifacts and consumption without declaring completion or replenishing resources. |
+| Verifier rejection or missing/stale verdict | Refuse completion and accepted publication; bounded repair, if still authorized, creates a changed subject requiring fresh verification. |
+| Mutation after verification | Subject/base comparison denies publication or completion using the superseded verdict, including conflict resolution and candidate substitution. |
+
+Acceptance is conditional on applicable T-141/T-142/T-143 independent dispositions
+and exact released leases recorded in `tasks.md`. As-built behavior and green tests
+are not acceptance. T-144 is a **capability demonstration**, never a control result;
+it does not close MS-SEE, MS-CHANGE or MS-CONTROL and cannot contribute a control
+success count or change the existing measurement protocol.
+
+## DIR-5. Engineering-MVP delivery and the child publication contract (2026-09-15)
+
+**DIR-5.1 — Typed outcome.** The next product outcome is the **Engineering-MVP
+subject**: the shipped public coding CLI performs a useful multi-file greenfield and
+brownfield journey, preserves identity and budgets across restart, refuses unsafe
+child mutation, and never claims completion without exact exterior verification. This
+outcome is closed into the finite predicate set `E1`-`E7` held canonically in
+[`mvp_delivery_protocol.md`](mvp_delivery_protocol.md). Prose elsewhere describing
+"the MVP" in open-ended terms is superseded by that predicate set.
+
+**DIR-5.2 — Orthogonality.** `MS-MVP` is a product-capability gate. It is not a `D-6`
+freeze precondition, adds no eighth `F` predicate, and does not alter the 2026-09-13
+`MS-CONTROL` decoupling. Closing it authorizes no paid execution, no corpus admission,
+no `T-27` and no `T-144`.
+
+**DIR-5.3 — Child publication is a normative contract, not an implementation detail.**
+`DIR-C5` and `DIR-C7` are realized by clauses `C-PUB-1`-`C-PUB-9`. Binding in
+substance: a supervised child executes effects through an adapter rooted at its own
+view; candidate retention is immutable and bound to the base it was computed against;
+shared-tree mutation is serialized by monotonic fencing token; publication revalidates
+fence, base, candidate, staged bytes and a signed exterior verdict naming the exact
+combined tree, at the instant before the tree changes; the bytes an evaluator read are
+the bytes that land; recovery finishes authorized publications and never promotes a
+merely retained candidate; and a refused publication is reported `undeterminable`,
+never `ok`.
+
+**DIR-5.4 — No second machinery.** This delta authorizes no scheduler, no second
+episode loop, no second ledger, no second task state and no transaction framework.
+`ChildRuntimePort` is unchanged; the publication authority seam is duck-typed so a
+conforming runner that needs no authority is not obliged to carry one.
+
+**DIR-5.5 — Mutation-proof obligation.** A negative control that does not fail when the
+guard it names is removed is not a control. Every packet introducing a negative control
+records which guards were disabled and that the suite reddened. A control that stays
+green is repaired; the guard is never narrowed to match a weak control, and no gate is
+weakened, silenced or narrowed to produce a green line.
+
+**DIR-5.6 — Reproduced defects are not speculation.** `E-CLI-1` (a non-git workspace
+raises `WorkspaceSnapshotRefused` out of completion admission and escapes the public
+route unhandled) and `E-CLI-2` (`entrypoint.execute` hydrates durable resume state only
+under `command == "resume"`) were reproduced at `90292daa` with exact stacks. Repair is
+bounded to a truthful terminal and to cold-start hydration with fail-closed
+revalidation on the existing ingress. A fabricated digest, an empty-tree default, a
+skipped binding or a second session implementation are each out of contract.
 
 ## NT-1. Near-term baseline, context, cache and recovery delta
 

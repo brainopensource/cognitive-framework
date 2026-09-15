@@ -299,3 +299,45 @@ def compile_task_plan(
         profile=profile,
         head_sha=head_sha,
     )
+
+
+def get_orchestrator(repo_root: Path) -> Any:
+    from .core.orchestrator import RepositoryOrchestrator
+    storage = get_storage(Path(repo_root))
+    return RepositoryOrchestrator(Path(repo_root), storage=storage)
+
+
+def sweep_repository(repo_root: Path, budget: int = 4000) -> Dict[str, Any]:
+    """Execute master one-shot sweep combining repo-status, code-status, and doc-status."""
+    return get_orchestrator(repo_root).sweep(budget=budget)
+
+
+def get_repo_status_summary(repo_root: Path) -> Dict[str, Any]:
+    """Fast git state, HEAD, branch, and dirty diffstat (<20ms)."""
+    return get_orchestrator(repo_root).repo_status()
+
+
+def get_code_status_summary(
+    repo_root: Path,
+    task_id: Optional[str] = None,
+    target_files: Optional[Sequence[str]] = None,
+) -> Dict[str, Any]:
+    """Auto-runs falsifiers for touched files via test-runner skill, plus linters (<2s)."""
+    return get_orchestrator(repo_root).code_status(task_id=task_id, target_files=target_files)
+
+
+def get_doc_status_summary(repo_root: Path) -> Dict[str, Any]:
+    """Living documentation verification (<300ms)."""
+    return get_orchestrator(repo_root).doc_status()
+
+
+def query_runway_tasks(
+    repo_root: Path,
+    task_id: Optional[str] = None,
+    owner: Optional[str] = None,
+    ready_only: bool = False,
+    limit: int = 50,
+) -> List[Dict[str, Any]]:
+    """Query tasks.md runway graph entities without loading full file into context."""
+    return get_orchestrator(repo_root).tasks(task_id=task_id, owner=owner, ready_only=ready_only, limit=limit)
+

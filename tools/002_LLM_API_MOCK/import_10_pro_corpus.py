@@ -9,13 +9,17 @@ DB_PATH = LAM_DIR / "lam.sqlite"
 CAPTURES_DIR = LAM_DIR / "runs" / "live_captures"
 SCENARIOS_DIR = LAM_DIR / "scenarios"
 PRO_DIR = LAM_DIR / "fixtures" / "pro"
+ROOT = LAM_DIR.parents[1]
 
 import sys
 if str(LAM_DIR) not in sys.path:
     sys.path.insert(0, str(LAM_DIR))
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from schema import validate_scenario
 from store import LamStore
+from benchmarks.ladder.quarantine import SCOPE_ORDINARY_USER, guard_loader
 
 NEW_10_PRO_TASKS = [
     ("t7_jit_bytecode_vm", "t7-jit-bytecode-vm", 7, "SWE-bench Pro: Stack Bytecode JIT VM Opcode Execution"),
@@ -34,6 +38,7 @@ def import_10_pro():
     store = LamStore(DB_PATH)
     imported = 0
     for folder_name, scenario_id, tier, title in NEW_10_PRO_TASKS:
+        guard_loader(task_id=scenario_id, capture=True, scope=SCOPE_ORDINARY_USER)
         matches = [p for p in CAPTURES_DIR.glob(f"{folder_name}-*") if p.is_dir()]
         if not matches:
             print(f"⚠ Missing capture for {folder_name}")

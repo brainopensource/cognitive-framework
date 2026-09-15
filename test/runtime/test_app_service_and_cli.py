@@ -149,3 +149,28 @@ class TestAppServiceAndCli(unittest.TestCase):
         self.assertEqual(res_events.returncode, 0)
         events_json = json.loads(res_events.stdout)
         self.assertEqual(events_json["runId"], "cli-run-1")
+
+    def test_non_git_workspace_reaches_a_typed_terminal(self) -> None:
+        """E-CLI-1 on ApplicationService: a plain directory is not a crash."""
+        from vanguard.packages.runtime.session import WorkspaceSnapshotRefused
+
+        app = ApplicationService(workspace=self.workspace)
+        try:
+            run_res = app.run(
+                brief="create the module",
+                profile_id="product",
+                model=FakeModel([{"kind": "finish", "note": "should not complete"}]),
+                run_id="run-plain-cli",
+                state_dir=self.state_dir,
+                interactive=False,
+            )
+        except WorkspaceSnapshotRefused as exc:
+            self.fail(f"a legitimate refusal escaped as a crash: {exc}")
+        self.assertNotEqual(run_res.outcome, "completed")
+        blob = f"{run_res.outcome} {run_res.detail or ''}".lower()
+        self.assertTrue(
+            "workspace" in blob or run_res.outcome in {
+                "undeterminable", "abandoned", "instrument_error",
+            },
+            f"unobservable workspace was not a typed refusal: {blob[:400]}",
+        )

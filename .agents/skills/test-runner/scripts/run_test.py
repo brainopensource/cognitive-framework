@@ -12,6 +12,7 @@ import json
 import time
 import argparse
 import subprocess
+import signal
 from typing import Dict, Any, List
 
 def run_isolated_test(command: str, timeout: float = 15.0, cwd: str = ".") -> Dict[str, Any]:
@@ -34,15 +35,29 @@ def run_isolated_test(command: str, timeout: float = 15.0, cwd: str = ".") -> Di
             env=env,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True
+            text=True,
+            start_new_session=True,
         )
         try:
             stdout_str, stderr_str = proc.communicate(timeout=timeout)
             exit_code = proc.returncode
         except subprocess.TimeoutExpired:
             timed_out = True
-            proc.kill()
-            stdout_str, stderr_str = proc.communicate()
+            try:
+                os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+            except (ProcessLookupError, PermissionError):
+                proc.terminate()
+            try:
+                stdout_str, stderr_str = proc.communicate(timeout=min(1.0, max(0.1, timeout)))
+            except subprocess.TimeoutExpired:
+                try:
+                    os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+                except (ProcessLookupError, PermissionError):
+                    proc.kill()
+                try:
+                    stdout_str, stderr_str = proc.communicate(timeout=2.0)
+                except subprocess.TimeoutExpired:
+                    stderr_str = f"{stderr_str}\n[runner] process group survived SIGKILL".strip()
             exit_code = 124
     except Exception as exc:
         stderr_str = f"Execution failed to launch: {exc}"
@@ -51,28 +66,69 @@ def run_isolated_test(command: str, timeout: float = 15.0, cwd: str = ".") -> Di
     duration = time.time() - start_time
     combined_output = f"{stdout_str}\n{stderr_str}".strip()
 
-    # Parse failure details
+    # Parse failure details one separator-delimited block at a time. This
+    # prevents a traceback from one test consuming the next test's header.
     failures: List[Dict[str, str]] = []
-    
-    # Match unittest/pytest style failures with optional multiline docstrings
-    fail_matches = re.findall(
-        r"(FAIL|ERROR):\s+([^\s]+)\s+\(([^)]+)\)\n.*?\n[-=]{40,}\n(Traceback.*?(?:\n[A-Z][a-zA-Z0-9_]*Error:.*?(?=\n\n|\n=|\n-|$)|$))",
-        combined_output,
-        re.DOTALL
+    block_re = re.compile(
+        r"^(FAIL|ERROR):\s+([^\s]+)\s+\(([^)]+)\)(?:\s+.*)?$",
+        re.MULTILINE,
     )
-    for kind, method, cls, tb in fail_matches:
+    headers = list(block_re.finditer(combined_output))
+    for index, header in enumerate(headers):
+        kind, method, owner = header.groups()
+        test_name = owner if owner.endswith("." + method) else f"{owner}.{method}"
+        end = headers[index + 1].start() if index + 1 < len(headers) else len(combined_output)
+        body = combined_output[header.end():end].strip()
+        body = re.sub(r"(?m)^[-=]{40,}\s*$", "", body).strip()
+        footer = re.search(r"(?m)^Ran\s+\d+\s+tests?\s+in\b", body)
+        if footer:
+            body = body[:footer.start()].strip()
         failures.append({
             "kind": kind,
-            "test": f"{cls}.{method}",
-            "traceback": tb.strip()
+            "test": test_name,
+            "traceback": body,
         })
 
-    # Summary regex
-    failed_summary_match = re.search(r"FAILED\s*\((?:failures=(\d+))?(?:,\s*)?(?:errors=(\d+))?\)", combined_output)
-    failures_count = int(failed_summary_match.group(1) or 0) if failed_summary_match else (len(failures) if exit_code != 0 else 0)
-    errors_count = int(failed_summary_match.group(2) or 0) if failed_summary_match else 0
+    # The final unittest summary is the only authoritative count. Parse its
+    # comma-separated name=count bag without relying on key ordering.
+    summary_matches = list(re.finditer(
+        r"(?m)^(?P<status>OK|FAILED)(?:\s*\((?P<details>[^)]*)\))?\s*$",
+        combined_output,
+    ))
+    counts: Dict[str, int] = {}
+    counts_parsed = bool(summary_matches)
+    total_match = list(re.finditer(r"(?m)^Ran\s+(\d+)\s+tests?\s+in\s+", combined_output))
+    total_count = int(total_match[-1].group(1)) if total_match else None
+    if summary_matches:
+        details = summary_matches[-1].group("details") or ""
+        pairs = re.findall(r"([A-Za-z][A-Za-z ]*?)\s*=\s*(\d+)", details)
+        remainder = re.sub(r"([A-Za-z][A-Za-z ]*?)\s*=\s*(\d+)", "", details)
+        keys = [key.strip() for key, _ in pairs]
+        if details and (not pairs or remainder.replace(",", "").strip() or len(keys) != len(set(keys))):
+            counts_parsed = False
+        else:
+            counts = {key.strip(): int(value) for key, value in pairs}
+    if counts_parsed:
+        failures_count = counts.get("failures", 0)
+        errors_count = counts.get("errors", 0)
+        skipped_count = counts.get("skipped", 0)
+    else:
+        # A parse miss never reads as zero. Infer only the kinds actually seen
+        # as blocks; a kind with no block is unknown, not proven absent.
+        observed_failures = [f for f in failures if f["kind"] == "FAIL"]
+        observed_errors = [f for f in failures if f["kind"] == "ERROR"]
+        failures_count = len(observed_failures) or None
+        errors_count = len(observed_errors) or None
+        skipped_count = None
 
     success = (exit_code == 0) and not timed_out
+
+    parsed_summary = "unknown"
+    if counts_parsed:
+        fields = ", ".join(f"{key}={value}" for key, value in counts.items())
+        parsed_summary = fields or "none"
+    if total_count is not None:
+        parsed_summary = f"total={total_count}; {parsed_summary}"
 
     return {
         "command": command,
@@ -82,12 +138,18 @@ def run_isolated_test(command: str, timeout: float = 15.0, cwd: str = ".") -> Di
         "timed_out": timed_out,
         "failures_count": failures_count,
         "errors_count": errors_count,
+        "skipped_count": skipped_count,
+        "total_count": total_count,
+        "counts": counts,
+        "counts_parsed": counts_parsed,
         "failures": failures,
         "stdout": stdout_str,
         "stderr": stderr_str,
-        "summary": "OK" if success else (
-            f"TIMED_OUT ({timeout}s)" if timed_out else f"FAILED (failures={failures_count}, errors={errors_count})"
-        )
+        "summary": (
+            f"OK ({parsed_summary})" if success else
+            f"TIMED_OUT ({timeout}s; {parsed_summary})" if timed_out else
+            f"FAILED ({parsed_summary})"
+        ),
     }
 
 def main():

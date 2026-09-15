@@ -6,6 +6,7 @@ and frozen at composition time.
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
 from typing import Any, Mapping, Protocol, Sequence, runtime_checkable
 
@@ -80,13 +81,174 @@ def _receipt_for(block: Block) -> Block:
     )
 
 
-def _drop_flexible_notes(notes: list[Block], dropped: list[str], total, ceiling: int) -> None:
-    """T-15: drop flexible L4 notes under pressure; never FEATURE_SPEC pinned sources."""
+#: The source the prompt assembler stamps on the durable task-state note it
+#: compiles from `fold_task_state` (`runtime/prompt_assembler.py`).
+_TASK_STATE_SOURCE = "task-state"
+
+#: T-142. `PINNED_L4_SOURCES` carries the FEATURE_SPEC tier 0-1 findings.
+#: The durable task-state note belongs beside them: it is the only L4 block
+#: that carries the objective, the open obligations, the settled effects, the
+#: aggregate consumption and the grant state at once, so dropping it to
+#: satisfy a budget deletes the whole continuation rather than trimming it.
+#: `Fragment.evictable` does not express this -- it marks a tool-result body
+#: that may be elided into a receipt, and it defaults to `False` on every
+#: ordinary note -- so the mandatory set is named here, where the drop policy
+#: lives, rather than inferred from it.
+_MANDATORY_L4_SOURCES: frozenset[str] = PINNED_L4_SOURCES | {_TASK_STATE_SOURCE}
+
+#: T-142. Keys of the durable task-state note whose values are identity, not
+#: content: they are bounded by construction and a continuation that loses one
+#: cannot be reconciled against the run that produced it. They are retained
+#: whole at every pressure level.
+_TASK_STATE_IDENTITY_KEYS: tuple[str, ...] = (
+    "objective", "overarchingGoal", "constraints", "taskClass", "runId",
+    "revision", "nextAction", "activeStepId", "changedFilesTreeHash",
+    "remainingBudgets", "lastVerification", "failureClass",
+    "repositoryIdentity", "indexSnapshotDigest", "selectionPolicyIdentity",
+    "recoveryState",
+)
+
+#: Collections a long session grows without bound. Under pressure each is
+#: bounded to its newest entries and the omission is stated in place, so the
+#: planner is told what it can no longer see instead of being shown a shorter
+#: list that looks complete.
+_TASK_STATE_BOUNDED_KEYS: tuple[str, ...] = (
+    "inspectedFiles", "discoveries", "deadEnds", "routeDecisions",
+    "hypotheses", "falsifiedHypotheses", "settledInvariants",
+    "strategySteps", "verificationPlan", "plan", "backlog",
+    "settledEffects", "modifiedFiles", "changeSurface", "todoItems",
+)
+
+#: The ladder `_bound_mandatory_note` walks. Each rung keeps fewer entries of
+#: every bounded collection; the last rung keeps none, and even there the
+#: identity keys and every unsatisfied obligation survive.
+_TASK_STATE_KEEP_LADDER: tuple[int, ...] = (32, 16, 8, 4, 2, 1, 0)
+
+
+def _is_open_obligation(item: Any) -> bool:
+    """An obligation nobody has discharged. Bounding one away loses the work."""
+    return isinstance(item, Mapping) and str(item.get("status", "pending")) != "complete"
+
+
+def _bound_collection(key: str, value: Any, keep: int) -> tuple[Any, int]:
+    """Bound one collection to `keep` newest entries. Returns (value, omitted).
+
+    `todoItems` is the exception the name "preserves obligations" turns on:
+    every still-open obligation is retained whatever the pressure, and only
+    discharged ones are counted away.
+    """
+    if not isinstance(value, list) or len(value) <= keep:
+        return value, 0
+    if key == "todoItems":
+        open_items = [item for item in value if _is_open_obligation(item)]
+        closed = [item for item in value if not _is_open_obligation(item)]
+        retained = open_items + closed[len(closed) - max(keep - len(open_items), 0):] \
+            if keep > len(open_items) else open_items
+        return retained, len(value) - len(retained)
+    return value[len(value) - keep:] if keep else [], len(value) - keep
+
+
+def _bound_mandatory_note(block: Block, keep: int) -> Block | None:
+    """One rung of bounded task-state compaction, or None if it does not apply.
+
+    T-142. A mandatory L4 note may not be dropped -- doing so takes the
+    objective, the open obligations, the settled effects and the consumption
+    with it, which is precisely the long-session failure this bounds. So the
+    note is *bounded* instead: identity whole, unbounded collections trimmed
+    newest-first, and an explicit `omitted` record of what was trimmed. This
+    projects the same task state the run already produced; it does not author
+    a second one.
+    """
+    try:
+        state = json.loads(block.text)
+    except (TypeError, ValueError):
+        return None
+    if not isinstance(state, dict):
+        return None
+
+    bounded: dict[str, Any] = {
+        key: state[key] for key in _TASK_STATE_IDENTITY_KEYS if key in state
+    }
+    # Bounding is iterative: each rung of the ladder re-enters this function
+    # with the previous rung's output. Counting only this pass would report
+    # the last trim rather than everything compaction has taken, so prior
+    # omissions are carried forward and added to.
+    prior = state.get("boundedByCompaction")
+    omitted: dict[str, int] = {
+        str(key): int(value) for key, value in prior.items()
+        if isinstance(value, int) and not isinstance(value, bool)
+    } if isinstance(prior, Mapping) else {}
+    for key in _TASK_STATE_BOUNDED_KEYS:
+        if key not in state:
+            continue
+        value, dropped_count = _bound_collection(key, state[key], keep)
+        bounded[key] = value
+        if dropped_count:
+            omitted[key] = omitted.get(key, 0) + dropped_count
+    for key, value in state.items():
+        if key not in bounded and key not in _TASK_STATE_BOUNDED_KEYS:
+            bounded[key] = value
+    if omitted:
+        # Stated in place. A bounded list that did not say it was bounded
+        # would read as a complete one, and the planner would conclude the
+        # omitted work was never there.
+        bounded["boundedByCompaction"] = omitted
+
+    text = json.dumps(bounded, sort_keys=True, default=str)
+    if len(text) >= len(block.text):
+        return None
+    return Block(
+        layer=block.layer, source=block.source, label=block.label,
+        text=text, evictable=block.evictable,
+    )
+
+
+def _drop_flexible_notes(notes: list[Block], dropped: list[str], elided: list[str],
+                         total, ceiling: int) -> None:
+    """T-15: drop flexible L4 notes under pressure; never FEATURE_SPEC pinned
+    sources, and never a note that declares itself mandatory (T-142).
+
+    Before T-142 the only exemption here was membership of
+    `PINNED_L4_SOURCES`, so `block.evictable` -- which the prompt assembler
+    sets to `False` on the durable task-state note -- was not read at all. A
+    long enough session therefore dropped the whole of sigma: objective, open
+    obligations, settled effects, aggregate consumption and grant state all
+    left the prompt at once, silently, and the turn proceeded. A mandatory
+    note is now bounded down the `_TASK_STATE_KEEP_LADDER` instead.
+    """
+    def _droppable(block: Block) -> bool:
+        return block.source not in _MANDATORY_L4_SOURCES
+
     while total() > ceiling and notes:
-        index = next((i for i, block in enumerate(notes) if block.source not in PINNED_L4_SOURCES), None)
-        if index is None:
+        index = next((i for i, block in enumerate(notes) if _droppable(block)), None)
+        if index is not None:
+            dropped.append(notes.pop(index).label)
+            continue
+        if not _bound_mandatory_notes(notes, elided, total, ceiling):
+            # Nothing further may be reclaimed here. Returning over the
+            # ceiling is the honest outcome: the alternative is deleting
+            # state the composition declared mandatory.
             break
-        dropped.append(notes.pop(index).label)
+
+
+def _bound_mandatory_notes(notes: list[Block], elided: list[str],
+                           total, ceiling: int) -> bool:
+    """Walk the keep ladder over mandatory notes. True if anything shrank."""
+    progressed = False
+    for keep in _TASK_STATE_KEEP_LADDER:
+        for index, block in enumerate(notes):
+            if block.source != _TASK_STATE_SOURCE:
+                continue
+            bounded = _bound_mandatory_note(block, keep)
+            if bounded is None:
+                continue
+            notes[index] = bounded
+            if block.label not in elided:
+                elided.append(block.label)
+            progressed = True
+        if total() <= ceiling:
+            return True
+    return progressed
 
 
 def _drop_flexible_dialogue(dialogue: list[Block], dropped: list[str], elided: list[str], total, ceiling: int) -> None:
@@ -159,7 +321,7 @@ class ResultEvictionStrategy:
 
         _drop_flexible_dialogue(dialogue, dropped, elided, total, ceiling)
 
-        _drop_flexible_notes(notes, dropped, total, ceiling)
+        _drop_flexible_notes(notes, dropped, elided, total, ceiling)
 
         return elided, dropped
 
@@ -217,7 +379,7 @@ class RecencyWindowStrategy:
         _drop_flexible_dialogue(dialogue, dropped, elided, total, ceiling)
 
         # 4. If still exceeding ceiling, drop oldest flexible notes
-        _drop_flexible_notes(notes, dropped, total, ceiling)
+        _drop_flexible_notes(notes, dropped, elided, total, ceiling)
 
         return elided, dropped
 
@@ -312,7 +474,7 @@ class StructuredConsolidateStrategy:
                 b = dialogue.pop(index)
                 dropped.append(b.label)
 
-        _drop_flexible_notes(notes, dropped, total, ceiling)
+        _drop_flexible_notes(notes, dropped, elided, total, ceiling)
 
         return elided, dropped
 

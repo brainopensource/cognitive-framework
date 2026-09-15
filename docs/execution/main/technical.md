@@ -28,6 +28,23 @@ relationships:
 
 ## Control-frontier packet execution (2026-09-14)
 
+**DIR-4 capability continuation (2026-09-15).** Three bounded outcomes may proceed
+without waiting for MS-CONTROL, but only on released exact leases: isolated child
+writable views with fenced ownership; long-session compaction/restart with aggregate
+identity and budget continuity; and candidate-bound greenfield/multi-file oracle
+completeness. Planner-worker-verifier convergence follows only after the applicable
+foundations are independently accepted. Reuse the existing topology lowering,
+compiler, runtime, ledger, budgets and exterior verifier. Git worktrees are one
+possible mechanism, not proof of containment; long-horizon packaging and numeric
+envelopes remain evidence-dependent; worker agreement never authorizes merge.
+
+The Senior compiles T-141–T-144 from the outcome rows in `tasks.md`, checks live
+leases before every dispatch, and names an independent acceptor. Developers choose
+private helpers and algorithms. Focused adversarial falsifiers precede `just check`;
+`just verify` runs once on the final exact acceptance subject unless a specific risk
+requires another full run. These packets demonstrate capability only and neither
+extend D-6 beyond F1–F7 nor authorize a control result.
+
 The current `tasks.md` leadership continuation advances the queue to A/T-131.8,
 C/T-133→T-132→T-137 and B/T-131.3/4/7, preserving predecessor acceptance and
 file-release conditions rather than asserting that earlier packets are accepted.
@@ -353,6 +370,26 @@ resolve the `runtime/memory.py` and `benchmarks/protocols.py` file/package colli
 reuse `ports/blob_store.py`, and account for schema registration, event reducers and
 composition bindings. A handwritten algorithm-to-file table proves none of these.
 Campaign/MCTS/RTV expansion is deferred; voting never accepts a patch.
+
+## Child publication handbook (T-141 / MS-MVP)
+
+The delegation and publication path has one canonical description:
+[`mvp_delivery_protocol.md`](mvp_delivery_protocol.md). It carries the digest
+equations, the publication state machine, the five-fold revalidation table, the crash
+contract, the `C-PUB-1`-`C-PUB-9` clauses, reference pseudocode and the composition
+seam table. It is not restated here — duplicating it would create a second authority
+that drifts.
+
+Orientation only, for a reader arriving at the source:
+
+| Question | Where |
+|---|---|
+| Where does a child's view live, and who may mutate the shared tree? | `runtime/workspace.py` — views, fence, base binding, staging, publish, recover |
+| Why does the child not use the parent's environment adapter? | `runtime/child_runtime.py::_environment_for` — `DIR-C5`; a view whose effects execute elsewhere is a directory, not containment |
+| What stops a completed child from publishing? | `runtime/child_runtime.py::_publish_workspace` — completion yields a candidate, not permission |
+| Where is the exterior verdict bound to the tree? | `runtime/child_runtime.py::_verify_tree`, projected through `runtime/evaluator_gateway.py` |
+| Why is the composition refused instead of activated? | `runtime/root.py` — `RuntimeChildRunner.is_contained()`; all three collaborators or none |
+| Where is the child-local adapter minted? | `runtime/bootstrap.py` — beside the root adapter, per process backend |
 
 ## Near-term implementation handbook (NT-1)
 

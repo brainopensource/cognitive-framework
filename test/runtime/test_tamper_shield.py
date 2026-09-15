@@ -67,7 +67,24 @@ class _Index:
         )
 
     def repo_map(self, *, token_budget: int = 4000) -> Result[RepositoryMap]:
-        return Result.fail("unavailable", "unused")
+        # W1: this returned `fail("unused")` from when nothing called it. The
+        # session now binds WorkspaceEpoch through `repo_map`, so a failing map
+        # sent the packet down the index-unbound fallback and `_admit_completion`
+        # answered INDEX_UNBOUND before the tamper shield was ever consulted.
+        # Enumeration failure belongs to `tests()` (the `fail` flag) and is left
+        # exactly where it was; the map itself is bound.
+        return Result.success(
+            RepositoryMap(
+                files=tuple(item.test_path for item in self._assoc),
+                symbols=(),
+                dependencies=(),
+                tests=self._assoc,
+                adapter_id="test-double/tamper-shield",
+                source_revision="sha256:tamper-revision",
+                tree_hash="sha256:tamper-tree",
+                index_digest="sha256:tamper-index",
+            )
+        )
 
 
 def _workspace(root: Path) -> tuple[Path, Path]:

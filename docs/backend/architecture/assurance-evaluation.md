@@ -19,7 +19,7 @@ audience:
   - contributor
 analysis_subject_sha: 9fd444674bf3a97f2673ff36a5f5928ef046c574
 version: 0.9.1a1
-last_verified: 2026-09-03
+last_verified: 2026-09-15
 evidence:
   - E-B-013
   - E-B-031
@@ -98,7 +98,7 @@ Upon episode conclusion, `EvidenceCaptureService` compiles an immutable `Traject
 ## 3. Signed Verdict Flow & Cryptographic Proofs
 
 1. `EvaluatorGateway` sends an evaluation request containing the `trajectory_digest` to `vanguard-evaluator`.
-2. The evaluator daemon executes objective assertions, linters, and verification suites inside an isolated evaluator sandbox.
+2. The evaluator daemon executes objective assertions, linters, and verification suites inside an isolated evaluator sandbox. `IsolatedEvaluator` binds that run to the submitted candidate: empty or stub solutions, vacuous verification commands, omitted required files, unauthorized additions, candidate-digest substitution and stale verification subjects fail closed as `EvaluationIncomplete` before the oracle process. The oracle child is bound to the submitted workspace (`PYTHONPATH`) with host import hooks (`PYTHONSTARTUP`, `LD_PRELOAD`, `PYTHONHOME`) stripped, so host environment pollution cannot witness or replace the candidate. A behavioral `passed` claim is not merge or completion authority (DIR-C7).
 3. The daemon constructs a `SignedVerdict` (`schemas/mhf/verdict_v2.schema.json`):
    - `verdict_id`, `trajectory_digest`, `run_id`, `score` ($0.0 \dots 1.0$), `status` (`PASSED` | `FAILED`), `rubric_id`.
    - `evaluator_signature`: Ed25519 signature computed over `JCS(verdict_payload)`.
@@ -134,6 +134,7 @@ Upon episode conclusion, `EvidenceCaptureService` compiles an immutable `Traject
 - **Trajectory Representation**: `vanguard/packages/runtime/trajectory.py`.
 - **Evaluator Gateway**: `vanguard/packages/runtime/evaluator_gateway.py`.
 - **Evaluator Daemon & Client**: `vanguard/packages/adapters/evaluators/daemon.py`, `client.py` (`EvaluatorClient`).
+- **Isolated evaluator completeness (T-143)**: `vanguard/packages/adapters/evaluators/isolated.py`; falsifiers `test/adapters/test_isolated_evaluator.py`, `test/falsifiers/test_t143_oracle_completeness.py`.
 - **Assurance Tests**: `test/contracts/test_trajectory_v2.py`, `test/adapters/test_evaluator_daemon.py`, `test/runtime/test_evaluation_service.py`.
 
 ---

@@ -4,13 +4,13 @@ description: >-
   Universal Repository Intelligence & Navigation Protocol (LDA).
   Use when exploring the codebase, finding symbols, routing tasks,
   compiling token-budgeted context, checking documentation debt, or locating test falsifiers.
-version: "1.0.0"
+version: "2.0.0"
 authority: operational
 ---
 
-# LDA Repository Intelligence & Context Navigation Protocol
+# LDA 2.0 Repository Intelligence & Context Navigation Protocol
 
-**LDA (LLM Docs Atlas)** is a thin, deterministic, zero-daemon repository-intelligence and context engine. It transforms codebases into an in-process SQLite-WAL fact graph to compile token-budgeted, provenance-bound context packets, task plans, and targeted test falsifiers for AI agents and human developers.
+**LDA 2.0 (LLM Docs Atlas)** is a thin, deterministic, zero-daemon repository-intelligence and context engine. It transforms codebases into an in-process SQLite-WAL fact graph to compile token-budgeted, provenance-bound context packets, task plans, targeted test falsifiers, and a one-shot repository/task posture for AI agents and human developers.
 
 ---
 
@@ -18,9 +18,10 @@ authority: operational
 
 LDA provides **structured repository intelligence** across code and documentation without external services or heavy dependencies:
 - **Zero Daemon Overhead:** Operates entirely in-process with SQLite-WAL. Consumes **0 MB idle RAM** and **0% background CPU** (zero watcher threads or background daemons).
-- **Sub-50ms Delta Indexing:** Incremental AST & markdown re-indexing in **<25 ms**, replacing 12+ second full rebuilds.
+- **Sub-50ms Delta Indexing:** Incremental AST & markdown re-indexing in **<25 ms** on dirty files (a different measurement from retrieval/`lda plan`). Full planning on this repository is seconds-scale, not sub-50ms.
 - **One-Shot Task Bundling:** Compiles symbols, upstream caller graphs (blast radius), canonical doc obligations, and executable test commands in a single ~2-second call.
 - **Offline Semantic Intent Resolution:** Pinpoints exact code symbols from natural language intent using BM25, graph in-degree, and architectural tier weighting without external embeddings or network calls.
+- **Universal Brownfield Portability:** Zero-configuration discovery across arbitrary Python, TypeScript/JavaScript, Go, Rust, Java, and Kotlin repositories with dynamic doc mapping and relevance-ranked test falsifiers.
 
 ---
 
@@ -31,21 +32,39 @@ LDA provides **structured repository intelligence** across code and documentatio
 | **Context Exhaustion:** Grepping and ingesting multi-thousand line files fills context windows quickly. | **Token-Bounded Slicing:** Extracts exact AST line slices and skeletons within strict token limits (e.g. 8000 tokens). | **~80% reduction** in context token consumption |
 | **Stale Facts After Edits:** Modifying code makes AST line numbers and symbol references stale unless reindexed. | **Ephemeral Delta Indexing:** Auto-detects dirty git working tree files and syncs AST in milliseconds. | **592x faster** re-indexing (`21ms` vs `12.8s`) |
 | **Multi-Roundtrip Discovery:** Agent runs 5+ exploratory commands to find code, callers, tests, and docs. | **One-Shot Task Bundle (`lda plan`):** Bundles target symbols, callers, doc obligations, and tests in 1 step. | **4x-5x fewer** exploratory tool calls |
-| **Unknown Symbol Names:** Agent doesn't know exact function name (e.g., "how capabilities are attenuated"). | **Intent Resolution (`lda resolve`):** Ranks symbols using multi-field tokens, in-degree, and authority tiers. | High precision without external API keys |
-| **Missing Test Falsifiers:** Guessing which unit tests cover a specific function or file. | **Targeted Falsification (`lda tests`):** Direct indexed SQL join linking touched symbols to test suites. | Tests found in **<3ms** with copy-paste commands |
+| **Noisy Test Selection:** Distant benchmark tests crowding out direct unit falsifiers. | **Relevance-Ranked Falsification (`lda tests`):** Direct 1-hop test edges strictly prioritized over benchmark noise. | Exact falsifier ranked **#1** across languages |
+| **Repomap Token Waste:** Alphabetical file sorting dumping benchmark fixtures before core modules. | **Centrality-Ranked Skeleton Map (`lda repomap`):** Core production architecture sorted by graph in-degree. | Core packages appear first in **< 1500 tokens** |
+| **Brownfield Friction:** Rigid hardcoded docs failing on non-standard repos. | **Dynamic Doc Discovery:** Auto-detects `spec.md`, `README.md`, `ARCHITECTURE.md`, and module docs. | **Zero broken doc links** on any project |
 
 ---
 
-## 3. When to Use What
+## 3. Start with LDA 2.0 posture, then use the "Big 3"
 
-| Development Phase | Question / Need | Recommended Command / Tool |
-|---|---|---|
-| **Starting a Task** | "What files, symbols, docs, and tests are relevant to this task?" | `uv run lda plan "<task description>"` |
-| **Concept Exploration** | "Where is this feature or behavior implemented if I don't know the symbol name?" | `uv run lda resolve "<natural language intent>"` |
-| **After Modifying Code** | "How do I refresh the symbol graph for files I just modified?" | `uv run lda index --delta` |
-| **Verifying Changes** | "Which exact tests falsify or verify my touched files?" | Output of `lda plan` or `uv run lda tests <files>` |
-| **Checking Documentation Debt** | "Did my changes leave documentation, links, or contracts stale?" | `uv run lda drift --json` and `uv run lda diff --json` |
-| **Diagnosing Index State** | "Is the SQLite fact graph healthy and bound to current git HEAD?" | `uv run lda doctor` and `uv run lda identity` |
+At the start of an implementation, review, or bugfix task, establish the current
+subject and select only work that is actually unblocked:
+
+```bash
+# Repository posture: HEAD/dirty state, targeted code health, and document health.
+uv run lda sweep --json
+
+# Do not ingest all of tasks.md merely to find runnable work.
+uv run lda tasks --ready --json
+```
+
+`sweep` reports current state; it is not an acceptance receipt and does not replace
+the targeted falsifiers for the packet you select. If it is unavailable, use
+`uv run lda doctor --json`, then fall back to the deterministic procedures in
+section 8.
+
+After posture is known, use the **Big 3** for 90% of development:
+
+To prevent cognitive overload and tool paralysis across 20+ commands, agents should rely on the **Big 3** commands for 90% of development:
+
+1. **`uv run lda plan "<task>"`** (or MCP `lda_plan`): The primary entry point. One-shot bundle providing target symbols, upstream caller blast radius, canonical docs, and relevance-ranked test falsifiers.
+2. **`uv run lda resolve "<intent>"`** (or MCP `lda_resolve`): When the symbol name is unknown (e.g., *"how are capability tokens attenuated"*), pinpoints exact classes/functions in < 1.5s.
+3. **`uv run lda repomap --budget 2000`** (or MCP `lda_repomap`): When orienting in a new or brownfield repo, renders a high-density, centrality-ranked architectural map of core production code without raw code bloat.
+
+After edits, run **`uv run lda index --delta`** (< 25ms dirty-file AST sync; not a retrieval SLA) to refresh facts before running the falsifiers surfaced in Step 1.
 
 ---
 
@@ -54,6 +73,10 @@ LDA provides **structured repository intelligence** across code and documentatio
 For any task (implementation, review, bugfix), agents MUST follow this sequence:
 
 ```text
+Step 0: lda sweep --json (New task: establish current repository posture)
+    ↓
+Step 0b: lda tasks --ready --json (Select a ready task without loading the whole runway)
+    ↓
 Step 1: lda plan "<task>" (One-shot bundle: symbols + blast radius + docs + test commands)
     ↓
 Step 2: Read targeted line ranges only (Never ingest whole files!)
@@ -62,9 +85,11 @@ Step 3: Implement surgical code changes
     ↓
 Step 4: uv run lda index --delta (Instant AST sync for edited files)
     ↓
-Step 5: Run targeted test falsifiers surfaced in Step 1
+Step 5: Run targeted test falsifiers surfaced in Step 1, or use
+        `lda code-status --task <id> --json` for the packet's changed files
     ↓
-Step 6: uv run lda drift --json (Verify zero doc drift or orphan contracts)
+Step 6: uv run lda drift --json (Inspect documentation drift; do not mask global
+        pre-existing findings as task success)
 ```
 
 ---
@@ -132,6 +157,18 @@ Step 6: uv run lda drift --json (Verify zero doc drift or orphan contracts)
 ---
 
 ## 6. Complete CLI Tool Surface
+
+### 0. LDA 2.0 operational posture and task routing
+```bash
+uv run lda sweep --json                 # Repository, code, and documentation posture
+uv run lda tasks --ready --json         # Unblocked runway tasks
+uv run lda tasks --inspect T-141 --json # One task's parsed record
+uv run lda code-status --task T-141 --json # Targeted falsifiers/linters for a packet
+uv run lda doc-status --json            # Frontmatter, links, and documentation health
+```
+
+Use `code-status` only for the packet or files in scope; it is not permission to
+run broad discovery or unrelated tests.
 
 ### 1. One-Shot Task Bundle (`lda plan`) [SOTA]
 ```bash
@@ -246,6 +283,10 @@ uv run lda index --rebuild --json # Fresh rebuild
 For agent environments connecting via Model Context Protocol (MCP JSON-RPC):
 
 ### MCP Tools
+- `lda_sweep`: Master one-shot execution combining repo-status, code-status, and doc-status in <2.5s (`{"budget": 4000}`).
+- `lda_repo_status`: Fast C-git status, HEAD SHA, branch, dirty diffstat (<25ms).
+- `lda_code_status`: Auto-runs falsifiers for touched files via test-runner skill, plus linters (<2s) (`{"task_id": "...", "target_files": [...]}`).
+- `lda_tasks`: AST/regex runway query over tasks.md by ID, owner, or unblocked status (`{"ready_only": true, "owner": "..."}`).
 - `lda_plan`: Compile one-shot task bundle with symbols, callers, falsifiers, doc obligations, and context (`{"query": "...", "budget": 8000}`).
 - `lda_resolve`: Semantic intent symbol resolution without exact names (`{"query": "...", "top_k": 5}`).
 - `lda_delta`: Ephemeral incremental delta re-indexing (`{"files": ["..."]}`).

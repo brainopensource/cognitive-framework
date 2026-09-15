@@ -7,7 +7,7 @@ canonical_for:
   - cli-usage
 status: living
 owner: developer-experience
-version: "0.9.3"
+version: "0.9.4"
 last_verified: 2026-09-04
 supersedes: []
 superseded_by: null

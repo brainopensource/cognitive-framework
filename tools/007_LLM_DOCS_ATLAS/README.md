@@ -46,7 +46,7 @@ First run on a new repo: `doctor` reports `index_healthy: false` and instructs `
 ```bash
 uv run lda plan "<task>" --budget 8000 --json   # 1. One-shot bundle: symbols + callers + docs + tests
 # ... read targeted line ranges, then implement surgical code edits ...
-uv run lda index --delta                        # 2. sub-50ms incremental re-index of touched files
+uv run lda index --delta                        # 2. sub-50ms dirty-file re-index (not retrieval)
 uv run <test command output by lda plan>        # 3. run targeted test falsifiers
 uv run lda drift --json && uv run lda diff --json  # 4. verify zero doc drift or orphan contracts
 ```
@@ -57,9 +57,16 @@ Rule of thumb: **never load whole files**. Zoom with `lda plan` / `lda symbol` /
 
 | Command | Purpose |
 |---|---|
+| `lda sweep [--budget B]` | **[LDA 2.0 SOTA] Master one-shot sweep**: git diffstat, HEAD, linters, target falsifiers, and doc health in <2.5s |
+| `lda repo-status` | **[LDA 2.0 SOTA] Fast C-git status**: branch, HEAD SHA, staged/unstaged, and per-file diffstat in <25ms |
+| `lda code-status [--task T] [--dirty]` | **[LDA 2.0 SOTA] Automated falsification**: runs isolated test-runner falsifiers + boundary/TCB linters in <2s |
+| `lda doc-status` | **[LDA 2.0 SOTA] Living doc verification**: frontmatter schemas, broken links, stale paths in <300ms |
+| `lda tasks [--ready] [--owner O] [--inspect ID]` | **[LDA 2.0 SOTA] Runway graph parser**: queries tasks.md without ingesting 2,500 lines into context |
+| `lda doc-scaffold <type> <title>` | **[LDA 2.0 SOTA] Doc template scaffolding**: architecture, decision, report, or standard skeleton |
+| `lda doc-lint [--fix]` | **[LDA 2.0 SOTA] Doc link auto-repair**: verifies frontmatter & repairs relative markdown links |
 | `lda plan "<task>" [--budget B] [--strategy S]` | **[SOTA] One-shot task bundle**: auto-delta sync, primary symbols, blast radius (callers), doc obligations, and test falsifiers |
 | `lda resolve "<intent>" [--top-k K]` | **[SOTA] Semantic intent symbol resolution**: offline multi-signal ranking (BM25 + graph in-degree + tier authority) |
-| `lda index --delta [files...]` | **[SOTA] Ephemeral incremental delta**: sub-50ms AST & markdown sync on modified files with 0 MB idle daemon |
+| `lda index --delta [files...]` | **[SOTA] Ephemeral incremental delta**: sub-50ms AST & markdown sync on modified files with 0 MB idle daemon (not a retrieval SLA) |
 | `lda index [--incremental/--rebuild]` | Build/refresh the full SQLite+FTS5 fact graph |
 | `lda status` / `scan` | Snapshot: DB stats, topology, totals |
 | `lda doctor` | Fast health check + actionable `index_hint` |
@@ -161,7 +168,7 @@ The local dashboard binds only to `127.0.0.1:8765` by default. Its read-only API
 }
 ```
 
-Tools: `lda_plan`, `lda_resolve`, `lda_delta`, `lda_context`, `lda_brief`, `lda_consolidate`, `lda_drift`, `lda_identity`, `lda_diff`, `lda_metrics`, `lda_repomap`, `lda_focused_tests`, `lda_symbol`, `lda_callers`, `lda_callees`, `lda_references`, `lda_tests_for_symbol`, `lda_docs_for_symbol`, `lda_fts_search`, `lda_map`, `lda_doctor`, `lda_check`, `lda_coverage`.
+Tools: `lda_sweep`, `lda_repo_status`, `lda_code_status`, `lda_tasks`, `lda_plan`, `lda_resolve`, `lda_delta`, `lda_context`, `lda_brief`, `lda_consolidate`, `lda_drift`, `lda_identity`, `lda_diff`, `lda_metrics`, `lda_repomap`, `lda_focused_tests`, `lda_symbol`, `lda_callers`, `lda_callees`, `lda_references`, `lda_tests_for_symbol`, `lda_docs_for_symbol`, `lda_fts_search`, `lda_map`, `lda_doctor`, `lda_check`, `lda_coverage`.
 Resources: `lda://map`, `lda://docs/{id}`. Prompts: `lda_task_briefing`, `lda_repo_orientation`.
 On a cold index the server degrades to authority-aware catalog routing (`degraded_mode: catalog_routing`) — LDA is standalone and imports no other repository tool.
 
@@ -177,7 +184,7 @@ On a cold index the server degrades to authority-aware catalog routing (`degrade
 
 ## Quality gates
 
-- `lda bench`: deterministic golden-query fixture, per-strategy recall@5 / MRR / latency; regression floor `recall@5 >= 0.5` (`test/tools/test_lda_skill_bench.py`).
+- `lda bench`: six-file golden-query fixture, per-strategy recall@5 / MRR / latency; demonstrated BM25/PPR recall@5 = 1.0 (hybrid 0.875); regression floor `recall@5 >= 0.5` (`test/tools/test_lda_skill_bench.py`). Not a million-line retrieval SLA.
 - `test/tools/test_lda_portability.py` is the executable definition of "works in ANY project": generic-by-default selection, fail-closed profiles, single-emitter read-only behavior, HEAD-bound provenance, symbol ceilings, and a full index→packet pipeline on a non-Python repository. Any core change must keep it green.
 - Embeddings are md5-bucketed feature hashes — byte-identical across processes (cross-process determinism is tested).
 

@@ -31,6 +31,7 @@ class TestAssociationEngine:
         touched_sym_set = set(touched_symbols or [])
         matched_test_files: Set[str] = set()
         matched_test_symbols: List[Dict[str, Any]] = []
+        file_scores: Dict[str, float] = {}
 
         # Fast path: SQLite indexed queries (<3ms)
         is_real_storage = (
@@ -66,15 +67,34 @@ class TestAssociationEngine:
                     list(touched_sym_set),
                 )
                 for r in cur_rel.fetchall():
-                    if r["source_path"]:
-                        matched_test_files.add(r["source_path"])
-                    if r["sym_file"]:
-                        matched_test_files.add(r["sym_file"])
+                    src_path = r["source_path"] or ""
+                    sym_file = r["sym_file"] or ""
+                    rel_kind = r["kind"] or ""
+
+                    # High priority: explicit tests/falsifies relation
+                    if rel_kind in ("tests", "falsifies"):
+                        if src_path:
+                            matched_test_files.add(src_path)
+                            file_scores[src_path] = file_scores.get(src_path, 0.0) + 100.0
+                        if sym_file:
+                            matched_test_files.add(sym_file)
+                            file_scores[sym_file] = file_scores.get(sym_file, 0.0) + 100.0
+                    else:
+                        # Medium priority: direct caller inside a test file
+                        if src_path:
+                            matched_test_files.add(src_path)
+                            file_scores[src_path] = file_scores.get(src_path, 0.0) + 60.0
+                        if sym_file:
+                            matched_test_files.add(sym_file)
+                            file_scores[sym_file] = file_scores.get(sym_file, 0.0) + 60.0
+
                     if r["name"]:
                         matched_test_symbols.append(dict(r))
 
             for tf in touched_files_set:
                 stem = Path(tf).stem
+                if len(stem) < 3:
+                    continue
                 cur_lex = con.execute(
                     """
                     SELECT DISTINCT file_path FROM symbols 
@@ -83,7 +103,9 @@ class TestAssociationEngine:
                     (f"%{stem}%",),
                 )
                 for r in cur_lex.fetchall():
-                    matched_test_files.add(r["file_path"])
+                    fpath = r["file_path"]
+                    matched_test_files.add(fpath)
+                    file_scores[fpath] = file_scores.get(fpath, 0.0) + 40.0
         else:
             # Slow fallback for unit mocks
             all_relations = self.storage.get_all_relations()
@@ -110,6 +132,7 @@ class TestAssociationEngine:
                         if is_test_rel:
                             if src_path:
                                 matched_test_files.add(src_path)
+                                file_scores[src_path] = file_scores.get(src_path, 0.0) + (100.0 if kind in ("tests", "falsifies") else 60.0)
                             test_sym = symbol_by_id.get(src)
                             if test_sym:
                                 s_id = test_sym.get("id") or test_sym.get("symbol_id")
@@ -117,44 +140,77 @@ class TestAssociationEngine:
                                     seen_sym_ids.add(s_id)
                                     matched_test_symbols.append(test_sym)
                                 if test_sym.get("file_path"):
-                                    matched_test_files.add(test_sym.get("file_path"))
+                                    f_p = test_sym.get("file_path")
+                                    matched_test_files.add(f_p)
+                                    file_scores[f_p] = file_scores.get(f_p, 0.0) + (100.0 if kind in ("tests", "falsifies") else 60.0)
                     elif src in touched_sym_set and kind in ("tests", "falsifies"):
                         test_sym = symbol_by_id.get(tgt)
                         if test_sym:
                             s_id = test_sym.get("id") or test_sym.get("symbol_id")
                             if s_id and s_id not in seen_sym_ids:
-                                seen_sym_ids.add(s_id)
-                                matched_test_symbols.append(test_sym)
+                                    seen_sym_ids.add(s_id)
+                                    matched_test_symbols.append(test_sym)
                             if test_sym.get("file_path"):
-                                matched_test_files.add(test_sym.get("file_path"))
+                                f_p = test_sym.get("file_path")
+                                matched_test_files.add(f_p)
+                                file_scores[f_p] = file_scores.get(f_p, 0.0) + 100.0
 
             for fpath in touched_files:
                 stem = Path(fpath).stem
+                if len(stem) < 3:
+                    continue
                 for s in all_symbols:
                     sym_file = s.get("file_path", "")
                     if "test" in sym_file.lower() and stem.lower() in sym_file.lower():
                         matched_test_files.add(sym_file)
+                        file_scores[sym_file] = file_scores.get(sym_file, 0.0) + 40.0
                         matched_test_symbols.append(s)
 
-        # Generate targeted runner commands
+        # Apply structural penalties and bonuses to eliminate benchmark/noise bias
+        for tf in matched_test_files:
+            tf_lower = tf.lower()
+            if any(term in tf_lower for term in ("benchmark", "frontier", "perf")):
+                file_scores[tf] = file_scores.get(tf, 0.0) - 50.0
+            if tf_lower.startswith(("test/", "tests/", "__tests__/", "spec/")):
+                file_scores[tf] = file_scores.get(tf, 0.0) + 15.0
+
+        # Rank test files by descending relevance score
+        ranked_test_files = sorted(
+            matched_test_files,
+            key=lambda f: (-file_scores.get(f, 0.0), f)
+        )
+
+        # Generate targeted runner commands preserving relevance order
         suggested_commands: List[str] = []
-        for tf in sorted(matched_test_files):
+        for tf in ranked_test_files:
             if tf.endswith(".py"):
                 # Convert file path to unittest module dotted notation
                 mod_name = tf.replace("/", ".").replace(".py", "")
                 if mod_name.startswith("."):
                     mod_name = mod_name[1:]
-                suggested_commands.append(f"python3 -m unittest {mod_name} -v")
+                cmd = f"python3 -m unittest {mod_name} -v"
+                if cmd not in suggested_commands:
+                    suggested_commands.append(cmd)
             elif tf.endswith((".ts", ".js", ".tsx", ".jsx")):
-                suggested_commands.append(f"npm test -- {tf}")
+                cmd = f"npm test -- {tf}"
+                if cmd not in suggested_commands:
+                    suggested_commands.append(cmd)
             elif tf.endswith(".rs"):
-                suggested_commands.append(f"cargo test --test {Path(tf).stem}")
+                cmd = f"cargo test --test {Path(tf).stem}"
+                if cmd not in suggested_commands:
+                    suggested_commands.append(cmd)
             elif tf.endswith(".go"):
-                suggested_commands.append(f"go test -v ./{Path(tf).parent}")
+                cmd = f"go test -v ./{Path(tf).parent}"
+                if cmd not in suggested_commands:
+                    suggested_commands.append(cmd)
+            elif tf.endswith((".java", ".kt")):
+                cmd = f"./gradlew test --tests {Path(tf).stem}"
+                if cmd not in suggested_commands:
+                    suggested_commands.append(cmd)
 
         return {
             "touched_files": list(touched_files),
-            "associated_test_files": sorted(matched_test_files),
+            "associated_test_files": ranked_test_files,
             "associated_test_symbols": matched_test_symbols[:20],
             "suggested_commands": suggested_commands,
         }

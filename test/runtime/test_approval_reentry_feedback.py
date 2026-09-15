@@ -27,9 +27,17 @@ class TestApprovalReentryFeedback(unittest.TestCase):
         session._active_episode_engine = MagicMock()
         session.run_plan = None
         session.harness = SimpleNamespace(composition_digest="sha256:composition")
-        session.task = SimpleNamespace(run_id="run-1", brief="finish it")
+        session.task = SimpleNamespace(
+            run_id="run-1", brief="finish it",
+            principal="agent-reentry", episode_id="ep-reentry")
         session.operator = _Operator()
         session._workspace_digest = lambda: "sha256:workspace"
+        # W1: `_observe_completion_dispatch` now appends a durable
+        # VerificationRecorded record. These partial sessions predate that
+        # call, so the ledger and its carrier latch must be supplied or the
+        # fixture errors before reaching its own assertions.
+        session.ledger = MagicMock()
+        session._durable_carrier_append_error = None
         request = SimpleNamespace(
             action="proc.exec",
             args={"argv": ["python3", "-m", "unittest", "discover"]},
@@ -55,8 +63,16 @@ class TestApprovalReentryFeedback(unittest.TestCase):
         session._completion_verification = None
         session.run_plan = None  # BEP-01: run_plan is None-guarded in _observe_completion_dispatch
         session.harness = SimpleNamespace(composition_digest="sha256:composition")  # fallback when run_plan is None
-        session.task = SimpleNamespace(run_id="run-1", brief="fix it")
+        session.task = SimpleNamespace(
+            run_id="run-1", brief="fix it",
+            principal="agent-reentry", episode_id="ep-reentry")
         session._workspace_digest = lambda: "sha256:workspace"
+        # W1: `_observe_completion_dispatch` now appends a durable
+        # VerificationRecorded record. These partial sessions predate that
+        # call, so the ledger and its carrier latch must be supplied or the
+        # fixture errors before reaching its own assertions.
+        session.ledger = MagicMock()
+        session._durable_carrier_append_error = None
         request = SimpleNamespace(
             action="proc.exec",
             args={"argv": ["python3", "-m", "unittest", "discover"]},

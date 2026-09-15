@@ -410,6 +410,45 @@ class LDAMCPServer:
                             "description": "Per-language coverage of the indexed fact graph (files, symbols, relations).",
                             "inputSchema": {"type": "object", "properties": {}},
                         },
+                        {
+                            "name": "lda_sweep",
+                            "description": "Master one-shot execution combining repo-status, code-status, and doc-status into a unified JSON/Markdown token-bounded report (<2.5s).",
+                            "inputSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "budget": {"type": "integer", "description": "Token budget for context/report (default: 4000).", "default": 4000},
+                                },
+                            },
+                        },
+                        {
+                            "name": "lda_repo_status",
+                            "description": "Fast C-git status, HEAD SHA, branch, dirty diffstat (<25ms).",
+                            "inputSchema": {"type": "object", "properties": {}},
+                        },
+                        {
+                            "name": "lda_code_status",
+                            "description": "Auto-runs falsifiers for touched files via test-runner skill, plus boundary/TCB linters with structured failure traces (<2s).",
+                            "inputSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "task_id": {"type": "string", "description": "Task ID from tasks.md to locate lease files."},
+                                    "target_files": {"type": "array", "items": {"type": "string"}, "description": "Specific files to test."},
+                                },
+                            },
+                        },
+                        {
+                            "name": "lda_tasks",
+                            "description": "AST/regex parser over docs/execution/main/tasks.md; queries tasks by ID, lease, owner, or --ready status without loading 2,500 lines into context.",
+                            "inputSchema": {
+                                "type": "object",
+                                "properties": {
+                                    "task_id": {"type": "string", "description": "Filter by specific Task ID."},
+                                    "owner": {"type": "string", "description": "Filter by assigned owner."},
+                                    "ready_only": {"type": "boolean", "description": "Return only unblocked tasks whose dependencies are satisfied.", "default": False},
+                                    "limit": {"type": "integer", "description": "Max tasks to return (default: 50).", "default": 50},
+                                },
+                            },
+                        },
                     ]
                 },
             }
@@ -667,6 +706,32 @@ class LDAMCPServer:
 
         elif name == "lda_coverage":
             return self._storage.coverage_by_language()
+
+        elif name == "lda_sweep":
+            from .commands.cmd_sweep import handle_sweep
+            return handle_sweep(self._root, budget=args.get("budget", 4000))
+
+        elif name == "lda_repo_status":
+            from .commands.cmd_repo_status import handle_repo_status
+            return handle_repo_status(self._root)
+
+        elif name == "lda_code_status":
+            from .commands.cmd_code_status import handle_code_status
+            return handle_code_status(
+                self._root,
+                task_id=args.get("task_id"),
+                target_files=args.get("target_files"),
+            )
+
+        elif name == "lda_tasks":
+            from .commands.cmd_tasks import handle_tasks
+            return handle_tasks(
+                self._root,
+                task_id=args.get("task_id"),
+                owner=args.get("owner"),
+                ready_only=args.get("ready_only", False),
+                limit=args.get("limit", 50),
+            )
 
         raise ValueError(f"Unknown tool: {name}")
 

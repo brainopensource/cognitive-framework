@@ -13,7 +13,7 @@ from vanguard_bridge import translate_vanguard_call_to_lam
 _REPO = Path(__file__).resolve().parents[2]
 if str(_REPO) not in sys.path:
     sys.path.insert(0, str(_REPO))
-from benchmarks.ladder.quarantine import guard_capture
+from benchmarks.ladder.quarantine import SCOPE_ORDINARY_USER, guard_loader
 
 
 def sanitize_secrets(text: str) -> str:
@@ -32,7 +32,7 @@ def trace_to_scenario(
     captures: Sequence[Mapping[str, Any]],
 ) -> Dict[str, Any]:
     """Convert captured turn messages (OpenAI or Ollama wire) into a validated scenario dictionary."""
-    guard_capture(task_id=scenario_id)
+    guard_loader(task_id=scenario_id, capture=True, scope=SCOPE_ORDINARY_USER)
     turns: list[dict[str, Any]] = []
 
     for idx, cap in enumerate(captures):

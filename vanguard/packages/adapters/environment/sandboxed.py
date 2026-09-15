@@ -12,6 +12,8 @@ from __future__ import annotations
 import datetime
 import hashlib
 import json
+import os
+import stat
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional, Protocol
@@ -30,6 +32,15 @@ from ...ports.environment import (
 from ...ports.event_store import Result
 
 __all__ = ["SandboxedEnvironmentAdapter", "WorkerRequest", "WorkerReply"]
+
+
+def _candidate_digest(entries: list[dict[str, object]]) -> str:
+    framed = bytearray()
+    for entry in entries:
+        encoded = hashlib.sha256(json.dumps(entry, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest().encode("ascii")
+        framed.extend(len(encoded).to_bytes(8, "big"))
+        framed.extend(encoded)
+    return "sha256:" + hashlib.sha256(bytes(framed)).hexdigest()
 
 
 @dataclass(frozen=True, slots=True)
@@ -109,16 +120,23 @@ class SandboxedEnvironmentAdapter:
         )
 
     def snapshot(self) -> Result[EnvironmentSnapshot]:
-        digest = hashlib.sha256()
-        for path in sorted(self.workspace.rglob("*")):
-            if path.is_symlink() or not path.is_file():
-                continue
-            digest.update(str(path.relative_to(self.workspace)).encode("utf-8"))
-            digest.update(path.read_bytes())
+        entries: list[dict[str, object]] = []
+        try:
+            for path in sorted(self.workspace.rglob("*"), key=lambda item: item.relative_to(self.workspace).as_posix()):
+                rel = path.relative_to(self.workspace).as_posix()
+                if path.is_symlink():
+                    entries.append({"path": rel, "type": "symlink", "mode": stat.S_IMODE(path.lstat().st_mode), "target": os.readlink(path)})
+                elif path.is_dir():
+                    entries.append({"path": rel, "type": "directory", "mode": stat.S_IMODE(path.lstat().st_mode)})
+                elif path.is_file():
+                    entries.append({"path": rel, "type": "file", "mode": stat.S_IMODE(path.lstat().st_mode), "content": hashlib.sha256(path.read_bytes()).hexdigest()})
+        except (OSError, ValueError) as exc:
+            return Result.fail("instrument_error", f"unable to enumerate workspace tree: {exc}")
+        candidate_digest = _candidate_digest(entries)
         return Result.success(
             EnvironmentSnapshot(
-                snapshot_id="sandbox-" + digest.hexdigest()[:16],
-                digest="sha256:" + digest.hexdigest(),
+                snapshot_id="sandbox-" + candidate_digest[7:23],
+                digest=candidate_digest,
                 created_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
             )
         )

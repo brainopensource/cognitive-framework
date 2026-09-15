@@ -30,6 +30,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from benchmarks._env import load_benchmark_env
+from benchmarks.ladder.quarantine import SCOPE_ORDINARY_USER, guard_materialization
 
 
 from vanguard.packages.runtime.root import (
@@ -276,6 +277,7 @@ def run_oracle_test(ws: Path) -> tuple[bool, str]:
 
 
 def setup_workspace(ws: Path) -> None:
+    guard_materialization(task_id=None, purpose="development", scope=SCOPE_ORDINARY_USER)
     (ws / "core").mkdir(parents=True, exist_ok=True)
     (ws / "tests").mkdir(parents=True, exist_ok=True)
     (ws / "core/__init__.py").write_text("", encoding="utf-8")
@@ -303,6 +305,7 @@ def run_needle_benchmark(
 
     with tempfile.TemporaryDirectory(prefix="needle_bench_") as td:
         ws = Path(td)
+        guard_materialization(task_id=None, purpose="development", scope=SCOPE_ORDINARY_USER)
         setup_workspace(ws)
 
         spec_file = ws / "SPECIFICATION.md"

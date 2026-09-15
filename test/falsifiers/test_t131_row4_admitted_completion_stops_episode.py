@@ -24,6 +24,7 @@ double; nothing here reaches a network or a paid model.
 
 from __future__ import annotations
 
+from dataclasses import replace
 import shutil
 import tempfile
 import unittest
@@ -42,7 +43,8 @@ from vanguard.packages.runtime.root import (
 from test.runtime.test_harness_session import FakeClock, FakeEnvironment
 
 from vanguard.packages.agency import EpisodeEngine, RunTermination
-from vanguard.packages.agency.episode.admission_gate import AdmissionVerdict
+from vanguard.packages.agency.episode.admission_gate import AdmissionVerdict, VerificationReceipt
+from vanguard.packages.runtime.session import VerificationSubject
 
 from test.agency import doubles
 from test.kernel import fakes
@@ -149,10 +151,15 @@ class TheProductRouteStopsAtCompletion(unittest.TestCase):
 
     def test_an_admitted_completion_ends_the_episode_well_inside_the_ceiling(self) -> None:
         admitter = RecordingAdmitter([ADMIT])
-        # Eight finishes are on the tape; the ceiling is eight turns. Only a
-        # loop that actually stops leaves seven of them unread.
+        # A mutating effect follows the admitted finish on the tape.  The
+        # terminal boundary must leave it unread: no later model request can
+        # become a later effect dispatch.  The ceiling is eight turns, so a
+        # loop that fails to stop has ample room to consume the sentinel.
         outcome, model, harness = run_episode(
-            [doubles.effect(), doubles.finish()] + [doubles.finish()] * 6, admitter)
+            [doubles.effect(), doubles.finish(),
+             doubles.effect(path="/workspace/src/must-not-dispatch.ts")]
+            + [doubles.finish()] * 5,
+            admitter)
 
         self.assertEqual(
             stop_at_completion_failures(
@@ -161,6 +168,8 @@ class TheProductRouteStopsAtCompletion(unittest.TestCase):
             [])
         self.assertEqual(outcome.episode.turn_count, 1)
         self.assertEqual(len(model.calls), 2)
+        self.assertEqual(len(outcome.dispatches), 1,
+                         "the post-finish effect must not reach kernel dispatch")
 
     def test_a_rejection_then_an_admission_still_stops_at_the_admission(self) -> None:
         """Retry is permitted; burning the remaining ceiling afterwards is not."""
@@ -276,6 +285,7 @@ class TheFullProductSessionStopsAtCompletion(unittest.TestCase):
     def _session(self, policy, *, model):
         tmp = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, tmp, True)
+        (Path(tmp) / ".git").mkdir(exist_ok=True)
         Path(tmp, "a.py").write_text("def f():\n    return 1\n")
         harness = Runtime.compose("vg-code-default", episode_id="ep-t131-row4")
         session = HarnessSession(
@@ -289,6 +299,29 @@ class TheFullProductSessionStopsAtCompletion(unittest.TestCase):
                 project_id="project-t131", run_id="run-t131-row4",
                 episode_id="ep-t131-row4", principal="agent-1",
                 max_turns=self.CEILING))
+        # T-131.3 now makes exact, current verification identity a prerequisite
+        # even for this deliberately tiny recording policy.  This remains a
+        # fake-environment row-4 test, but its admitted path must model the
+        # same receipt/subject binding the product gate requires.
+        workspace_digest = session._workspace_digest()
+        task_digest = session._current_task_digest()
+        command = "python3 -m unittest test.row4 -v"
+        subject = VerificationSubject(
+            argv=("python3", "-m", "unittest", "test.row4", "-v"),
+            workspace_digest=workspace_digest,
+            task_digest=task_digest,
+        )
+        session._completion_verification_subject = subject
+        session._completion_verification_command = command
+        session._completion_verification = VerificationReceipt(
+            exit_code=0,
+            executed_test_count=1,
+            workspace_digest=workspace_digest,
+            task_digest=task_digest,
+            composition_digest=harness.composition_digest,
+            verification_command=command,
+            verification_subject_digest=subject.digest(),
+        )
         return session
 
     def test_an_admitted_completion_ends_the_session_run(self) -> None:
@@ -328,6 +361,66 @@ class TheFullProductSessionStopsAtCompletion(unittest.TestCase):
             self.assertEqual(len(model.calls), 1)
         with self.assertRaises(AssertionError):
             self.assertEqual(policy.calls, 1)
+
+    def test_a_receipt_bound_to_a_stale_workspace_cannot_complete(self) -> None:
+        """T-131.3 negative control: drifted workspace digest refuses completion."""
+        policy = _RecordingPolicy(ADMIT)
+        model = doubles.ScriptedModel([doubles.finish("done")] * 20)
+        session = self._session(policy, model=model)
+        assert session._completion_verification is not None
+        session._completion_verification = replace(
+            session._completion_verification, workspace_digest="sha256:" + "0" * 64)
+        result = session.run()
+        self.assertIsNot(result.terminal, RunTermination.COMPLETED)
+        self.assertGreater(len(model.calls), 1)
+
+    def test_a_receipt_bound_to_a_foreign_task_cannot_complete(self) -> None:
+        """T-131.3 negative control: foreign task digest refuses completion."""
+        policy = _RecordingPolicy(ADMIT)
+        model = doubles.ScriptedModel([doubles.finish("done")] * 20)
+        session = self._session(policy, model=model)
+        assert session._completion_verification is not None
+        session._completion_verification = replace(
+            session._completion_verification, task_digest="sha256:" + "0" * 64)
+        result = session.run()
+        self.assertIsNot(result.terminal, RunTermination.COMPLETED)
+        self.assertGreater(len(model.calls), 1)
+
+    def test_a_receipt_bound_to_a_foreign_composition_cannot_complete(self) -> None:
+        """T-131.3 negative control: foreign composition digest refuses completion."""
+        policy = _RecordingPolicy(ADMIT)
+        model = doubles.ScriptedModel([doubles.finish("done")] * 20)
+        session = self._session(policy, model=model)
+        assert session._completion_verification is not None
+        session._completion_verification = replace(
+            session._completion_verification, composition_digest="sha256:" + "0" * 64)
+        result = session.run()
+        self.assertIsNot(result.terminal, RunTermination.COMPLETED)
+        self.assertGreater(len(model.calls), 1)
+
+    def test_a_receipt_bound_to_a_foreign_command_cannot_complete(self) -> None:
+        """T-131.3 negative control: foreign command refuses completion."""
+        policy = _RecordingPolicy(ADMIT)
+        model = doubles.ScriptedModel([doubles.finish("done")] * 20)
+        session = self._session(policy, model=model)
+        assert session._completion_verification is not None
+        session._completion_verification = replace(
+            session._completion_verification, verification_command="pytest")
+        result = session.run()
+        self.assertIsNot(result.terminal, RunTermination.COMPLETED)
+        self.assertGreater(len(model.calls), 1)
+
+    def test_a_receipt_bound_to_a_foreign_subject_digest_cannot_complete(self) -> None:
+        """T-131.3 negative control: foreign verification subject refuses completion."""
+        policy = _RecordingPolicy(ADMIT)
+        model = doubles.ScriptedModel([doubles.finish("done")] * 20)
+        session = self._session(policy, model=model)
+        assert session._completion_verification is not None
+        session._completion_verification = replace(
+            session._completion_verification, verification_subject_digest="sha256:" + "0" * 64)
+        result = session.run()
+        self.assertIsNot(result.terminal, RunTermination.COMPLETED)
+        self.assertGreater(len(model.calls), 1)
 
 
 class _RecordingPolicy:

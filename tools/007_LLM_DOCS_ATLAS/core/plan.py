@@ -38,41 +38,100 @@ _SUBSYSTEM_DOC_MAP = {
 def _resolve_doc_obligations(
     touched_files: Sequence[str],
     packet: Optional[ContextPacket] = None,
+    profile: Optional[RepositoryProfile] = None,
+    repo_root: Optional[Path] = None,
 ) -> List[Dict[str, Any]]:
     """Determine normative and canonical docs governing the affected code."""
     obligations: List[Dict[str, Any]] = []
     seen_docs: Set[str] = set()
 
-    # Always include top normative laws
-    obligations.append({
-        "document": "docs/execution/main/spec.md",
-        "authority": "normative",
-        "reason": "Compact Normative Law & System Specification of record",
-    })
-    seen_docs.add("docs/execution/main/spec.md")
+    subsystem_map = profile.subsystem_doc_map if profile and profile.subsystem_doc_map else _SUBSYSTEM_DOC_MAP
+    default_docs = profile.default_normative_docs if profile and profile.default_normative_docs else ()
 
-    # Map touched files to governing subsystem docs
+    # 1. Top specification / normative documents
+    if default_docs:
+        for d in default_docs:
+            if repo_root and not (repo_root / d).is_file():
+                continue
+            seen_docs.add(d)
+            obligations.append({
+                "document": d,
+                "authority": "normative",
+                "reason": "Specification / normative law of record",
+            })
+    elif not profile or profile.name == "generic":
+        # Dynamic brownfield discovery for generic repos
+        for root_doc in ("docs/execution/main/spec.md", "spec.md", "docs/spec.md", "docs/architecture.md", "ARCHITECTURE.md", "README.md", "CONTRIBUTING.md"):
+            if repo_root and (repo_root / root_doc).is_file() and root_doc not in seen_docs:
+                seen_docs.add(root_doc)
+                auth = "normative" if "spec" in root_doc.lower() else "canonical"
+                reason = "Compact Normative Law & System Specification of record" if root_doc == "docs/execution/main/spec.md" else "Root architectural documentation and specification baseline"
+                obligations.append({
+                    "document": root_doc,
+                    "authority": auth,
+                    "reason": reason,
+                })
+                break
+    else:
+        # Backward-compatible fallback for AETHER
+        default_spec = "docs/execution/main/spec.md"
+        if not repo_root or (repo_root / default_spec).is_file():
+            obligations.append({
+                "document": default_spec,
+                "authority": "normative",
+                "reason": "Compact Normative Law & System Specification of record",
+            })
+            seen_docs.add(default_spec)
+
+    # 2. Map touched files to governing subsystem docs
     for tf in touched_files:
         norm_tf = str(Path(tf)).replace("\\", "/")
-        for prefix, (doc_path, authority, reason) in _SUBSYSTEM_DOC_MAP.items():
-            if norm_tf.startswith(prefix) and doc_path not in seen_docs:
-                seen_docs.add(doc_path)
-                obligations.append({
-                    "document": doc_path,
-                    "authority": authority,
-                    "reason": f"Governs subsystem `{prefix}/` touched by task ({reason})",
-                })
+        matched_explicit = False
+        for prefix, doc_info in subsystem_map.items():
+            if norm_tf.startswith(prefix):
+                matched_explicit = True
+                doc_path, authority, reason = doc_info[0], doc_info[1], doc_info[2]
+                if doc_path not in seen_docs and (not repo_root or (repo_root / doc_path).is_file()):
+                    seen_docs.add(doc_path)
+                    obligations.append({
+                        "document": doc_path,
+                        "authority": authority,
+                        "reason": f"Governs `{prefix}/` touched by task ({reason})",
+                    })
 
-    # Include normative candidates selected by the context compiler
+        # Dynamic brownfield directory documentation discovery
+        if not matched_explicit and repo_root:
+            parent_dir = Path(norm_tf).parent
+            if parent_dir and str(parent_dir) not in (".", "/"):
+                dir_name = parent_dir.name
+                dir_readme = parent_dir / "README.md"
+                doc_file = Path("docs") / f"{dir_name}.md"
+                if (repo_root / doc_file).is_file() and str(doc_file) not in seen_docs:
+                    seen_docs.add(str(doc_file))
+                    obligations.append({
+                        "document": str(doc_file),
+                        "authority": "canonical",
+                        "reason": f"Governs subsystem `{dir_name}` touched by task",
+                    })
+                elif (repo_root / dir_readme).is_file() and str(dir_readme) not in seen_docs:
+                    seen_docs.add(str(dir_readme))
+                    obligations.append({
+                        "document": str(dir_readme),
+                        "authority": "canonical",
+                        "reason": f"Directory documentation for `{parent_dir}`",
+                    })
+
+    # 3. Include normative candidates selected by the context compiler
     if packet:
         for c in packet.documents:
             if c.locator not in seen_docs and (c.authority in ("normative", "canonical", "specification") or "spec" in c.locator.lower()):
-                seen_docs.add(c.locator)
-                obligations.append({
-                    "document": c.locator,
-                    "authority": c.authority or "canonical",
-                    "reason": c.reason or "Task-relevant documentation constraint",
-                })
+                if not repo_root or (repo_root / c.locator).is_file():
+                    seen_docs.add(c.locator)
+                    obligations.append({
+                        "document": c.locator,
+                        "authority": c.authority or "canonical",
+                        "reason": c.reason or "Task-relevant documentation constraint",
+                    })
 
     return obligations[:6]
 
@@ -160,7 +219,7 @@ def compile_task_plan(
     packet = compiler.compile(task, budget=budget, strategy=strategy, use_cache=True)
 
     # 6. Documentation Obligations
-    doc_obligations = _resolve_doc_obligations(list(affected_files), packet)
+    doc_obligations = _resolve_doc_obligations(list(affected_files), packet=packet, profile=active_profile, repo_root=root)
 
     # 7. Render Markdown Briefing
     elapsed = time.perf_counter() - t0
@@ -291,7 +350,8 @@ def render_plan_markdown(
     lines.append("## 5. Working Memory & Context Extracts")
     for doc in packet.documents[:3]:
         lines.append(f"- **Document:** [`{doc.locator}`]({doc.locator}) — *{doc.title}* ({doc.tokens} tok)")
-    for code in (packet.symbols[:3] + packet.code[:2]):
+    valid_codes = [c for c in (packet.symbols + packet.code) if not c.locator.startswith("lang:") and ("." in c.locator or "/" in c.locator)]
+    for code in valid_codes[:4]:
         lines.append(f"- **Code:** [`{code.locator}`]({code.locator}) — `{code.representation}` ({code.tokens} tok)")
     lines.append("")
 

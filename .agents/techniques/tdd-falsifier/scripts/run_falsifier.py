@@ -11,6 +11,7 @@ import json
 import time
 import argparse
 import subprocess
+import signal
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
@@ -22,17 +23,48 @@ try:
 except ImportError:
     # Fallback inline if module path issues
     def run_isolated_test(cmd, timeout=15.0, cwd="."):
+        # Keep the fallback semantically identical to the atomic skill. The
+        # import fallback must not silently remove its timeout guarantee.
         t0 = time.time()
-        p = subprocess.run(cmd, shell=True, cwd=cwd, capture_output=True, text=True)
+        env = dict(os.environ)
+        process = subprocess.Popen(
+            cmd,
+            shell=True,
+            cwd=cwd,
+            env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            start_new_session=True,
+        )
+        timed_out = False
+        try:
+            stdout, stderr = process.communicate(timeout=timeout)
+            code = process.returncode
+        except subprocess.TimeoutExpired:
+            timed_out = True
+            try:
+                os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+            except (ProcessLookupError, PermissionError):
+                process.terminate()
+            try:
+                stdout, stderr = process.communicate(timeout=min(1.0, max(0.1, timeout)))
+            except subprocess.TimeoutExpired:
+                try:
+                    os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+                except (ProcessLookupError, PermissionError):
+                    process.kill()
+                stdout, stderr = process.communicate(timeout=2.0)
+            code = 124
         return {
             "command": cmd,
-            "success": p.returncode == 0,
-            "exit_code": p.returncode,
+            "success": code == 0 and not timed_out,
+            "exit_code": code,
             "duration_seconds": round(time.time() - t0, 3),
-            "timed_out": False,
-            "stdout": p.stdout,
-            "stderr": p.stderr,
-            "failures": []
+            "timed_out": timed_out,
+            "stdout": stdout,
+            "stderr": stderr,
+            "failures": [],
         }
 
 def find_falsifiers_via_lda(target_path: str) -> List[str]:
@@ -42,7 +74,8 @@ def find_falsifiers_via_lda(target_path: str) -> List[str]:
         res = subprocess.run(
             ["uv", "run", "lda", "tests", target_path, "--json"],
             capture_output=True,
-            text=True
+            text=True,
+            timeout=60,
         )
         if res.returncode == 0 and res.stdout.strip():
             data = json.loads(res.stdout)

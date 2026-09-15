@@ -24,6 +24,7 @@ relationships:
   - execution.backlog
   - execution.feature_spec
   - execution.technical
+  - execution.mvp_delivery_protocol
 reviewer: repository-governance
 confidence: high
 ---
@@ -80,7 +81,248 @@ explicit missing entries before all predicates pass; neither preparation writes 
 real frozen record nor performs any provider/evaluation run. No benchmark invocation
 is added by this clarification: use only the existing focused hermetic falsifiers.
 When internal work reaches the evidence frontier, stop that blocked leaf and report
-the exact missing resource; do not fill idle time with CAS, delegation or more hardening.
+the exact missing resource. The Senior MAY then dispatch only an explicitly authorized,
+lease-compatible capability-foundation row below; CAS, campaigns, learned routing and
+other FH-1 work remain unassigned.
+
+### Leadership ruling — W2c release and autonomous dispatch (2026-09-15)
+
+This ruling supersedes conflicting lease and acceptor assignments below. Source
+inspection baseline: `cf4103de882ad9eca5596f192595a941845c9e7a`; this is a ruling,
+not an implementation receipt or predecessor acceptance.
+
+**R1 — Narrow T-140 release, W2c / B; peer acceptor C.** Transfer exclusive write
+from C/T-140 to B/W2c for `vanguard/packages/runtime/session.py` only at
+`HarnessSession._workspace_digest` and its immediate snapshot-error propagation callers,
+and `vanguard/packages/adapters/environment/git.py::GitEnvironment.snapshot`.
+LDA resolve and source inspection confirm the latter owner: unresolved `HEAD`
+currently returns `instrument_error` for an unborn repository; `_workspace_digest`
+then converts snapshot failure to `""`. Restore greenfield through the product CLI
+(`vanguard code` / `entrypoint.execute`), with a valid content identity for a genuine
+unborn repository and explicit failure for other snapshot errors. No fabricated
+commit or empty-string identity may stand in for unavailable evidence. Existing
+snapshot contracts and DIR-C3 constrain this repair; a new public shape requires
+escalation before implementation. The Senior compiles focused source-owner tests
+and product-entrypoint positive/adversarial falsifiers into the ephemeral W2c packet.
+C retains the rest of T-140 skill/memory work. C and B serialize physical writes to
+`session.py`; C releases these named seams with the actual handoff SHA before B
+edits, and retains no veto over the released W2c scope. B releases the seams with
+its landing SHA before another packet acquires them. No W4, CAS, or full
+`session.py` rewrite is authorized by this transfer.
+
+**R2 — Peer acceptance.** B accepts A; A accepts C; C accepts B, including Wave B
+and DIR-4 packets. DIR-I7 applies to the exact implementation, integration delta
+and evidence: an author or material repair contributor cannot accept that claim.
+If the designated peer is ineligible, the Senior names an uninvolved acceptor;
+implementation on disjoint leases continues. Leadership is not the routine packet
+acceptor and never accepts a claim it authored or materially supplied. Intervention
+is limited to the six triggers in
+[roles_and_authority.md](../management/roles_and_authority.md#escalation-triggers--the-complete-list).
+
+**R3 — Landing receipts.** One commit per packet ID. Each handoff names that ID,
+implementation SHA, released files/seams, evidence subject/digest and eligible peer
+acceptor. Mixed “LDA improvements” commits are not packet receipts; a green test or
+mechanism's presence is not a release or independent acceptance.
+
+**T-131.8 receipt reconciliation.** `4006f6432e2c1545e95dc19c235d3d3737bfb224`
+and follow-up `5a3e6e444e0fe995eb8efd321ae9e11e6ded584c` both name T-131.8; the
+latter repairs its product-route fixture after W2c. Shared history is not rewritten,
+but this is not a one-commit packet receipt. B may review the bounded component
+evidence against the exact two-commit subject and record **LANDED / acceptance
+pending** with both SHAs, changed-file list, command receipt and release decision.
+It must not call the pair an accepted single-commit T-131.8 packet or release an
+unidentified integration subject. A future independent integration packet, if needed,
+has its own ID and one commit.
+
+**R4 — Standing sprint authorization.** A/B/C are authorized to execute the sprints
+in their dispatch prompts without further Leadership review, within the compiled
+leases and target contracts here, as soon as the named predecessor files are free.
+An owner-to-owner handoff note with SHA establishes release; elapsed time or as-built
+presence does not. The Senior records exact leases and resolves ordinary sequencing.
+Priority is W2c product greenfield, continued Packet 1 integrity (A/T-131.8,
+C/T-133→T-132→T-137, B/T-131.7 with its existing row prerequisites), then disjoint
+T-141/A, T-142/B and T-143/C in parallel after their named handoffs. T-144 follows
+independently accepted applicable foundations and released topology/session/integration
+leases, under the target design in spec DIR-4. No T-26 freeze, T-27 authorization,
+MS-CAS/W3b acceleration, document-ceiling increase or milestone closure is granted.
+Packets remain ephemeral; the five runway files retain authority.
+
+### Capability-foundation continuation (DIR-4, 2026-09-15)
+
+DIR-4 authorizes three bounded outcomes without waiting for MS-CONTROL. They do not
+displace the current integrity queue: each begins only when its exact files are free,
+the Senior records the lease, and an eligible acceptor is named. Ordinary private
+implementation choices belong to the developer. No provider calls or paid runs.
+
+| Task / initial owner | requires: and lease boundary | Outcome and focused falsifier contract |
+|---|---|---|
+| **T-141 Isolated child workspace lifecycle / A** | T-131.8 handoff; no active owner on `runtime/{child_runtime,workspace,delegation}.py`; final lease compiled before edit | Child-local mutation, recoverable candidate retention and controlled integration over the existing execution path. Attempt parent/sibling escape, stale-writer mutation, competing ownership, and crash during mutation/handoff/cleanup; prove no partial accepted candidate, lost accepted artifact or duplicate settled effect. |
+| **T-142 Long-session continuity / B** | T-131.7 handoff and release of its `runtime/checkpoints.py` plus `agency/context/{compiler,compaction}.py` lease; C releases any session seam | Separately identified bounded large-context treatment reusing the existing pack/compiler/runtime. Compare uninterrupted and fresh-process state; force repeated compaction, pending-effect interruption, identity change, revocation and exhaustion; prove no lost obligation, authority widening, fabricated evidence or budget reset. |
+| **T-143 Greenfield and multi-file oracle completeness / C** | T-137 handoff; final lease must extend, not duplicate, T-131 evidence work | Exterior verification of the exact submitted candidate with meaningful required-behavior coverage. Reject empty/stub solutions, vacuous discovery, test tampering, stale verification, omitted required files, unauthorized additions and candidate substitution; retain valid positive controls. |
+| **T-144 Planner-worker-verifier convergence / Senior assigns** | Applicable T-141/T-142/T-143 contracts independently accepted; topology/session/integration leases explicitly released | Use existing topology lowering and the same runtime. Competing candidates, stale bases, worker failure, restart, exhaustion and verifier rejection cannot produce unauthorized merge or completion; exterior verification binds the final combined tree. Capability demonstration only, never a control result. |
+
+The Senior refines each row into an exact subject-bound work packet before dispatch,
+including final changed files, canonical-owner documentation, focused command,
+positive/adversarial receipts and the R2 peer acceptor. This is delegated packet
+compilation, not a further Leadership review gate.
+
+**Active ownership — T-141-ACT / Principal (2026-09-15).** Principal owns
+`vanguard/packages/runtime/{root,child_runtime,workspace,delegation,session,bootstrap,evaluator_gateway}.py`,
+necessary existing environment/sandbox adapters, focused activation/lifecycle tests,
+and mapped canonical documentation for production-safe activation. This explicit
+user assignment supersedes earlier T-141 lease prerequisites. `session.py` remains
+exclusive until the activation packet lands and Principal gives B its exact file
+and evidence handoff; B's episode-engine work is disjoint. Root refusal stays until
+positive isolated spawn and adversarial publication/recovery controls pass. No Git
+commands, staging or commits: the repository operator receives the packet's exact
+changed files, commands and requested one-commit subject. Independent acceptance
+and final clean-subject MVP verification remain separate, pending gates.
+
+**MVP implementation takeover (2026-09-15).** The user's expanded authority
+supersedes the release prerequisite below: Developer A / Principal owns the
+necessary T-141 integration changes in `runtime/{root,child_runtime,workspace,
+delegation,session,bootstrap,evaluator_gateway}.py`, existing environment/sandbox
+adapters, their focused tests and mapped architecture owners. Public contracts
+remain DIR-C3/C5/C6/C7; no control or paid authority is granted. Existing uncommitted
+`root.py` guard, its production falsifier and this board's guard/qualification
+rulings are explicitly adopted; unrelated AGENTS/README/LDA edits remain untouched.
+Implementation may proceed without another owner release. Independent acceptance
+remains pending an uninvolved reviewer; this author cannot accept its own changes.
+The guard stays until complete production safety is proved. First bounded repair:
+retained-candidate integrity and serialized lifecycle access in `workspace.py`,
+its existing lifecycle falsifier and delegation architecture owner. No completion
+or activation follows merely from that component repair.
+
+**T-141 delivery ruling (2026-09-15; supersedes constructor-only activation).**
+Production activation remains **BLOCKED**. The root refusal is required until the
+existing child execution and publication paths satisfy DIR-C5/C7 together. Source
+inspection finds `_rebind` shares the parent environment; `_settle_workspace`
+integrates on child success; `retain_candidate` can replace a retained candidate;
+`acquire` uses an unlocked read/write sequence; and `recover` applies retained
+candidates without revalidating a fence, current base, grant or exterior verdict.
+A constructor argument cannot repair those defects. No new public contract is
+required by this ruling; existing DIR-C3/C5/C6/C7 already constrain the solution.
+
+**Bounded guard packet T-141-G / Principal; B accepts.** Exclusive write is
+`vanguard/packages/runtime/root.py` at the existing spawn-binding guard and
+`test/falsifiers/test_t141_production_activation.py`. Refuse both automatic binding
+and explicitly supplied unsafe `RuntimeChildRunner` instances before activation;
+prove the ordinary non-spawning public run still executes. This is containment of
+a known unsafe activation path, not T-141 activation or general certification of
+third-party child runners. Focused command: `python3 -m unittest
+ test.falsifiers.test_t141_production_activation -v` (join as one shell line).
+
+**Smallest missing release for activation.** The Senior must record owner-to-owner,
+SHA-bound releases for `runtime/{root,child_runtime,workspace,delegation}.py`, the
+parent publication/authorization seam in `runtime/session.py`, and the child
+adapter composition seam in `runtime/bootstrap.py`; C's retained session work and
+B's continuation lease cannot be assumed free. Then compile one A-owned integration
+packet, B acceptance, with exact additional adapter/test paths established from
+those seams. Required behavior is child-local effect adapters and containment,
+immutable base-bound candidates, mutually exclusive fencing through publication,
+current grant/budget checks through existing dispatch, and exterior verification
+of the exact staged combined tree through the existing evaluator gateway. Retention
+alone must never authorize recovery/publication. Test real spawn, parent/sibling
+escape, candidate replacement, stale base, racing acquisition, revocation after
+verification, crash/restart, verifier rejection and cleanup failure. Retain the
+root guard until these positive and negative cells pass. This records missing
+release/packet authority, not an expanded write lease or permission to edit C's work.
+
+**Parallel delivery assignments (no additional Leadership review).**
+
+| Owner | Authorized next work and handoff |
+|---|---|
+| C + repository operator | Produce separate one-commit, SHA-bound T-133, T-132, T-137 and T-143 packets from their actual deltas; list files, exact evidence subject/digest and releases. Never include another owner's dirty files or relabel an old receipt. T-143 is reported implemented, independent acceptance pending. |
+| A | Independently review those exact C packets as they arrive; record missing SHA/evidence instead of accepting a working-tree claim. No repair contribution inside the claim being accepted. Read-only T-141 integration preparation may proceed while leases remain occupied. |
+| B | Record T-131.8 as LANDED / acceptance pending with `4006f643` and `5a3e6e44`; preserve history. Reconcile prior review/releases, then execute the runtime qualification packet below. B also independently accepts T-141-G; the guard receipt is not T-141 acceptance. |
+
+**B qualification packet T-131.7 → T-142; C accepts.** Retain the existing B source
+leases after explicit releases. Qualification must exercise actual runtime sessions,
+not merely `fold_task_state` over handcrafted events or `critical_state` over a
+constructed view. Use the existing row-7 falsifier as the T-131.7 test owner; the
+T-142 test owner is `test/falsifiers/test_t142_runtime_continuity.py` (authorized new
+module). Use a scripted model, local disposable WAL store and real runtime-produced
+events; no provider. Establish an uninterrupted positive baseline, force repeated
+compaction, interrupt a pending effect, and restart in a fresh process using the
+existing runtime resume path. Reconcile uncertainty before retry and prove a settled
+effect is not repeated. Exercise grant revocation before the next effect and exact
+budget exhaustion before the next dispatch; neither restart nor compaction may
+restore authority or resources. Compare objective, revisions, candidate/tree,
+composition, evidence, obligations, grant state and consumption against the baseline.
+Missing required fields must fail the assertion rather than be skipped. Removing
+each preservation/revalidation step must make its corresponding control fail.
+The executable ingress is `entrypoint.execute` → `Runtime.execute_profiled` →
+`Runtime.run_composed` → `HarnessSession.run`, using `injectedModel`, `storePath`
+and the same run ID across processes. Observe at least two actual compactions and
+compare the first resumed model context. Crash after a real durable `EffectStarted`,
+not after a fabricated test ledger. Attempt a larger `maxTurnsPerEpisode`, changed
+preset/composition, corrupt checkpoint and changed verification subject on restart.
+Source-inspected seams to qualify first: `entrypoint.execute` creates `TaskContext`
+without `resume_state`; `HarnessSession._assert_resume_behavior_identity` returns
+when that state's prior identity is absent; `_refresh_sigma` is reached after
+write/verification. Governor debit restoration exists, while a new `GrantIssuer`
+is constructed. These are test targets, not proven runtime bypasses. If reproduced,
+the smallest repair is cold-start hydration/revalidation on the existing ingress;
+`entrypoint.py` and `session.py` require explicit releases before B edits them.
+Focused commands are the row-7 module and then the T-142 module only; no broad run
+is implied. Any required source repair outside the released B lease returns to the
+Senior for an exact amendment; no speculative session rewrite is authorized.
+
+**Dev C independent review of B qualification packet T-131.7 / T-142 (2026-09-15).**
+C reviewed B's continuity packet (`runtime/ledger/recovery.py`, `runtime/entrypoint.py`, `runtime/session.py`,
+`test/falsifiers/test_t131_row7_resume_compaction_identity.py`, `test/falsifiers/test_t142_runtime_continuity.py`).
+Bounded in-process and chain-tip recovery behavior is **ACCEPTED**: all 5 mandatory dimensions (`task`, `candidate`,
+`plan`, `changed-file`, `budget`) are preserved by `critical_state` and `fold_task_state`; `reconcile_open_intents`
+and `reconcile_open_children` append at the current project chain tip preserving causation without sequence regression;
+replay deduplication of settled effects holds; monotonic grant revocation and non-replenishment of budgets survive
+restart and compaction; multi-compaction continuity under the 4096-token ceiling is verified (31 row-7 tests PASS, 16 T-142
+tests PASS). Public runtime-ingress behavior across all CLI surfaces is **WITHHELD / NOT ACCEPTED**: non-git/unborn
+workspace snapshot failures during finish attempts and general CLI multi-process resume remain open issues handed off
+to Developer A's final CLI integration packet.
+
+**Dev C local F1–F7 and T-51 readiness inventory (2026-09-15).**
+Local Q-01 quarantine controls (`quarantine.py`, 35 tests PASS) and gate discovery widening (`collection_integrity.py`,
+deliberate red on unaccepted holdout, green on synthetic eligible holdout) are complete. In accordance with DIR-I7,
+external dependencies are named explicitly without fabrication or contact:
+- Curator: UNASSIGNED / MISSING (independent private corpus authoring required).
+- Sealed store: UNPROVISIONED / MISSING (isolated storage infrastructure required).
+- External evaluation authority: UNASSIGNED / MISSING (signed cryptographic authorization required).
+- Uninvolved acceptor: UNASSIGNED / MISSING (non-author review required; A, B, and C are ineligible).
+Live execution, paid calls, control freeze (T-26), and milestone closure remain strictly unauthorized.
+
+**MS-MVP packet issue — leadership ruling (2026-09-15).** The T-141 activation packet
+landed at `90292daa` and `session.py` was released; B's session-dependent continuity
+repairs are complete in-tree awaiting operator commit and C's disposition. The
+remaining Engineering-MVP work is closed into the `E1`-`E7` gate and the six packets
+below, specified in full in
+[`mvp_delivery_protocol.md`](mvp_delivery_protocol.md#6-work-packets). Owners execute
+without further routine escalation. Two public-route defects were **reproduced**
+in-session and are named there with their exact stacks: `E-CLI-1` (a non-git workspace
+raises `WorkspaceSnapshotRefused` out of completion admission and escapes the public
+route unhandled) and `E-CLI-2` (`entrypoint.execute` hydrates durable resume state only
+when `command == "resume"`). Neither is speculative; both belong to A's integration
+lease, not to B or C.
+
+| Task / owner | requires: and lease boundary | Outcome and focused falsifier contract |
+|---|---|---|
+| **T-145 Public ingress truthfulness / A** | B's continuity packet committed; lease `runtime/entrypoint.py` and the `runtime/session.py` ingress/workspace-identity seams only | Close `E-CLI-1` and `E-CLI-2`. Typed terminal when workspace identity is unobservable — never a fabricated digest, an empty-tree default or a skipped binding; hydration keyed on durable state rather than the command verb, revalidating composition, preset, verification subject and turn ceiling fail-closed. Prove a plain-directory greenfield run reaches a truthful terminal, and that hydration never replenishes budget or re-widens a revoked grant. Acceptor: C |
+| **T-146 Public journey evidence / A** | T-145; lease is the new falsifier module only, no production source without amendment | One greenfield multi-file creation and one brownfield multi-file change through `entrypoint.execute` only, with exterior verification of the exact submitted candidate, complete changed-file attribution and honest cost accounting. Scripted model, disposable WAL, no provider. Acceptor: uninvolved (A authors the claim) |
+| **T-147 Independent acceptance of T-141 / C** | none — READY; read-only, no repair to any file under review | Dispose T-141 at `90292daa` against `C-PUB-1`-`C-PUB-9`. Re-run the eight mutation probes; a negative control that does not red when its guard is removed is a rejection, not a nit. Acceptor: C; Principal is ineligible |
+| **T-148 Independent acceptance of C's four packets / A** | none — READY; read-only on `a217a9ef`, `9b61c71b`, `d76156a3`, `95a9ba38` | Accept only bounded demonstrated behavior; record missing SHA or evidence instead of accepting a working-tree claim. No repair inside a packet under review. Acceptor: A |
+| **T-149 Independent acceptance of the integration / B** | T-145, T-146; read-only | Verify the integration weakened no continuity control and confirm `E6` on the public route: no false completion, and restart neither widens authority nor replenishes budget. Acceptor: B |
+| **T-150 MVP subject assembly and single verify / Principal** | T-145-T-149 | Assemble one clean exact MVP subject; run `just verify` **once**; name every pre-existing failure with file and reason and attribute none to the MVP subject; report `E1`-`E7` disposition honestly including any predicate that did not close |
+
+T-147 and T-148 are READY now and run in parallel with T-145/T-146. The only
+serialized chain is A (T-145 -> T-146) -> B (T-149) -> Principal (T-150).
+
+Pre-existing failures to name rather than repair under these packets: the 16
+machine-local path references in `docs/research/coding_harness/aux_cli_multi_profiles.md`,
+164 broken documentation links, and 63 frontmatter violations. Folding documentation
+debt into a product gate would let a chore block a capability outcome; it is tracked
+in [`backlog.md`](backlog.md) instead.
+
+T-144 remains unassigned until applicable foundations have independent acceptance.
+T-26, T-27, provider/paid calls, CAS and milestone closure remain unauthorized.
 
 ### Protected prior handoffs and acceptance reconciliation
 

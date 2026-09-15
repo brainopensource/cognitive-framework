@@ -8,13 +8,17 @@ LAM_DIR = Path(__file__).resolve().parent
 DB_PATH = LAM_DIR / "lam.sqlite"
 SCENARIOS_DIR = LAM_DIR / "scenarios"
 SWE_REPO_DIR = LAM_DIR.parent / "005_SWE_VERIFIED_REPO"
+ROOT = LAM_DIR.parents[1]
 
 import sys
 if str(LAM_DIR) not in sys.path:
     sys.path.insert(0, str(LAM_DIR))
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from schema import validate_scenario
 from store import LamStore
+from benchmarks.ladder.quarantine import SCOPE_ORDINARY_USER, guard_loader
 
 SWE_INSTANCES = [
     ("django__django-10097", "t2-django-10097", 2, "Django: Make URLValidator reject invalid characters in username/password"),
@@ -38,6 +42,7 @@ def import_swe_verified():
     print(f"Importing {len(SWE_INSTANCES)} genuine SWE-bench Verified repositories into LAM...")
 
     for inst_id, scenario_id, tier, title in SWE_INSTANCES:
+        guard_loader(task_id=scenario_id, capture=True, scope=SCOPE_ORDINARY_USER)
         inst_dir = SWE_REPO_DIR / inst_id
         if not inst_dir.is_dir():
             print(f"⚠ Missing instance dir {inst_dir}")

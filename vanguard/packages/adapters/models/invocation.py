@@ -290,7 +290,7 @@ def validate_proposal_schema(proposal: Mapping[str, Any]) -> Result[None]:
     if not isinstance(proposal, Mapping):
         return Result.fail("instrument_error", "provider proposal must be an object")
 
-    allowed = {"text", "toolCalls", "usage", "cost_usd", "usd_micros",
+    allowed = {"text", "toolCalls", "usage", "cost_usd", "usd_micros", "provider_usd_micros",
                "pricing_known", "pricing_source", "resolved_model", "model_fingerprint"}
     unknown = set(proposal) - allowed
     if unknown:

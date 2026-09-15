@@ -15,13 +15,17 @@ SPLIT_MANIFEST = LAM_DIR / "calibration_split.json"
 CAPTURES_DIR = LAM_DIR / "runs" / "live_captures"
 SCENARIOS_DIR = LAM_DIR / "scenarios"
 LAB_DIR = Path(os.environ.get("LEX_LAB_DIR", str(LAM_DIR / "lab")))
+ROOT = LAM_DIR.parents[1]
 
 import sys
 if str(LAM_DIR) not in sys.path:
     sys.path.insert(0, str(LAM_DIR))
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from schema import validate_scenario
 from store import LamStore
+from benchmarks.ladder.quarantine import SCOPE_ORDINARY_USER, guard_loader
 
 TASK_TO_SCENARIO_ID = {
     "semver_parser": "t1-semver-parser",
@@ -121,6 +125,7 @@ def import_corpus() -> None:
         trajectory = json.loads(traj_path.read_text(encoding="utf-8"))
 
         scenario_id = TASK_TO_SCENARIO_ID.get(task_id, f"t{meta['tier']}-{task_id.replace('_', '-')}")
+        guard_loader(task_id=scenario_id, capture=True, scope=SCOPE_ORDINARY_USER)
         tier = meta["tier"]
         title = f"SWE-Verified: {meta['description']}"
         workspace = build_workspace_snapshot(task_id)

@@ -39,6 +39,7 @@ from ..kernel.attenuation import Scope, attenuate
 from ..kernel.model import AdapterOutcome, Occurrence
 from ..ports.child_runtime import ChildRunPlan, ChildRunResult, ChildRuntimePort
 from ..ports.event_store import EventRange
+from .workspace import PublicationAuthority
 
 __all__ = [
     "ADDITIVE_DIMENSIONS",
@@ -582,7 +583,7 @@ class SpawnAdapter:
                    episode_id=plan.child_episode_id)
 
         try:
-            child_result = self._child_runtime.run_child(plan)
+            child_result = self._dispatch_child(plan, granted)
         except Exception as exc:  # noqa: BLE001 -- occurrence is genuinely unknown
             # The child may have completed an irreversible effect before
             # raising. Reporting DID_NOT_OCCUR here would be a guess that
@@ -627,6 +628,31 @@ class SpawnAdapter:
         )
 
     # -- internals --------------------------------------------------------
+
+    def _dispatch_child(self, plan: ChildRunPlan, granted: Scope) -> Any:
+        """Run the child, carrying the authority that admitted it (`T-141`).
+
+        A runner that publishes into the parent's tree must recheck the grant
+        and the remaining balance *after* the child finishes, and this adapter
+        is the only place that holds either: `granted` is the scope the kernel
+        actually attenuated to, and `_remaining_budget` is a live callable, not
+        a snapshot, so a sibling's spend is visible to it.
+
+        The optional method is duck-typed rather than added to
+        `ChildRuntimePort`. Publication authority is a property of *this*
+        runtime's workspace supervision, not of every conceivable child
+        runtime, and widening the port would oblige every conforming runner --
+        including the test doubles that prove the unsupervised path still
+        works -- to carry a parameter it has no use for.
+        """
+        authorized = getattr(self._child_runtime, "run_child_authorized", None)
+        if not callable(authorized):
+            return self._child_runtime.run_child(plan)
+        return authorized(plan, PublicationAuthority(
+            grant=granted,
+            remaining_budget=self._remaining_budget,
+            now=lambda: str(self._clock.now()),
+        ))
 
     def _child_turns(self, intent: SpawnIntent) -> int:
         """A child may lower the turn ceiling and never raise it."""

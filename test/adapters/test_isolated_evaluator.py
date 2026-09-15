@@ -21,13 +21,18 @@ class IsolatedEvaluatorContract(unittest.TestCase):
     def setUp(self) -> None:
         self._temporary = tempfile.TemporaryDirectory()
         self.workspace = Path(self._temporary.name)
-        self.oracle = self.workspace / "test_oracle.py"
-        self.oracle.write_text("assert 1 + 1 == 2\n", encoding="utf-8")
+        self.oracle_dir = self.workspace / "tests"
+        self.oracle_dir.mkdir()
+        self.oracle = self.oracle_dir / "test_oracle.py"
+        self.oracle.write_text(
+            "from src import VALUE\nassert VALUE == 2\n", encoding="utf-8")
+        self.source = self.workspace / "src.py"
+        self.source.write_text("VALUE = 2\n", encoding="utf-8")
         subprocess.run(
             ["git", "init", "-q"], cwd=self.workspace, check=True
         )
         subprocess.run(
-            ["git", "add", "test_oracle.py"], cwd=self.workspace, check=True
+            ["git", "add", "tests/test_oracle.py", "src.py"], cwd=self.workspace, check=True
         )
         self.protocol = EvaluationProtocol(name="coding-oracle@3")
 
@@ -37,8 +42,8 @@ class IsolatedEvaluatorContract(unittest.TestCase):
     def _evaluator(self, **overrides: object) -> IsolatedEvaluator:
         options = {
             "workspace": self.workspace,
-            "oracle_digests": {"test_oracle.py": _digest(self.oracle)},
-            "command": ("python3", "-c", "raise SystemExit(0)"),
+            "oracle_digests": {"tests/test_oracle.py": _digest(self.oracle)},
+            "command": ("python3", "tests/test_oracle.py"),
             "expected_uid": os.getuid(),
             "image_digest": "sha256:" + "a" * 64,
         }
@@ -99,13 +104,14 @@ class IsolatedEvaluatorContract(unittest.TestCase):
         self.assertEqual(claim["event"], "EvaluationCompleted")
         self.assertEqual(claim["status"], "passed")
         self.assertEqual(
-            claim["probes"], {"immutability": True, "nonPollution": True}
+            claim["probes"],
+            {"immutability": True, "nonPollution": True, "candidateCompleteness": True},
         )
         self.assertEqual(claim["evaluatorUid"], os.getuid())
         self.assertEqual(claim["imageDigest"], "sha256:" + "a" * 64)
 
     def test_untracked_files_under_oracle_paths_fails(self) -> None:
-        (self.workspace / "untracked_oracle.py").write_text("assert True\n")
+        (self.workspace / "tests" / "untracked_oracle.py").write_text("assert True\n")
         result = self._evaluator().evaluate(RunRef("run", episode_id="ep1"), self.protocol)
         self.assertEqual(result.value.outcome, "claims")
         self.assertFalse(result.value.claims[0]["probes"]["immutability"])
@@ -113,11 +119,11 @@ class IsolatedEvaluatorContract(unittest.TestCase):
     def test_oracle_directory_replaced_by_symlink(self) -> None:
         digest = _digest(self.oracle)
         self.oracle.unlink()
-        (self.workspace / "test_oracle.py").symlink_to(Path("/tmp"))
+        self.oracle.symlink_to(Path("/tmp"))
         evaluator = IsolatedEvaluator(
             workspace=self.workspace,
-            oracle_digests={"test_oracle.py": digest},
-            command=("python3", "-c", "raise SystemExit(0)"),
+            oracle_digests={"tests/test_oracle.py": digest},
+            command=("python3", "tests/test_oracle.py"),
             expected_uid=os.getuid(),
             image_digest="sha256:" + "a" * 64
         )
@@ -157,20 +163,34 @@ class IsolatedEvaluatorContract(unittest.TestCase):
         self.assertFalse(result.value.claims[0]["probes"]["nonPollution"])
 
     def test_unsafe_env_vars(self) -> None:
+        captured: dict[str, object] = {}
+
+        def runner(*args: object, **kwargs: object) -> subprocess.CompletedProcess[bytes]:
+            captured["env"] = kwargs.get("env")
+            return subprocess.CompletedProcess(list(args[0]) if args else [], 0, b"", b"")
+
         os.environ["PYTHONPATH"] = "/tmp"
+        os.environ["LD_PRELOAD"] = "/tmp/evil.so"
         try:
-            result = self._evaluator().evaluate(RunRef("run", episode_id="ep1"), self.protocol)
-            self.assertFalse(result.value.claims[0]["probes"]["nonPollution"])
+            result = self._evaluator(runner=runner).evaluate(
+                RunRef("run", episode_id="ep1"), self.protocol)
+            self.assertTrue(result.value.claims[0]["probes"]["nonPollution"])
+            env = captured["env"]
+            self.assertIsInstance(env, dict)
+            assert isinstance(env, dict)
+            self.assertEqual(env.get("PYTHONPATH"), str(self.workspace.resolve()))
+            self.assertNotIn("LD_PRELOAD", env)
         finally:
             del os.environ["PYTHONPATH"]
+            del os.environ["LD_PRELOAD"]
 
     @unittest.skipIf(not hasattr(os, "getuid") or os.getuid() == 10002,
                      "this host already is the evaluator uid")
     def test_default_uid_gate_is_inconclusive_off_the_daemon(self) -> None:
         evaluator = IsolatedEvaluator(
             workspace=self.workspace,
-            oracle_digests={"test_oracle.py": _digest(self.oracle)},
-            command=("python3", "-c", "raise SystemExit(0)"),
+            oracle_digests={"tests/test_oracle.py": _digest(self.oracle)},
+            command=("python3", "tests/test_oracle.py"),
             image_digest="sha256:" + "a" * 64,
         )
         result = evaluator.evaluate(RunRef("run-uid", episode_id="ep1"), self.protocol)

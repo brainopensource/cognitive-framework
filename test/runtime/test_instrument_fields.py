@@ -224,6 +224,8 @@ class NoVerbLacksABinding(unittest.TestCase):
         from vanguard.packages.runtime.wiring import (
             _environment_observer,
             _environment_effector,
+            _repo_observer,
+            _task_revise_effector,
         )
 
         # Sandbox worker operations plus in-process verbs:
@@ -233,10 +235,23 @@ class NoVerbLacksABinding(unittest.TestCase):
         #     (read-only context observation) and agency.finish (protocol
         #     completion signal). These are legitimately absent from
         #     WorkerProtocol.SUPPORTED_OPERATIONS by design.
+        # W1: enumerate by FACTORY, never by verb name. Listing names here
+        # would turn this gate into an allowlist that grows every time a verb
+        # is added; listing factories keeps it a real check -- a verb bound to
+        # no in-process factory and no worker operation still fails.
+        # `_repo_observer` (index-backed reads) and `_task_revise_effector`
+        # (durable task-state revision) run in-process for the same reason the
+        # environment verbs do, and predate neither.
+        in_process_factories = (
+            _environment_observer,
+            _environment_effector,
+            _repo_observer,
+            _task_revise_effector,
+        )
         environment_verbs = {
             verb
             for verb, binding in DEFAULT_BINDINGS.items()
-            if binding.factory in (_environment_observer, _environment_effector)
+            if binding.factory in in_process_factories
         }
         supported = set(WorkerProtocol.SUPPORTED_OPERATIONS) | {"agent.spawn"} | environment_verbs
         self.assertTrue(set(DEFAULT_BINDINGS) <= supported,

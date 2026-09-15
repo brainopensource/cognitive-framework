@@ -84,7 +84,7 @@ A complete task execution follows an 8-stage pipeline from client invocation to 
 2. **Composition & Identity**: `runtime.compose` loads manifests, binds configuration profiles, and seals the immutable `RunPlan` ($D_H, D_R$).
 3. **Session Activation**: `HarnessSession` initializes, opens the SQLite WAL event ledger, binds `LedgerEmitter`, and writes `RunStarted`.
 4. **Turn Cognition**: `agency.EpisodeEngine` compiles context layers (L1 System Prompt, L2 State Snapshot, L3 Trajectory History, L4 Dynamic Workspace) and prompts `ModelPort`.
-5. **Kernel Effect Dispatch**: Proposed tool calls pass to `Kernel.dispatch()` through 13 discrete stages (S0 Observe $\to$ S1 Resolve $\to$ S2 Admissibility $\to$ S3 Reserve $\to$ S4 Persist Intent $\to$ S5–S9 Execute $\to$ S10 Commit Budget $\to$ S11 Release Leases $\to$ S12 Append Receipt).
+5. **Kernel Effect Dispatch**: Proposed tool calls pass through the canonical pipeline in `kernel.dispatch`: S0 Enter $\to$ S1 Parse $\to$ S2 Resolve $\to$ S3 Describe $\to$ S4 Classify $\to$ S5 Authorize $\to$ S6 Grant $\to$ S7 Reserve $\to$ S8 Verify $\to$ S8a durably append and fsync intent $\to$ S9 Dispatch $\to$ S10 Commit Budget $\to$ S11 Release $\to$ S12 Emit. Durable intent always precedes the physical effect.
 6. **Receipt Ingestion**: Causal receipts and observations are fed back into context memory; the sequential turn loop repeats until completion.
 7. **Exterior Assurance**: `EvidenceCaptureService` packages the final execution trajectory, calls `vanguard-evaluator` over RPC (UID 10002), and records signed `VerdictRecorded`.
 8. **Teardown**: Leases close, SQLite WAL flushes, and the final `RunResult` returns to the invoking client.

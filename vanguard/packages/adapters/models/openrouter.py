@@ -12,6 +12,7 @@ import os
 import random
 import threading
 import time
+from decimal import Decimal, InvalidOperation
 import urllib.error
 import urllib.request
 from codecs import getincrementaldecoder
@@ -404,11 +405,11 @@ def _extract_dsml_tool_calls(text: str) -> tuple[str, list[dict[str, Any]]]:
     """Extract tool calls emitted via DeepSeek DSML markup tags."""
     import re
     invoke_rx = re.compile(
-        r'<[｜|]DSML[｜|]invoke\s+name=["\']([^"\']+)["\']>(.*?)</[｜|]DSML[｜|]invoke>',
+        r'<[｜|]DSML[｜|]\s*invoke\s+name=["\']([^"\']+)["\']>(.*?)</[｜|]DSML[｜|]\s*invoke>',
         re.DOTALL,
     )
     param_rx = re.compile(
-        r'<[｜|]DSML[｜|]parameter\s+name=["\']([^"\']+)["\'][^>]*>(.*?)</[｜|]DSML[｜|]parameter>',
+        r'<[｜|]DSML[｜|]\s*parameter\s+name=["\']([^"\']+)["\'][^>]*>(.*?)</[｜|]DSML[｜|]\s*parameter>',
         re.DOTALL,
     )
     calls: list[dict[str, Any]] = []
@@ -1192,6 +1193,7 @@ class OpenRouterModel:
                     proposal["model_fingerprint"] = fingerprint
 
         # Token usage and priced accounting
+        provider_usd_micros: int | None = None
         if raw_usage is not None:
             prompt_tokens = int(raw_usage.get("prompt_tokens") or 0)
             completion_tokens = int(raw_usage.get("completion_tokens") or 0)
@@ -1201,6 +1203,12 @@ class OpenRouterModel:
             else:
                 cached_tokens = int(raw_usage.get("cached_tokens") or 0)
             total_tokens = int(raw_usage.get("total_tokens") or (prompt_tokens + completion_tokens))
+            raw_cost = raw_usage.get("cost")
+            if raw_cost is not None:
+                try:
+                    provider_usd_micros = int((Decimal(str(raw_cost)) * Decimal(1_000_000)).to_integral_value())
+                except (InvalidOperation, ValueError, TypeError):
+                    provider_usd_micros = None
 
             # Fallback if provider passed zero/missing values
             if prompt_tokens <= 0:
@@ -1250,6 +1258,8 @@ class OpenRouterModel:
             "total_tokens": total_tokens,
             "cost_usd": cost_usd,
             "usd_micros": usd_micros,
+            "provider_usd_micros": provider_usd_micros,
+            "provider_cost_observed": provider_usd_micros is not None,
             "pricing_known": pricing_known,
             "pricing_source": pricing_source,
             "resolved_model": resolved_model,
@@ -1257,6 +1267,7 @@ class OpenRouterModel:
         }
         proposal["cost_usd"] = cost_usd
         proposal["usd_micros"] = usd_micros
+        proposal["provider_usd_micros"] = provider_usd_micros
         proposal["pricing_known"] = pricing_known
         proposal["pricing_source"] = pricing_source
         proposal["resolved_model"] = resolved_model

@@ -65,6 +65,18 @@ lda-doctor:
 	uv run lda doctor
 
 # Canonical local/CI qualification gate before PR completion or sprint closure
+#
+# T-132 discovery exclusions (deliberate; not silent omissions):
+# - test/e2e: not an importable unittest package (no __init__.py); clean-machine RC
+#   install probe, not a hermetic unit collection. Invoked only by packaging/RC jobs.
+# - test/broken: linter negative fixtures, not a unittest package (no __init__.py).
+# - test/falsifiers full discover: 21 errors / 3 failures on this subject in material
+#   graph-coloring, M-5b, M-7 topology, and inference-accounting packs (missing
+#   signed bundles / operator approval). Named false-completion modules are gated
+#   below; remaining falsifier modules are listed as exclusions, not deleted.
+# Cost on this subject (timed 2026-09-15): kernel 0.59s + agency 2.82s + contracts
+# 0.35s ≈ 3.8s narrow; required control/falsifier modules <1s green plus
+# test_control_corpus 0.04s RED (stale oracle). Full falsifiers discover 39.48s RED.
 verify:
 	uv lock --check
 	uv sync --frozen
@@ -75,7 +87,6 @@ verify:
 	python3 tools/linters/check_isolation_policy.py
 	python3 tools/linters/check_path_hygiene.py
 	python3 tools/linters/check_corpus_quarantine.py --metadata
-	python3 tools/linters/check_corpus_quarantine.py --admission
 	python3 tools/linters/check_event_coverage.py
 	python3 tools/linters/check_execution_truth.py
 	python3 tools/linters/check_falsifier_ids.py
@@ -83,10 +94,30 @@ verify:
 	python3 -m unittest discover -s test/kernel -t .
 	python3 -m unittest discover -s test/agency -t .
 	python3 -m unittest discover -s test/contracts -t .
+	python3 -m unittest test.benchmarks.test_corpus_quarantine test.benchmarks.test_control_accounting test.benchmarks.test_metric_veto test.falsifiers.test_completion_gate_scope -v
+	python3 -m unittest test.benchmarks.test_control_corpus -v
+	just verify-admission-strict
 	npm run typecheck
 	npm test
 	just docs-full
 	@echo "AETHER VERIFY: PASS"
+
+# Scoring/acceptance admission gate. Metadata --admission exit 0 with
+# "HOLDOUT UNACCEPTED" is a diagnostic, never a green scoring result (T-132).
+verify-admission-strict:
+	#!/usr/bin/env bash
+	set -euo pipefail
+	out="$(python3 tools/linters/check_corpus_quarantine.py --admission)"
+	printf '%s\n' "$out"
+	if printf '%s\n' "$out" | grep -q "HOLDOUT UNACCEPTED"; then
+		echo "STRICT ADMISSION GATE: RED (actual holdout unaccepted)"
+		exit 1
+	fi
+	if printf '%s\n' "$out" | grep -q "ADMISSION FAIL"; then
+		echo "STRICT ADMISSION GATE: RED (admission errors)"
+		exit 1
+	fi
+	echo "STRICT ADMISSION GATE: GREEN"
 
 # Release candidate qualification wrapper
 release-verify SUBJECT ENVELOPE GIT_RECEIPT:

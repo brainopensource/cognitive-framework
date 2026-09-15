@@ -12,6 +12,7 @@ Falsifier for T-101 / GATE-01:
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import shutil
 import sys
@@ -222,6 +223,178 @@ class TestCollectionIntegrity(unittest.TestCase):
             self.assertTrue(len(reason.strip()) > 10, f"Retirement rationale for {path_str} is too brief")
             p = _REPO_ROOT / path_str
             self.assertTrue(p.is_file(), f"Recorded retired module {path_str} does not exist on disk")
+
+
+REQUIRED_VERIFY_MODULES: tuple[str, ...] = (
+    "test.benchmarks.test_corpus_quarantine",
+    "test.benchmarks.test_control_accounting",
+    "test.benchmarks.test_metric_veto",
+    "test.falsifiers.test_completion_gate_scope",
+    "test.benchmarks.test_control_corpus",
+)
+
+GATE_EXCLUSIONS: dict[str, str] = {
+    "test/e2e": "not an importable unittest package",
+    "test/broken": "linter negative fixtures",
+    "test/falsifiers full discover": "graph-coloring",
+}
+
+
+def _just_recipe(justfile: str, name: str) -> str:
+    """Return the indented body of a just recipe, excluding later recipes."""
+    lines = justfile.splitlines()
+    capturing = False
+    body: list[str] = []
+    for line in lines:
+        if line == f"{name}:" or line.startswith(f"{name}:"):
+            capturing = True
+            continue
+        if not capturing:
+            continue
+        if line.startswith("\t") or line.startswith(" ") or line == "":
+            body.append(line)
+            continue
+        break
+    if not body:
+        raise AssertionError(f"just recipe {name} has no body")
+    return "\n".join(body)
+
+
+def _active_recipe_text(body: str) -> str:
+    """Recipe lines with trailing comments stripped; used to detect hidden suites."""
+    active: list[str] = []
+    for line in body.splitlines():
+        stripped = line.split("#", 1)[0].strip()
+        if stripped:
+            active.append(stripped)
+    return "\n".join(active)
+
+
+def strict_admission_exit(stdout: str, returncode: int) -> int:
+    """Scoring-gate interpreter: diagnostic UNACCEPTED is red, not green."""
+    if returncode != 0 or "HOLDOUT UNACCEPTED" in stdout or "ADMISSION FAIL" in stdout:
+        return 1
+    return 0
+
+
+class TestGateDiscoveryWidening(unittest.TestCase):
+    """T-132: routine verify must see the control instrument; unaccepted holdout stays red."""
+
+    def test_justfile_lists_required_control_modules(self) -> None:
+        justfile = (_REPO_ROOT / "justfile").read_text(encoding="utf-8")
+        verify_active = _active_recipe_text(_just_recipe(justfile, "verify"))
+        for module in REQUIRED_VERIFY_MODULES:
+            self.assertIn(module, verify_active, f"just verify must collect {module}")
+        self.assertIn("verify-admission-strict", verify_active)
+        for path, reason in GATE_EXCLUSIONS.items():
+            self.assertIn(path, justfile, f"exclusion {path} must be named")
+            self.assertGreater(len(reason), 10)
+
+    def test_required_control_modules_are_not_emptied_or_removed(self) -> None:
+        for module in REQUIRED_VERIFY_MODULES:
+            path = _REPO_ROOT.joinpath(*module.split(".")).with_suffix(".py")
+            self.assertTrue(path.is_file(), f"required suite hidden or removed: {module}")
+            self.assertRegex(
+                path.read_text(encoding="utf-8"),
+                r"def test_",
+                f"required suite emptied to manufacture green: {module}",
+            )
+
+    def test_just_check_stays_fast_without_red_scoring_controls(self) -> None:
+        justfile = (_REPO_ROOT / "justfile").read_text(encoding="utf-8")
+        check_active = _active_recipe_text(_just_recipe(justfile, "check"))
+        self.assertIn("check_corpus_quarantine.py --metadata", check_active)
+        self.assertNotIn("verify-admission-strict", check_active)
+        self.assertNotIn("test.benchmarks.test_control_corpus", check_active)
+
+    def test_exclusions_and_cost_are_recorded_honestly(self) -> None:
+        justfile = (_REPO_ROOT / "justfile").read_text(encoding="utf-8")
+        lowered = justfile.casefold()
+        self.assertIn("cost on this subject", lowered)
+        self.assertRegex(justfile, r"\d+\.\d+s")
+        self.assertIn("named false-completion", lowered)
+        for path, needle in GATE_EXCLUSIONS.items():
+            self.assertIn(path.casefold(), lowered, f"exclusion {path} must be named")
+            self.assertIn(needle.casefold(), lowered, f"exclusion reason missing for {path}")
+
+    def test_ci_workflows_list_required_control_modules(self) -> None:
+        ci = (_REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+        clean = (_REPO_ROOT / ".github" / "workflows" / "clean-candidate.yml").read_text(encoding="utf-8")
+        for module in REQUIRED_VERIFY_MODULES:
+            self.assertIn(module, ci, f"ci.yml must collect {module}")
+            self.assertIn(module, clean, f"clean-candidate.yml must collect {module}")
+        self.assertIn("HOLDOUT UNACCEPTED", ci)
+        self.assertIn("HOLDOUT UNACCEPTED", clean)
+
+    def test_e2e_and_broken_are_deliberately_not_packages(self) -> None:
+        self.assertFalse((_REPO_ROOT / "test" / "e2e" / "__init__.py").is_file())
+        self.assertFalse((_REPO_ROOT / "test" / "broken" / "__init__.py").is_file())
+        self.assertTrue((_REPO_ROOT / "test" / "e2e" / "test_clean_machine_rc.py").is_file())
+        self.assertTrue((_REPO_ROOT / "test" / "broken" / "fixtures").is_dir())
+
+    def test_stale_oracle_digest_fails_control_corpus_suite(self) -> None:
+        """The defect that escaped narrow verify must red the widened control suite."""
+        loader = unittest.defaultTestLoader
+        suite = loader.loadTestsFromName(
+            "test.benchmarks.test_control_corpus.TestControlCorpus.test_frozen_suite_is_complete_and_digest_bound"
+        )
+        result = unittest.TestResult()
+        suite.run(result)
+        self.assertGreaterEqual(len(result.errors) + len(result.failures), 1)
+        blob = "\n".join(traceback for (_, traceback) in result.errors + result.failures)
+        self.assertIn("oracle digest mismatch", blob)
+
+    def test_actual_unaccepted_holdout_is_strict_red(self) -> None:
+        from tools.linters.check_corpus_quarantine import main
+
+        import io
+        from contextlib import redirect_stdout
+
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = main(["--admission"])
+        stdout = buf.getvalue()
+        self.assertEqual(strict_admission_exit(stdout, code), 1)
+        self.assertIn("HOLDOUT UNACCEPTED", stdout)
+
+    def test_synthetic_eligible_holdout_admission_is_green(self) -> None:
+        from tools.linters.check_corpus_quarantine import check_admission
+        from benchmarks.ladder.quarantine import EXPECTED_HOLDOUT_STRATA, digest_canonical
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            members = []
+            index = 0
+            for stratum, count in EXPECTED_HOLDOUT_STRATA.items():
+                for _ in range(count):
+                    index += 1
+                    member_id = f"eval-{index:02d}"
+                    source = "sha256:" + f"{index:02x}" * 32
+                    oracle = "sha256:" + f"{index + 50:02x}" * 32
+                    members.append({
+                        "id": member_id,
+                        "aliases": [],
+                        "origin": source,
+                        "source_fingerprint": source,
+                        "oracle_fingerprint": oracle,
+                        "task_fingerprint": digest_canonical({"id": member_id, "source": source}),
+                        "stratum": stratum,
+                        "role": "HOLDOUT",
+                        "exposure_tombstone": None,
+                        "attestation": digest_canonical({"id": member_id, "role": "HOLDOUT"}),
+                    })
+            registry = {
+                "schema": "aether.corpus-quarantine/1",
+                "holdout_admission": "PENDING",
+                "expected_holdout": {"n": 30, "strata": dict(EXPECTED_HOLDOUT_STRATA)},
+                "members": members,
+                "entrypoints": [],
+            }
+            registry_path = root / "benchmarks" / "ladder" / "corpus_registry.json"
+            registry_path.parent.mkdir(parents=True, exist_ok=True)
+            registry_path.write_text(json.dumps(registry), encoding="utf-8")
+            errors = check_admission(root, registry_path=registry_path, scan_entrypoints=False)
+            self.assertEqual(errors, [])
 
 
 if __name__ == "__main__":

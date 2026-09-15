@@ -54,6 +54,19 @@ This document is the canonical architecture owner for recursive child agent spaw
 - Manifest schema field declarations (owned by [`ref.manifests`](../reference/manifests.md)).
 - Kernel capability grant internals (owned by [`arch.trust.kernel`](kernel.md)).
 
+## T-141 retained-candidate integrity
+
+The workspace lifecycle serializes retention, fence updates, integration, recovery
+and cleanup across cooperating processes with an OS file lock. Retaining the same
+candidate is idempotent; changing a retained candidate is refused. Integration and
+recovery recompute the retained content digest. Corrupt fence metadata and unreadable
+text candidate files fail closed. Atomic record replacement flushes file and directory
+metadata. Binary candidates remain unsupported and are refused rather than omitted.
+These controls do not establish filesystem containment against an untrusted process,
+current-base/grant validation, or exterior combined-tree verification. Production
+activation therefore remains refused by the root guard; component recovery is not
+an authorized production publication path. See the active T-141 row in the runway.
+
 ## AS_BUILT Status
 - `PARTIAL` — Sequential mediated child spawning and topology/1 lowering are fully operational (`IMPLEMENTED`), while `mhf.topology/2` workflow schedulers remain isolated mechanisms without canonical runtime callers (`UNR-B-002`).
 

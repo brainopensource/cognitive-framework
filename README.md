@@ -135,13 +135,19 @@ of its own.
 4. [`docs/architecture/overview.md`](docs/architecture/overview.md) & [`docs/backend/`](docs/backend/) — as-built architecture and rationale.
 5. [`docs/execution/main/tasks.md`](docs/execution/main/tasks.md) & [`docs/execution/main/milestones.md`](docs/execution/main/milestones.md) (future work vs TARGET gates).
 
-### Fast targeted navigation (LDA SOTA Repository Intelligence)
+### Fast targeted navigation (LDA 2.0 Repository Intelligence)
 
 For implementation and review work, use the repository's intelligence engine to route a small,
 task-specific context packet instead of opening source broadly or burning context window tokens:
 
 ```bash
-# 1. One-shot task bundle: primary symbols, blast radius (callers), doc obligations, & test falsifiers
+# 0. Establish current repository posture before selecting work.
+uv run lda sweep --json
+
+# 0b. Query ready runway work instead of loading all of tasks.md.
+uv run lda tasks --ready --json
+
+# 1. One-shot task bundle: primary symbols, blast radius (callers), doc obligations, & test falsifiers.
 uv run lda plan "<task keywords or intent>" --budget 8000
 
 # 2. Semantic intent symbol resolution (when symbol name is unknown):
@@ -150,10 +156,21 @@ uv run lda resolve "<natural language intent or concept>"
 # 3. Sub-50ms incremental re-index after code edits (0 MB idle RAM, zero background daemon):
 uv run lda index --delta
 
-# 4. Fallback routing via standalone tools (when LDA index is cold or unbuilt):
+# 4. Run only the selected packet's falsifiers/linters after an edit.
+uv run lda code-status --task "<task-id>" --json
+
+# 5. Inspect documentation health when a documentation obligation is in scope.
+uv run lda doc-status --json
+
+# Fallback routing via standalone tools (when LDA is cold, degraded, or unbuilt):
 python3 tools/docs_rag_v0.py "<task keywords>" --budget 8000
 python3 tools/docs_rag_v0.py --file vanguard/packages/kernel/budget.py
 ```
+
+`sweep` establishes posture; it is not a packet acceptance receipt. `code-status`
+must be scoped to the active packet or changed files, not used to justify broad or
+unrelated test execution. Run `uv run lda doctor --json` before trusting an index;
+if it is unhealthy, use the fallback commands above.
 
 Or the equivalent artifact flow, if you prefer reading the raw JSONL projections:
 

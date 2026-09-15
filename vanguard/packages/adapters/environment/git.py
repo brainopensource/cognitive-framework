@@ -50,6 +50,15 @@ from .transaction import AtomicMultiFileTransactionManager, FileMutation
 __all__ = ["GitEnvironment", "GitEnvironmentAdapter", "GitUnavailableError"]
 
 
+def _candidate_digest(entries: Sequence[Mapping[str, object]]) -> str:
+    framed = bytearray()
+    for entry in entries:
+        encoded = digest_of(dict(entry)).encode("ascii")
+        framed.extend(len(encoded).to_bytes(8, "big"))
+        framed.extend(encoded)
+    return digest_bytes(bytes(framed))
+
+
 class GitUnavailableError(RuntimeError):
     """`git` is not on `PATH` (BETA-11: a sparse host has no git binary).
 
@@ -253,27 +262,67 @@ class GitEnvironment:
             return git_err
         self._snapshot_seq += 1
 
-        head_proc = subprocess.run(
-            ["git", "rev-parse", "HEAD"], cwd=self._working_dir, capture_output=True, text=True, check=False
-        )
-        head_commit = head_proc.stdout.strip() if head_proc.returncode == 0 else "unknown"
-
         status_proc = subprocess.run(
             ["git", "status", "--porcelain"], cwd=self._working_dir, capture_output=True, text=True, check=False
         )
-        status_out = status_proc.stdout if status_proc.returncode == 0 else ""
+        if status_proc.returncode != 0:
+            return Result.fail("instrument_error", "unable to enumerate repository status")
 
-        # Snapshot identity describes workspace material, not how often it was
-        # observed. Including `_snapshot_seq` made two consecutive reads of an
-        # unchanged tree produce different digests, so every verification
-        # receipt became stale the instant admission took a second snapshot.
-        snapshot_digest = digest_of({"head": head_commit, "status": status_out})
+        # An unborn repository has a perfectly observable working tree but no
+        # revision yet. ``HEAD`` is provenance metadata, not the candidate
+        # identity: the latter is derived from the tree below. Checking status
+        # first keeps a non-repository or otherwise unenumerable tree
+        # fail-closed instead of mistaking it for a greenfield repository.
+        head_proc = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=self._working_dir, capture_output=True, text=True, check=False
+        )
+        if head_proc.returncode == 0:
+            head_commit = head_proc.stdout.strip()
+        else:
+            # A missing ``HEAD`` is greenfield only if this repository has no
+            # reachable history at all. An orphan/broken current ref in a
+            # repository that already has objects is not evidence that the
+            # candidate has an absent revision, so refuse it rather than
+            # silently changing the provenance claim.
+            history_proc = subprocess.run(
+                ["git", "rev-list", "--all", "--count"],
+                cwd=self._working_dir,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            if history_proc.returncode != 0:
+                return Result.fail("instrument_error", "unable to enumerate repository history")
+            if history_proc.stdout.strip() != "0":
+                return Result.fail("instrument_error", "unable to resolve repository HEAD")
+            head_commit = None
+
+        entries: list[dict[str, object]] = []
+        try:
+            for path in sorted(self._working_dir.rglob("*"), key=lambda item: item.relative_to(self._working_dir).as_posix()):
+                rel = path.relative_to(self._working_dir).as_posix()
+                if ".git" in path.parts:
+                    continue
+                mode = stat.S_IMODE(path.lstat().st_mode)
+                if path.is_symlink():
+                    entries.append({"path": rel, "type": "symlink", "mode": mode, "target": os.readlink(path)})
+                elif path.is_dir():
+                    entries.append({"path": rel, "type": "directory", "mode": mode})
+                elif path.is_file():
+                    entries.append({"path": rel, "type": "file", "mode": mode, "content": digest_bytes(path.read_bytes())})
+        except (OSError, ValueError) as exc:
+            return Result.fail("instrument_error", f"unable to enumerate workspace tree: {exc}")
+
+        # Snapshot identity describes the candidate tree, not merely status
+        # codes. The repository revision remains metadata; content identity is
+        # stable across repeated observations of an unchanged tree.
+        snapshot_digest = _candidate_digest(entries)
         return Result.success(
             EnvironmentSnapshot(
-                snapshot_id=f"git-snap-{head_commit[:8]}-{self._snapshot_seq:04d}",
+                snapshot_id=f"git-snap-{(head_commit or 'unborn')[:8]}-{self._snapshot_seq:04d}",
                 digest=snapshot_digest,
                 created_at="2026-08-15T00:00:00.000Z",
-                metadata={"head_commit": head_commit, "status_lines": len(status_out.splitlines())},
+                metadata={"head_commit": head_commit, "status_lines": len(status_proc.stdout.splitlines())},
             )
         )
 

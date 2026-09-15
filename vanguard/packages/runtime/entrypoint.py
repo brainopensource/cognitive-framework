@@ -10,7 +10,9 @@ from typing import Any, Mapping
 
 from ..adapters.models.fake import FakeModel
 from ..adapters.stores.blob_store import FileBlobStore
+from ..adapters.stores.event_store import SqliteEventStore
 from ..adapters.sandbox.platform import discover_platform
+from ..ports.event_store import EventRange
 from .app_service import project_receipts, project_terminal_outcome
 from .compose import TaskContext
 from .evidence_capture import (
@@ -21,6 +23,9 @@ from .evidence_capture import (
 from . import pack_catalog
 from .profiles import SandboxUnavailable, resolve_profile
 from .root import Runtime
+from .session import WorkspaceSnapshotRefused
+from ..agency.context.packet import ContextPacketError
+from .task_state import episode_id_from_events, fold_task_state
 
 
 def _manifest(command: str, preset: str | None = None) -> Path:
@@ -68,6 +73,38 @@ def _doctor(request: Mapping[str, Any]) -> dict[str, Any]:
     }}
 
 
+def _durable_turn_ceiling(events: Any) -> int | None:
+    """The turn ceiling this run was actually opened under, from the ledger.
+
+    `EpisodeStarted` records `maxTurns` before a provider sees a prompt, so it
+    is the authorised bound rather than whatever the current ingress resolved.
+    The *first* such record wins: a later episode in the same run inherits the
+    ceiling it was opened with, and taking the maximum would let one widened
+    re-entry raise the bound for every continuation after it.
+    """
+    for event in events:
+        payload = getattr(event, "payload", None)
+        if not isinstance(payload, Mapping):
+            continue
+        raw = payload.get("maxTurns")
+        if isinstance(raw, bool):
+            continue
+        if isinstance(raw, int) or (isinstance(raw, str) and raw.isdigit()):
+            return int(raw)
+    return None
+
+
+def _events_to_hydrate(command: str, events: Any) -> list[Any]:
+    """Durable events that must hydrate this ingress.
+
+    Hydration is keyed on **state**, not on the command verb. ``command`` is
+    accepted so a mutation probe can restore the pre-T-145
+    ``command == "resume"`` guard and prove the suite reds (`DIR-5.5`).
+    """
+    del command
+    return list(events)
+
+
 def execute(request: Mapping[str, Any]) -> dict[str, Any]:
     command = str(request.get("command", "code"))
     if command == "doctor":
@@ -102,11 +139,71 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
             max_turns = (
                 pack_catalog.DEFAULT_TURN_CEILING if explicit_turns in (None, "")
                 else int(explicit_turns))
+    repo_path = Path(str(request.get("workspace", "."))).resolve()
+    configured_store_path = (
+        Path(str(request["storePath"])) if request.get("storePath") else
+        repo_path / ".vanguard" / "events.sqlite3"
+    )
+    resume_state = None
+    episode_id = f"episode-{run_id}"
+    project_id = str(request.get("projectId") or "coding-preview")
+    # `E-CLI-2`. Hydration is keyed on **durable state**, not on the command
+    # verb. A run whose store already holds events for its `run_id` is a
+    # continuation whatever the operator typed; conditioning continuity on
+    # `command == "resume"` meant a `code` re-invocation of a known run started
+    # with no spent budget, no revoked grants and no effect in flight -- the
+    # continuity T-131.7 and T-142 establish, bypassed by a word.
+    #
+    # Nothing here trusts the durable state. `fold_task_state` derives spend,
+    # transitively-revoked authority and unresolved effects from the ledger, so
+    # hydration cannot replenish a budget or re-widen a grant; and the folded
+    # `selectionPolicyIdentity` carries the prior `behaviorIdentity`, which
+    # `HarnessSession._assert_resume_behavior_identity` rejects on a changed
+    # composition, preset, model route or context policy. This ingress adds the
+    # one revalidation the ledger records and the session cannot see: the turn
+    # ceiling, which is resolved *here* from the preset and would otherwise let
+    # a continuation buy turns the original run never had.
+    store = SqliteEventStore(str(configured_store_path))
+    try:
+        read = store.read(EventRange(run_id=run_id))
+    finally:
+        store.close()
+    if command == "resume" and not read.ok:
+        detail = read.error.message if read.error is not None else "ledger unavailable"
+        raise ValueError(f"resume state unavailable: {detail}")
+    events = list(read.value or ()) if read.ok else []
+    if command == "resume" and not events:
+        raise ValueError(f"resume state unavailable: no durable events for {run_id}")
+    events = _events_to_hydrate(command, events)
+    if events:
+        resumed = fold_task_state(events, objective=brief)
+        resume_state = resumed.to_canonical_dict()
+        if resumed.objective:
+            brief = resumed.objective
+        episode_id = episode_id_from_events(events, run_id=run_id)
+        first_project = next(
+            (str(getattr(event, "project_id", "")) for event in events
+             if str(getattr(event, "project_id", ""))),
+            "",
+        )
+        if first_project and not request.get("projectId"):
+            project_id = first_project
+        durable_turns = _durable_turn_ceiling(events)
+        if durable_turns is not None and max_turns > durable_turns:
+            # Fail closed, and closed means the *narrower* bound is refused
+            # rather than silently applied: a continuation that asked for more
+            # turns than the run was authorised is a different run, and
+            # quietly clamping it would report the operator's ceiling back to
+            # them as if it had been honoured.
+            raise ValueError(
+                f"resume state unavailable: run {run_id} was authorised for "
+                f"{durable_turns} turns; this ingress resolved {max_turns}. "
+                "A continuation may not widen the turn ceiling.")
     task = TaskContext(
-        brief=brief, repo_path=Path(str(request.get("workspace", "."))).resolve(),
-        run_id=run_id, episode_id=f"episode-{run_id}",
-        project_id=str(request.get("projectId") or "coding-preview"),
-        max_turns=max_turns,
+        brief=brief, repo_path=repo_path,
+        run_id=run_id, episode_id=episode_id,
+        project_id=project_id, max_turns=max_turns,
+        resume_state=resume_state,
     )
     # The client-side deterministic smoke backend is an explicit, non-release
     fake_backend = request.get("fakeBackend")
@@ -128,26 +225,61 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
             # explicit operator action (for the CLI, ``--budget-usd``).
             allow_paid=bool(request.get("allowPaid", False)),
         ).model
-    configured_store_path = (
-        Path(str(request["storePath"])) if request.get("storePath") else
-        task.repo_path / ".vanguard" / "events.sqlite3"
-    )
     # Product runs and explicit previews use a real content-addressed store;
     # topology artifact edges must never point at ephemeral process state.
     # The fake model remains an explicit preview choice, but its captured
     # material is still kept in the same installation state directory.
-    result = Runtime.execute_profiled(
-        manifest_path, task,
-        profile_id=str(request.get("profile") or "product"),
-        model=selected_model,
-        store_path=str(configured_store_path),
-        interactive=bool(request.get("interactive", True)),
-        blobs=FileBlobStore(configured_store_path.parent / "blobs"),
-        completion_policy=_completion_policy(manifest_path),
-    )
+    try:
+        result = Runtime.execute_profiled(
+            manifest_path, task,
+            profile_id=str(request.get("profile") or "product"),
+            model=selected_model,
+            store_path=str(configured_store_path),
+            interactive=bool(request.get("interactive", True)),
+            blobs=FileBlobStore(configured_store_path.parent / "blobs"),
+            completion_policy=_completion_policy(manifest_path),
+        )
+    except (WorkspaceSnapshotRefused, ContextPacketError) as refused:
+        # `E4`. A fail-closed refusal must reach the operator as a *terminal*,
+        # not as a traceback. Two kinds arrive here:
+        #
+        # `WorkspaceSnapshotRefused` (`E-CLI-1`(b)) -- admission already
+        # refuses an unobservable workspace, so nothing should reach here; the
+        # other workspace-identity bindings raise the same typed refusal and
+        # must not escape either.
+        #
+        # `ContextPacketError` (`E-CLI-2`) -- the revalidation that rejects a
+        # continuation whose composition, preset, model route or context
+        # policy moved. Hydrating on durable state made this guard reachable
+        # from every ingress rather than only from `resume`, so its refusal
+        # became a public-route outcome and had to become a typed one.
+        #
+        # Neither is ever converted into a completion: `undeterminable` is
+        # what the run genuinely is when identity could not be established.
+        kind = getattr(refused, "kind", "") or type(refused).__name__
+        code = ("WORKSPACE_UNOBSERVABLE"
+                if isinstance(refused, WorkspaceSnapshotRefused)
+                else "CONTINUATION_REVALIDATION_REFUSED")
+        message = getattr(refused, "message", "") or str(refused)
+        return {"type": "result", "runId": run_id, "result": {
+            "runId": run_id, "outcome": "undeterminable",
+            "phase": "complete", "attempts": 0, "turns": 0,
+            "planDigest": None, "activeStepId": None, "verifiedStepIds": [],
+            "modelRoutes": [], "promptTokens": None, "completionTokens": None,
+            "spentUsdMicros": None,
+            "detail": f"{code}[{kind}]: {message}",
+            "projections": [
+                {"kind": "error", "detail": f"{code}: {message}"},
+                {"kind": "complete", "outcome": "undeterminable", "turns": 0},
+            ],
+        }}
     # NT-B04. One projection rule, shared with the application service; this
     # surface does not own a second copy of it.
     outcome = project_terminal_outcome(result.terminal)
+    if str(getattr(result, "detail", "") or "").startswith("WORKSPACE_UNOBSERVABLE"):
+        # Session already typed the refusal as a RunResult. Do not project
+        # `abandoned` as if the model gave up: the workspace was unobservable.
+        outcome = "undeterminable"
     projections: list[dict[str, Any]] = project_receipts(result)
     # The ledger already carries verification, spend, approval, recovery and
     # sub-agent lifecycle. Projecting only fs/proc receipts left `--headless`

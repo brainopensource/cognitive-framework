@@ -1,4 +1,9 @@
-"""Runtime workspace root and path validation contracts."""
+"""Runtime workspace root and path validation contracts.
+
+Filesystem I/O here is a named hexagonal exception. The grant lives in
+``DOMAIN_IO_ALLOWLIST`` in ``tools/linters/check_boundaries.py`` (SSOT).
+Other ``domain/`` modules remain I/O-free unless they hold their own row.
+"""
 
 from __future__ import annotations
 

@@ -25,6 +25,7 @@ wiring in `runtime/session.py`, or the terminal branch in
 from __future__ import annotations
 
 import json
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -96,6 +97,16 @@ def _run(preset: str, model: _Model) -> dict:
     """One real episode through the public entrypoint. Zero provider calls."""
     with tempfile.TemporaryDirectory() as raw:
         workspace = Path(raw).resolve()
+        # The product route observes a workspace *identity* before it admits a
+        # completion, and that observation is fail-closed: a tree whose status
+        # cannot be enumerated is refused rather than digested as `""`
+        # (`session.HarnessSession._workspace_digest`). A bare directory is not
+        # a thing the product ever runs in, so initialising the repository is
+        # what makes this fixture the product route rather than a weaker one.
+        # The repository is deliberately left unborn -- no commit -- because a
+        # greenfield tree is the harder of the two cases it must support.
+        subprocess.run(["git", "init", "--quiet", str(workspace)],
+                       capture_output=True, check=False)
         (workspace / "pyproject.toml").write_text("[project]\nname='t'\n", encoding="utf-8")
         for index in range(1, 80):
             (workspace / f"target_{index}.py").write_text(

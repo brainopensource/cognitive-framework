@@ -15,7 +15,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path, PurePosixPath
-from typing import Callable, Mapping, Sequence
+from typing import Any, Callable, Mapping, Sequence
 
 from ...domain.workspace import controlled_environment
 from ...ports.evaluator import EvaluationProtocol, RunRef, Verdict
@@ -27,6 +27,24 @@ Runner = Callable[..., subprocess.CompletedProcess[bytes]]
 
 _DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
 _POLLUTION_NAMES = frozenset({"conftest.py", "sitecustomize.py", "usercustomize.py"})
+_IGNORED_CANDIDATE_DIRS = frozenset({
+    ".git", ".hg", ".svn", ".vanguard", ".pytest_cache", "__pycache__", ".venv",
+})
+_IGNORED_CANDIDATE_NAMES = frozenset({
+    ".gitignore", ".editorconfig", "README.md", "TASK.md",
+})
+_VACUOUS_ARGV = re.compile(
+    r"^\s*(?:true|/bin/true|/usr/bin/true|echo\b|printf\b)\b",
+    re.IGNORECASE,
+)
+_INCOMPLETE_REASONS = frozenset({
+    "empty_stub_solution",
+    "vacuous_discovery",
+    "omitted_required_file",
+    "unauthorized_addition",
+    "candidate_substitution",
+    "stale_verification",
+})
 
 
 class IsolatedEvaluator:
@@ -48,6 +66,10 @@ class IsolatedEvaluator:
         timeout_seconds: float = 60.0,
         oracle_root: Path | str | None = None,
         runner: Runner = subprocess.run,
+        candidate_digest: str | None = None,
+        required_files: Sequence[str] = (),
+        allowed_files: Sequence[str] = (),
+        verification_subject_digest: str | None = None,
     ) -> None:
         self._workspace = Path(workspace).resolve()
         self._oracle_root = (Path(oracle_root).resolve() if oracle_root is not None
@@ -58,6 +80,12 @@ class IsolatedEvaluator:
         self._image_digest = image_digest
         self._timeout_seconds = timeout_seconds
         self._runner = runner
+        # DIR-C7: optional immutable candidate reference. Workers emit these;
+        # this adapter never mints acceptance or merge authority.
+        self._candidate_digest = candidate_digest
+        self._required_files = tuple(str(item) for item in required_files)
+        self._allowed_files = tuple(str(item) for item in allowed_files)
+        self._verification_subject_digest = verification_subject_digest
 
     def evaluate(self, run_ref: RunRef, protocol: EvaluationProtocol) -> Result[Verdict]:
         """Return a confirmed claim or preserve uncertainty as inconclusive."""
@@ -94,10 +122,29 @@ class IsolatedEvaluator:
                     )
                 )
 
+            live_digest, completeness_reason, completeness_details = (
+                self._probe_candidate_completeness(protocol)
+            )
+            if completeness_reason is not None:
+                return Result.success(
+                    self._incomplete_claim(
+                        run_ref,
+                        protocol,
+                        reason=completeness_reason,
+                        details=completeness_details,
+                        candidate_digest=live_digest,
+                    )
+                )
+
+            # Bind the child import path to the submitted tree. Running
+            # ``python3 tests/test_oracle.py`` puts ``tests/`` on ``sys.path[0]``;
+            # without this, candidate modules at the workspace root are invisible
+            # and a valid positive control looks like a failed oracle.
             completed = self._runner(
                 self._command,
                 cwd=self._workspace,
-                env=controlled_environment(os.environ),
+                env=controlled_environment(
+                    os.environ, extra={"PYTHONPATH": str(self._workspace)}),
                 capture_output=True,
                 timeout=self._timeout_seconds,
                 check=False,
@@ -114,7 +161,9 @@ class IsolatedEvaluator:
                             "probes": {
                                 "immutability": True,
                                 "nonPollution": True,
+                                "candidateCompleteness": True,
                             },
+                            "candidateDigest": live_digest,
                             "evaluatorUid": os.getuid(),
                             "imageDigest": self._image_digest,
                             "exitCode": completed.returncode,
@@ -265,6 +314,202 @@ class IsolatedEvaluator:
                 continue
 
         return not pollution, tuple(sorted(set(pollution)))
+
+    def _bound_ref(self, protocol: EvaluationProtocol) -> dict[str, Any]:
+        params = dict(protocol.parameters or {})
+        required = params.get("requiredFiles") or params.get("required_files")
+        allowed = params.get("allowedFiles") or params.get("allowed_files")
+        return {
+            "candidate_digest": (
+                params.get("candidateDigest") or params.get("candidate_digest")
+                or self._candidate_digest
+            ),
+            "required_files": tuple(
+                str(item) for item in (required if required is not None else self._required_files)
+            ),
+            "allowed_files": tuple(
+                str(item) for item in (allowed if allowed is not None else self._allowed_files)
+            ),
+            "verification_subject_digest": (
+                params.get("verificationSubjectDigest")
+                or params.get("verification_subject_digest")
+                or self._verification_subject_digest
+            ),
+        }
+
+    def _candidate_files(self) -> dict[str, Path]:
+        found: dict[str, Path] = {}
+        oracle_keys = set(self._oracle_digests)
+        for path in sorted(self._workspace.rglob("*")):
+            if not path.is_file() or path.is_symlink():
+                continue
+            rel = path.relative_to(self._workspace)
+            if any(part in _IGNORED_CANDIDATE_DIRS for part in rel.parts):
+                continue
+            if rel.name in _IGNORED_CANDIDATE_NAMES:
+                continue
+            key = rel.as_posix()
+            if key in oracle_keys:
+                continue
+            found[key] = path
+        return found
+
+    def _live_candidate_digest(self, files: Mapping[str, Path]) -> str:
+        entries = [
+            f"{rel}:{hashlib.sha256(path.read_bytes()).hexdigest()}"
+            for rel, path in sorted(files.items())
+        ]
+        return "sha256:" + hashlib.sha256("\n".join(entries).encode()).hexdigest()
+
+    @staticmethod
+    def _is_stub_source(text: str) -> bool:
+        meaningful: list[str] = []
+        in_doc = False
+        fence = ""
+        for raw in text.splitlines():
+            line = raw.strip()
+            if in_doc:
+                if fence in line:
+                    in_doc = False
+                continue
+            if not line or line.startswith("#"):
+                continue
+            if line.startswith(('"""', "'''")):
+                fence = line[:3]
+                if line.count(fence) < 2:
+                    in_doc = True
+                continue
+            if line.startswith(("import ", "from ")):
+                continue
+            if line.startswith(("def ", "class ", "@")):
+                continue
+            if line in {"pass", "..."} or line.startswith("raise NotImplementedError"):
+                continue
+            meaningful.append(line)
+        return not meaningful
+
+    def _command_is_vacuous(self) -> bool:
+        if not self._command:
+            return True
+        if "-c" in self._command:
+            return True
+        joined = " ".join(self._command)
+        return bool(_VACUOUS_ARGV.match(joined))
+
+    def _oracles_cover(self, required: Sequence[str]) -> bool:
+        if not required:
+            return False
+        texts: list[str] = []
+        for relative in self._oracle_digests:
+            path = self._oracle_path(relative)
+            if path is None or not path.is_file() or path.is_symlink():
+                continue
+            texts.append(path.read_text(encoding="utf-8", errors="replace"))
+        blob = "\n".join(texts)
+        if not blob.strip():
+            return False
+        for rel in required:
+            stem = Path(rel).stem
+            if rel not in blob and stem not in blob:
+                return False
+        command_blob = " ".join(self._command)
+        names_oracle = any(
+            relative in command_blob or Path(relative).name in command_blob
+            for relative in self._oracle_digests
+        )
+        runner_named = any(
+            token in command_blob for token in ("unittest", "pytest", "py.test")
+        )
+        return names_oracle or runner_named
+
+    def _probe_candidate_completeness(
+        self, protocol: EvaluationProtocol,
+    ) -> tuple[str, str | None, tuple[str, ...]]:
+        """Exterior completeness of the exact submitted candidate (DIR-C7).
+
+        Returns ``(live_digest, reason, details)``. ``reason is None`` means
+        the candidate is complete enough to run required-behavior tests.
+        A failed completeness probe never becomes acceptance.
+        """
+        bound = self._bound_ref(protocol)
+        files = self._candidate_files()
+        live = self._live_candidate_digest(files)
+        required = bound["required_files"]
+        allowed = set(bound["allowed_files"]) | set(required) | set(self._oracle_digests)
+
+        if self._command_is_vacuous():
+            return live, "vacuous_discovery", ("verification command cannot witness required behavior",)
+        if not files:
+            return live, "empty_stub_solution", ("submitted candidate contains no solution files",)
+
+        if required:
+            missing = tuple(rel for rel in required if rel not in files)
+            if missing:
+                return live, "omitted_required_file", missing
+            extras = tuple(sorted(rel for rel in files if rel not in allowed))
+            if extras:
+                return live, "unauthorized_addition", extras
+            stubs = tuple(rel for rel in required if self._is_stub_source(files[rel].read_text(encoding="utf-8", errors="replace")))
+            if stubs:
+                return live, "empty_stub_solution", stubs
+            if not self._oracles_cover(required):
+                return live, "vacuous_discovery", ("oracle does not exercise required files",)
+        else:
+            stubs = tuple(
+                rel for rel, path in files.items()
+                if self._is_stub_source(path.read_text(encoding="utf-8", errors="replace"))
+            )
+            if stubs and len(stubs) == len(files):
+                return live, "empty_stub_solution", stubs
+            if not self._oracles_cover(tuple(files)):
+                return live, "vacuous_discovery", ("oracle does not exercise submitted files",)
+
+        expected = bound["candidate_digest"]
+        if expected:
+            if not isinstance(expected, str) or not _DIGEST.fullmatch(expected):
+                return live, "candidate_substitution", ("bound candidate digest is not a sha256 reference",)
+            if expected != live:
+                return live, "candidate_substitution", (expected, live)
+
+        subject = bound["verification_subject_digest"]
+        if subject:
+            if not isinstance(subject, str) or not _DIGEST.fullmatch(subject):
+                return live, "stale_verification", ("verification subject is not a sha256 reference",)
+            if subject != live:
+                return live, "stale_verification", (subject, live)
+        return live, None, ()
+
+    def _incomplete_claim(
+        self,
+        run_ref: RunRef,
+        protocol: EvaluationProtocol,
+        *,
+        reason: str,
+        details: tuple[str, ...],
+        candidate_digest: str,
+    ) -> Verdict:
+        return Verdict(
+            outcome="claims",
+            claims=(
+                {
+                    "event": "EvaluationIncomplete",
+                    "status": "failed",
+                    "runId": run_ref.run_id,
+                    "protocol": protocol.name,
+                    "reason": reason,
+                    "details": details,
+                    "candidateDigest": candidate_digest,
+                    "probes": {
+                        "immutability": True,
+                        "nonPollution": True,
+                        "candidateCompleteness": False,
+                    },
+                    "evaluatorUid": os.getuid(),
+                    "imageDigest": self._image_digest,
+                },
+            ),
+            reason=reason,
+        )
 
     def _tampered_claim(
         self,

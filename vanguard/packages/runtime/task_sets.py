@@ -56,8 +56,13 @@ def resolve_task_set(
     would take that reporting away.
     """
     base = Path(root)
-    return tuple({"id": task["id"], "workspace": str(base / task["workspace"])}
-                 for task in tasks)
+    resolved = []
+    for task in tasks:
+        row = {"id": task["id"], "workspace": str(base / task["workspace"])}
+        if "role" in task:
+            row["role"] = str(task["role"])
+        resolved.append(row)
+    return tuple(resolved)
 
 
 def missing_tasks(tasks: Sequence[Mapping[str, str]]) -> tuple[str, ...]:

@@ -28,9 +28,9 @@ DEFAULT_LOW_SIGNAL_PATTERNS: tuple[str, ...] = (
 @dataclass(frozen=True)
 class RepositoryProfile:
     name: str = "generic"
-    docs_roots: tuple[str, ...] = ("docs", "documentation", "doc", "wiki")
-    source_roots: tuple[str, ...] = ("src", "lib", "packages", "app", "backend", "frontend", "server", "client", "pkg", "cmd", "internal")
-    test_roots: tuple[str, ...] = ("tests", "test", "spec", "specs", "__tests__")
+    docs_roots: tuple[str, ...] = ("docs", "documentation", "doc")
+    source_roots: tuple[str, ...] = ("src", "lib", "packages")
+    test_roots: tuple[str, ...] = ("tests", "test")
     schema_roots: tuple[str, ...] = ("schemas", "schema")
     generated_root: str = ".generated"
     cache_root: str = ".generated/lda-cache"

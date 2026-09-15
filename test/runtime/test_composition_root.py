@@ -283,9 +283,23 @@ class Composition(unittest.TestCase):
 
         self.assertNotEqual(code.composition_digest, shell.composition_digest)
         self.assertEqual(code.harness, "vg-code-default")
+        # W1: pinned surface of the public default. It grew from the original
+        # five by the repo.* index reads and task.revise; this assertion is the
+        # guard on that surface, so it is updated, never relaxed to a subset.
         self.assertEqual(
             sorted(code.verbs),
-            ["agency.finish", "fs.read", "fs.search", "patch.apply", "proc.exec"],
+            [
+                "agency.finish",
+                "fs.read",
+                "fs.search",
+                "patch.apply",
+                "proc.exec",
+                "repo.get_callers",
+                "repo.get_dependencies",
+                "repo.get_tests",
+                "repo.search_symbols",
+                "task.revise",
+            ],
         )
         self.assertEqual(sorted(shell.verbs), ["proc.exec"])
 

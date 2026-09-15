@@ -89,6 +89,12 @@ class TestRF85ReleaseAdmission(unittest.TestCase):
     def test_undeterminable_recovery_never_becomes_success(self) -> None:
         session = object.__new__(HarnessSession)
         session.ports = SimpleNamespace(store=object())
+        # W1: `dispatch` consults the durable-carrier latch before doing
+        # anything else. This partial session predates that guard, so the
+        # fixture errored before reaching its own UNDETERMINABLE assertion.
+        # `None` is the unlatched state -- it asserts no failure, it only
+        # declares that none has been recorded.
+        session._durable_carrier_append_error = None
         # `WP-A1`: settlement lookup is project-scoped, so an idempotency key
         # from one project can never answer another project's dispatch.
         session.task = SimpleNamespace(project_id="project-default")

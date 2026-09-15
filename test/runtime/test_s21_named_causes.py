@@ -120,7 +120,11 @@ class GreenfieldIsAValidWorkspace(unittest.TestCase):
         from vanguard.packages.runtime.root import Runtime
 
         harness = Runtime.compose("vg-code-default", episode_id="e")
-        self.assertEqual(len(harness.verbs), 5)
+        # W1: the public default declared 5 verbs when this was written and
+        # declares 10 now (the repo.* reads and task.revise). The count is
+        # pinned, not derived, so a silent change to the public surface
+        # still fails here.
+        self.assertEqual(len(harness.verbs), 10)
         self.assertGreater(len(harness.tool_schemas), 0)
 
     def test_declared_index_accepts_an_empty_tree(self) -> None:

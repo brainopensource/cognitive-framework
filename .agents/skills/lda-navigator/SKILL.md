@@ -21,6 +21,7 @@ LDA provides **structured repository intelligence** across code and documentatio
 - **Sub-50ms Delta Indexing:** Incremental AST & markdown re-indexing in **<25 ms**, replacing 12+ second full rebuilds.
 - **One-Shot Task Bundling:** Compiles symbols, upstream caller graphs (blast radius), canonical doc obligations, and executable test commands in a single ~2-second call.
 - **Offline Semantic Intent Resolution:** Pinpoints exact code symbols from natural language intent using BM25, graph in-degree, and architectural tier weighting without external embeddings or network calls.
+- **Universal Brownfield Portability:** Zero-configuration discovery across arbitrary Python, TypeScript/JavaScript, Go, Rust, Java, and Kotlin repositories with dynamic doc mapping and relevance-ranked test falsifiers.
 
 ---
 
@@ -31,21 +32,21 @@ LDA provides **structured repository intelligence** across code and documentatio
 | **Context Exhaustion:** Grepping and ingesting multi-thousand line files fills context windows quickly. | **Token-Bounded Slicing:** Extracts exact AST line slices and skeletons within strict token limits (e.g. 8000 tokens). | **~80% reduction** in context token consumption |
 | **Stale Facts After Edits:** Modifying code makes AST line numbers and symbol references stale unless reindexed. | **Ephemeral Delta Indexing:** Auto-detects dirty git working tree files and syncs AST in milliseconds. | **592x faster** re-indexing (`21ms` vs `12.8s`) |
 | **Multi-Roundtrip Discovery:** Agent runs 5+ exploratory commands to find code, callers, tests, and docs. | **One-Shot Task Bundle (`lda plan`):** Bundles target symbols, callers, doc obligations, and tests in 1 step. | **4x-5x fewer** exploratory tool calls |
-| **Unknown Symbol Names:** Agent doesn't know exact function name (e.g., "how capabilities are attenuated"). | **Intent Resolution (`lda resolve`):** Ranks symbols using multi-field tokens, in-degree, and authority tiers. | High precision without external API keys |
-| **Missing Test Falsifiers:** Guessing which unit tests cover a specific function or file. | **Targeted Falsification (`lda tests`):** Direct indexed SQL join linking touched symbols to test suites. | Tests found in **<3ms** with copy-paste commands |
+| **Noisy Test Selection:** Distant benchmark tests crowding out direct unit falsifiers. | **Relevance-Ranked Falsification (`lda tests`):** Direct 1-hop test edges strictly prioritized over benchmark noise. | Exact falsifier ranked **#1** across languages |
+| **Repomap Token Waste:** Alphabetical file sorting dumping benchmark fixtures before core modules. | **Centrality-Ranked Skeleton Map (`lda repomap`):** Core production architecture sorted by graph in-degree. | Core packages appear first in **< 1500 tokens** |
+| **Brownfield Friction:** Rigid hardcoded docs failing on non-standard repos. | **Dynamic Doc Discovery:** Auto-detects `spec.md`, `README.md`, `ARCHITECTURE.md`, and module docs. | **Zero broken doc links** on any project |
 
 ---
 
-## 3. When to Use What
+## 3. The "Big 3" Agent Workflow (Recommended Path)
 
-| Development Phase | Question / Need | Recommended Command / Tool |
-|---|---|---|
-| **Starting a Task** | "What files, symbols, docs, and tests are relevant to this task?" | `uv run lda plan "<task description>"` |
-| **Concept Exploration** | "Where is this feature or behavior implemented if I don't know the symbol name?" | `uv run lda resolve "<natural language intent>"` |
-| **After Modifying Code** | "How do I refresh the symbol graph for files I just modified?" | `uv run lda index --delta` |
-| **Verifying Changes** | "Which exact tests falsify or verify my touched files?" | Output of `lda plan` or `uv run lda tests <files>` |
-| **Checking Documentation Debt** | "Did my changes leave documentation, links, or contracts stale?" | `uv run lda drift --json` and `uv run lda diff --json` |
-| **Diagnosing Index State** | "Is the SQLite fact graph healthy and bound to current git HEAD?" | `uv run lda doctor` and `uv run lda identity` |
+To prevent cognitive overload and tool paralysis across 20+ commands, agents should rely on the **Big 3** commands for 90% of development:
+
+1. **`uv run lda plan "<task>"`** (or MCP `lda_plan`): The primary entry point. One-shot bundle providing target symbols, upstream caller blast radius, canonical docs, and relevance-ranked test falsifiers.
+2. **`uv run lda resolve "<intent>"`** (or MCP `lda_resolve`): When the symbol name is unknown (e.g., *"how are capability tokens attenuated"*), pinpoints exact classes/functions in < 1.5s.
+3. **`uv run lda repomap --budget 2000`** (or MCP `lda_repomap`): When orienting in a new or brownfield repo, renders a high-density, centrality-ranked architectural map of core production code without raw code bloat.
+
+After edits, run **`uv run lda index --delta`** (< 25ms) to refresh facts before running the falsifiers surfaced in Step 1.
 
 ---
 

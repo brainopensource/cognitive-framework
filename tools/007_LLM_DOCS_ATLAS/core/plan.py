@@ -61,13 +61,15 @@ def _resolve_doc_obligations(
             })
     elif not profile or profile.name == "generic":
         # Dynamic brownfield discovery for generic repos
-        for root_doc in ("spec.md", "docs/spec.md", "docs/architecture.md", "ARCHITECTURE.md", "README.md", "CONTRIBUTING.md"):
+        for root_doc in ("docs/execution/main/spec.md", "spec.md", "docs/spec.md", "docs/architecture.md", "ARCHITECTURE.md", "README.md", "CONTRIBUTING.md"):
             if repo_root and (repo_root / root_doc).is_file() and root_doc not in seen_docs:
                 seen_docs.add(root_doc)
+                auth = "normative" if "spec" in root_doc.lower() else "canonical"
+                reason = "Compact Normative Law & System Specification of record" if root_doc == "docs/execution/main/spec.md" else "Root architectural documentation and specification baseline"
                 obligations.append({
                     "document": root_doc,
-                    "authority": "canonical",
-                    "reason": "Root architectural documentation and specification baseline",
+                    "authority": auth,
+                    "reason": reason,
                 })
                 break
     else:

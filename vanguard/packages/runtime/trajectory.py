@@ -138,7 +138,15 @@ def _compute_turn_cost(
     diagnostics = proposal_payload.get("diagnostics")
     usage = diagnostics.get("usage") if isinstance(diagnostics, Mapping) else None
     provider_cost = None
+    provider_cost_observed = False
     for source in (diagnostics, usage):
+        if isinstance(source, Mapping) and source.get("provider_usd_micros") is not None:
+            provider_cost = source.get("provider_usd_micros")
+            provider_cost_observed = True
+            break
+    for source in (diagnostics, usage):
+        if provider_cost_observed:
+            break
         if isinstance(source, Mapping):
             candidate = source.get("usd_micros")
             if candidate is not None:
@@ -168,7 +176,7 @@ def _compute_turn_cost(
         millis_status = "measured"
 
     measurement_status = {
-        "usd_micros": {"status": usd_status, "reason": None if usd_status != "unavailable" else "unpriced_provider"},
+        "usd_micros": {"status": usd_status, "reason": "provider_reported" if provider_cost_observed else (None if usd_status != "unavailable" else "unpriced_provider")},
         "tokens": {"status": tokens_status, "reason": None},
         "bytes": {"status": bytes_status, "reason": None},
         "millis": {"status": millis_status, "reason": None},

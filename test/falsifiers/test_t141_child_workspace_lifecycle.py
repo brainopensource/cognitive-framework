@@ -515,3 +515,64 @@ class _RunResult:
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class RetainedCandidateIntegrity(_Fixture):
+    def test_retention_cannot_replace_an_existing_candidate(self) -> None:
+        original = self._retained(self.alice)
+        self.supervisor.workspace_for(self.alice).write("out/a.py", "replacement")
+        with self.assertRaises(StaleWriterError):
+            self.supervisor.retain_candidate(self.alice)
+        self.assertEqual(self.supervisor.candidate_digest(self.alice), original)
+
+    def test_modified_retained_bytes_cannot_keep_the_old_digest(self) -> None:
+        digest = self._retained(self.alice)
+        path = self.supervisor._child_dir(self.alice) / "candidate.json"
+        record = json.loads(path.read_text())
+        record["entries"]["out/a.py"] = "forged"
+        path.write_text(json.dumps(record))
+        ticket = self.supervisor.acquire(self.alice)
+        with self.assertRaises(StaleWriterError):
+            self.supervisor.integrate(ticket, candidate_digest=digest)
+        self.assertFalse((self.shared / "out/a.py").exists())
+
+    def test_unreadable_candidate_content_is_not_silently_omitted(self) -> None:
+        view = self.supervisor.workspace_for(self.alice)
+        (view.root / "binary.dat").write_bytes(b"\xff")
+        with self.assertRaises(WorkspaceEscapeError):
+            self.supervisor.retain_candidate(self.alice)
+
+    def test_corrupt_fence_cannot_reset_ownership(self) -> None:
+        self.supervisor.acquire(self.alice)
+        self.supervisor._fence_path().write_text("{")
+        with self.assertRaises(StaleWriterError):
+            self.supervisor.acquire(self.bob)
+
+    def test_recovery_rechecks_retained_content_identity(self) -> None:
+        self._retained(self.alice)
+        path = self.supervisor._child_dir(self.alice) / "candidate.json"
+        record = json.loads(path.read_text())
+        record["entries"]["out/a.py"] = "forged"
+        path.write_text(json.dumps(record))
+        with self.assertRaises(StaleWriterError):
+            self._supervisor().recover()
+        self.assertIsNone(self.supervisor.settled_digest(self.alice))
+
+    def test_identical_retention_is_idempotent(self) -> None:
+        original = self._retained(self.alice)
+        self.assertEqual(self.supervisor.retain_candidate(self.alice), original)
+
+    def test_competing_threads_cannot_both_acquire(self) -> None:
+        from concurrent.futures import ThreadPoolExecutor
+        from threading import Barrier
+        barrier = Barrier(2)
+        def acquire(child):
+            barrier.wait(timeout=5)
+            try:
+                self._supervisor().acquire(child)
+                return True
+            except OwnershipConflict:
+                return False
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            results = list(pool.map(acquire, (self.alice, self.bob)))
+        self.assertEqual(sum(results), 1)

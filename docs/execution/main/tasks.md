@@ -165,19 +165,98 @@ including final changed files, canonical-owner documentation, focused command,
 positive/adversarial receipts and the R2 peer acceptor. This is delegated packet
 compilation, not a further Leadership review gate.
 
-**T-141 integration disposition (2026-09-15).** Component subject
-`f284599e238ca335ce1ee96a3a24aa90205fa812` supplies isolated views, fencing and
-recovery controls, but is **LANDED / INTEGRATION PENDING**, not production accepted:
-targeted LDA and source inspection show `Runtime.run_composed` constructs
-`RuntimeChildRunner` without a `ChildWorkspaceSupervisor`, so its existing public
-delegation path remains explicitly unsupervised. A receives the narrow, disjoint
-integration lease `vanguard/packages/runtime/root.py` at that constructor and a new
-focused production-wiring falsifier under `test/falsifiers/`; no workspace,
-child-runtime, delegation, session, port, public-contract or topology edit is
-authorized by this lease. The falsifier must drive the existing spawn path and prove
-the injected supervisor gives each child its isolated view and fences integration.
-B independently accepts A's exact integration subject after its SHA-bound handoff;
-until then T-141 remains dormant for downstream integration and cannot qualify T-144.
+**MVP implementation takeover (2026-09-15).** The user's expanded authority
+supersedes the release prerequisite below: Developer A / Principal owns the
+necessary T-141 integration changes in `runtime/{root,child_runtime,workspace,
+delegation,session,bootstrap,evaluator_gateway}.py`, existing environment/sandbox
+adapters, their focused tests and mapped architecture owners. Public contracts
+remain DIR-C3/C5/C6/C7; no control or paid authority is granted. Existing uncommitted
+`root.py` guard, its production falsifier and this board's guard/qualification
+rulings are explicitly adopted; unrelated AGENTS/README/LDA edits remain untouched.
+Implementation may proceed without another owner release. Independent acceptance
+remains pending an uninvolved reviewer; this author cannot accept its own changes.
+The guard stays until complete production safety is proved. First bounded repair:
+retained-candidate integrity and serialized lifecycle access in `workspace.py`,
+its existing lifecycle falsifier and delegation architecture owner. No completion
+or activation follows merely from that component repair.
+
+**T-141 delivery ruling (2026-09-15; supersedes constructor-only activation).**
+Production activation remains **BLOCKED**. The root refusal is required until the
+existing child execution and publication paths satisfy DIR-C5/C7 together. Source
+inspection finds `_rebind` shares the parent environment; `_settle_workspace`
+integrates on child success; `retain_candidate` can replace a retained candidate;
+`acquire` uses an unlocked read/write sequence; and `recover` applies retained
+candidates without revalidating a fence, current base, grant or exterior verdict.
+A constructor argument cannot repair those defects. No new public contract is
+required by this ruling; existing DIR-C3/C5/C6/C7 already constrain the solution.
+
+**Bounded guard packet T-141-G / Principal; B accepts.** Exclusive write is
+`vanguard/packages/runtime/root.py` at the existing spawn-binding guard and
+`test/falsifiers/test_t141_production_activation.py`. Refuse both automatic binding
+and explicitly supplied unsafe `RuntimeChildRunner` instances before activation;
+prove the ordinary non-spawning public run still executes. This is containment of
+a known unsafe activation path, not T-141 activation or general certification of
+third-party child runners. Focused command: `python3 -m unittest
+ test.falsifiers.test_t141_production_activation -v` (join as one shell line).
+
+**Smallest missing release for activation.** The Senior must record owner-to-owner,
+SHA-bound releases for `runtime/{root,child_runtime,workspace,delegation}.py`, the
+parent publication/authorization seam in `runtime/session.py`, and the child
+adapter composition seam in `runtime/bootstrap.py`; C's retained session work and
+B's continuation lease cannot be assumed free. Then compile one A-owned integration
+packet, B acceptance, with exact additional adapter/test paths established from
+those seams. Required behavior is child-local effect adapters and containment,
+immutable base-bound candidates, mutually exclusive fencing through publication,
+current grant/budget checks through existing dispatch, and exterior verification
+of the exact staged combined tree through the existing evaluator gateway. Retention
+alone must never authorize recovery/publication. Test real spawn, parent/sibling
+escape, candidate replacement, stale base, racing acquisition, revocation after
+verification, crash/restart, verifier rejection and cleanup failure. Retain the
+root guard until these positive and negative cells pass. This records missing
+release/packet authority, not an expanded write lease or permission to edit C's work.
+
+**Parallel delivery assignments (no additional Leadership review).**
+
+| Owner | Authorized next work and handoff |
+|---|---|
+| C + repository operator | Produce separate one-commit, SHA-bound T-133, T-132, T-137 and T-143 packets from their actual deltas; list files, exact evidence subject/digest and releases. Never include another owner's dirty files or relabel an old receipt. T-143 is reported implemented, independent acceptance pending. |
+| A | Independently review those exact C packets as they arrive; record missing SHA/evidence instead of accepting a working-tree claim. No repair contribution inside the claim being accepted. Read-only T-141 integration preparation may proceed while leases remain occupied. |
+| B | Record T-131.8 as LANDED / acceptance pending with `4006f643` and `5a3e6e44`; preserve history. Reconcile prior review/releases, then execute the runtime qualification packet below. B also independently accepts T-141-G; the guard receipt is not T-141 acceptance. |
+
+**B qualification packet T-131.7 → T-142; C accepts.** Retain the existing B source
+leases after explicit releases. Qualification must exercise actual runtime sessions,
+not merely `fold_task_state` over handcrafted events or `critical_state` over a
+constructed view. Use the existing row-7 falsifier as the T-131.7 test owner; the
+T-142 test owner is `test/falsifiers/test_t142_runtime_continuity.py` (authorized new
+module). Use a scripted model, local disposable WAL store and real runtime-produced
+events; no provider. Establish an uninterrupted positive baseline, force repeated
+compaction, interrupt a pending effect, and restart in a fresh process using the
+existing runtime resume path. Reconcile uncertainty before retry and prove a settled
+effect is not repeated. Exercise grant revocation before the next effect and exact
+budget exhaustion before the next dispatch; neither restart nor compaction may
+restore authority or resources. Compare objective, revisions, candidate/tree,
+composition, evidence, obligations, grant state and consumption against the baseline.
+Missing required fields must fail the assertion rather than be skipped. Removing
+each preservation/revalidation step must make its corresponding control fail.
+The executable ingress is `entrypoint.execute` → `Runtime.execute_profiled` →
+`Runtime.run_composed` → `HarnessSession.run`, using `injectedModel`, `storePath`
+and the same run ID across processes. Observe at least two actual compactions and
+compare the first resumed model context. Crash after a real durable `EffectStarted`,
+not after a fabricated test ledger. Attempt a larger `maxTurnsPerEpisode`, changed
+preset/composition, corrupt checkpoint and changed verification subject on restart.
+Source-inspected seams to qualify first: `entrypoint.execute` creates `TaskContext`
+without `resume_state`; `HarnessSession._assert_resume_behavior_identity` returns
+when that state's prior identity is absent; `_refresh_sigma` is reached after
+write/verification. Governor debit restoration exists, while a new `GrantIssuer`
+is constructed. These are test targets, not proven runtime bypasses. If reproduced,
+the smallest repair is cold-start hydration/revalidation on the existing ingress;
+`entrypoint.py` and `session.py` require explicit releases before B edits them.
+Focused commands are the row-7 module and then the T-142 module only; no broad run
+is implied. Any required source repair outside the released B lease returns to the
+Senior for an exact amendment; no speculative session rewrite is authorized.
+
+T-144 remains unassigned until applicable foundations have independent acceptance.
+T-26, T-27, provider/paid calls, CAS and milestone closure remain unauthorized.
 
 ### Protected prior handoffs and acceptance reconciliation
 

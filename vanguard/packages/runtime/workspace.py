@@ -50,6 +50,9 @@ enable concurrent mutating workers, and it makes no provider calls.
 from __future__ import annotations
 
 import json
+import fcntl
+import tempfile
+from functools import wraps
 import os
 import shutil
 import time
@@ -126,9 +129,21 @@ def _atomic_write(path: Path, text: str) -> None:
     marker would be indistinguishable from a forged one on the next read.
     """
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(path.name + ".tmp")
-    tmp.write_text(text, encoding="utf-8")
-    os.replace(tmp, path)
+    descriptor, temporary = tempfile.mkstemp(prefix=".workspace-", dir=path.parent)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
+            stream.write(text)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+        directory = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(directory)
+        finally:
+            os.close(directory)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 
 
 def _read_json(path: Path) -> dict[str, Any] | None:
@@ -208,9 +223,25 @@ class ChildWorkspace:
             try:
                 found[path.relative_to(base).as_posix()] = path.read_text(
                     encoding="utf-8")
-            except (OSError, UnicodeDecodeError):
-                continue
+            except (OSError, UnicodeDecodeError) as exc:
+                raise WorkspaceEscapeError(
+                    f"cannot retain complete text candidate: {path}") from exc
         return found
+
+
+def _serialized(method: Callable[..., Any]) -> Callable[..., Any]:
+    """Serialize lifecycle operations across threads and supervisor processes."""
+    @wraps(method)
+    def locked(self: Any, *args: Any, **kwargs: Any) -> Any:
+        descriptor = os.open(
+            self.control_dir / "lifecycle.lock",
+            os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+        try:
+            fcntl.flock(descriptor, fcntl.LOCK_EX)
+            return method(self, *args, **kwargs)
+        finally:
+            os.close(descriptor)
+    return locked
 
 
 class ChildWorkspaceSupervisor:
@@ -253,8 +284,17 @@ class ChildWorkspaceSupervisor:
         return self.control_dir / _FENCE
 
     def _fence(self) -> dict[str, Any]:
-        return _read_json(self._fence_path()) or {"holder": None, "token": 0, "expires_at": 0.0}
+        path = self._fence_path()
+        if not path.exists():
+            return {"holder": None, "token": 0, "expires_at": 0.0}
+        record = _read_json(path)
+        if not isinstance(record, dict) or not {
+            "holder", "token", "expires_at"
+        }.issubset(record):
+            raise StaleWriterError("workspace fence is corrupt")
+        return record
 
+    @_serialized
     def acquire(self, child_id: str) -> MutationTicket:
         """Take exclusive ownership of the shared tree, or refuse.
 
@@ -279,6 +319,7 @@ class ChildWorkspaceSupervisor:
         }, sort_keys=True))
         return ticket
 
+    @_serialized
     def release(self, ticket: MutationTicket) -> None:
         """Give the tree back -- but only if this ticket still holds it.
 
@@ -303,6 +344,7 @@ class ChildWorkspaceSupervisor:
 
     # -- retention ---------------------------------------------------------
 
+    @_serialized
     def retain_candidate(self, child_id: str) -> str:
         """Freeze the child's view into a durable, content-addressed candidate.
 
@@ -311,14 +353,30 @@ class ChildWorkspaceSupervisor:
         """
         entries = dict(self.workspace_for(child_id).entries())
         digest = digest_of({"childId": child_id, "entries": entries})
-        _atomic_write(
-            self._child_dir(child_id) / _CANDIDATE,
-            json.dumps({"digest": digest, "entries": entries}, sort_keys=True))
+        path = self._child_dir(child_id) / _CANDIDATE
+        if path.exists():
+            retained = self._candidate(child_id)
+            if retained["digest"] != digest:
+                raise StaleWriterError("retained candidate is immutable")
+            return digest
+        _atomic_write(path, json.dumps({"digest": digest, "entries": entries}, sort_keys=True))
         return digest
 
-    def candidate_digest(self, child_id: str) -> str | None:
+    def _candidate(self, child_id: str) -> dict[str, Any]:
         record = _read_json(self._child_dir(child_id) / _CANDIDATE)
-        return str(record["digest"]) if record and record.get("digest") else None
+        if not isinstance(record, dict) or not isinstance(record.get("entries"), dict):
+            raise StaleWriterError("retained candidate is missing or corrupt")
+        entries = record["entries"]
+        if not all(isinstance(k, str) and isinstance(v, str) for k, v in entries.items()):
+            raise StaleWriterError("retained candidate entries are malformed")
+        if record.get("digest") != digest_of({"childId": child_id, "entries": entries}):
+            raise StaleWriterError("retained candidate content does not match identity")
+        return record
+
+    def candidate_digest(self, child_id: str) -> str | None:
+        if not (self._child_dir(child_id) / _CANDIDATE).exists():
+            return None
+        return str(self._candidate(child_id)["digest"])
 
     def settled_digest(self, child_id: str) -> str | None:
         """Which candidate has been accepted, if any. The acceptance marker."""
@@ -327,6 +385,7 @@ class ChildWorkspaceSupervisor:
 
     # -- integration -------------------------------------------------------
 
+    @_serialized
     def integrate(self, ticket: MutationTicket, *, candidate_digest: str) -> str:
         """Apply this child's retained candidate to the shared tree, once.
 
@@ -338,7 +397,7 @@ class ChildWorkspaceSupervisor:
         if self.settled_digest(ticket.child_id) == candidate_digest:
             return "already_integrated"
 
-        record = _read_json(self._child_dir(ticket.child_id) / _CANDIDATE)
+        record = self._candidate(ticket.child_id)
         if not record or record.get("digest") != candidate_digest:
             # Refused *before* anything is applied: a candidate that cannot be
             # named is a candidate that must not be accepted.
@@ -391,6 +450,7 @@ class ChildWorkspaceSupervisor:
 
     # -- recovery ----------------------------------------------------------
 
+    @_serialized
     def recover(self) -> tuple[str, ...]:
         """Finish every retained-but-unaccepted candidate. Idempotent.
 
@@ -405,15 +465,16 @@ class ChildWorkspaceSupervisor:
             if not child_dir.is_dir():
                 continue
             child_id = child_dir.name
-            record = _read_json(child_dir / _CANDIDATE)
-            if not record or not record.get("digest"):
+            if not (child_dir / _CANDIDATE).exists():
                 continue
+            record = self._candidate(child_id)
             if self.settled_digest(child_id) == record["digest"]:
                 continue
             self._apply(child_id, record)
             recovered.append(child_id)
         return tuple(recovered)
 
+    @_serialized
     def discard(self, child_id: str) -> None:
         """Drop a child's view once its candidate is settled.
 

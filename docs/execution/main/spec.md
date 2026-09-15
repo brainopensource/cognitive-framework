@@ -552,6 +552,72 @@ New target contracts enter this specification before implementation; an as-built
 observation is not an acceptance claim. Accepted durable behavior is promoted to its
 existing architecture/reference owner with its original subject, scope and limits.
 
+### T-144 target — planner-worker-verifier capability demonstration
+
+**TARGET, design only; DIR-C3/C4/C5/C6/C7 refinement.** Extend the existing
+`Topology` and `lower_topology` in `vanguard/packages/runtime/topology.py` through
+the existing runtime execution path. A versioned plan MAY be an input artifact;
+it MUST bind its revision, objective/constraints, input references and intended
+role/artifact relationships. It supplies no execution authority. Lowering MUST
+preserve existing dispatch authorization, attenuated grants, resource ceilings and
+single-writer ledger semantics. No second scheduler, episode loop, ledger writer,
+task-state authority, per-mille allocation or FH-1 aggregation is introduced.
+
+**Identity and candidate contract.** Each immutable worker candidate MUST bind its
+plan/task revision, producing lineage, base workspace identity, candidate tree and
+artifact references. Claims dependent on all three MUST separately bind workspace
+identity, behavior/composition identity and verification-subject identity; one digest
+MUST NOT silently substitute for another. Verification additionally binds the
+required-behavior/oracle subject and its result. Unknown versions, missing bindings,
+changed requirements or mismatched identities MUST fail closed for integration or
+completion claims. Workers and a planner-local verifier role can propose and supply
+artifacts, but neither their agreement nor their role names confer exterior evaluator,
+merge or completion authority.
+
+**Integration and completion contract.** Only the existing authorized integration
+path MAY combine candidates. It MUST revalidate the current base, candidate lineage,
+mutation ownership/fence, grants and remaining resources before effects. It stages
+an exact combined tree, obtains exterior verification of that tree against the
+required behavior, and binds any publication to that same verified subject and
+still-current base. A base change between verification and publication MUST deny
+publication until revalidation and affected verification are repeated. Rebase,
+conflict resolution or any mutation invalidates affected evidence; individual worker
+passes do not verify the combined tree. Successful integration alone is not completion:
+the existing runtime completion admission MUST independently require the applicable
+exact-subject evidence. Partial integration MUST NOT become an accepted candidate.
+
+**Continuity contract.** Plan revisions, immutable candidate references, pending and
+settled integration identities and verification references MUST survive through the
+existing ledger fold/checkpoint path. Restart and compaction grant no new authority,
+reset no consumption and cannot turn uncertain effects into success. Reconcile
+uncertain integration before retry; settled effects MUST NOT be replayed. Only
+recoverable, completely identified artifacts may be considered after recovery.
+
+**Required paper safety argument and future falsifiers.** The invariant is that every
+published integration has current authorization and base binding plus exterior
+verification of its exact combined subject; every admitted completion additionally
+passes existing completion admission. Planning and worker transitions create only
+proposals/artifacts, so they cannot establish either conclusion. The only publishing
+transition checks those predicates; recovery preserves them rather than bypassing
+them. The following cases MUST retain positive controls and must-fail counterparts
+before an implementation can be independently accepted:
+
+| Case | Required disposition preserving the invariant |
+|---|---|
+| Competing candidates | Retain distinct immutable candidates; serialize/fence authorized integration. Selecting or voting for a candidate grants no merge authority; the loser cannot overwrite the accepted tree. |
+| Stale base | Reject integration/publication against a changed base. A newly rebased/combined candidate receives fresh affected evidence before retry. |
+| Worker failure | Failed or partial output cannot satisfy candidate completeness or verification; surviving candidates still pass the full integration gate. |
+| Restart during integration | Recover pending/settled identity from the existing ledger, reconcile uncertainty and prevent duplicate effects; absent proof leaves the claim unresolved. |
+| Exhaustion or revoked grant | Deny the next unauthorized dispatch/integration; preserve artifacts and consumption without declaring completion or replenishing resources. |
+| Verifier rejection or missing/stale verdict | Refuse completion and accepted publication; bounded repair, if still authorized, creates a changed subject requiring fresh verification. |
+| Mutation after verification | Subject/base comparison denies publication or completion using the superseded verdict, including conflict resolution and candidate substitution. |
+
+Acceptance is conditional on applicable T-141/T-142/T-143 independent dispositions
+and exact released leases recorded in `tasks.md`. As-built behavior and green tests
+are not acceptance. T-144 is a **capability demonstration**, never a control result;
+it does not close MS-SEE, MS-CHANGE or MS-CONTROL and cannot contribute a control
+success count or change the existing measurement protocol.
+
 ## NT-1. Near-term baseline, context, cache and recovery delta
 
 **Authority and scope (2026-09-07).** This executive amendment authorizes T-98–T-111 and the revised T-77 before control qualification. It supersedes earlier EW-9 exclusions only for deterministic context/cache/recovery hardening and baseline remediation. Existing T-09–T-16 mechanisms are extended, not re-created. T-80 remains the later workspace-policy treatment; deterministic semantic stall detection belongs to T-106. Model escalation, consultation, specialists, CAS workspace promotion, memory learning, new index backends and T-96 remain outside this iteration. Historical milestone receipts retain their original subjects. No new milestone is accepted by this amendment.

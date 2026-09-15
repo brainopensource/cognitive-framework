@@ -84,6 +84,58 @@ the exact missing resource. The Senior MAY then dispatch only an explicitly auth
 lease-compatible capability-foundation row below; CAS, campaigns, learned routing and
 other FH-1 work remain unassigned.
 
+### Leadership ruling — W2c release and autonomous dispatch (2026-09-15)
+
+This ruling supersedes conflicting lease and acceptor assignments below. Source
+inspection baseline: `cf4103de882ad9eca5596f192595a941845c9e7a`; this is a ruling,
+not an implementation receipt or predecessor acceptance.
+
+**R1 — Narrow T-140 release, W2c / B; peer acceptor C.** Transfer exclusive write
+from C/T-140 to B/W2c for `vanguard/packages/runtime/session.py` only at
+`HarnessSession._workspace_digest` and its immediate snapshot-error propagation callers,
+and `vanguard/packages/adapters/environment/git.py::GitEnvironment.snapshot`.
+LDA resolve and source inspection confirm the latter owner: unresolved `HEAD`
+currently returns `instrument_error` for an unborn repository; `_workspace_digest`
+then converts snapshot failure to `""`. Restore greenfield through the product CLI
+(`vanguard code` / `entrypoint.execute`), with a valid content identity for a genuine
+unborn repository and explicit failure for other snapshot errors. No fabricated
+commit or empty-string identity may stand in for unavailable evidence. Existing
+snapshot contracts and DIR-C3 constrain this repair; a new public shape requires
+escalation before implementation. The Senior compiles focused source-owner tests
+and product-entrypoint positive/adversarial falsifiers into the ephemeral W2c packet.
+C retains the rest of T-140 skill/memory work. C and B serialize physical writes to
+`session.py`; C releases these named seams with the actual handoff SHA before B
+edits, and retains no veto over the released W2c scope. B releases the seams with
+its landing SHA before another packet acquires them. No W4, CAS, or full
+`session.py` rewrite is authorized by this transfer.
+
+**R2 — Peer acceptance.** B accepts A; A accepts C; C accepts B, including Wave B
+and DIR-4 packets. DIR-I7 applies to the exact implementation, integration delta
+and evidence: an author or material repair contributor cannot accept that claim.
+If the designated peer is ineligible, the Senior names an uninvolved acceptor;
+implementation on disjoint leases continues. Leadership is not the routine packet
+acceptor and never accepts a claim it authored or materially supplied. Intervention
+is limited to the six triggers in
+[roles_and_authority.md](../management/roles_and_authority.md#escalation-triggers--the-complete-list).
+
+**R3 — Landing receipts.** One commit per packet ID. Each handoff names that ID,
+implementation SHA, released files/seams, evidence subject/digest and eligible peer
+acceptor. Mixed “LDA improvements” commits are not packet receipts; a green test or
+mechanism's presence is not a release or independent acceptance.
+
+**R4 — Standing sprint authorization.** A/B/C are authorized to execute the sprints
+in their dispatch prompts without further Leadership review, within the compiled
+leases and target contracts here, as soon as the named predecessor files are free.
+An owner-to-owner handoff note with SHA establishes release; elapsed time or as-built
+presence does not. The Senior records exact leases and resolves ordinary sequencing.
+Priority is W2c product greenfield, continued Packet 1 integrity (A/T-131.8,
+C/T-133→T-132→T-137, B/T-131.7 with its existing row prerequisites), then disjoint
+T-141/A, T-142/B and T-143/C in parallel after their named handoffs. T-144 follows
+independently accepted applicable foundations and released topology/session/integration
+leases, under the target design in spec DIR-4. No T-26 freeze, T-27 authorization,
+MS-CAS/W3b acceleration, document-ceiling increase or milestone closure is granted.
+Packets remain ephemeral; the five runway files retain authority.
+
 ### Capability-foundation continuation (DIR-4, 2026-09-15)
 
 DIR-4 authorizes three bounded outcomes without waiting for MS-CONTROL. They do not
@@ -100,8 +152,8 @@ implementation choices belong to the developer. No provider calls or paid runs.
 
 The Senior refines each row into an exact subject-bound work packet before dispatch,
 including final changed files, canonical-owner documentation, focused command,
-positive/adversarial receipts and independent acceptor. Leadership may accept only
-where it did not author or materially supply the implementation under DIR-I7.
+positive/adversarial receipts and the R2 peer acceptor. This is delegated packet
+compilation, not a further Leadership review gate.
 
 ### Protected prior handoffs and acceptance reconciliation
 

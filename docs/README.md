@@ -117,7 +117,7 @@ The repository automatically maintains a deterministic, machine-readable knowled
 
 ### Primary SOTA Fast Path vs. Deterministic Fallback
 
-1. **Primary SOTA Fast Path (LDA Engine)**: For active development and task routing, use the in-process SQLite-WAL engine (`.lda/index.db`) operating with 0 MB idle RAM and sub-25ms delta indexing:
+1. **Primary SOTA Fast Path (LDA Engine)**: For active development and task routing, use the in-process SQLite-WAL engine (`.lda/index.db`) operating with 0 MB idle RAM. Dirty-file delta indexing is sub-25ms; `lda plan` on this repository is seconds-scale, not a sub-25ms retrieval SLA:
 ```bash
 # One-shot task bundle (symbols, callers, falsifiers, docs)
 uv run lda plan "<task keywords or intent>" --budget 8000

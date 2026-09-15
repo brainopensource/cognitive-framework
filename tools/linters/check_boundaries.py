@@ -72,29 +72,58 @@ LAYER0_PACKAGES = (
 )
 
 # S7-A-02 (N-06): shell is contained by the sandbox, not mediated by the host
-# language. Process creation belongs to adapters/sandbox/ alone; this rule is
-# the static half of that guarantee.
+# language. Default home for process creation is adapters/sandbox/. Every other
+# host-process grant is a named row in SUBPROCESS_ALLOWLIST (this table is the
+# single source of truth — not the prose that used to say "sandbox alone").
 SUBPROCESS_MODULES = {"subprocess", "os.popen", "pty", "child_process", "node:child_process"}
 SUBPROCESS_HOME = ("vanguard", "packages", "adapters", "sandbox")
 
 # Triaged exceptions, each named individually. A wildcard here would defeat the
-# rule, so entries are exact repo-relative paths and every one carries its
+# rule, so keys are exact repo-relative paths and every value is the
 # justification. Adding a row is a deliberate act with a reviewer attached.
 SUBPROCESS_ALLOWLIST = {
-    # M-3 plugin isolation broker owns the lifecycle boundary and launches the
-    # already constrained packages registry worker. The worker applies the
-    # declared rlimits before serving JSON-RPC over its private UDS.
-    "vanguard/packages/runtime/registry/broker.py",
-    # The exterior judge executes the oracle in its own process. A-05/LT-4: the
-    # evaluator is architecturally unreachable from the agent it judges, so it
-    # cannot borrow the agent's sandbox to do this.
-    "vanguard/packages/adapters/evaluators/isolated.py",
-    # EnvironmentPort's git-backed snapshot/diff. Host git invocation behind the
-    # port. Candidate for containment once the sandbox grows a git verb.
-    "vanguard/packages/adapters/environment/git.py",
-    # `git ls-files --error-unmatch` proving the .env is untracked before a
-    # secret is read. Read-only query, no agent-supplied argv.
-    "vanguard/packages/adapters/models/env_loader.py",
+    "vanguard/packages/runtime/registry/broker.py": (
+        "M-3 plugin isolation broker owns the lifecycle boundary and launches "
+        "the already constrained packages registry worker. The worker applies "
+        "the declared rlimits before serving JSON-RPC over its private UDS."
+    ),
+    "vanguard/packages/adapters/evaluators/isolated.py": (
+        "The exterior judge executes the oracle in its own process. A-05/LT-4: "
+        "the evaluator is architecturally unreachable from the agent it judges, "
+        "so it cannot borrow the agent's sandbox to do this."
+    ),
+    "vanguard/packages/adapters/environment/git.py": (
+        "EnvironmentPort's git-backed snapshot/diff. Host git invocation behind "
+        "the port. Candidate for containment once the sandbox grows a git verb."
+    ),
+    "vanguard/packages/adapters/models/env_loader.py": (
+        "`git ls-files --error-unmatch` proving the .env is untracked before a "
+        "secret is read. Read-only query, no agent-supplied argv."
+    ),
+}
+
+# Domain may not perform filesystem I/O. Stdlib imports resolve to
+# target_area=None and would otherwise pass the import lattice invisibly.
+# DOMAIN_IO_ALLOWLIST is the single named exception table.
+DOMAIN_IO_ATTRS = frozenset({
+    "read_text", "write_text", "read_bytes", "write_bytes",
+    "mkdir", "rmdir", "unlink", "touch", "open",
+    "iterdir", "glob", "rglob",
+})
+DOMAIN_IO_ALLOWLIST = {
+    "vanguard/packages/domain/workspace.py": (
+        "Host workspace-root discovery and category directories. Value objects "
+        "elsewhere in domain stay pure; this module is the named filesystem "
+        "exception until a port owns the I/O."
+    ),
+    "vanguard/packages/domain/evidence/baseline.py": (
+        "Content digest of a caller-supplied Path for signed baseline manifests. "
+        "The bytes are hashed; the module does not choose a workspace."
+    ),
+    "vanguard/packages/domain/test/schema_conformance.py": (
+        "In-tree schema replay helper (not a domain value object). Reads fixture "
+        "JSON from schemas/v4 for jsonschema validation."
+    ),
 }
 
 # S7-A-03 (A-05, LT-4): a component that can construct its own evaluator is a
@@ -261,6 +290,41 @@ def find_cycles(graph: dict[Path, set[Path]]) -> list[list[Path]]:
     return cycles
 
 
+def find_domain_io(root: Path) -> list[str]:
+    """Fail closed on filesystem I/O inside domain/, except DOMAIN_IO_ALLOWLIST."""
+    errors: list[str] = []
+    domain_root = root / "vanguard" / "packages" / "domain"
+    if not domain_root.is_dir():
+        return errors
+    root_resolved = root.resolve()
+    for path in sorted(domain_root.rglob("*.py")):
+        if set(path.parts) & IGNORED_PARTS:
+            continue
+        rel_source = path.resolve().relative_to(root_resolved).as_posix()
+        if rel_source in DOMAIN_IO_ALLOWLIST:
+            continue
+        try:
+            tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        except (SyntaxError, UnicodeDecodeError) as exc:
+            errors.append(f"{rel_source}: cannot parse ({exc})")
+            continue
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            func = node.func
+            if isinstance(func, ast.Name) and func.id == "open":
+                errors.append(
+                    f"{rel_source}:{node.lineno}: domain I/O via open(); "
+                    f"route through a port or add a justified DOMAIN_IO_ALLOWLIST row"
+                )
+            elif isinstance(func, ast.Attribute) and func.attr in DOMAIN_IO_ATTRS:
+                errors.append(
+                    f"{rel_source}:{node.lineno}: domain I/O via .{func.attr}(); "
+                    f"route through a port or add a justified DOMAIN_IO_ALLOWLIST row"
+                )
+    return errors
+
+
 def check(root: Path, s4_exit: bool) -> list[str]:
     errors: list[str] = []
     # S7-A-01 (VG-03 4, LT-1..LT-8): the lattice is closed. Anything sitting
@@ -332,10 +396,10 @@ def check(root: Path, s4_exit: bool) -> list[str]:
             ):
                 if rel_parts[: len(SUBPROCESS_HOME)] != SUBPROCESS_HOME:
                     errors.append(
-                        f"{rel_source}:{line}: subprocess is confined to "
+                        f"{rel_source}:{line}: subprocess home is "
                         f"vanguard/packages/adapters/sandbox/ (N-06); {spec!r} is reachable here "
                         f"without a grant. Route it through SandboxPort, or add an explicit, "
-                        f"justified row to SUBPROCESS_ALLOWLIST"
+                        f"justified row to SUBPROCESS_ALLOWLIST (the grant SSOT)"
                     )
                     continue
             if (
@@ -400,6 +464,8 @@ def check(root: Path, s4_exit: bool) -> list[str]:
                 )
                 if not shim_ok:
                     errors.append(f"{source.relative_to(root)}:{line}: forbidden {source_area} -> {target_area} import via {spec!r}")
+
+    errors.extend(find_domain_io(root))
 
     for cycle in find_cycles(graph):
         rendered = " -> ".join(str(path.relative_to(root)) for path in cycle)

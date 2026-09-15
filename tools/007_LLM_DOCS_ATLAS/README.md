@@ -46,7 +46,7 @@ First run on a new repo: `doctor` reports `index_healthy: false` and instructs `
 ```bash
 uv run lda plan "<task>" --budget 8000 --json   # 1. One-shot bundle: symbols + callers + docs + tests
 # ... read targeted line ranges, then implement surgical code edits ...
-uv run lda index --delta                        # 2. sub-50ms incremental re-index of touched files
+uv run lda index --delta                        # 2. sub-50ms dirty-file re-index (not retrieval)
 uv run <test command output by lda plan>        # 3. run targeted test falsifiers
 uv run lda drift --json && uv run lda diff --json  # 4. verify zero doc drift or orphan contracts
 ```
@@ -59,7 +59,7 @@ Rule of thumb: **never load whole files**. Zoom with `lda plan` / `lda symbol` /
 |---|---|
 | `lda plan "<task>" [--budget B] [--strategy S]` | **[SOTA] One-shot task bundle**: auto-delta sync, primary symbols, blast radius (callers), doc obligations, and test falsifiers |
 | `lda resolve "<intent>" [--top-k K]` | **[SOTA] Semantic intent symbol resolution**: offline multi-signal ranking (BM25 + graph in-degree + tier authority) |
-| `lda index --delta [files...]` | **[SOTA] Ephemeral incremental delta**: sub-50ms AST & markdown sync on modified files with 0 MB idle daemon |
+| `lda index --delta [files...]` | **[SOTA] Ephemeral incremental delta**: sub-50ms AST & markdown sync on modified files with 0 MB idle daemon (not a retrieval SLA) |
 | `lda index [--incremental/--rebuild]` | Build/refresh the full SQLite+FTS5 fact graph |
 | `lda status` / `scan` | Snapshot: DB stats, topology, totals |
 | `lda doctor` | Fast health check + actionable `index_hint` |
@@ -177,7 +177,7 @@ On a cold index the server degrades to authority-aware catalog routing (`degrade
 
 ## Quality gates
 
-- `lda bench`: deterministic golden-query fixture, per-strategy recall@5 / MRR / latency; regression floor `recall@5 >= 0.5` (`test/tools/test_lda_skill_bench.py`).
+- `lda bench`: six-file golden-query fixture, per-strategy recall@5 / MRR / latency; demonstrated BM25/PPR recall@5 = 1.0 (hybrid 0.875); regression floor `recall@5 >= 0.5` (`test/tools/test_lda_skill_bench.py`). Not a million-line retrieval SLA.
 - `test/tools/test_lda_portability.py` is the executable definition of "works in ANY project": generic-by-default selection, fail-closed profiles, single-emitter read-only behavior, HEAD-bound provenance, symbol ceilings, and a full index→packet pipeline on a non-Python repository. Any core change must keep it green.
 - Embeddings are md5-bucketed feature hashes — byte-identical across processes (cross-process determinism is tested).
 

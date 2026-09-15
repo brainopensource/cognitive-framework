@@ -160,7 +160,7 @@ domain ← ports ← kernel ← agency ← runtime → adapters
 
 | Subsystem | Location | Responsibilities & Contents |
 |---|---|---|
-| **`domain/`** | `vanguard/packages/domain/` | Pure value objects, wire contracts, RFC 8785 JCS canonicalization, ledger reducers, evidence models, selector algebra (`resource_selector.py`), task state models. Pure Python stdlib only (zero I/O, zero network, zero dependencies). |
+| **`domain/`** | `vanguard/packages/domain/` | Pure value objects, wire contracts, RFC 8785 JCS canonicalization, ledger reducers, evidence models, selector algebra (`resource_selector.py`), task state models. Stdlib only, no first-party imports. Filesystem I/O is forbidden except named rows in `DOMAIN_IO_ALLOWLIST` (`check_boundaries.py`; today `workspace.py`, `evidence/baseline.py`, `domain/test/schema_conformance.py`). |
 | **`ports/`** | `vanguard/packages/ports/` | Hexagonal port typing protocols (`KernelPort`, `ModelPort`, `SandboxPort`, `EvaluatorPort`, `EventStorePort`, `BlobStorePort`, `EnvironmentPort`, `DeterminismPort`, `IndexPort`, and 5 SPI protocols in `spi.py`). |
 | **`kernel/`** | `vanguard/packages/kernel/` | Trusted Computing Base (TCB limit `<=1438` LOC; currently 1386 LOC). 13-stage dispatch pipeline (S0–S12), monotonic capability attenuation, typed budget algebra, descriptor-bound capability grants, fail-closed policy, execution provenance DAG. Strictly domain-blind (Invariant I-7). |
 | **`agency/`** | `vanguard/packages/agency/` | Recursive turn loop engine (`EpisodeEngine`), attenuated child subagent `spawn()`, structured context compactor, admission gates, and prompt composers. |
@@ -292,7 +292,7 @@ AI Agents working in this repository MUST comply with the following operational 
   - Run `just check` during incremental development loops.
   - Run `just verify` before claiming task, PR, or sprint completion.
 - **Honest Status Reporting**: Agents MUST report commands actually executed and NEVER claim `PASS` for an unexecuted command. Never suppress failing assertions with `|| true`. Fix task-introduced failures before declaring completion.
-- **Invariant N-06 Compliance**: Code inside `vanguard/packages/runtime/` (including capability catalogs such as `agent_plugins.py`) must remain pure declarative metadata and must never import `subprocess`. All subprocess execution and script runners belong strictly in `tools/` or `.agents/`.
+- **Invariant N-06 Compliance**: `agent_plugins.py` remains declarative metadata. Process creation's default home is `adapters/sandbox/`; every other host-process grant is a named row in `SUBPROCESS_ALLOWLIST` (`check_boundaries.py` — SSOT), including `runtime/registry/broker.py`. Do not add `subprocess` under `runtime/` without a justified allowlist row.
 - **Fail-Closed Rollback Guarantee**: Iterative SWE repair loops and proficiencies must guarantee byte-for-byte rollback of mutated target files if the turn budget exhausts before all test falsifiers pass.
 - **Prompt Prefix Headroom**: Any prompt composition that embeds `.agents/` capability cards must strictly respect the $\le 4096$ character budget (`W12-A`).
 

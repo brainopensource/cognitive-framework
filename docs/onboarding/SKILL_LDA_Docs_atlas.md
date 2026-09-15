@@ -68,7 +68,7 @@ $$\text{Efficiency} = \frac{\text{Tokens Used for High-Signal Reasoning}}{\text{
 
 - **Naive Agent:** Ingests raw files (~40,000 tokens) to inspect a single 20-line method. Efficiency: < 10%.
 - **LDA Agent:** Sets bounded budget $B \le 4000$ tokens via [`.agents/skills/lda-navigator/SKILL.md`](../../.agents/skills/lda-navigator/SKILL.md). LDA selects exact AST skeletons, authority docs, and test links. Efficiency: > 85%.
-- **Result:** 7x to 10x reduction in token burn, with latency dropping from 15s filesystem regex scans to < 5ms indexed SQLite queries.
+- **Result:** 7x to 10x reduction in token burn. Delta re-index of dirty files is the sub-50ms measurement. `lda plan` / context compilation on this repository is seconds-scale. A six-file fixture recorded recall@5 of 1.0 for BM25/PPR (hybrid 0.875); that does not substantiate million-line retrieval SLAs.
 
 ---
 
@@ -342,15 +342,13 @@ uv run lda context "extend EpisodeEngine spawn lifecycle" --budget 2000
 
 ## Chapter 10: Empirical Benchmarks & Performance Metrics
 
-From live executions on this repository (3,420 files, 10,611 symbols, 77,719 relations):
+From measurements that actually exist (do not read these as a million-line SLA):
 
 ### 10.1 Latency & Retrieval Benchmarks
-- **Mean Retrieval Latency (PPR Submodular):** $2.98\text{ ms}$
-- **Mean Retrieval Latency (BM25):** $3.07\text{ ms}$
-- **Recall@5:** $1.00$ (100% precision within top 5 candidates)
-- **Mean Reciprocal Rank (MRR):** $0.67$ (target entity ranks on average at position 1.5)
-- **Direct AST Symbol Lookup:** $< 5\text{ ms}$
-- **Call-Graph Traversal (`lda callers` over 54k edges):** $< 5\text{ ms}$
+- **Delta index (`lda index --delta`):** sub-50ms dirty-file AST/markdown sync (separate from retrieval).
+- **Built-in `lda bench` fixture (six files):** recall@5 = 1.0 for BM25 and PPR; hybrid = 0.875. Regression floor in `test/tools/test_lda_skill_bench.py` is `recall@5 >= 0.5`.
+- **Repository `lda plan`:** on the order of seconds on this tree (~4.9s observed in the Stage 5 audit), not sub-50ms.
+- Point lookups (`lda symbol`, local FTS) can be milliseconds; that is not a universal retrieval claim.
 
 ---
 

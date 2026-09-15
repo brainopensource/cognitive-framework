@@ -6,16 +6,15 @@ projection over an immutable, event-sourced causality ledger. Its architectural 
 
 1. Long-Horizon Cognitive Resilience: Empower agents to sustain 40 to 120+ continuous turns of exploration, reasoning, and debugging without context           
 dissipation or catastrophic forgetting, backed by structured compaction and crash-safe ledger resumption.
-2. Fail-Closed Trust Spine: Confine execution within a mathematically verified microkernel (TCB ≤ 1, 438 LOC) with monotonic capability attenuation and Ed25519
+2. Fail-Closed Trust Spine: Confine execution within a bounded, domain-blind microkernel (TCB ≤ 1,438 LOC, audited by tests and linters — not a machine-checked proof) with monotonic capability attenuation and Ed25519
 cryptographic approvals, preventing unauthorized environmental escape or lease violations.
-3. Token-Bounded Repository Intelligence (LDA): Replace blind, context-exhausting grepping with a sub-50ms SQLite-WAL AST fact graph, delivering surgical code 
-slices, symbol caller maps, and exact test falsifiers.
+3. Token-Bounded Repository Intelligence (LDA): Replace blind, context-exhausting grepping with a SQLite-WAL AST fact graph. Demonstrated: recall@5 of 1.0 for BM25/PPR on a six-file fixture (hybrid 0.875); a real-repo `lda plan` call on the order of seconds; sub-50ms is the delta-index measurement, not universal retrieval.
 4. Anti-Tampering & Orthogonal Settlement: Strictly decouple run termination from task disposition. Victory is never self-declared by the model; it is granted 
 solely by exterior, tamper-proof test oracles with zero tolerance for vacuous stubs or assertion tampering.
 5. Atomic Multi-File Manipulation: Equip agents with two-phase commit (2PC) transactional editing and dynamic dependency tracking to safely architect new      
 systems from scratch or navigate multi-million-line legacy codebases.
 
-Ultimately, Vanguard transforms AI agents from probabilistic conversational tools into rigorous, verifiable, and self-correcting software engineers that deliver mathematically sound, production-ready systems.
+Ultimately, Vanguard transforms AI agents from probabilistic conversational tools into rigorous, verifiable, and self-correcting software engineers that deliver systems whose behavior is demonstrated under test — not assumed proven.
 
 One general substrate — kernel, ports, budgets, evidence ledger, one episode loop — on which many agents are composed, with coding as the first pack rather than the point. The kernel is domain-blind by invariant (I-7), which is why formal-sat and code-explain sit beside code-default without a second runtime.
 

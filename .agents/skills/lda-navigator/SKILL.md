@@ -18,7 +18,7 @@ authority: operational
 
 LDA provides **structured repository intelligence** across code and documentation without external services or heavy dependencies:
 - **Zero Daemon Overhead:** Operates entirely in-process with SQLite-WAL. Consumes **0 MB idle RAM** and **0% background CPU** (zero watcher threads or background daemons).
-- **Sub-50ms Delta Indexing:** Incremental AST & markdown re-indexing in **<25 ms**, replacing 12+ second full rebuilds.
+- **Sub-50ms Delta Indexing:** Incremental AST & markdown re-indexing in **<25 ms** on dirty files (a different measurement from retrieval/`lda plan`). Full planning on this repository is seconds-scale, not sub-50ms.
 - **One-Shot Task Bundling:** Compiles symbols, upstream caller graphs (blast radius), canonical doc obligations, and executable test commands in a single ~2-second call.
 - **Offline Semantic Intent Resolution:** Pinpoints exact code symbols from natural language intent using BM25, graph in-degree, and architectural tier weighting without external embeddings or network calls.
 - **Universal Brownfield Portability:** Zero-configuration discovery across arbitrary Python, TypeScript/JavaScript, Go, Rust, Java, and Kotlin repositories with dynamic doc mapping and relevance-ranked test falsifiers.
@@ -46,7 +46,7 @@ To prevent cognitive overload and tool paralysis across 20+ commands, agents sho
 2. **`uv run lda resolve "<intent>"`** (or MCP `lda_resolve`): When the symbol name is unknown (e.g., *"how are capability tokens attenuated"*), pinpoints exact classes/functions in < 1.5s.
 3. **`uv run lda repomap --budget 2000`** (or MCP `lda_repomap`): When orienting in a new or brownfield repo, renders a high-density, centrality-ranked architectural map of core production code without raw code bloat.
 
-After edits, run **`uv run lda index --delta`** (< 25ms) to refresh facts before running the falsifiers surfaced in Step 1.
+After edits, run **`uv run lda index --delta`** (< 25ms dirty-file AST sync; not a retrieval SLA) to refresh facts before running the falsifiers surfaced in Step 1.
 
 ---
 

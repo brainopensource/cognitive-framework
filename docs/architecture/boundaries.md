@@ -108,7 +108,7 @@ The production codebase (`vanguard/packages/`) strictly enforces a unidirectiona
 $$\text{domain} \leftarrow \text{ports} \leftarrow \text{kernel} \leftarrow \text{agency} \leftarrow \text{runtime} \rightarrow \text{adapters}$$
 $$(\text{apps/ is a client slot of runtime})$$
 
-- **`domain/`**: Pure value objects, wire contracts, RFC 8785 JCS canonicalization, deterministic event reducers, resource selectors, and task state models. Standard library Python only (zero I/O, zero network, zero dependencies).
+- **`domain/`**: Pure value objects, wire contracts, RFC 8785 JCS canonicalization, deterministic event reducers, resource selectors, and task state models. Standard library Python only (zero network, zero third-party dependencies). Filesystem I/O is fail-closed except named rows in `DOMAIN_IO_ALLOWLIST` (`tools/linters/check_boundaries.py`; includes `workspace.py`).
 - **`ports/`**: Hexagonal port protocols (`KernelPort`, `ModelPort`, `SandboxPort`, `EvaluatorPort`, `EventStorePort`, `BlobStorePort`, `IndexPort`) and 5 frozen SPI contracts (`spi.py`). Zero runtime dependencies.
 - **`kernel/`**: Domain-blind reference monitor (TCB $\le 1438$ LOC; currently 1386 LOC). Mediates effects through 13-stage dispatch (S0–S12), monotonic attenuation, descriptor-bound capability grants, typed budget algebra, and execution provenance DAG.
 - **`agency/`**: Sequential turn execution loop (`EpisodeEngine`), attenuated child agent `spawn()`, layered context compilation (L1–L4), admission gates, and protocol recovery.
@@ -158,7 +158,7 @@ Agent capability grants (attenuated model permissions) and plugin isolation poli
 
 ## Implementation Evidence
 
-- **Hexagonal Boundary Enforcement**: `tools/linters/check_boundaries.py`
+- **Hexagonal Boundary Enforcement**: `tools/linters/check_boundaries.py` (`ALLOWED`, `SUBPROCESS_ALLOWLIST`, `DOMAIN_IO_ALLOWLIST` are the enforced contracts)
 - **TCB Budget Linter**: `tools/linters/check_tcb_budget.py`
 - **Isolation Policy Linter**: `tools/linters/check_isolation_policy.py`
 - **Security Boundary Tests**: `test/contracts/test_b2_lifecycle_integration.py`, `test/falsifiers/test_rf94_single_runtime_authority.py`

@@ -119,6 +119,15 @@ from .wiring import (
 )
 
 
+class WorkspaceSnapshotRefused(RuntimeError):
+    """A workspace identity could not be observed at a trust boundary."""
+
+    def __init__(self, kind: str, message: str) -> None:
+        self.kind = kind
+        self.message = message
+        super().__init__(f"WORKSPACE_SNAPSHOT_REFUSED[{kind}]: {message}")
+
+
 def _workspace_access_of(run_plan: Any) -> str:
     """Duck-typed read of the profile's workspace access, mirroring
     `artifacts.resolve_capture_policy`'s `getattr(profile, "requested", profile)`
@@ -1935,7 +1944,11 @@ class HarnessSession:
         snapshot = self.ports.environment.snapshot()
         if snapshot.ok and snapshot.value is not None:
             return snapshot.value.digest
-        return ""
+        failure = snapshot.error
+        raise WorkspaceSnapshotRefused(
+            getattr(failure, "kind", "instrument_error"),
+            getattr(failure, "message", "workspace snapshot unavailable"),
+        )
 
     def _epoch_from_repo_map(self, repo_map: Any, *, compiled_at_turn: int) -> WorkspaceEpoch:
         try:

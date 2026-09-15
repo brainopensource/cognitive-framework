@@ -262,18 +262,40 @@ class GitEnvironment:
             return git_err
         self._snapshot_seq += 1
 
-        head_proc = subprocess.run(
-            ["git", "rev-parse", "HEAD"], cwd=self._working_dir, capture_output=True, text=True, check=False
-        )
-        if head_proc.returncode != 0:
-            return Result.fail("instrument_error", "unable to resolve repository HEAD")
-        head_commit = head_proc.stdout.strip()
-
         status_proc = subprocess.run(
             ["git", "status", "--porcelain"], cwd=self._working_dir, capture_output=True, text=True, check=False
         )
         if status_proc.returncode != 0:
             return Result.fail("instrument_error", "unable to enumerate repository status")
+
+        # An unborn repository has a perfectly observable working tree but no
+        # revision yet. ``HEAD`` is provenance metadata, not the candidate
+        # identity: the latter is derived from the tree below. Checking status
+        # first keeps a non-repository or otherwise unenumerable tree
+        # fail-closed instead of mistaking it for a greenfield repository.
+        head_proc = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=self._working_dir, capture_output=True, text=True, check=False
+        )
+        if head_proc.returncode == 0:
+            head_commit = head_proc.stdout.strip()
+        else:
+            # A missing ``HEAD`` is greenfield only if this repository has no
+            # reachable history at all. An orphan/broken current ref in a
+            # repository that already has objects is not evidence that the
+            # candidate has an absent revision, so refuse it rather than
+            # silently changing the provenance claim.
+            history_proc = subprocess.run(
+                ["git", "rev-list", "--all", "--count"],
+                cwd=self._working_dir,
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            if history_proc.returncode != 0:
+                return Result.fail("instrument_error", "unable to enumerate repository history")
+            if history_proc.stdout.strip() != "0":
+                return Result.fail("instrument_error", "unable to resolve repository HEAD")
+            head_commit = None
 
         entries: list[dict[str, object]] = []
         try:
@@ -297,7 +319,7 @@ class GitEnvironment:
         snapshot_digest = _candidate_digest(entries)
         return Result.success(
             EnvironmentSnapshot(
-                snapshot_id=f"git-snap-{head_commit[:8]}-{self._snapshot_seq:04d}",
+                snapshot_id=f"git-snap-{(head_commit or 'unborn')[:8]}-{self._snapshot_seq:04d}",
                 digest=snapshot_digest,
                 created_at="2026-08-15T00:00:00.000Z",
                 metadata={"head_commit": head_commit, "status_lines": len(status_proc.stdout.splitlines())},

@@ -60,6 +60,90 @@ Collapsing that block yields ~1,667 lines and **~633 lines of headroom under the
 
 ---
 
+## Work allocation and wave plan
+
+### The current misallocation
+
+Every developer is in the integrity lane: A on T-131.8, B on four reviews plus reconciliation, C on T-133→T-132→T-137. That lane is serialized by file leases, review-heavy by construction, and terminates in an acceptor pool of three. **Three high-capability coding agents with large context are being used as auditors of code that already exists.** That is simultaneously the most expensive and the least parallel way to deploy them.
+
+The remedy is not to abandon integrity work — D-6 F1–F7 is real and the control gate is the right gate. It is to stop routing *all* capacity through the narrowest lane.
+
+### Two streams
+
+The 2026-09-13 CEO directive already decoupled capability from MS-CONTROL. Make that operational:
+
+| | **Stream A — Control & integrity** | **Stream B — Capability** |
+|---|---|---|
+| Shape | Narrow, serialized, lease-contended | Wide, parallel, mostly new files |
+| Review burden | Heavy — non-author acceptance on every leaf | Light — new surface carries no acceptance debt |
+| Bound by | Acceptor availability, curator/store authority | Nothing external |
+| Output | F-number dispositions, T-27 readiness | The SOTA capability surface |
+
+**Two standing rules.** Stream B never claims a control result or a benchmark score — its output is capability, measured later under Stream A's protocol. Stream A never blocks Stream B: a blocked integrity leaf stops *that leaf*, and its owner moves to their Stream B row rather than idling or inventing hardening work.
+
+### Leadership is the fourth acceptor
+
+The acceptor deadlock has been recorded as an external staffing blocker. It is not one.
+
+`roles_and_authority.md:72-88` states that **review independence is per-change, not per-role-label**, and that the Senior records the independence basis. Leadership authored none of A/B/C's deltas, so it is non-author by construction and eligible on every one of them. This dissolves the deadlock without hiring.
+
+**The constraint that makes it legitimate:** `DIRECTOR.md:37-43` says the Director does not approve every edit, and that strategic review and ordinary code review are different gates. So leadership accepts **only at batched acceptance boundaries** — a completed leaf with its full receipt — never per-commit and never as routine diff review. Ordinary review stays with the Senior. Record the independence basis each time.
+
+This is the single highest-leverage action available right now: it unblocks B's entire queue and every downstream leaf that waits on a non-author disposition.
+
+### Leadership's coding box
+
+Leadership writes code only where the work is **small in LOC and large in consequence** — where getting it wrong is expensive and holding every invariant at once is the hard part:
+
+- **Kernel-adjacent changes.** TCB is 1,386 logical LOC against a 1,438 alarm ceiling — **52 lines of headroom.** Any kernel edit is a leadership call by arithmetic alone.
+- **Measurement math.** `roles_and_authority.md:20-26` assigns "statistical meaning" to the Director. The Wilson bound and the false-completion detector (§4.1, §4.2) are leadership code.
+- **Cross-cutting seam repairs** surfaced during acceptance, where the fix spans more than one developer's lease.
+- **Wave sequencing and contract authorship** (Phases 1–4).
+
+Explicitly **not** leadership work: feature implementation, test authoring, corpus maintenance, status upkeep, routine diff review.
+
+### Wave plan
+
+**W1 — now (Stream A, finish what is leased)**
+
+| Owner | Work |
+|---|---|
+| A | T-131.8 to completion |
+| B | Four LANDED reviews → acceptance-record reconciliation → T-131.3→4→7 |
+| C | T-133 (non-probe files first) → T-132 → T-137 |
+| Leadership | Phase 0; then accept A's and C's leaves as they land; begin Phases 1–2 |
+
+**W2 — the capability sprint (Stream B, genuinely parallel)**
+
+Three disjoint surfaces, each substantially new code, no shared leases. These are the hard, interesting rows.
+
+**B2-1 — Per-child worktree isolation (assign: A)**
+> **The correctness blocker for parallel workers.** `child_runtime.py` contains *zero* worktree or workspace references; `runtime/workspace.py` is a 21-line re-export shim. `git worktree` exists only as a `GitEnvironment` constructor option (`git.py:153-168`) that nothing in the delegation path uses. Today two parallel workers edit the same tree.
+> **Outcome:** every spawned child receives an isolated worktree; parent tree is unreachable from a child; a failing child cannot mutate it; worktrees are reclaimed on every exit path including crash.
+> **Lease:** `runtime/child_runtime.py`, `runtime/workspace.py`, `runtime/delegation.py` (spawn path only), new `test/runtime/test_child_worktree_isolation.py`.
+> **Falsifier:** a child that writes outside its worktree is refused; a crashed child leaks no worktree; two concurrent children writing the same path do not interfere; disabling isolation makes the oracle fail.
+> **Why it is hard:** crash-safe reclamation interacts with the `finally`-path teardown in `EpisodeEngine.spawn:1452` and with budget release ordering (S11 before S12).
+
+**B2-2 — `packs/code-horizon/` and compaction at scale (assign: B)**
+> **Outcome:** the fourth preset as a separate pack, `code-default` bytes untouched so the frozen control subject survives. Mandatory `StructuredConsolidateStrategy`, checkpoint cadence, sigma durable across restart.
+> **Lease:** new `packs/code-horizon/**`, `agency/context/compaction.py`, `runtime/checkpoints.py`, new `test/packs/code_horizon/**`.
+> **Falsifier:** a 200-turn session at 200k context survives a mid-run process kill and resumes with task/candidate/evidence/budget identity intact; compaction preserves the `TC-E-057` preservation set; a dropped carrier is detected, not silently repaired.
+> **Why it is hard:** the compaction strategies exist but have never run at this scale. Identity preservation across ~10 compaction cycles plus a restart is the real test, and it is exactly where long-session agents fail.
+
+**B2-3 — Greenfield oracle vacuity detector (assign: C)**
+> **Outcome:** a real detector behind `VACUOUS_ORACLE_REJECTED`, which is currently a code with no implementation. `spec.md:2287-2297` gives five prose stages whose load-bearing predicate — *"if it passes on stubs, it is vacuous"* — has no formal form.
+> **Lease:** `adapters/environment/analysis.py`, `agency/multi_file_completeness.py`, new detector module, `test/packs/code_default/` greenfield cases.
+> **Falsifier:** an oracle that passes against `pass`/`NotImplementedError` stubs is rejected; a real oracle is admitted; the detector cannot be satisfied by test mutation.
+> **Why it is hard:** it must reject vacuity without rejecting legitimately simple tests — the false-positive side is what makes this a design problem rather than a grep.
+
+Leadership in W2: Phases 3–4, the false-completion detector, the Wilson formula, and acceptance of W1 leaves as they arrive.
+
+**W3 — convergence**
+
+Planner→worker→verifier running end-to-end on the `horizon` preset over a real multi-file greenfield task, with worktree isolation active and exterior-verifier merge. This is the first run that exercises the whole SOTA claim. It produces a capability demonstration, **not** a control result — MS-CONTROL still requires Stream A's protocol.
+
+---
+
 ## Phase 0 — Reclaim and re-pin (mechanical, no semantic content)
 
 `README.md:108-110`: *"A documentation topology move is isolated from semantic edits."* This phase is **its own commit** and must land before any content edit.

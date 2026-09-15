@@ -14,6 +14,17 @@ applicable_trees:
 
 # Guia Operacional SOTA: Skills, Techniques, Proficiencies e Roteamento Híbrido
 
+> [!NOTE]
+> **Status do Documento: GUIA OPERACIONAL — CAPACIDADES INTEGRADAS NO RUNTIME (2026-09-11 | HEAD: `1e257e76`)**
+> - **Autoridade:** Guia Operacional de Apoio (`authority: operational-staging`).
+> - **O QUE ESTÁ CONCLUÍDO E INTEGRADO:**
+>   - As 10 capacidades sob [`.agents/`](file:///home/rock-dev/Coding/cognitive-framework/.agents) (Skills, Techniques, Proficiencies) estão registradas no runtime via [`vanguard/packages/runtime/agent_plugins.py`](file:///home/rock-dev/Coding/cognitive-framework/vanguard/packages/runtime/agent_plugins.py).
+>   - Suíte de regressão de capacidades validada (7/7 testes verdes em [`test/runtime/test_techniques_and_proficiencies.py`](file:///home/rock-dev/Coding/cognitive-framework/test/runtime/test_techniques_and_proficiencies.py)).
+>   - Orçamento de prefixo de prompt ($\le 4096$ caracteres, regra W12-A) estritamente respeitado.
+>   - Servidor MCP universal em `tools/agent_plugins/mcp_server.py`.
+> - **O QUE É PROTÓTIPO / HORIZONTE FUTURO:**
+>   - O nível **Mastery** (metacognição adaptativa dinâmica e seleção online de algoritmos) permanece como horizonte de pesquisa posterior ao fechamento de `MS-CONTROL`.
+
 Este documento consolida tudo o que foi implementado no repositório, como operar os componentes hoje, como testar e validar combinações locais e em nuvem (OpenRouter) e o roteiro de próximas etapas.
 
 ---

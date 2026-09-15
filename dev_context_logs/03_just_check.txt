@@ -1,0 +1,25 @@
+python3 tools/linters/check_test_hygiene.py
+TEST HYGIENE PASS: provider keys and inherited state are clean
+python3 tools/linters/check_boundaries.py
+BOUNDARY PASS: 833 source files checked
+python3 tools/linters/check_tcb_budget.py
+{"alarm_delta_lines": 131, "baseline_logical_loc": 1307, "current_logical_loc": 1386, "files": {"vanguard/packages/kernel/__init__.py": 41, "vanguard/packages/kernel/attenuation.py": 171, "vanguard/packages/kernel/budget.py": 150, "vanguard/packages/kernel/classifier.py": 96, "vanguard/packages/kernel/dispatch.py": 374, "vanguard/packages/kernel/grants.py": 201, "vanguard/packages/kernel/model.py": 137, "vanguard/packages/kernel/policy.py": 106, "vanguard/packages/kernel/provenance.py": 110}, "threshold": 1438}
+TCB PASS: 1386 logical lines across 9 files (alarm above 1438)
+python3 tools/linters/check_domain_blindness.py
+DOMAIN-BLINDNESS WARN: scan target missing (not an error): layer0/
+DOMAIN-BLINDNESS PASS: no coding|pytest|ast tokens in vanguard/packages/domain/, vanguard/packages/kernel/
+python3 tools/linters/check_isolation_policy.py
+ISOLATION POLICY PASS: proc.exec plugins declare container/subprocess
+python3 tools/linters/check_path_hygiene.py
+PATH HYGIENE PASS: no machine-local paths or developer identifiers detected
+just docs-check
+python3 tools/linters/check_doc_metadata.py
+DOC METADATA PASS: 91 living documents verified with valid, unique metadata
+python3 tools/linters/check_markdown_links.py
+LINK PASS: local markdown links resolve
+npx markdownlint-cli2 "docs/**/*.md" "README.md" "AGENTS.md" "VISION.md"
+markdownlint-cli2 v0.23.2 (markdownlint v0.41.1)
+Finding: docs/**/*.md README.md AGENTS.md VISION.md
+Linting: 133 files
+Summary: 0 issues in 0 files
+AETHER CHECK: PASS

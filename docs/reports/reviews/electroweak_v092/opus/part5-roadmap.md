@@ -231,7 +231,7 @@ Deliberately last, and this ordering is the point.
 |---|---|---|
 | 7.1 | `VISION.md` rewritten **in English** | ~1,200 lines; keep Ch. 4, 7, 15, 17, 18 substance; drop the constitutional apparatus |
 | 7.2 | `README.md` | ~200 lines; one honest capability number at the top |
-| 7.3 | `docs/execution/spec.md` remains the sole normative surface | keep RFC-2119 obligations, invariants, falsifier IDs |
+| 7.3 | `docs/execution/main/spec.md` remains the sole normative surface | keep RFC-2119 obligations, invariants, falsifier IDs |
 | 7.4 | Delete ~40,000 lines of governance ceremony; keep the `check_*` linters | executable law survives; prose law shrinks |
 | 7.5 | Collapse entry points to `just check · verify · bench · run · docs` | one canonical path per action |
 

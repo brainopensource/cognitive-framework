@@ -44,12 +44,18 @@ from ...kernel import (
     attenuate,
 )
 from .protocol_recovery import (
+    Attempt,
+    FailureClass,
     ProtocolRecoveryState,
     RecoveryDecision,
+    recover,
     recover_proposal,
+    semantic_attempt_fingerprint,
+    semantic_progress_key,
 )
 from .admission_gate import AdmissionVerdict
 from .tool_policy import ToolPolicy, derive_phase, resolve_tool_policy
+from .observation import ObservationRequest, settlement_levels
 from .state import (
     TERMINAL_FOR_KIND,
     Episode,
@@ -79,6 +85,19 @@ _TERMINAL_FOR_FAILURE: Mapping[FailurePath, RunTermination] = {
     FailurePath.COMMIT_FAILED: RunTermination.RUNTIME_ERROR,
     FailurePath.CLASSIFIER_ERROR: RunTermination.RUNTIME_ERROR,
 }
+
+_PERMISSION_FAILURES = frozenset({
+    FailurePath.DENIED_REJECT,
+    FailurePath.DENIED_ASK_FAIL_CLOSED,
+    FailurePath.DENIED_UNTRUSTED_JUSTIFYING,
+    FailurePath.DENIED_SCOPE_ESCALATION,
+})
+
+_TRANSIENT_FAILURES = frozenset({
+    FailurePath.TIMEOUT,
+    FailurePath.ADAPTER_UNAVAILABLE,
+    FailurePath.PERIMETER_UNAVAILABLE,
+})
 
 #: Reservation dimension names as they arrive in a proposal (`CT-06`, `CT-07`).
 _RESERVATION_FIELDS = {
@@ -211,6 +230,7 @@ class EpisodeEngine:
         truncation_detector: Any = None,
         completion_admitter: Any = None,
         completion_allowed_tools: Sequence[str] | None = None,
+        observation_sinks: Any = None,
     ) -> None:
         self._kernel = kernel
         #: True when this engine runs a spawned child under a narrowed grant.
@@ -250,6 +270,16 @@ class EpisodeEngine:
         self._completion_allowed_tools = (
             frozenset(str(item) for item in completion_allowed_tools)
             if completion_allowed_tools is not None else None)
+        #: Sink classification for the parallel-observation batch (`A1`).
+        #: Supplied by the composition root from the manifest's own
+        #: declarations -- the engine never carries a list of read-only verbs,
+        #: because that would be a second place a domain has to be registered
+        #: (`C-01`, `ADR-0060`).
+        #:
+        #: `None` disables batching entirely: a composition that has not said
+        #: which of its verbs are observations has not authorised any of them
+        #: to travel in a batch. Fail closed (`F-05`).
+        self._observation_sinks = observation_sinks
 
     # ------------------------------------------------------------------
 
@@ -440,6 +470,19 @@ class EpisodeEngine:
                 error = getattr(result, "error", None)
                 reason = (getattr(error, "message", "")
                           or "provider returned no proposal")
+                # A refused *spend* is not a provider failure. The runtime's
+                # inference meter denies a reservation with its own typed kind
+                # so a budget stop keeps the budget terminal: folding it into
+                # `instrument_error` would report a ceiling working correctly
+                # as the model misbehaving, and move the observation out of the
+                # budget bucket and into the missingness taxonomy (`DIR-D2`).
+                if str(getattr(error, "kind", "")) == RunTermination.BUDGET_EXHAUSTED.value:
+                    episode = episode.terminated(
+                        RunTermination.BUDGET_EXHAUSTED, reason)
+                    self._emit_terminal(
+                        episode, RunTermination.BUDGET_EXHAUSTED.value, reason,
+                        diagnostics=diagnostics)
+                    break
                 episode = episode.terminated(RunTermination.INSTRUMENT_ERROR, reason)
                 self._emit_terminal(episode, "instrument_error", reason, diagnostics=diagnostics)
                 break
@@ -518,7 +561,17 @@ class EpisodeEngine:
                     # same call; the retry bound catches one that keeps
                     # proposing it after being blocked, which adds nudge turns
                     # but no new dispatches for the window to count.
-                    if (repeat_count >= 2 * self._no_progress_limit
+                    stall_attempt = self._semantic_attempt(
+                        proposal,
+                        outcome=(same[-1].progress_signal if same else "repeated"),
+                        failure=None,
+                    )
+                    semantic, recovery_state = self._run_recover(
+                        episode, recovery_state, stall_attempt, proposal,
+                    )
+                    self._emit_recovery_state(episode, recovery_state)
+                    if (semantic.action == "stop"
+                            or repeat_count >= 2 * self._no_progress_limit
                             or recovery_state.effect_retries
                             >= recovery_state.max_effect_retries):
                         detail = (f"repeated action {proposal.action} over "
@@ -539,6 +592,7 @@ class EpisodeEngine:
                             retry_feedback={
                                 "repeatedAction": proposal.action,
                                 "repeatCount": repeat_count,
+                                "semanticAction": semantic.action,
                                 "lastReceiptDigest": (
                                     episode.turns[-1].receipt_digest
                                     if episode.turns else None),
@@ -561,11 +615,25 @@ class EpisodeEngine:
             # matter (I4/I12). Bounded: once protocol retries are exhausted
             # the proposal proceeds and the kernel fail-closes, so this gate
             # cannot deadlock the episode.
+            #
+            # A read-only batch is gated the same way and by the same policy:
+            # every request in it is checked, so a narrowed phase cannot be
+            # evaded by moving the disallowed verb inside a batch (`A1`).
+            if proposal.kind is ProposalKind.OBSERVE:
+                requested_actions = [request.action
+                                     for request in proposal.observations]
+            elif proposal.kind == ProposalKind.EFFECT:
+                requested_actions = [proposal.action]
+            else:
+                requested_actions = []
+            blocked_actions = [
+                action for action in requested_actions
+                if action in declared_tool_names
+                and policy is not None and action not in policy.allowed
+            ]
             if (policy is not None
-                    and proposal.kind == ProposalKind.EFFECT
                     and policy.mode == "required" and policy.allowed
-                    and proposal.action in declared_tool_names
-                    and proposal.action not in policy.allowed
+                    and blocked_actions
                     and recovery_state.protocol_retries < recovery_state.max_protocol_retries):
                 recovery_state = recovery_state.with_protocol_retry()
                 if not _apply_retry(
@@ -574,7 +642,8 @@ class EpisodeEngine:
                         retry_reason="DISALLOWED_TOOL_PHASE",
                         retry_feedback={
                             "allowed_tools": list(policy.allowed),
-                            "requested": proposal.action,
+                            "requested": blocked_actions[0],
+                            "blockedActions": list(blocked_actions),
                             "phase": phase,
                         },
                     ),
@@ -584,15 +653,112 @@ class EpisodeEngine:
                 continue
 
             self._emit_proposal(episode, proposal, diagnostics=diagnostics)
+
+            # -- a read-only batch settles as a causal partial order (`A1`) --
+            if proposal.kind is ProposalKind.OBSERVE:
+                refusal = self._batch_refusal(proposal)
+                if refusal is not None:
+                    # Typed and recorded, never silent, and never terminal on
+                    # its own: a refused batch is feedback the next turn can
+                    # act on by proposing the same reads singly (`VG-03 §6.1`,
+                    # denial is an event).
+                    self._emit_batch_denied(episode, proposal, refusal)
+                    if not _apply_retry(
+                        RecoveryDecision(
+                            status="retry_model",
+                            retry_reason="OBSERVATION_BATCH_REFUSED",
+                            retry_feedback={
+                                "refusal": refusal,
+                                "message": (
+                                    f"{refusal} Parallel requests are read-only. "
+                                    "Send anything that changes the workspace as a "
+                                    "single action of its own."
+                                ),
+                            },
+                        ),
+                        base_sampling=turn_sampling,
+                    ):
+                        break
+                    continue
+
+                settled, halting = self._settle_batch(
+                    episode, proposal,
+                    spans=accumulated,
+                    dispatches=dispatches,
+                    seen_verbs=seen_verbs,
+                )
+                for row in settled:
+                    if receipt_labeller is not None:
+                        label = receipt_labeller(episode.turn_count, row["dispatch"])
+                        if label is not None:
+                            accumulated = accumulated + (label,)
+                turn = Turn(
+                    index=episode.turn_count,
+                    state_digest=episode.state_digest(),
+                    proposal_descriptor=proposal.descriptor,
+                    # A *vector* digest, not a collapsed one: every settled
+                    # request contributes its own receipt digest, so the batch
+                    # receipt is reconstructable rather than opaque. Keyed by
+                    # declaration position because provider-generated ids
+                    # would differ every turn and the no-progress detector
+                    # would never fire (`Turn.signature`).
+                    receipt_digest=digest_of({"observations": [
+                        {"position": row["position"],
+                         "level": row["level"],
+                         "receiptDigest": row["receiptDigest"],
+                         "failure": row["failure"]}
+                        for row in settled
+                    ]}),
+                    progress_signal=(
+                        f"observed_{sum(1 for r in settled if r['failure'] == 'ok')}"
+                        f"_of_{len(proposal.observations)}"),
+                )
+                repeats = episode.repeats(turn, limit=self._no_progress_limit)
+                episode = episode.with_turn(turn)
+                self._emit_batch_settled(episode, proposal, settled)
+                if halting is not None:
+                    episode = episode.terminated(
+                        _TERMINAL_FOR_FAILURE[halting.failure], halting.detail)
+                    break
+                if repeats:
+                    episode = episode.terminated(
+                        RunTermination.ABANDONED,
+                        f"no progress over {self._no_progress_limit} turns",
+                    )
+                    break
+                continue
+
             # -- a non-effect proposal reduces straight to a terminal ----
             terminal = TERMINAL_FOR_KIND.get(proposal.kind)
             if terminal is not None:
+                # Permission recovery never retries the denied effect, but a
+                # denial remains observable feedback so a later turn can pick
+                # a different, narrower effect.  That feedback cannot be
+                # converted directly into success by an immediate finish.
+                # A successful subsequent dispatch replaces the recovery
+                # decision with ``continue`` and may therefore complete
+                # normally.
+                if (proposal.kind == ProposalKind.FINISH
+                        and recovery_state.last_decision is not None
+                        and recovery_state.last_decision.action == "stop"
+                        and recovery_state.last_decision.reason == "permission"):
+                    episode = episode.terminated(
+                        RunTermination.ABANDONED,
+                        "permission denial requires a permitted next action",
+                    )
+                    break
                 if (proposal.kind == ProposalKind.FINISH
                         and self._completion_admitter is not None):
                     verdict = self._completion_admitter(episode, proposal)
                     if not isinstance(verdict, AdmissionVerdict):
                         raise TypeError("completion_admitter must return AdmissionVerdict")
                     if not verdict.admissible:
+                        if verdict.reason == "INDEX_UNBOUND":
+                            episode = episode.terminated(
+                                RunTermination.ABANDONED,
+                                "INDEX_UNBOUND: untestable workspace cannot be verified",
+                            )
+                            break
                         if not _apply_retry(
                             RecoveryDecision(
                                 status="retry_model",
@@ -724,15 +890,19 @@ class EpisodeEngine:
                     }),
                     progress_signal="scope_escalation_denied",
                 )
-                repeats = episode.repeats(turn, limit=self._no_progress_limit)
                 episode = episode.with_turn(turn)
-                if repeats:
-                    episode = episode.terminated(
-                        RunTermination.ABANDONED,
-                        f"no progress over {self._no_progress_limit} turns",
-                    )
-                    break
-                continue
+                attempt = self._semantic_attempt(
+                    proposal, outcome="scope_escalation_denied",
+                    failure=FailureClass.PERMISSION.value,
+                )
+                semantic, recovery_state = self._run_recover(
+                    episode, recovery_state, attempt, proposal,
+                )
+                self._emit_recovery_state(episode, recovery_state)
+                episode = episode.terminated(
+                    RunTermination.ABANDONED, semantic.reason,
+                )
+                break
 
             # -- authorise + effect + receipt, through the one path ------
             request = self._to_effect_request(episode, proposal, accumulated)
@@ -768,6 +938,40 @@ class EpisodeEngine:
             if terminal is not None:
                 episode = episode.terminated(terminal, outcome.detail)
                 break
+            failure_kind: str | None = None
+            if outcome.failure in _PERMISSION_FAILURES:
+                failure_kind = FailureClass.PERMISSION.value
+            elif outcome.failure in _TRANSIENT_FAILURES:
+                failure_kind = FailureClass.TRANSPORT.value
+            attempt = self._semantic_attempt(
+                proposal,
+                outcome=outcome.failure.name.lower(),
+                failure=failure_kind,
+            )
+            semantic, recovery_state = self._run_recover(
+                episode, recovery_state, attempt, proposal,
+            )
+            self._emit_recovery_state(episode, recovery_state)
+            # A kernel denial is durable feedback, not a terminal result.  The
+            # next provider turn must be allowed to select a narrower action;
+            # stopping here made the recorded F-09 denial indistinguishable
+            # from a crash and prevented the scripted trust trajectory from
+            # reaching its subsequent safe effect.
+            if semantic.action == "wait":
+                if not _apply_retry(
+                    RecoveryDecision(
+                        status="retry_model",
+                        retry_reason=semantic.reason,
+                        retry_feedback={
+                            "semanticAction": semantic.action,
+                            "delayMs": semantic.delay_ms,
+                            "message": semantic.reason,
+                        },
+                    ),
+                    base_sampling=turn_sampling,
+                ):
+                    break
+                continue
             if repeats:
                 if recovery_state.effect_retries < recovery_state.max_effect_retries:
                     recovery_state = recovery_state.with_effect_retry()
@@ -852,6 +1056,41 @@ class EpisodeEngine:
             payload=payload,
         ))
 
+    def _semantic_attempt(
+        self, proposal: Proposal, *, outcome: str, failure: str | None,
+    ) -> Attempt:
+        action = str(proposal.action or "")
+        return Attempt(
+            semantic_attempt_fingerprint(action, proposal.args, ""),
+            outcome,
+            semantic_progress_key({
+                "outcome": outcome,
+                "action": action,
+                "args": dict(proposal.args),
+            }),
+            failure,
+        )
+
+    def _run_recover(
+        self,
+        episode: Episode,
+        recovery_state: ProtocolRecoveryState,
+        attempt: Attempt,
+        proposal: Proposal,
+    ) -> tuple[Any, ProtocolRecoveryState]:
+        remaining_turns = max(self._max_turns - episode.turn_count, 1)
+        remaining_ms = int(proposal.reservation.get("millis") or 1)
+        return recover(
+            recovery_state,
+            attempt,
+            remaining_ms=remaining_ms,
+            remaining_turns=remaining_turns,
+            jitter=0.0,
+            state_digest=episode.state_digest(),
+            remaining_budget_ref=digest_of(dict(proposal.reservation)),
+            deadline=self._clock.now(),
+        )
+
     def _emit_recovery_state(self, episode: Episode,
                              state: ProtocolRecoveryState) -> None:
         """Persist retry spend through the existing event authority.
@@ -924,6 +1163,25 @@ class EpisodeEngine:
             "action": proposal.action,
             "proposalDescriptor": proposal.descriptor,
         }
+        if proposal.observations:
+            # Exactly one `ProposalProduced` per turn, batch or not:
+            # `Session.turns_consumed` counts these, so emitting one per
+            # request would make a ten-read batch cost ten turns of budget.
+            # The per-request causal identity lives in the kernel's own
+            # `EffectStarted`/`EffectCompleted` pair for each member; what
+            # this payload adds is the partial order they settle under, which
+            # nothing downstream could otherwise reconstruct.
+            payload["observations"] = [
+                {"requestId": request.request_id,
+                 "action": request.action,
+                 "dependsOn": list(request.depends_on),
+                 "proposalDescriptor": request.descriptor,
+                 "level": level}
+                for level, positions in enumerate(
+                    settlement_levels(proposal.observations))
+                for position in positions
+                for request in (proposal.observations[position],)
+            ]
         if proposal.note:
             payload["note"] = proposal.note[:8000]
         if diagnostics:
@@ -965,12 +1223,231 @@ class EpisodeEngine:
         )
 
     def _reservation(self, proposal: Proposal) -> Reservation:
+        return self._reservation_of(proposal.reservation)
+
+    @staticmethod
+    def _reservation_of(declared: Mapping[str, int]) -> Reservation:
+        """One reservation per request (`CT-06`, `CT-07`).
+
+        Shared by the single-action path and by every member of a batch, so a
+        request settled inside a batch reserves and settles against the
+        governor exactly as the same request settles alone.
+        """
         fields = {
             _RESERVATION_FIELDS[name]: amount
-            for name, amount in proposal.reservation.items()
+            for name, amount in declared.items()
             if name in _RESERVATION_FIELDS
         }
         return Reservation(**fields)
+
+    # -- parallel observation (`A1`) ------------------------------------
+
+    def _is_observation(self, action: str) -> bool:
+        """Ask the composition whether an action is a read.
+
+        Structural, never a list. The source is the manifest's own sink
+        declaration, carried by the kernel's registry (`ICD §3`): `observation`
+        effects are selector-checked and provenance-labelled but change
+        nothing, which is exactly the property a batch member needs.
+        """
+        source = self._observation_sinks
+        if source is None:
+            return False
+        getter = getattr(source, "sink_class", None)
+        try:
+            value = getter(action) if callable(getter) else source(action)
+        except Exception:
+            # `F-05`: a classification that raises is not evidence of
+            # harmlessness.
+            return False
+        return str(getattr(value, "value", value)) == SinkClass.OBSERVATION.value
+
+    def _batch_refusal(self, proposal: Proposal) -> str | None:
+        """Why this batch may not settle, or `None` if it may.
+
+        Three refusals, in the order a defect would reach them:
+
+        * the composition declared no sink classification, so no verb of its
+          has been established as read-only;
+        * a member is not an observation. `patch.apply`, `proc.exec`, `finish`
+          and `spawn` stay single and strictly serialised -- batching a
+          mutation would break the single-writer rule and the atomic-candidate
+          invariant (`RUN-10`), which no turn-economics argument outranks;
+        * a member escalates an attenuated child's sealed scope. The
+          equivalent single-action refusal lives further down the loop and
+          would otherwise be skipped by the batch path (`S8-B-01`).
+        """
+        if self._observation_sinks is None:
+            return ("this composition has not declared which of its verbs are "
+                    "observations, so it settles no parallel batches.")
+        mutating = [request.action for request in proposal.observations
+                    if not self._is_observation(request.action)]
+        if mutating:
+            return (f"{', '.join(sorted(set(mutating)))} is not a read-only "
+                    "observation and cannot travel in a parallel batch.")
+        if self._attenuated:
+            outside = [request.action for request in proposal.observations
+                       if request.action not in self._scope.actions]
+            if outside:
+                return (f"{', '.join(sorted(set(outside)))} is outside this "
+                        "episode's sealed scope.")
+        return None
+
+    def _settle_batch(
+        self,
+        episode: Episode,
+        proposal: Proposal,
+        *,
+        spans: Sequence[Span],
+        dispatches: list[Any],
+        seen_verbs: set[str],
+    ) -> tuple[list[dict[str, Any]], Any]:
+        """Settle a batch level by level and return what each request got.
+
+        Every request goes through `Kernel.dispatch` on its own, so each keeps
+        its own `EffectStarted`, its own grant path, its own reservation and
+        its own receipt. Nothing here is a batch to the kernel, which is what
+        makes the run replayable request-by-request.
+
+        Settlement is sequential within a deterministic linear extension of
+        the partial order. The order is *causal*, not positional: a level is a
+        set of mutually independent requests, and executing that set
+        concurrently is a permitted optimisation that changes no receipt. It
+        is not taken here, because a run that reorders under load stops being
+        reconstructable from its own ledger.
+
+        **Failure is per request.** A read that fails settles as a failure and
+        the rest of the level still runs; one missing file does not void the
+        other nine. Only a failure path that terminates the *run* -- budget,
+        cancellation, a suspended approval -- stops the batch, and what
+        already settled stays settled.
+        """
+        settled: list[dict[str, Any]] = []
+        halting: Any = None
+        for level, positions in enumerate(settlement_levels(proposal.observations)):
+            for position in positions:
+                request = proposal.observations[position]
+                outcome = self._kernel.dispatch(
+                    self._observation_request(episode, request, spans),
+                    requested_scope=self._scope,
+                    reservation=self._reservation_of(request.reservation),
+                )
+                dispatches.append(outcome)
+                seen_verbs.add(request.action)
+                settled.append({
+                    "position": position,
+                    "level": level,
+                    "requestId": request.request_id,
+                    "action": request.action,
+                    "dependsOn": list(request.depends_on),
+                    "proposalDescriptor": request.descriptor,
+                    "descriptorDigest": outcome.descriptor_digest,
+                    "receiptDigest": (outcome.outcome.result_digest
+                                      if outcome.outcome is not None else None),
+                    "failure": outcome.failure.name.lower(),
+                    "dispatch": outcome,
+                })
+                if _TERMINAL_FOR_FAILURE.get(outcome.failure) is not None:
+                    halting = outcome
+                    break
+            if halting is not None:
+                break
+        return settled, halting
+
+    def _observation_request(
+        self, episode: Episode, request: ObservationRequest,
+        spans: Sequence[Span],
+    ) -> EffectRequest:
+        """One batch member as an `EffectRequest`.
+
+        Deliberately identical to `_to_effect_request` in everything the
+        kernel reads, including `declared_sink_class`: a read inside a batch
+        must be authorised, reserved and recorded exactly as the same read
+        issued alone, or the batch would be a second dispatch path with
+        different authority.
+        """
+        resource = dict(request.resource)
+        if not resource and self._scope.resources:
+            resource = dict(self._scope.resources[0])
+        return EffectRequest(
+            action=request.action,
+            resource=resource,
+            args=dict(request.args),
+            principal=episode.principal,
+            run_id=episode.run_id,
+            depth=episode.depth,
+            justifying_spans=tuple(spans),
+            parent_lease=self._parent_lease,
+            declared_sink_class=self._sink_class,
+            idempotency_key=request.idempotency_key,
+        )
+
+    def _emit_batch_denied(self, episode: Episode, proposal: Proposal,
+                           refusal: str) -> None:
+        """`AuthorizationDenied` for a batch the loop declines to settle.
+
+        Like the sealed-scope refusal above, no kernel dispatch stands behind
+        this one, so without a durable event the denial would exist only in
+        memory (`A-07`).
+        """
+        event = Event(
+            kind="AuthorizationDenied",
+            reason="observation_batch_refused",
+            at=self._clock.now(),
+            run_id=episode.run_id,
+            principal=episode.principal,
+            payload={
+                "episodeId": episode.episode_id,
+                "turn": episode.turn_count,
+                "proposalDescriptor": proposal.descriptor,
+                "detail": refusal,
+                "requests": [
+                    {"requestId": request.request_id, "action": request.action}
+                    for request in proposal.observations
+                ],
+            },
+        )
+        try:
+            self._events.emit(event)
+        except Exception:
+            # `F-25`: emission failure never fails the work it describes.
+            pass
+
+    def _emit_batch_settled(self, episode: Episode, proposal: Proposal,
+                            settled: Sequence[Mapping[str, Any]]) -> None:
+        """The partial order as it actually settled, as episode state.
+
+        Reuses `EpisodeStateChanged` rather than minting an event kind, for
+        the same reason recovery state does: this is state belonging to the
+        episode, not a new event authority.
+
+        Digests only -- no argument and no result content, because either may
+        reference a secret (`REQ-TRUST-001`). `descriptorDigest` is the
+        kernel's own, which is what joins each row to its `EffectStarted` and
+        `EffectCompleted` pair.
+        """
+        try:
+            self._events.emit(Event(
+                kind="EpisodeStateChanged",
+                reason="observation_batch",
+                at=self._clock.now(),
+                run_id=episode.run_id,
+                principal=episode.principal,
+                payload={
+                    "episodeId": episode.episode_id,
+                    "turn": episode.turn_count - 1,
+                    "proposalDescriptor": proposal.descriptor,
+                    "observations": [
+                        {key: row[key] for key in (
+                            "position", "level", "requestId", "action",
+                            "dependsOn", "proposalDescriptor",
+                            "descriptorDigest", "receiptDigest", "failure")}
+                        for row in settled
+                    ],
+                },
+            ))
+        except Exception:
+            pass
 
     def spawn(
         self,
@@ -1066,7 +1543,7 @@ class EpisodeEngine:
                 is_cancelled=is_cancelled,
             )
 
-            is_ok = child_outcome.terminal in (RunTermination.COMPLETED, RunTermination.ABSTAINED)
+            is_ok = child_outcome.terminal is RunTermination.COMPLETED
             # Child return payload is value-only text / note
             payload = child_outcome.episode.detail or child_outcome.episode.brief
             # `K-33`: the child's return value re-enters the parent's

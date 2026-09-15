@@ -9,6 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Mapping
 
+from benchmarks.ladder.quarantine import guard_product_execution
 from vanguard.packages.runtime.entrypoint import execute, _manifest
 
 __all__ = ["PRODUCT_PRESETS", "execute_product", "manifest_for_preset"]
@@ -41,6 +42,7 @@ def execute_product(
     extra: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Invoke the public product entrypoint in-process."""
+    guard_product_execution(workspace=workspace, extra=extra)
     command = "explain" if harness == "vg-code-explain" else "code"
     chosen = PRODUCT_PRESETS.get(harness or "", preset)
     request: dict[str, Any] = {

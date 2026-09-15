@@ -28,12 +28,27 @@ from ..adapters.environment.sandboxed import SandboxedEnvironmentAdapter
 from ..adapters.sandbox.rootless import RootlessSandboxRunner
 from ..adapters.sandbox.worker import WorkerProtocol
 from ..adapters.stores.event_store import SqliteEventStore
+from ..adapters.stores.lda_index import LdaRepoIndex
+from ..adapters.stores.repo_index import FileRepoIndex, workspace_tree_hash
+from ..domain.workspace_epoch import WorkspaceEpoch
+from ..ports.event_store import PortFailure, Result
+from ..ports.index import IndexHealthVerdict, IndexSelection, RepositoryMap
 from .determinism import ClockPort, SystemClock
 from .profiles import EffectiveExecutionProfile, resolve_profile
 from .wiring import _bwrap_path
 from .workspace import get_workspace_path
 
-__all__ = ["RuntimeDependencies", "RuntimeBootstrap"]
+__all__ = [
+    "RuntimeDependencies",
+    "RuntimeBootstrap",
+    "ProductionIndexBinding",
+    "select_production_index",
+    "PRODUCTION_INDEX_SELECTION_ENABLED",
+    "PRODUCTION_INDEX_REJECT_UNUSABLE",
+]
+
+PRODUCTION_INDEX_SELECTION_ENABLED = True
+PRODUCTION_INDEX_REJECT_UNUSABLE = True
 
 
 def _resolve_model_adapter(model: Any, profile_id: str) -> Any:
@@ -82,6 +97,135 @@ class RuntimeDependencies:
     profile: EffectiveExecutionProfile
     clock: ClockPort
     cleanup: Callable[[], None] = field(default=lambda: None)
+    index: Any = None
+    index_selection: IndexSelection | None = None
+    index_error: PortFailure | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ProductionIndexBinding:
+    """Composition-root index binding for session integration (DIR-I5 / ADR-0107)."""
+
+    port: Any
+    selection: IndexSelection
+
+
+def _epoch_from_map(mapped: RepositoryMap, *, compiled_at_turn: int) -> WorkspaceEpoch:
+    return WorkspaceEpoch(
+        tree_hash=mapped.tree_hash,
+        index_digest=mapped.index_digest,
+        source_revision=mapped.source_revision,
+        compiled_at_turn=compiled_at_turn,
+    )
+
+
+def _bind_file_index(
+    root: Path,
+    *,
+    verdict: IndexHealthVerdict,
+    reason: str,
+    compiled_at_turn: int,
+) -> Result[ProductionIndexBinding]:
+    port = FileRepoIndex()
+    indexed = port.index(str(root))
+    if not indexed.ok:
+        kind = "INDEX_ABSENT" if verdict == "optional_absent" else "INDEX_INVALID"
+        message = indexed.error.message if indexed.error else "file index unavailable"
+        return Result.fail(kind, message, retryable=False)
+    mapped = port.repo_map()
+    if not mapped.ok or mapped.value is None:
+        message = mapped.error.message if mapped.error else "file index map unbound"
+        return Result.fail("INDEX_INVALID", message, retryable=False)
+    selection = IndexSelection(
+        backend="file",
+        source_identity=_epoch_from_map(mapped.value, compiled_at_turn=compiled_at_turn),
+        health_verdict=verdict,
+        degradation_reason=reason,
+        unresolved_coverage=True,
+    )
+    return Result.success(ProductionIndexBinding(port=port, selection=selection))
+
+
+def select_production_index(
+    repo_path: str | Path,
+    *,
+    required: bool = False,
+    prior: IndexSelection | None = None,
+    refresh: bool = False,
+    compiled_at_turn: int = 0,
+    db_path: str | Path | None = None,
+    selection_enabled: bool = PRODUCTION_INDEX_SELECTION_ENABLED,
+    reject_unusable: bool = PRODUCTION_INDEX_REJECT_UNUSABLE,
+) -> Result[ProductionIndexBinding]:
+    """DIR-I5 five-state production index selection.
+
+    Returns a selected `IndexPort` plus an `IndexSelection` value. Failures are
+    typed, non-retryable, and never fabricate an empty graph or an epoch.
+    """
+    root = Path(repo_path).resolve()
+    lda_db = Path(db_path).resolve() if db_path is not None else root / ".lda" / "index.db"
+
+    if prior is not None and not refresh:
+        current_tree = workspace_tree_hash(root)
+        if current_tree is None or current_tree != prior.source_identity.tree_hash:
+            return Result.fail(
+                "INDEX_SUBJECT_CHANGED",
+                "workspace changed after index selection; refresh required",
+                retryable=False,
+            )
+
+    def required_unbound(message: str) -> Result[ProductionIndexBinding]:
+        return Result.fail("INDEX_REQUIRED_UNBOUND", message, retryable=False)
+
+    if not selection_enabled:
+        if required:
+            return required_unbound("production LDA selection disabled")
+        return _bind_file_index(
+            root,
+            verdict="optional_absent",
+            reason="lda_selection_disabled",
+            compiled_at_turn=compiled_at_turn,
+        )
+
+    lda_present = lda_db.is_file()
+    if not lda_present:
+        if required:
+            return required_unbound(f"required LDA index missing at {lda_db}")
+        return _bind_file_index(
+            root,
+            verdict="optional_absent",
+            reason="lda_absent",
+            compiled_at_turn=compiled_at_turn,
+        )
+
+    lda = LdaRepoIndex(db_path=lda_db)
+    indexed = lda.index(str(root), enforce_freshness=reject_unusable)
+    if indexed.ok:
+        mapped = lda.repo_map()
+        if mapped.ok and mapped.value is not None:
+            unresolved = bool(lda.unresolved_coverage or mapped.value.truncated)
+            selection = IndexSelection(
+                backend="lda",
+                source_identity=_epoch_from_map(
+                    mapped.value, compiled_at_turn=compiled_at_turn
+                ),
+                health_verdict="healthy_current",
+                degradation_reason=None,
+                unresolved_coverage=unresolved,
+            )
+            return Result.success(ProductionIndexBinding(port=lda, selection=selection))
+        cause = mapped.error.message if mapped.error else "LDA repo_map unbound"
+    else:
+        cause = indexed.error.message if indexed.error else "LDA index unusable"
+
+    if required:
+        return required_unbound(cause)
+    return _bind_file_index(
+        root,
+        verdict="present_invalid",
+        reason=cause,
+        compiled_at_turn=compiled_at_turn,
+    )
 
 
 class RuntimeBootstrap:
@@ -157,6 +301,16 @@ class RuntimeBootstrap:
         if selected_model is None:
             raise RuntimeError(f"no model adapter could be selected or resolved for profile {profile_id!r}")
 
+        index_result = select_production_index(repo)
+        if index_result.ok and index_result.value is not None:
+            selected_index = index_result.value.port
+            selected_selection = index_result.value.selection
+            selected_index_error: PortFailure | None = None
+        else:
+            selected_index = None
+            selected_selection = None
+            selected_index_error = index_result.error
+
         return RuntimeDependencies(
             model=selected_model,
             store=selected_store,
@@ -164,4 +318,7 @@ class RuntimeBootstrap:
             profile=profile,
             clock=clock or SystemClock(),
             cleanup=cleanup,
+            index=selected_index,
+            index_selection=selected_selection,
+            index_error=selected_index_error,
         )

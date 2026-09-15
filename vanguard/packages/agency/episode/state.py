@@ -16,9 +16,15 @@ from enum import Enum
 from typing import Any, Mapping, Sequence
 
 from ...domain.canonicalisation.digest import digest_of
+from .observation import (
+    ObservationRequest,
+    batch_descriptor,
+    parse_observation_requests,
+)
 
 __all__ = [
     "Episode",
+    "ObservationRequest",
     "Proposal",
     "ProposalKind",
     "ProposalMalformed",
@@ -65,6 +71,10 @@ class ProposalKind(str, Enum):
     """What the operator asked for this turn."""
 
     EFFECT = "effect"
+    #: N independent read-only requests settled as a partial order in one
+    #: turn (`A1`). Never carries a mutation: the single-writer rule and the
+    #: atomic-candidate invariant (`RUN-10`) are untouched by it.
+    OBSERVE = "observe"
     FINISH = "finish"
     ABSTAIN = "abstain"
     ESCALATE = "escalate"
@@ -94,10 +104,16 @@ class Proposal:
     reservation: Mapping[str, int] = field(default_factory=dict)
     note: str = ""
     idempotency_key: str | None = None
+    #: Populated only for `ProposalKind.OBSERVE`, and empty for every other
+    #: kind. A batch carries its requests here rather than in `args` so that
+    #: `action` stays exactly one verb for every proposal that has one.
+    observations: tuple[ObservationRequest, ...] = ()
 
     @property
     def descriptor(self) -> str:
         """A stable digest of the proposal, for no-progress detection."""
+        if self.kind is ProposalKind.OBSERVE:
+            return batch_descriptor(self.observations)
         return digest_of({
             "kind": self.kind.value,
             "action": self.action,
@@ -133,6 +149,22 @@ def parse_proposal(value: Any) -> Proposal:
             args=dict(args),
             note=str(value.get("note", "")),
             idempotency_key=_proposal_idempotency_key(value, args),
+        )
+
+    if kind is ProposalKind.OBSERVE:
+        # A batch is parsed here and settled by the engine one request at a
+        # time through `Kernel.dispatch`. Nothing about the parse grants a
+        # read: sink class, scope and budget remain kernel authority, and this
+        # parse only establishes that the provider sent a well-formed partial
+        # order (`CT-03`).
+        try:
+            requests = parse_observation_requests(value.get("requests"))
+        except ValueError as exc:
+            raise ProposalMalformed(str(exc)) from exc
+        return Proposal(
+            kind=kind,
+            observations=requests,
+            note=str(value.get("note", "")),
         )
 
     if kind is not ProposalKind.EFFECT:

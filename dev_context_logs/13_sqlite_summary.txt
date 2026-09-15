@@ -1,10 +1,96 @@
-Found 2 SQLite database(s).
+Found 4 SQLite database(s).
 
 ====================================================================================================
-DATABASE: benchmarks/frontier_v090/runs/tier1_lru_ttl_cache-vg-code-v090-react-control-9e64iiva/.vanguard/events.sqlite3
+DATABASE: .lda/index.db
+
+  TABLE: doc_sections
+  ROWS:    6146
+  COLUMNS: id, doc_id, heading, level, anchor, content, estimated_tokens, start_line, end_line
+
+  TABLE: documents
+  ROWS:    297
+  COLUMNS: id, entity_id, file_path, title, canonical_id, authority, summary, estimated_tokens, metadata_json
+
+  TABLE: entities
+  ROWS:    13533
+  COLUMNS: id, repo_id, kind, name, locator, authority, confidence_tier, metadata_json
+
+  TABLE: files
+  ROWS:    2099
+  COLUMNS: path, repo_id, language, content_hash, mtime, size_bytes, git_blob_sha, updated_at
+
+  TABLE: fts_search
+  ROWS:    175519
+  COLUMNS: entity_id, title, name, content, kind, locator
+
+  TABLE: fts_search_config
+  ROWS:    1
+  COLUMNS: k, v
+
+  TABLE: fts_search_content
+  ROWS:    175519
+  COLUMNS: id, c0, c1, c2, c3, c4, c5
+
+  TABLE: fts_search_data
+  ROWS:    9458
+  COLUMNS: id, block
+
+  TABLE: fts_search_docsize
+  ROWS:    175519
+  COLUMNS: id, sz
+
+  TABLE: fts_search_idx
+  ROWS:    4467
+  COLUMNS: segid, term, pgno
+
+  TABLE: index_runs
+  ROWS:    165
+  COLUMNS: id, repo_id, started_at, completed_at, files_indexed, symbols_found, relations_found, is_incremental, indexer_version, head_sha
+
+  TABLE: relations
+  ROWS:    91003
+  COLUMNS: id, source_id, target_id, kind, confidence_tier, evidence, source_path, location_json
+
+  TABLE: repositories
+  ROWS:    0
+  COLUMNS: id, name, root_path, metadata_json
+
+  TABLE: symbols
+  ROWS:    11306
+  COLUMNS: id, entity_id, name, qualified_name, kind, language, file_path, signature, docstring, start_line, end_line, metadata_json
+
+====================================================================================================
+DATABASE: .vanguard/events.sqlite3
 
   TABLE: events
-  ROWS:    244
+  ROWS:    33500
+  COLUMNS: global_id, event_id, seq, seq_str, run_id, episode_id, project_id, scope, occurred_at, recorded_at, principal, tenant_id, owner_id, confidentiality, retention_class, trainability, redaction_status, envelope_json, envelope_digest
+
+  TABLE: sqlite_sequence
+  ROWS:    1
+  COLUMNS: name, seq
+
+====================================================================================================
+DATABASE: .vanguard/runtime.db
+
+  TABLE: active_runs
+  ROWS:    4
+  COLUMNS: run_id, manifest_path, repo_path, status, created_at, updated_at
+
+  TABLE: checkpoints
+  ROWS:    0
+  COLUMNS: checkpoint_id, run_id, seq, digest, state_json, created_at
+
+  TABLE: command_inbox
+  ROWS:    17
+  COLUMNS: command_id, idempotency_key, name, run_id, actor, payload_json, status, receipt_json, created_at, updated_at
+
+  TABLE: event_outbox
+  ROWS:    0
+  COLUMNS: run_id, seq, event_id, event_json, created_at
+
+  TABLE: events
+  ROWS:    8
   COLUMNS: global_id, event_id, seq, seq_str, run_id, episode_id, project_id, scope, occurred_at, recorded_at, principal, tenant_id, owner_id, confidentiality, retention_class, trainability, redaction_status, envelope_json, envelope_digest
 
   TABLE: sqlite_sequence
@@ -23,7 +109,7 @@ DATABASE: tools/002_LLM_API_MOCK/lam.sqlite
   COLUMNS: episode_id, parent_id, task_id, depth, depth_label, budget_tokens, remaining_tokens, tokens_used, recorded_at
 
   TABLE: mock_calls
-  ROWS:    629
+  ROWS:    965
   COLUMNS: id, created_at, request_sha256, scenario_key, tier, requested_turn, returned_turn, reply_sha256, source_label, run_id, prompt_snippet, response_snippet, evidence_label, tokens, millis, prompt_tokens, completion_tokens, cost_usd
 
   TABLE: model_ceilings
@@ -31,7 +117,7 @@ DATABASE: tools/002_LLM_API_MOCK/lam.sqlite
   COLUMNS: model, band, ceiling_tier, evidence_trace_id, updated_at
 
   TABLE: scenarios
-  ROWS:    254
+  ROWS:    256
   COLUMNS: id, tier, title, atoms_used, n_files, n_turns, created_from, content_hash
 
   TABLE: sqlite_sequence
@@ -39,5 +125,5 @@ DATABASE: tools/002_LLM_API_MOCK/lam.sqlite
   COLUMNS: name, seq
 
   TABLE: traces
-  ROWS:    598
+  ROWS:    886
   COLUMNS: trace_id, scenario_id, backend, model, passed, llm_calls, prompt_tokens, completion_tokens, usd, wall_s, recorded_at, blob_path, is_downgrade, model_tier, scenario_tier, harness, cascade, episode_id, parent_id, task_id, depth, context_bytes, compression_ratio, memory_turns, skills_used, harness_version

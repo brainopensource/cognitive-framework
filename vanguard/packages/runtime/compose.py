@@ -72,6 +72,14 @@ BUDGET_DIMENSION: Mapping[str, str] = {
 STRUCTURAL_BUDGET_DIMENSION: Mapping[str, str] = {
     "turns": "turns",
     "depth": "depth",
+    # `contextWindowTokens` is the per-turn *prompt* ceiling the context
+    # compiler may fill. It is structural for the same reason `turns` is:
+    # nobody spends it, it bounds one turn's shape rather than the episode's
+    # consumption. It is deliberately NOT `tokens`, which is the conserved
+    # aggregate the governor debits -- one key cannot carry two conservation
+    # laws, and using `tokens` for both let a single maximal prompt legally
+    # consume an entire episode's declared spend.
+    "contextWindowTokens": "context_window_tokens",
 }
 
 

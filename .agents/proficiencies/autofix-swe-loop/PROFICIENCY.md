@@ -86,6 +86,22 @@ python3 .agents/proficiencies/autofix-swe-loop/scripts/autofix_harness.py \
   --json
 ```
 
+For an explicit local escalation after the first failed candidate, provide a
+second `llama-server` endpoint.  The harness accepts only `provider: local`;
+remote and paid providers are intentionally outside this proficiency's
+authority and require a separately admitted adapter, budget policy, and
+hermetic cassette coverage.
+
+```bash
+python3 .agents/proficiencies/autofix-swe-loop/scripts/autofix_harness.py \
+  --task "Repair a reproducible defect" \
+  --target-file "path/to/module.py" \
+  --model-path "$LOCAL_MODEL_PATH" \
+  --cascade \
+  --fallback-model-path "$LOCAL_AUTOFIX_FALLBACK_MODEL_PATH" \
+  --fallback-port 8081
+```
+
 ---
 
 ## 4. Telemetry & Output Schema

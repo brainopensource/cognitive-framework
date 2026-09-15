@@ -1,0 +1,81 @@
+[
+  {
+    "payload": {
+      "kind": "VerificationRecorded",
+      "reason": "VerificationRecorded",
+      "alertable": false,
+      "taskDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "compositionDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+      "workspaceDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+      "verificationSubjectDigest": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+      "argv": [
+        "python3",
+        "-m",
+        "unittest",
+        "test.smoke",
+        "-v"
+      ],
+      "exitCode": 0,
+      "observedTestCount": 7,
+      "resultArtifactDigest": "sha256:5555555555555555555555555555555555555555555555555555555555555555"
+    },
+    "canonical": "{\"alertable\":false,\"argv\":[\"python3\",\"-m\",\"unittest\",\"test.smoke\",\"-v\"],\"compositionDigest\":\"sha256:2222222222222222222222222222222222222222222222222222222222222222\",\"exitCode\":0,\"kind\":\"VerificationRecorded\",\"observedTestCount\":7,\"reason\":\"VerificationRecorded\",\"resultArtifactDigest\":\"sha256:5555555555555555555555555555555555555555555555555555555555555555\",\"taskDigest\":\"sha256:1111111111111111111111111111111111111111111111111111111111111111\",\"verificationSubjectDigest\":\"sha256:4444444444444444444444444444444444444444444444444444444444444444\",\"workspaceDigest\":\"sha256:3333333333333333333333333333333333333333333333333333333333333333\"}",
+    "digest": "sha256:19b10e738d4f8f26468a6438087cc1b1d0556fde6efe07c56b9b199f2eb89961"
+  },
+  {
+    "payload": {
+      "kind": "VerificationRecorded",
+      "reason": "VerificationRecorded",
+      "alertable": false,
+      "taskDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "compositionDigest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+      "workspaceDigest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+      "verificationSubjectDigest": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+      "argv": [
+        "just",
+        "check"
+      ],
+      "exitCode": 1,
+      "observedTestCount": null,
+      "resultArtifactDigest": null
+    },
+    "canonical": "{\"alertable\":false,\"argv\":[\"just\",\"check\"],\"compositionDigest\":\"sha256:2222222222222222222222222222222222222222222222222222222222222222\",\"exitCode\":1,\"kind\":\"VerificationRecorded\",\"observedTestCount\":null,\"reason\":\"VerificationRecorded\",\"resultArtifactDigest\":null,\"taskDigest\":\"sha256:1111111111111111111111111111111111111111111111111111111111111111\",\"verificationSubjectDigest\":\"sha256:7777777777777777777777777777777777777777777777777777777777777777\",\"workspaceDigest\":\"sha256:6666666666666666666666666666666666666666666666666666666666666666\"}",
+    "digest": "sha256:e909a3e3d6b2e3736fd40052d1b6332a175666343bcc665bbf456e4378d09fbf"
+  },
+  {
+    "payload": {
+      "kind": "ChangeSurfaceUpdated",
+      "reason": "ChangeSurfaceUpdated",
+      "alertable": false,
+      "taskDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "candidateDigest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+      "effectDescriptorDigest": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+      "changeSurface": [
+        "src/added.py",
+        "src/modified.py",
+        "src/removed.py"
+      ],
+      "deletedPaths": [
+        "src/removed.py"
+      ]
+    },
+    "canonical": "{\"alertable\":false,\"candidateDigest\":\"sha256:3333333333333333333333333333333333333333333333333333333333333333\",\"changeSurface\":[\"src/added.py\",\"src/modified.py\",\"src/removed.py\"],\"deletedPaths\":[\"src/removed.py\"],\"effectDescriptorDigest\":\"sha256:8888888888888888888888888888888888888888888888888888888888888888\",\"kind\":\"ChangeSurfaceUpdated\",\"reason\":\"ChangeSurfaceUpdated\",\"taskDigest\":\"sha256:1111111111111111111111111111111111111111111111111111111111111111\"}",
+    "digest": "sha256:87ff9fd8873ace136c795471be5fc320e0d6a3b036ccb11b282bfb0efa9e7324"
+  },
+  {
+    "payload": {
+      "kind": "ChangeSurfaceUpdated",
+      "reason": "ChangeSurfaceUpdated",
+      "alertable": false,
+      "taskDigest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "candidateDigest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+      "effectDescriptorDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "changeSurface": [
+        "src/only.py"
+      ],
+      "deletedPaths": []
+    },
+    "canonical": "{\"alertable\":false,\"candidateDigest\":\"sha256:9999999999999999999999999999999999999999999999999999999999999999\",\"changeSurface\":[\"src/only.py\"],\"deletedPaths\":[],\"effectDescriptorDigest\":\"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"kind\":\"ChangeSurfaceUpdated\",\"reason\":\"ChangeSurfaceUpdated\",\"taskDigest\":\"sha256:1111111111111111111111111111111111111111111111111111111111111111\"}",
+    "digest": "sha256:9010705c62d4e5fd55424c881a9b663eae13de1a042430a811af37d209af8ec9"
+  }
+]

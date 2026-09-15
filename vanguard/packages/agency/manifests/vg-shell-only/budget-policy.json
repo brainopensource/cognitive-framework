@@ -1,1 +1,8 @@
-{"tokens":"32000","wallClockMillis":"900000","effects":"64","evaluations":"8","depth":"1"}
+{
+  "tokens": "2097152",
+  "wallClockMillis": "900000",
+  "effects": "64",
+  "evaluations": "8",
+  "depth": "1",
+  "contextWindowTokens": "32000"
+}

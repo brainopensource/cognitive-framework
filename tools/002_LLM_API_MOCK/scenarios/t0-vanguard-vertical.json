@@ -64,7 +64,7 @@
     },
     {
       "tool_messages": 3,
-      "finish_reason": "tool_calls",
+      "finish_reason": "stop",
       "content": "The tests pass and the repair is complete.",
       "tool_calls": [
         {

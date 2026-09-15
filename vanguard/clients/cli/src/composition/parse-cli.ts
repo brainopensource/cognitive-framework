@@ -5,6 +5,12 @@ import { existsSync } from "node:fs";
 export type ParsedCli = CliOptions & {
   promptExplicit: boolean;
   budgetError?: string;
+  /**
+   * A flag-level parse refusal (T-97). Set when an argument cannot be bound to
+   * exactly one meaning. The caller MUST report it and exit non-zero before
+   * dispatching, so an ambiguous invocation never reaches a model call.
+   */
+  flagError?: string;
 };
 
 export const USAGE =
@@ -29,7 +35,41 @@ export const USAGE =
   "       --repo --workspace --prompt --brief --model --manifest --decision --socket-path --yes|-y\n" +
   "       --planner --provider --model-port --executor-band --recovery-model --profile\n" +
   "       --wal-path --store-path --token-budget --effect-budget --max-turns --max-episodes --max-replans\n" +
-  "       --budget-usd --allow-paid --interactive --benchmark --dry-plan --jsonl-out --json --question --help";
+  "       --budget-usd --allow-paid --interactive --benchmark --dry-plan --jsonl-out --json --question --help\n" +
+  "Short flags (the only ones bound; no short flag is inferred):\n" +
+  "       -h = --help    -y = --yes    -m = --model\n" +
+  "       `-m` is --model and nothing else. --manifest, --model-port, --max-turns,\n" +
+  "       --max-episodes and --max-replans have no short spelling; writing `-m` for\n" +
+  "       one of them is refused, never silently resolved to the other.";
+
+/**
+ * The complete short-flag binding table (T-97).
+ *
+ * `-m` was a live ambiguity: it reads equally well as `--model`, `--manifest`,
+ * `--model-port` or `--max-turns`, and the parser bound it to none of them --
+ * so `vg code . -m claude-3` dropped the flag and silently appended
+ * `claude-3` to the *task brief*. A wrong flag winning is bad; a flag value
+ * leaking into the prompt is worse, because nothing downstream can see that it
+ * happened.
+ *
+ * The resolution is explicit binding, not precedence: `-m` means `--model`,
+ * every losing spelling has no short form at all, and anything unbound is a
+ * parse error naming the long flag to write instead.
+ */
+export const SHORT_FLAG_BINDINGS: Readonly<Record<string, string>> = Object.freeze({
+  "-h": "--help",
+  "-y": "--yes",
+  "-m": "--model",
+});
+
+/** Long flags a short spelling could plausibly be mistaken for. */
+const SHORT_FLAG_NEAR_MISSES: Readonly<Record<string, readonly string[]>> = Object.freeze({
+  "-m": ["--model", "--manifest", "--model-port", "--max-turns", "--max-episodes", "--max-replans"],
+});
+
+function isShortFlag(arg: string): boolean {
+  return /^-[A-Za-z]$/.test(arg);
+}
 
 export function usage(): never {
   console.error(USAGE);
@@ -65,7 +105,26 @@ const VALUE_FLAGS = new Set([
   "--budget-usd",
   "--jsonl-out",
   "--question",
+  // `-m` carries a value exactly as `--model` does; binding it here is what
+  // stops its value being absorbed into the positional stream (T-97).
+  "-m",
 ]);
+
+/**
+ * Does this argv ask for help?
+ *
+ * Help is a question, not an execution: `vg code --help` must print usage and
+ * exit zero without composing a harness or calling a model. A `--help` sitting
+ * in the *value* position of a value flag is that flag's value, not a request.
+ */
+export function wantsHelp(args: readonly string[]): boolean {
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i]!;
+    if (arg === "--help" || arg === "-h") return true;
+    if (VALUE_FLAGS.has(arg)) i++;
+  }
+  return false;
+}
 
 export function parseCliOptions(args: string[]): ParsedCli {
   const value = (name: string) => {
@@ -119,6 +178,36 @@ export function parseCliOptions(args: string[]): ParsedCli {
     }
   }
 
+  // T-97. Bind short spellings explicitly, and refuse rather than guess.
+  // Order matters: a refusal is reported before any value is consumed, so an
+  // ambiguous invocation cannot reach a handler and call a model.
+  let flagError: string | undefined;
+  for (const arg of args) {
+    if (!isShortFlag(arg) || arg in SHORT_FLAG_BINDINGS) continue;
+    flagError =
+      `unknown short flag ${arg}; short flags are never inferred. ` +
+      `Bound short flags: ${Object.entries(SHORT_FLAG_BINDINGS)
+        .map(([short, long]) => `${short}=${long}`)
+        .join(", ")}. Write the long flag instead.`;
+    break;
+  }
+
+  for (const [short, long] of Object.entries(SHORT_FLAG_BINDINGS)) {
+    if (flagError || !VALUE_FLAGS.has(short) || !flag(short) || !flag(long)) continue;
+    const shortValue = value(short);
+    const longValue = value(long);
+    if (shortValue === longValue) continue;
+    const alternatives = SHORT_FLAG_NEAR_MISSES[short] ?? [long];
+    flagError =
+      `${short} and ${long} were both given with different values ` +
+      `(${short}=${shortValue ?? "<missing>"}, ${long}=${longValue ?? "<missing>"}). ` +
+      `${short} is bound to ${long} and to nothing else; it is never resolved ` +
+      `to ${alternatives.filter((name) => name !== long).join(", ")}. ` +
+      `Give one spelling.`;
+  }
+
+  const modelValue = value("--model") ?? value("-m");
+
   const promptExplicit = Boolean(prompt);
   const budgetRaw = value("--budget-usd");
   let budgetUsdMicros: number | undefined;
@@ -146,7 +235,7 @@ export function parseCliOptions(args: string[]): ParsedCli {
     resumeFrom: value("--resume"),
     checkpointEvery: Number(value("--checkpoint-every") ?? 2),
     replay: value("--replay"),
-    model: value("--model"),
+    model: modelValue,
     manifest: value("--manifest") ?? "vg-code-default",
     decision,
     autoApprove: flag("--yes") || flag("-y"),
@@ -154,7 +243,7 @@ export function parseCliOptions(args: string[]): ParsedCli {
     demo,
     demoScenario,
     promptExplicit,
-    plannerModel: value("--planner") ?? value("--model") ?? "openrouter/free",
+    plannerModel: value("--planner") ?? modelValue ?? "openrouter/free",
     modelPort: value("--model-port") ?? value("--provider"),
     storePath: value("--store-path") ?? value("--wal-path"),
     profile: value("--profile"),
@@ -173,6 +262,7 @@ export function parseCliOptions(args: string[]): ParsedCli {
     jsonlOut: value("--jsonl-out"),
     question: value("--question"),
     budgetError,
+    flagError,
   };
 }
 

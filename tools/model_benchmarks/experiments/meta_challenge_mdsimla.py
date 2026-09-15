@@ -92,7 +92,7 @@ EXPLAIN_SYSTEM_PROMPT = """You are the official Vanguard codebase comprehension 
 Analyze the codebase thoroughly and answer the user's architectural inquiry accurately.
 Explain code structure, control flow, design decisions, invariants, and implementation strategy clearly with direct citations."""
 
-REASONING_PROMPT = f"""[CONTEXT: NEXT BACKLOG TASK T-75 FROM docs/execution/tasks.md]
+REASONING_PROMPT = f"""[CONTEXT: NEXT BACKLOG TASK T-75 FROM docs/execution/main/tasks.md]
 {T75_SPEC}
 
 [PORT SPECIFICATION: vanguard/packages/ports/index.py]

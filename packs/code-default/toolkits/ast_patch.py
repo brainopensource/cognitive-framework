@@ -5,9 +5,17 @@ from __future__ import annotations
 import ast
 import difflib
 import hashlib
+import os
+import stat
 from pathlib import Path
 from typing import ClassVar, Mapping
 
+from vanguard.packages.adapters.environment.hunks import (
+    HunkFailure,
+    apply_unified_to_text,
+    declared_preimages,
+)
+from vanguard.packages.domain.canonicalisation.digest import digest_bytes
 from vanguard.packages.domain.wire.result import Err, Ok, Result
 from vanguard.packages.domain.wire.types_gen import (
     ArtifactRef,
@@ -43,6 +51,8 @@ class AstPatchToolkit:
                         "old": {"type": "string"},
                         "new": {"type": "string"},
                         "diff": {"type": "string"},
+                        "expected_preimage": {"type": "string"},
+                        "expected_preimages": {"type": "object"},
                     },
                 },
             )
@@ -59,12 +69,22 @@ class AstPatchToolkit:
         except ValueError:
             return Err("denied", "path escapes workspace")
         before = target.read_text(encoding="utf-8") if target.is_file() else ""
+        prior_mode = stat.S_IMODE(target.stat().st_mode) if target.is_file() else None
+        pre_digest = digest_bytes(before.encode("utf-8")) if target.is_file() else None
+        declared = declared_preimages(request.args)
+        want = declared.get(rel) or declared.get("")
+        if want and pre_digest and want != pre_digest:
+            return Err("conflict", f"stale preimage for {rel}")
         try:
-            after = _apply(before, request.args)
+            after = _apply(before, request.args, rel)
         except ValueError as exc:
             return Err("invalid_request", str(exc))
+        except HunkFailure as exc:
+            return Err(exc.kind, exc.message)
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(after, encoding="utf-8")
+        if prior_mode is not None:
+            os.chmod(target, prior_mode)
         structural = structural_diff(before, after, rel)
         text_diff = "\n".join(difflib.unified_diff(
             before.splitlines(), after.splitlines(), fromfile="a/" + rel, tofile="b/" + rel, lineterm="",
@@ -116,7 +136,7 @@ def _defs(source: str) -> set[str]:
     return names
 
 
-def _apply(before: str, args: Mapping[str, object]) -> str:
+def _apply(before: str, args: Mapping[str, object], path: str = "<patch>") -> str:
     replacement = args.get("replacement")
     qualified = args.get("qualified_name")
     node_kind = args.get("node_kind")
@@ -124,12 +144,18 @@ def _apply(before: str, args: Mapping[str, object]) -> str:
         return _anchored(before, node_kind, qualified, str(args.get("anchor_digest") or ""), replacement)
     old, new = args.get("old"), args.get("new")
     if isinstance(old, str) and isinstance(new, str):
-        if old not in before:
+        count = before.count(old)
+        if count == 0:
             raise ValueError("search text not found")
+        if count > 1:
+            raise ValueError("ambiguous search text matches multiple locations")
         return before.replace(old, new, 1)
     diff = args.get("diff")
     if isinstance(diff, str) and diff.strip():
-        return _unified(before, diff)
+        try:
+            return apply_unified_to_text(before, diff, path)
+        except HunkFailure as exc:
+            raise ValueError(exc.message) from exc
     content = args.get("content")
     if isinstance(content, str):
         return content
@@ -141,6 +167,8 @@ def _anchored(before: str, node_kind: str, qualified: str, anchor: str, replacem
         tree = ast.parse(before)
     except SyntaxError as exc:
         raise ValueError(f"cannot parse target: {exc}") from exc
+    named: list[str] = []
+    digest_hits: list[str] = []
     for node in ast.walk(tree):
         name = getattr(node, "name", None)
         kind = type(node).__name__
@@ -150,25 +178,14 @@ def _anchored(before: str, node_kind: str, qualified: str, anchor: str, replacem
         if segment is None:
             continue
         digest = "sha256:" + hashlib.sha256(segment.encode("utf-8")).hexdigest()
-        if anchor and anchor != digest:
-            raise ValueError("anchor digest mismatch")
-        return before.replace(segment, replacement.rstrip() + "\n", 1)
-    raise ValueError(f"anchor {qualified!r} not found")
-
-
-def _unified(before: str, diff: str) -> str:
-    lines = before.splitlines(keepends=True)
-    hunks = [line for line in diff.splitlines() if line[:1] in {"+", "-", " "} and not line.startswith(("+++", "---"))]
-    if not hunks:
-        raise ValueError("empty unified diff")
-    # Last-resort: treat '+' lines as the new file body when old is empty.
-    added = [line[1:] + "\n" for line in hunks if line.startswith("+")]
-    removed = [line[1:] for line in hunks if line.startswith("-")]
-    if not lines and added:
-        return "".join(added)
-    text = before
-    for gone in removed:
-        text = text.replace(gone, "", 1)
-    if added and not removed:
-        text = text + "".join(added)
-    return text
+        named.append(segment)
+        if not anchor or anchor == digest:
+            digest_hits.append(segment)
+    if not named:
+        raise ValueError(f"anchor {qualified!r} not found")
+    if anchor and not digest_hits:
+        raise ValueError("anchor digest mismatch")
+    matches = digest_hits
+    if len(matches) > 1:
+        raise ValueError(f"ambiguous anchor {qualified!r} matches {len(matches)} locations")
+    return before.replace(matches[0], replacement.rstrip() + "\n", 1)

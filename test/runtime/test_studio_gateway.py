@@ -30,7 +30,14 @@ class TestStudioGateway(unittest.TestCase):
         self.inbox = ServiceInboxStore(self.db_path)
         self.signer = OperatorSigner(key_id="op-test")
         self.authority = ApprovalAuthority({"op-test": self.signer.public_bytes})
-        self.service = RuntimeService(self.inbox, authority=self.authority)
+
+        def _harness_runner(ctx, srv):
+            while not ctx.is_cancelled:
+                time.sleep(0.01)
+
+        self.service = RuntimeService(
+            self.inbox, authority=self.authority, harness_runner=_harness_runner
+        )
 
         # Bind to ephemeral port on 127.0.0.1
         self.server = create_gateway(

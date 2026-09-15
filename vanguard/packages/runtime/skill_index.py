@@ -20,7 +20,17 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Iterable, Mapping, Sequence
 
-__all__ = ["SkillIndex", "SkillEntry", "build_skill_index"]
+from ..domain.artifacts.skill_index import SkillCard
+from ..domain.canonicalisation.digest import digest_of
+
+__all__ = [
+    "DYNAMIC_SELECTION_POLICY",
+    "SkillEntry",
+    "SkillIndex",
+    "SkillSelection",
+    "build_skill_index",
+    "select_skills_for_task",
+]
 
 #: `W12-A`. Characters, not tokens: the ceiling must be checkable without a
 #: tokenizer, and a character bound is conservative against every tokenizer.
@@ -92,3 +102,157 @@ def build_skill_index(
         used += cost
     return SkillIndex(entries=tuple(entries), dropped=tuple(dropped),
                       budget_chars=budget_chars)
+
+
+#: Identity of the selection rule, bound into every selection's provenance so a
+#: changed rule produces a different receipt instead of silently reusing one.
+DYNAMIC_SELECTION_POLICY = "skill-selection/task-overlap/v1"
+
+
+@dataclass(frozen=True, slots=True)
+class SkillSelection:
+    """One task-conditioned selection over the composed skill cards.
+
+    This is an **observation**, not an instruction: it says which skills look
+    relevant to this task and where their bodies live. Bodies stay on disk
+    behind `fs.read` exactly as they do in the frozen `L3` index, so selecting
+    a skill costs a line, not a document.
+
+    `omitted` names whole cards the ceiling excluded. Half a card is worse than
+    an absent one, because the agent cannot tell it is reading a fragment.
+    """
+
+    selected: tuple[SkillCard, ...] = ()
+    omitted: tuple[str, ...] = ()
+    budget_chars: int = DEFAULT_BUDGET_CHARS
+    query_digest: str = ""
+    policy_identity: str = DYNAMIC_SELECTION_POLICY
+
+    _HEADER = "Task-relevant skills (read bodyPath with fs.read when needed):"
+
+    def render(self) -> str:
+        if not self.selected:
+            return ""
+        lines = [self._HEADER]
+        lines.extend(card.index_line() for card in self.selected)
+        if self.omitted:
+            # The ceiling biting is itself an observation. An agent that cannot
+            # see the omission cannot tell a skill it never got from a skill
+            # that does not exist. The footer reports a *count*: listing every
+            # omitted id would grow without bound exactly when the budget is
+            # already exhausted.
+            lines.append(_omission_footer(len(self.omitted)))
+        return "\n".join(lines)
+
+    @property
+    def size_chars(self) -> int:
+        return len(self.render())
+
+    def digest(self) -> str:
+        """Provenance receipt: what was asked, by which rule, with what result."""
+        return digest_of({
+            "query": self.query_digest,
+            "policy": self.policy_identity,
+            "selected": [card.skill_id for card in self.selected],
+            "omitted": list(self.omitted),
+            "budget": self.budget_chars,
+        })
+
+
+def _omission_footer(count: int) -> str:
+    return f"(omitted for W12-A ceiling: {count} skill card(s))"
+
+
+#: Structural English words carry no evidence of relevance. Without this, every
+#: brief matches every card through words like "the" and "not", and the
+#: selector degenerates into a sort over the whole pack -- which is precisely
+#: what it exists to avoid. Deliberately tiny: this is a stopword list, not a
+#: language model, and a long one would start making topical judgements.
+_STOPWORDS = frozenset({
+    "a", "an", "and", "are", "as", "at", "be", "but", "by", "do", "for", "from",
+    "has", "have", "in", "into", "is", "it", "its", "not", "of", "on", "or",
+    "that", "the", "their", "then", "there", "this", "to", "via", "was", "were",
+    "when", "which", "with", "you", "your",
+})
+
+
+def _tokens(text: str) -> set[str]:
+    """Alphanumeric word set, lowercased, minus structural words.
+
+    No stemmer and no topical model: a heavier analyzer here would be a second
+    ranking authority living in the runtime. The selector only needs to tell
+    "mentions this" from "does not".
+    """
+    folded = "".join(char if char.isalnum() else " " for char in text.lower())
+    return {
+        part for part in folded.split()
+        if len(part) >= 2 and part not in _STOPWORDS
+    }
+
+
+def select_skills_for_task(
+    cards: Sequence[SkillCard],
+    task_text: str,
+    *,
+    budget_chars: int = DEFAULT_BUDGET_CHARS,
+) -> SkillSelection:
+    """Select the composed skill cards this task actually implicates (`W12-A`).
+
+    The stable index of *every* composed card rides the frozen `L3` prefix and
+    is not this function's business. This is the dynamic half: a per-task
+    observation that belongs in `L5`, because it changes with the brief and a
+    prefix that changed with the brief would not be a prefix.
+
+    A card scoring zero is **omitted, not ranked last**. Returning every card in
+    relevance order would make two different briefs select the same set, which
+    is a sort, not a selection.
+
+    Ties keep composition order, so the selection is a deterministic function of
+    (cards, task text, ceiling) and the same brief always yields the same
+    receipt.
+    """
+    if budget_chars < 1:
+        raise ValueError("skill selection budget must be positive")
+    wanted = _tokens(task_text)
+    if not wanted:
+        return SkillSelection(budget_chars=budget_chars,
+                              query_digest=digest_of({"task": task_text}))
+
+    scored: list[tuple[int, int, SkillCard]] = []
+    for position, card in enumerate(cards):
+        name_tokens = _tokens(f"{card.skill_id} {card.name}")
+        description_tokens = _tokens(card.description)
+        # A name match is the stronger signal: a description mentions many
+        # things a skill merely touches, a name says what it is.
+        score = 3 * len(wanted & name_tokens) + len(wanted & description_tokens)
+        if score > 0:
+            scored.append((score, position, card))
+    scored.sort(key=lambda item: (-item[0], item[1]))
+
+    def _fit(reserve: int) -> tuple[list[SkillCard], list[str]]:
+        chosen: list[SkillCard] = []
+        dropped: list[str] = []
+        used = len(SkillSelection._HEADER) + reserve
+        for _score, _position, candidate in scored:
+            cost = 1 + len(candidate.index_line())
+            if used + cost > budget_chars:
+                dropped.append(candidate.skill_id)
+                continue
+            chosen.append(candidate)
+            used += cost
+        return chosen, dropped
+
+    # First pass assumes everything fits, so a selection that needs no footer
+    # is never charged for one. If the ceiling does bite, refit against the
+    # worst-case footer width; the second pass can only select fewer, so the
+    # bound it was computed against still holds.
+    selected, omitted = _fit(0)
+    if omitted:
+        selected, omitted = _fit(1 + len(_omission_footer(len(scored))))
+
+    return SkillSelection(
+        selected=tuple(selected),
+        omitted=tuple(omitted),
+        budget_chars=budget_chars,
+        query_digest=digest_of({"task": task_text}),
+    )

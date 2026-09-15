@@ -13,11 +13,14 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import Mock
 
 from vanguard.packages.adapters.models.fake import FakeModel
 from vanguard.packages.adapters.stores.event_store import SqliteEventStore
 from vanguard.packages.apps.coding_max.facade import CodingMaxFacade
+from vanguard.packages.runtime import cli as runtime_cli, entrypoint, pack_catalog
 from vanguard.packages.ports.event_store import EventRange
+from vanguard.packages.runtime.app_service import ApplicationService
 
 ROOT = Path(__file__).resolve().parents[2]
 PRESETS_JSON = ROOT / "packs" / "code-default" / "presets.json"
@@ -188,6 +191,81 @@ class TheCeilingReachesTheLedger(unittest.TestCase):
         self.assertEqual(int(ceiling["turns"]), 8)
         self.assertEqual(int(started.payload["maxTurns"]), 6)
         self.assertEqual(started.payload["budgetAttenuation"], {"turns": 6})
+
+
+class OneCatalogReachesEverySurface(unittest.TestCase):
+    """T-102. CLI, stdio entrypoint, application service and facade agree.
+
+    The declared ceiling, the effective (attenuated) loop bound and the
+    manifest a preset selects are resolved once, in ``pack_catalog``. These
+    tests fail the moment any surface grows a second copy of that resolution.
+    """
+
+    def test_every_surface_resolves_the_same_manifest_and_bounds(self) -> None:
+        for preset in pack_catalog.preset_names():
+            declared = pack_catalog.resolve_preset(preset)
+            self.assertEqual(declared.turns, _catalog()[preset]["budget"]["turns"], preset)
+
+            manifests = {
+                "pack_catalog": pack_catalog.preset_manifest_path(preset),
+                "entrypoint": entrypoint._manifest("code", preset),
+            }
+            self.assertEqual(len(set(manifests.values())), 1, f"{preset}: {manifests}")
+
+            # Omitted attenuation resolves to the declared catalog everywhere.
+            effective = {
+                "pack_catalog": pack_catalog.turn_ceiling(preset, None),
+                "entrypoint": entrypoint._resolve_turn_ceiling(preset, None),
+            }
+            self.assertEqual(set(effective.values()), {declared.turns}, f"{preset}: {effective}")
+
+            # An explicit bound attenuates identically and never elevates.
+            attenuated = {
+                "pack_catalog": pack_catalog.turn_ceiling(preset, 3),
+                "entrypoint": entrypoint._resolve_turn_ceiling(preset, 3),
+            }
+            self.assertEqual(set(attenuated.values()), {min(3, declared.turns)}, preset)
+            self.assertEqual(pack_catalog.turn_ceiling(preset, 10_000), declared.turns, preset)
+
+    def test_the_facade_passes_the_catalog_manifest_and_bound_through(self) -> None:
+        for preset in pack_catalog.preset_names():
+            for explicit in (None, 3):
+                service = Mock(spec=ApplicationService)
+                CodingMaxFacade(service=service).run(
+                    "same input", preset=preset, max_turns=explicit)
+                call = service.run.call_args.kwargs
+                self.assertEqual(
+                    call["manifest_path"], pack_catalog.preset_manifest_path(preset))
+                self.assertEqual(
+                    call["max_turns"], pack_catalog.turn_ceiling(preset, explicit))
+
+    def test_no_surface_carries_a_second_preset_list_or_pack_loader(self) -> None:
+        surfaces = {
+            "facade": Path(inspect.getsourcefile(CodingMaxFacade)),
+            "entrypoint": Path(inspect.getsourcefile(entrypoint)),
+            "cli": Path(inspect.getsourcefile(runtime_cli)),
+        }
+        canonical = Path(inspect.getsourcefile(pack_catalog))
+        for name, path in surfaces.items():
+            source = path.read_text(encoding="utf-8")
+            self.assertFalse(
+                "spec_from_file_location" in source,
+                f"{name} ({path.name}): only pack_catalog may load the pack module")
+            for literal in ('"fast"', "'fast'"):
+                self.assertFalse(
+                    literal in source,
+                    f"{name} ({path.name}): preset names belong to the catalog, "
+                    "not to a second list on this surface")
+        self.assertIn("spec_from_file_location", canonical.read_text(encoding="utf-8"))
+
+    def test_the_unknown_preset_refusal_is_one_rule(self) -> None:
+        from vanguard.packages.apps.coding_max.facade import InvalidPreset
+
+        self.assertIs(InvalidPreset, pack_catalog.InvalidPreset)
+        with self.assertRaises(pack_catalog.InvalidPreset):
+            entrypoint._manifest("code", "turbo")
+        with self.assertRaises(pack_catalog.InvalidPreset):
+            CodingMaxFacade(service=Mock(spec=ApplicationService)).run("t", preset="turbo")
 
 
 if __name__ == "__main__":

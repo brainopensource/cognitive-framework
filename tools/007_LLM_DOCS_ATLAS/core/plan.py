@@ -45,11 +45,11 @@ def _resolve_doc_obligations(
 
     # Always include top normative laws
     obligations.append({
-        "document": "docs/execution/spec.md",
+        "document": "docs/execution/main/spec.md",
         "authority": "normative",
         "reason": "Compact Normative Law & System Specification of record",
     })
-    seen_docs.add("docs/execution/spec.md")
+    seen_docs.add("docs/execution/main/spec.md")
 
     # Map touched files to governing subsystem docs
     for tf in touched_files:

@@ -30,14 +30,17 @@ from vanguard.packages.agency.context import (
     CacheBreakpointCeilingExceeded,
     CompetencePriorRecorder,
     CompiledContext,
+    ContextBudget,
     ContextBudgetExceeded,
     ContextCompiler,
     Fragment,
+    Interaction,
     Layer,
     estimate_tokens,
 )
 
 from vanguard.packages.domain.artifacts.skill_index import SkillCard
+from vanguard.packages.domain.task_state import Evidence, MemoryView
 
 from test.kernel import fakes
 
@@ -186,6 +189,13 @@ class PrefixStability(unittest.TestCase):
         self.assertEqual(build().compile(brief="b").prefix_digest,
                          build(tool_schemas=reordered).compile(brief="b").prefix_digest)
 
+    def test_tool_list_order_is_stable_by_name(self) -> None:
+        reversed_tools = tuple(reversed(TOOLS))
+        self.assertNotEqual([tool["name"] for tool in reversed_tools],
+                            [tool["name"] for tool in TOOLS])
+        self.assertEqual(build().compile(brief="b").prefix_digest,
+                         build(tool_schemas=reversed_tools).compile(brief="b").prefix_digest)
+
 
 class CacheBreakpoints(unittest.TestCase):
     def test_breakpoints_sit_only_at_layer_one_three_and_four(self) -> None:
@@ -242,8 +252,8 @@ class Budget(unittest.TestCase):
             brief="fix the parser", dialogue=dialogue(30, size=400))
 
         self.assertEqual(compiled.layer_blocks(Layer.SYSTEM)[0].text, SYSTEM_CORE)
-        self.assertEqual(json.loads(compiled.layer_blocks(Layer.TOOLS)[0].text),
-                         [dict(tool) for tool in TOOLS])
+        expected_tools = sorted((dict(tool) for tool in TOOLS), key=lambda item: str(item.get("name") or ""))
+        self.assertEqual(json.loads(compiled.layer_blocks(Layer.TOOLS)[0].text), expected_tools)
         self.assertLessEqual(compiled.total_tokens, floor + 4)
 
     def test_dialogue_is_exhausted_before_a_task_note_is_dropped(self) -> None:
@@ -405,6 +415,85 @@ class Reach(unittest.TestCase):
             self.assertEqual(set(message), {"role", "content"})
         self.assertEqual([message["content"] for message in bundle["messages"]],
                          [message["content"] for message in bundle["layers"]])
+
+
+class BoundedSelection(unittest.TestCase):
+    """T-104: Prefix/compile_packet semantics on the existing compiler."""
+
+    SUBJECT = "sha256:" + "a" * 64
+    OTHER = "sha256:" + "b" * 64
+    ARTIFACT = "sha256:" + "c" * 64
+
+    def _view(self, *evidence: Evidence) -> MemoryView:
+        from vanguard.packages.domain.task_state import SemanticTaskState
+        task = SemanticTaskState(
+            objective="repair parser",
+            constraints=("keep tests green",),
+            plan=("inspect", "patch"),
+            next_action="inspect parser",
+            modified_files=("src/parser.py",),
+            last_verification={"ok": True},
+            remaining_budgets={"turns": 4},
+        )
+        return MemoryView.capture(
+            task, 3, lineage_id="lin-1", reducer_version="task-fold/1", evidence=evidence,
+        )
+
+    def test_stale_evidence_is_omitted_with_artifact_identity(self) -> None:
+        stale = Evidence("old", self.OTHER, self.ARTIFACT, "historic finding", "old body")
+        current = Evidence("now", self.SUBJECT, self.ARTIFACT, "current finding", "now body")
+        packet = build().compile_packet(
+            self._view(stale, current), self.SUBJECT,
+            budget=ContextBudget(window=8000, output=100, safety=50, recovery=50),
+        )
+        labels = [block.label for block in packet.blocks]
+        self.assertIn("now", labels)
+        self.assertNotIn("old", labels)
+        self.assertIn(("old", "stale"), packet.omissions)
+        self.assertTrue(any(block.label == "now" and current.finding in block.text for block in packet.blocks))
+
+    def test_oversize_body_is_elided_to_an_artifact_receipt(self) -> None:
+        huge = Evidence("huge", self.SUBJECT, self.ARTIFACT, "finding", "x" * 5000)
+        packet = build().compile_packet(
+            self._view(huge), self.SUBJECT,
+            budget=ContextBudget(window=8000, max_body_bytes=200),
+        )
+        text = " ".join(block.text for block in packet.blocks if block.label == "huge")
+        self.assertIn(self.ARTIFACT, text)
+        self.assertNotIn("x" * 5000, text)
+        self.assertIn(("huge", "body_elided"), packet.omissions)
+        self.assertLessEqual(packet.total_tokens, 8000)
+
+    def test_newest_interaction_is_preserved_and_oldest_may_drop(self) -> None:
+        turns = tuple(
+            Interaction(f"turn-{i}", "fs.read", "body-" + str(i), self.ARTIFACT)
+            for i in range(4)
+        )
+        packet = build().compile_packet(
+            self._view(), self.SUBJECT, turns,
+            budget=ContextBudget(window=8000, max_items=2),
+        )
+        labels = [block.label for block in packet.layer_blocks(Layer.DIALOGUE)
+                  if block.source != "goal-echo"]
+        self.assertEqual(labels[-1], "turn-3")
+        self.assertNotIn("turn-0", labels)
+        self.assertIn(("turn-0", "interaction_dropped"), packet.omissions)
+
+    def test_irreducible_overflow_raises_without_inference(self) -> None:
+        huge = Evidence("huge", self.SUBJECT, self.ARTIFACT, "finding", "x" * 400)
+        with self.assertRaises(ContextBudgetExceeded) as ctx:
+            build().compile_packet(
+                self._view(huge), self.SUBJECT,
+                (Interaction("newest", "fs.read", "y" * 400, self.ARTIFACT),),
+                budget=ContextBudget(window=40, output=10, safety=10, recovery=10, max_body_bytes=400),
+            )
+        self.assertIn("CONTEXT_BUDGET_EXCEEDED", str(ctx.exception))
+
+    def test_capability_cards_cannot_exceed_w12a(self) -> None:
+        with self.assertRaises(ValueError):
+            build().compile_packet(
+                self._view(), self.SUBJECT, capability_cards="c" * 4097,
+            )
 
 
 if __name__ == "__main__":

@@ -17,9 +17,9 @@ audience:
   - developer
   - architect
   - contributor
-analysis_subject_sha: 9fd444674bf3a97f2673ff36a5f5928ef046c574
-version: 0.9.1a1
-last_verified: 2026-09-03
+analysis_subject_sha: 6f4f39422abde27d31715560be790003681d4981
+version: 0.9.2
+last_verified: 2026-09-13
 evidence:
   - E-B-009
   - E-B-019
@@ -49,6 +49,65 @@ confidence: high
 
 ## Purpose
 This document is the canonical architecture owner for the end-to-end runtime lifecycle: manifest composition, execution profile binding, `RunPlan` identity construction, `HarnessSession` lifecycle management, turn engine handoff, and cold recovery entry points (`RF-94`).
+
+**DIR-D1 integration (63d12d83).** The existing HarnessSession/single-emitter
+boundary persists observed verification and whole change-surface facts before
+the next proposal, with append failure stopping inference/dispatch. Cold replay
+uses the existing task-state fold; no second session loop, state store or port
+was introduced. The event field contract is in [events](../reference/events.md).
+
+**T-131.6 product-route identity qualification.** `entrypoint.execute` reuses
+the existing candidate snapshot and DIR-D1 carriers to qualify the published
+receipt. Returned evidence, durable `VerificationRecorded`, exterior-oracle
+subject, task, composition and submitted workspace must name one tree; a
+same-named foreign tree, post-verification mutation, extra or deleted file, or
+stale artifact publishes `instrument_error` rather than green. This is
+publication qualification, not a second episode loop, tree algorithm, store or
+ledger writer. Session admission remains the B-owned mechanism.
+
+**Quarantine topology (Q-01; implementation not yet accepted).**
+`benchmarks/ladder/quarantine.py` and the commitments/exposure registry sit in the
+measurement tooling layer. Runtime task sets carry declarative identity only.
+The target separates development materialization/capture from curator-held
+holdout source; only an authorized measured slot receives source/task bytes,
+while the exterior oracle/reference remain outside the solver mount. Current
+guards allow missing/unknown identity and do not verify sealed content/authority;
+14 of 22 inventoried paths remain observed-unleased. Metadata diagnostics and
+`HOLDOUT UNACCEPTED` output must not be read as enforcement or corpus acceptance.
+T-133 correction and T-51 curator/store provisioning remain blockers.
+
+**Diagnostic composition boundary.** T-130 adapter normalization and durable-store
+inspection are tooling in `tools/diagnostics/write_landing_probe.py`, invoked by
+`python3 -m tools.diagnostics.write_landing_probe`. The probe still enters via
+`benchmarks.product_path.execute_product`; fixtures remain under
+`benchmarks/diagnostics/fixtures/`. Benchmarks gain no adapter import privilege,
+and no runtime re-export facade was introduced to hide the dependency. Its valid
+NOT_REPRODUCED result preserves the unresolved approval-path hypothesis; T-137 is
+authorized to discriminate that seam, not to change production approvals.
+
+**Read-only batch handoff.** A composed harness passes its `SinkRegistry` into the
+single production `EpisodeEngine`. One provider turn may therefore carry a bounded
+partial order of capabilities that the manifest itself classifies as
+`observation`; every member still crosses `Kernel.dispatch` with its own grant,
+reservation and receipt. Any unknown, mutating, process, spawn or terminal member
+refuses the whole batch before dispatch. Settlement is deterministic and sequential
+within dependency levels for the current control candidate; concurrent settlement
+is an optional optimization and cannot change ledger shape or turn accounting.
+
+**Task revision capability (T-139 / ADR-0107).** The `task.revise` capability (`_TaskReviseEffect`) binds
+to the privileged sink in `wiring.py` and is declared across `vg-code-*` manifests. `TaskRevisionHook` manages
+optimistic concurrency validation (`validate_task_revision_request`) against `expected_revision` / `expected_state_digest`
+and appends `PlanRevised` before the next prompt compilation via the sole ledger writer. Batches containing
+`task.revise` are strictly refused under the single-writer rule; invalid, stale, or widening requests leave authority
+and state completely unchanged.
+
+**Bootstrap and completion handoff (DIR-2 / ADR-0107).** `Runtime.execute_profiled` passes the bootstrap-selected
+`IndexPort`, its immutable `IndexSelection`, any typed binding failure, and the pure caller-admission policy into the
+single `HarnessSession`; the session does not silently replace an explicit bootstrap failure. Completion evidence is
+candidate-bound: changed public symbols obtain known callers from that selected index, and each caller must be current
+inspection evidence or part of the submitted change. A file fallback records unresolved coverage and cannot manufacture
+an empty caller graph. Shared Python syntax/stub inspection is adapter-side analysis: transactions own write preflight,
+while the session consumes the same structural facts for completion qualification.
 
 ## Scope
 - The unified construction pipeline: `compose` $	o$ `activate` $	o$ `begin_episode` $	o$ `execute_turns` $	o$ `teardown`.
@@ -174,9 +233,35 @@ readers remain available only when no current binding is requested.
 
 `D_H` must change when component bindings or durable context/admission policy change. Runtime evidence must retain enough identity to distinguish control and treatment configurations in benchmark comparisons.
 
+### 6.1 Truthful terminal projection
+
+`project_terminal_outcome` in `runtime/app_service.py` is the single product projection used by
+the generic entrypoint and `ApplicationService.run()`/`resume()`; the Coding Max facade receives
+the same value transitively through `RunResult`. It preserves the normalized terminal, including
+`abstained`, so refusal is never presented as completion. `project_trajectory_outcome` in
+`runtime/trajectory.py` is a separate narrowing projection shared by `mhf.trajectory/1` and `/2`:
+because their frozen enum has no `abstained` member, refusal projects to `aborted`, never
+`completed`. Both mappings concern termination only; acceptance/disposition remains on verdict.
+
+### 6.2 Environment patch apply (TC-E-061)
+
+`GitEnvironment.apply` and `FakeEnvironment.apply` share one in-memory hunk algorithm (`adapters/environment/hunks.py`). Context lines are the preimage anchor; hunk start lines are relocation hints, while declared old/new line counts must exactly match the hunk body. A declared `expected_preimage` / `expected_preimages` digest that does not match the current file fails closed as `conflict`. `str_replace` is the separate exact-edit strategy: its non-empty `old` text must occur exactly once byte-for-byte in the addressed file, and absent or non-unique preimages fail as `PATCH_PREIMAGE_MISMATCH`; it has no whitespace normalization or fuzzy fallback. It routes through `AtomicMultiFileTransactionManager`, so Python syntax failure leaves its preimage byte-identical. Bare `@@` hunks that match more than one location, empty or edit-free hunks, false line counts, and malformed hunk bodies are refused before any write. Multi-file applies still go through `AtomicMultiFileTransactionManager`: syntax preflight or a later-file refusal restores every original byte and file mode. Single-file Python syntax remains an observation receipt (S8-B-09), not a rollback. The pack toolkit `mhf.toolkit.ast-patch` reuses the same hunk/preimage rules; it is not a second patcher. CAS workspace promotion is not part of this path.
+
+### 6.3 Provider request accounting and cache observation
+
+`adapters/models/prompt_codec.py` is the single final serialization boundary used by the OpenRouter adapter. It counts the exact bytes posted, including native tool schemas, after route-specific cache controls are negotiated. A route may inject its exact tokenizer; without one, the codec uses the deliberately pessimistic byte-level BPE ceiling of one token per UTF-8 byte. It does not use an average character/token density as a capacity proof. Output, safety, and recovery reservations are deducted before admission and observed cache reuse never widens the input window. Cache usage remains a provider observation with explicit missingness, not a hit-rate or performance claim.
+
+The offline LAM adapter derives each scenario turn from actual tool-result fragments only. Context bookkeeping such as the goal echo does not advance a scenario. A scenario `finish` is validated against an advertised manifest finish schema when one exists; without such a schema it remains ordinary completion text for the generic proposal translator. This preserves deterministic read → patch → test → finish replay without granting an undeclared `agency.finish` verb.
+
+Custom execution-profile overrides accept JSON or YAML mappings. YAML parsing is provided by the locked PyYAML runtime dependency; unreadable, malformed, or security-widening profile inputs raise `ExecutionProfileError` before a profile is used.
+
 ## 7. Semantic Continuation
 
 Cold resume reconstructs safety/accounting state and reconciles effects. `SemanticTaskState` (`CodingTaskState` alias) in `vanguard/packages/domain/task_state.py` is the compact durable continuation value: task class, completion requirements, plan/discoveries/dead ends, implicated and modified files, route decisions, evidence-gated TODOs, latest verification, settled effects, next action, remaining budgets, monotonic revision, and backlog steps. Runtime `fold_task_state` is the only producer. Resume preserves the ledger `episode_id` and compiles σ into L4/L5; it must not dump `resume_state` JSON into frozen L3. This packet is derived state; missing evidence must fail explicitly or trigger regrounding rather than silently invent context.
+
+Ledger sequence and digest continuity are scoped by `project_id`. Every session projection that reduces an episode therefore queries by both `episode_id` and `project_id`; folding an episode label across independent projects would combine separate sequence-zero events and violate monotonic reconstruction. `ContextSelectionRecorded.selectionPolicyIdentity` carries the stable `ContextPacket` selector identity used by resume. The compiler's richer policy identity remains bound by `policyDigest` and `behaviorIdentity.contextPolicyDigest`; it is not recursively inserted into the next frozen packet prefix.
+
+The integrated long-session falsifier runs 104 scripted turns through the production `HarnessSession` path. Its resumed candidate crosses four separate Python interpreter processes, reconstructs solely from the SQLite ledger, reconciles a persisted open effect intent and compares the final semantic vector with an uninterrupted control. Test-only turn headroom does not alter the shipped fast, balanced or max preset bytes.
 
 ---
 
@@ -186,3 +271,5 @@ Cold resume reconstructs safety/accounting state and reconciles effects. `Semant
 - **Composition Root**: `vanguard/packages/runtime/compose.py` (`compose_harness`, `RunPlan`).
 - **Profile Resolution**: `vanguard/packages/runtime/profiles.py` (`resolve_profile`, `ExecutionProfile`).
 - **Lifecycle Integration Tests**: `test/contracts/test_b2_lifecycle_integration.py`, `test/falsifiers/test_rf94_single_runtime_authority.py`, `test/runtime/test_harness_session.py`.
+- **Terminal Projection Falsifiers**: `test/falsifiers/test_completion_gate_scope.py`, `test/apps/coding_max/test_coding_max_facade.py`, `test/contracts/test_trajectory_v2.py`.
+- **Patch Apply Falsifiers**: `test/falsifiers/test_d6_patch_context_anchoring.py`, `test/packs/code_default/test_ast_patch.py`, `test/adapters/test_str_replace_exact.py`, `test/runtime/test_atomic_multi_file_transaction.py`.

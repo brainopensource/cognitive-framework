@@ -48,7 +48,7 @@ AETHER / Vanguard is a Python-first, recursive-agency substrate designed for mat
       • Publishes the future M-OCT (Octopus Outer-Loop Meta-Orchestrator) horizon (W-OCT-1 to W-OCT-4: Mailbox protocol, CoordinationPlan DAG, Roadmap director, Swarm goal algebra) at a  
       conceptual gate level without premature pseudocode.                                                                                                                                  
   2. backlog.md [STABLE INVENTORY]:                                                                                                                                                        
-      • Categorized inventory of all capability packages (SUB-* Kernel, MEM-* Memory, DEL-* Delegation, TLS-* Tooling, CMX-* Coding Max, and OCT-* Octopus Swarms).                        
+      • Categorized inventory of all capability packages (`SUB-*` Kernel, `MEM-*` Memory, `DEL-*` Delegation, `TLS-*` Tooling, `CMX-*` Coding Max, and `OCT-*` Octopus Swarms).                        
       • Tracks package lifecycle state: PROPOSED, APPROVED, IN_PROGRESS, REVIEWING, DONE, BLOCKED, DEFERRED.                                                                               
   3. FEATURE_SPEC.md [ACTIVE DELTA SPEC] (The PRD / In-Flight Contract):                                                                                                                   
       • The authoritative typed delta contract for the active sprint ticket (W-092-F1 / CMX-09).                                                                                           

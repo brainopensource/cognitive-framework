@@ -2,48 +2,26 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "version": "1.0.0",
   "provenance": {
-    "branch": "feat/beta-release_electroweak-v091",
-    "head_sha": "7d46c7f5528cf23a7b6cfcd6e02ece4d7f32e6a0",
+    "branch": "feat/aether-framework-electroweak-canonical-agents",
+    "head_sha": "5224912f7fb121e0be2b723ffd2a6c605cfa9777",
     "tier2_evidence_directory": "dev_context_logs"
   },
   "environment": {
-    "Python": "Python 3.12.3",
-    "uv": "uv 0.5.9",
-    "Node": "v22.18.0",
-    "npm": "10.9.2",
-    "just": "NOT FOUND",
-    "make": "GNU Make 4.3"
+    "Python": "Python 3.12.14",
+    "uv": "uv 0.12.9 (x86_64-unknown-linux-gnu)",
+    "Node": "v24.20.0",
+    "npm": "11.19.0",
+    "just": "just 1.58.0",
+    "make": "GNU Make 4.4.1"
   },
   "validation_gates": {
     "overall_status": "PASS",
-    "tcb_budget": {
-      "status": "PASS",
-      "current_loc": 1384,
-      "files_count": 9,
-      "threshold_loc": 1438,
-      "headroom_loc": 54
-    },
+    "tcb_budget": {},
     "boundary_checks": {
-      "status": "PASS",
-      "files_checked": 597
+      "status": "UNKNOWN",
+      "files_checked": 0
     },
-    "test_suites": [
-      {
-        "total": 97,
-        "duration_s": 0.562,
-        "verdict": "OK"
-      },
-      {
-        "total": 121,
-        "duration_s": 1.459,
-        "verdict": "OK"
-      },
-      {
-        "total": 416,
-        "duration_s": 8.565,
-        "verdict": "OK (skipped=6)"
-      }
-    ],
+    "test_suites": [],
     "provenance_ref": "dev_context_logs/04_tests.txt"
   },
   "code_topology": {
@@ -52,43 +30,43 @@
         "name": "domain",
         "path": "vanguard/packages/domain",
         "role": "Pure value objects & wire contracts",
-        "files": 50,
-        "loc": 9541
+        "files": 55,
+        "loc": 10634
       },
       {
         "name": "ports",
         "path": "vanguard/packages/ports",
         "role": "Hexagonal port interfaces & SPI protocols",
         "files": 15,
-        "loc": 1510
+        "loc": 1582
       },
       {
         "name": "kernel",
         "path": "vanguard/packages/kernel",
         "role": "TCB 13-stage dispatch & capability attenuation",
         "files": 9,
-        "loc": 1767
+        "loc": 1769
       },
       {
         "name": "agency",
         "path": "vanguard/packages/agency",
         "role": "Turn loop, context compiler, subagent spawn",
-        "files": 15,
-        "loc": 3388
+        "files": 27,
+        "loc": 8300
       },
       {
         "name": "runtime",
         "path": "vanguard/packages/runtime",
         "role": "Lifecycle, composition, SQLite event store",
-        "files": 87,
-        "loc": 23391
+        "files": 93,
+        "loc": 27074
       },
       {
         "name": "adapters",
         "path": "vanguard/packages/adapters",
         "role": "Model adapters (OpenRouter/Ollama), bwrap sandbox",
-        "files": 56,
-        "loc": 10549
+        "files": 61,
+        "loc": 12350
       }
     ],
     "provenance_ref": "dev_context_logs/10_code_map.txt"
@@ -96,38 +74,38 @@
   "failure_signature_matrix": {
     "clusters": [
       {
-        "signature": "NO_PATCH",
-        "total_occurrences": 129,
+        "signature": "max_turns",
+        "total_occurrences": 531,
         "primary_area": "benchmarks"
       },
       {
-        "signature": "max_turns",
-        "total_occurrences": 89,
-        "primary_area": "vanguard"
-      },
-      {
-        "signature": "malformed",
-        "total_occurrences": 81,
-        "primary_area": "vanguard"
+        "signature": "NO_PATCH",
+        "total_occurrences": 185,
+        "primary_area": "benchmarks"
       },
       {
         "signature": "abandoned",
-        "total_occurrences": 45,
-        "primary_area": "benchmarks"
-      },
-      {
-        "signature": "COMPLETED",
-        "total_occurrences": 44,
+        "total_occurrences": 157,
         "primary_area": "benchmarks"
       },
       {
         "signature": "DATASET_INVALID",
-        "total_occurrences": 38,
+        "total_occurrences": 128,
+        "primary_area": "benchmarks"
+      },
+      {
+        "signature": "malformed",
+        "total_occurrences": 116,
+        "primary_area": "vanguard"
+      },
+      {
+        "signature": "COMPLETED",
+        "total_occurrences": 109,
         "primary_area": "benchmarks"
       },
       {
         "signature": "provider_error",
-        "total_occurrences": 1,
+        "total_occurrences": 4,
         "primary_area": "benchmarks"
       }
     ],
@@ -149,11 +127,101 @@
   },
   "database_catalogs": [
     {
-      "path": "benchmarks/frontier_v090/runs/tier1_lru_ttl_cache-vg-code-v090-react-control-9e64iiva/.vanguard/events.sqlite3",
+      "path": ".lda/index.db",
+      "tables": [
+        {
+          "name": "doc_sections",
+          "rows": "6146"
+        },
+        {
+          "name": "documents",
+          "rows": "297"
+        },
+        {
+          "name": "entities",
+          "rows": "13533"
+        },
+        {
+          "name": "files",
+          "rows": "2099"
+        },
+        {
+          "name": "fts_search",
+          "rows": "175519"
+        },
+        {
+          "name": "fts_search_config",
+          "rows": "1"
+        },
+        {
+          "name": "fts_search_content",
+          "rows": "175519"
+        },
+        {
+          "name": "fts_search_data",
+          "rows": "9458"
+        },
+        {
+          "name": "fts_search_docsize",
+          "rows": "175519"
+        },
+        {
+          "name": "fts_search_idx",
+          "rows": "4467"
+        },
+        {
+          "name": "index_runs",
+          "rows": "165"
+        },
+        {
+          "name": "relations",
+          "rows": "91003"
+        },
+        {
+          "name": "repositories",
+          "rows": "0"
+        },
+        {
+          "name": "symbols",
+          "rows": "11306"
+        }
+      ]
+    },
+    {
+      "path": ".vanguard/events.sqlite3",
       "tables": [
         {
           "name": "events",
-          "rows": "244"
+          "rows": "33500"
+        },
+        {
+          "name": "sqlite_sequence",
+          "rows": "1"
+        }
+      ]
+    },
+    {
+      "path": ".vanguard/runtime.db",
+      "tables": [
+        {
+          "name": "active_runs",
+          "rows": "4"
+        },
+        {
+          "name": "checkpoints",
+          "rows": "0"
+        },
+        {
+          "name": "command_inbox",
+          "rows": "17"
+        },
+        {
+          "name": "event_outbox",
+          "rows": "0"
+        },
+        {
+          "name": "events",
+          "rows": "8"
         },
         {
           "name": "sqlite_sequence",
@@ -174,7 +242,7 @@
         },
         {
           "name": "mock_calls",
-          "rows": "629"
+          "rows": "965"
         },
         {
           "name": "model_ceilings",
@@ -182,7 +250,7 @@
         },
         {
           "name": "scenarios",
-          "rows": "254"
+          "rows": "256"
         },
         {
           "name": "sqlite_sequence",
@@ -190,7 +258,7 @@
         },
         {
           "name": "traces",
-          "rows": "598"
+          "rows": "886"
         }
       ]
     }

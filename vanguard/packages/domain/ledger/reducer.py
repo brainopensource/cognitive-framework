@@ -580,6 +580,10 @@ def reduce_event(state: LedgerState, envelope: EventEnvelope) -> LedgerState:
             "removedTokens": payload.get("removedTokens"),
         })
 
+    elif kind == "ContextSelectionRecorded":
+        # Stream A (T-107): Per-turn token-bounded context selection audit trail.
+        pass
+
     elif kind == "RunRecovered":
         terminal_recovery = {
             "kind": "RunRecovered",

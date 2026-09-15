@@ -13,6 +13,7 @@ from typing import Any, Mapping, Sequence
 
 from vanguard.packages.agency import EpisodeEngine, RunTermination
 from vanguard.packages.agency.episode.tool_policy import derive_phase
+from vanguard.packages.kernel import Scope
 
 from test.kernel import fakes
 from vanguard.packages.runtime.protocol_pipeline import default_protocol_pipeline
@@ -59,6 +60,16 @@ class CaptureModel:
 
 def _engine(model: CaptureModel, *, tools: Sequence[Mapping[str, Any]] = (),
             preset_mode: str | None = None, **harness_kwargs: Any):
+    if "scope" not in harness_kwargs:
+        parent = fakes.parent_scope()
+        actions = harness_kwargs.get(
+            "held_actions", frozenset({"fs.read", "fs.write"}))
+        harness_kwargs["scope"] = Scope(
+            actions=actions,
+            resources=parent.resources,
+            constraints=parent.constraints,
+            depth=parent.depth,
+        )
     harness = fakes.build(**harness_kwargs)
     engine = EpisodeEngine(
         kernel=harness.kernel,
@@ -180,4 +191,3 @@ class TestToolPolicyWiring(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

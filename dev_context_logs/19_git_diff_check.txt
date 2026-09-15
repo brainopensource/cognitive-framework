@@ -1,16 +1,43 @@
 === GIT STATUS ===
-## feat/beta-release_electroweak-v091
-M  .generated/knowledge/catalog.jsonl
- M .gitignore
-M  Makefile
-M  benchmarks/frontier_v090/artifacts/dry_run_report.json
-M  benchmarks/frontier_v090/artifacts/preregistration.json
-AM collect_dev_context.sh
-MM tools/002_LLM_API_MOCK/lam.sqlite
-M  tools/lda/index.html
+## feat/aether-framework-electroweak-canonical-agents...origin/feat/aether-framework-electroweak-canonical-agents
+ M dev_context_logs/01_repo_state.txt
+ M dev_context_logs/02_commands.txt
+ M dev_context_logs/04_tests.txt
+ M dev_context_logs/05_lda_status.json
+ M dev_context_logs/06_lda_agentview.txt
+ M dev_context_logs/07_lda_harness_context.json
+ M dev_context_logs/08_lda_backend_context.json
+ M dev_context_logs/09_knowledge_indexes.txt
+ M dev_context_logs/10_code_map.txt
+ M dev_context_logs/11_code_stats.txt
+ M dev_context_logs/12_databases.txt
+ M dev_context_logs/13_sqlite_summary.txt
+ M dev_context_logs/14_lam_simulation.txt
+ M dev_context_logs/15_lam_tests.txt
+ M dev_context_logs/16_frontier_dryrun.txt
+ M dev_context_logs/17_benchmark_files.txt
+ M dev_context_logs/18_failure_evidence.txt
+ M dev_context_logs/19_git_diff_check.txt
+?? dev_context_logs/03_just_check.txt
+?? dev_context_logs/04_just_verify.txt
 
 === GIT DIFF STAT ===
- .gitignore                        |   4 +-
- collect_dev_context.sh            | 627 +++++++++++++++++++++++---------------
- tools/002_LLM_API_MOCK/lam.sqlite | Bin 458752 -> 458752 bytes
- 3 files changed, 386 insertions(+), 245 deletions(-)
+ dev_context_logs/01_repo_state.txt           |   43 +-
+ dev_context_logs/02_commands.txt             |  155 +-
+ dev_context_logs/04_tests.txt                |   76 +-
+ dev_context_logs/05_lda_status.json          |  126 +-
+ dev_context_logs/06_lda_agentview.txt        |  243 +-
+ dev_context_logs/07_lda_harness_context.json |  333 ++
+ dev_context_logs/08_lda_backend_context.json |  534 +++-
+ dev_context_logs/09_knowledge_indexes.txt    |  135 +-
+ dev_context_logs/10_code_map.txt             |  110 +-
+ dev_context_logs/11_code_stats.txt           |   79 +-
+ dev_context_logs/12_databases.txt            |    6 +-
+ dev_context_logs/13_sqlite_summary.txt       |   98 +-
+ dev_context_logs/14_lam_simulation.txt       | 4336 +-------------------------
+ dev_context_logs/15_lam_tests.txt            |   23 +-
+ dev_context_logs/16_frontier_dryrun.txt      |  190 +-
+ dev_context_logs/17_benchmark_files.txt      |  916 +++++-
+ dev_context_logs/18_failure_evidence.txt     | 1478 ++++++---
+ dev_context_logs/19_git_diff_check.txt       |   34 +-
+ 18 files changed, 3554 insertions(+), 5361 deletions(-)

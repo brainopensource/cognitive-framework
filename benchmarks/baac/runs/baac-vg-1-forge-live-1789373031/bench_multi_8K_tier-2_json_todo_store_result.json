@@ -1,0 +1,69 @@
+{
+  "challengeId": "bench_multi_8K_tier-2_json_todo_store",
+  "tier": "tier-2",
+  "scope": "multi",
+  "contextBracket": "8K",
+  "preset": "vg-1-forge",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "mode": "live",
+  "status": "FAIL",
+  "disposition": "failed",
+  "attribution": "LLM_COGNITIVE_ERROR",
+  "turns": 10,
+  "promptTokens": 17555,
+  "completionTokens": 2368,
+  "totalTokens": 19923,
+  "costUsd": 0.00119,
+  "durationSeconds": 100.21,
+  "changedFiles": [
+    "src/todo.py",
+    "verify_todo.py"
+  ],
+  "diffPatch": "--- a/todo.py\n+++ b/todo.py\n@@ -1,2 +1,68 @@\n+import json\n+import os\n+\n+\n class TodoStore:\n-    pass\n+    \"\"\"A todo store with JSON file persistence.\n+\n+    Todos are stored as dictionaries with keys: id, title, tags, completed.\n+    IDs are 1-based and monotonically increasing.\n+    \"\"\"\n+\n+    def __init__(self, path):\n+        self.path = path\n+        self._todos = {}\n+        self._next_id = 1\n+        self._load()\n+\n+    def _load(self):\n+        if os.path.exists(self.path):\n+            with open(self.path) as f:\n+                data = json.load(f)\n+            self._todos = {int(k): v for k, v in data.get(\"todos\", {}).items()}\n+            self._next_id = int(data.get(\"next_id\", 1))\n+        else:\n+            self._todos = {}\n+            self._next_id = 1\n+\n+    def _save(self):\n+        with open(self.path, \"w\") as f:\n+            json.dump(\n+                {\"next_id\": self._next_id, \"todos\": self._todos}, f, indent=2\n+            )\n+\n+    def add(self, title, tags=None):\n+        \"\"\"Add a new todo and return its 1-based id.\"\"\"\n+        if tags is None:\n+            tags = []\n+        todo_id = self._next_id\n+        self._next_id += 1\n+        self._todos[todo_id] = {\n+            \"id\": todo_id,\n+            \"title\": title,\n+            \"tags\": list(tags),\n+            \"completed\": False,\n+        }\n+        self._save()\n+        return todo_id\n+\n+    def complete(self, id):\n+        \"\"\"Mark the todo with the given id as completed.\"\"\"\n+        if id not in self._todos:\n+            raise KeyError(id)\n+        self._todos[id][\"completed\"] = True\n+        self._save()\n+\n+    def get(self, id):\n+        \"\"\"Return a copy of the todo with the given id.\"\"\"\n+        if id not in self._todos:\n+            raise KeyError(id)\n+        return dict(self._todos[id])\n+\n+    def list_pending(self):\n+        \"\"\"Return all todos that are not yet completed.\"\"\"\n+        return [dict(t) for t in self._todos.values() if not t[\"completed\"]]\n+\n+    def list_by_tag(self, tag):\n+        \"\"\"Return all todos that have the given tag.\"\"\"\n+        return [dict(t) for t in self._todos.values() if tag in t[\"tags\"]]",
+  "oracle": {
+    "passed": false,
+    "exitCode": 1,
+    "stdout": "",
+    "stderr": "test_todo (__main__.TestTodo.test_todo) ... ERROR\n\n======================================================================\nERROR: test_todo (__main__.TestTodo.test_todo)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/rock-dev/Coding/cognitive-framework/benchmarks/baac/challenges/tier-2/bench_multi_8K_tier-2_json_todo_store/oracle/verify.py\", line 9, in test_todo\n    store = TodoStore(tmp.name)\n            ^^^^^^^^^^^^^^^^^^^\n  File \"/tmp/baac-scratch-bench_multi_8K_tier-2_json_todo_store-pcje8s6k/src/todo.py\", line 16, in __init__\n    self._load()\n  File \"/tmp/baac-scratch-bench_multi_8K_tier-2_json_todo_store-pcje8s6k/src/todo.py\", line 21, in _load\n    data = json.load(f)\n           ^^^^^^^^^^^^\n  File \"/home/rock-dev/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/__init__.py\", line 293, in load\n    return loads(fp.read(),\n           ^^^^^^^^^^^^^^^^\n  File \"/home/rock-dev/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/__init__.py\", line 346, in loads\n    return _default_decoder.decode(s)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rock-dev/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/decoder.py\", line 338, in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rock-dev/.local/share/uv/python/cpython-3.12.14-linux-x86_64-gnu/lib/python3.12/json/decoder.py\", line 356, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\n\n----------------------------------------------------------------------\nRan 1 test in 0.002s\n\nFAILED (errors=1)\n",
+    "durationSeconds": 0.036,
+    "error": "test_todo (__main__.TestTodo.test_todo) ... ERROR\n\n======================================================================\nERROR: test_todo (__main__.TestTodo.test_todo)\n-------------------------------",
+    "assertionCount": 1,
+    "failingAssertions": [
+      "test_todo",
+      "(errors=1)"
+    ]
+  },
+  "aiJudgeScore": null,
+  "diagnosis": "test_todo (__main__.TestTodo.test_todo) ... ERROR\n\n======================================================================\nERROR: test_todo (__main__.TestTodo.test_todo)\n-------------------------------",
+  "metadata": {
+    "id": "bench_multi_8K_tier-2_json_todo_store",
+    "name": "JSON-Backed Todo Store",
+    "scope": "multi",
+    "context_bracket": "8K",
+    "tier": "tier-2",
+    "difficulty": 2,
+    "timeout_seconds": 35,
+    "entrypoint": "src/main.py",
+    "eval_type": "oracle",
+    "tags": [
+      "storage",
+      "json",
+      "multi_file"
+    ],
+    "metadata": {
+      "schema": "aether.baac.challenge/1"
+    },
+    "cli_args": {
+      "command": "run",
+      "preset": "vg-1-forge",
+      "mode": "live",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "tier": "tier-2",
+      "single": null,
+      "max_turns": 10,
+      "max_requests": 22,
+      "budget": 0.03,
+      "keep_scratch": false
+    }
+  }
+}

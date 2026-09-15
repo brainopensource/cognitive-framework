@@ -167,7 +167,7 @@ class TestLDASota3Phases(unittest.TestCase):
 
         # Documentation obligations
         self.assertTrue(len(plan["doc_obligations"]) >= 1)
-        self.assertEqual(plan["doc_obligations"][0]["document"], "docs/execution/spec.md")
+        self.assertEqual(plan["doc_obligations"][0]["document"], "docs/execution/main/spec.md")
 
         # Markdown output formatting
         md = plan["plan_markdown"]

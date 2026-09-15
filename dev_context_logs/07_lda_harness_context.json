@@ -1,0 +1,333 @@
+{
+  "authority": [],
+  "budget": 16000,
+  "callers": [],
+  "code": [
+    {
+      "authority": null,
+      "content": null,
+      "kind": "code_topology",
+      "locator": "lang:bash",
+      "provenance_ref": null,
+      "reason": "8 files (39783 bytes)",
+      "representation": "FULL",
+      "score": 15.0,
+      "title": "Language: bash",
+      "tokens": 30
+    },
+    {
+      "authority": null,
+      "content": null,
+      "kind": "code_topology",
+      "locator": "lang:javascript",
+      "provenance_ref": null,
+      "reason": "8 files (30887 bytes)",
+      "representation": "FULL",
+      "score": 15.0,
+      "title": "Language: javascript",
+      "tokens": 30
+    },
+    {
+      "authority": null,
+      "content": null,
+      "kind": "code_topology",
+      "locator": "lang:markdown",
+      "provenance_ref": null,
+      "reason": "285 files (4931598 bytes)",
+      "representation": "FULL",
+      "score": 15.0,
+      "title": "Language: markdown",
+      "tokens": 30
+    },
+    {
+      "authority": null,
+      "content": null,
+      "kind": "code_topology",
+      "locator": "lang:python",
+      "provenance_ref": null,
+      "reason": "1204 files (7687238 bytes)",
+      "representation": "FULL",
+      "score": 15.0,
+      "title": "Language: python",
+      "tokens": 30
+    },
+    {
+      "authority": null,
+      "content": null,
+      "kind": "code_topology",
+      "locator": "lang:rust",
+      "provenance_ref": null,
+      "reason": "1 files (1050 bytes)",
+      "representation": "FULL",
+      "score": 15.0,
+      "title": "Language: rust",
+      "tokens": 30
+    },
+    {
+      "authority": null,
+      "content": null,
+      "kind": "code_topology",
+      "locator": "lang:text",
+      "provenance_ref": null,
+      "reason": "191 files (197873 bytes)",
+      "representation": "FULL",
+      "score": 15.0,
+      "title": "Language: text",
+      "tokens": 30
+    },
+    {
+      "authority": null,
+      "content": null,
+      "kind": "code_topology",
+      "locator": "lang:typescript",
+      "provenance_ref": null,
+      "reason": "402 files (1650126 bytes)",
+      "representation": "FULL",
+      "score": 15.0,
+      "title": "Language: typescript",
+      "tokens": 30
+    }
+  ],
+  "documents": [
+    {
+      "authority": null,
+      "content": "### `test/packs/` \u2014 Domain Packs (27 tests)\nTests domain-specific packs (`packs/code-default/`):\n- `test_ast_patch.py`: Verifies AST-level code modification plugins.\n- `test_repo_map.py`: Verifies repository symbol indexing and map generation.\n- `test_single_planner.py`: Verifies single-step and hierarchical plan formulation.\n- `test_terminal_runner.py`: Verifies safe terminal command execution within the sandbox.\n- `test_walking_skeleton.py`: Verifies the end-to-end flow of compiling `harness.yaml` into a runnable coding agent.\n",
+      "kind": "doc_section",
+      "locator": "test/README.md#L137-L144",
+      "provenance_ref": null,
+      "reason": "Matching section in test/README.md [PPR Boost: 0.00]",
+      "representation": "SKELETON",
+      "score": 76.22540032331004,
+      "title": "`test/packs/` \u2014 Domain Packs (27 tests)",
+      "tokens": 59
+    },
+    {
+      "authority": null,
+      "content": null,
+      "kind": "doc_section",
+      "locator": "docs/research/coding_harness/research_agentic_runtime_systems_engineering.md#L2443-L2451",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "FULL",
+      "score": 95.06418127589404,
+      "title": "Coder Harness",
+      "tokens": 100
+    },
+    {
+      "authority": null,
+      "content": null,
+      "kind": "doc_section",
+      "locator": "docs/research/coding_harness/RESEARCH_harness_agentic_coding_builder_research_and_framework_B.md#L1596-L1651",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "FULL",
+      "score": 82.79515481184376,
+      "title": "41. HarnessManifest como programa declarativo de composi\u00e7\u00e3o",
+      "tokens": 100
+    },
+    {
+      "authority": null,
+      "content": null,
+      "kind": "doc_section",
+      "locator": "docs/research/coding_harness/research_harness_agentic_systems_engineering.md#L127-L160",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "FULL",
+      "score": 80.57138396198572,
+      "title": "H1 \u2014 Harness Engineering Is a Primary Performance Variable",
+      "tokens": 100
+    },
+    {
+      "authority": null,
+      "content": null,
+      "kind": "doc_section",
+      "locator": "docs/reports/reviews/electroweak_v092/plans/frontend_cursor_suggested_approach_plan.md#L267-L287",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "FULL",
+      "score": 73.56808638272848,
+      "title": "6. Coding-agent loop (what makes it \u201clike Claude Code\u201d)",
+      "tokens": 100
+    },
+    {
+      "authority": null,
+      "content": null,
+      "kind": "doc_section",
+      "locator": "tools/002_LLM_API_MOCK/docs/review_v020.md#L595-L621",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "FULL",
+      "score": 70.5076159628943,
+      "title": "6.7.6 Context engineering and retrieval",
+      "tokens": 100
+    },
+    {
+      "authority": null,
+      "content": null,
+      "kind": "doc_section",
+      "locator": "docs/research/features/HYDRA_MULTI_AGENT_TOPOLOGY_AND_EMERGENT_AGENCY.md#L1747-L1777",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "FULL",
+      "score": 70.40091559206134,
+      "title": "1. Complete Manifest: `vg-hydra`",
+      "tokens": 100
+    },
+    {
+      "authority": null,
+      "content": null,
+      "kind": "doc_section",
+      "locator": "docs/reports/reviews/electroweak_v092/gem/gem_sota_harness_evolution_report.md#L124-L134",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "FULL",
+      "score": 70.82360954118892,
+      "title": "Gap 1: Brittle Patch Application (`packs/code-default/toolkits/ast_patch.py`)",
+      "tokens": 100
+    },
+    {
+      "authority": null,
+      "content": null,
+      "kind": "doc_section",
+      "locator": "test/README.md#L137-L144",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "FULL",
+      "score": 64.22540032331004,
+      "title": "`test/packs/` \u2014 Domain Packs (27 tests)",
+      "tokens": 100
+    },
+    {
+      "authority": null,
+      "content": "### 6.7.6 Context engineering and retrieval\n\nImplement context policies as interchangeable modules:\n\n- recent-window history;\n- failure-focused history;\n- symbol-level retrieval;\n- dependency-graph retrieval;\n- test-name retrieval;\n- patch-history retrieval;\n- repository map summaries;\n- semantic search over prior successful repairs;\n- compaction with digest-preserving provenance.\n\nMeasure:\n\n- tokens per successful repair;\n- tool calls per successful repair;\n- context recall of the eventual changed symbols;\n- irrelevant-context ratio;\n- latency and cost;\n- regression rate after compaction;\n- performance under a fixed context budget.\n\nThe central question is not \u201cdoes retrieval help?\u201d but \u201cwhich information policy helps which task\nfamily under which budget, and does it generalize beyond the tasks used to tune it?\u201d\n",
+      "kind": "doc_section",
+      "locator": "tools/002_LLM_API_MOCK/docs/review_v020.md#L595-L621",
+      "provenance_ref": null,
+      "reason": "Matching section in tools/002_LLM_API_MOCK/docs/review_v020.md [PPR Boost: 0.00]",
+      "representation": "SKELETON",
+      "score": 74.5076159628943,
+      "title": "6.7.6 Context engineering and retrieval",
+      "tokens": 115
+    }
+  ],
+  "estimated_tokens": 1593,
+  "invariants": [
+    "Packet facts are bound to provenance.source_head_sha; on workspace HEAD mismatch, recompile the packet or fail closed \u2014 never serve stale line numbers or symbols.",
+    "Never serve stale facts: recompile on any index/workspace mismatch.",
+    "All privileged tool invocations must fail closed on widest authority.",
+    "Modifications must remain scoped strictly to the target modules."
+  ],
+  "omitted": [
+    {
+      "kind": "function",
+      "locator": ".agents/techniques/spec-driven-codegen/scripts/generate_grounded_patch.py#L64",
+      "reason": "budget_exhausted",
+      "score": 93.63,
+      "title": "retrieve_lda_context",
+      "tokens": 100
+    }
+  ],
+  "provenance": {
+    "indexer": "LDA Universal SOTA Engine",
+    "profile": "AETHER",
+    "ranking_channels": {
+      "dense_rrf": false,
+      "lexical_bm25": true,
+      "ppr_diffusion": true,
+      "stack_trace_frames": true
+    },
+    "schema_version": "1.2.0",
+    "source_head_sha": "5224912f7fb121e0be2b723ffd2a6c605cfa9777",
+    "strategy": "ppr_submodular",
+    "task_intent": "research",
+    "total_repo_files": 2099,
+    "total_repo_relations": 91003,
+    "total_repo_symbols": 11306
+  },
+  "symbols": [
+    {
+      "authority": null,
+      "content": "import ast\nimport json\nimport os\nimport re\nimport sys\nimport time\nimport urllib.request\nfrom dataclasses import dataclass, field, asdict\nfrom pathlib import Path\nfrom typing import Any, Callable\ndef load_api_key() -> str: ...\nclass ASTPreflightGate:\n    \"\"\"In-process syntax validation gate.\"\"\"\n    def validate_patch(code: str) -> tuple[bool, str]: ...\n\nclass SBFLLocalizer:\n    \"\"\"Spectrum-Based Fault Localization using Ochiai suspiciousness metric.\"\"\"\n    def calculate_ochiai(coverage_matrix: dict[int, list[str]], test_results: dict[str, bool]) -> list[tuple[int, float]]: ...\n\nclass AntiThrashingFSM:\n    \"\"\"State-hash loop detector.\"\"\"\n    def __init__(self, escalation_threshold: int): ...\n    def record_action(self, tool_name: str, args: dict[str, Any], workspace_hash: str) -> tuple[str, bool]: ...\n\nclass RadixContextCompiler:\n    \"\"\"Simulates L1-L5 prefix-stable context assembly with token accounting.\"\"\"\n    def __init__(self, system_core: str, repo_map: str): ...\n    def compile_prompt(self, issue: str, turn_obs: str) -> dict[str, Any]: ...\n\ndef run_live_agent_benchmark(model: str) -> dict[str, Any]: ...\ndef main(): ...",
+      "kind": "symbol",
+      "locator": "tools/skunkworks_benchmarks/run_skunkworks_benchmark.py#L45",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "SKELETON",
+      "score": 78.5710326326294,
+      "title": "tools.skunkworks_benchmarks.run_skunkworks_benchmark.ASTPreflightGate.validate_patch",
+      "tokens": 127
+    },
+    {
+      "authority": null,
+      "content": "from __future__ import annotations\nimport json\nimport unittest\nfrom pathlib import Path\nfrom vanguard.packages.domain import BUILTIN_KINDS, ArtifactFile, ArtifactKind, GraphError, KindRegistry, LogicalEdit, ManifestError, ManifestRegistry, Workspace, compose, parse_manifest\nfrom .schema_subset import SchemaSet\ndef _baseline_workspace() -> Workspace: ...\nclass ArtifactGraphContract(unittest.TestCase):\n    def test_kind_registry_is_extensible_without_changing_builtins(self) -> None: ...\n    def test_one_logical_edit_is_exactly_one_content_addressed_commit(self) -> None: ...\n    def test_rollback_is_itself_one_auditable_logical_commit(self) -> None: ...\n    def test_unregistered_kind_and_path_escape_fail_closed(self) -> None: ...\n    def test_dependency_edges_resolve_and_cycles_fail_closed(self) -> None: ...\n\nclass ShellBaselineContract(unittest.TestCase):\n    def setUp(self) -> None: ...\n    def test_baseline_files_validate_and_match_the_kind_registry(self) -> None: ...\n    def test_baseline_is_one_tool_with_no_hidden_extension_layers(self) -> None: ...\n    def test_composition_digest_is_episode_independent(self) -> None: ...\n    def test_unreferenced_artifact_does_not_change_composed_identity(self) -> None: ...\n    def test_baseline_runs_through_an_injected_deterministic_fake(self) -> None: ...\n\ndef _code_default_workspace() -> Workspace: \"\"\"Register exactly the components the manifest declares.\"\"\"\nclass CodeDefaultHarnessContract(unittest.TestCase):\n    \"\"\"REQ-HARN-001: vg-code-default product manifest with typed read/search/patch/test.\"\"\"\n    def setUp(self) -> None: ...\n    def test_code_default_files_validate_against_schema(self) -> None: ...\n    def test_code_default_contains_typed_tools_and_capabilities(self) -> None: ...\n    def test_composition_digest_is_episode_independent(self) -> None: ...\n    def test_registry_contains_both_manifests_and_protects_undeletable_control(self) -> None: ...",
+      "kind": "symbol",
+      "locator": "test/contracts/t7_artifact_graph.py#L181",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "SKELETON",
+      "score": 72.74175144750292,
+      "title": "test.contracts.t7_artifact_graph.CodeDefaultHarnessContract",
+      "tokens": 139
+    }
+  ],
+  "task": "improve the agentic coding harness context planning tools patching verification retries and benchmark performance",
+  "tests": [
+    {
+      "authority": null,
+      "content": "### `test/packs/` \u2014 Domain Packs (27 tests)\nTests domain-specific packs (`packs/code-default/`):\n- `test_ast_patch.py`: Verifies AST-level code modification plugins.\n- `test_repo_map.py`: Verifies repository symbol indexing and map generation.\n- `test_single_planner.py`: Verifies single-step and hierarchical plan formulation.\n- `test_terminal_runner.py`: Verifies safe terminal command execution within the sandbox.\n- `test_walking_skeleton.py`: Verifies the end-to-end flow of compiling `harness.yaml` into a runnable coding agent.\n",
+      "kind": "doc_section",
+      "locator": "test/README.md#L137-L144",
+      "provenance_ref": null,
+      "reason": "Matching section in test/README.md [PPR Boost: 0.00]",
+      "representation": "SKELETON",
+      "score": 76.22540032331004,
+      "title": "`test/packs/` \u2014 Domain Packs (27 tests)",
+      "tokens": 59
+    },
+    {
+      "authority": null,
+      "content": null,
+      "kind": "method",
+      "locator": "test/packs/code_default/test_single_planner.py#L35",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "FULL",
+      "score": 79.75311103886231,
+      "title": "test_plan_emits_patch_apply",
+      "tokens": 100
+    },
+    {
+      "authority": null,
+      "content": null,
+      "kind": "symbol",
+      "locator": "test/contracts/t7_artifact_graph.py#L181",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "FULL",
+      "score": 72.74175144750292,
+      "title": "test.contracts.t7_artifact_graph.CodeDefaultHarnessContract",
+      "tokens": 120
+    },
+    {
+      "authority": null,
+      "content": null,
+      "kind": "doc_section",
+      "locator": "test/README.md#L137-L144",
+      "provenance_ref": null,
+      "reason": "Task relevance & graph match [PPR Boost: 0.00]",
+      "representation": "FULL",
+      "score": 64.22540032331004,
+      "title": "`test/packs/` \u2014 Domain Packs (27 tests)",
+      "tokens": 100
+    }
+  ],
+  "token_accounting": {
+    "budget": 16000,
+    "document_tokens": 974,
+    "omitted_count": 1,
+    "symbol_tokens": 240,
+    "test_tokens": 379,
+    "used_tokens": 1593
+  },
+  "warnings": []
+}

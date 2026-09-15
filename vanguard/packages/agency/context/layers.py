@@ -25,10 +25,14 @@ __all__ = [
     "BREAKPOINT_LAYERS",
     "Block",
     "CompiledContext",
+    "ContextBudget",
     "Fragment",
     "GOAL_ECHO_SOURCE",
+    "Interaction",
     "Layer",
+    "NEWEST_INTERACTION_SOURCE",
     "PINNED_L4_SOURCES",
+    "PINNED_L5_SOURCES",
     "PREFIX_LAYERS",
     "ROLE_FOR_LAYER",
     "estimate_tokens",
@@ -80,6 +84,82 @@ PINNED_L4_SOURCES: frozenset[str] = frozenset({
 
 #: Short restatement of the brief at the tail of L5 (v2 §15 / T-36).
 GOAL_ECHO_SOURCE = "goal-echo"
+
+#: `NT-C04` — the newest *complete* action/result interaction. Compaction may
+#: elide its body into a receipt, because a receipt still says what ran and
+#: what it produced; it may never remove the interaction, because the newest
+#: result is the only evidence of the state the next action starts from.
+NEWEST_INTERACTION_SOURCE = "newest-interaction"
+
+#: L5 sources compaction may elide but must not drop (`NT-C04`).
+PINNED_L5_SOURCES: frozenset[str] = frozenset({
+    GOAL_ECHO_SOURCE,
+    NEWEST_INTERACTION_SOURCE,
+})
+
+#: `NT-C05` — the capability-card prefix is bounded in *characters*, so a
+#: route with a generous tokenizer cannot quietly enlarge it.
+CAPABILITY_PREFIX_CEILING = 4096
+
+
+def _natural(value: Any, field: str) -> int:
+    if type(value) is not int or value < 0:
+        raise ValueError(f"invalid {field}")
+    return value
+
+
+@dataclass(frozen=True, slots=True)
+class Interaction:
+    """One complete action/result unit retained or omitted as a whole."""
+
+    key: str
+    action: str
+    result: str
+    artifact: str
+
+    def __post_init__(self) -> None:
+        if not all((self.key, self.action, self.artifact)):
+            raise ValueError("interaction requires key, action, and artifact")
+        if not isinstance(self.result, str):
+            raise TypeError("interaction result must be a string")
+
+
+@dataclass(frozen=True, slots=True)
+class ContextBudget:
+    """Window reservation for NT-C03/C04 selection on the existing compiler."""
+
+    window: int
+    output: int = 0
+    safety: int = 0
+    recovery: int = 0
+    high_percent: int = 80
+    low_percent: int = 60
+    max_items: int = 64
+    max_body_bytes: int = 2000
+
+    def __post_init__(self) -> None:
+        for name in ("window", "output", "safety", "recovery", "high_percent",
+                     "low_percent", "max_items", "max_body_bytes"):
+            _natural(getattr(self, name), name.replace("_", " "))
+        if not 0 < self.low_percent < self.high_percent <= 100:
+            raise ValueError("invalid hysteresis watermarks")
+        if self.max_items <= 0 or self.max_body_bytes <= 0:
+            raise ValueError("item and body bounds must be positive")
+
+    @property
+    def usable(self) -> int:
+        result = self.window - self.output - self.safety - self.recovery
+        if result <= 0:
+            raise ValueError("no usable input budget")
+        return result
+
+    @property
+    def high_watermark(self) -> int:
+        return self.usable * self.high_percent // 100
+
+    @property
+    def low_watermark(self) -> int:
+        return self.usable * self.low_percent // 100
 
 
 def estimate_tokens(text: str) -> int:
@@ -178,10 +258,24 @@ class CompiledContext:
     #: after the budget ruled; the difference between the two is exactly what
     #: compaction removed, which no consumer can compute from `digest` alone.
     candidate_tokens: int = 0
+    omissions: tuple[tuple[str, str], ...] = ()
 
     @property
     def total_tokens(self) -> int:
         return sum(block.token_estimate for block in self.blocks)
+
+    @property
+    def goal_echo(self) -> str:
+        """The `L5` trailing goal echo, or empty when none was appended.
+
+        `NT-C05`: the objective and its constraints are restated *after* the
+        dynamic evidence, so no amount of late-turn untrusted text is the last
+        thing the model reads.
+        """
+        for block in reversed(self.blocks):
+            if block.source == GOAL_ECHO_SOURCE:
+                return block.text
+        return ""
 
     @property
     def total_bytes(self) -> int:

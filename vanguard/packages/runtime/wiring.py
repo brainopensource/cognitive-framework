@@ -65,6 +65,7 @@ class BindingContext:
     composition_digest: str = ""
     lineage: tuple[str, ...] = ()
     ledger: Any = None
+    index: Any = None
 
 class _EnvironmentEffect:
     """`kernel.EffectAdapter` over an `EnvironmentAdapter` (`ICD §4`).
@@ -172,9 +173,23 @@ def _effect_of(request: Any) -> EnvironmentRequest:
     """A kernel request read as an environment effect."""
     diff = request.args.get("diff") or request.args.get("patch")
     argv = request.args.get("argv") or request.args.get("command")
+    req_action = getattr(request, "action", "")
+    args_action = request.args.get("action")
+    if (
+        args_action == "str_replace"
+        or req_action == "str_replace"
+        or ("old" in request.args and "new" in request.args)
+    ):
+        action = "str_replace"
+    elif diff:
+        action = "patch"
+    elif argv:
+        action = "exec"
+    else:
+        action = "write"
     return EnvironmentRequest(
         verb=request.action,
-        action="patch" if diff else ("exec" if argv else "write"),
+        action=action,
         args=dict(request.args),
         patch=diff,
         command=tuple(argv) if argv else None,
@@ -238,6 +253,187 @@ def _spawn_effector(context: BindingContext) -> Any:
     )
 
 
+class _RepoIndexEffect:
+    """`kernel.EffectAdapter` over an `IndexPort` for repo.* query verbs."""
+
+    def __init__(self, name: str, index: Any) -> None:
+        self.name = name
+        self.verb = name
+        self._index = index
+
+    def healthy(self) -> bool:
+        return self._index is not None
+
+    def execute(self, request: Any) -> Any:
+        import json
+        from ..domain.canonicalisation.digest import digest_of
+        from ..kernel import AdapterOutcome, Occurrence
+
+        if self._index is None:
+            return AdapterOutcome(
+                status="error",
+                occurrence=Occurrence.DID_NOT_OCCUR,
+                actual_cost={"usd_micros": 0},
+                result_digest="sha256:" + "0" * 64,
+                detail="index is not available",
+            )
+        args = getattr(request, "args", {}) or {}
+        if not isinstance(args, Mapping):
+            args = {}
+        if self.name == "repo.search_symbols":
+            res = self._index.symbols(name=str(args.get("name", "")), path=str(args.get("path", "")))
+            if not res.ok:
+                return AdapterOutcome(
+                    status="error",
+                    occurrence=Occurrence.DID_NOT_OCCUR,
+                    actual_cost={"usd_micros": 0},
+                    result_digest="sha256:" + "0" * 64,
+                    detail=str(res.error.message if res.error else "symbols failed"),
+                )
+            detail = json.dumps([{"name": s.name, "kind": s.kind, "path": s.path, "line": s.line} for s in (res.value or ())])
+        elif self.name == "repo.get_callers":
+            res = self._index.callers(symbol=str(args.get("symbol", "")))
+            if not res.ok:
+                return AdapterOutcome(
+                    status="error",
+                    occurrence=Occurrence.DID_NOT_OCCUR,
+                    actual_cost={"usd_micros": 0},
+                    result_digest="sha256:" + "0" * 64,
+                    detail=str(res.error.message if res.error else "callers failed"),
+                )
+            detail = json.dumps([{"name": s.name, "kind": s.kind, "path": s.path, "line": s.line} for s in (res.value or ())])
+        elif self.name == "repo.get_dependencies":
+            res = self._index.dependencies(path=str(args.get("path", "")))
+            if not res.ok:
+                return AdapterOutcome(
+                    status="error",
+                    occurrence=Occurrence.DID_NOT_OCCUR,
+                    actual_cost={"usd_micros": 0},
+                    result_digest="sha256:" + "0" * 64,
+                    detail=str(res.error.message if res.error else "dependencies failed"),
+                )
+            detail = json.dumps([{"source": d.source, "target": d.target, "kind": d.kind} for d in (res.value or ())])
+        elif self.name == "repo.get_tests":
+            res = self._index.tests(path=str(args.get("path", "")))
+            if not res.ok:
+                return AdapterOutcome(
+                    status="error",
+                    occurrence=Occurrence.DID_NOT_OCCUR,
+                    actual_cost={"usd_micros": 0},
+                    result_digest="sha256:" + "0" * 64,
+                    detail=str(res.error.message if res.error else "tests failed"),
+                )
+            detail = json.dumps([{"test_path": t.test_path, "source_path": t.source_path} for t in (res.value or ())])
+        else:
+            return AdapterOutcome(
+                status="error",
+                occurrence=Occurrence.DID_NOT_OCCUR,
+                actual_cost={"usd_micros": 0},
+                result_digest="sha256:" + "0" * 64,
+                detail=f"unknown verb {self.name}",
+            )
+
+        digest = digest_of({"verb": self.name, "detail": detail})
+        return AdapterOutcome(
+            status="ok",
+            occurrence=Occurrence.OCCURRED,
+            actual_cost={"usd_micros": 0},
+            result_digest=digest,
+            detail=detail,
+        )
+
+
+def _repo_observer(context: BindingContext) -> Any:
+    index = getattr(context.index, "index", context.index)
+    return _RepoIndexEffect(context.verb, index)
+
+
+class _TaskReviseEffect:
+    """`kernel.EffectAdapter` for task.revise."""
+
+    def __init__(self, verb: str, context: BindingContext) -> None:
+        from .task_state import TaskRevisionHook
+        self.name = verb
+        self.verb = verb
+        self._context = context
+        self._hook = TaskRevisionHook(
+            emitter=context.emitter or context.ledger,
+            target_binding=(
+                context.project_id,
+                context.parent_episode_id or "",
+                "",
+                context.composition_digest,
+            ),
+        )
+
+    def healthy(self) -> bool:
+        return True
+
+    def execute(self, request: Any) -> Any:
+        import json
+        from ..domain.canonicalisation.digest import digest_of
+        from ..domain.task_state import TASK_REVISION_MALFORMED
+        from ..kernel import AdapterOutcome, Occurrence
+        from .task_state import fold_task_state
+
+        args = getattr(request, "args", {}) or {}
+        if not isinstance(args, Mapping):
+            args = {}
+
+        events = ()
+        if self._context.store is not None:
+            read_res = self._context.store.read()
+            if read_res.ok and read_res.value:
+                events = read_res.value
+        elif self._context.ledger is not None and hasattr(self._context.ledger, "events"):
+            events = self._context.ledger.events
+
+        current_state = fold_task_state(events, objective=getattr(request, "brief", "") or "task")
+
+        target_binding = (
+            getattr(request, "run_id", self._context.project_id),
+            self._context.parent_episode_id or "",
+            "",
+            self._context.composition_digest,
+        )
+
+        res = self._hook.handle_revision(
+            current_state,
+            args,
+            target_binding=target_binding,
+        )
+        if not res.ok or res.value is None:
+            err_kind = res.error.kind if res.error else TASK_REVISION_MALFORMED
+            err_msg = res.error.message if res.error else "revision failed"
+            return AdapterOutcome(
+                status="error",
+                occurrence=Occurrence.DID_NOT_OCCUR,
+                actual_cost={"usd_micros": 0},
+                result_digest="sha256:" + "0" * 64,
+                detail=f"{err_kind}: {err_msg}",
+            )
+
+        revision, receipt = res.value
+        detail = json.dumps({
+            "status": "ok",
+            "revisionId": revision.revision_id,
+            "revision": revision.expected_revision + 1,
+            "mutatedFields": list(revision.mutated_fields),
+        })
+        digest = digest_of({"verb": self.verb, "detail": detail})
+        return AdapterOutcome(
+            status="ok",
+            occurrence=Occurrence.OCCURRED,
+            actual_cost={"usd_micros": 0},
+            result_digest=digest,
+            detail=detail,
+        )
+
+
+def _task_revise_effector(context: BindingContext) -> Any:
+    return _TaskReviseEffect(context.verb, context)
+
+
 #: Verb → adapter. Adding a capability is a row here plus a manifest line
 #: (`01 §2`, open/closed); the dispatcher and the loop never change to
 #: accommodate one.
@@ -251,6 +447,11 @@ DEFAULT_BINDINGS: Mapping[str, EffectBinding] = {
     "agent.spawn": EffectBinding(_spawn_effector),
     "web.distill": EffectBinding(_environment_observer),
     "agency.finish": EffectBinding(_environment_effector),
+    "repo.search_symbols": EffectBinding(_repo_observer),
+    "repo.get_callers": EffectBinding(_repo_observer),
+    "repo.get_dependencies": EffectBinding(_repo_observer),
+    "repo.get_tests": EffectBinding(_repo_observer),
+    "task.revise": EffectBinding(_task_revise_effector),
 }
 
 
@@ -312,7 +513,9 @@ class _DomainProviderBridge:
         carries_diff = bool(declared(verb)) if callable(declared) else verb.endswith(
             self._DIFF_SUFFIXES)
         return EffectBinding(
-            lambda context: provider.create_adapter(context.verb, context.environment),
+            lambda context: provider.create_adapter(
+                context.verb, context.environment, index=context.index
+            ),
             carries_diff=carries_diff,
         )
 

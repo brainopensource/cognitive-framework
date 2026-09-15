@@ -8,4 +8,4 @@ Domain packs. The kernel stays domain-blind (`coding|ast|pytest` must not land i
 
 Older as-built harness configs still live under `vanguard/packages/agency/manifests/vg-*`.
 
-See [`../README.md`](../README.md) and [`../docs/execution/spec.md`](../docs/execution/spec.md).
+See [`../README.md`](../README.md) and [`../docs/execution/main/spec.md`](../docs/execution/main/spec.md).

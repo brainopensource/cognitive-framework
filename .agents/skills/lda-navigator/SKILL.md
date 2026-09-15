@@ -4,6 +4,8 @@ description: >-
   Universal Repository Intelligence & Navigation Protocol (LDA).
   Use when exploring the codebase, finding symbols, routing tasks,
   compiling token-budgeted context, checking documentation debt, or locating test falsifiers.
+version: "1.0.0"
+authority: operational
 ---
 
 # LDA Repository Intelligence & Context Navigation Protocol

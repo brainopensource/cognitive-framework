@@ -6,31 +6,37 @@ canonical_for: []
 status: living
 owner: architecture-review
 version: "0.9.3"
-last_verified: 2026-09-07
+last_verified: 2026-09-11
 supersedes: []
 superseded_by: null
 ---
 
 # Concrete Code Blueprints & Interface Contracts
 
+> [!IMPORTANT]
+> **Implementation Status & Lifecycle Classification (Current Head: `2989d57d` / September 2026)**:  
+> This document specifies Python reference algorithms and interface contracts. The table below standardizes the operational lifecycle status of each blueprint:
+>
+> | Blueprint Component | Production Owner | Lifecycle Status | Existing Production Integration |
+> |---|---|:---:|---|
+> | **MemoryView & Snapshot Values** (§2) | [`domain/`](../../../../vanguard/packages/domain/) | **`[DONE - INTEGRATED]`** | Delivered in [`domain/task_state.py`](../../../../vanguard/packages/domain/task_state.py) via `T-100` (Schema `aether.memory-view/1`, JCS canonicalization). |
+> | **Prefix Stability & Eviction** (§3) | [`agency/context/`](../../../../vanguard/packages/agency/context/) | **`[DONE - INTEGRATED]`** | Delivered in [`compiler.py`](../../../../vanguard/packages/agency/context/compiler.py) and [`compaction.py`](../../../../vanguard/packages/agency/context/compaction.py) via `T-104`, `T-77` (Schema `aether.context-policy/2`). |
+> | **Finite Recovery Controller** (§4) | [`agency/episode/`](../../../../vanguard/packages/agency/episode/) | **`[DONE - INTEGRATED]`** | Delivered in [`protocol_recovery.py`](../../../../vanguard/packages/agency/episode/protocol_recovery.py) via `T-106` (Schema `aether.recovery-state/1`). |
+> | **Transaction Preflight & Checks** (§5) | [`adapters/environment/`](../../../../vanguard/packages/adapters/environment/) | **`[DONE - INTEGRATED]`** | Delivered in [`transaction.py`](../../../../vanguard/packages/adapters/environment/transaction.py); atomic multi-file preflight passes 5/5 tests. |
+> | **Exact String Replace (`str_replace`)** (§5) | [`adapters/environment/`](../../../../vanguard/packages/adapters/environment/) | **`[NEXT - TODO]`** | Tracked as [`T-78`](../../../execution/main/tasks.md#L819) (`str_replace_exact.py`) under MS-CHANGE. |
+> | **Virtual CAS Workspace & Promotion** (§5) | [`ports/`](../../../../vanguard/packages/ports/), [`adapters/`](../../../../vanguard/packages/adapters/) | **`[PROPOSAL - EXPERIMENTAL]`** | Prototype algorithms for `CAS-01` ([`T-112`–`T-116`](../../../execution/main/tasks.md#L281-L309)); gated on MS-CONTROL closure. |
+> | **Controller Coding FSM** (§6) | [`packs/code-default/`](../../../../packs/code-default/) | **`[DONE - INTEGRATED]`** | Outcome-driven phase progression implemented across [`EpisodeEngine`](../../../../vanguard/packages/agency/episode/engine.py). |
+> | **Attenuated Read-Only Delegation** (§6) | [`agency/`](../../../../vanguard/packages/agency/), [`runtime/`](../../../../vanguard/packages/runtime/) | **`[PROPOSAL - EXPERIMENTAL]`** | Prototype delegation logic for `DEL-01` ([`T-117`–`T-118`](../../../execution/main/tasks.md#L316-L323)); gated on MS-CONTROL closure. |
+
 ## 1. Implementation boundary
 
-These blueprints implement the decisions in [Part 1](part1_modular_hardware_architecture.md) and [Part 2](part2_benchmark_mastery_and_topologies.md): one durable controller, bounded context, immutable evidence, safe candidate edits, and optional attenuated specialists. They are executable reference algorithms, not claims that the integrations are already deployed. The inspected HEAD is `8b7b642cf4d67ea06161590fc9e1af76d2b0cbe2`. LDA reports a healthy, populated index at that revision; the older checked-in development summary is not current evidence.
+These blueprints implement the decisions in [Part 1](part1_modular_hardware_architecture.md) and [Part 2](part2_benchmark_mastery_and_topologies.md): one durable controller, bounded context, immutable evidence, safe candidate edits, and optional attenuated specialists. They are executable reference algorithms, not claims that the integrations are already deployed. The inspected HEAD was `8b7b642cf4d67ea06161590fc9e1af76d2b0cbe2` (reconciled through candidate `2989d57d4d38c01eecdb7a5fbb6f125077f00e59`).
 
-All Python fences concatenate in document order into one Python 3.10+ reference module. Imports are shared deliberately. During production integration, split definitions by the ownership table below; do not copy the combined module into a lower layer. Ellipses appear only in abstract protocol methods. External effects are explicit dependencies, not empty implementations disguised as working storage, authorization, or execution.
-
-| Definitions | Production owner | Existing integration |
-| --- | --- | --- |
-| Memory and snapshot values | `domain/` | `SemanticTaskState`, JCS, artifact values |
-| Storage, verification, promotion protocols | `ports/` | Existing blob, evaluator, event-store seams |
-| Context selection and recovery | `agency/context/`, `agency/episode/` | Compiler and protocol-recovery policy |
-| Candidate editing and coding FSM | `packs/code-default/` | Toolkit, planner, completion policy |
-| Durable adapters and composition | `adapters/`, `runtime/` | Single writer and sandbox wiring |
-| Scope validation for delegation | `agency/` | Existing `attenuate()` and canonical spawn |
+All Python fences concatenate in document order into one Python 3.10+ reference module. Imports are shared deliberately. During production integration, split definitions by the ownership table above; do not copy the combined module into a lower layer. Ellipses appear only in abstract protocol methods. External effects are explicit dependencies, not empty implementations disguised as working storage, authorization, or execution.
 
 No kernel additions are proposed. Scope types are imported only by the agency section, never by public port definitions. Runtime owns event admission and composition; it does not execute subprocesses. Syntax inspection remains a pack-side operation. Storage and verification protocols below specify behavioral obligations beyond structural typing, and require adapter conformance before production activation.
 
-## 2. Working memory: canonical values and evidence
+## 2. Working memory: canonical values and evidence [DONE - INTEGRATED IN PRODUCTION]
 
 Reuse [SemanticTaskState](../../../../vanguard/packages/domain/task_state.py) rather than inventing another authoritative blackboard. Freeze its canonical bytes at a verified event cursor: the existing dataclass contains mappings, so a shallow frozen wrapper alone would not prevent mutation through nested dictionaries. The runtime reducer constructs this snapshot; a model may propose updates but cannot directly declare verified facts or change remaining budgets.
 
@@ -139,7 +145,7 @@ def critical_state(view: MemoryView) -> dict[str, Any]:
 
 The snapshot includes the complete existing task value: dead ends, discoveries, task DAG, recovery history, and route decisions survive serialization even when not all are displayed. `critical_state()` is a projection, not a writeback format. The caller selects relevant dead ends into source-bound evidence before compilation. If mandatory state cannot fit, compilation refuses instead of deleting a requirement. In production, loading also verifies the cursor's lineage and reducer version through the existing checkpoint machinery; a matching blob digest alone is not authorization.
 
-## 3. Prefix stability, serialization, and bounded eviction
+## 3. Prefix stability, serialization, and bounded eviction [DONE - INTEGRATED IN PRODUCTION]
 
 Freeze tool order as well as schema-key order. Static bytes identify a composition epoch; tool additions or changed system instructions require recomposition. Mutable facts follow that prefix. `PromptCodec` is implemented by the model adapter so budgeting counts the actual request representation, including native tool schemas and message overhead. Its `count()` must provide an exact count or a documented upper bound for the selected model, not a generic character heuristic.
 
@@ -266,7 +272,7 @@ The codec must serialize the same frozen prefix identically across requests, pre
 
 This compiler performs repeated exact counts for correctness. Bound the number and body size of input records before calling it; a production optimization may maintain cached costs, but must recount the final request. Its finite loops cannot make model calls or silently spend additional inference budget. Record the packet's digest and omission manifest through the existing runtime emitter before inference so context selection is attributable.
 
-## 4. Recovery: finite decisions across restart
+## 4. Recovery: finite decisions across restart [DONE - INTEGRATED IN PRODUCTION]
 
 Extend [protocol recovery](../../../../vanguard/packages/agency/episode/protocol_recovery.py), which already has semantic fingerprints and persisted retry counters. The following pure controller is a proposed bounded policy value to merge into that schema, not a second engine. It detects repeated outcomes and short cycles without treating transcript growth as progress. `progress_key` is produced from verified task facts, excluding clocks, model prose, and receipt identifiers. The workspace digest belongs in the attempt fingerprint; the progress key should not count repeatedly toggling the same patch as a new accomplishment.
 
@@ -380,7 +386,7 @@ The intervention allowance is cumulative for a task, including after restart or 
 
 `CONSULT` requests a bounded change of strategy, not more authority. If no consultation budget exists, the caller transitions to stop. Verification failures trigger regrounding or replanning immediately; they do not receive transport backoff. Provider failures with unknown usage retain their reservations until reconciliation. On terminal exhaustion the candidate manager below leaves the active subject intact.
 
-## 5. Multi-file editing: immutable candidates and atomic promotion
+## 5. Multi-file editing: immutable candidates and atomic promotion [HYBRID: PREFLIGHT DONE; CAS PROPOSAL]
 
 Refine Part 2's isolated-candidate design into a versioned workspace. A complete tree manifest includes regular files and directories, including modes and empty directories. Symlinks and special files are deliberately unsupported in this initial adapter contract and must be rejected during capture. Candidate preparation changes immutable values only. Failed verification therefore requires no destructive inverse edits: the active version remains byte-for-byte the baseline.
 
@@ -566,7 +572,7 @@ def transact(branch: str, baseline: str, edits: Sequence[Edit],
 
 Before promotion, exceptions, cancellation, failed assertions, and budget exhaustion leave the active head unchanged; immutable failed candidates can be retained for diagnosis. After successful promotion, a lost reply is reconciled with `committed(transaction)`, not an inverse write. A later rollback is a new compare-and-append operation targeting the old snapshot, preserving history and refusing to overwrite a concurrently advanced head. Process restart never reruns settled effects blindly. This gives a precise fail-closed guarantee while acknowledging that durability, isolated execution, and atomic compare-and-append require qualified concrete adapters.
 
-## 6. Controller FSM and attenuated delegation
+## 6. Controller FSM and attenuated delegation [HYBRID: CONTROLLER DONE; SPECIALISTS PROPOSAL]
 
 Retain the public `IPlanner` SPI. The following coding phase reducer sits behind it: proposals request actions, but only typed, fresh observations advance phases. In the integration, an accepted candidate transaction means all configured targeted and broader checks passed; `COMPLETE` still needs requirement coverage and generic completion admission. Greenfield tasks enter through baseline/harness establishment instead of requiring an invented failing test.
 
@@ -648,7 +654,7 @@ def delegate_readonly(parent: Scope, requested: Scope, role: str,
 
 The parent is the sole mutating controller. Specialists return artifact-bound findings, proposed hypotheses, and limitations; they cannot change the parent task projection, certify completion, or promote snapshots. The existing planner adapter decodes `PlannerPolicy.propose()` through the current proposal dialect, then uses kernel dispatch. JSON bytes are a transport boundary, not an authorization bypass. Preserve complete grant attenuation at dispatch even if the offered tool set was already narrowed in the prompt.
 
-## 7. Integration and falsification obligations
+## 7. Integration and falsification obligations [REFERENCE & VERIFIED STATUS]
 
 These algorithms intentionally separate pure policy from external mechanisms. Integrate memory capture through the existing task-state fold, prompt selection through `ContextCompiler`, recovery through `ProtocolRecoveryState`, transactions through the environment adapter, and phase decisions through the code pack. Preserve existing schema readers when adding fields. Version behavior-affecting policies in the composition identity and record every selection or transition through the runtime's single emitter.
 

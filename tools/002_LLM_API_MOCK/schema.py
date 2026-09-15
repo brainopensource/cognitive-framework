@@ -9,7 +9,7 @@ ALLOWED_ATOMS = ("view_file", "edit_file", "run_command", "grep_file", "list_dir
 # t0 calibration scenarios predate the canonical LAM atom vocabulary and use
 # their own explicitly frozen tool dialect. They are validated under this
 # separate schema; t1-t6 use ALLOWED_ATOMS.
-CALIBRATION_ATOMS = ("read", "patch", "test")
+CALIBRATION_ATOMS = ("read", "patch", "test", "finish")
 # The corpus deliberately contains calibration (t0), task (t1-t5), and
 # integration/deep (t6) scenarios. Freeze that vocabulary explicitly rather
 # than silently accepting arbitrary tier names.

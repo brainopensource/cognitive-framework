@@ -158,17 +158,23 @@ Pack plugins loaded by `vanguard.packages.runtime.registry` transition through s
 
 Topology definitions specify delegation roles and child agent routing:
 - `mhf.topology/1` declarations are compiled by `vanguard.packages.runtime.compose` and lowered to sequential child turn executions (`arch.orchestration.delegation`).
+ 
+ The production code pack registers three data-selected identities:
+ `vg-code-fast`, `vg-code-balanced`, and `vg-code-max`. They share the default
+ tool and policy artifacts while varying only bounded execution ceilings and
+ are compiled by the same runtime composition root. The single preset catalog
+ (`packs/code-default/presets.json`, loaded via `load.py`) binds frozen budget
+ ceilings (`fast`: $0.05/8t/16k, `balanced`: $0.15/20t/40k, `max`: $0.40/40t/96k);
+ `effective_limit()` enforces monotonic caller attenuation without elevating declared bounds,
+ and normalized behavioral identity includes selected plugins (`planner`, `context`).
+ 
+ ---
+ 
+ ## Implementation Evidence
+ 
+ - **Manifest Schema**: `schemas/mhf/manifest_v2.schema.json`.
+ - **Preset Catalog**: `packs/code-default/presets.json`, `packs/code-default/load.py`.
+ - **Runtime Composition**: `vanguard/packages/runtime/compose.py` (`compose_harness`, `FrozenComposition`).
+ - **Registry & Plugin Lifecycle**: `vanguard/packages/runtime/registry/`.
+ - **Contract Tests**: `test/contracts/test_manifest_v2_graph.py`, `test/agency/test_manifest_loader.py`, `test/packs/code_default/test_presets.py`, `test/apps/test_preset_budgets.py`.
 
-The production code pack registers three data-selected identities:
-`vg-code-fast`, `vg-code-balanced`, and `vg-code-max`. They share the default
-tool and policy artifacts while varying only bounded execution ceilings and
-are compiled by the same runtime composition root.
-
----
-
-## Implementation Evidence
-
-- **Manifest Schema**: `schemas/mhf/manifest_v2.schema.json`.
-- **Runtime Composition**: `vanguard/packages/runtime/compose.py` (`compose_harness`, `FrozenComposition`).
-- **Registry & Plugin Lifecycle**: `vanguard/packages/runtime/registry/`.
-- **Contract Tests**: `test/contracts/test_manifest_v2_graph.py`, `test/agency/test_manifest_loader.py`.

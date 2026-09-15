@@ -25,6 +25,7 @@ topic:
 
 - qwen/qwen3.7-flash
 - qwen/qwen3.6-35b-a3b
+- deepseek/deepseek-v4.1-flash
 - deepseek/deepseek-v4-flash-0731 (v2 coding)
 - deepseek/deepseek-v4-flash (v2 0423)
 - z-ai/glm-5.3-flash
@@ -40,6 +41,7 @@ topic:
 
 ## 2. Great Paid Models
 
+- tencent/hy4-preview
 - google/gemini-3.8-flash
 - deepseek/deepseek-v4-pro
 - moonshotai/kimi-k3

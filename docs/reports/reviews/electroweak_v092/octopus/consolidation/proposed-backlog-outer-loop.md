@@ -36,7 +36,7 @@ relationships:
 
 Each milestone gate is a package's own admission evidence, same discipline as the existing
 board: "mechanism presence is not closure; state transitions require empirical receipts"
-(quoting `docs/execution/backlog.md` §1's own invariant — this proposal inherits it, does not
+(quoting `docs/execution/main/backlog.md` §1's own invariant — this proposal inherits it, does not
 relax it).
 
 ## Package sequence (proposed; WIP=1 per lane, same convention as current board)
@@ -78,7 +78,7 @@ relax it).
 
 1. Owner reviews `arch.outer-loop.orchestrator` and this file.
 2. If accepted, file an ADR superseding nothing (additive layer, per the architecture doc §3)
-   and copy the accepted subset of the table above into the real `docs/execution/backlog.md`
-   and `docs/execution/milestones.md`, in that repo's own frontmatter/lifecycle format.
+   and copy the accepted subset of the table above into the real `docs/execution/main/backlog.md`
+   and `docs/execution/main/milestones.md`, in that repo's own frontmatter/lifecycle format.
 3. `docs/execution/active.md` picks up `ORCH-01` as the first authorized package once a lane
    has WIP capacity.

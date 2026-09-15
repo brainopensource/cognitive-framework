@@ -1,0 +1,77 @@
+{
+  "name": "task_revise",
+  "verb": "task.revise",
+  "description": "Revise mutable working state of the task (plan, strategy_steps, hypotheses, verification_plan, next_action, active_step_id, backlog). Cannot alter task objective, constraints, or remaining budgets.",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "expected_revision": {
+        "type": "integer",
+        "description": "Expected revision sequence number for optimistic concurrency control"
+      },
+      "expected_state_digest": {
+        "type": "string",
+        "description": "Expected state digest for optimistic concurrency control"
+      },
+      "mutated_fields": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "List of mutable fields being updated in this revision"
+      },
+      "plan": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Updated high-level plan steps"
+      },
+      "strategy_steps": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Updated technical strategy steps"
+      },
+      "hypotheses": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Current working hypotheses"
+      },
+      "verification_plan": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Executable verification and falsifier steps"
+      },
+      "next_action": {
+        "type": "string",
+        "description": "Immediate next action to be taken"
+      },
+      "active_step_id": {
+        "type": "string",
+        "description": "Identifier of the currently executing step"
+      },
+      "backlog": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Pending task backlog items"
+      },
+      "proposed_state": {
+        "type": "object",
+        "description": "Dictionary of proposed updates to mutable task state fields"
+      },
+      "rationale": {
+        "type": "string",
+        "description": "Explanation or justification for the task state revision"
+      }
+    },
+    "additionalProperties": false
+  }
+}

@@ -1,0 +1,651 @@
+{
+  "entrypoints": [
+    {
+      "guard": "required",
+      "kind": "score",
+      "path": "benchmarks/agentic_harness_matrix_benchmark.py"
+    },
+    {
+      "guard": "required",
+      "kind": "materialize",
+      "path": "benchmarks/baac/lib/runner.py"
+    },
+    {
+      "guard": "observed-unleased",
+      "kind": "loader",
+      "path": "benchmarks/baac/lib/state.py"
+    },
+    {
+      "guard": "observed-unleased",
+      "kind": "loader",
+      "path": "benchmarks/benchmark_needle_in_haystack.py"
+    },
+    {
+      "guard": "observed-unleased",
+      "kind": "loader",
+      "path": "tools/diagnostics/write_landing_probe.py"
+    },
+    {
+      "guard": "observed-unleased",
+      "kind": "loader",
+      "path": "benchmarks/gemini_multifile_benchmark/runner.py"
+    },
+    {
+      "guard": "observed-unleased",
+      "kind": "loader",
+      "path": "benchmarks/harness_comparison_bench.py"
+    },
+    {
+      "guard": "observed-unleased",
+      "kind": "loader",
+      "path": "benchmarks/ladder/l0_triad/runner.py"
+    },
+    {
+      "guard": "required",
+      "kind": "materialize",
+      "path": "benchmarks/ladder_runner.py"
+    },
+    {
+      "guard": "required",
+      "kind": "materialize",
+      "path": "benchmarks/product_path.py"
+    },
+    {
+      "guard": "observed-unleased",
+      "kind": "loader",
+      "path": "benchmarks/run_20_eval_suite.py"
+    },
+    {
+      "guard": "observed-unleased",
+      "kind": "loader",
+      "path": "benchmarks/run_3_hard_lda.py"
+    },
+    {
+      "guard": "observed-unleased",
+      "kind": "loader",
+      "path": "tools/002_LLM_API_MOCK/import_10_pro_corpus.py"
+    },
+    {
+      "guard": "observed-unleased",
+      "kind": "loader",
+      "path": "tools/002_LLM_API_MOCK/import_16_corpus.py"
+    },
+    {
+      "guard": "observed-unleased",
+      "kind": "loader",
+      "path": "tools/002_LLM_API_MOCK/import_pro_corpus.py"
+    },
+    {
+      "guard": "observed-unleased",
+      "kind": "loader",
+      "path": "tools/002_LLM_API_MOCK/import_swe_verified_repo.py"
+    },
+    {
+      "guard": "observed-unleased",
+      "kind": "capture",
+      "path": "tools/002_LLM_API_MOCK/importer.py"
+    },
+    {
+      "guard": "required",
+      "kind": "materialize",
+      "path": "tools/002_LLM_API_MOCK/live_coding.py"
+    },
+    {
+      "guard": "required",
+      "kind": "capture",
+      "path": "tools/002_LLM_API_MOCK/record.py"
+    },
+    {
+      "guard": "required",
+      "kind": "export",
+      "path": "tools/002_LLM_API_MOCK/store.py"
+    },
+    {
+      "guard": "observed-unleased",
+      "kind": "loader",
+      "path": "tools/telemetry/coding_lam.py"
+    },
+    {
+      "guard": "declarative",
+      "kind": "identity-declaration",
+      "path": "vanguard/packages/runtime/task_sets.py"
+    }
+  ],
+  "expected_holdout": {
+    "n": 30,
+    "strata": {
+      "brownfield": 10,
+      "greenfield": 11,
+      "multi_file": 5,
+      "multi_turn": 1,
+      "single_file": 3
+    }
+  },
+  "holdout_admission": "UNACCEPTED",
+  "irreversible_exposed_ids": [
+    "01_rate_limiter_lease_recovery",
+    "02_ed25519_signature_replay",
+    "03_trait_attenuation_escalation",
+    "04_sqlite_wal_checkpoint_lock",
+    "05_token_budget_clamping_drift",
+    "06_fts5_stale_index_rebuild",
+    "07_context_lost_in_middle_prune",
+    "08_evaluator_oracle_timeout",
+    "09_model_port_streaming_chunk_drop",
+    "10_graph_ppr_dangling_node_sink",
+    "11_kv_lru_ttl_store",
+    "12_finite_state_machine_workflow",
+    "13_semver_dependency_resolver",
+    "14_merkle_tree_ledger",
+    "15_circuit_breaker_proxy",
+    "16_submodular_greedy_packer",
+    "17_json_canonicalizer_jcs",
+    "18_token_bucket_hierarchical",
+    "19_markdown_section_splitter",
+    "20_event_bus_pubsub_channel",
+    "bench_single_2K_tier-1_calculator",
+    "bench_single_2K_tier-1_fib_cli",
+    "bench_single_2K_tier-1_string_dedupe",
+    "bench_greenfield_8K_tier-2_quiz_game",
+    "bench_multi_8K_tier-2_json_todo_store",
+    "bench_multi_16K_tier-3_event_bus",
+    "bench_multi_32K_tier-4_circuit_breaker",
+    "bench_multi_64K_tier-5_immutable_trie",
+    "bench_multi_128K_tier-6_mvcc_db",
+    "dogfood-01-multi-turn-file-rollback"
+  ],
+  "members": [
+    {
+      "aliases": [],
+      "attestation": "sha256:731928da8bc19c9aafca2cdc1c033c94d34488cf195bae796aa32b6c522947aa",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BENCHMARK_RESULT"
+      ],
+      "exposure_tombstone": "sha256:ef20fd8c8da98712ca12ecc74a604e4df9c6408c8f7c9e011bb6651983be974d",
+      "id": "01_rate_limiter_lease_recovery",
+      "oracle_fingerprint": "sha256:0acc0076f80e49b383d86b779f68400f08972a7284cc9f3e13bc223a5795f03e",
+      "origin": "sha256:1a4b5693009ce995ba0519f6794c5d123c94010f60a500a2ce18c6de9ae85b62",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:1a4b5693009ce995ba0519f6794c5d123c94010f60a500a2ce18c6de9ae85b62",
+      "stratum": "brownfield",
+      "task_fingerprint": "sha256:acf025c3769486276642fac793b770cc56ba3231255ecfa4619d073e94f2a537"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:d7d89c8aa63d66551669952b98ac51f2b16ef2b81a05bcfac6f36f05bfd1d0c4",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BENCHMARK_RESULT"
+      ],
+      "exposure_tombstone": "sha256:2a5ba67c899c9d179912faca66cad78f8a21bae178ca1e5d3a09ec69ab3ab80d",
+      "id": "02_ed25519_signature_replay",
+      "oracle_fingerprint": "sha256:2f139cd918654a52c096cee37d72dc96e8c447ec2640dd98a5fa96d8918a7a47",
+      "origin": "sha256:65346c79898ea638845294f5bc6b837181d3e95e912eb54c09e473d28f4d351a",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:65346c79898ea638845294f5bc6b837181d3e95e912eb54c09e473d28f4d351a",
+      "stratum": "brownfield",
+      "task_fingerprint": "sha256:8ffb2058cf8fe534a2ff554febece5a5afddbbecbc1f885d88fcac113639a84a"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:2c1c643041f8cde7a5cc2d25bb098962b62c990fb7c2f98bea99b4b327380ecf",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BENCHMARK_RESULT"
+      ],
+      "exposure_tombstone": "sha256:1c4c63dc2a8640b407aa49c9695dd95665a654448aadaeffd2214ed48a3bf4d7",
+      "id": "03_trait_attenuation_escalation",
+      "oracle_fingerprint": "sha256:d6b5392f4724fedb2c07f53f495d39cb1f8b325208cb4999c8dd594bab1c5789",
+      "origin": "sha256:3410435b84e605ea6543815c41fc7e72bdaf062bd69f1c877154030fba451b20",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:3410435b84e605ea6543815c41fc7e72bdaf062bd69f1c877154030fba451b20",
+      "stratum": "brownfield",
+      "task_fingerprint": "sha256:d81358f918fcc5f60291af89948075fb3486925cdee89ce7aabbb9e9393df91f"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:5c08e11ecf0c11a4d9a868629754019b2c815b46dba87f60c08d3c1f5b867f6d",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BENCHMARK_RESULT"
+      ],
+      "exposure_tombstone": "sha256:fed084a8f27d215e7e0e5331201ba446657ab7ae7e8d98eaf9cb663b7a0fae51",
+      "id": "04_sqlite_wal_checkpoint_lock",
+      "oracle_fingerprint": "sha256:bd3c94a2b27eafda0cf1443a8709a156d186161d48b380f2332e52b2fc2099a6",
+      "origin": "sha256:b73d55a7387163e609bda2ad78d2983bf0661740253780cee881bf96a7a909dd",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:b73d55a7387163e609bda2ad78d2983bf0661740253780cee881bf96a7a909dd",
+      "stratum": "brownfield",
+      "task_fingerprint": "sha256:b2d100d22ba6d5a3bd927d8968b8e221ec1488dab0323384c7995c07104aa059"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:e419b656e2eef21205e4a1d473deb7caa48e44c80f1f5ed74cd01fe3c8b0da67",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BENCHMARK_RESULT"
+      ],
+      "exposure_tombstone": "sha256:e335b4328e3894ad9a6f92736a1a8cac2e4bb6fd1efab78a9064a8b28027a0f4",
+      "id": "05_token_budget_clamping_drift",
+      "oracle_fingerprint": "sha256:18e8de5108f5f1eaa4cbc1b4f1451c58177fd809f81370baebc3d940ac5cb685",
+      "origin": "sha256:a5280a320100ff480c533046d472abe24f53307586ad5446fc815e7bc0544dd3",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:a5280a320100ff480c533046d472abe24f53307586ad5446fc815e7bc0544dd3",
+      "stratum": "brownfield",
+      "task_fingerprint": "sha256:7445ce4fd22c13f1c5cf459ac9bf0c28f331033bd1a4d212b8498f41fa286306"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:d81eaf69e6542a2c57d36bdfcdee2cb849192501a3857b61842659ec8bd7a1bc",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BENCHMARK_RESULT"
+      ],
+      "exposure_tombstone": "sha256:c5ddfbfc44b8db82cdfb6863704462c82263012ed3ba42a1dacf40c14af6e204",
+      "id": "06_fts5_stale_index_rebuild",
+      "oracle_fingerprint": "sha256:3263a2afddb4ebf36bd8fa8382e16de25a00e6aefef27c64951b4ded2738a4dc",
+      "origin": "sha256:4f456d7336dc0f623623d5959aba7ea2e94ee9301cd1c3d6f4e8148a7de66215",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:4f456d7336dc0f623623d5959aba7ea2e94ee9301cd1c3d6f4e8148a7de66215",
+      "stratum": "brownfield",
+      "task_fingerprint": "sha256:72364be52eb061a6f533be4315941ad7c954d980077c719a1092db111cde97fc"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:0b5c0e5141e789cd65b702e98c20ab1143511c153b5991abe7868c96902b45d4",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BENCHMARK_RESULT"
+      ],
+      "exposure_tombstone": "sha256:8a02e6226561343c5d2ec7073662835c28702cf961ca1a716abb34cdb7467bf8",
+      "id": "07_context_lost_in_middle_prune",
+      "oracle_fingerprint": "sha256:1c76a49187df39301300d51db02dce5b1d3da9b7c142be51326e8dc2d657d7db",
+      "origin": "sha256:9e8d9d12e0d68ed6cbe65171fa909d6ba7e3f50d20913613a3fe041767fa4f61",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:9e8d9d12e0d68ed6cbe65171fa909d6ba7e3f50d20913613a3fe041767fa4f61",
+      "stratum": "brownfield",
+      "task_fingerprint": "sha256:aafeefbebcbcfb61bf82bf7880a4daf64d8d2524b8036589e8f4e5b38bcf508a"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:5a7a55fc5f9a96dc47e4207540e5c3139d8ec21b7133fa9d462e5d14a807efb6",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BENCHMARK_RESULT"
+      ],
+      "exposure_tombstone": "sha256:dfc58a1ddedc7bc3c0da2146f86af8c6a9f417211956c397f082df0b6ab22213",
+      "id": "08_evaluator_oracle_timeout",
+      "oracle_fingerprint": "sha256:671e9e4c1d3caff776bccbc160bb752c352b2cf987310080fb87a6b13945080a",
+      "origin": "sha256:6b31d03663184c8e8773dfcc04d34b2f508598820ca230188a3b88b6c08b22ff",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:6b31d03663184c8e8773dfcc04d34b2f508598820ca230188a3b88b6c08b22ff",
+      "stratum": "brownfield",
+      "task_fingerprint": "sha256:24baa14973e58ffcd6e2a20d6c25a0ddba07bced52fb9cef06fa67c9e4f6d4e5"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:ceb276ff1f7e4a7f194621abd1fe146041fcd32d0636ccbe9eef11263f121a4d",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BENCHMARK_RESULT"
+      ],
+      "exposure_tombstone": "sha256:41fc8bbb5afc269b0d494678c160b769e01f128d6aef569f4955c83d69f43b97",
+      "id": "09_model_port_streaming_chunk_drop",
+      "oracle_fingerprint": "sha256:402c0a2172e48e80043ecb8e7136388266630ba1b7384b5bc3848441bd97845c",
+      "origin": "sha256:f78911bfb743428adb10f5974dded376bfb3a0a210f271e2f25f4555d9a0c81f",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:f78911bfb743428adb10f5974dded376bfb3a0a210f271e2f25f4555d9a0c81f",
+      "stratum": "brownfield",
+      "task_fingerprint": "sha256:4699b129cd48e6034cceb61d927fde680cae7863b57619a6bed58eeafc3d5adf"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:0244943defba024d900833f323b4acff24314225842f3722277938606f8c9e7c",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BENCHMARK_RESULT"
+      ],
+      "exposure_tombstone": "sha256:6c8a78abf72c430290d293bb043495938f0f3d8ab4de174f74ae55551982922f",
+      "id": "10_graph_ppr_dangling_node_sink",
+      "oracle_fingerprint": "sha256:614baae8b875d0bce3ba2d10f6ca6242e4726f210d629e052ecebabb2c25165a",
+      "origin": "sha256:bad2203e7164925e664053603802b62087438d1e0468468aec03f0f5a0694dce",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:bad2203e7164925e664053603802b62087438d1e0468468aec03f0f5a0694dce",
+      "stratum": "brownfield",
+      "task_fingerprint": "sha256:bf27cd4837cdaefe61e516941fc8acf3c0655ac2225040b55012673f55e2cfcd"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:a9ab4f4800dfa6ea0aef33cf634c767c9d7b7be49c9c46ea6f7bf21936eedde1",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BENCHMARK_RESULT"
+      ],
+      "exposure_tombstone": "sha256:0d974d9bf66d1885f95013770db92ab858a5a7f7ccb77681625b7c9b58ce97a6",
+      "id": "11_kv_lru_ttl_store",
+      "oracle_fingerprint": "sha256:69e5fd740e993e534e10fba970967733db6eaa6541d4f9f9add4993d074ac98b",
+      "origin": "sha256:ae9fed58a27027888d494e6d34cde81e52ac1f90c622755dff4c2241fbc51ad9",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:ae9fed58a27027888d494e6d34cde81e52ac1f90c622755dff4c2241fbc51ad9",
+      "stratum": "greenfield",
+      "task_fingerprint": "sha256:62de2d800d0669bf5b95bb7c8f2ab369472956d31eefb5f498889c5274293ca9"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:6f1f645ca825b954fded4a358302e6f699dcee3f60dfd4211e2b05b4885f1341",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BENCHMARK_RESULT"
+      ],
+      "exposure_tombstone": "sha256:46f20c8b807fefa34d0becd23356fce9f412c69ab0dc280f3cdad7fae058d368",
+      "id": "12_finite_state_machine_workflow",
+      "oracle_fingerprint": "sha256:1a9621d0284a6217827f6e1d1f8132aeead8282d1a02657ca8900465152c2ccb",
+      "origin": "sha256:7f4badb65964684dc65b2d62a1133819d21af2da23871dcc5a0097e8564ea68b",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:7f4badb65964684dc65b2d62a1133819d21af2da23871dcc5a0097e8564ea68b",
+      "stratum": "greenfield",
+      "task_fingerprint": "sha256:6358b8f29a447fc31355c99431ee5916baeb239428d85d8a44e1f52d8ccdcbe9"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:9c6fe9a6ce6d90eb8a54ba804baa181b83246e33d6bc70e07fd9bc197cf9c91d",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BENCHMARK_RESULT"
+      ],
+      "exposure_tombstone": "sha256:58110eeb45aec49e5cb19f9beb8f2775a2b1e0b6f3a5868e5f08d3ea3289efb7",
+      "id": "13_semver_dependency_resolver",
+      "oracle_fingerprint": "sha256:c436b7a004bb5b3b3f8f6d56465121b3ec67d4a926b7298bd62a214c43774559",
+      "origin": "sha256:e399b8d2024a6d0a8750eb36655dc9fd29276e50facccc90d009d1f3c2568197",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:e399b8d2024a6d0a8750eb36655dc9fd29276e50facccc90d009d1f3c2568197",
+      "stratum": "greenfield",
+      "task_fingerprint": "sha256:2edde9cf510d81411721923b856315b19853afb09f4c8b1d93fcd7f632f4695a"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:15c32db076dc7879b05b5aadaea054be4e496b2f50512e421e9c4212582c4e76",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BENCHMARK_RESULT"
+      ],
+      "exposure_tombstone": "sha256:741c40b5900e37d8f5222a194e11ce1159257c410764210cc26c1cad39b940fb",
+      "id": "14_merkle_tree_ledger",
+      "oracle_fingerprint": "sha256:ad514c3646a452cc4c4c243511e8c711dcc8657ba33d2ad4ce4c2a0345af0679",
+      "origin": "sha256:f91d71113f918c1bb2addc5f5bbf532132cdd4fd1364a9c5bf055cb0db2b3078",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:f91d71113f918c1bb2addc5f5bbf532132cdd4fd1364a9c5bf055cb0db2b3078",
+      "stratum": "greenfield",
+      "task_fingerprint": "sha256:e7c66032dd565fcaf02bf993cb59ddeea7d06de088c4abd5cc8b1d8004dd4e4d"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:ec21c454a4c3660384021e50eea147063be6756d85c2f3bc991604121577b1ed",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BENCHMARK_RESULT"
+      ],
+      "exposure_tombstone": "sha256:5797b842e0df973b85376695120adfecf89b52e6f80ad97a3f4c8bb82c2ee67b",
+      "id": "15_circuit_breaker_proxy",
+      "oracle_fingerprint": "sha256:ee3e512705c87924920afa44de0cd7c46b117bf96f965856122729fece6becad",
+      "origin": "sha256:d5c162bf873afacb0a5e84dca094076db6596dc604000323f9bf1a76609a6132",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:d5c162bf873afacb0a5e84dca094076db6596dc604000323f9bf1a76609a6132",
+      "stratum": "greenfield",
+      "task_fingerprint": "sha256:426337b39871e4c0eda2c945b94fe110d11c96b2d3ccebf0454961130bced7ee"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:e0d476c801ddeb49333b38163eb2ffb15c7ccc6781fe66a75b8e58bbac4ba4a3",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BENCHMARK_RESULT"
+      ],
+      "exposure_tombstone": "sha256:256156d653aedf0282a0a85f8bcd4c699c763c9d492c7470e498f02be81d03e0",
+      "id": "16_submodular_greedy_packer",
+      "oracle_fingerprint": "sha256:ac4e16f5031de7e4d4bec367c1c35ee8fd0205ac9f185997060f204ba9e0d46c",
+      "origin": "sha256:a4aeb55dd7a32ddfb24a8e35ad1532a1c73438866b8c2f9ba7e39451c1822b32",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:a4aeb55dd7a32ddfb24a8e35ad1532a1c73438866b8c2f9ba7e39451c1822b32",
+      "stratum": "greenfield",
+      "task_fingerprint": "sha256:273d17e932243f5f1d493774c86056ec6b8486234e8a92dca74906e36ac0579f"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:b45855b843630b96ac58b03169b652e62f00a37f3d2ecc1327f51a9c2406f664",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BENCHMARK_RESULT"
+      ],
+      "exposure_tombstone": "sha256:4c12958de90271863a279fb5d3c6e5318bcaeb06000732061afdbcbe5ace47cb",
+      "id": "17_json_canonicalizer_jcs",
+      "oracle_fingerprint": "sha256:09a8b089155630322a01e1c9187df14da55a2ac7cd76c3359dbcbaccbd47fe2a",
+      "origin": "sha256:c7abf47bba31ff5a282a0aaa06a24d9113eff6b8872878f53341a7773e918c82",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:c7abf47bba31ff5a282a0aaa06a24d9113eff6b8872878f53341a7773e918c82",
+      "stratum": "greenfield",
+      "task_fingerprint": "sha256:78d785b931fc4d67e0362aa57ec85455d6b8230d2764771fb14a75c133cb7c89"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:ee751f6839aafb7875f8bd9f7a945688b807e6d9851e8baf1d1c953b2f0dd4e7",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BENCHMARK_RESULT"
+      ],
+      "exposure_tombstone": "sha256:8e3857c76242f2bfa064cab8904c4abcff149186e904fb1486fac5e5dcb8994a",
+      "id": "18_token_bucket_hierarchical",
+      "oracle_fingerprint": "sha256:11bf89beb4f1edb99240673157b8aca0e57c42e8b6cfd813dcefd72ac02a245e",
+      "origin": "sha256:9437f6b9ca6e32619a1894eee9b12d56cea7b671f108ebc8a8e19f2d0d870338",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:9437f6b9ca6e32619a1894eee9b12d56cea7b671f108ebc8a8e19f2d0d870338",
+      "stratum": "greenfield",
+      "task_fingerprint": "sha256:bba137b5761644af8a6842d1228ef896d35fb42dc2bc8a844d9db78467464362"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:547425171b6e2bba6da3a7464535ca317fab305138eb88458e897ee1a97005c9",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BENCHMARK_RESULT"
+      ],
+      "exposure_tombstone": "sha256:351b835a4b13dbe67a7c85dd895317144bfd8d8c914da80e0a2ad3055ad54896",
+      "id": "19_markdown_section_splitter",
+      "oracle_fingerprint": "sha256:f92c73627b877540ba693c620c395ea6a822f4bd0baad00a230df775acd45bdf",
+      "origin": "sha256:43b19de6c0e4ea66b07463ac1abb38d06faf065893bae33264003f36be74d5a4",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:43b19de6c0e4ea66b07463ac1abb38d06faf065893bae33264003f36be74d5a4",
+      "stratum": "greenfield",
+      "task_fingerprint": "sha256:d1815205e335ef648d32d4efc04b4fea7e8939daf554c70164d206b2343001af"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:c60449b0167c9b0f87e923fb60f2bf7e3aef139610369fc95987366a8f116e80",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BENCHMARK_RESULT"
+      ],
+      "exposure_tombstone": "sha256:c6f11aa06bf6fefb1a06ed7349183718c48b211b8700f1cddf77452ca9715b28",
+      "id": "20_event_bus_pubsub_channel",
+      "oracle_fingerprint": "sha256:2555bcd517a2149afea1cdf04304deed9aa5b9c81c767c8e2794f24fe729244d",
+      "origin": "sha256:766ba0f86a2b280df747741340530d7719b09c06fdae6a793b6f03f75c49e010",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:766ba0f86a2b280df747741340530d7719b09c06fdae6a793b6f03f75c49e010",
+      "stratum": "greenfield",
+      "task_fingerprint": "sha256:200e76c5a840d238025950df873037c007226b38542abeaecd48a2d315e92677"
+    },
+    {
+      "aliases": [
+        "t1-calculator"
+      ],
+      "attestation": "sha256:0ff3abeebc5e4c43d693c7eef735738a40a577c9220c0128e8f73d56bccf877c",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "RESOLVED_PATCH",
+        "BAAC_OR_SUITE_PATH"
+      ],
+      "exposure_tombstone": "sha256:d22f5aa64c55716d82b90c9e7e50ad38dae73826ef2bb6911aa188af54da6b60",
+      "id": "bench_single_2K_tier-1_calculator",
+      "oracle_fingerprint": "sha256:7287193ea2692e8d8dd0e65cda20ecf0eb963af80c42659e7e2b3cc895027523",
+      "origin": "sha256:dfa2d7efdea35ec54cf8131ef236b320803c68bb66da86e7289f148b14424b81",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:dfa2d7efdea35ec54cf8131ef236b320803c68bb66da86e7289f148b14424b81",
+      "stratum": "single_file",
+      "task_fingerprint": "sha256:aa797a1086cb9a06d8248ebc0b3d152e01542423c85ec05b04b19fe7126141c9"
+    },
+    {
+      "aliases": [
+        "t1-fib-cli"
+      ],
+      "attestation": "sha256:4b5992697288a1960fc97856ce8076aef46c01016c6d24071d3853ce6d262c5e",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "RESOLVED_PATCH",
+        "BAAC_OR_SUITE_PATH"
+      ],
+      "exposure_tombstone": "sha256:647af900aa2fc77a5d1b2202bb962d704843f63e4b0d2c12927787d320f77973",
+      "id": "bench_single_2K_tier-1_fib_cli",
+      "oracle_fingerprint": "sha256:563ae37809eb4b549e76d36c6eed1fad73af27a54d0c8cb02d1c3efd00effcd0",
+      "origin": "sha256:061ccb001402d55b61294937373dbbdb4851744e06e479d7ee4a965b26ea223e",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:061ccb001402d55b61294937373dbbdb4851744e06e479d7ee4a965b26ea223e",
+      "stratum": "single_file",
+      "task_fingerprint": "sha256:6ea8e18c8cda662bce72a8ae5ece088ad0296d7e642e3770af825e773f39582c"
+    },
+    {
+      "aliases": [
+        "t1-string-dedupe"
+      ],
+      "attestation": "sha256:bb6390671b07db48d282118e9e0645949a20239f42c4652f0ca5d20bde817874",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "RESOLVED_PATCH",
+        "BAAC_OR_SUITE_PATH"
+      ],
+      "exposure_tombstone": "sha256:d500ffc58538bf971b59e2dc79ee32454c5c8244a5c88cf8097b572783cf6717",
+      "id": "bench_single_2K_tier-1_string_dedupe",
+      "oracle_fingerprint": "sha256:49f9e51e76c4f6e8bf205239b605ffd6959e43bf7185225c8135324976d644a3",
+      "origin": "sha256:483a8eab7c110108791ad5f5201f2882ef02f828ff8bcedf6ac57592505b1c12",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:483a8eab7c110108791ad5f5201f2882ef02f828ff8bcedf6ac57592505b1c12",
+      "stratum": "single_file",
+      "task_fingerprint": "sha256:f8166e59f8e6239547a8a9d05e08b38a46e833fac54c94dc69b49fc1e64ce974"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:c9a97e2a0842f9fe81d934d7b4f347de716019b25336b346ee925fc904dc1d26",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BAAC_OR_SUITE_PATH"
+      ],
+      "exposure_tombstone": "sha256:5e02cf5918eb7dedd4a1d3ab2b25c1d960203778762f78558ab9a706512624fc",
+      "id": "bench_greenfield_8K_tier-2_quiz_game",
+      "oracle_fingerprint": "sha256:824f318ac88c1340f1012ea1892d08b551ba398c54c2416521373a7de46b8d35",
+      "origin": "sha256:c9a6f75ec001051c2e83b13c3a6b0cb520aa5e73315a8964a6005765dfe5e708",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:c9a6f75ec001051c2e83b13c3a6b0cb520aa5e73315a8964a6005765dfe5e708",
+      "stratum": "greenfield",
+      "task_fingerprint": "sha256:641487a92e57670e7542fb7b9b2eb002b8a1c75564900dbd399534a34190eeca"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:8575df57c43c1ac9c871e2998d405d380ef699e5d74f068d5bcceb4b21bd8965",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BAAC_OR_SUITE_PATH"
+      ],
+      "exposure_tombstone": "sha256:a6496d694409c66a09e2e874654870bbbe492728ab51fa33a971b3152184bd5a",
+      "id": "bench_multi_8K_tier-2_json_todo_store",
+      "oracle_fingerprint": "sha256:45c589c3580a96e215e7cda31915119c84c55f2b3b28b0068a984f788cf88d9f",
+      "origin": "sha256:dbc59c7ffb470618622005c2111e066e3e71f9fec722e02ef241e37a84076329",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:dbc59c7ffb470618622005c2111e066e3e71f9fec722e02ef241e37a84076329",
+      "stratum": "multi_file",
+      "task_fingerprint": "sha256:312c34dc157be639de9ba7e84048d1e71b1158404de8515977010faac2d47011"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:200a72adee65f99aff9ddfc718b2189bcd93bf783cd555111f45397eb20631bf",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BAAC_OR_SUITE_PATH"
+      ],
+      "exposure_tombstone": "sha256:f461324bea0cc29e4ecb30314c39bbb39658c3e9e1359c22f6bca2e4048a4cde",
+      "id": "bench_multi_16K_tier-3_event_bus",
+      "oracle_fingerprint": "sha256:0655d9f780a941cf39731fac274ae04bd16edf87f8def1f4dd01689aae632f33",
+      "origin": "sha256:eb242f2f721ce24f2e73efebf86139991f358d726a349b8911dcb8963c1d16c6",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:eb242f2f721ce24f2e73efebf86139991f358d726a349b8911dcb8963c1d16c6",
+      "stratum": "multi_file",
+      "task_fingerprint": "sha256:bbfde7ef7aaf6f8eb327bedb7d7bf42206f8ea4da3641f2378ea4f0fc2925e55"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:97aa92448767ec48ca7f9222d61476faded74699595a9cac1147ed0b9bce6dea",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BAAC_OR_SUITE_PATH"
+      ],
+      "exposure_tombstone": "sha256:315c1901a1f5374f10e87259f2e02547a12b1864c2e7eed8fdd4661790c0fa2c",
+      "id": "bench_multi_32K_tier-4_circuit_breaker",
+      "oracle_fingerprint": "sha256:e7f8ad7cd496da599ed4942bd872802ff037e977cbf5bbbe17869b405758b52a",
+      "origin": "sha256:29ace6cdff1eb06488c73d2fcf8ef6eb2ebe72447b8f12886d3dae978aa9a7fc",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:29ace6cdff1eb06488c73d2fcf8ef6eb2ebe72447b8f12886d3dae978aa9a7fc",
+      "stratum": "multi_file",
+      "task_fingerprint": "sha256:1247e42bd60e4a74faf205cfb67597b6ca686f2e66172f8280bf739bd5ebcc17"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:e2fe176eb95ffab05ec62446c154acdd4cd5df787a8f9a24b65836b6a9512e35",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BAAC_OR_SUITE_PATH"
+      ],
+      "exposure_tombstone": "sha256:a400653f69340f79b87beaab63605c29c71627de7ce3b20c59df02e99ee6711b",
+      "id": "bench_multi_64K_tier-5_immutable_trie",
+      "oracle_fingerprint": "sha256:bc5fbc2ac41ac315b5d414ef68b4c597dee5fc8ea99290478b632d4fd593252e",
+      "origin": "sha256:8b00ee517830a9f74d61ac6115958bf43bbe9e7812fb5e78bb873e09626bc6ef",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:8b00ee517830a9f74d61ac6115958bf43bbe9e7812fb5e78bb873e09626bc6ef",
+      "stratum": "multi_file",
+      "task_fingerprint": "sha256:640ca6f7dc02416ac26b7d1bafc13f46bc2560731385c4082d54055ca8777b0c"
+    },
+    {
+      "aliases": [],
+      "attestation": "sha256:83006ecd57be5cce2800409993d6d5c6f477901d2c41b2e7c81d5a52acf14b9b",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "BAAC_OR_SUITE_PATH"
+      ],
+      "exposure_tombstone": "sha256:e9f7445f835d64c80394ed8f16e70713a97f51a2ebe25d1ae28d7f8043e8fb2f",
+      "id": "bench_multi_128K_tier-6_mvcc_db",
+      "oracle_fingerprint": "sha256:d034c1ee2fa92e1a1ca6a2977c58ba26ccb1a47a28928f1529360c97d9403eb3",
+      "origin": "sha256:9263974bd9fb69909a27c632a36ce7a0d6f687c5a852d5989be5c1db95565301",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:9263974bd9fb69909a27c632a36ce7a0d6f687c5a852d5989be5c1db95565301",
+      "stratum": "multi_file",
+      "task_fingerprint": "sha256:942660b95b51bcf3fa7ab022f911e1bd18a02e0f1fbe7f9460cb03f50303be09"
+    },
+    {
+      "aliases": [
+        "DOGFOOD-01"
+      ],
+      "attestation": "sha256:e5380fed92f53c221c555b91f7064bb0eb452c5524628c41082da40817ae7b1a",
+      "exposure_kinds": [
+        "DIR1_RULING",
+        "DOGFOOD_SET"
+      ],
+      "exposure_tombstone": "sha256:2b2dcc6a91548ba9c85eb2a4cae1475aad319b83a72e4d4ef0561a428f9a3dda",
+      "id": "dogfood-01-multi-turn-file-rollback",
+      "oracle_fingerprint": "sha256:909834da1e5ae7a79b7616064e490a707ba636d88d4b9f544c32885685dba1a3",
+      "origin": "sha256:b8047d0db0a68afa2adbfbc2d4361b0d4e57d5ee66944f992d4ad2b18bbcd79c",
+      "role": "EXPOSED",
+      "source_fingerprint": "sha256:b8047d0db0a68afa2adbfbc2d4361b0d4e57d5ee66944f992d4ad2b18bbcd79c",
+      "stratum": "multi_turn",
+      "task_fingerprint": "sha256:4324311c76182d3cdeeb760b85c2e1c6ac2838ba0de9bf70c6cef494c50482e4"
+    }
+  ],
+  "schema": "aether.corpus-quarantine/1"
+}

@@ -92,6 +92,37 @@ class ProjectChains(unittest.TestCase):
         self.assertEqual(int(b1.seq), 0)
         self.assertEqual(a2.prev_digest, a1.content_digest)
 
+    def test_session_projection_does_not_fold_a_foreign_project_chain(self) -> None:
+        store = InMemoryEventStore()
+        episode_id = "ep-shared-label"
+        _emitter(store, episode_id=episode_id, project_id="proj-a").emit_kind(
+            "Heartbeat", run_id="run-a", principal="p")
+        _emitter(store, episode_id=episode_id, project_id="proj-b").emit_kind(
+            "Heartbeat", run_id="run-b", principal="p")
+
+        session = HarnessSession(
+            Runtime.compose("vg-code-default", episode_id=episode_id),
+            SessionPorts(
+                model=ScriptedModel([finish()]),
+                environment=FakeEnvironment(),
+                clock=FakeClock(),
+                store=store,
+                interactive=False,
+            ),
+            TaskContext(
+                brief="project-scoped fold",
+                repo_path=Path("/workspace"),
+                run_id="run-a",
+                episode_id=episode_id,
+                principal="p",
+                project_id="proj-a",
+            ),
+        )
+
+        state = session.ledger_state()
+        self.assertEqual(state.event_count, 1)
+        self.assertEqual(state.last_seq, "0")
+
 
 class _SignedVerifier:
     """Fake `EvaluatorPort`: a genuinely Ed25519-signed, bound verdict.

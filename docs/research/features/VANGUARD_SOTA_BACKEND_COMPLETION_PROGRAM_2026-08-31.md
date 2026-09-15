@@ -15,8 +15,8 @@ last_verified: 2026-09-07
 **Inspected subject:** `43d9973b880be7a705199b75c03e0a6531aba265`
 **Date:** 2026-09-01
 
-Status and authorization resolve through [`milestones.md`](../docs/execution/milestones.md),
-[`tasks.md`](../docs/execution/tasks.md), and [`backlog.md`](../docs/execution/backlog.md)
+Status and authorization resolve through [`milestones.md`](../docs/execution/main/milestones.md),
+[`tasks.md`](../docs/execution/main/tasks.md), and [`backlog.md`](../docs/execution/main/backlog.md)
 (`active.md` is a historical name; the file is absent).
 This brief does not authorize M-9, M-10, or benchmark claims. The operator has
 separately authorized up to $0.15, 300,000 tokens, and 120 OpenRouter calls for

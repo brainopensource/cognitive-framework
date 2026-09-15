@@ -146,5 +146,46 @@
       "description": "Capability grant this event rests on; null only when semantically inapplicable."
     }
   },
-  "description": "mhf.event/2 -- the mhf.event/1 envelope plus four typed authority-provenance fields (ADR-0098 Decision 1). /1 remains readable and unchanged."
+  "description": "mhf.event/2 -- the mhf.event/1 envelope plus four typed authority-provenance fields (ADR-0098 Decision 1). /1 remains readable and unchanged.",
+  "allOf": [
+    {
+      "$comment": "DIR-D1 /2 payload validation. The envelope's payload stayed an unconstrained object, so a durable carrier could append with any shape and replay would trust it. These two kinds bind their typed payload; every other kind keeps the historical open payload, because retroactively constraining kinds whose ledgers already exist would make valid history invalid.",
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "VerificationRecorded"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "event_envelope.schema.json#/$defs/VerificationRecordedPayload"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "const": "ChangeSurfaceUpdated"
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "$ref": "event_envelope.schema.json#/$defs/ChangeSurfaceUpdatedPayload"
+          }
+        }
+      }
+    }
+  ]
 }

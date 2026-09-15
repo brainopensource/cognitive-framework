@@ -7,7 +7,6 @@ compose a harness and it does not write envelopes except through
 
 from __future__ import annotations
 
-import ast
 import json
 import re
 from dataclasses import dataclass, replace
@@ -16,6 +15,7 @@ from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
 from ..adapters.stores.repo_index import FileRepoIndex
+from ..adapters.environment.analysis import analyze_candidate
 from ..agency import EpisodeEngine, RunTermination
 from ..agency.episode import ProtocolRecoveryState
 from ..agency.episode.admission_gate import AdmissionGate, AdmissionVerdict, VerificationReceipt
@@ -38,11 +38,13 @@ from ..agency.manifests.discovery import WorkspaceDiscovery
 from ..agency.provenance import NullProvenanceSink, ProvenanceSink
 from ..domain.canonicalisation.digest import digest_of
 from ..domain.workspace_epoch import WorkspaceEpoch
+from ..domain.ledger.events import WRITABLE_KINDS
 from ..domain.ledger.agent_view import AgentView, fold_agent_view
 from ..domain.ledger.progress import ConfidenceRecord, ProgressView, fold_progress
 from ..domain.ledger.reducer import compute_state_digest, reconstruct_state
 from ..domain.ledger.state import LedgerState
 from ..kernel.attenuation import RISK_ORDER
+from ..kernel.grants import descriptor_of
 from ..kernel import (
     EffectRequest,
     AdapterOutcome,
@@ -63,8 +65,8 @@ from ..ports.blob_store import BlobStorePort
 from ..ports.child_runtime import ChildRuntimePort
 from ..ports.determinism import RandomPort
 from ..ports.evaluator import EvaluationProtocol, RunRef, Verdict
-from ..ports.event_store import EventRange, EventStorePort, Result
-from ..ports.index import IndexPort
+from ..ports.event_store import EventRange, EventStorePort, PortFailure, Result
+from ..ports.index import IndexPort, IndexSelection
 from ..ports.meta_controller import MetaController
 from ..ports.memory import MemoryBinding, require_retrieval_provenance
 from ..ports.spi import ICompletionPolicy
@@ -77,13 +79,19 @@ from .compose import (
 from .artifacts import ArtifactWriter, CapturePolicy, resolve_capture_policy
 from .budget_view import ADDITIVE_DIMENSIONS, remaining_budget
 from .checkpoints import Checkpoint, CheckpointManager, Reconstruction
+from .inference_meter import (
+    INFERENCE_DENIED_KIND,
+    BudgetDenied,
+    InferenceMeter,
+)
 from .evaluator_gateway import record_verdict
 from .ledger.recovery import RecoveryScanner
-from .ledger_emitter import LedgerEmitter
+from .ledger_emitter import LedgerEmitter, WriterAuthorityError
 from .meta_controller import ControllerProposal, guarded_consult
 from .provenance import RuntimeProvenanceSink, cache_participation
 from .evidence_capture import capture_evidence as _capture_evidence_pure
 from .prompt_assembler import PromptAssembler
+from .skill_index import SkillSelection, select_skills_for_task
 from .protocol_pipeline import default_protocol_pipeline
 from .response_handler import ResponseHandler
 from .task_state import fold_task_state
@@ -375,6 +383,8 @@ class _LayeredOperator:
         meta_controller: Callable[[], ControllerProposal | None] | None = None,
         memory: MemoryBinding | None = None,
         capabilities: Sequence[Mapping[str, Any]] = (),
+        before_propose: Callable[[Mapping[str, Any], Any, int, Sequence[Mapping[str, Any]], Mapping[str, Any]], None] | None = None,
+        meter: InferenceMeter | None = None,
     ) -> None:
         self._model = model
         configure_capabilities = getattr(model, "configure_capabilities", None)
@@ -398,6 +408,15 @@ class _LayeredOperator:
         self.contexts: list[Mapping[str, Any]] = []
         self._artifacts = artifacts
         self._meta_controller = meta_controller
+        # The compiler intentionally has no ledger dependency.  This callback
+        # is the runtime-owned write-before-inference boundary: it receives
+        # the final compiled vector, records its selection, and may refuse the
+        # provider call without making context compilation stateful.
+        self._before_propose = before_propose
+        # Inference accounting (`inference_meter`). Optional so a raw
+        # composition without a governor still constructs; when present, the
+        # provider call is reserved and settled like any other resource.
+        self._meter = meter
 
     def set_task_state(self, state: Mapping[str, Any] | None) -> None:
         self._assembler.set_task_state(state)
@@ -441,6 +460,8 @@ class _LayeredOperator:
 
         turn = len(self.contexts)
         bundle, compiled = self._assembler.assemble(view, turn)
+        if self._before_propose is not None:
+            self._before_propose(bundle, compiled, turn, tools, sampling)
         self.contexts.append(bundle)
 
         input_ref = self._capture(
@@ -450,9 +471,41 @@ class _LayeredOperator:
             labels={"promptDigest": compiled.digest, "prefixDigest": compiled.prefix_digest},
         )
 
-        answer = self._model.propose(bundle, tools, sampling)
+        # -- inference accounting -----------------------------------------
+        # S7 for the model call. A denied reservation is a *spend* refusal and
+        # carries its own typed kind: collapsing it into `instrument_error`
+        # would move a budget stop into the model-failure bucket and corrupt
+        # the missingness taxonomy (`DIR-D2`).
+        reservation = None
+        if self._meter is not None:
+            try:
+                reservation = self._meter.reserve(
+                    prompt_tokens=int(getattr(compiled, "total_tokens", 0) or 0),
+                    sampling=sampling,
+                )
+            except BudgetDenied as denied:
+                return Result.fail(
+                    kind=INFERENCE_DENIED_KIND,
+                    message=(
+                        f"inference reservation denied on {denied.dimension}: "
+                        f"requested {denied.requested}, remaining {denied.remaining}"
+                    ),
+                )
+
+        try:
+            answer = self._model.propose(bundle, tools, sampling)
+        except BaseException:
+            # The call never settled; the whole reservation comes back. The
+            # provider failure itself keeps its own path.
+            if reservation is not None and self._meter is not None:
+                self._meter.release(reservation)
+            raise
         value = getattr(answer, "value", None)
         raw = value if value is not None else answer
+        if reservation is not None and self._meter is not None:
+            # S10 on every outcome: a call that failed after the tokens were
+            # spent still spent them.
+            self._meter.settle(reservation, raw)
         if isinstance(value, Mapping) and value.get("kind") == "effect":
             action = value.get("action")
             args = value.get("args")
@@ -497,14 +550,19 @@ class _LayeredOperator:
         return self._artifacts.capture(role, payload, turn=turn, labels=labels)
 
 
-def _route_of(model: Any) -> Mapping[str, Any]:
+def _route_of(model: Any) -> dict[str, Any]:
     """Which provider/model this call actually went to.
 
     Small and identity-only: a route that carried credentials or headers
     would put them in an append-only store.
     """
+    adapter = type(model).__name__
+    for base in type(model).__mro__:
+        if base.__name__ == "FakeModel":
+            adapter = "FakeModel"
+            break
     return {
-        "adapter": type(model).__name__,
+        "adapter": adapter,
         "provider": str(getattr(model, "provider", "")),
         "model": str(getattr(model, "model", getattr(model, "model_name", ""))),
         "mode": str(getattr(model, "mode", getattr(model, "_mode", ""))),
@@ -593,6 +651,12 @@ class SessionPorts:
     #: `W11-A`. Bound only when the pack declares an index component. `None`
     #: means the harness declared none -- not that indexing failed.
     index: IndexPort | None = None
+    #: DIR-I5's selected backend and health result. The session consumes the
+    #: already-selected port; it never chooses an index implementation itself.
+    index_selection: IndexSelection | None = None
+    #: A bootstrap refusal is evidence of missingness, not permission to
+    #: silently substitute a weaker index inside the session.
+    index_error: PortFailure | None = None
     verifier: Any = None
     approver: Callable[[Any], Any] | None = None
     approval_key: bytes | None = None
@@ -628,6 +692,9 @@ class SessionPorts:
     #: built-in gate for legacy harnesses; production coding packs bind their
     #: repository/greenfield policy here.
     completion_policy: ICompletionPolicy | None = None
+    #: Pure T-83b policy. The session gathers repository observations and
+    #: verification bindings; agency alone judges their completeness.
+    caller_admission: Callable[..., Any] | None = None
     #: `M-6`. The runtime that executes child episodes. `None` is legal for a
     #: composition that never declares `agent.spawn`; for one that does, the
     #: binding fails closed at composition rather than substituting a fake.
@@ -660,6 +727,53 @@ class _SwappablePolicy:
 
     def authorize(self, request: EffectRequest, **kwargs: Any) -> Any:
         return self._current.authorize(request, **kwargs)
+
+
+class _RecoveryGuardedEmitter:
+    """Preserve the engine's event seam while making recovery append failure fatal.
+
+    ``EpisodeEngine`` deliberately treats ordinary observability failures as
+    non-fatal.  Recovery state is different: without its durable snapshot a
+    restart could redraw a delay or repeat an unknown operation.  The engine
+    still owns recovery policy; this runtime boundary merely remembers a
+    failed ``EpisodeStateChanged(recoveryState=...)`` append so the next model
+    call or dispatch is refused before it can become an external action.
+    """
+
+    def __init__(self, inner: Any) -> None:
+        self._inner = inner
+        self.recovery_append_error: str | None = None
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._inner, name)
+
+    @property
+    def pending(self) -> Any:
+        return self._inner.pending
+
+    @pending.setter
+    def pending(self, value: Any) -> None:
+        self._inner.pending = value
+
+    def emit(self, event: Event) -> Any:
+        try:
+            emitted = self._inner.emit(event)
+            if (emitted is None
+                    and event.kind == "EpisodeStateChanged"
+                    and isinstance(event.payload, Mapping)
+                    and isinstance(event.payload.get("recoveryState"), Mapping)):
+                self.recovery_append_error = "recovery snapshot append returned no envelope"
+                raise OSError(self.recovery_append_error)
+            return emitted
+        except Exception as exc:
+            if (event.kind == "EpisodeStateChanged"
+                    and isinstance(event.payload, Mapping)
+                    and isinstance(event.payload.get("recoveryState"), Mapping)):
+                self.recovery_append_error = str(exc) or type(exc).__name__
+            raise
+
+    def append_intent(self, event: Event) -> None:
+        return self._inner.append_intent(event)
 
 
 class HarnessSession:
@@ -702,6 +816,7 @@ class HarnessSession:
         self._completion_gate = AdmissionGate()
         self._completion_changed_files: set[str] = set()
         self._completion_inspected_files: set[str] = set()
+        self._completion_inspection_receipts: dict[str, str] = {}
         self._completion_verification: VerificationReceipt | None = None
         self._completion_verification_command: str | None = None
         #: T-07. The typed subject the current verification receipt is bound
@@ -709,6 +824,22 @@ class HarnessSession:
         #: cannot survive the write that invalidated it.
         self._completion_verification_subject: VerificationSubject | None = None
         self._completion_redundant_verifications = 0
+        #: DIR-D1. The observed executed count as the runner actually reported
+        #: it: `None` when it reported no count at all, `0` when it reported
+        #: running zero tests. `VerificationReceipt.executed_test_count` is an
+        #: `int` and collapses both to 0 (fail-closed, correct for the
+        #: in-memory admission gate), but the durable carrier must keep them
+        #: distinct -- "the runner printed nothing" and "the runner ran nothing"
+        #: are different facts, and replay cannot re-derive the difference once
+        #: it is gone.
+        self._completion_observed_test_count: int | None = None
+        #: DIR-D1 / NT-1.6. Why the durable carrier append failed, or `None`.
+        #: The in-memory receipt above is not evidence until the fact behind
+        #: it is accepted by the single ledger writer, so this latch gates the
+        #: next external boundary exactly the way `recovery_append_error`
+        #: does. It is never cleared by a later success: the turn that lost
+        #: its carrier stays unrecoverable within this process.
+        self._durable_carrier_append_error: str | None = None
         self._completion_allowed_tools: frozenset[str] | None = None
         self._active_episode_engine: EpisodeEngine | None = None
         self._completion_oracle_failed_on_stub = False
@@ -736,6 +867,34 @@ class HarnessSession:
 
         self.workspace_access = ports.workspace_access or _workspace_access_of(run_plan)
         self.scope = task.scope_override or _scope_for(harness, workspace_access=self.workspace_access)
+        # `W11-A`. The index is bound only when the pack declares it. A
+        # harness that did not ask for one must not silently acquire it: an
+        # unread component is a composition error (`S7-B-02`), and an unasked-
+        # for one is a capability nobody authorised.
+        self.index: IndexPort | None = None
+        self.index_selection = ports.index_selection
+        self.index_error = ports.index_error
+        if harness.index_component is not None:
+            if ports.index is not None:
+                self.index = ports.index
+                indexed = self.index.index(str(repo))
+                if not indexed.ok:
+                    self.index_error = indexed.error
+                    self.index = None
+            elif ports.index_error is None:
+                # Direct/test composition has no bootstrap selection. Preserve
+                # its established local FileRepoIndex fallback; a production
+                # bootstrap refusal takes the explicit branch above instead.
+                self.index = FileRepoIndex()
+                indexed = self.index.index(str(repo))
+                if not indexed.ok:
+                    self.index_error = indexed.error
+                    self.index = None
+        elif ports.index is not None:
+            raise CompositionError(
+                "an IndexPort was supplied but the manifest declares no index "
+                "component; bind it in the pack or do not pass it")
+
         # `W3`. `self.scope.actions` is the manifest ceiling attenuated for
         # this session (e.g. plan mode drops `patch.apply`/`proc.exec` --
         # `wiring._scope_for`). Binding adapters only for held verbs, rather
@@ -763,23 +922,12 @@ class HarnessSession:
                     composition_digest=harness.frozen.composition_digest,
                     lineage=task.lineage or (task.episode_id,),
                     ledger=self.ledger,
+                    index=self.index,
                 )
             )
             for verb in harness.verbs
             if verb in self.scope.actions
         }
-        # `W11-A`. The index is bound only when the pack declares it. A
-        # harness that did not ask for one must not silently acquire it: an
-        # unread component is a composition error (`S7-B-02`), and an unasked-
-        # for one is a capability nobody authorised.
-        self.index: IndexPort | None = None
-        if harness.index_component is not None:
-            self.index = ports.index or FileRepoIndex()
-            self.index.index(str(repo))
-        elif ports.index is not None:
-            raise CompositionError(
-                "an IndexPort was supplied but the manifest declares no index "
-                "component; bind it in the pack or do not pass it")
 
         # `I-SHD` / T-18. Freeze the enumerated oracle set now, at turn 0,
         # before the operator has seen the workspace -- a shield frozen after
@@ -830,6 +978,14 @@ class HarnessSession:
             governor=governor, issuer=GrantIssuer(),
             clock=ports.clock, ledger=self.ledger, events=self.ledger,
             sinks=harness.sinks)
+        # One governor covers effects *and* inference. The model call used to
+        # be the single unmetered resource in an episode: its usage was
+        # recorded as proposal diagnostics and never debited, so a preset's
+        # declared `tokens`/`usd_micros` ceilings bounded patches and processes
+        # while the dominant cost ran free. `RUN-10` requires one aggregate
+        # budget; this is the seam that makes that true for inference.
+        self._inference_meter = InferenceMeter(
+            governor, task.run_id, pricing=_model_pricing(ports.model))
 
         discovery = WorkspaceDiscovery(repo)
         discovered_env = discovery.render_environment_text()
@@ -861,8 +1017,20 @@ class HarnessSession:
             tool_schemas=harness.tool_schemas,
             environment=env_text,
             skill_cards=harness.skill_cards,
-            token_ceiling=max(harness.budget.get("tokens", 0) or 64_000, 4_096),
+            # The *prompt window*, not the episode's conserved token spend.
+            # These were the same key until the inference meter began debiting
+            # `tokens`, at which point one maximal prompt could legally consume
+            # a whole episode's budget. A pack that declares no window falls
+            # back to the legacy reading so older manifests keep working.
+            token_ceiling=max(
+                harness.budget.get("context_window_tokens")
+                or harness.budget.get("tokens", 0)
+                or 64_000,
+                4_096,
+            ),
         )
+        self._behavior_identity = self._composition_identity(compiler)
+        self._recovery_guard: _RecoveryGuardedEmitter | None = None
         # `ADR-0096 §14`. One optional seam, resolved once: either this
         # session captures evidence or it does not. There is no second
         # composition root and no per-call switch -- a capture path that could
@@ -909,10 +1077,22 @@ class HarnessSession:
                  "selector": capability.selector}
                 for capability in harness.frozen.capabilities
             ),
+            before_propose=self._record_context_selection,
+            meter=self._inference_meter,
         )
         # Read-only callback context for completion facts; it is populated
         # exclusively by this session's mediated dispatch path.
         self.operator._completion_calls = self.calls
+
+        # `W12-A` / T-140. The stable index of every composed card is already
+        # frozen into `L3` by `ContextCompiler`; this is the dynamic half. The
+        # selection is task-conditioned, so it must not touch the prefix -- it
+        # enters `L5` as one bounded observation, like any other turn-local
+        # fact. Done once here, at composition, because the brief is immutable
+        # for the episode: re-selecting per turn would spend the ceiling again
+        # to reach the same answer.
+        self.skill_selection: SkillSelection | None = None
+        self._admit_dynamic_skill_selection()
 
         # Ed25519 verify keys are injected by the operator. The root never mints
         # a signing authority in-process (`GOV-01`, `ADR-0062`): a missing key can
@@ -924,6 +1104,29 @@ class HarnessSession:
             # and `vg-code-default` writes `patch.apply`. The manifest wins.
             patch_verb=harness.diff_verb() or "fs.patch")
 
+    def _admit_dynamic_skill_selection(self) -> None:
+        """Admit this task's relevant skills to `L5`, never to the prefix.
+
+        Fails open *as a selection* and closed as an authority: a pack with no
+        skill cards, or a brief that implicates none of them, contributes no
+        note at all rather than an empty header. Nothing here reads a skill
+        body -- the card carries a path, and the agent spends its own `fs.read`
+        if it wants the contents.
+        """
+        cards = getattr(self.harness, "skill_cards", ()) or ()
+        brief = self.task.brief or ""
+        if not cards or not brief:
+            return
+        selection = select_skills_for_task(cards, brief)
+        if not selection.selected:
+            return
+        self.skill_selection = selection
+        self.operator.note(
+            label="skill-selection",
+            source="skill_retrieval",
+            text=selection.render(),
+        )
+
     # -- the ledger is the only memory ------------------------------------
 
     def ledger_state(self) -> LedgerState:
@@ -934,7 +1137,10 @@ class HarnessSession:
         crash recovery -- approval suspension is the same mechanism with a
         different trigger, so this is a reuse, not new machinery.
         """
-        read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
+        read = self.ports.store.read(EventRange(
+            episode_id=self.task.episode_id,
+            project_id=self.task.project_id,
+        ))
         envelopes = read.value if read.ok and read.value is not None else ()
         return reconstruct_state(envelopes)
 
@@ -967,7 +1173,10 @@ class HarnessSession:
         later turns must see what earlier siblings actually spent, or the
         second child is handed a budget the first one already consumed.
         """
-        read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
+        read = self.ports.store.read(EventRange(
+            episode_id=self.task.episode_id,
+            project_id=self.task.project_id,
+        ))
         if not read.ok:
             # Fail closed. A store we cannot read is not a store that says
             # "nothing spent"; reporting the full ceiling here would let an
@@ -996,7 +1205,10 @@ class HarnessSession:
         projections and B-M65 confidence records. It never receives this
         session, its ports, the model, the store, the emitter, or the Kernel.
         """
-        read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
+        read = self.ports.store.read(EventRange(
+            episode_id=self.task.episode_id,
+            project_id=self.task.project_id,
+        ))
         envelopes = tuple(read.value) if read.ok and read.value is not None else ()
         if not any(
             (event.payload.get("kind") or event.mhf_kind) == "ProposalProduced"
@@ -1083,7 +1295,10 @@ class HarnessSession:
         separates capability from proof and this is where that separation is
         actually enforced on the runtime path.
         """
-        read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
+        read = self.ports.store.read(EventRange(
+            episode_id=self.task.episode_id,
+            project_id=self.task.project_id,
+        ))
         envelopes = list(read.value) if read.ok and read.value is not None else []
         if self.checkpoints is None:
             if not envelopes:
@@ -1109,10 +1324,170 @@ class HarnessSession:
         """`T3.6`. The digest a resumed run must reproduce from events alone."""
         return compute_state_digest(self.ledger_state())
 
+    def _composition_identity(self, compiler: ContextCompiler) -> dict[str, Any]:
+        """The immutable inputs that determine runtime behaviour for a session.
+
+        This is deliberately a value assembled at composition, rather than a
+        second configuration object.  The ledger records its digest before a
+        provider sees a prompt and each context epoch extends it with the
+        current repository subject.
+        """
+        frozen = self.harness.frozen
+        manifest_digest = digest_of(frozen.manifest.identity_preimage())
+        policy_fn = getattr(compiler, "_policy_identity", compiler.selection_identity)
+        policy = dict(policy_fn())
+        recovery = ProtocolRecoveryState().to_dict()
+        serializer = {"id": "agency.context.messages", "version": "1"}
+        counter = {"id": "agency.context.estimate_tokens", "version": "1"}
+        return {
+            "repositorySubject": (
+                self.context_packet.repository_identity
+                if self.context_packet is not None else ""
+            ),
+            "manifestDigest": manifest_digest,
+            "compositionDigest": self.harness.composition_digest,
+            "systemPromptDigest": digest_of({"systemPrompt": self.harness.system_core}),
+            "toolSchemasDigest": digest_of({"orderedToolSchemas": list(self.harness.tool_schemas)}),
+            "contextPolicyDigest": digest_of(policy),
+            "modelRoute": _route_of(self.ports.model),
+            "serializerIdentity": serializer,
+            "counterIdentity": counter,
+            "recoveryPolicyDigest": str(recovery.get("policyDigest", "")),
+            "productPreset": self.harness.harness,
+        }
+
+    def _context_epoch(self) -> dict[str, Any]:
+        packet = self.context_packet
+        epoch = (
+            packet.workspace_epoch.to_canonical_dict()
+            if packet is not None and packet.workspace_epoch is not None else {}
+        )
+        identity = dict(self._behavior_identity)
+        if packet is not None:
+            identity["repositorySubject"] = packet.repository_identity or packet.repository_snapshot
+        return {
+            "identity": identity,
+            "workspaceEpoch": epoch,
+            "digest": digest_of({"identity": identity, "workspaceEpoch": epoch}),
+        }
+
+    def _assert_resume_behavior_identity(self) -> None:
+        """Reject a continuation under a different immutable behaviour identity."""
+        prior = self.task.resume_state if isinstance(self.task.resume_state, Mapping) else {}
+        policy = prior.get("selectionPolicyIdentity")
+        prior_identity = policy.get("behaviorIdentity") if isinstance(policy, Mapping) else None
+        if prior_identity is None:
+            return
+        if not isinstance(prior_identity, Mapping):
+            raise ContextPacketError("resume behavior identity is malformed")
+        # Repository subject is epoch-scoped: a known, settled write naturally
+        # creates the next epoch.  All other fields are composition inputs and
+        # must be exact on a fresh process.
+        expected = {k: v for k, v in prior_identity.items() if k != "repositorySubject"}
+        actual = {k: v for k, v in self._behavior_identity.items() if k != "repositorySubject"}
+        if expected != actual:
+            raise ContextPacketError("resume behavior identity does not match composition")
+
+    def _record_context_selection(
+        self,
+        bundle: Mapping[str, Any],
+        compiled: Any,
+        cursor: int,
+        tools: Sequence[Mapping[str, Any]],
+        sampling: Mapping[str, Any],
+    ) -> None:
+        """Append selection evidence before a provider call, or make no call.
+
+        The generated kind is intentionally checked at runtime during the
+        short hand-off window in which Stream C owns the schema input.  Before
+        that schema lands this branch remains compatibility-only; once it is
+        registered, absence of a successful append is a hard inference gate.
+        """
+        guard = getattr(self, "_recovery_guard", None)
+        if guard is not None and guard.recovery_append_error is not None:
+            raise RuntimeError(
+                "recovery snapshot append failed; refusing subsequent inference: "
+                f"{guard.recovery_append_error}")
+        # DIR-D1: append through the single writer BEFORE the next proposal.
+        # A verification or change-surface fact that did not land means the
+        # next proposal would be composed over evidence no fresh process can
+        # read, so there is no next proposal.
+        if self._durable_carrier_append_error is not None:
+            raise RuntimeError(
+                "durable carrier append failed; refusing subsequent inference: "
+                f"{self._durable_carrier_append_error}")
+        if "ContextSelectionRecorded" not in WRITABLE_KINDS:
+            return
+        epoch = self._context_epoch()
+        policy_identity = dict(self.operator._compiler.selection_identity())
+        policy_identity["behaviorIdentity"] = dict(epoch["identity"])
+        policy_identity["contextEpoch"] = epoch["digest"]
+        omissions = [
+            {"identity": str(item), "reason": "elided"}
+            for item in getattr(compiled, "elided", ())
+        ] + [
+            {"identity": str(item), "reason": "dropped"}
+            for item in getattr(compiled, "dropped", ())
+        ]
+        if self.context_packet is not None:
+            omissions.extend(
+                {"identity": str(item), "reason": "packet_omission"}
+                for item in self.context_packet.omissions
+            )
+        request_digest = digest_of({
+            "bundle": bundle,
+            "orderedTools": list(tools),
+            "sampling": dict(sampling),
+        })
+        self.ledger.emit_kind(
+            "ContextSelectionRecorded",
+            run_id=self.task.run_id,
+            principal=self.task.principal,
+            episode_id=self.task.episode_id,
+            payload={
+                "prefixDigest": str(getattr(compiled, "prefix_digest", "")),
+                "stateDigest": digest_of(dict(self.ledger_state().to_canonical_dict())),
+                "policyDigest": digest_of(policy_identity),
+                "requestDigest": request_digest,
+                "repositorySubject": epoch["identity"]["repositorySubject"],
+                "repositoryIdentity": epoch["identity"]["repositorySubject"],
+                "cursor": int(cursor),
+                "serializedTokens": int(getattr(compiled, "total_tokens", 0)),
+                "orderedOmissions": omissions,
+                "contextEpoch": epoch["digest"],
+                "serializerIdentity": dict(self._behavior_identity["serializerIdentity"]),
+                "counterIdentity": dict(self._behavior_identity["counterIdentity"]),
+                "behaviorIdentity": dict(epoch["identity"]),
+                # This field is the ContextPacket selector identity consumed
+                # by cold resume. Feeding the compiler identity back into the
+                # next packet would recursively change the frozen prefix and
+                # reject an otherwise identical fresh-process continuation.
+                # The compiler identity remains bound by policyDigest and by
+                # behaviorIdentity.contextPolicyDigest.
+                "selectionPolicyIdentity": (
+                    dict(self.context_packet.selection_policy_identity)
+                    if self.context_packet is not None
+                    and self.context_packet.selection_policy_identity is not None
+                    else None
+                ),
+                "indexSnapshotDigest": (
+                    self.context_packet.index_snapshot_digest
+                    if self.context_packet is not None else ""
+                ),
+            },
+        )
+
     # -- the kernel seam --------------------------------------------------
 
     def dispatch(self, request: EffectRequest, **kwargs: Any) -> Any:
         """Forward to the one kernel, remembering the request behind the result."""
+        guard = getattr(self, "_recovery_guard", None)
+        if guard is not None and guard.recovery_append_error is not None:
+            raise RuntimeError("recovery snapshot append failed; refusing dispatch")
+        if self._durable_carrier_append_error is not None:
+            raise RuntimeError(
+                "durable carrier append failed; refusing dispatch: "
+                f"{self._durable_carrier_append_error}")
         request = _with_diff_headers(request)
         if request.idempotency_key:
             settled = RecoveryScanner.settled_effect(
@@ -1192,6 +1567,8 @@ class HarnessSession:
                     self.run_plan, "preregistration_digest", ""),
                 "maxTurns": int(self.task.max_turns),
                 "interactive": bool(self.ports.interactive),
+                "behaviorIdentity": dict(self._behavior_identity),
+                "contextEpoch": self._context_epoch()["digest"],
                 **self._budget_attenuation_fields(),
             },
         ))
@@ -1207,6 +1584,7 @@ class HarnessSession:
     def run(self) -> RunResult:
         """Run the episode, resolve approvals, evaluate from outside."""
         harness, task, ports = self.harness, self.task, self.ports
+        self._assert_resume_behavior_identity()
         receipts: list[Receipt] = []
         authorization = None
         terminal = RunTermination.ABANDONED
@@ -1241,7 +1619,10 @@ class HarnessSession:
                 project_id=task.project_id,
             )
             self.ledger._seq, self.ledger._prev = self.ledger._load_chain(task.project_id)
-            read_events = ports.store.read(EventRange(episode_id=task.episode_id))
+            read_events = ports.store.read(EventRange(
+                episode_id=task.episode_id,
+                project_id=task.project_id,
+            ))
             ev_list = list(read_events.value) if read_events.ok and read_events.value else []
             kinds = [(e.payload.get("kind") if hasattr(e, "payload") and isinstance(e.payload, Mapping) else None) or getattr(e, "mhf_kind", "") for e in ev_list]
             if "RunRecovered" not in kinds:
@@ -1266,6 +1647,7 @@ class HarnessSession:
         # Re-entry is now driven by the ledger: `max_turns` bounds the episode,
         # not each segment of it, and an exhausted budget is terminal.
         delayed = DelayedTerminalEmitter(self.ledger)
+        self._recovery_guard = _RecoveryGuardedEmitter(delayed)
         # The episode's turn history spans approval re-entries. Rebuilding the
         # engine with an empty `Episode` discarded it every round-trip, so turn
         # indices restarted at 0 and no-progress detection could never see two
@@ -1289,13 +1671,18 @@ class HarnessSession:
             decoders, patch_detector, truncation_detector = default_protocol_pipeline()
             engine = EpisodeEngine(
                 kernel=self, model=self.operator, clock=ports.clock,
-                events=delayed, scope=self.scope, tools=harness.tool_schemas,
+                events=self._recovery_guard, scope=self.scope, tools=harness.tool_schemas,
                 max_turns=len(prior_turns) + remaining,
                 spawn_dispatcher=self.dispatch,
                 preset_mode=getattr(harness, "tool_policy_preset", None),
                 protocol_decoders=decoders,
                 patch_detector=patch_detector,
                 truncation_detector=truncation_detector,
+                # Manifest sink declarations are the sole authority for
+                # classifying members of a read-only observation batch.
+                # Omitting this handoff leaves the engine correctly closed
+                # and makes batching reachable only to direct engine tests.
+                observation_sinks=harness.sinks,
                 # Raw composition tests and legacy in-process callers may
                 # intentionally omit a pack policy. The strict completion
                 # contract is enabled by the product activation seam, which
@@ -1369,7 +1756,10 @@ class HarnessSession:
             if self._on_terminal is not None
             else self._evaluate(terminal_status=str(getattr(terminal, "value", terminal)))
         )
-        read_all = ports.store.read(EventRange(episode_id=task.episode_id))
+        read_all = ports.store.read(EventRange(
+            episode_id=task.episode_id,
+            project_id=task.project_id,
+        ))
         durable_events = list(read_all.value) if read_all.ok and read_all.value else list(self.ledger.events)
         if delayed.pending is None:
             terminal_name = str(getattr(terminal, "value", terminal))
@@ -1633,6 +2023,14 @@ class HarnessSession:
         }
         if fallback_reason is not None:
             view["fallbackReason"] = fallback_reason
+        if self.index_selection is not None:
+            view["indexSelection"] = {
+                "backend": self.index_selection.backend,
+                "healthVerdict": self.index_selection.health_verdict,
+                "degradationReason": self.index_selection.degradation_reason,
+                "unresolvedCoverage": self.index_selection.unresolved_coverage,
+                "sourceIdentity": self.index_selection.source_identity.to_canonical_dict(),
+            }
         return view
 
     def _bind_no_index_fallback(self, cause: str) -> Mapping[str, Any]:
@@ -1640,14 +2038,26 @@ class HarnessSession:
         reason = f"INDEX_UNBOUND: {cause}"
         try:
             epoch = self._epoch_from_environment_snapshot(
-                compiled_at_turn=self.turns_consumed())
+                compiled_at_turn=0 if self.task.resume_state is not None else self.turns_consumed())
         except ContextPacketError:
             self.context_packet = None
             return self._orientation_view(None, fallback_reason=reason)
-        selection_policy_identity = {
-            "policyId": "agency.context-compiler/default",
-            "policyVersion": CONTEXT_POLICY_VERSION,
-        }
+        prior = self.task.resume_state if isinstance(self.task.resume_state, Mapping) else {}
+        prior_repo = prior.get("repositoryIdentity")
+        prior_policy = prior.get("selectionPolicyIdentity")
+        prior_index = prior.get("indexSnapshotDigest")
+        prior_epoch_raw = prior.get("workspaceEpoch")
+        prior_epoch = (
+            WorkspaceEpoch.from_mapping(prior_epoch_raw)
+            if isinstance(prior_epoch_raw, Mapping) else None
+        )
+        selection_policy_identity = (
+            dict(prior_policy) if isinstance(prior_policy, Mapping)
+            else {
+                "policyId": "agency.context-compiler/default",
+                "policyVersion": CONTEXT_POLICY_VERSION,
+            }
+        )
         packet = build_context_packet(
             task_digest=digest_of({"runId": self.task.run_id, "brief": self.task.brief}),
             repository_snapshot=epoch.source_revision,
@@ -1656,15 +2066,29 @@ class HarnessSession:
             query_digest=digest_of({"brief": self.task.brief}),
             budget_tokens=4000,
             selected=(),
-            index_snapshot_digest=epoch.index_digest,
+            index_snapshot_digest=str(prior_index) if prior_index is not None else epoch.index_digest,
             reserve_tokens=1000,
-            repository_identity=epoch.source_revision,
+            repository_identity=str(prior_repo) if prior_repo is not None else epoch.source_revision,
             selection_policy_identity=selection_policy_identity,
             workspace_epoch=epoch,
             require_epoch=True,
             map_truncated=True,
             extra_omissions=(INDEX_PORT_UNBOUND,),
         )
+        if prior_repo is not None or prior_policy is not None or prior_index is not None:
+            validate_resume_identity(
+                packet,
+                repository_identity=str(prior_repo or packet.repository_identity or ""),
+                index_snapshot_digest=(
+                    str(prior_index) if prior_index is not None
+                    else packet.index_snapshot_digest
+                ),
+                selection_policy_identity=(
+                    dict(prior_policy) if isinstance(prior_policy, Mapping)
+                    else selection_policy_identity
+                ),
+                workspace_epoch=prior_epoch,
+            )
         self.context_packet = packet
         return self._orientation_view(packet, fallback_reason=reason)
 
@@ -1678,7 +2102,10 @@ class HarnessSession:
             return self._bind_no_index_fallback(cause)
         repo_map = mapped.value
         try:
-            epoch = self._epoch_from_repo_map(repo_map, compiled_at_turn=self.turns_consumed())
+            epoch = self._epoch_from_repo_map(
+                repo_map,
+                compiled_at_turn=0 if self.task.resume_state is not None else self.turns_consumed(),
+            )
         except ContextPacketError as exc:
             return self._bind_no_index_fallback(str(exc))
         selected: list[Mapping[str, Any]] = [
@@ -1703,26 +2130,6 @@ class HarnessSession:
              "source": item.source_path, "estimated_tokens": 5}
             for item in repo_map.tests
         )
-        selection_policy_identity = {
-            "policyId": "agency.context-compiler/default",
-            "policyVersion": CONTEXT_POLICY_VERSION,
-        }
-        packet = build_context_packet(
-            task_digest=digest_of({"runId": self.task.run_id, "brief": self.task.brief}),
-            repository_snapshot=repo_map.source_revision,
-            provider=repo_map.adapter_id,
-            provider_version="1",
-            query_digest=digest_of({"brief": self.task.brief}),
-            budget_tokens=4000,
-            selected=selected,
-            index_snapshot_digest=repo_map.source_revision,
-            reserve_tokens=1000,
-            repository_identity=repo_map.source_revision,
-            selection_policy_identity=selection_policy_identity,
-            workspace_epoch=epoch,
-            require_epoch=True,
-            map_truncated=bool(repo_map.truncated),
-        )
         prior = self.task.resume_state if isinstance(self.task.resume_state, Mapping) else {}
         prior_repo = prior.get("repositoryIdentity")
         prior_policy = prior.get("selectionPolicyIdentity")
@@ -1731,6 +2138,29 @@ class HarnessSession:
         prior_epoch = (
             WorkspaceEpoch.from_mapping(prior_epoch_raw)
             if isinstance(prior_epoch_raw, Mapping) else None
+        )
+        selection_policy_identity = (
+            dict(prior_policy) if isinstance(prior_policy, Mapping)
+            else {
+                "policyId": "agency.context-compiler/default",
+                "policyVersion": CONTEXT_POLICY_VERSION,
+            }
+        )
+        packet = build_context_packet(
+            task_digest=digest_of({"runId": self.task.run_id, "brief": self.task.brief}),
+            repository_snapshot=repo_map.source_revision,
+            provider=repo_map.adapter_id,
+            provider_version="1",
+            query_digest=digest_of({"brief": self.task.brief}),
+            budget_tokens=4000,
+            selected=selected,
+            index_snapshot_digest=str(prior_index) if prior_index is not None else repo_map.source_revision,
+            reserve_tokens=1000,
+            repository_identity=str(prior_repo) if prior_repo is not None else repo_map.source_revision,
+            selection_policy_identity=selection_policy_identity,
+            workspace_epoch=epoch,
+            require_epoch=True,
+            map_truncated=bool(repo_map.truncated),
         )
         if prior_repo is not None or prior_policy is not None or prior_index is not None:
             validate_resume_identity(
@@ -1776,11 +2206,28 @@ class HarnessSession:
         if request.action in {"read", "search"} or request.action == "fs.read":
             path = request.args.get("path")
             if isinstance(path, str) and path and not path.startswith(("/", "\\")):
-                self._completion_inspected_files.add(path.replace("\\", "/"))
-        if request.action in {"patch", "patch.apply", "fs.patch", "write", "fs.write", "delete"}:
+                normalized = path.replace("\\", "/")
+                self._completion_inspected_files.add(normalized)
+                self._completion_inspection_receipts[normalized] = self._workspace_digest()
+        is_str_replace = (
+            request.action == "str_replace"
+            or request.args.get("action") == "str_replace"
+            or "edits" in request.args
+        )
+        if request.action in {"patch", "patch.apply", "fs.patch", "write", "fs.write", "delete"} or is_str_replace:
+            changed_paths: list[str] = []
             path = request.args.get("path")
-            if isinstance(path, str) and path and not path.startswith(("/", "\\")):
-                self._completion_changed_files.add(path.replace("\\", "/"))
+            if isinstance(path, str):
+                changed_paths.append(path)
+            edits = request.args.get("edits")
+            if isinstance(edits, (list, tuple)):
+                changed_paths.extend(
+                    edit.get("path") for edit in edits
+                    if isinstance(edit, Mapping) and isinstance(edit.get("path"), str)
+                )
+            for changed_path in changed_paths:
+                if changed_path and not changed_path.startswith(("/", "\\")):
+                    self._completion_changed_files.add(changed_path.replace("\\", "/"))
             self._refresh_sigma()
             self._refresh_index_after_write()
             artifacts = getattr(self, "artifacts", None)
@@ -1792,6 +2239,18 @@ class HarnessSession:
                      "resultDigest": outcome.result_digest},
                     turn=self.turns_consumed(),
                 )
+            # DIR-D1. The settled surface becomes durable here, at the one
+            # mediated boundary that knows the effect actually landed. The
+            # in-memory `_completion_changed_files` set is re-published in
+            # full rather than as a delta: a fresh process folds the LAST
+            # surface fact, so an incremental fact would reconstruct only the
+            # final file of a multi-file candidate.
+            self._append_change_surface(request)
+        if request.action == "task.revise":
+            # `_TaskReviseEffect` has already appended the existing PlanRevised
+            # carrier through the sole writer. Re-fold before the next proposal
+            # so the task revision becomes current L5 state in this episode.
+            self._refresh_sigma()
         if not is_verification:
             return
         argv = verification_argv(request.args)
@@ -1810,6 +2269,13 @@ class HarnessSession:
             task_digest=self._current_task_digest(),
         )
         self._completion_verification_subject = subject
+        observed_counts = parse_observed_test_counts(detail)
+        self._completion_observed_test_count = (
+            max(0, observed_counts.executed)
+            if observed_counts.executed is not None
+            else (max(0, observed_counts.collected)
+                  if observed_counts.collected is not None else None)
+        )
         self._completion_verification = VerificationReceipt(
             exit_code=exit_code,
             executed_test_count=_observed_test_count(detail),
@@ -1850,6 +2316,7 @@ class HarnessSession:
                 ),
                 "errors": 0,
             }
+        self._append_verification_record()
         self._refresh_sigma()
         if previous_verification is not None and self._completion_verification.passed:
             self._completion_redundant_verifications += 1
@@ -1886,13 +2353,120 @@ class HarnessSession:
                         evictable=False,
                     )
 
+    def _carrier_bindings_or_latch(self, kind: str, payload: Mapping[str, Any]) -> bool:
+        """Whether every identity binding in a DIR-D1 carrier is bound.
+
+        A carrier whose bindings are unbound is not a weaker fact, it is a
+        different one: replay would accept it and compare it against nothing.
+        Fail closed rather than append a fact whose subject cannot be checked.
+        """
+        unbound = sorted(
+            key for key, value in payload.items()
+            if key.endswith("Digest") and value is not None
+            and not str(value).startswith("sha256:")
+        )
+        if not unbound:
+            return True
+        self._durable_carrier_append_error = (
+            f"{kind}: unbound identity bindings {unbound}")
+        return False
+
+    def _latch_carrier_failure(self, kind: str, exc: BaseException) -> None:
+        """Record why a carrier append failed, so no next boundary proceeds."""
+        self._durable_carrier_append_error = f"{kind}: {exc}"
+
+    def _append_change_surface(self, request: EffectRequest) -> None:
+        """Record the complete settled change surface, deletions included.
+
+        `emit_kind` raises on a rejected store append and on a writer the kind
+        does not belong to. Neither is swallowed: `WriterAuthorityError` is a
+        composition defect and propagates unchanged, while a durable-write
+        failure latches and then re-raises, so the caller's turn cannot report
+        success over a fact the ledger never accepted.
+        """
+        surface = sorted(self._completion_changed_files)
+        if not surface:
+            return
+        deleted = sorted(
+            path for path in surface if not (self.repo / path).exists()
+        )
+        payload = {
+            "taskDigest": self._current_task_digest(),
+            # The postimage this surface describes. A later verification whose
+            # own `workspaceDigest` differs from this is evidence about a
+            # candidate that no longer exists -- which is what the fold uses
+            # to refuse a stale receipt on replay.
+            "candidateDigest": self._workspace_digest(),
+            "effectDescriptorDigest": descriptor_of(request.action, request.args),
+            "changeSurface": surface,
+            "deletedPaths": deleted,
+        }
+        if not self._carrier_bindings_or_latch("ChangeSurfaceUpdated", payload):
+            raise RuntimeError(self._durable_carrier_append_error)
+        try:
+            self.ledger.emit_kind(
+                "ChangeSurfaceUpdated",
+                run_id=self.task.run_id,
+                principal=self.task.principal,
+                episode_id=self.task.episode_id,
+                payload=payload,
+            )
+        except WriterAuthorityError:
+            raise
+        except Exception as exc:
+            self._latch_carrier_failure("ChangeSurfaceUpdated", exc)
+            raise
+
+    def _append_verification_record(self) -> None:
+        """Record the observed verification, never an evaluator verdict."""
+        receipt = self._completion_verification
+        subject = self._completion_verification_subject
+        if receipt is None or subject is None:
+            return
+        # Absent knowledge stays absent, and observed zero stays zero.
+        # `receipt.executed_test_count` is deliberately lossy -- it is an `int`
+        # that reports 0 for "no count printed" and for "ran zero tests" alike,
+        # which is the right fail-closed input to the admission gate but the
+        # wrong thing to make durable. `parse_observed_test_counts` is the one
+        # authority that keeps the two apart ("None means unknown, never
+        # invented"), so the carrier binds its answer, not the collapsed one.
+        observed = self._completion_observed_test_count
+        payload = {
+            "taskDigest": receipt.task_digest,
+            "compositionDigest": receipt.composition_digest,
+            "workspaceDigest": receipt.workspace_digest,
+            "verificationSubjectDigest": receipt.verification_subject_digest,
+            "argv": list(subject.argv),
+            "exitCode": int(receipt.exit_code),
+            "observedTestCount": observed,
+            "resultArtifactDigest": receipt.receipt_digest or None,
+        }
+        if not self._carrier_bindings_or_latch("VerificationRecorded", payload):
+            raise RuntimeError(self._durable_carrier_append_error)
+        try:
+            self.ledger.emit_kind(
+                "VerificationRecorded",
+                run_id=self.task.run_id,
+                principal=self.task.principal,
+                episode_id=self.task.episode_id,
+                payload=payload,
+            )
+        except WriterAuthorityError:
+            raise
+        except Exception as exc:
+            self._latch_carrier_failure("VerificationRecorded", exc)
+            raise
+
     def _refresh_sigma(self) -> None:
         """Recompile L4 from the live fold after a write or verification."""
         operator = getattr(self, "operator", None)
         assembler = getattr(operator, "set_task_state", None)
         if not callable(assembler):
             return
-        read = self.ports.store.read(EventRange(episode_id=self.task.episode_id))
+        read = self.ports.store.read(EventRange(
+            episode_id=self.task.episode_id,
+            project_id=self.task.project_id,
+        ))
         events = list(read.value or ()) if getattr(read, "ok", False) else []
         if self.task.resume_state and not events:
             assembler(dict(self.task.resume_state))
@@ -1902,50 +2476,16 @@ class HarnessSession:
 
     def _changed_implementation_is_stub(self) -> bool:
         """Whether a changed non-test Python implementation is still a stub."""
-        candidates = [
-            self.repo / relative
-            for relative in self._completion_changed_files
+        paths = tuple(
+            relative for relative in self._completion_changed_files
             if "test" not in Path(relative).name.lower()
             and Path(relative).suffix == ".py"
-        ]
-        for candidate in candidates:
-            try:
-                tree = ast.parse(candidate.read_text(encoding="utf-8"))
-            except (OSError, SyntaxError, UnicodeError):
-                continue
-            for node in ast.walk(tree):
-                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                    body = list(node.body)
-                    if body and all(
-                        isinstance(item, ast.Pass)
-                        or (
-                            isinstance(item, ast.Raise)
-                            and isinstance(item.exc, (ast.Name, ast.Call))
-                            and (
-                                getattr(item.exc, "id", "") == "NotImplementedError"
-                                or getattr(getattr(item.exc, "func", None), "id", "")
-                                == "NotImplementedError"
-                            )
-                        )
-                        for item in body
-                    ):
-                        return True
-        return False
+        )
+        return analyze_candidate(self.repo, paths).contains_stub
 
     def _completion_structure_is_valid(self) -> bool:
         """Check file presence and Python syntax independently of test results."""
-        if not self._completion_changed_files:
-            return False
-        for relative in self._completion_changed_files:
-            candidate = self.repo / relative
-            if not candidate.is_file():
-                return False
-            if candidate.suffix == ".py":
-                try:
-                    ast.parse(candidate.read_text(encoding="utf-8"))
-                except (OSError, SyntaxError, UnicodeError):
-                    return False
-        return True
+        return analyze_candidate(self.repo, self._completion_changed_files).valid
 
     def _freeze_tamper_shield(self) -> TestTamperShield | None:
         """Hash the IndexPort-enumerated oracle set for this workspace (T-18).
@@ -1962,11 +2502,97 @@ class HarnessSession:
             return TestTamperShield(
                 workspace=self.repo, frozen_test_digests={}, enumeration_failed=True)
 
+    def _caller_admission_evidence(self) -> Any:
+        """Collect candidate-bound caller observations for T-83b's pure policy."""
+        from ..agency.multi_file_completeness import (
+            CallerAdmissionEvidence,
+            omit_uninspected_caller,
+        )
+
+        candidate_identity = (
+            self._current_task_digest(),
+            self.run_plan.composition_digest if self.run_plan is not None else self.harness.composition_digest,
+            self._workspace_digest(),
+        )
+        unresolved = bool(
+            getattr(self.index_selection, "unresolved_coverage", False)
+            or getattr(self.index, "unresolved_coverage", False)
+        )
+        source_identity: WorkspaceEpoch | None = None
+        symbols: list[Any] = []
+        callers: list[Any] = []
+        if self.index is None:
+            unresolved = True
+        else:
+            try:
+                source_identity = self.current_workspace_epoch()
+            except ContextPacketError:
+                unresolved = True
+            for path in sorted(self._completion_changed_files):
+                result = self.index.symbols(path=path)
+                if not result.ok:
+                    unresolved = True
+                    continue
+                # Leading underscores are the portable minimum signal that a
+                # definition is not a public API. Everything else is kept
+                # conservative until a richer language visibility fact exists.
+                symbols.extend(
+                    symbol for symbol in (result.value or ())
+                    if not str(getattr(symbol, "name", "")).startswith("_")
+                )
+            unique_symbols = {
+                (item.path, item.line, item.name, item.kind): item for item in symbols
+            }
+            symbols = [unique_symbols[key] for key in sorted(unique_symbols)]
+            for symbol in symbols:
+                result = self.index.get_callers(symbol.name)
+                if not result.ok:
+                    unresolved = True
+                    continue
+                callers.extend(result.value or ())
+
+        unique_callers = {
+            (item.path, item.line, item.name, item.kind): item for item in callers
+        }
+        caller_values = [unique_callers[key] for key in sorted(unique_callers)]
+        inspected: list[Any] = []
+        updated: list[Any] = []
+        inspection_receipts: list[tuple[Any, str]] = []
+        update_receipts: list[tuple[Any, str]] = []
+        omissions: list[str] = []
+        current_tree = candidate_identity[2]
+        for caller in caller_values:
+            path = str(caller.path)
+            if path in self._completion_changed_files:
+                updated.append(caller)
+                update_receipts.append((caller, current_tree))
+            elif path in self._completion_inspection_receipts:
+                inspected.append(caller)
+                inspection_receipts.append(
+                    (caller, self._completion_inspection_receipts[path]))
+            else:
+                omissions.append(omit_uninspected_caller(caller))
+        return CallerAdmissionEvidence(
+            changed_public_symbols=tuple(symbols),
+            inspected_callers=tuple(inspected),
+            updated_callers=tuple(updated),
+            inspection_receipts=tuple(inspection_receipts),
+            update_receipts=tuple(update_receipts),
+            omissions=tuple(sorted(set(omissions))),
+            candidate_identity=candidate_identity,
+            source_identity=source_identity,
+            unresolved_coverage=unresolved,
+        )
+
     def _admit_completion(self, _episode: Any, _proposal: Any) -> AdmissionVerdict:
         """Apply the coding completion contract before reducing ``finish``."""
         policy = self.ports.completion_policy or self._completion_gate
         packet = self.context_packet
-        if packet is None:
+        if (
+            self.index is None
+            or packet is None
+            or (INDEX_PORT_UNBOUND in getattr(packet, "omissions", ()))
+        ):
             return AdmissionVerdict(
                 False,
                 "INDEX_UNBOUND",
@@ -2041,14 +2667,31 @@ class HarnessSession:
             },
         )
         if isinstance(verdict, AdmissionVerdict):
-            return verdict
-        if isinstance(verdict, Mapping):
-            return AdmissionVerdict(
+            admission = verdict
+        elif isinstance(verdict, Mapping):
+            admission = AdmissionVerdict(
                 bool(verdict.get("admissible", verdict.get("admitted", False))),
                 str(verdict.get("reason", "COMPLETION_POLICY_REJECTED")),
                 verdict.get("rejection_feedback"),
             )
-        return AdmissionVerdict(False, "COMPLETION_POLICY_INVALID_VERDICT")
+        else:
+            return AdmissionVerdict(False, "COMPLETION_POLICY_INVALID_VERDICT")
+        if not admission.admissible or self.ports.caller_admission is None:
+            return admission
+        evidence = self._caller_admission_evidence()
+        caller_verdict = self.ports.caller_admission(
+            evidence,
+            verification_passed=bool(
+                self._completion_verification and self._completion_verification.passed),
+            verification_candidate_identity=evidence.candidate_identity,
+        )
+        if bool(getattr(caller_verdict, "admissible", False)):
+            return admission
+        return AdmissionVerdict(
+            False,
+            str(getattr(caller_verdict, "reason", "CALLER_ADMISSION_INVALID_VERDICT")),
+            getattr(caller_verdict, "rejection_feedback", None),
+        )
 
 
 def _admit_turn_result(operator: _LayeredOperator, turn: int, result: Any,
@@ -2232,3 +2875,22 @@ def _with_diff_headers(request: EffectRequest) -> EffectRequest:
         # untouched is correct -- normalisation is a convenience for real
         # proposals, never a precondition of dispatch.
         return request
+
+
+def _model_pricing(model: Any) -> tuple[int, int] | None:
+    """Micro-USD per million prompt/completion tokens, or `None` when unknown.
+
+    `None` is not "free". It means the USD dimension cannot be bounded before
+    the call, so `InferenceMeter` bounds tokens exactly and settles USD from
+    whatever the provider reports afterwards. Representing an unpriced route as
+    zero is precisely the reporting `RUN-12` forbids.
+    """
+    pricing = getattr(model, "pricing", None)
+    if isinstance(pricing, (tuple, list)) and len(pricing) >= 2:
+        try:
+            prompt, completion = int(pricing[0]), int(pricing[1])
+        except (TypeError, ValueError):
+            return None
+        if prompt >= 0 and completion >= 0:
+            return (prompt, completion)
+    return None

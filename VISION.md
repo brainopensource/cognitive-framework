@@ -10,7 +10,7 @@ canonical_for:
 status: locked
 owner: principal-systems-architect
 version: "0.9.0b1"
-last_verified: 2026-08-26
+last_verified: 2026-09-12
 locked_by: ADR-0095+ADR-0096+ADR-0097+ADR-0100+ADR-0101+ADR-0102
 read_when:
   - resolving-any-architectural-authority-conflict
@@ -39,10 +39,10 @@ measure, or schedule this Vision.
 | # | Layer | Documents | Owns |
 |---|---|---|---|
 | 0 | **Vision (constitutional)** | `VISION.md` | Architectural identity, ontology, product principles, non-negotiable direction |
-| 1 | **Law (normative)** | [`docs/execution/spec.md`](docs/execution/spec.md) | Current system requirements, invariants, RFC-2119 obligations that realize the Vision |
+| 1 | **Law (normative)** | [`docs/execution/main/spec.md`](docs/execution/main/spec.md) | Current system requirements, invariants, RFC-2119 obligations that realize the Vision |
 | 2 | **Architecture & product** | [`docs/architecture/`](docs/architecture/), [`docs/backend/`](docs/backend/), [`docs/frontend/`](docs/frontend/), [`docs/product/`](docs/product/), `schemas/` | Wire-level and component realization of the law, including architectural rationale (DEC-01–DEC-11) |
-| 3 | **Sequencing** | [`docs/execution/milestones.md`](docs/execution/milestones.md), [`backlog.md`](docs/execution/backlog.md) | Delivery gates and stable work packages |
-| 4 | **Authorization** | [`docs/execution/tasks.md`](docs/execution/tasks.md) | Flat work tree that authorizes remaining implementation (`active.md` is a historical name; the file is absent) |
+| 3 | **Sequencing** | [`docs/execution/main/milestones.md`](docs/execution/main/milestones.md), [`backlog.md`](docs/execution/main/backlog.md) | Delivery gates and stable work packages |
+| 4 | **Authorization** | [`docs/execution/main/tasks.md`](docs/execution/main/tasks.md) | Flat work tree that authorizes remaining implementation (`active.md` is a historical name; the file is absent) |
 | 5 | **Communication** | `README.md`, [`docs/theory/`](docs/theory/), [`docs/research/`](docs/research/), [`docs/reports/`](docs/reports/) | Current state and orientation; introduces **no** independent architecture |
 
 Three rules follow from this ladder:
@@ -84,6 +84,16 @@ ADR-0096 and ADR-0097 bind the following interpretations throughout this Vision:
   independent attestation, and accepted closure are distinct states.
 - Durable memory and promotion remain subordinate capabilities: authorization precedes retrieval,
   and an immutable composition is promoted or rolled back only by separated authorities.
+
+## Ratified present-state realization & operational clarifications (v0.9.3, 2026-09-12)
+
+The constitutional requirements of this Vision are realized in the current codebase under the following concrete operational facts:
+
+- **Hexagonal Production Truth (`vanguard/packages/`)**: The system of record strictly enforces the boundary flow `domain ← ports ← kernel ← agency ← runtime → adapters`. Domain objects remain zero-dependency pure Python; adapters never import kernel or agency.
+- **TCB Budget & Invariant I-7 (`vanguard/packages/kernel/`)**: The domain-blind Trusted Computing Base is strictly maintained at $\le 1438$ LOC (currently 1386 LOC across 9 single-responsibility modules). Privileged side-effects flow exclusively through the 13-stage dispatch pipeline (S0–S12) with intent logging (`EffectStarted` fsync) before physical execution.
+- **Causal State of Record**: State is strictly an event-sourced fold over an append-only SQLite WAL ledger (`mhf.event/2`), enabling deterministic cold replay (`RF-25`) and discardable snapshot checkpoints.
+- **Universal Agent Capability Layer (`.agents/`)**: Reusable skills, open-loop techniques, and closed-loop proficiencies are organized under `.agents/` and registered into runtime via `vanguard/packages/runtime/agent_plugins.py`, bounded by the prompt prefix headroom constraint ($W12-A \le 4096$ characters).
+- **Present Operational Gate (`MS-CONTROL`)**: Historical foundation gates M-0 through M-5a and reliability gates `MS-BASELINE`, `MS-CONTEXT`, and `MS-RESUME` are closed on `2989d57d`. The present immediate empirical milestone is `MS-CONTROL` (qualified single-controller Coding Max on $n=30$ L2 tasks, Wilson 95% LB $\ge 0.40$, zero observed false completions). Governed learning (M-8), installable beta (M-9), and general release (M-10) remain strictly gated by Invariants G-1 and G-2.
 
 ---
 
@@ -476,6 +486,8 @@ Essa é a principal justificativa para manter o kernel mínimo: quanto menos com
 A documentação da v0.7+ deve refletir essa tese de maneira inequívoca.
 
 O roadmap recomendado começa por **M-4**, com um coding agent útil e observabilidade de trajetória desde o primeiro dia. Depois vem **M-5a**, formalizando AgentView e agent state como projections event-sourced e estabilizando um baseline experimental imutável, revisado e verificável. **ADR-0102 registra que o ref histórico `M-5A-BASE-v2` não é esse controle e exige `CONVERGENCE-BASE-v1` como sucessor.** A partir do baseline válido, **M-5b** tenta falsificar a generalidade em um segundo domínio enquanto **M-6** implementa recursive delegation por nested lineages em uma lane independente. **M-6.5** introduz adaptive strategy e meta-control como policy/reducer/plugin. **M-7** introduz declarative topologies. **M-8** consolida memory, retrieval, skills e learning. **M-9/M-10** permanecem horizontes de compatibilidade até o aceite independente de M-8. A antiga lane de concurrency measurement deve permanecer identificável historicamente e terminar em uma decisão explícita de implementação, simplificação ou cancelamento.
+
+*Nota de Realização Presente (v0.9.3, 2026-09-12):* Os marcos fundacionais M-0 a M-5a foram formalmente concluídos e reconciliados. O foco empírico imediato na v0.9.3 concentra-se na qualificação do Coding Max monoprocesso (`MS-CONTROL`, $n=30$ tarefas L2 congeladas, Wilson 95% LB $\ge 0.40$), antes da progressão para memória governada (M-8), beta operacional (M-9) e release final (M-10).
 
 Essa reorganização deve ser refletida em `README`, Product Vision, `SPEC.md`, architecture documentation, protocols, milestone definitions, sprint boards e novos ADRs. ADRs antigos permanecem como provenance histórica; novas decisões supersedem apenas aquilo que realmente mudou.
 

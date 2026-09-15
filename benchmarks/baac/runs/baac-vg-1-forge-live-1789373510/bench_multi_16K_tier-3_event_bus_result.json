@@ -1,0 +1,66 @@
+{
+  "challengeId": "bench_multi_16K_tier-3_event_bus",
+  "tier": "tier-3",
+  "scope": "multi",
+  "contextBracket": "16K",
+  "preset": "vg-1-forge",
+  "model": "deepseek/deepseek-v4-flash-0731",
+  "mode": "live",
+  "status": "PASS",
+  "disposition": "passed",
+  "attribution": "PASS",
+  "turns": 10,
+  "promptTokens": 15574,
+  "completionTokens": 2414,
+  "totalTokens": 17988,
+  "costUsd": 0.000745,
+  "durationSeconds": 63.13,
+  "changedFiles": [
+    "src/event_bus.py",
+    "verify_event_bus.py"
+  ],
+  "diffPatch": "--- a/event_bus.py\n+++ b/event_bus.py\n@@ -1,2 +1,25 @@\n class EventBus:\n-    pass\n+    \"\"\"A simple publish/subscribe event bus.\"\"\"\n+\n+    def __init__(self):\n+        self._subscriptions = {}  # topic -> {subscription_id: handler}\n+        self._next_id = 1\n+\n+    def subscribe(self, topic, handler):\n+        \"\"\"Subscribe handler to topic; returns a unique subscription id.\"\"\"\n+        subscription_id = self._next_id\n+        self._next_id += 1\n+        self._subscriptions.setdefault(topic, {})[subscription_id] = handler\n+        return subscription_id\n+\n+    def publish(self, topic, payload):\n+        \"\"\"Deliver payload to all handlers subscribed to topic.\"\"\"\n+        for handler in list(self._subscriptions.get(topic, {}).values()):\n+            handler(payload)\n+\n+    def unsubscribe(self, subscription_id):\n+        \"\"\"Remove the subscription with the given id.\"\"\"\n+        for handlers in self._subscriptions.values():\n+            if subscription_id in handlers:\n+                del handlers[subscription_id]\n+                return",
+  "oracle": {
+    "passed": true,
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "test_bus (__main__.TestEventBus.test_bus) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+    "durationSeconds": 0.031,
+    "error": null,
+    "assertionCount": 1,
+    "failingAssertions": []
+  },
+  "aiJudgeScore": null,
+  "diagnosis": "All falsifiers green",
+  "metadata": {
+    "id": "bench_multi_16K_tier-3_event_bus",
+    "name": "Asynchronous In-Memory Event Bus",
+    "scope": "multi",
+    "context_bracket": "16K",
+    "tier": "tier-3",
+    "difficulty": 3,
+    "timeout_seconds": 35,
+    "entrypoint": "src/main.py",
+    "eval_type": "oracle",
+    "tags": [
+      "events",
+      "pubsub",
+      "patterns"
+    ],
+    "metadata": {
+      "schema": "aether.baac.challenge/1"
+    },
+    "cli_args": {
+      "command": "run",
+      "preset": "vg-1-forge",
+      "mode": "live",
+      "model": "deepseek/deepseek-v4-flash-0731",
+      "tier": "tier-3",
+      "single": null,
+      "max_turns": 10,
+      "max_requests": 12,
+      "budget": 0.02,
+      "keep_scratch": false
+    }
+  }
+}

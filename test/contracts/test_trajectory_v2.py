@@ -31,7 +31,12 @@ from test.fixtures.artifact_provenance_fixtures import (
 from vanguard.packages.domain.canonicalisation.digest import digest_of
 from vanguard.packages.kernel.model import Event
 from vanguard.packages.runtime.root import TaskContext
-from vanguard.packages.runtime.trajectory import assemble_trajectory
+from vanguard.packages.agency.episode.state import RunTermination
+from vanguard.packages.runtime.trajectory import (
+    TRAJECTORY_OUTCOME_VALUES,
+    assemble_trajectory,
+    project_trajectory_outcome,
+)
 from vanguard.packages.runtime.trajectory_reader import (
     TrajectoryReader,
     diff_trajectories,
@@ -161,6 +166,102 @@ class TestTrajectoryV2Contract(unittest.TestCase):
         self.assertEqual(degraded["capture"]["status"], "incomplete")
         self.assertFalse(degraded["capture"]["required"])
         self.assertEqual(degraded["capture"]["degradation_reason"], "storage_disk_full")
+
+
+class TestTrajectoryOutcomeIsNeverFabricatedSuccess(unittest.TestCase):
+    """NT-B04 / EW-9.1 on the benchmark writer axis, for /1 and /2 alike.
+
+    Trajectories are what benchmark rows, evidence bundles and convergence
+    baselines are folded from. `abstained` used to be written into this axis
+    as `completed`, so a refusal read as a success everywhere downstream --
+    the surface NT-B04 names explicitly beside the facade and the CLI mapper.
+
+    Every assertion below is behavioural: it calls `assemble_trajectory` and
+    reads the emitted payload. Restoring `"abstained": "completed"` in
+    `_TRAJECTORY_OUTCOMES` fails these outright, at both schema versions and
+    independently of each other.
+    """
+
+    def _assemble(self, terminal: object, schema_version: str) -> dict[str, Any]:
+        task = TaskContext(brief="refusal probe", repo_path=ROOT,
+                           run_id="run-abstain", episode_id="ep-abstain")
+        return assemble_trajectory(
+            task=task,
+            harness_digest="sha256:" + "0" * 64,
+            terminal=terminal,
+            receipts=(),
+            contexts=(),
+            events=(),
+            verdict=None,
+            schema_version=schema_version,
+        )
+
+    # -- /1 -------------------------------------------------------------
+
+    def test_v1_never_writes_abstention_as_completion(self) -> None:
+        traj = self._assemble(RunTermination.ABSTAINED, "mhf.trajectory/1")
+        self.assertEqual(traj["schema"], "mhf.trajectory/1")
+        self.assertNotEqual(traj["outcome"], "completed")
+        self.assertEqual(traj["outcome"], "aborted")
+        self.assertEqual(_validate_schema(traj, SCHEMA_V1), [])
+
+    def test_v1_still_writes_a_real_completion_as_completed(self) -> None:
+        traj = self._assemble(RunTermination.COMPLETED, "mhf.trajectory/1")
+        self.assertEqual(traj["outcome"], "completed")
+        self.assertEqual(_validate_schema(traj, SCHEMA_V1), [])
+
+    # -- /2 -------------------------------------------------------------
+
+    def test_v2_never_writes_abstention_as_completion(self) -> None:
+        traj = self._assemble(RunTermination.ABSTAINED, "mhf.trajectory/2")
+        self.assertEqual(traj["schema"], "mhf.trajectory/2")
+        self.assertNotEqual(traj["outcome"], "completed")
+        self.assertEqual(traj["outcome"], "aborted")
+        self.assertEqual(_validate_schema(traj, SCHEMA_V2), [])
+
+    def test_v2_still_writes_a_real_completion_as_completed(self) -> None:
+        traj = self._assemble(RunTermination.COMPLETED, "mhf.trajectory/2")
+        self.assertEqual(traj["outcome"], "completed")
+        self.assertEqual(_validate_schema(traj, SCHEMA_V2), [])
+
+    # -- both, and the string form the ledger actually carries -----------
+
+    def test_the_two_schemas_agree_on_every_termination(self) -> None:
+        """A refusal cannot be a success in one schema and not the other."""
+        for terminal in RunTermination:
+            with self.subTest(terminal=terminal.value):
+                v1 = self._assemble(terminal, "mhf.trajectory/1")["outcome"]
+                v2 = self._assemble(terminal, "mhf.trajectory/2")["outcome"]
+                self.assertEqual(v1, v2)
+                self.assertIn(v1, TRAJECTORY_OUTCOME_VALUES)
+                if terminal is not RunTermination.COMPLETED:
+                    self.assertNotEqual(v1, "completed", terminal.value)
+
+    def test_a_bare_terminal_string_projects_identically_to_the_enum(self) -> None:
+        """Writers hand this axis both forms; neither may be the lenient one."""
+        for terminal in RunTermination:
+            with self.subTest(terminal=terminal.value):
+                self.assertEqual(
+                    project_trajectory_outcome(terminal),
+                    project_trajectory_outcome(terminal.value),
+                )
+        self.assertEqual(project_trajectory_outcome("ABSTAINED"), "aborted")
+
+    def test_only_completed_reaches_the_success_value(self) -> None:
+        """The success value has exactly one preimage in the whole vocabulary."""
+        preimages = [t.value for t in RunTermination
+                     if project_trajectory_outcome(t) == "completed"]
+        self.assertEqual(preimages, ["completed"])
+
+    def test_an_unknown_termination_is_aborted_not_completed(self) -> None:
+        self.assertEqual(project_trajectory_outcome("a-terminal-from-2030"), "aborted")
+
+    def test_no_disposition_is_synthesised_onto_the_trajectory(self) -> None:
+        """EW-9.1: acceptance travels on `verdict`, never on `outcome`."""
+        traj = self._assemble(RunTermination.ABSTAINED, "mhf.trajectory/2")
+        self.assertIsNone(traj["verdict"])
+        self.assertEqual(traj["verdict_absence_reason"], "no_evaluator_bound")
+        self.assertNotIn("disposition", traj)
 
 
 if __name__ == "__main__":

@@ -189,25 +189,41 @@ class CodeDefaultHarnessContract(unittest.TestCase):
     def test_code_default_files_validate_against_schema(self) -> None:
         schema_set = SchemaSet(SCHEMAS)
         schema_set.validate(self.raw, "harness-manifest.schema.json")
-        for tool_file in ("read-tool.json", "search-tool.json", "patch-tool.json", "test-tool.json"):
+        for tool_file in (
+            "read-tool.json", "search-tool.json", "repo-search-symbols-tool.json",
+            "repo-get-callers-tool.json", "repo-get-dependencies-tool.json",
+            "repo-get-tests-tool.json", "patch-tool.json", "test-tool.json",
+            "task-revise-tool.json", "finish-tool.json",
+        ):
             tool_data = json.loads((MANIFESTS / "vg-code-default" / tool_file).read_text())
             self.assertIn("name", tool_data)
             self.assertIn("verb", tool_data)
 
     def test_code_default_contains_typed_tools_and_capabilities(self) -> None:
         components = dict(self.manifest.components)
-        self.assertEqual(len(components["tools"]), 5)
+        self.assertEqual(len(components["tools"]), 10)
         verbs = {cap.verb for cap in self.manifest.capabilities}
         self.assertEqual(
             verbs,
-            {"fs.read", "fs.search", "patch.apply", "proc.exec", "agency.finish"},
+            {
+                "fs.read", "fs.search", "patch.apply", "proc.exec",
+                "repo.search_symbols", "repo.get_callers",
+                "repo.get_dependencies", "repo.get_tests",
+                "task.revise", "agency.finish",
+            },
         )
         sinks = {cap.verb: cap.sink for cap in self.manifest.capabilities}
         self.assertEqual(sinks["fs.read"], "observation")
         self.assertEqual(sinks["fs.search"], "observation")
         self.assertEqual(sinks["patch.apply"], "privileged")
         self.assertEqual(sinks["proc.exec"], "privileged")
-        self.assertEqual(sinks["agency.finish"], "observation")
+        for verb in (
+            "repo.search_symbols", "repo.get_callers",
+            "repo.get_dependencies", "repo.get_tests",
+        ):
+            self.assertEqual(sinks[verb], "observation")
+        self.assertEqual(sinks["task.revise"], "privileged")
+        self.assertEqual(sinks["agency.finish"], "privileged")
 
     def test_composition_digest_is_episode_independent(self) -> None:
         """ADR-0076 §4 / 1.3-A (F-11): see the sibling test on

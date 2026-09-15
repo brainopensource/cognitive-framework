@@ -451,11 +451,8 @@ def verify_baseline_manifest(
         if tree_code == 0:
             tree_sha = tree_out.strip()
             tree_hash = "sha256:" + hashlib.sha256(tree_sha.encode("ascii")).hexdigest()
-            if tree_digest not in (f"sha256:{tree_sha}", tree_hash):
-                if tree_digest != f"sha256:{tree_sha.ljust(64, '0')}" and tree_digest != tree_hash:
-                    reasons.append(f"tree_digest_mismatch: expected={tree_digest} actual={tree_hash}")
-                else:
-                    verified_pins["tree"] = True
+            if tree_digest != tree_hash:
+                reasons.append(f"tree_digest_mismatch: expected={tree_digest} actual={tree_hash}")
             else:
                 verified_pins["tree"] = True
 

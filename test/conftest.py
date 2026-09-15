@@ -1,18 +1,11 @@
 """Test-suite fixtures that keep runs from mutating tracked files.
 
-`tools/002_LLM_API_MOCK/lam.sqlite` is a tracked corpus, and the harness ladder
-opens it for writing at import time. A test run that edits a tracked file makes
-`git status` report work nobody did, and that is how a batch of build artifacts
-was staged by accident once already.
-
-The redirect happens in `pytest_configure` rather than in a fixture because the
-ladder builds its store during module import, which is collection time -- before
-any fixture runs.
+Consolidates setup through `test.establish_test_environment` so both
+`pytest` and `unittest` share identical isolation guarantees.
 """
 
 from __future__ import annotations
 
-import atexit
 import os
 import shutil
 import tempfile
@@ -22,48 +15,58 @@ _ROOT = Path(__file__).resolve().parents[1]
 _TRACKED_LAM_DB = _ROOT / "tools" / "002_LLM_API_MOCK" / "lam.sqlite"
 
 
-def pytest_configure(config) -> None:
-    default_ws = str(Path(tempfile.gettempdir()) / "aether_workspace")
-    ws_root = os.environ.get("AETHER_WORKSPACE_ROOT", default_ws)
-    os.environ["AETHER_WORKSPACE_ROOT"] = ws_root
-    tmp_dir = Path(ws_root) / "tmp"
-    tmp_dir.mkdir(parents=True, exist_ok=True)
-    os.environ.setdefault("TMPDIR", str(tmp_dir))
-    os.environ.setdefault("TMP", str(tmp_dir))
-    os.environ.setdefault("TEMP", str(tmp_dir))
-    os.environ.setdefault("XDG_CACHE_HOME", str(Path(ws_root) / "cache"))
-    os.environ.setdefault("XDG_STATE_HOME", str(Path(ws_root) / "state"))
-
-    if not os.environ.get("LAM_DB_PATH"):
-        directory = tempfile.mkdtemp(prefix="lam-db-", dir=tmp_dir)
-        scratch = Path(directory) / "lam.sqlite"
-        if _TRACKED_LAM_DB.is_file():
-            shutil.copy2(_TRACKED_LAM_DB, scratch)
-        os.environ["LAM_DB_PATH"] = str(scratch)
-        atexit.register(shutil.rmtree, directory, True)
-
-    if not os.environ.get("BAAC_RUNS_DIR"):
-        baac_runs = Path(ws_root) / "baac_runs"
-        baac_runs.mkdir(parents=True, exist_ok=True)
-        os.environ["BAAC_RUNS_DIR"] = str(baac_runs)
+def pytest_configure(config: object = None) -> None:
+    """Configure pytest to reuse the consolidated runner-independent environment."""
+    from test import establish_test_environment
+    establish_test_environment()
 
 
-def probe_bwrap_available() -> bool:
-    """Check if bubblewrap executable is available on PATH and runnable."""
+class ContainmentBlocker(RuntimeError):
+    """Typed blocker raised when required containment or sandbox isolation is unsupported."""
+
+
+def probe_bwrap_containment() -> tuple[bool, str | None]:
+    """Qualify the exact bubblewrap containment operation required by execution.
+
+    Verifies that bubblewrap exists AND can successfully create an unshared
+    user, pid, IPC, and network namespace (including loopback setup via netlink).
+    Returns (True, None) if supported, or (False, failure_reason) if unsupported.
+    """
     bwrap = shutil.which("bwrap")
     if not bwrap:
-        return False
+        return False, "bubblewrap executable (bwrap) not found on PATH"
+
+    true_bin = shutil.which("true") or "/usr/bin/true"
+    # Exact containment operation required: unshare user, network, mounts, and loopback setup
+    cmd = [
+        bwrap,
+        "--unshare-all",
+        "--unshare-user",
+        "--ro-bind", "/", "/",
+        "--",
+        true_bin,
+    ]
     try:
         import subprocess
         res = subprocess.run(
-            [bwrap, "--unshare-user", "--ro-bind", "/usr", "/usr", "--", "/bin/true"],
+            cmd,
             check=False,
             capture_output=True,
-            timeout=2,
+            text=True,
+            timeout=3,
         )
-        return res.returncode == 0
-    except (OSError, Exception):
-        return False
+        if res.returncode == 0:
+            return True, None
+        err = res.stderr.strip() or f"exit code {res.returncode}"
+        return False, f"bubblewrap containment failed: {err}"
+    except Exception as exc:
+        return False, f"bubblewrap containment execution error: {exc}"
+
+
+def probe_bwrap_available() -> bool:
+    """Check if bubblewrap containment is fully supported on the current host."""
+    ok, _ = probe_bwrap_containment()
+    return ok
 
 
 def probe_lda_index_available() -> bool:
@@ -72,17 +75,25 @@ def probe_lda_index_available() -> bool:
     return lda_db.is_file() and lda_db.stat().st_size > 0
 
 
-def require_bwrap() -> None:
-    """Skip test if bubblewrap containment is absent."""
-    import unittest
-    if not probe_bwrap_available():
-        raise unittest.SkipTest("Bubblewrap (bwrap) not available or user namespaces restricted on host")
+def require_bwrap(*, allow_skip: bool = False) -> None:
+    """Ensure bubblewrap containment is available; fail closed with ContainmentBlocker if absent."""
+    ok, reason = probe_bwrap_containment()
+    if not ok:
+        if allow_skip:
+            import unittest
+            raise unittest.SkipTest(f"Bubblewrap containment unavailable: {reason}")
+        raise ContainmentBlocker(f"BLOCKER: Bubblewrap containment unsupported: {reason}")
 
 
-def require_lda() -> None:
-    """Skip test if LDA index is unbuilt."""
-    import unittest
+def require_lda(*, allow_skip: bool = False) -> None:
+    """Ensure LDA index is initialized and non-empty; fail closed if absent (NT-B03)."""
     if not probe_lda_index_available():
-        raise unittest.SkipTest("LDA index (.lda/index.db) not built or empty")
+        msg = "LDA index (.lda/index.db) not built or empty"
+        if allow_skip:
+            import unittest
+            raise unittest.SkipTest(msg)
+        raise RuntimeError(f"BLOCKER: {msg}")
+
+
 
 

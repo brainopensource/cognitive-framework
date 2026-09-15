@@ -62,7 +62,22 @@ class TestModelInvocation(unittest.TestCase):
         self.assertTrue(res.ok)
         self.assertEqual(res.value["args"]["path"], "pkg/parser.py")
 
-    def test_translate_multiple_actions_fails(self):
+    def test_translate_multiple_actions_never_collapses_to_one(self):
+        """Narrowed for `A1`, not relaxed.
+
+        This check was written against a real defect: several tool calls in
+        one reply becoming one effect, with the rest silently dropped, so the
+        model believed it had issued reads it never issued. That defect still
+        reds here -- a multi-call proposal may never translate to a single
+        `effect`, and every call must survive into the result.
+
+        What changed is the disposition of the surviving calls. They now
+        become a parallel observation batch, which the *episode* refuses
+        unless every member is a declared read-only observation
+        (`test/falsifiers/test_parallel_observation.py`). Read-only membership
+        is manifest and kernel authority; the translator only establishes
+        shape (`C-01`).
+        """
         proposal = {
             "text": "",
             "toolCalls": [
@@ -71,6 +86,32 @@ class TestModelInvocation(unittest.TestCase):
             ]
         }
         res = ProposalTranslator.translate(proposal)
+        self.assertTrue(res.ok, res.error if not res.ok else None)
+        self.assertNotEqual(res.value["kind"], "effect")
+        self.assertEqual(res.value["kind"], "observe")
+        self.assertEqual([row["action"] for row in res.value["requests"]],
+                         ["fs.read", "fs.search"])
+
+    def test_translate_refuses_a_completion_beside_another_action(self):
+        """A terminal cannot travel in a batch: the turn it ends is otherwise
+        ambiguous, and completion is not an observation."""
+        proposal = {
+            "text": "",
+            "toolCalls": [
+                {"name": "fs.read", "arguments": {"path": "a.py"}},
+                {"name": "finish", "arguments": {"summary": "done"}},
+            ],
+        }
+        res = ProposalTranslator.translate(proposal, tool_schemas=[
+            {"name": "read", "verb": "fs.read",
+             "schema": {"type": "object",
+                        "properties": {"path": {"type": "string"}},
+                        "required": ["path"]}},
+            {"name": "finish", "verb": "agency.finish",
+             "schema": {"type": "object",
+                        "properties": {"summary": {"type": "string"}},
+                        "required": ["summary"]}},
+        ])
         self.assertFalse(res.ok)
 
     def test_translate_oversized_args_fails(self):

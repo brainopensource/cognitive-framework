@@ -11,6 +11,7 @@ Invariants:
 
 from __future__ import annotations
 
+import ast
 import os
 import re
 from typing import Any, Callable, Mapping, Optional, Sequence
@@ -28,11 +29,19 @@ from ...ports.environment import (
     Reconciliation,
 )
 from ...ports.event_store import Result
+from .hunks import (
+    HunkFailure,
+    apply_hunk_sequence,
+    collect_hunk_body,
+    parse_hunk_header,
+    require_complete_hunk,
+    stale_preimage_kind_message,
+    unique_str_replace,
+)
 
 __all__ = ["FakeEnvironment"]
 
 _DIFF_HEADER = re.compile(r"^diff --git a/(.+) b/(.+)$")
-_HUNK_HEADER = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
 
 
 def _is_safe_relative_path(path: str) -> bool:
@@ -50,6 +59,29 @@ def _is_safe_relative_path(path: str) -> bool:
 def _compute_file_digest(content: str) -> str:
     """Digest of text file content."""
     return digest_bytes(content.encode("utf-8"))
+
+
+def _str_replace_edits(args: Mapping[str, Any]) -> list[dict[str, str]] | None:
+    """Normalize the production single- and multi-edit exact-replace surface.
+
+    The fake is used as a hermetic production double.  It must therefore
+    accept exactly the request shapes that ``GitEnvironment`` accepts rather
+    than turning a five-file transactional request into five unrelated writes.
+    """
+    raw_edits = args.get("edits")
+    if raw_edits is None:
+        raw_edits = (args,)
+    if not isinstance(raw_edits, (list, tuple)) or not raw_edits:
+        return None
+    edits: list[dict[str, str]] = []
+    for raw in raw_edits:
+        if not isinstance(raw, Mapping):
+            return None
+        path, old, new = raw.get("path"), raw.get("old"), raw.get("new")
+        if not all(isinstance(value, str) for value in (path, old, new)):
+            return None
+        edits.append({"path": path, "old": old, "new": new})
+    return edits
 
 
 class FakeEnvironment:
@@ -263,84 +295,33 @@ class FakeEnvironment:
                     orig_lines = old_content.splitlines(keepends=True)
                     pre_digest = _compute_file_digest(old_content)
 
-                # Process hunks
-                new_file_lines: list[str] = []
-                orig_idx = 0
+                hunks: list[tuple[int | None, list[str]]] = []
                 has_hunk = False
 
-                while i < len(lines) and lines[i].startswith("@@"):
-                    has_hunk = True
-                    hunk_match = _HUNK_HEADER.match(lines[i])
-                    hint = None
-                    if hunk_match:
-                        hint = max(int(hunk_match.group(1)) - 1, 0)
-                    elif lines[i].strip() not in ("@@", "@@@"):
-                        return Result.fail("invalid_request", f"malformed hunk header: {lines[i]}")
-                    i += 1
-
-                    body: list[str] = []
-                    while i < len(lines) and not lines[i].startswith("@@") and not lines[i].startswith("--- ") and not lines[i].startswith("diff --git"):
-                        hline = lines[i]
+                while i < len(lines):
+                    if not lines[i].strip():
                         i += 1
-                        if hline[:1] in ("+", "-", " ", "\\"):
-                            body.append(hline)
-                        else:
-                            i -= 1
-                            break
-
-                    expected_old = [line[1:] for line in body if line[:1] in ("-", " ")]
-                    if hint is None and expected_old:
-                        candidates = [
-                            at for at in range(orig_idx, len(orig_lines) - len(expected_old) + 1)
-                            if all(orig_lines[at + n].rstrip("\r\n") == want.rstrip("\r\n")
-                                   for n, want in enumerate(expected_old))
-                        ]
-                        if not candidates:
-                            return Result.fail("conflict", f"patch context not found in {target_path}")
-                        hint = candidates[0]
-                    if hint is not None:
-                        if hint < orig_idx or hint > len(orig_lines):
-                            return Result.fail("conflict", f"hunk starts past end of {target_path}")
-                        new_file_lines.extend(orig_lines[orig_idx:hint])
-                        orig_idx = hint
-
-                    for hline in body:
-                        if hline.startswith("+"):
-                            new_file_lines.append(hline[1:] + "\n")
-                        elif hline.startswith("-"):
-                            # deletion line: check match against original
-                            expected_del = hline[1:]
-                            if orig_idx < len(orig_lines):
-                                actual = orig_lines[orig_idx].rstrip("\r\n")
-                                if actual != expected_del.rstrip("\r\n"):
-                                    return Result.fail("conflict", f"patch deletion mismatch in {target_path}: expected {expected_del!r}, got {actual!r}")
-                                orig_idx += 1
-                            else:
-                                return Result.fail("conflict", f"patch deletion extends past end of {target_path}")
-                        elif hline.startswith(" "):
-                            # context line
-                            expected_ctx = hline[1:]
-                            if orig_idx < len(orig_lines):
-                                actual = orig_lines[orig_idx].rstrip("\r\n")
-                                if actual != expected_ctx.rstrip("\r\n"):
-                                    return Result.fail("conflict", f"patch context mismatch in {target_path}: expected {expected_ctx!r}, got {actual!r}")
-                                new_file_lines.append(orig_lines[orig_idx])
-                                orig_idx += 1
-                            else:
-                                return Result.fail("conflict", f"patch context extends past end of {target_path}")
-                        elif hline.startswith("\\"):
-                            # \ No newline at end of file
-                            continue
-                        else:
-                            return Result.fail("invalid_request", f"malformed hunk line: {hline}")
+                        continue
+                    if not lines[i].startswith("@@"):
+                        break
+                    has_hunk = True
+                    try:
+                        header = lines[i]
+                        hint = parse_hunk_header(header)
+                        i += 1
+                        body, i = collect_hunk_body(lines, i)
+                        require_complete_hunk(body, target_path, header)
+                    except HunkFailure as exc:
+                        return Result.fail(exc.kind, exc.message)
+                    hunks.append((hint, body))
 
                 if not has_hunk and not is_delete:
                     return Result.fail("invalid_request", f"patch file {target_path} contained no hunks")
 
-                # Copy remaining original lines
-                while orig_idx < len(orig_lines):
-                    new_file_lines.append(orig_lines[orig_idx])
-                    orig_idx += 1
+                try:
+                    new_file_lines = apply_hunk_sequence(orig_lines, hunks, target_path)
+                except HunkFailure as exc:
+                    return Result.fail(exc.kind, exc.message)
 
                 if is_delete:
                     planned_files[target_path] = None
@@ -492,6 +473,73 @@ class FakeEnvironment:
         descriptor_digest = digest_of({"verb": req.verb, "action": req.action, "args": req.args})
 
         action = req.action
+        if action == "str_replace":
+            edits = _str_replace_edits(req.args)
+            if edits is None:
+                self._history.pop()
+                return Result.fail("invalid_request", "str_replace requires non-empty string path, old, and new edits")
+            shadow: dict[str, str] = {}
+            original: dict[str, str] = {}
+            order: list[str] = []
+            for edit in edits:
+                path = edit["path"]
+                if not _is_safe_relative_path(path):
+                    self._history.pop()
+                    return Result.fail("denied", f"path traversal escape denied: {path!r}")
+                norm_path = os.path.normpath(path).replace("\\", "/")
+                if norm_path not in shadow:
+                    before = self._files.get(norm_path)
+                    if before is None:
+                        self._history.pop()
+                        return Result.fail(
+                            "PATCH_PREIMAGE_MISMATCH",
+                            f"PATCH_PREIMAGE_MISMATCH for {norm_path}: target file is absent",
+                        )
+                    shadow[norm_path] = before
+                    original[norm_path] = before
+                    order.append(norm_path)
+                try:
+                    shadow[norm_path] = unique_str_replace(
+                        shadow[norm_path], edit["old"], edit["new"], norm_path)
+                except HunkFailure as err:
+                    self._history.pop()
+                    return Result.fail(err.kind, err.message)
+            for norm_path in order:
+                if norm_path.endswith(".py"):
+                    try:
+                        ast.parse(shadow[norm_path], filename=norm_path)
+                    except SyntaxError as exc:
+                        self._history.pop()
+                        return Result.fail(
+                            "invalid_request",
+                            f"SyntaxError in {norm_path}:{exc.lineno}: {exc.msg}",
+                        )
+            affected_resources = tuple(
+                AffectedResource(
+                    resource=norm_path,
+                    change="modified",
+                    pre_digest=_compute_file_digest(original[norm_path]),
+                    post_digest=_compute_file_digest(shadow[norm_path]),
+                )
+                for norm_path in order
+            )
+            stale = stale_preimage_kind_message(affected_resources, req.args)
+            if stale is not None:
+                self._history.pop()
+                return Result.fail(stale[0], stale[1])
+            self._files.update({norm_path: shadow[norm_path] for norm_path in order})
+            return Result.success(
+                EffectReceipt(
+                    descriptor_digest=descriptor_digest,
+                    outcome="ok",
+                    observed_at=observed_at,
+                    result_digest=digest_of({
+                        "resources": [item.resource for item in affected_resources],
+                        "post_digests": [item.post_digest for item in affected_resources],
+                    }),
+                    affected_resources=affected_resources,
+                )
+            )
         if action == "patch" or req.patch is not None:
             patch_content = req.patch or req.args.get("patch", "")
             if not isinstance(patch_content, str):
@@ -503,6 +551,9 @@ class FakeEnvironment:
                     message=sim_res.error.message if sim_res.error else "patch apply failed",
                 )
             planned_files, affected, _, _, _, diff_txt = sim_res.value
+            stale = stale_preimage_kind_message(affected, req.args)
+            if stale is not None:
+                return Result.fail(stale[0], stale[1])
             for target_path, content in planned_files.items():
                 if content is None:
                     self._files.pop(target_path, None)

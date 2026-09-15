@@ -16,6 +16,7 @@ from __future__ import annotations
 import os
 import re
 import shutil
+import stat
 import subprocess
 import tempfile
 from pathlib import Path
@@ -35,6 +36,15 @@ from ...ports.environment import (
     Reconciliation,
 )
 from ...ports.event_store import Result
+from .hunks import (
+    HunkFailure,
+    apply_hunk_sequence,
+    collect_hunk_body,
+    parse_hunk_header,
+    require_complete_hunk,
+    stale_preimage_kind_message,
+    unique_str_replace,
+)
 from .transaction import AtomicMultiFileTransactionManager, FileMutation
 
 __all__ = ["GitEnvironment", "GitEnvironmentAdapter", "GitUnavailableError"]
@@ -50,7 +60,6 @@ class GitUnavailableError(RuntimeError):
     """
 
 _DIFF_HEADER = re.compile(r"^diff --git a/(.+) b/(.+)$")
-_HUNK_HEADER = re.compile(r"^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@")
 #: `ls`/`find` are pure read-only directory-inspection utilities (no write,
 #: network, or credential surface) added after live qualification runs showed
 #: models reaching for `ls` to orient themselves before a directory-listing
@@ -570,134 +579,33 @@ class GitEnvironment:
                     orig_lines = old_content.splitlines(keepends=True)
                     pre_digest = _compute_file_digest(old_content)
 
-                new_file_lines: list[str] = []
-                orig_idx = 0
+                hunks: list[tuple[int | None, list[str]]] = []
                 has_hunk = False
 
-                while i < len(lines) and lines[i].startswith("@@"):
-                    has_hunk = True
-                    hunk_match = _HUNK_HEADER.match(lines[i])
-                    # A header without line numbers (a bare `@@`) is common in
-                    # model-authored diffs. It is not a malformed patch -- it
-                    # is a patch that declines to state *where*, which is
-                    # answerable from the context lines themselves. `patch(1)`
-                    # and `git apply` both locate a hunk by searching for its
-                    # context near the stated offset; requiring the offset to
-                    # be exactly right made this applier stricter than either,
-                    # and it rejected diffs whose content was correct.
-                    hint: int | None = None
-                    if hunk_match:
-                        hunk_start = int(hunk_match.group(1))
-                        hint = max(hunk_start - 1, 0) if hunk_start else 0
-                    elif lines[i].strip() not in ("@@", "@@@"):
-                        return Result.fail(
-                            "invalid_request", f"malformed hunk header: {lines[i]}")
-                    i += 1
-
-                    # Collect the hunk body before applying any of it, so the
-                    # old-file block it expects is known and can be searched
-                    # for. Applying while parsing cannot backtrack.
-                    body: list[str] = []
-                    while i < len(lines) and not lines[i].startswith("@@") \
-                            and not lines[i].startswith("--- ") \
-                            and not lines[i].startswith("diff --git"):
-                        hline = lines[i]
-                        if hline[:1] not in ("+", "-", " ", "\\"):
-                            break
-                        body.append(hline)
+                while i < len(lines):
+                    if not lines[i].strip():
                         i += 1
-
-                    expected_old = [
-                        line[1:] for line in body if line[:1] in ("-", " ")
-                    ]
-
-                    def _matches(at: int) -> bool:
-                        if at < 0 or at + len(expected_old) > len(orig_lines):
-                            return False
-                        return all(
-                            orig_lines[at + n].rstrip("\r\n") == want.rstrip("\r\n")
-                            for n, want in enumerate(expected_old)
-                        )
-
-                    if not expected_old:
-                        # Pure insertion: nothing to anchor on, so the header's
-                        # offset is all there is. Without one, append at the
-                        # current position rather than guessing.
-                        target_idx = hint if hint is not None else orig_idx
-                        if target_idx > len(orig_lines):
-                            return Result.fail(
-                                "conflict",
-                                f"hunk starts past end of {norm_rel} at line {target_idx}")
-                    else:
-                        # Context is the preimage anchor; line numbers are a
-                        # location hint only.  A model may have generated the
-                        # hunk against a slightly older line offset, but it may
-                        # never apply unless every context/removal line matches
-                        # one complete candidate in the current file.
-                        candidates = [
-                            at for at in range(orig_idx, len(orig_lines) - len(expected_old) + 1)
-                            if _matches(at)
-                        ]
-                        if not candidates:
-                            head = expected_old[0].rstrip("\r\n")
-                            return Result.fail(
-                                "conflict",
-                                f"patch context not found in {norm_rel}: no location "
-                                f"matches the hunk beginning {head!r}")
-                        if hint is None and len(candidates) > 1:
-                            # Anchoring must not become guessing. With no line
-                            # hint and several equally good matches, writing to
-                            # the first one silently edits a location the author
-                            # may not have meant -- the exact corruption this
-                            # applier's strictness used to prevent. Refuse, and
-                            # say how to disambiguate.
-                            return Result.fail(
-                                "conflict",
-                                f"ambiguous hunk in {norm_rel}: its context matches "
-                                f"{len(candidates)} locations; supply a hunk header "
-                                "with line numbers or add distinguishing context")
-                        target_idx = (
-                            min(candidates, key=lambda at: abs(at - hint))
-                            if hint is not None else candidates[0])
-
-                    if target_idx < orig_idx:
-                        return Result.fail(
-                            "invalid_request",
-                            f"hunks out of order in {norm_rel} at line {target_idx + 1}")
-                    while orig_idx < target_idx:
-                        new_file_lines.append(orig_lines[orig_idx])
-                        orig_idx += 1
-
-                    for hline in body:
-                        marker, text = hline[:1], hline[1:]
-                        if marker == "+":
-                            new_file_lines.append(text + "\n")
-                        elif marker == "\\":
-                            continue
-                        elif marker in ("-", " "):
-                            if orig_idx >= len(orig_lines):
-                                return Result.fail(
-                                    "conflict",
-                                    f"patch context extends past end of {norm_rel}")
-                            actual = orig_lines[orig_idx].rstrip("\r\n")
-                            if actual != text.rstrip("\r\n"):
-                                # Unreachable once anchored, retained so a
-                                # future change to the search cannot corrupt a
-                                # file silently.
-                                return Result.fail(
-                                    "conflict",
-                                    f"patch context mismatch in {norm_rel}: "
-                                    f"expected {text!r}, got {actual!r}")
-                            if marker == " ":
-                                new_file_lines.append(orig_lines[orig_idx])
-                            orig_idx += 1
+                        continue
+                    if not lines[i].startswith("@@"):
+                        break
+                    has_hunk = True
+                    try:
+                        header = lines[i]
+                        hint = parse_hunk_header(header)
+                        i += 1
+                        body, i = collect_hunk_body(lines, i)
+                        require_complete_hunk(body, norm_rel, header)
+                    except HunkFailure as exc:
+                        return Result.fail(exc.kind, exc.message)
+                    hunks.append((hint, body))
 
                 if not has_hunk and not is_delete:
                     return Result.fail("invalid_request", f"patch file {norm_rel} contained no hunks")
 
-                while orig_idx < len(orig_lines):
-                    new_file_lines.append(orig_lines[orig_idx])
-                    orig_idx += 1
+                try:
+                    new_file_lines = apply_hunk_sequence(orig_lines, hunks, norm_rel)
+                except HunkFailure as exc:
+                    return Result.fail(exc.kind, exc.message)
 
                 if is_delete:
                     planned_files[norm_rel] = None
@@ -860,6 +768,111 @@ class GitEnvironment:
             mutations
         )
 
+    @staticmethod
+    def _str_replace_edits(args: Mapping[str, Any]) -> list[dict[str, str]] | None:
+        """Normalize the single-edit and batched forms into one ordered list.
+
+        T-78 routes exact replacement through the *multi-file* transaction
+        manager, so the request surface has to be able to carry more than one
+        file. The single ``path``/``old``/``new`` form stays valid and is just
+        a one-element batch; ``None`` means the request was malformed.
+        """
+        raw = args.get("edits")
+        if raw is None:
+            path, old, new = args.get("path"), args.get("old"), args.get("new")
+            if not isinstance(path, str) or not isinstance(old, str) or not isinstance(new, str):
+                return None
+            return [{"path": path, "old": old, "new": new}]
+        if isinstance(raw, (str, bytes, Mapping)) or not isinstance(raw, Sequence):
+            return None
+        edits: list[dict[str, str]] = []
+        for entry in raw:
+            if not isinstance(entry, Mapping):
+                return None
+            path, old, new = entry.get("path"), entry.get("old"), entry.get("new")
+            if not isinstance(path, str) or not isinstance(old, str) or not isinstance(new, str):
+                return None
+            edits.append({"path": path, "old": old, "new": new})
+        return edits or None
+
+    def _apply_str_replace(self, req: EffectRequest, descriptor_digest: str, observed_at: str) -> Result[EffectReceipt]:
+        """Apply unique exact replacements as one all-or-nothing 2PC batch.
+
+        Every preimage is resolved against an in-memory shadow before anything
+        reaches disk, so a later edit that is absent, non-unique or syntactically
+        invalid leaves *all* of the batch's files byte-identical to their
+        preimages. Successive edits to the same file compose against the shadow,
+        which keeps each one an exact observation of what it is editing rather
+        than of a state two edits ago.
+        """
+        edits = self._str_replace_edits(req.args)
+        if edits is None:
+            return Result.fail(
+                "invalid_request",
+                "str_replace requires string path, old, and new arguments",
+            )
+        shadow: dict[str, str] = {}
+        preimages: dict[str, str] = {}
+        order: list[str] = []
+        for edit in edits:
+            path = edit["path"]
+            resolved = self._resolve_safe_path(path)
+            if not resolved.ok or resolved.value is None:
+                return Result.fail("denied", f"path traversal escape denied: {path!r}")
+            norm_path = os.path.normpath(path).replace("\\", "/")
+            if norm_path not in shadow:
+                file_obj = resolved.value
+                if not file_obj.is_file():
+                    return Result.fail(
+                        "PATCH_PREIMAGE_MISMATCH",
+                        f"PATCH_PREIMAGE_MISMATCH for {path}: target file is absent",
+                    )
+                before = file_obj.read_text(encoding="utf-8")
+                shadow[norm_path] = before
+                preimages[norm_path] = before
+                order.append(norm_path)
+            try:
+                shadow[norm_path] = unique_str_replace(
+                    shadow[norm_path], edit["old"], edit["new"], norm_path)
+            except HunkFailure as err:
+                return Result.fail(err.kind, err.message)
+        affected = tuple(
+            AffectedResource(
+                resource=norm_path,
+                change="modified",
+                pre_digest=_compute_file_digest(preimages[norm_path]),
+                post_digest=_compute_file_digest(shadow[norm_path]),
+            )
+            for norm_path in order
+        )
+        stale = stale_preimage_kind_message(affected, req.args)
+        if stale is not None:
+            return Result.fail(stale[0], stale[1])
+        transaction = self._apply_multi_file_transaction(
+            {norm_path: shadow[norm_path] for norm_path in order})
+        if not transaction.ok:
+            return Result.fail(
+                transaction.error.kind if transaction.error else "invalid_request",
+                transaction.error.message if transaction.error else "str_replace transaction failed",
+            )
+        return Result.success(
+            EffectReceipt(
+                descriptor_digest=descriptor_digest,
+                outcome="ok",
+                observed_at=observed_at,
+                result_digest=digest_of({
+                    "resources": [
+                        {"resource": item.resource, "post_digest": item.post_digest}
+                        for item in affected
+                    ]
+                }) if len(affected) > 1 else digest_of({
+                    "resource": affected[0].resource,
+                    "post_digest": affected[0].post_digest,
+                }),
+                affected_resources=affected,
+            )
+        )
+
     def apply(self, req: EffectRequest, grant: Optional[Any] = None) -> Result[EffectReceipt]:
         del grant
         disposed_err = self._check_disposed()
@@ -873,6 +886,8 @@ class GitEnvironment:
         descriptor_digest = digest_of({"verb": req.verb, "action": req.action, "args": req.args})
 
         action = req.action
+        if action == "str_replace":
+            return self._apply_str_replace(req, descriptor_digest, observed_at)
         if action == "patch" and req.patch is None and "diff" not in req.args and "content" in req.args:
             action = "write"
 
@@ -888,6 +903,9 @@ class GitEnvironment:
                     message=val_res.error.message if val_res.error else "patch apply failed",
                 )
             planned_files, affected, _, _, _, diff_txt = val_res.value
+            stale = stale_preimage_kind_message(affected, req.args)
+            if stale is not None:
+                return Result.fail(stale[0], stale[1])
             if len(planned_files) > 1:
                 txn_res = self._apply_multi_file_transaction(planned_files)
                 if not txn_res.ok:
@@ -913,8 +931,13 @@ class GitEnvironment:
                     if file_path.exists():
                         file_path.unlink()
                 else:
+                    prior_mode = (
+                        stat.S_IMODE(file_path.stat().st_mode) if file_path.is_file() else None
+                    )
                     file_path.parent.mkdir(parents=True, exist_ok=True)
                     file_path.write_text(content, encoding="utf-8")
+                    if prior_mode is not None:
+                        os.chmod(file_path, prior_mode)
 
             result_digest = digest_of({"affected": [a.resource for a in affected], "diff": diff_txt})
 
@@ -955,9 +978,25 @@ class GitEnvironment:
             is_new = not file_obj.is_file()
             pre_digest = _compute_file_digest(file_obj.read_text(encoding="utf-8")) if not is_new else None
             post_digest = _compute_file_digest(content)
+            stale = stale_preimage_kind_message(
+                (
+                    AffectedResource(
+                        resource=norm_rel,
+                        change="created" if is_new else "modified",
+                        pre_digest=pre_digest,
+                        post_digest=post_digest,
+                    ),
+                ),
+                req.args,
+            )
+            if stale is not None:
+                return Result.fail(stale[0], stale[1])
 
+            prior_mode = stat.S_IMODE(file_obj.stat().st_mode) if file_obj.is_file() else None
             file_obj.parent.mkdir(parents=True, exist_ok=True)
             file_obj.write_text(content, encoding="utf-8")
+            if prior_mode is not None:
+                os.chmod(file_obj, prior_mode)
 
             affected = [
                 AffectedResource(

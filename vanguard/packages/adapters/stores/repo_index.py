@@ -24,7 +24,7 @@ from ...domain.canonicalisation.digest import digest_of
 from ...ports.event_store import Result
 from ...ports.index import DependencyEdge, RepositoryMap, Symbol, TestAssociation
 
-__all__ = ["FileRepoIndex", "InMemoryRepoIndex"]
+__all__ = ["FileRepoIndex", "InMemoryRepoIndex", "workspace_tree_hash"]
 
 #: Definition forms this scan recognises. Adding a language is a row.
 _DEFINITIONS: tuple[tuple[str, str, re.Pattern[str]], ...] = (
@@ -37,7 +37,7 @@ _DEFINITIONS: tuple[tuple[str, str, re.Pattern[str]], ...] = (
 
 _IGNORED = {
     ".git", ".vanguard", ".pytest_cache", "__pycache__", "node_modules",
-    ".venv", "dist", "build",
+    ".venv", "dist", "build", ".cursor", ".lda",
 }
 
 
@@ -180,6 +180,18 @@ class InMemoryRepoIndex:
             return Result.fail("invalid_request", str(exc))
         return Result.success(tuple(item for item in self._tests if not path or item.source_path.startswith(path) or item.test_path.startswith(path)))
 
+    def callers(self, *, symbol: str = "") -> Result[Sequence[Symbol]]:
+        if not symbol:
+            return Result.success(())
+        matching: list[Symbol] = []
+        for path, text in sorted(self._contents.items()):
+            if symbol in text:
+                matching.extend(_symbols_in(path, text.splitlines()))
+        return Result.success(tuple(matching))
+
+    def get_callers(self, symbol: str) -> Result[Sequence[Symbol]]:
+        return self.callers(symbol=symbol)
+
     def repo_map(self, *, token_budget: int = 4000) -> Result[RepositoryMap]:
         if token_budget < 0:
             return Result.fail("invalid_request", "token_budget must be non-negative")
@@ -198,6 +210,8 @@ class InMemoryRepoIndex:
 
 class FileRepoIndex:
     """The real one. Walks a workspace and records definitions by regex."""
+
+    unresolved_coverage: bool = True
 
     def __init__(self, max_bytes: int = 1_048_576, *, max_files: int = 10_000,
                  max_symbols: int = 20_000, max_edges: int = 20_000,
@@ -222,9 +236,17 @@ class FileRepoIndex:
         files: list[str] = []
         symbols: list[Symbol] = []
         for path in sorted(base.rglob("*")):
+            if set(path.parts) & _IGNORED:
+                continue
             if path.is_symlink():
-                return Result.fail("invalid_request", f"symlink escape is not indexable: {path.relative_to(base)}")
-            if not path.is_file() or set(path.parts) & _IGNORED:
+                try:
+                    resolved = path.resolve()
+                    if not resolved.is_relative_to(base):
+                        return Result.fail("invalid_request", f"symlink escape is not indexable: {path.relative_to(base)}")
+                except OSError:
+                    return Result.fail("invalid_request", f"symlink unresolvable: {path.relative_to(base)}")
+                continue
+            if not path.is_file():
                 continue
             if len(files) >= self.max_files:
                 break
@@ -302,6 +324,24 @@ class FileRepoIndex:
             return Result.fail("invalid_request", str(exc))
         return Result.success(tuple(item for item in self._tests if not path or item.source_path.startswith(path) or item.test_path.startswith(path)))
 
+    def callers(self, *, symbol: str = "") -> Result[Sequence[Symbol]]:
+        if self._root is None:
+            return Result.fail("invalid_request", "index() has not been called")
+        if not symbol:
+            return Result.success(())
+        matching: list[Symbol] = []
+        for s in self._symbols:
+            try:
+                content = (self._root / s.path).read_text(encoding="utf-8")
+                if symbol in content:
+                    matching.append(s)
+            except OSError:
+                continue
+        return Result.success(tuple(matching))
+
+    def get_callers(self, symbol: str) -> Result[Sequence[Symbol]]:
+        return self.callers(symbol=symbol)
+
     def repo_map(self, *, token_budget: int = 4000) -> Result[RepositoryMap]:
         if self._root is None:
             return Result.fail("invalid_request", "index() has not been called")
@@ -323,6 +363,14 @@ class FileRepoIndex:
         return Result.success(mapped)
 
 
+def workspace_tree_hash(root: str | Path, *, max_files: int = 10_000) -> str | None:
+    """Live hashed-tree identity. None if the workspace cannot be bound."""
+    live = _live_content_digests(Path(root), max_files=max_files)
+    if live is None:
+        return None
+    return _hashed_tree(live)
+
+
 def _live_content_digests(root: Path, *, max_files: int) -> dict[str, str] | None:
     """Hash the current workspace tree. None means the digest cannot be bound."""
     try:
@@ -333,9 +381,17 @@ def _live_content_digests(root: Path, *, max_files: int) -> dict[str, str] | Non
         return None
     digests: dict[str, str] = {}
     for path in sorted(base.rglob("*")):
+        if set(path.parts) & _IGNORED:
+            continue
         if path.is_symlink():
-            return None
-        if not path.is_file() or set(path.parts) & _IGNORED:
+            try:
+                resolved = path.resolve()
+                if not resolved.is_relative_to(base):
+                    return None
+            except OSError:
+                return None
+            continue
+        if not path.is_file():
             continue
         if len(digests) >= max_files:
             break

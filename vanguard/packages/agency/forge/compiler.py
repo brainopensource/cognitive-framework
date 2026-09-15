@@ -33,6 +33,10 @@ Operational Directives:
 3. Discipline:
    - Keep patches focused and minimal.
    - Always verify that all test assertions pass before invoking `finish_task`.
+   - Never call `view_file` on a path already listed under **Already Inspected** in the
+     working state: its contents are already in this context, and re-reading it wastes a turn.
+   - Inspect only what you need, then implement. Emit your first `edit_file` within the first
+     few turns and always leave a turn to verify it with `run_command`.
 """
 
 FORGE_TOOLS_SCHEMA = [
@@ -183,6 +187,11 @@ class ForgeWorkingState:
             lines.append("**Confirmed Facts**:\n" + "\n".join(f"- {f}" for f in self.confirmed_facts))
         if self.rejected_hypotheses:
             lines.append("**Rejected Hypotheses / Dead Ends**:\n" + "\n".join(f"- {r}" for r in self.rejected_hypotheses))
+        if self.inspected_files:
+            lines.append(
+                "**Already Inspected (contents are already in this context; do NOT re-read)**: "
+                + ", ".join(self.inspected_files)
+            )
         if self.changed_files:
             lines.append("**Modified Files**: " + ", ".join(self.changed_files))
         if self.verification_evidence:

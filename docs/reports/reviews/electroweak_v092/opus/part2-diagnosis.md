@@ -197,18 +197,18 @@ procedure, and ADRs through 0102 — governing a coding agent that produced no p
 consecutive tasks.
 
 **Evidence.** Part 1 §2.1, §2.7. Nine commits reworking board structure. `VISION.md` at 487 lines
-of frontmatter-versioned constitutional text; `docs/execution/technical.md` at 5,575 lines;
-`docs/execution/spec.md` at 1,258.
+of frontmatter-versioned constitutional text; `docs/execution/main/technical.md` at 5,575 lines;
+`docs/execution/main/spec.md` at 1,258.
 
 **Mechanism.** Documentation is *tractable*. When the agent doesn't work and you don't know why,
 restructuring the board produces a visible, satisfying, committable result. The `check_doc_budgets.py`
 limit of 200 lines per living document is itself evidence that someone recognised the problem and
-addressed it with a linter rather than with deletion — and `docs/execution/technical.md` at 5,575
+addressed it with a linter rather than with deletion — and `docs/execution/main/technical.md` at 5,575
 lines shows the linter is being routed around.
 
 **What is genuinely valuable and must survive any cut:**
 
-- `docs/execution/spec.md` as the single normative surface, with RFC-2119 obligations and invariants.
+- `docs/execution/main/spec.md` as the single normative surface, with RFC-2119 obligations and invariants.
 - The falsifier IDs and the `check_*` linter suite. These are executable law and they work.
 - The precedence *principle* — one normative document per contract — which prevents the second
   source of truth.

@@ -20,6 +20,56 @@ from .reproducibility import (
 )
 
 
+#: The frozen `outcome` enum shared by `mhf.trajectory/1` and `/2`. Both
+#: schemas set `additionalProperties: false` and admit exactly these four
+#: values, so a trajectory writer may narrow a termination onto them but may
+#: never invent a fifth value or a new sibling field to carry the difference.
+TRAJECTORY_OUTCOME_VALUES: frozenset[str] = frozenset(
+    {"completed", "aborted", "budget_exhausted", "instrument_error"})
+
+#: Termination -> trajectory outcome axis (NT-B04, EW-9.1).
+#:
+#: This is a *narrowing* onto the frozen enum, never a relabelling. Every
+#: non-success termination lands on `aborted`; `abstained` is a refusal and
+#: belongs there beside `abandoned`, `cancelled` and `escalated`. It used to
+#: map to `completed`, which reported a refusal as a success in every
+#: benchmark row and evidence bundle folded from a trajectory -- the defect
+#: NT-B04 names for the benchmark writer, and the one T-99 removes here.
+_TRAJECTORY_OUTCOMES: Mapping[str, str] = {
+    "completed": "completed",
+    "abstained": "aborted",
+    "abandoned": "aborted",
+    "cancelled": "aborted",
+    "escalated": "aborted",
+    "budget_exhausted": "budget_exhausted",
+    "runtime_error": "instrument_error",
+}
+
+
+def project_trajectory_outcome(terminal: Any) -> str:
+    """Project a run termination onto the frozen trajectory outcome axis.
+
+    Termination and task disposition stay orthogonal (EW-9.1): this function
+    answers only "how did the run stop", never "did the work pass". Acceptance
+    is carried separately by `verdict` / `verdict_absence_reason`, and nothing
+    here reads, writes or synthesises a `TaskDisposition`.
+
+    Success is `completed` and nothing else. An unknown termination narrows to
+    `aborted` rather than to a guess: the schema has no value for "unknown",
+    and defaulting the other way would rebuild the exact collapse this
+    projection exists to prevent.
+    """
+    name = str(getattr(terminal, "value", terminal)).lower()
+    outcome = _TRAJECTORY_OUTCOMES.get(name, "aborted")
+    if outcome not in TRAJECTORY_OUTCOME_VALUES:
+        # A mapping edited to an off-enum value would silently emit a
+        # trajectory no reader can validate. Fail loudly instead.
+        raise ValueError(
+            f"trajectory outcome {outcome!r} is outside the frozen enum "
+            f"{sorted(TRAJECTORY_OUTCOME_VALUES)}")
+    return outcome
+
+
 def signed_verdict_object(verdict: Any) -> Mapping[str, Any] | None:
     binding = getattr(verdict, "binding", None)
     signature = getattr(verdict, "signature", None)
@@ -309,16 +359,8 @@ def assemble_trajectory(
             "count": len(events),
         }
 
-    outcome_map = {
-        "completed": "completed",
-        "abandoned": "aborted",
-        "budget_exhausted": "budget_exhausted",
-        "runtime_error": "instrument_error",
-        "cancelled": "aborted",
-        "escalated": "aborted",
-        "abstained": "completed",
-    }
-    terminal_name = getattr(terminal, "value", str(terminal)).lower()
+    # NT-B04. One narrowing rule, shared by both schema emissions below.
+    trajectory_outcome = project_trajectory_outcome(terminal)
 
     signed_verdict = signed_verdict_object(verdict)
     verdict_absence_reason = None if signed_verdict is not None else "no_evaluator_bound"
@@ -340,7 +382,7 @@ def assemble_trajectory(
             "verdict": signed_verdict,
             "verdict_absence_reason": verdict_absence_reason,
             "cost": total_cost,
-            "outcome": outcome_map.get(terminal_name, "aborted"),
+            "outcome": trajectory_outcome,
         }
 
     # /2 payload assembly
@@ -426,7 +468,7 @@ def assemble_trajectory(
         "verdict": signed_verdict,
         "verdict_absence_reason": verdict_absence_reason,
         "cost": total_cost,
-        "outcome": outcome_map.get(terminal_name, "aborted"),
+        "outcome": trajectory_outcome,
         "artifacts": artifacts_list,
         "provenance": {
             "context": ctx_prov,

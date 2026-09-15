@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -16,6 +17,11 @@ import { ReplayRuntimeClient } from "../src/adapters/replay.js";
 import { LiveRuntimeClient } from "../src/adapters/live.js";
 import { jsonLine } from "../src/headless/jsonl.js";
 import { parseEventEnvelope, parseJsonlLine } from "../src/contract/parse.js";
+import {
+  SHORT_FLAG_BINDINGS,
+  parseCliOptions,
+  wantsHelp,
+} from "../src/composition/parse-cli.js";
 import type { EventEnvelope, StreamItem } from "../src/contract/types.js";
 
 function packageRoot(): string {
@@ -276,4 +282,127 @@ test("ReplayRuntimeClient rejects recordCorrection with permission_denied", asyn
   if (!res.ok) {
     assert.equal(res.error.code, "permission_denied");
   }
+});
+
+// ---------------------------------------------------------------------------
+// T-97: CLI product surface — help exits zero, `-m` binds explicitly
+// ---------------------------------------------------------------------------
+
+function cliBin(): string {
+  return join(packageRoot(), "dist/src/main.js");
+}
+
+function runCli(args: string[]): { status: number; text: string } {
+  const result = spawnSync(process.execPath, [cliBin(), ...args], {
+    encoding: "utf8",
+    // A help request must not reach a provider. Removing every credential from
+    // the child proves that on the harness rather than by inspection: a run
+    // that tried to call one could not succeed here.
+    env: Object.fromEntries(
+      Object.entries(process.env).filter(([key]) => !/API_KEY|AUTH_TOKEN|SECRET/i.test(key))
+    ) as NodeJS.ProcessEnv,
+  });
+  return { status: result.status ?? -1, text: `${result.stdout}${result.stderr}` };
+}
+
+test("T-97: help exits zero for every subcommand without a completion frame", () => {
+  // Before repair, `vg code --help` fell through to the coding handler and
+  // printed `[complete] instrument_error, 0 turns, unknown` with exit 3.
+  for (const args of [
+    ["--help"],
+    ["-h"],
+    ["code", "--help"],
+    ["code", "-h"],
+    ["explain", "--help"],
+    ["doctor", "--help"],
+    ["run", "--help"],
+    ["resume", "--help"],
+    ["code", ".", "--brief", "do a thing", "--help"],
+  ]) {
+    const { status, text } = runCli(args);
+    assert.equal(status, 0, `exit code for ${args.join(" ")}`);
+    assert.ok(text.includes("Usage:"), `usage text for ${args.join(" ")}`);
+    assert.equal(
+      /\[complete\]/.test(text),
+      false,
+      `help emitted a completion frame for ${args.join(" ")}`
+    );
+    assert.equal(/\[complete\]|instrument_error/.test(text), false, args.join(" "));
+  }
+});
+
+test("T-97: help documents every bound short flag and claims no others", () => {
+  const { text } = runCli(["code", "--help"]);
+  for (const [short, long] of Object.entries(SHORT_FLAG_BINDINGS)) {
+    assert.ok(text.includes(short), `help omits ${short}`);
+    assert.ok(text.includes(long), `help omits ${long}`);
+  }
+  assert.deepEqual(Object.keys(SHORT_FLAG_BINDINGS).sort(), ["-h", "-m", "-y"]);
+});
+
+test("T-97: wantsHelp reads a request, not a flag value", () => {
+  assert.equal(wantsHelp(["code", "--help"]), true);
+  assert.equal(wantsHelp(["code", "-h"]), true);
+  assert.equal(wantsHelp(["code", "."]), false);
+  // `--help` in the value position of a value flag is that flag's value.
+  assert.equal(wantsHelp(["code", ".", "--brief", "--help"]), false);
+  assert.equal(wantsHelp(["code", ".", "--prompt", "-h"]), false);
+});
+
+test("T-97: -m binds to --model and its value never leaks into the brief", () => {
+  const parsed = parseCliOptions([".", "-m", "openrouter/anthropic/claude-3"]);
+  assert.equal(parsed.flagError, undefined);
+  assert.equal(parsed.model, "openrouter/anthropic/claude-3");
+  assert.equal(parsed.plannerModel, "openrouter/anthropic/claude-3");
+  // The defect this replaces: the value was dropped from the flag and appended
+  // to the task brief, where nothing downstream could see what happened.
+  assert.equal((parsed.prompt ?? "").includes("claude-3"), false);
+  assert.equal((parsed.brief ?? "").includes("claude-3"), false);
+});
+
+test("T-97: a conflicting -m/--model pair is refused, never silently resolved", () => {
+  const conflicting = parseCliOptions([".", "--model", "model-a", "-m", "model-b"]);
+  assert.notEqual(conflicting.flagError, undefined);
+  assert.match(conflicting.flagError!, /-m/);
+  assert.match(conflicting.flagError!, /--model/);
+  // The losing spellings are named so the operator is told what -m is NOT.
+  for (const losing of ["--manifest", "--model-port", "--max-turns"]) {
+    assert.ok(conflicting.flagError!.includes(losing), losing);
+  }
+  // The same value twice is not a conflict.
+  assert.equal(parseCliOptions([".", "--model", "m", "-m", "m"]).flagError, undefined);
+  // A different long flag beside -m is not a conflict either.
+  const distinct = parseCliOptions([".", "--manifest", "vg-code-max", "-m", "claude-3"]);
+  assert.equal(distinct.flagError, undefined);
+  assert.equal(distinct.model, "claude-3");
+  assert.equal(distinct.manifest, "vg-code-max");
+});
+
+test("T-97: an unbound short flag errors instead of swallowing its value", () => {
+  for (const short of ["-M", "-p", "-x"]) {
+    const parsed = parseCliOptions([".", short, "some-value"]);
+    assert.notEqual(parsed.flagError, undefined, short);
+    assert.match(parsed.flagError!, /short flags are never inferred/);
+  }
+  // The bound ones stay bound.
+  for (const short of Object.keys(SHORT_FLAG_BINDINGS)) {
+    assert.equal(parseCliOptions([".", short]).flagError, undefined, short);
+  }
+});
+
+test("T-97: an ambiguous invocation exits non-zero before any execution", () => {
+  const { status, text } = runCli(["code", ".", "--model", "a", "-m", "b"]);
+  assert.notEqual(status, 0);
+  assert.equal(status, 2);
+  assert.equal(/\[complete\]/.test(text), false, "ambiguity produced a completion frame");
+  const unknown = runCli(["code", ".", "-M", "b"]);
+  assert.notEqual(unknown.status, 0);
+  assert.equal(/\[complete\]/.test(unknown.text), false);
+});
+
+test("T-97: non-success execution still returns non-zero", () => {
+  // No daemon, no provider credentials: the run cannot succeed, and the CLI
+  // must say so with a non-zero status rather than a zero-exit success frame.
+  const { status } = runCli(["code", ".", "--headless", "--max-turns", "1"]);
+  assert.notEqual(status, 0);
 });

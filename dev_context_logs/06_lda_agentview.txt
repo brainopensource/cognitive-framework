@@ -1,1 +1,242 @@
-[]
+[
+  {
+    "entity_id": "sym:3b0779fe583f626b",
+    "kind": "symbol",
+    "locator": "vanguard/packages/domain/ledger/agent_view.py#L31",
+    "name": "AgentView",
+    "rank": -11.859128830537683,
+    "title": "vanguard.packages.domain.ledger.agent_view.AgentView"
+  },
+  {
+    "entity_id": "sym:3b0779fe583f626b",
+    "kind": "symbol",
+    "locator": "vanguard/packages/domain/ledger/agent_view.py#L31",
+    "name": "AgentView",
+    "rank": -11.859128830537683,
+    "title": "vanguard.packages.domain.ledger.agent_view.AgentView"
+  },
+  {
+    "entity_id": "sym:3b0779fe583f626b",
+    "kind": "symbol",
+    "locator": "vanguard/packages/domain/ledger/agent_view.py#L31",
+    "name": "AgentView",
+    "rank": -11.859128830537683,
+    "title": "vanguard.packages.domain.ledger.agent_view.AgentView"
+  },
+  {
+    "entity_id": "sym:3b0779fe583f626b",
+    "kind": "symbol",
+    "locator": "vanguard/packages/domain/ledger/agent_view.py#L31",
+    "name": "AgentView",
+    "rank": -11.859128830537683,
+    "title": "vanguard.packages.domain.ledger.agent_view.AgentView"
+  },
+  {
+    "entity_id": "sym:3b0779fe583f626b",
+    "kind": "symbol",
+    "locator": "vanguard/packages/domain/ledger/agent_view.py#L31",
+    "name": "AgentView",
+    "rank": -11.859128830537683,
+    "title": "vanguard.packages.domain.ledger.agent_view.AgentView"
+  },
+  {
+    "entity_id": "sym:3b0779fe583f626b",
+    "kind": "symbol",
+    "locator": "vanguard/packages/domain/ledger/agent_view.py#L31",
+    "name": "AgentView",
+    "rank": -11.859128830537683,
+    "title": "vanguard.packages.domain.ledger.agent_view.AgentView"
+  },
+  {
+    "entity_id": "sym:f1d9dd2aaff4d8c2",
+    "kind": "symbol",
+    "locator": "test/contracts/test_m5a_agent_view.py#L86",
+    "name": "AgentViewFold",
+    "rank": -11.731735233477407,
+    "title": "test.contracts.test_m5a_agent_view.AgentViewFold"
+  },
+  {
+    "entity_id": "sym:f1d9dd2aaff4d8c2",
+    "kind": "symbol",
+    "locator": "test/contracts/test_m5a_agent_view.py#L86",
+    "name": "AgentViewFold",
+    "rank": -11.731735233477407,
+    "title": "test.contracts.test_m5a_agent_view.AgentViewFold"
+  },
+  {
+    "entity_id": "sym:f1d9dd2aaff4d8c2",
+    "kind": "symbol",
+    "locator": "test/contracts/test_m5a_agent_view.py#L86",
+    "name": "AgentViewFold",
+    "rank": -11.731735233477407,
+    "title": "test.contracts.test_m5a_agent_view.AgentViewFold"
+  },
+  {
+    "entity_id": "sym:f1d9dd2aaff4d8c2",
+    "kind": "symbol",
+    "locator": "test/contracts/test_m5a_agent_view.py#L86",
+    "name": "AgentViewFold",
+    "rank": -11.731735233477407,
+    "title": "test.contracts.test_m5a_agent_view.AgentViewFold"
+  },
+  {
+    "entity_id": "sym:f1d9dd2aaff4d8c2",
+    "kind": "symbol",
+    "locator": "test/contracts/test_m5a_agent_view.py#L86",
+    "name": "AgentViewFold",
+    "rank": -11.731735233477407,
+    "title": "test.contracts.test_m5a_agent_view.AgentViewFold"
+  },
+  {
+    "entity_id": "sym:f1d9dd2aaff4d8c2",
+    "kind": "symbol",
+    "locator": "test/contracts/test_m5a_agent_view.py#L86",
+    "name": "AgentViewFold",
+    "rank": -11.731735233477407,
+    "title": "test.contracts.test_m5a_agent_view.AgentViewFold"
+  },
+  {
+    "entity_id": "sym:3b0779fe583f626b",
+    "kind": "class",
+    "locator": "vanguard/packages/domain/ledger/agent_view.py#L31",
+    "name": "AgentView",
+    "rank": -11.714988495531152,
+    "title": "AgentView"
+  },
+  {
+    "entity_id": "sym:3b0779fe583f626b",
+    "kind": "class",
+    "locator": "vanguard/packages/domain/ledger/agent_view.py#L31",
+    "name": "AgentView",
+    "rank": -11.714988495531152,
+    "title": "AgentView"
+  },
+  {
+    "entity_id": "sym:3b0779fe583f626b",
+    "kind": "class",
+    "locator": "vanguard/packages/domain/ledger/agent_view.py#L31",
+    "name": "AgentView",
+    "rank": -11.714988495531152,
+    "title": "AgentView"
+  },
+  {
+    "entity_id": "sym:3b0779fe583f626b",
+    "kind": "class",
+    "locator": "vanguard/packages/domain/ledger/agent_view.py#L31",
+    "name": "AgentView",
+    "rank": -11.714988495531152,
+    "title": "AgentView"
+  },
+  {
+    "entity_id": "sym:3b0779fe583f626b",
+    "kind": "class",
+    "locator": "vanguard/packages/domain/ledger/agent_view.py#L31",
+    "name": "AgentView",
+    "rank": -11.714988495531152,
+    "title": "AgentView"
+  },
+  {
+    "entity_id": "sym:3b0779fe583f626b",
+    "kind": "class",
+    "locator": "vanguard/packages/domain/ledger/agent_view.py#L31",
+    "name": "AgentView",
+    "rank": -11.714988495531152,
+    "title": "AgentView"
+  },
+  {
+    "entity_id": "sym:f1d9dd2aaff4d8c2",
+    "kind": "class",
+    "locator": "test/contracts/test_m5a_agent_view.py#L86",
+    "name": "AgentViewFold",
+    "rank": -11.640071333217591,
+    "title": "AgentViewFold"
+  },
+  {
+    "entity_id": "sym:f1d9dd2aaff4d8c2",
+    "kind": "class",
+    "locator": "test/contracts/test_m5a_agent_view.py#L86",
+    "name": "AgentViewFold",
+    "rank": -11.640071333217591,
+    "title": "AgentViewFold"
+  },
+  {
+    "entity_id": "sym:f1d9dd2aaff4d8c2",
+    "kind": "class",
+    "locator": "test/contracts/test_m5a_agent_view.py#L86",
+    "name": "AgentViewFold",
+    "rank": -11.640071333217591,
+    "title": "AgentViewFold"
+  },
+  {
+    "entity_id": "sym:f1d9dd2aaff4d8c2",
+    "kind": "class",
+    "locator": "test/contracts/test_m5a_agent_view.py#L86",
+    "name": "AgentViewFold",
+    "rank": -11.640071333217591,
+    "title": "AgentViewFold"
+  },
+  {
+    "entity_id": "sym:f1d9dd2aaff4d8c2",
+    "kind": "class",
+    "locator": "test/contracts/test_m5a_agent_view.py#L86",
+    "name": "AgentViewFold",
+    "rank": -11.640071333217591,
+    "title": "AgentViewFold"
+  },
+  {
+    "entity_id": "sym:f1d9dd2aaff4d8c2",
+    "kind": "class",
+    "locator": "test/contracts/test_m5a_agent_view.py#L86",
+    "name": "AgentViewFold",
+    "rank": -11.640071333217591,
+    "title": "AgentViewFold"
+  },
+  {
+    "entity_id": "sym:f0fe5013d3414265",
+    "kind": "class",
+    "locator": "vanguard/packages/domain/ledger/agent_view.py#L83",
+    "name": "AgentViewCheckpoint",
+    "rank": -11.420960754253821,
+    "title": "AgentViewCheckpoint"
+  },
+  {
+    "entity_id": "sym:f0fe5013d3414265",
+    "kind": "class",
+    "locator": "vanguard/packages/domain/ledger/agent_view.py#L83",
+    "name": "AgentViewCheckpoint",
+    "rank": -11.420960754253821,
+    "title": "AgentViewCheckpoint"
+  },
+  {
+    "entity_id": "sym:f0fe5013d3414265",
+    "kind": "class",
+    "locator": "vanguard/packages/domain/ledger/agent_view.py#L83",
+    "name": "AgentViewCheckpoint",
+    "rank": -11.420960754253821,
+    "title": "AgentViewCheckpoint"
+  },
+  {
+    "entity_id": "sym:f0fe5013d3414265",
+    "kind": "class",
+    "locator": "vanguard/packages/domain/ledger/agent_view.py#L83",
+    "name": "AgentViewCheckpoint",
+    "rank": -11.420960754253821,
+    "title": "AgentViewCheckpoint"
+  },
+  {
+    "entity_id": "sym:f0fe5013d3414265",
+    "kind": "class",
+    "locator": "vanguard/packages/domain/ledger/agent_view.py#L83",
+    "name": "AgentViewCheckpoint",
+    "rank": -11.420960754253821,
+    "title": "AgentViewCheckpoint"
+  },
+  {
+    "entity_id": "sym:f0fe5013d3414265",
+    "kind": "class",
+    "locator": "vanguard/packages/domain/ledger/agent_view.py#L83",
+    "name": "AgentViewCheckpoint",
+    "rank": -11.420960754253821,
+    "title": "AgentViewCheckpoint"
+  }
+]

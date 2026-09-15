@@ -16,11 +16,30 @@ into the indexer's state.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol, Sequence, runtime_checkable
+from typing import Literal, Protocol, Sequence, runtime_checkable
 
+from ..domain.workspace_epoch import WorkspaceEpoch
 from .event_store import Result
 
-__all__ = ["DependencyEdge", "IndexPort", "RepositoryMap", "Symbol", "TestAssociation"]
+__all__ = [
+    "DependencyEdge",
+    "IndexBackend",
+    "IndexHealthVerdict",
+    "IndexPort",
+    "IndexSelection",
+    "RepositoryMap",
+    "Symbol",
+    "TestAssociation",
+]
+
+IndexBackend = Literal["lda", "file"]
+IndexHealthVerdict = Literal[
+    "healthy_current",
+    "optional_absent",
+    "present_invalid",
+    "required_unbound",
+    "subject_changed",
+]
 
 
 @dataclass(frozen=True, slots=True)
@@ -72,6 +91,17 @@ class RepositoryMap:
     index_digest: str = ""
 
 
+@dataclass(frozen=True, slots=True)
+class IndexSelection:
+    """DIR-I5 composition result. Value-only; no ranking or handle authority."""
+
+    backend: IndexBackend
+    source_identity: WorkspaceEpoch
+    health_verdict: IndexHealthVerdict
+    degradation_reason: str | None
+    unresolved_coverage: bool
+
+
 @runtime_checkable
 class IndexPort(Protocol):
     """What is in the workspace, as observations."""
@@ -90,6 +120,12 @@ class IndexPort(Protocol):
 
     def tests(self, *, path: str = "") -> Result[Sequence[TestAssociation]]:
         """Test-to-source associations, optionally for one source path."""
+
+    def callers(self, *, symbol: str = "") -> Result[Sequence[Symbol]]:
+        """Callers of `symbol`, as definitions. Empty is not a failure."""
+
+    def get_callers(self, symbol: str) -> Result[Sequence[Symbol]]:
+        """Convenience alias for callers(symbol=symbol)."""
 
     def repo_map(self, *, token_budget: int = 4000) -> Result[RepositoryMap]:
         """Return a bounded, attributable repository summary."""

@@ -308,6 +308,24 @@ class CodeDefaultCompletionPolicy:
             return {"admissible": False, "reason": "VERIFICATION_FAILED"}
         if not current_workspace_digest or workspace_digest != current_workspace_digest:
             return {"admissible": False, "reason": "VERIFICATION_STALE"}
+        # T-131 row 6 / RUN-09 defect 6. The workspace digest alone leaves the
+        # typed verification subject unchecked, so evidence whose argv ran over
+        # a different postimage could still be admitted while the raw workspace
+        # digest matched. When the caller binds a current subject (the runtime
+        # always does), the receipt must carry the identical one.
+        current_subject_digest = observations.get("current_verification_subject_digest")
+        if current_subject_digest:
+            if isinstance(verification, Mapping):
+                receipt_subject_digest = str(verification.get(
+                    "verification_subject_digest",
+                    verification.get("verificationSubjectDigest", "")))
+            else:
+                receipt_subject_digest = str(
+                    getattr(verification, "verification_subject_digest", ""))
+            if not receipt_subject_digest:
+                return {"admissible": False, "reason": "VERIFICATION_UNBOUND_SUBJECT"}
+            if receipt_subject_digest != str(current_subject_digest):
+                return {"admissible": False, "reason": "VERIFICATION_FOREIGN_SUBJECT"}
         command = _verification_command(verification, observations)
         if _VACUOUS_VERIFICATION_COMMAND.match(command):
             return {"admissible": False, "reason": "VACUOUS_VERIFICATION_COMMAND"}

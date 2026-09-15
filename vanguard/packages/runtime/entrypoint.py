@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import os
 import sys
 import uuid
 from pathlib import Path
@@ -12,52 +11,34 @@ from typing import Any, Mapping
 from ..adapters.models.fake import FakeModel
 from ..adapters.stores.blob_store import FileBlobStore
 from ..adapters.sandbox.platform import discover_platform
+from .app_service import project_receipts, project_terminal_outcome
 from .compose import TaskContext
+from .evidence_capture import (
+    last_kind_payload,
+    qualify_candidate_identity,
+    submitted_workspace_digests,
+)
+from . import pack_catalog
 from .profiles import SandboxUnavailable, resolve_profile
 from .root import Runtime
 
 
-def _root() -> Path:
-    return Path(os.environ.get("VANGUARD_ROOT", Path(__file__).resolve().parents[3]))
-
-
 def _manifest(command: str, preset: str | None = None) -> Path:
+    """Resolve the installed manifest a product command selects.
+
+    T-102. The preset allowlist and the manifest lookup both live in
+    ``pack_catalog``; this surface owns no second copy of either.
+    """
     if command == "explain":
-        name = "vg-code-explain"
-    elif command == "code":
-        chosen = (preset or "balanced").strip().lower()
-        if chosen not in {"fast", "balanced", "max"}:
-            raise ValueError(f"unknown Coding Max preset {chosen!r}")
-        name = f"vg-code-{chosen}"
-    else:
-        name = "vg-code-default"
-    return _root() / "vanguard/packages/agency/manifests" / name / "manifest.json"
-
-
-_PACK_LOAD = None
-
-
-def _pack_loader() -> Any:
-    global _PACK_LOAD
-    if _PACK_LOAD is None:
-        import importlib.util
-        path = _root() / "packs" / "code-default" / "load.py"
-        spec = importlib.util.spec_from_file_location("code_default_load", path)
-        if spec is None or spec.loader is None:
-            raise ImportError(f"cannot load preset catalog from {path}")
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[spec.name] = module
-        spec.loader.exec_module(module)
-        _PACK_LOAD = module
-    return _PACK_LOAD
+        return pack_catalog.manifest_path("vg-code-explain")
+    if command == "code":
+        return pack_catalog.preset_manifest_path(preset)
+    return pack_catalog.manifest_path("vg-code-default")
 
 
 def _resolve_turn_ceiling(preset: str, explicit: Any) -> int:
     """Loop bound: omitted uses the catalog; explicit may only attenuate."""
-    loader = _pack_loader()
-    policy = loader.resolve_preset_policy(preset)
-    parsed = None if explicit in (None, "") else int(explicit)
-    return int(loader.effective_limit(policy.turns, parsed))
+    return pack_catalog.turn_ceiling(preset, explicit)
 
 
 def _completion_policy(manifest_path: Path) -> Any:
@@ -105,20 +86,22 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
         raise ValueError("brief or question is required")
     preset = str(request.get("preset") or "balanced").strip().lower()
     harness_override = str(request.get("harness") or "").strip()
+    explicit_turns = request.get("maxTurnsPerEpisode")
     if harness_override:
-        manifest_path = (
-            _root() / "vanguard/packages/agency/manifests" / harness_override / "manifest.json")
-        explicit = request.get("maxTurnsPerEpisode")
-        max_turns = 40 if explicit in (None, "") else int(explicit)
+        manifest_path = pack_catalog.manifest_path(harness_override)
+        max_turns = (
+            pack_catalog.DEFAULT_TURN_CEILING if explicit_turns in (None, "")
+            else int(explicit_turns))
     else:
-        if command == "code" and preset not in {"fast", "balanced", "max"}:
-            raise ValueError(f"unknown Coding Max preset {preset!r}")
+        # ``_manifest`` validates the preset against the catalog, so this
+        # surface raises on an unknown preset without holding its own list.
         manifest_path = _manifest(command, preset if command == "code" else None)
         if command == "code":
-            max_turns = _resolve_turn_ceiling(preset, request.get("maxTurnsPerEpisode"))
+            max_turns = _resolve_turn_ceiling(preset, explicit_turns)
         else:
-            explicit = request.get("maxTurnsPerEpisode")
-            max_turns = 40 if explicit in (None, "") else int(explicit)
+            max_turns = (
+                pack_catalog.DEFAULT_TURN_CEILING if explicit_turns in (None, "")
+                else int(explicit_turns))
     task = TaskContext(
         brief=brief, repo_path=Path(str(request.get("workspace", "."))).resolve(),
         run_id=run_id, episode_id=f"episode-{run_id}",
@@ -162,19 +145,10 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
         blobs=FileBlobStore(configured_store_path.parent / "blobs"),
         completion_policy=_completion_policy(manifest_path),
     )
-    terminal = str(getattr(result.terminal, "value", result.terminal))
-    outcome = "completed" if terminal in {"completed", "abstained"} else terminal
-    projections: list[dict[str, Any]] = []
-    for rec in getattr(result, "receipts", ()) or ():
-        verb = getattr(rec, "verb", "")
-        rec_outcome = getattr(rec, "outcome", "")
-        rec_detail = getattr(rec, "detail", "")
-        if verb == "fs.read":
-            projections.append({"kind": "read", "path": rec_detail or "file"})
-        elif verb in ("patch.apply", "fs.patch", "fs.write"):
-            projections.append({"kind": "write", "path": rec_detail or "patch", "text": rec_outcome})
-        elif verb == "proc.exec":
-            projections.append({"kind": "test", "path": rec_detail or "exec", "exitCode": 0 if rec_outcome == "ok" else 1})
+    # NT-B04. One projection rule, shared with the application service; this
+    # surface does not own a second copy of it.
+    outcome = project_terminal_outcome(result.terminal)
+    projections: list[dict[str, Any]] = project_receipts(result)
     # The ledger already carries verification, spend, approval, recovery and
     # sub-agent lifecycle. Projecting only fs/proc receipts left `--headless`
     # unable to report why a run failed or what it cost, so fold the event
@@ -299,6 +273,36 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
          if item.status == "in_progress"), None,
     )
     usage = run_result.token_usage or {}
+    # T-131.6. Qualify the published receipt against the submitted tree using
+    # the existing candidate snapshot and DIR-D1 carriers. A green claim that
+    # names any other tree is an instrument failure, not a terminal mapping.
+    events = getattr(result, "events", ()) or ()
+    verification = last_kind_payload(events, "VerificationRecorded")
+    if verification is None and run_result.verification_identity:
+        verification = dict(run_result.verification_identity)
+    trajectory = result.trajectory if isinstance(getattr(result, "trajectory", None), Mapping) else {}
+    artifacts = trajectory.get("artifacts") if isinstance(trajectory.get("artifacts"), (list, tuple)) else ()
+    qualification = qualify_candidate_identity(
+        submitted_digests=submitted_workspace_digests(task.repo_path),
+        task_digest=run_result.task_digest,
+        composition_digest=run_result.composition_digest,
+        verification=verification,
+        change_surface=last_kind_payload(events, "ChangeSurfaceUpdated"),
+        captured_artifacts=artifacts,
+    )
+    detail = run_result.detail
+    claims_green = (
+        outcome == "completed"
+        and isinstance(verification, Mapping)
+        and verification.get("exitCode") == 0
+    )
+    if claims_green and not qualification["qualified"]:
+        outcome = "instrument_error"
+        reason = qualification.get("reason") or "VERIFICATION_STALE"
+        detail = f"EVIDENCE_IDENTITY: {reason}"
+        if projections and projections[-1].get("kind") == "complete":
+            projections[-1] = {**projections[-1], "outcome": outcome}
+    identity = qualification.get("identity") or run_result.verification_identity
     return {"type": "result", "runId": run_id, "result": {
         "runId": run_id, "outcome": outcome, "phase": "complete", "attempts": 1,
         "turns": run_result.turns,
@@ -308,8 +312,12 @@ def execute(request: Mapping[str, Any]) -> dict[str, Any]:
         "promptTokens": usage.get("promptTokens"),
         "completionTokens": usage.get("completionTokens"),
         "spentUsdMicros": run_result.observed_cost,
+        "taskDigest": run_result.task_digest,
+        "compositionDigest": run_result.composition_digest,
+        "candidateDigest": qualification.get("candidateDigest"),
+        "verificationIdentity": dict(identity) if identity else None,
         "projections": projections,
-        "detail": run_result.detail,
+        "detail": detail,
     }}
 
 

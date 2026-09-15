@@ -254,17 +254,36 @@ class NoProgressRule:
     """Detects when multiple turns elapse without new evidence or changed status."""
 
     @staticmethod
-    def evaluate(turns_since_progress: int) -> StrategyDirective | None:
-        if turns_since_progress >= 3:
+    def evaluate(
+        turns_since_progress: int,
+        has_changes: bool = True,
+    ) -> StrategyDirective | None:
+        if turns_since_progress < 3:
+            return None
+        if not has_changes:
+            # Nothing has ever been written. Steering this state toward "another
+            # angle of investigation" is what produced the observed read-only
+            # stall: the agent re-inspected files it had already read until the
+            # turn ceiling. The corrective action here is to emit an edit, not
+            # to gather more evidence.
             return StrategyDirective(
-                kind="abandon_hypothesis",
-                reason=f"No progress over {turns_since_progress} consecutive turns",
+                kind="force_write",
+                reason=f"No file has been written after {turns_since_progress} turns",
                 feedback=(
-                    "REFLEX ALERT: 3 consecutive turns without workspace changes or new test evidence. "
-                    "Abandon the current hypothesis and try a new angle of investigation."
+                    "REFLEX ALERT: you have not written to a single file yet, and further "
+                    "inspection is returning content already present in this context. "
+                    "STOP inspecting. Your very next tool call MUST be `edit_file` or "
+                    "`surgical_patch` implementing the task, then `run_command` to verify it."
                 ),
             )
-        return None
+        return StrategyDirective(
+            kind="abandon_hypothesis",
+            reason=f"No progress over {turns_since_progress} consecutive turns",
+            feedback=(
+                "REFLEX ALERT: 3 consecutive turns without workspace changes or new test evidence. "
+                "Abandon the current hypothesis and try a new angle of investigation."
+            ),
+        )
 
 
 def compute_workspace_digest(workspace_root: Path) -> str:
@@ -614,9 +633,33 @@ class ForgeEngine:
             if rep_directive:
                 directive = rep_directive
             else:
-                np_directive = NoProgressRule.evaluate(turns_since_progress)
+                np_directive = NoProgressRule.evaluate(
+                    turns_since_progress, has_changes=bool(changed_files)
+                )
                 if np_directive:
                     directive = np_directive
+
+            # Turn-budget pressure. The loop bound is a hard ceiling, but the
+            # model was never told where it stood against it, so episodes spent
+            # every turn exploring and wrote (if at all) on the final turn, with
+            # no turn left to verify. Surface the remaining budget and reserve
+            # the last turns for write-then-verify.
+            turns_left = self.max_turns - turn
+            if turns_left <= max(2, self.max_turns // 4):
+                pressure = (
+                    f"TURN BUDGET: {turns_left} of {self.max_turns} turns remain. "
+                    "A run that ends without a fresh passing `run_command` receipt is "
+                    "recorded as ABANDONED and scores zero."
+                )
+                if not changed_files:
+                    pressure += (
+                        " You have written nothing. Emit `edit_file` NOW, then verify."
+                    )
+                directive = StrategyDirective(
+                    kind=directive.kind if directive else "budget_pressure",
+                    reason=directive.reason if directive else "Approaching turn ceiling",
+                    feedback=(directive.feedback + " " if directive else "") + pressure,
+                )
 
             # 2. Update working state
             working_state = ForgeWorkingState(

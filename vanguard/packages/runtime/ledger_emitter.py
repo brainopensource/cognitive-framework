@@ -101,6 +101,19 @@ PRIVILEGED_KIND_OWNERS: Mapping[str, frozenset[str]] = {
     "PluginRetired": frozenset({"registry"}),
     "PluginFaulted": frozenset({"registry"}),
     "ApprovalResolved": frozenset({"approval"}),
+    # DIR-D1. The two durable carriers of the semantic task fold. The
+    # `HarnessSession` composition is their SOLE legal writer: they are facts
+    # about what this session observed at its own mediated dispatch boundary,
+    # so an orchestrator, a plugin or an evaluator that appended one would be
+    # asserting an observation it never made. `_SESSION_ROLES` widening does
+    # not apply in reverse -- a bare `kernel` or `scheduler` writer is
+    # disjoint from `{"session"}` and is refused.
+    #
+    # `VerificationRecorded` is deliberately NOT owned by
+    # `evaluator_gateway`: it records an observed runner invocation, never a
+    # signed verdict, and `VerdictRecorded` ownership above is unchanged.
+    "VerificationRecorded": frozenset({"session"}),
+    "ChangeSurfaceUpdated": frozenset({"session"}),
 }
 
 WRITER_ROLES = frozenset({

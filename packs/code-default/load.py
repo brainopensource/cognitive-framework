@@ -39,7 +39,8 @@ __all__ = [
 ]
 
 PRESET_NAMES = ("fast", "balanced", "max")
-_REQUIRED_BUDGET = ("usd_micros", "millis", "tokens", "turns")
+_REQUIRED_BUDGET = ("usd_micros", "millis", "tokens", "turns",
+                    "context_window_tokens")
 _SHARED_STRUCTURAL = {"effects": "128", "evaluations": "16", "depth": "1"}
 
 
@@ -52,6 +53,7 @@ class ResolvedPresetPolicy:
     millis: int
     tokens: int
     turns: int
+    context_window_tokens: int
 
     def as_budget_map(self) -> dict[str, int]:
         return {
@@ -59,6 +61,7 @@ class ResolvedPresetPolicy:
             "millis": self.millis,
             "tokens": self.tokens,
             "turns": self.turns,
+            "context_window_tokens": self.context_window_tokens,
         }
 
 PACK_ROOT = Path(__file__).resolve().parent
@@ -138,6 +141,7 @@ def resolve_preset_policy(name: str, pack_root: Path | None = None) -> ResolvedP
         millis=int(budget["millis"]),
         tokens=int(budget["tokens"]),
         turns=int(budget["turns"]),
+        context_window_tokens=int(budget["context_window_tokens"]),
     )
 
 
@@ -162,6 +166,7 @@ def budget_policy_document(name: str, pack_root: Path | None = None) -> dict[str
         "wallClockMillis": str(policy.millis),
         "tokens": str(policy.tokens),
         "turns": str(policy.turns),
+        "contextWindowTokens": str(policy.context_window_tokens),
     }
     document.update(_SHARED_STRUCTURAL)
     return document

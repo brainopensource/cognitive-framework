@@ -1,20 +1,22 @@
 """Adapter-side two-phase commit for multi-file workspace mutations.
 
-I-7 / I-TXN: `ast.parse` lives here, never in `kernel/`. Syntax failure aborts
-before any durable flush; any later commit error restores the pre-image.
+I-7 / I-TXN: structural parsing lives at the shared environment-adapter boundary,
+never in `kernel/`. This transaction owns syntax preflight: a failure aborts before
+any durable flush; any later commit error restores the pre-image.
 """
 
 from __future__ import annotations
 
-import ast
 import hashlib
 import os
+import stat
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal, Sequence
 
 from ...ports.event_store import Result
+from .analysis import python_syntax_error
 
 __all__ = [
     "FileMutation",
@@ -100,13 +102,16 @@ class AtomicMultiFileTransactionManager:
     def _snapshot(
         self,
         resolved: Sequence[tuple[FileMutation, Path]],
-    ) -> dict[str, bytes | None]:
-        snapshots: dict[str, bytes | None] = {}
+    ) -> dict[str, tuple[bytes | None, int | None]]:
+        snapshots: dict[str, tuple[bytes | None, int | None]] = {}
         for mutation, dest in resolved:
             if dest.is_file():
-                snapshots[mutation.path] = dest.read_bytes()
+                snapshots[mutation.path] = (
+                    dest.read_bytes(),
+                    stat.S_IMODE(dest.stat().st_mode),
+                )
             else:
-                snapshots[mutation.path] = None
+                snapshots[mutation.path] = (None, None)
         return snapshots
 
     def _preflight(self, mutations: Sequence[FileMutation]) -> Result[TransactionReceipt] | None:
@@ -115,19 +120,18 @@ class AtomicMultiFileTransactionManager:
                 continue
             if not mutation.path.endswith(".py"):
                 continue
-            try:
-                ast.parse(mutation.content, filename=mutation.path)
-            except SyntaxError as syn_err:
+            syntax_error = python_syntax_error(mutation.content, path=mutation.path)
+            if syntax_error is not None:
                 return Result.fail(
                     "invalid_request",
-                    f"SyntaxError at {mutation.path}:{syn_err.lineno}: {syn_err.msg}",
+                    syntax_error,
                 )
         return None
 
     def _commit(
         self,
         resolved: Sequence[tuple[FileMutation, Path]],
-        snapshots: dict[str, bytes | None],
+        snapshots: dict[str, tuple[bytes | None, int | None]],
         transaction_id: str,
     ) -> Result[TransactionReceipt] | None:
         staged: list[Path] = []
@@ -144,6 +148,9 @@ class AtomicMultiFileTransactionManager:
                 if mutation.content is None or mutation.action == "delete":
                     continue
                 os.replace(staged[stage_index], dest)
+                prior_mode = snapshots.get(mutation.path, (None, None))[1]
+                if prior_mode is not None:
+                    os.chmod(dest, prior_mode)
                 stage_index += 1
             for mutation, dest in resolved:
                 if mutation.content is None or mutation.action == "delete":
@@ -156,8 +163,8 @@ class AtomicMultiFileTransactionManager:
         self._unlink_tmps(staged)
         return None
 
-    def _restore(self, snapshots: dict[str, bytes | None]) -> None:
-        for rel_path, payload in snapshots.items():
+    def _restore(self, snapshots: dict[str, tuple[bytes | None, int | None]]) -> None:
+        for rel_path, (payload, mode) in snapshots.items():
             dest = self._root / rel_path
             if payload is None:
                 if dest.is_file():
@@ -165,6 +172,8 @@ class AtomicMultiFileTransactionManager:
                 continue
             dest.parent.mkdir(parents=True, exist_ok=True)
             dest.write_bytes(payload)
+            if mode is not None:
+                os.chmod(dest, mode)
 
     def _unlink_tmps(self, staged: Sequence[Path]) -> None:
         for tmp in staged:

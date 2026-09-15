@@ -53,7 +53,7 @@ Two constraints you should know before we start
    PRD_AETHER_CLI.md §2 already targets. But it does mean OpenTUI is a nativTS convention is "zero runtime deps outside Node stdlib". W0 exists to prove it
    holds up before we commit.
 2. This work is not currently authorized. docs/SPEC.md TC-E-047 puts packaged CLI/TUI in M-9, which is UNAUTHORIZED (blocked on M-8), and both WIP=1 lanes in docs/execution/active.md
-   are backend (CMX-09, REL-01R). Per docs/execution/backlog.md §2.9 this nefinition-of-Ready fields and lane authorization. W6 does that paperwork; youneed to authorize the lane before W1 lands.
+   are backend (CMX-09, REL-01R). Per docs/execution/main/backlog.md §2.9 this nefinition-of-Ready fields and lane authorization. W6 does that paperwork; youneed to authorize the lane before W1 lands.
 
 ---
 
@@ -287,7 +287,7 @@ Manual end-to-end — the actual acceptance test:
 6. /exit, relaunch, /resume latest — transcript restored, conversation conti
 7. /logout.
 
-Docs. AGENTS.md §7 forbids creating new markdown anywhere under docs/. So: no new files. Edit docs/execution/backlog.md to add the package with Definition-of-Ready fields,
+Docs. AGENTS.md §7 forbids creating new markdown anywhere under docs/. So: no new files. Edit docs/execution/main/backlog.md to add the package with Definition-of-Ready fields,
 docs/execution/active.md to authorize the lane, and PRD_AETHER_TUI.md §2's Asays React+Ink, which is stale for @aether/tui). Then just docs-knowledge.
 
 ---
@@ -297,11 +297,11 @@ Critical files
 ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │                                    Path                                   ange                         │
 ├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ vanguard/clients/tui-core/**                                                │ New headless package                                  │
+│ vanguard/clients/tui-core/\*\*                                               │ New headless package                                  │
 ├─────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────┤
-│ vanguard/clients/tui/src/**                                                 │ Rewritten on OpenTUI + Solid                          │
+│ vanguard/clients/tui/src/\*\*                                                │ Rewritten on OpenTUI + Solid                          │
 ├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│ vanguard/clients/cli/src/tui/**                                           d                            │
+│ vanguard/clients/cli/src/tui/\*\*                                          d                            │
 ├─────────────────────────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────┤
 │ vanguard/clients/client/src/application/app-controller.ts:131             y fallback                   │
 ├────────────────────────────────────────────────────────────────────────────────────────────────────────┤

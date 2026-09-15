@@ -74,6 +74,7 @@ Execution profiles (`mhf.execution-profile/2`) define the containment backend, a
 ### Key Profile Constraints
 - **Fail-Closed Sandbox**: If `sandboxed` or `hermetic` is selected and the sandbox backend (`bwrap`) is unavailable, runtime fails immediately with `SandboxUnavailable` (`INV-B-001`, `RF-88`). Silent fallback to `host` is prohibited.
 - **Hermetic Invariants**: `hermetic` assurance requires `attestation_required: true`, `retention: "full"`, and `evaluation_mode: "exterior"`.
+- **Custom Overrides**: `load_custom_profile` accepts JSON and YAML mapping files. YAML uses the locked PyYAML dependency; unreadable, malformed, or widening inputs raise `ExecutionProfileError` before execution.
 
 ---
 

@@ -130,7 +130,7 @@ $$\text{FinalScore}(d) = \text{PPR}(d) \times \mathbf{W}_{\text{auth}}(d) \times
 
 - **Normative Law** (`docs/SPEC.md`, `AGENTS.md`): $\mathbf{W} = 1.50$
 - **System Architecture** (`docs/architecture/`, `docs/backend/`): $\mathbf{W} = 1.30$
-- **Execution Runway** (`docs/execution/tasks.md`): $\mathbf{W} = 1.20$
+- **Execution Runway** (`docs/execution/main/tasks.md`): $\mathbf{W} = 1.20$
 - **Descriptive Documentation** (`docs/onboarding/`, guides): $\mathbf{W} = 1.00$
 - **Non-Canonical Research / Scratchpads**: $\mathbf{W} = 0.50$
 

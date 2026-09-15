@@ -172,6 +172,18 @@ class TestApprovalPathMatrix(unittest.TestCase):
         self.assertIn("entrypoint.execute", self.packet["subject"]["publicRoute"])
         self.assertIn("execute_profiled", self.packet["subject"]["sessionRoute"])
 
+    def test_first_seam_retains_evidence_and_does_not_authorize_repair(self) -> None:
+        row = self.cases["pub-require-missing"]
+        self.assertTrue(row.get("seamEvidence"), row)
+        self.assertEqual(self.packet["firstSeam"], row["seam"])
+        self.assertFalse(self.packet["config"]["repairAuthorized"])
+        unresolved = " ".join(self.packet.get("unresolved") or []).lower()
+        self.assertIn("not a repair", unresolved)
+        self.assertNotRegex(
+            PROBE_SOURCE,
+            r"execute_product\([^)]*approver\s*=",
+        )
+
     def test_first_seam_is_not_overwritten_by_later_cells(self) -> None:
         from benchmarks.diagnostics import approval_path_probe as probe
 

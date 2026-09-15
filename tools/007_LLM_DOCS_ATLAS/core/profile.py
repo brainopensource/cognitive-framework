@@ -28,9 +28,9 @@ DEFAULT_LOW_SIGNAL_PATTERNS: tuple[str, ...] = (
 @dataclass(frozen=True)
 class RepositoryProfile:
     name: str = "generic"
-    docs_roots: tuple[str, ...] = ("docs", "documentation", "doc")
-    source_roots: tuple[str, ...] = ("src", "lib", "packages")
-    test_roots: tuple[str, ...] = ("tests", "test")
+    docs_roots: tuple[str, ...] = ("docs", "documentation", "doc", "wiki")
+    source_roots: tuple[str, ...] = ("src", "lib", "packages", "app", "backend", "frontend", "server", "client", "pkg", "cmd", "internal")
+    test_roots: tuple[str, ...] = ("tests", "test", "spec", "specs", "__tests__")
     schema_roots: tuple[str, ...] = ("schemas", "schema")
     generated_root: str = ".generated"
     cache_root: str = ".generated/lda-cache"
@@ -62,6 +62,8 @@ class RepositoryProfile:
     # context packet budget mix (intents: bugfix/feature/research/test/explain).
     budget_mix: dict[str, Any] = field(default_factory=dict)
     labels: dict[str, str] = field(default_factory=dict)
+    subsystem_doc_map: dict[str, tuple[str, str, str]] = field(default_factory=dict)
+    default_normative_docs: tuple[str, ...] = ()
 
     def authority_score(self, value: str | None) -> int:
         if value in self.preferred_authority: return 80 - self.preferred_authority.index(value)
@@ -103,5 +105,13 @@ def profile_from_mapping(mapping: Mapping[str, Any]) -> RepositoryProfile:
                 value = dict(value)
             else:
                 value = tuple(str(item) for item in value)
+        elif isinstance(value, dict):
+            if key == "subsystem_doc_map":
+                value = {
+                    str(k): tuple(str(x) for x in v)
+                    for k, v in dict(value).items()
+                }
+            else:
+                value = dict(value)
         kwargs[key] = value
     return RepositoryProfile(**kwargs)

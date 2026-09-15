@@ -7,13 +7,13 @@ canonical_for:
   - quick-start
 status: living
 owner: documentation-architect
-version: "0.9.3"
-last_verified: 2026-09-03
+version: "0.9.4"
+last_verified: 2026-09-15
 supersedes: []
 superseded_by: null
 ---
 
-# AETHER — Strongforce Development Version (`0.9.3`) H
+# AETHER — Strongforce Development Version (`0.9.4`) H
 
 **AETHER is a general event-sourced agentic computation framework and experimental substrate.**
 

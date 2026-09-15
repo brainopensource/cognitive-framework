@@ -7,8 +7,8 @@ canonical_for:
   - repository-anti-sprawl-rules
 status: living
 owner: repository-governance
-version: "0.9.3"
-last_verified: 2026-09-03
+version: "0.9.4"
+last_verified: 2026-09-15
 supersedes: []
 superseded_by: null
 ---

@@ -7,7 +7,7 @@ status: living
 owner: repository-governance
 canonical_for:
   - active-feature-delta-specification
-version: "2.1.1"
+version: "0.9.4"
 date: "2026-09-13"
 last_verified: 2026-09-14
 lock_head: "6f4f3942"

@@ -4,13 +4,13 @@ description: >-
   Universal Repository Intelligence & Navigation Protocol (LDA).
   Use when exploring the codebase, finding symbols, routing tasks,
   compiling token-budgeted context, checking documentation debt, or locating test falsifiers.
-version: "1.0.0"
+version: "2.0.0"
 authority: operational
 ---
 
-# LDA Repository Intelligence & Context Navigation Protocol
+# LDA 2.0 Repository Intelligence & Context Navigation Protocol
 
-**LDA (LLM Docs Atlas)** is a thin, deterministic, zero-daemon repository-intelligence and context engine. It transforms codebases into an in-process SQLite-WAL fact graph to compile token-budgeted, provenance-bound context packets, task plans, and targeted test falsifiers for AI agents and human developers.
+**LDA 2.0 (LLM Docs Atlas)** is a thin, deterministic, zero-daemon repository-intelligence and context engine. It transforms codebases into an in-process SQLite-WAL fact graph to compile token-budgeted, provenance-bound context packets, task plans, targeted test falsifiers, and a one-shot repository/task posture for AI agents and human developers.
 
 ---
 
@@ -38,7 +38,25 @@ LDA provides **structured repository intelligence** across code and documentatio
 
 ---
 
-## 3. The "Big 3" Agent Workflow (Recommended Path)
+## 3. Start with LDA 2.0 posture, then use the "Big 3"
+
+At the start of an implementation, review, or bugfix task, establish the current
+subject and select only work that is actually unblocked:
+
+```bash
+# Repository posture: HEAD/dirty state, targeted code health, and document health.
+uv run lda sweep --json
+
+# Do not ingest all of tasks.md merely to find runnable work.
+uv run lda tasks --ready --json
+```
+
+`sweep` reports current state; it is not an acceptance receipt and does not replace
+the targeted falsifiers for the packet you select. If it is unavailable, use
+`uv run lda doctor --json`, then fall back to the deterministic procedures in
+section 8.
+
+After posture is known, use the **Big 3** for 90% of development:
 
 To prevent cognitive overload and tool paralysis across 20+ commands, agents should rely on the **Big 3** commands for 90% of development:
 
@@ -55,6 +73,10 @@ After edits, run **`uv run lda index --delta`** (< 25ms dirty-file AST sync; not
 For any task (implementation, review, bugfix), agents MUST follow this sequence:
 
 ```text
+Step 0: lda sweep --json (New task: establish current repository posture)
+    ↓
+Step 0b: lda tasks --ready --json (Select a ready task without loading the whole runway)
+    ↓
 Step 1: lda plan "<task>" (One-shot bundle: symbols + blast radius + docs + test commands)
     ↓
 Step 2: Read targeted line ranges only (Never ingest whole files!)
@@ -63,9 +85,11 @@ Step 3: Implement surgical code changes
     ↓
 Step 4: uv run lda index --delta (Instant AST sync for edited files)
     ↓
-Step 5: Run targeted test falsifiers surfaced in Step 1
+Step 5: Run targeted test falsifiers surfaced in Step 1, or use
+        `lda code-status --task <id> --json` for the packet's changed files
     ↓
-Step 6: uv run lda drift --json (Verify zero doc drift or orphan contracts)
+Step 6: uv run lda drift --json (Inspect documentation drift; do not mask global
+        pre-existing findings as task success)
 ```
 
 ---
@@ -133,6 +157,18 @@ Step 6: uv run lda drift --json (Verify zero doc drift or orphan contracts)
 ---
 
 ## 6. Complete CLI Tool Surface
+
+### 0. LDA 2.0 operational posture and task routing
+```bash
+uv run lda sweep --json                 # Repository, code, and documentation posture
+uv run lda tasks --ready --json         # Unblocked runway tasks
+uv run lda tasks --inspect T-141 --json # One task's parsed record
+uv run lda code-status --task T-141 --json # Targeted falsifiers/linters for a packet
+uv run lda doc-status --json            # Frontmatter, links, and documentation health
+```
+
+Use `code-status` only for the packet or files in scope; it is not permission to
+run broad discovery or unrelated tests.
 
 ### 1. One-Shot Task Bundle (`lda plan`) [SOTA]
 ```bash
@@ -247,6 +283,10 @@ uv run lda index --rebuild --json # Fresh rebuild
 For agent environments connecting via Model Context Protocol (MCP JSON-RPC):
 
 ### MCP Tools
+- `lda_sweep`: Master one-shot execution combining repo-status, code-status, and doc-status in <2.5s (`{"budget": 4000}`).
+- `lda_repo_status`: Fast C-git status, HEAD SHA, branch, dirty diffstat (<25ms).
+- `lda_code_status`: Auto-runs falsifiers for touched files via test-runner skill, plus linters (<2s) (`{"task_id": "...", "target_files": [...]}`).
+- `lda_tasks`: AST/regex runway query over tasks.md by ID, owner, or unblocked status (`{"ready_only": true, "owner": "..."}`).
 - `lda_plan`: Compile one-shot task bundle with symbols, callers, falsifiers, doc obligations, and context (`{"query": "...", "budget": 8000}`).
 - `lda_resolve`: Semantic intent symbol resolution without exact names (`{"query": "...", "top_k": 5}`).
 - `lda_delta`: Ephemeral incremental delta re-indexing (`{"files": ["..."]}`).

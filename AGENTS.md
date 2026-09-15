@@ -68,8 +68,11 @@ For any implementation, review, or bugfix task, agents MUST begin with this toke
 sequence before broad exploration. Each step answers a specific development question:
 
 ```bash
-# Step 0 — Bootstrap state: which gates must stay green? what is already failing?
-cat dev_context_logs/context_summary.md          # refresh first with: make dev-context
+# Step 0 — Bootstrap state & gates: one-shot operational posture in <2.5s (LDA 2.0 SOTA):
+uv run lda sweep --json                           # Fast C-git, boundary/TCB linters, falsifiers, doc health
+
+# Step 0b — Runway tasks & unblocked leases query (replaces ingesting 2,500 lines of tasks.md):
+uv run lda tasks --ready --json                   # Query ready unblocked tasks directly
 
 # Step 1 — Primary SOTA Fast Path: One-shot task bundle (symbols, callers, falsifiers, docs)
 #          Replaces multiple manual searches with a single, auto-delta synchronized plan.
@@ -81,17 +84,22 @@ uv run lda resolve "<natural language intent or concept>"
 # Step 2 — Post-edit sync (sub-50ms incremental re-index with 0 MB background daemon):
 uv run lda index --delta
 
-# Step 3 — Deterministic Fallback (when LDA index is cold, degraded, or unbuilt):
+# Step 3 — Targeted falsification & test-runner bridge:
+uv run lda code-status --task "<task-id>" --json   # or uv run lda code-status --dirty
+
+# Step 4 — Deterministic Fallback (when LDA index is cold, degraded, or unbuilt):
 python3 tools/docs_rag_v0.py "<task keywords>" --budget 8000
 python3 tools/docs_rag_v0.py --file vanguard/packages/kernel/budget.py
 grep "<Symbol>" .generated/knowledge/symbols.jsonl
 ```
 
-- Step 0 answers: *which gates, headrooms, and failure signatures are already known?*
+- Step 0 answers: *what is the complete repository posture (git dirty diffstat, linters, target falsifiers, doc health) in a single roundtrip?*
+- Step 0b answers: *which runway tasks are unblocked right now without reading 2,500 lines into context?*
 - Step 1 answers: *which subsystem owns the task, what are the exact symbol ranges, who calls them (blast radius), which canonical docs must stay synchronized, and which executable test falsifiers verify the change?*
 - Step 1b answers: *which classes/functions implement a given semantic behavior or concept?*
 - Step 2 answers: *how do I refresh AST ranges and relation facts instantly after editing a file without a full rebuild?*
-- Step 3 answers: *how do I deterministically route documentation debt if the SQLite graph is unavailable?*
+- Step 3 answers: *how do I auto-execute isolated test falsifiers and boundary linters for modified files?*
+- Step 4 answers: *how do I deterministically route documentation debt if the SQLite graph is unavailable?*
 
 #### Core LDA Engineering Patterns (Anti-Blind Exploration)
 

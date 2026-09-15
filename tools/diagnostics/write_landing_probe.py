@@ -50,6 +50,7 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
 from benchmarks.product_path import execute_product
+from benchmarks.ladder.quarantine import SCOPE_ORDINARY_USER, guard_materialization
 from vanguard.packages.adapters.models.invocation import ProposalTranslator
 from vanguard.packages.adapters.stores.event_store import SqliteEventStore
 from vanguard.packages.ports.event_store import EventRange, Result
@@ -592,6 +593,7 @@ def fixture_dir(fixture: str) -> Path:
 
 def materialize(fixture: str, workspace: Path) -> str:
     """Copy the fixture into a candidate workspace; return the brief."""
+    guard_materialization(task_id=fixture, purpose="development", scope=SCOPE_ORDINARY_USER)
     source = fixture_dir(fixture)
     workspace.mkdir(parents=True, exist_ok=True)
     for path in sorted(source.iterdir()):
@@ -682,6 +684,7 @@ def run_probe(
     resolved_brief = brief if brief is not None else materialize(fixture, workspace)
     if brief is not None:
         materialize(fixture, workspace)
+    guard_materialization(task_id=fixture, purpose="development", scope=SCOPE_ORDINARY_USER)
     preimage = tree_digest(workspace)
     preimage_files = exterior_oracle_digest(workspace)[1]
     store = store_path or (workspace.parent / f"{label}-events.sqlite3")

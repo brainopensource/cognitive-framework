@@ -39,7 +39,7 @@ from vanguard.packages.ports.event_store import EventRange
 from benchmarks.ladder.control import CONTROL_ARM, ControlManifestError, require_frozen
 from benchmarks.ladder.evidence import append_row
 from benchmarks.ladder.metrics import BUDGET_EXHAUSTED, budget_exhausted, publish_control_report
-from benchmarks.ladder.quarantine import refuse_unfrozen_scoring
+from benchmarks.ladder.quarantine import refuse_unfrozen_scoring, guard_loader
 from benchmarks.product_path import PRODUCT_PRESETS, execute_product
 from benchmarks.swe_bench.challenges import CHALLENGES
 
@@ -275,6 +275,7 @@ def run_single_harness_task(
         db_path = repo / ".vanguard" / "events.sqlite3"
         db_path.parent.mkdir(parents=True, exist_ok=True)
 
+        guard_loader(task_id=task_name, purpose="development")
         start_t = time.perf_counter()
         try:
             frame = execute_product(

@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from benchmarks.product_path import execute_product
+from benchmarks.ladder.quarantine import SCOPE_ORDINARY_USER, guard_materialization
 from vanguard.packages.domain.canonicalisation.digest import digest_of
 
 ROOT = Path(__file__).resolve().parent
@@ -23,6 +24,7 @@ def task_dir(task_id: str) -> Path:
 
 
 def materialize(task_id: str, workspace: Path) -> dict[str, str]:
+    guard_materialization(task_id=task_id, purpose="development", scope=SCOPE_ORDINARY_USER)
     source = task_dir(task_id)
     workspace.mkdir(parents=True, exist_ok=True)
     for path in source.iterdir():
@@ -54,6 +56,7 @@ def run_task(
     preset: str = "balanced",
 ) -> dict[str, Any]:
     meta = materialize(task_id, workspace)
+    guard_materialization(task_id=task_id, purpose="development", scope=SCOPE_ORDINARY_USER)
     frame = execute_product(
         workspace=workspace,
         brief=meta["brief"],

@@ -12,6 +12,7 @@ Falsifier for T-101 / GATE-01:
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import shutil
 import sys
@@ -222,6 +223,120 @@ class TestCollectionIntegrity(unittest.TestCase):
             self.assertTrue(len(reason.strip()) > 10, f"Retirement rationale for {path_str} is too brief")
             p = _REPO_ROOT / path_str
             self.assertTrue(p.is_file(), f"Recorded retired module {path_str} does not exist on disk")
+
+
+REQUIRED_VERIFY_MODULES: tuple[str, ...] = (
+    "test.benchmarks.test_corpus_quarantine",
+    "test.benchmarks.test_control_accounting",
+    "test.benchmarks.test_metric_veto",
+    "test.falsifiers.test_completion_gate_scope",
+    "test.benchmarks.test_control_corpus",
+)
+
+GATE_EXCLUSIONS: dict[str, str] = {
+    "test/e2e": "not an importable unittest package (no __init__.py); clean-machine RC install probe",
+    "test/broken": "linter negative fixtures, not a unittest package (no __init__.py)",
+    "test/falsifiers full discover": "material graph-coloring / M-5b / M-7 / inference-accounting currently error; named false-completion modules are gated instead",
+}
+
+
+def strict_admission_exit(stdout: str, returncode: int) -> int:
+    """Scoring-gate interpreter: diagnostic UNACCEPTED is red, not green."""
+    if returncode != 0 or "HOLDOUT UNACCEPTED" in stdout or "ADMISSION FAIL" in stdout:
+        return 1
+    return 0
+
+
+class TestGateDiscoveryWidening(unittest.TestCase):
+    """T-132: routine verify must see the control instrument; unaccepted holdout stays red."""
+
+    def test_justfile_lists_required_control_modules(self) -> None:
+        justfile = (_REPO_ROOT / "justfile").read_text(encoding="utf-8")
+        for module in REQUIRED_VERIFY_MODULES:
+            self.assertIn(module, justfile, f"just verify must collect {module}")
+        self.assertIn("verify-admission-strict", justfile)
+        for path, reason in GATE_EXCLUSIONS.items():
+            self.assertIn(path, justfile, f"exclusion {path} must be named")
+            self.assertGreater(len(reason), 10)
+
+    def test_ci_workflows_list_required_control_modules(self) -> None:
+        ci = (_REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+        clean = (_REPO_ROOT / ".github" / "workflows" / "clean-candidate.yml").read_text(encoding="utf-8")
+        for module in REQUIRED_VERIFY_MODULES:
+            self.assertIn(module, ci, f"ci.yml must collect {module}")
+            self.assertIn(module, clean, f"clean-candidate.yml must collect {module}")
+        self.assertIn("HOLDOUT UNACCEPTED", ci)
+        self.assertIn("HOLDOUT UNACCEPTED", clean)
+
+    def test_e2e_and_broken_are_deliberately_not_packages(self) -> None:
+        self.assertFalse((_REPO_ROOT / "test" / "e2e" / "__init__.py").is_file())
+        self.assertFalse((_REPO_ROOT / "test" / "broken" / "__init__.py").is_file())
+        self.assertTrue((_REPO_ROOT / "test" / "e2e" / "test_clean_machine_rc.py").is_file())
+        self.assertTrue((_REPO_ROOT / "test" / "broken" / "fixtures").is_dir())
+
+    def test_stale_oracle_digest_fails_control_corpus_suite(self) -> None:
+        """The defect that escaped narrow verify must red the widened control suite."""
+        loader = unittest.defaultTestLoader
+        suite = loader.loadTestsFromName(
+            "test.benchmarks.test_control_corpus.TestControlCorpus.test_frozen_suite_is_complete_and_digest_bound"
+        )
+        result = unittest.TestResult()
+        suite.run(result)
+        self.assertGreaterEqual(len(result.errors) + len(result.failures), 1)
+        blob = "\n".join(traceback for (_, traceback) in result.errors + result.failures)
+        self.assertIn("oracle digest mismatch", blob)
+
+    def test_actual_unaccepted_holdout_is_strict_red(self) -> None:
+        from tools.linters.check_corpus_quarantine import main
+
+        import io
+        from contextlib import redirect_stdout
+
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = main(["--admission"])
+        stdout = buf.getvalue()
+        self.assertEqual(strict_admission_exit(stdout, code), 1)
+        self.assertIn("HOLDOUT UNACCEPTED", stdout)
+
+    def test_synthetic_eligible_holdout_admission_is_green(self) -> None:
+        from tools.linters.check_corpus_quarantine import check_admission
+        from benchmarks.ladder.quarantine import EXPECTED_HOLDOUT_STRATA, digest_canonical
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            members = []
+            index = 0
+            for stratum, count in EXPECTED_HOLDOUT_STRATA.items():
+                for _ in range(count):
+                    index += 1
+                    member_id = f"eval-{index:02d}"
+                    source = "sha256:" + f"{index:02x}" * 32
+                    oracle = "sha256:" + f"{index + 50:02x}" * 32
+                    members.append({
+                        "id": member_id,
+                        "aliases": [],
+                        "origin": source,
+                        "source_fingerprint": source,
+                        "oracle_fingerprint": oracle,
+                        "task_fingerprint": digest_canonical({"id": member_id, "source": source}),
+                        "stratum": stratum,
+                        "role": "HOLDOUT",
+                        "exposure_tombstone": None,
+                        "attestation": digest_canonical({"id": member_id, "role": "HOLDOUT"}),
+                    })
+            registry = {
+                "schema": "aether.corpus-quarantine/1",
+                "holdout_admission": "PENDING",
+                "expected_holdout": {"n": 30, "strata": dict(EXPECTED_HOLDOUT_STRATA)},
+                "members": members,
+                "entrypoints": [],
+            }
+            registry_path = root / "benchmarks" / "ladder" / "corpus_registry.json"
+            registry_path.parent.mkdir(parents=True, exist_ok=True)
+            registry_path.write_text(json.dumps(registry), encoding="utf-8")
+            errors = check_admission(root, registry_path=registry_path, scan_entrypoints=False)
+            self.assertEqual(errors, [])
 
 
 if __name__ == "__main__":

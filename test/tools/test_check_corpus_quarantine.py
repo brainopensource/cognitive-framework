@@ -106,12 +106,53 @@ class TestCorpusQuarantineLinter(unittest.TestCase):
             rogue.parent.mkdir(parents=True, exist_ok=True)
             rogue.write_text(
                 "from benchmarks.baac.lib.state import materialize_scratch_workspace\n"
+                "from benchmarks.ladder.quarantine import guard_loader\n"
                 "def run(src, dest):\n"
+                "    guard_loader(task_id=src.name)\n"
                 "    materialize_scratch_workspace(src, dest)\n",
                 encoding="utf-8",
             )
             errors = check_metadata(root, registry_path=registry_path, scan_entrypoints=True)
             self.assertTrue(any("uncovered" in error.lower() or "loader" in error.lower() for error in errors))
+
+    def test_metadata_rejects_unguarded_callable(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            registry_path = root / "benchmarks" / "ladder" / "corpus_registry.json"
+            _write_json(
+                registry_path,
+                {
+                    "schema": "aether.corpus-quarantine/1",
+                    "holdout_admission": "UNACCEPTED",
+                    "expected_holdout": {
+                        "n": 30,
+                        "strata": {
+                            "brownfield": 10,
+                            "greenfield": 11,
+                            "multi_file": 5,
+                            "multi_turn": 1,
+                            "single_file": 3,
+                        },
+                    },
+                    "members": [_valid_member("dev-1", "DEV")],
+                    "entrypoints": [
+                        {
+                            "guard": "required",
+                            "kind": "loader",
+                            "path": "benchmarks/unguarded_setup.py",
+                        }
+                    ],
+                },
+            )
+            target = root / "benchmarks" / "unguarded_setup.py"
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(
+                "def setup_workspace(ws):\n"
+                "    ws.mkdir(parents=True, exist_ok=True)\n",
+                encoding="utf-8",
+            )
+            errors = check_metadata(root, registry_path=registry_path, scan_entrypoints=True)
+            self.assertTrue(any("unguarded callable" in error.lower() for error in errors))
 
     def test_admission_rejects_wrong_holdout_count(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

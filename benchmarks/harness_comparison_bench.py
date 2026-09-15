@@ -35,6 +35,7 @@ from vanguard.packages.runtime.root import (
 )
 from benchmarks.ladder_runner import ALL_CHALLENGES, setup_workspace, run_oracle_test
 from benchmarks._env import load_benchmark_env
+from benchmarks.ladder.quarantine import guard_loader
 
 OUT_DIR = ROOT / "benchmarks/artifacts/comparison"
 
@@ -49,6 +50,7 @@ def run_single_harness_eval(
         raise ValueError(f"Unknown challenge: {challenge_id}")
 
     ch = ALL_CHALLENGES[challenge_id]
+    guard_loader(task_id=challenge_id, purpose="development")
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     stem = f"comp__{challenge_id}__{manifest_name}__{re.sub(r'[^A-Za-z0-9_.-]+', '_', model_name)}"
     tape_path = OUT_DIR / f"{stem}.cassette.json"

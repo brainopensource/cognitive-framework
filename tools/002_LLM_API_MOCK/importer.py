@@ -3,11 +3,20 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 from typing import Any, Dict, List, Mapping
 
+_REPO = Path(__file__).resolve().parents[2]
+_LAM = Path(__file__).resolve().parent
+if str(_REPO) not in sys.path:
+    sys.path.insert(0, str(_REPO))
+if str(_LAM) not in sys.path:
+    sys.path.insert(0, str(_LAM))
+
 from record import trace_to_scenario
 from schema import validate_scenario
+from benchmarks.ladder.quarantine import guard_loader
 
 VERB_MAP = {
     "read_file": "view_file",
@@ -35,6 +44,7 @@ def import_trajectory(
     workspace: Mapping[str, str],
 ) -> Dict[str, Any]:
     """Import a JSONL trajectory log and output a validated gold scenario dictionary."""
+    guard_loader(task_id=scenario_id, capture=True)
     path = Path(jsonl_path)
     if not path.is_file():
         raise FileNotFoundError(f"Trajectory JSONL missing at {path}")

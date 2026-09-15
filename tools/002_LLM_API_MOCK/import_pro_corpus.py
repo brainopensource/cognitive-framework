@@ -19,6 +19,7 @@ if str(ROOT) not in sys.path:
 from schema import validate_scenario
 from store import LamStore
 from benchmarks.swe_bench.challenges import CHALLENGES
+from benchmarks.ladder.quarantine import guard_loader
 
 def import_all_swe_challenges():
     store = LamStore(DB_PATH)
@@ -29,6 +30,7 @@ def import_all_swe_challenges():
     
     for cid, chal in CHALLENGES.items():
         scenario_id = f"t{chal.tier}-{cid.replace('_', '-')}"
+        guard_loader(task_id=scenario_id, capture=True)
         scenario_file = SCENARIOS_DIR / f"{scenario_id}.json"
         
         # Build workspace representation

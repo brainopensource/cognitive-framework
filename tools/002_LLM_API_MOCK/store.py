@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional
 _REPO = Path(__file__).resolve().parents[2]
 if str(_REPO) not in sys.path:
     sys.path.insert(0, str(_REPO))
-from benchmarks.ladder.quarantine import guard_export
+from benchmarks.ladder.quarantine import guard_loader
 
 #: The checked-in corpus. It is a tracked fixture, so anything that writes to it
 #: turns a test run into a working-tree change. Set ``LAM_DB_PATH`` to redirect
@@ -145,7 +145,7 @@ class LamStore:
         created_from: str = "hand",
         content_hash: Optional[str] = None,
     ) -> None:
-        guard_export(task_id=scenario_id)
+        guard_loader(task_id=scenario_id, capture=True)
         atoms_str = json.dumps(sorted(list(set(atoms))))
         with self._get_connection() as conn:
             conn.execute(

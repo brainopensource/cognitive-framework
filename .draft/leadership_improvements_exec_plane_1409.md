@@ -48,8 +48,10 @@ Collapsing that block yields ~1,667 lines and **~633 lines of headroom under the
 
 | When | Owner | What |
 |---|---|---|
-| **First — one commit, no content edits** | CEO + Senior | **Phase 0**: reclaim `technical.md`, dedup `spec.md`, retire the superseded board in `tasks.md`, re-pin the four stale blobs, close the `justfile` gate gap |
-| **Same day Phase 0 lands** | Senior dispatches | **A**: T-131.8 on its exclusive lease. **B**: the four LANDED reviews (T-130/T-135/T-131.6/T-140) → acceptance-record reconciliation (T-75/T-76, T-78, T-83b, T-138, T-139) → T-131.3→4→7 on released files. **C**: T-133 *non-probe files first* → T-132 → T-137 → hermetic T-51 local readiness |
+| **First — one commit, no content edits** | CEO + Senior | **Phase 0a** (mechanical only): reclaim `technical.md`'s unlinked anchors, delete the byte-identical dialect duplicate |
+| **On leadership ruling** | Senior | **Phase 0b**: the `spec.md` dedup/renumber choices, the `tasks.md` board retirement, and `justfile` linter placement — each selects surviving law or answers an open decision |
+| **After the last semantic edit** | Senior | **Phase 0c**: regenerate all four binding pins on the final subject |
+| **Same day Phase 0a lands** | Senior dispatches | **A**: T-131.8 on its exclusive lease. **B**: the four LANDED reviews (T-130/T-135/T-131.6/T-140) → acceptance-record reconciliation (T-75/T-76, T-78, T-83b, T-138, T-139) → T-131.3→4→7 on released files. **C**: T-133 *non-probe files first* → T-132 → T-137 → hermetic T-51 local readiness |
 | **Concurrent with dev execution** | Director rules, Senior transfers | **Phases 1–4**: contradictions, as-built contracts, capability plane, measurement math |
 | **After Phases 1–4 land** | Senior | **Phase 5**: contract index in `DEVS.md`; escalation triggers unchanged |
 | **Last** | CEO | **Phase 6**: `.draft/` sweep, 0.9.4 cut |
@@ -144,21 +146,39 @@ Planner→worker→verifier running end-to-end on the `horizon` preset over a re
 
 ---
 
-## Phase 0 — Reclaim and re-pin (mechanical, no semantic content)
+## Phase 0 — Reclaim and re-pin
 
-`README.md:108-110`: *"A documentation topology move is isolated from semantic edits."* This phase is **its own commit** and must land before any content edit.
+`README.md:108-110`: *"A documentation topology move is isolated from semantic edits."*
 
-1. **`technical.md`**: delete lines 1656–2466, keeping the 11-line retirement note and its `git show` pointer. Result ~1,667 lines / 2,300 ceiling.
-2. **`spec.md`** (2,390 / 2,150 — over by 240): deduplicate, do not rewrite.
-   - Delete the verbatim dialect duplicate at `1940–1942` (identical to `1915–1917`).
-   - Collapse the two `INV-DELTA-1..5` copies (`1037–1043` terse, `2192–2196` verbose) into the verbose one, which is materially stronger — it carries "stale preimage" and the IndexPort enumeration requirement that the terse copy drops.
-   - Fold the self-contained second document at `2174–2390` into the main body. It restarts numbering at `## 1.` and duplicates §6.5/§5/§7/§8 with *conflicting* definitions. Its Python dataclasses are the only real typed contracts in the corpus — **keep those, they move to `technical.md` in Phase 2** — and delete the prose shell.
-   - Renumber: the sequence currently runs `0,0,1,2,3,6,4,10,21,22,23,11,28,12,25,26,9,22,23,5,6,7,8,13,14,15,16,1,2…` with `## 0.`, `## 6.`, `## 22.`, `## 23.` each appearing twice.
-3. **`tasks.md`** (2,500 / 1,700 — over by 800): retire the superseded historical board. §"Prior integration board (2026-09-13)" onward is explicitly superseded by §39. Apply the same retirement-note pattern.
-4. **Re-pin** `state_of_play.md` and both guideline binding blocks. All four blobs currently mismatch, so `state_of_play.md` self-invalidates and `DEVS.md`/`DIRECTOR.md` self-declare their assignment sections stale. Regenerate through the prescribed path — **never blind `git hash-object` substitution**, since the pin attests a verified snapshot, not a string match.
-5. **Fix the gate gap**: `check_doc_budgets.py` and `check_stale_paths.py` run in `.github/workflows/ci.yml` but in **neither** `just check` nor `just verify`. Local green does not predict CI green — exactly the trap this phase would otherwise spring. Add both to the `check` recipe in `justfile`.
+**Correction.** An earlier revision of this directive labelled all of Phase 0 "mechanical, no semantic content." That was wrong, and this document contradicted itself: Phase 1's table routes rulings **C5** and **C7** through Phase 0, and three further items below change law or pre-empt a decision leadership has been asked to make. The phase is split accordingly. **Only 0a is mechanical. 0b requires rulings and does not proceed without them.**
 
+### Phase 0a — Genuinely mechanical (proceeds immediately, its own commit)
+
+Byte-level operations with no choice of surviving content.
+
+1. **`technical.md`**: delete lines 1656–2466, keeping the 11-line retirement note and its `git show` pointer. Verified: zero inbound anchor links. Result ~1,667 lines / 2,300 ceiling.
+2. **`spec.md`**: delete the dialect duplicate at `1940–1942` — byte-identical to `1915–1917`, so nothing is chosen.
 **Receipt:** blob comparison before/after confirming no semantic delta, plus `check_markdown_links.py` and `check_execution_truth.py` green.
+
+**Note:** 0a alone does not bring `spec.md` or `tasks.md` under ceiling. Those depend on 0b, so the budget gate stays red until leadership rules.
+
+**Re-pinning is deliberately NOT in 0a.** All four blobs currently mismatch, so `state_of_play.md` self-invalidates and `DEVS.md`/`DIRECTOR.md` self-declare their assignment sections stale — but 0b rewrites `spec.md` and `tasks.md`, which would invalidate any pin taken now. Pins are regenerated **once, in Phase 0c**, on the final intended documentation subject.
+
+### Phase 0b — Requires leadership ruling before execution
+
+Each item selects which of two conflicting texts becomes law, or decides a question leadership has been asked.
+
+| Item | Why it is not mechanical |
+|---|---|
+| **`spec.md`** — collapse the two `INV-DELTA-1..5` copies (`1037–1043` terse, `2192–2196` verbose) | The copies differ materially. The verbose one carries "stale preimage" and the IndexPort enumeration requirement; the terse one drops them. Choosing the survivor **changes the invariant**. This is ruling **C5**. |
+| **`spec.md`** — fold the second document at `2174–2390` | It duplicates §6.5/§5/§7/§8 with *conflicting* definitions. Selecting winners is a ruling, not a move. Its Python dataclasses are the only real typed contracts in the corpus and are retained for Phase 2 regardless. |
+| **`spec.md`** — renumber the incoherent heading sequence | Section numbers are cited across the corpus (`§23.2`, `A §9.4`). Renumbering rewrites those references and can break anchors. |
+| **`tasks.md`** — retire the superseded historical board | Deciding what is "superseded" is a **status judgment**, which `roles_and_authority.md` assigns to the Senior under leadership ruling, not a topology move. |
+| **`justfile`** — placement of `check_doc_budgets.py` and `check_stale_paths.py` | Both run in `.github/workflows/ci.yml` but in neither `just check` nor `just verify`, so local green does not predict CI green. **But which recipe they belong in is an open decision** — `docs-check`, `check`, or `verify` — and depends on measured cost. Leadership decides; this directive does not pre-empt it. |
+
+### Phase 0c — Final re-pin (after every applicable semantic edit)
+
+Regenerate the binding blocks in `state_of_play.md`, `DEVS.md` and `DIRECTOR.md` against the final documentation subject — after 0b and after any Phase 1–4 edit that changes the four pinned files. Regenerate through the prescribed path; **never blind `git hash-object` substitution**, since the pin attests a verified snapshot, not a string match. A pin taken before its subject stops changing is worse than no pin: it reads as attested and is not.
 
 ---
 
@@ -172,9 +192,9 @@ Nine active contradictions make correct implementation impossible from the docum
 | **C2** | `progressive.py`: `spec.md:1896/1934/1871` and `technical.md:377` forbid creating it; `spec.md:2186/2334` specifies it as a new module | Forbidden. The 4-tier budget is **L4/L5 policy on the existing `ContextCompiler`**. Delete the `2334` ASCII tree; its tier token numbers move into the L4/L5 policy table (Phase 2). |
 | **C3** | `SemanticTaskState`: four incompatible field sets (`spec.md:2204` dataclass, `:1928` `task_class`, `:504` cursor/lineage, `technical.md:614` recovery/budget fields) | `domain/task_state.py:210` is the single schema. Document the as-built; record the other three as drift, not as alternatives. |
 | **C4** | Budget algebra: FH-D04/D05 (`spec.md:769-794`, four named dimensions, dispatch-time, refund bound, structural ceilings excluded) vs §23.2 (`:1581-1595`, abstract vector, issue-time, no dimensions) | FH-D04/D05 governs and is promoted from `[PROPOSAL]` to FACT — `kernel/budget.py:83` already implements it, and `Reservation:63` already excludes `depth`/`turns` as FH-D04 requires. §23.2 would permit summing structural ceilings, which FH-D04 itself names as defect `F-10`. Delete §23.2. |
-| **C5** | Two `INV-DELTA` copies | Resolved in Phase 0 — verbose wins. |
+| **C5** | Two `INV-DELTA` copies | Verbose wins — it carries "stale preimage" and the IndexPort enumeration the terse copy drops. Executed in **Phase 0b**, not 0a: this selects surviving law. |
 | **C6** | Epoch membership: 7 components (`technical.md:569`) vs 4 (`spec.md:1910` `WorkspaceEpoch`) vs 8 (`:563`) | **These are two different epochs and the conflation is the bug.** `WorkspaceEpoch` = repository state (`session.py:1987`). `composition_epoch` = prompt/tool/policy identity (`compiler.py:289`). Name both, define both, state the relationship. |
-| **C7** | Dialect section duplicated verbatim | Phase 0. |
+| **C7** | Dialect section duplicated verbatim | Phase 0a — the two blocks are byte-identical, so nothing is chosen. |
 | **C8** | T-83b wave placement, resolved by fiat in the handbook, never corrected in `spec.md` | Transfer the ruling into `spec.md`. A contradiction resolved only in the handbook re-litigates itself every time someone reads the spec. |
 | **C9** | `S0–S12`, `I-6`, `N-06`, `F-10`, `C-05`, `K-23/K-25/K-26`, `G-01…G-12` referenced but defined nowhere | S0–S12 *are* defined — in `kernel/dispatch.py:3-21`. Promote that docstring into `technical.md` as the canonical table. Define or delete the rest; a referenced-undefined invariant is an escalation generator. |
 
@@ -334,7 +354,7 @@ State which line `0.9.4` refers to, or the first person who reads it will conclu
 
 ## Verification
 
-**Phase 0** (must be its own commit)
+**Phase 0a** (must be its own commit)
 - `just docs-check` — metadata, links, markdownlint
 - `python3 tools/linters/check_markdown_links.py` — confirms the anchor deletion broke nothing
 - `python3 tools/linters/check_doc_budgets.py` — all five files under ceiling **without a raise**

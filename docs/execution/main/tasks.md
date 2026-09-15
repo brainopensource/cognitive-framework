@@ -165,6 +165,18 @@ including final changed files, canonical-owner documentation, focused command,
 positive/adversarial receipts and the R2 peer acceptor. This is delegated packet
 compilation, not a further Leadership review gate.
 
+**Active ownership — T-141-ACT / Principal (2026-09-15).** Principal owns
+`vanguard/packages/runtime/{root,child_runtime,workspace,delegation,session,bootstrap,evaluator_gateway}.py`,
+necessary existing environment/sandbox adapters, focused activation/lifecycle tests,
+and mapped canonical documentation for production-safe activation. This explicit
+user assignment supersedes earlier T-141 lease prerequisites. `session.py` remains
+exclusive until the activation packet lands and Principal gives B its exact file
+and evidence handoff; B's episode-engine work is disjoint. Root refusal stays until
+positive isolated spawn and adversarial publication/recovery controls pass. No Git
+commands, staging or commits: the repository operator receives the packet's exact
+changed files, commands and requested one-commit subject. Independent acceptance
+and final clean-subject MVP verification remain separate, pending gates.
+
 **MVP implementation takeover (2026-09-15).** The user's expanded authority
 supersedes the release prerequisite below: Developer A / Principal owns the
 necessary T-141 integration changes in `runtime/{root,child_runtime,workspace,

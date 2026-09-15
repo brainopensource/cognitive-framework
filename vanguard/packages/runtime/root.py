@@ -405,12 +405,19 @@ class Runtime(_ComposedRuntime):
         # child, and the only admissible runner re-enters this same method.
         # Bound here rather than in `HarnessSession` so recursion stays an
         # edge of the public boundary and never a second activation authority.
-        if ports.child_runtime is None and SPAWN_VERB in harness.verbs:
-            ports = replace(ports, child_runtime=RuntimeChildRunner(
-                run_composed=cls.run_composed,
-                harness=harness, parent_ports=ports, parent_task=task_context,
-                profile=profile, release=release,
-            ))
+        if SPAWN_VERB in harness.verbs and (
+            ports.child_runtime is None
+            or isinstance(ports.child_runtime, RuntimeChildRunner)
+        ):
+            # T-141 cannot be activated by changing repo_path alone:
+            # RuntimeChildRunner._rebind still shares the parent's environment,
+            # and _settle_workspace integrates on child success without the
+            # DIR-C7 base/combined-tree verification gate. Do not silently
+            # construct an unsupervised runner or claim isolated mutation.
+            raise CompositionError(
+                "T-141 automatic child runtime unavailable: child-local effect "
+                "environment and verified, base-bound integration are required"
+            )
         if completion_policy is not None:
             ports = replace(ports, completion_policy=completion_policy)
         session = HarnessSession(

@@ -54,7 +54,7 @@ Collapsing that block yields ~1,667 lines and **~633 lines of headroom under the
 | **After Phases 1–4 land** | Senior | **Phase 5**: contract index in `DEVS.md`; escalation triggers unchanged |
 | **Last** | CEO | **Phase 6**: `.draft/` sweep, 0.9.4 cut |
 
-**The CEO owes exactly two decisions**, and both are blocking if deferred: ratify the `horizon` envelope (§3.2) and supply a fourth acceptor (§5.4). Everything else is delegated.
+**The CEO owes exactly one decision**: ratify the `horizon` envelope (§3.2). The acceptor gap is resolved below by leadership standing as the non-author acceptor, so no hire is required. Everything else is delegated.
 
 **Do not wait for Phases 1–4 before dispatching developers.** The contracts remove *future* escalations; they do not gate the work already leased. A/B/C are blocked today on review capacity, not on documentation.
 
@@ -286,7 +286,9 @@ Only after Phases 1–4 land. Advisory files only (`AGENTS.md:317`).
 1. **`DEVS.md`** — add a contract index: capability → locked section → implementing module → falsifier. `README.md:91`: *"A row that cannot be started without reading all five documents is a malformed row."*
 2. **RUN-04 restated** against the now-existing contracts: a locked contract is a decision already made. A developer implementing to a locked contract does not escalate.
 3. **Escalation triggers unchanged.** `roles_and_authority.md:45-57` lists six. `:59-60`: *"The value of this list is entirely in what it excludes. Each addition costs a fortnight of autonomy."* This directive **adds none** and removes none. The gate reduction comes from contracts making escalation unnecessary, not from deleting gates.
-4. **[CEO] The acceptor constraint is the real throughput limit.** Non-author acceptance with a pool of three deadlocks: B authors T-131.3/4/7 and T-26b; A is excluded wherever it authored the delta; C cannot accept C/B integration. `tasks.md` already records this correctly as an external staffing blocker. **No document change fixes it.** It needs a fourth qualified reviewer or a designated external acceptor. Flagged, not solved.
+4. **The acceptor constraint — resolved, not escalated.** Non-author acceptance with a pool of three deadlocks: B authors T-131.3/4/7 and T-26b; A is excluded wherever it authored the delta; C cannot accept C/B integration. `tasks.md` records this as an external staffing blocker.
+
+   **It is not one.** Per *Leadership is the fourth acceptor* above, independence is per-change rather than per-role-label (`roles_and_authority.md:72-88`), and leadership authored none of these deltas. Leadership accepts at batched acceptance boundaries only; the Senior records the independence basis. No hire is required, and no escalation trigger is added — `roles_and_authority.md:45-57` still lists exactly six.
 
 ---
 
